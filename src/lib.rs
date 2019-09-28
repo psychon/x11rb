@@ -1,3 +1,7 @@
+pub mod wire;
+
+// TODO: Make all of this async? (At least where it makes sense)
+
 #[cfg(test)]
 mod tests {
     #[test]
