@@ -42,9 +42,9 @@ impl<W: Write> ToWireFormat<W> for SetupRequest {
         writer.write_u16::<NativeEndian>(self.authorization_protocol_name.len().try_into()?)?;
         writer.write_u16::<NativeEndian>(self.authorization_protocol_data.len().try_into()?)?;
         writer.write(&self.pad1)?;
-        writer.write(&self.authorization_protocol_name);
+        writer.write(&self.authorization_protocol_name)?;
         writer.write_padding(self.authorization_protocol_name.len())?;
-        writer.write(&self.authorization_protocol_data);
+        writer.write(&self.authorization_protocol_data)?;
         writer.write_padding(self.authorization_protocol_data.len())?;
         Ok(())
     }

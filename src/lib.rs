@@ -1,6 +1,14 @@
-pub mod wire;
+#![deny(//missing_copy_implementations,
+        //missing_debug_implementations,
+        //missing_docs,
+        //private_doc_tests,
+        single_use_lifetimes,
+        trivial_casts,
+        trivial_numeric_casts,
+        unreachable_pub)]
 
-// TODO: Make all of this async? (At least where it makes sense)
+pub mod wire;
+pub mod thoughts;
 
 #[cfg(test)]
 mod tests {
