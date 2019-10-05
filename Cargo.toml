@@ -3,8 +3,7 @@ name = "x11rb"
 version = "0.1.0"
 authors = ["Uli Schlachter <psychon@znc.in>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 byteorder = "1.3"
