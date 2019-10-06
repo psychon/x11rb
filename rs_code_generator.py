@@ -191,14 +191,14 @@ def rs_request(self, name):
     request = []
     for field in self.fields:
         if field.field_name == "major_opcode":
-            request.append("%s_REQUEST" % _name(name))
+            request.append("%s_REQUEST" % _name(name).upper())
         elif field.type.is_pad:
             for i in range(field.type.size):
                 request.append("0")
         else:
             if field.field_name == "length":
                 value = sum((field.type.size for field in self.fields))
-                value = "(%s / 4)" % value
+                value = "(%susize / 4)" % value
             else:
                 value = field.field_name
             _out("let %s_bytes = %s.to_ne_bytes();", field.field_name, value)

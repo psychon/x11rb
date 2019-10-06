@@ -25,16 +25,16 @@ pub enum ConnectionError {
 }
 
 pub struct CSlice {
-    ptr: *const u8,
-    len: usize
+    slice: &'static [u8]
 }
 impl CSlice {
     unsafe fn new(ptr: *const u8, len: usize) -> CSlice {
-        CSlice{ ptr, len }
+        let slice = std::slice::from_raw_parts(ptr, len);
+        CSlice{ slice }
     }
 
     fn into_ptr(self) -> *const u8 {
-        let ptr = self.ptr;
+        let ptr = self.slice.as_ptr();
         forget(self);
         ptr
     }
@@ -43,12 +43,12 @@ impl Deref for CSlice {
     type Target = [u8];
 
     fn deref(&self) -> &[u8] {
-        unsafe { std::slice::from_raw_parts(self.ptr, self.len) }
+        self.slice
     }
 }
 impl Drop for CSlice {
     fn drop(&mut self) {
-        unsafe { free(self.ptr as _) }
+        unsafe { free(self.slice.as_ptr() as _) }
     }
 }
 
