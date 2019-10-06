@@ -120,7 +120,7 @@ impl Connection {
             if reply != null_mut() {
                 let header = CSlice::new(reply as _, 32);
 
-                let length_field = Cursor::new(&header[4..7]).read_u32::<NativeEndian>().unwrap();
+                let length_field = Cursor::new(&header[4..8]).read_u32::<NativeEndian>().unwrap();
                 let other_error: IOError = Other.into();
                 let other_error: Result<_, Box<dyn Error>> = Err(other_error.into());
                 let length_field: usize = length_field.try_into().or(other_error)?;
