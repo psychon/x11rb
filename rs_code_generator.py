@@ -92,15 +92,18 @@ def rs_close(self):
     _out("}")
 
 def rs_enum(self, name):
+    def ename_to_rust(ename):
+        # if all upercase or number -> to_rust_identifier, else keep as is
+        if ename.isupper() or ename.isdigit():
+            return _to_rust_identifier(ename)
+        else:
+            return ename[0].upper() + ename[1:]
+
     rust_name = _name(name)
     _out("pub enum %s {", rust_name)
     _out_indent_incr()
     for (ename, value) in self.values:
-        # if all upercase -> to_rust_identifier, else keep as is
-        if ename.isupper():
-            _out("%s,", _to_rust_identifier(ename))
-        else:
-            _out("%s,", ename)
+        _out("%s,", ename_to_rust(ename))
     _out_indent_decr()
     _out("}")
 
@@ -121,9 +124,9 @@ def rs_enum(self, name):
     bits = [ename for (ename, bit) in self.bits]
     for (ename, value) in self.values:
         if ename not in bits:
-            _out("%s::%s => %s,", rust_name, _to_rust_identifier(ename), value)
+            _out("%s::%s => %s,", rust_name, ename_to_rust(ename), value)
     for (ename, bit) in self.bits:
-        _out("%s::%s => 1 << %s,", rust_name, _to_rust_identifier(ename), bit)
+        _out("%s::%s => 1 << %s,", rust_name, ename_to_rust(ename), bit)
     _out_indent_decr()
     _out("}")
     _out_indent_decr()
