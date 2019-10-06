@@ -198,10 +198,8 @@ def rs_request(self, name):
         else:
             if field.field_name == "length":
                 value = sum((field.type.size for field in self.fields))
-                value = "(%susize / 4)" % value
-            else:
-                value = field.field_name
-            _out("let %s_bytes = %s.to_ne_bytes();", field.field_name, value)
+                _out("let %s: usize = %s / 4;", field.field_name, value)
+            _out("let %s_bytes = %s.to_ne_bytes();", field.field_name, field.field_name)
             for i in range(field.type.size):
                 request.append("%s_bytes[%d]" % (field.field_name, i))
 
@@ -211,8 +209,7 @@ def rs_request(self, name):
         _out("%s,", byte)
     _out_indent_decr()
     _out("];")
-    _out("let bufs = [IoSlice::new(&request)];")
-    _out("c.send_request_without_reply(&bufs)")
+    _out("c.send_request_without_reply(&[IoSlice::new(&request)])")
     _out_indent_decr()
     _out("}")
 
