@@ -6,6 +6,7 @@ use std::marker::PhantomData;
 use std::convert::{TryFrom, TryInto};
 use std::error::Error;
 use std::io::{Cursor, IoSlice, Error as IOError, ErrorKind::Other};
+use std::mem::forget;
 use libc::free;
 use byteorder::{NativeEndian, ReadBytesExt};
 
@@ -34,7 +35,9 @@ impl CSlice {
     }
 
     fn into_ptr(self) -> *const u8 {
-        self.ptr
+        let ptr = self.ptr;
+        forget(self);
+        ptr
     }
 }
 impl Deref for CSlice {
