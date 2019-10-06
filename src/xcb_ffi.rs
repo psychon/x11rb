@@ -140,7 +140,7 @@ impl Connection {
     pub fn wait_for_event(&self) -> Result<CSlice, Box<dyn Error>> {
         unsafe {
             let event = raw_ffi::xcb_wait_for_event(self.0);
-            // FIXME: XGE events may have sizes > 32
+            assert_ne!(35, (*event).response_type); // FIXME: XGE events may have sizes > 32
             Ok(CSlice::new(event as _, 32))
         }
     }
