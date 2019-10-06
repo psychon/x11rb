@@ -9,7 +9,7 @@ use std::io::{IoSlice, Error as IOError, ErrorKind::Other};
 use std::mem::forget;
 use libc::free;
 
-type SequenceNumber = u64;
+pub type SequenceNumber = u64;
 
 pub struct Connection(*mut raw_ffi::xcb_connection_t);
 

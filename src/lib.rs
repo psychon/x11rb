@@ -12,6 +12,10 @@ pub mod wire;
 pub mod thoughts;
 pub mod xcb_ffi;
 
+pub mod generated {
+    include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+}
+
 #[cfg(test)]
 mod tests {
     #[test]

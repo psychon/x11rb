@@ -8,6 +8,9 @@ TODO: Write a proper README.
 
 (The image is licensed under a Creative Commons Attribution-NonCommercial 2.5 License)
 
+- It should be possible to use an X11 library without using `unsafe`.
+- Lifetimes should be tracked correctly.
+
 ## Async/await
 
 No. If you have so many X11 connections that this would matter, you are doing
