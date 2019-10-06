@@ -2,6 +2,12 @@
 
 TODO: Write a proper README.
 
+## Motivation
+
+![Motivation](https://imgs.xkcd.com/comics/standards.png)
+
+(The image is licensed under a Creative Commons Attribution-NonCommercial 2.5 License)
+
 ## Async/await
 
 No. If you have so many X11 connections that this would matter, you are doing
