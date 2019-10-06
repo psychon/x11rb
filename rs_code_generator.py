@@ -96,7 +96,11 @@ def rs_enum(self, name):
     _out("pub enum %s {", rust_name)
     _out_indent_incr()
     for (ename, value) in self.values:
-        _out("%s,", _to_rust_identifier(ename))
+        # if all upercase -> to_rust_identifier, else keep as is
+        if ename.isupper():
+            _out("%s,", _to_rust_identifier(ename))
+        else:
+            _out("%s,", ename)
     _out_indent_decr()
     _out("}")
 
