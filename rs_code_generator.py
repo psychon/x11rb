@@ -133,14 +133,14 @@ def rs_simple(self, name):
 def emit_opcode(name, extra_name, opcode):
     _out("pub const %s_%s: u8 = %s;", _name(name).upper(), extra_name.upper(), opcode)
 
-def complex_type(self, name, extra_name):
+def complex_type(self, name, extra_name, name_transform=lambda x: x):
     is_simple = all(field.type.is_simple or field.type.is_pad for field in self.fields)
     is_fixed_size = all((field.type.fixed_size() and field.type.nmemb == 1) or field.type.is_pad for field in self.fields)
     if (not is_simple) or (not is_fixed_size):
-        print("skipping complicated complex type", self, name)
+        print("skipping complicated complex type", extra_name, self, name)
         return
 
-    _out("pub struct %s%s {", _name(name), extra_name)
+    _out("pub struct %s%s {", name_transform(_name(name)), extra_name)
     _out_indent_incr()
     for field in self.fields:
         if field.visible:
@@ -148,7 +148,7 @@ def complex_type(self, name, extra_name):
     _out_indent_decr()
     _out("}")
 
-    _out("impl TryFrom<&[u8]> for %s%s {", _name(name), extra_name)
+    _out("impl TryFrom<&[u8]> for %s%s {", name_transform(_name(name)), extra_name)
     _out_indent_incr()
     _out("type Error = MyTryError;")
     _out("fn try_from(value: &[u8]) -> Result<Self, Self::Error> {")
@@ -162,7 +162,7 @@ def complex_type(self, name, extra_name):
                     field.field_name, rust_type, offset, next_offset)
         offset = next_offset
 
-    _out("Ok(%s%s {", _name(name), extra_name)
+    _out("Ok(%s%s {", name_transform(_name(name)), extra_name)
     _out_indent_incr()
     for field in self.fields:
         if field.visible:
@@ -175,7 +175,7 @@ def complex_type(self, name, extra_name):
     _out("}")
 
 def rs_struct(self, name):
-    print("struct", self, name)
+    complex_type(self, name, '', lambda name: _to_rust_identifier(name))
 
 def rs_union(self, name):
     print("union", self, name)
@@ -243,6 +243,9 @@ def rs_eventstruct(self, name):
     print("eventstruct", self, name)
 
 def rs_event(self, name):
+    if self.is_ge_event:
+        print("skipping GE event", self, name)
+        return
     emit_opcode(name, 'Event', self.opcodes[name])
     complex_type(self, name, 'Event')
 
