@@ -177,7 +177,7 @@ impl<R> Cookie<'_, R> {
 impl<'a, R> Cookie<'_, R>
 where R: TryFrom<CSlice, Error=Box<dyn Error>>,
 {
-    pub fn wait(mut self) -> Result<R, Box<dyn Error>> {
+    pub fn reply(mut self) -> Result<R, Box<dyn Error>> {
         let reply = self.connection.wait_for_reply(self.sequence_number.take().unwrap())?;
         Ok(reply.try_into()?)
     }
