@@ -5,10 +5,9 @@ use std::ops::Deref;
 use std::marker::PhantomData;
 use std::convert::{TryFrom, TryInto};
 use std::error::Error;
-use std::io::{Cursor, IoSlice, Error as IOError, ErrorKind::Other};
+use std::io::{IoSlice, Error as IOError, ErrorKind::Other};
 use std::mem::forget;
 use libc::free;
-use byteorder::{NativeEndian, ReadBytesExt};
 
 type SequenceNumber = u64;
 
@@ -127,7 +126,7 @@ impl Connection {
             if reply != null_mut() {
                 let header = CSlice::new(reply as _, 32);
 
-                let length_field = Cursor::new(&header[4..8]).read_u32::<NativeEndian>().unwrap();
+                let length_field = u32::from_ne_bytes(header[4..8].try_into().unwrap());
                 let other_error: IOError = Other.into();
                 let other_error: Result<_, Box<dyn Error>> = Err(other_error.into());
                 let length_field: usize = length_field.try_into().or(other_error)?;
