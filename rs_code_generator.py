@@ -3,6 +3,7 @@
 import getopt
 import sys
 import glob
+import re
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], "p:o:i:")
@@ -40,6 +41,11 @@ def _name(name):
     assert len(name) == 2, name
     return name[1]
 
+def _snake_name(name):
+    name = _name(name)
+    name = re.sub('([a-z0-9])([A-Z])', '\\1_\\2', name)
+    return name.lower()
+
 rust_type_mapping = {
         'uint32_t': 'u32',
         'uint16_t': 'u16',
@@ -57,10 +63,14 @@ def _to_rust_type(name):
     return rust_type_mapping[name]
 
 def _to_rust_identifier(name):
+    if name[0].isdigit():
+        name = 'M' + name
+    name = re.sub('_(.)', lambda pat: pat.group(1).upper(), name.lower())
+    return name[0].upper() + name[1:]
+
+def _to_rust_variable(name):
     if name == "type":
         name = "type_"
-    if name[0].isdigit():
-        return 'M' + name
     return name
 
 # Now the real fun begins
@@ -182,14 +192,14 @@ def rs_request(self, name):
     args = ["c: &Connection"]
     for field in self.fields:
         if field.visible:
-            args.append("%s: %s" % (_to_rust_identifier(field.field_name), _to_rust_type(field.type.name)))
+            args.append("%s: %s" % (_to_rust_variable(field.field_name), _to_rust_type(field.type.name)))
 
     if self.reply:
         result_type = "Cookie<%sReply>" % _name(name)
     else:
         result_type = "SequenceNumber"
 
-    _out("pub fn %s(%s) -> Result<%s, Box<dyn Error>> {", _name(name), ", ".join(args), result_type)
+    _out("pub fn %s(%s) -> Result<%s, Box<dyn Error>> {", _snake_name(name), ", ".join(args), result_type)
     _out_indent_incr()
 
     request = []
@@ -203,7 +213,7 @@ def rs_request(self, name):
             if field.field_name == "length":
                 value = sum((field.type.size for field in self.fields))
                 _out("let %s: usize = %s / 4;", field.field_name, value)
-            _out("let %s_bytes = %s.to_ne_bytes();", field.field_name, _to_rust_identifier(field.field_name))
+            _out("let %s_bytes = %s.to_ne_bytes();", field.field_name, _to_rust_variable(field.field_name))
             for i in range(field.type.size):
                 request.append("%s_bytes[%d]" % (field.field_name, i))
 
