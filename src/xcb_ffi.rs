@@ -81,6 +81,10 @@ impl Connection {
         }
     }
 
+    pub fn flush(&self) {
+        unsafe { raw_ffi::xcb_flush(self.0); }
+    }
+
     pub fn send_request_with_reply<R>(&self, bufs: &[IoSlice]) -> Result<Cookie<R>, Box<dyn Error>> {
         Ok(Cookie::new(self, self.send_request(bufs, true)?))
     }
@@ -265,5 +269,6 @@ mod raw_ffi {
         pub fn xcb_discard_reply64(c: *const xcb_connection_t, sequence: u64);
         pub fn xcb_wait_for_reply64(c: *const xcb_connection_t, request: u64, e: *mut * mut xcb_generic_error_t) -> *mut c_void;
         pub fn xcb_wait_for_event(c: *const xcb_connection_t) -> *mut xcb_generic_event_t;
+        pub fn xcb_flush(c: *const xcb_connection_t) -> c_int;
     }
 }
