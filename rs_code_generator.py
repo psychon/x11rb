@@ -272,7 +272,8 @@ def rs_request(self, name):
         if field.field_name == "major_opcode":
             request.append("%s_REQUEST" % _upper_snake_name(name))
         elif field.type.is_pad:
-            for i in range(field.type.size):
+            assert field.type.size == 1
+            for i in range(field.type.nmemb):
                 request.append("0")
         else:
             if field.type.is_list:
