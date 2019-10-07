@@ -60,11 +60,16 @@ rust_type_mapping = {
 }
 
 def _to_rust_type(name):
-    if type(name) == tuple and len(name) == 1:
-        name = name[0]
+    if type(name) == tuple:
+        if name[0] == 'xcb':
+            name = name[1:]
+        if len(name) == 1:
+            name = name[0]
 
-    assert name in rust_type_mapping, name
-    return rust_type_mapping[name]
+    if name in rust_type_mapping:
+        return rust_type_mapping[name]
+    else:
+        return _to_rust_identifier(name)
 
 def _to_rust_identifier(name):
     if name[0].isdigit():
