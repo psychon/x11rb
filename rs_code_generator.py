@@ -94,7 +94,18 @@ def rs_open(self):
     _out("use crate::xcb_ffi::Connection;")
     _out("use crate::xcb_ffi::SequenceNumber;")
     _out("use crate::xcb_ffi::Cookie;")
-    _out("pub struct MyTryError();");
+    _out("#[derive(Default, Debug)]")
+    _out("pub struct MyTryError();")
+    _out("impl Error for MyTryError {}")
+    _out("impl std::fmt::Display for MyTryError {")
+    _out_indent_incr()
+    _out("fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {")
+    _out_indent_incr()
+    _out("write!(f, \"My try error that I should replace with something proper eventually\")")
+    _out_indent_decr()
+    _out("}")
+    _out_indent_decr()
+    _out("}")
     _out("")
 
 def rs_close(self):
