@@ -101,6 +101,7 @@ def rs_close(self):
     _out_indent_decr()
     _out("}")
 
+enum_sizes = {}
 def rs_enum(self, name):
     def ename_to_rust(ename):
         # if all upercase or number -> to_rust_identifier, else keep as is
@@ -125,6 +126,7 @@ def rs_enum(self, name):
     else:
         assert highest_value < 1 << 32
         to_type = "u32"
+    enum_sizes[rust_name] = to_type
     _out("impl Into<%s> for %s {", to_type, rust_name)
     _out_indent_incr()
     _out("fn into(self) -> %s {", to_type)
@@ -241,19 +243,84 @@ def rs_union(self, name):
     _out("}")
     _out("")
 
+def _generate_aux(name, request, switch, mask_field):
+    field_size = switch.type.fields[0].type.size
+    assert all(field.type.size == field_size for field in switch.type.fields)
+    mask_field.individual_field_size = field_size
+
+    _out("#[derive(Default)]")
+    _out("pub struct %s {", name)
+    _out_indent_incr()
+    for field in switch.type.fields:
+        _out("pub %s: Option<%s>,", field.field_name, _to_rust_type(field.type.name))
+    _out_indent_decr()
+    _out("}")
+
+    _out("impl %s {", name)
+    _out_indent_incr()
+    _out("pub fn to_ne_bytes(&self) -> Vec<u8> {")
+    _out_indent_incr()
+    _out("let mut result = Vec::new();")
+    for field in switch.type.fields:
+        _out("if let Some(value) = self.%s {", field.field_name)
+        _out_indent_incr()
+        _out("result.extend(value.to_ne_bytes().iter());")
+        _out_indent_decr()
+        _out("}")
+    _out("result")
+    _out_indent_decr()
+    _out("}")
+
+    _out("pub fn value_mask(&self) -> %s {", _to_rust_type(mask_field.type.name))
+    _out_indent_incr()
+    _out("let mut mask = 0;")
+    for field in switch.type.fields:
+        expr, = field.parent.expr
+        assert expr.op == "enumref"
+        enum_name = _name(expr.lenfield_type.name)
+        _out("if self.%s.is_some() {", field.field_name)
+        _out_indent_incr()
+        _out("mask |= Into::<%s>::into(Into::<%s>::into(%s::%s));", _to_rust_type(mask_field.type.name), enum_sizes[enum_name], enum_name, expr.lenfield_name)
+        _out_indent_decr()
+        _out("}")
+    _out("mask")
+    _out_indent_decr()
+    _out("}")
+    _out_indent_decr()
+    _out("}")
+
 def rs_request(self, name):
     emit_opcode(name, 'REQUEST', self.opcode)
 
-    has_switch = any(field.type.is_switch for field in self.fields)
     skip = [
             'QueryTextExtents', # has an <exprfield> odd_length that we do not support currently
             'SetFontPath', # depends on the Str struct
             ]
-    if has_switch or name[1] in skip:
+    if name[1] in skip:
         print("skipping complicated request", self, name)
         return
 
+    switches = list(filter(lambda field: field.type.is_switch, self.fields))
+    assert len(switches) <= 1
+    if switches:
+        aux_name = "%sAux" % _name(name)
+        switch = switches[0]
+
+        # Find the mask field for the switch
+        lenfield_name = switch.type.expr.lenfield_name
+        mask_field = list(filter(lambda field: field.field_name == lenfield_name, self.fields))
+        assert len(mask_field) == 1
+        mask_field = mask_field[0]
+
+        # Hide it from the API and "connect" it to the switch
+        mask_field.visible = False
+        mask_field.lenfield_for_switch = switch
+
+        _generate_aux(aux_name, self, switch, mask_field)
+
     def _to_complex_rust_type(field_type):
+        if field_type.is_switch:
+            return "&" + aux_name
         result = _to_rust_type(field_type.name)
         if field_type.is_list:
             if field_type.nmemb is None:
@@ -306,6 +373,9 @@ def rs_request(self, name):
     for field in self.fields:
         if field.type.nmemb is None:
             request_length.append("%s * %s.len()" % (field.type.size, field.field_name))
+        if hasattr(field, 'lenfield_for_switch'):
+            _out("let %s = %s.value_mask();", field.field_name, field.lenfield_for_switch.field_name)
+            request_length.append("(%s * %s.count_ones()) as usize" % (field.individual_field_size, field.field_name))
     request_length = " + ".join(request_length)
 
     _out("let length: usize = (%s) / 4;", request_length)
@@ -332,8 +402,12 @@ def rs_request(self, name):
                 requests.append("&%s_bytes" % field.field_name)
         else:
             _out("let %s_bytes = %s.to_ne_bytes();", field.field_name, _to_rust_variable(field.field_name))
-            for i in range(field.type.size):
-                request.append("%s_bytes[%d]" % (field.field_name, i))
+            if field.type.is_switch:
+                _emit_request()
+                requests.append("&%s_bytes" % field.field_name)
+            else:
+                for i in range(field.type.size):
+                    request.append("%s_bytes[%d]" % (field.field_name, i))
 
     _emit_request()
 
