@@ -247,7 +247,6 @@ def complex_type(self, name, generate_try_from, extra_name, name_transform=lambd
         for field in self.fields:
             rust_type = _to_rust_type(field.type.name)
             assert field.wire  # I *guess* that non-wire fields just have to be skipped
-            next_offset = offset + field.type.size
             if field.visible or hasattr(field, 'is_length_field_for'):
                 field_name = _to_rust_variable(field.field_name)
                 if field.type.is_list:
@@ -266,8 +265,11 @@ def complex_type(self, name, generate_try_from, extra_name, name_transform=lambd
 
                     next_offset = "FIXME need offset after variable length field"
                 else:
+                    next_offset = offset + field.type.size * field.type.nmemb
                     _out("let %s = %s::from_ne_bytes(value.get(%s..%s).ok_or(MyTryError())?.try_into().unwrap());",
                             field_name, rust_type, offset, next_offset)
+            else:
+                next_offset = offset + field.type.size * field.type.nmemb
             offset = next_offset
 
         _out("Ok(%s%s {", name_transform(_name(name)), extra_name)
