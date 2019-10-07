@@ -153,9 +153,8 @@ def emit_opcode(name, extra_name, opcode):
     _out("pub const %s_%s: u8 = %s;", _upper_snake_name(name), extra_name.upper(), opcode)
 
 def complex_type(self, name, extra_name, name_transform=lambda x: x):
-    is_simple = all(field.type.is_simple or field.type.is_pad for field in self.fields)
     is_fixed_size = all((field.type.fixed_size() and field.type.nmemb == 1) or field.type.is_pad for field in self.fields)
-    if (not is_simple) or (not is_fixed_size):
+    if not is_fixed_size:
         print("skipping complicated complex type", extra_name, self, name)
         return
 
@@ -196,8 +195,10 @@ def complex_type(self, name, extra_name, name_transform=lambda x: x):
 
 def rs_struct(self, name):
     complex_type(self, name, '', lambda name: _to_rust_identifier(name))
+
     is_fixed_size = all(field.type.fixed_size() or field.type.is_pad for field in self.fields)
     if not is_fixed_size:
+        print("skipping complicated struct", self, name)
         return
 
     length = sum((field.type.size * field.type.nmemb for field in self.fields))
@@ -352,9 +353,8 @@ def rs_request(self, name):
         complex_type(self.reply, name, 'Reply')
         # Work-around for some types not being supported currently and thus not
         # getting emitted
-        is_simple = all(field.type.is_simple or field.type.is_pad for field in self.reply.fields)
         is_fixed_size = all((field.type.fixed_size() and field.type.nmemb == 1) or field.type.is_pad for field in self.reply.fields)
-        if not (is_simple and is_fixed_size):
+        if not is_fixed_size:
             _out("pub struct %s%s {}", _name(name), 'Reply')
     _out("")
 
@@ -365,6 +365,9 @@ def rs_eventstruct(self, name):
 def rs_event(self, name):
     if self.is_ge_event:
         print("skipping GE event", self, name)
+        return
+    if name == ('xcb', 'ClientMessage'):
+        print("skipping XCB ClientMessage event (needs ClientMessageData)", self, name)
         return
     emit_opcode(name, 'Event', self.opcodes[name])
     complex_type(self, name, 'Event')
