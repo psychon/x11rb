@@ -185,7 +185,13 @@ def rs_struct(self, name):
     complex_type(self, name, '', lambda name: _to_rust_identifier(name))
 
 def rs_union(self, name):
-    print("union", self, name)
+    rust_name = _name(name)
+    _out("pub enum %s {", rust_name)
+    _out_indent_incr()
+    for field in self.fields:
+        _out("%s([%s; %s]),", _to_rust_identifier(field.field_name), _to_rust_type(field.type.member.name), field.type.expr.nmemb)
+    _out_indent_decr()
+    _out("}")
 
 def rs_request(self, name):
     emit_opcode(name, 'REQUEST', self.opcode)
