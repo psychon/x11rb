@@ -225,7 +225,22 @@ def rs_request(self, name):
     _out("pub fn %s(%s) -> Result<%s, Box<dyn Error>> {", _lower_snake_name(name), ", ".join(args), result_type)
     _out_indent_incr()
 
+    requests = []
     request = []
+
+    def _emit_request():
+        if not request:
+            return
+
+        _out("let request%d = [", len(requests));
+        requests.append("&request%d" % len(requests))
+        _out_indent_incr()
+        for byte in request:
+            _out("%s,", byte)
+        _out_indent_decr()
+        _out("];")
+        del request[:]
+
     request_length = sum((field.type.size * field.type.nmemb for field in self.fields))
     _out("let length: usize = %s / 4;", request_length)
     for field in self.fields:
@@ -237,24 +252,24 @@ def rs_request(self, name):
         else:
             if field.type.is_list:
                 assert field.type.size == 1
-                for i in range(field.type.nmemb):
-                    request.append("%s[%d]" % (field.field_name, i))
+                _emit_request()
+                requests.append(field.field_name)
             else:
                 _out("let %s_bytes = %s.to_ne_bytes();", field.field_name, _to_rust_variable(field.field_name))
                 for i in range(field.type.size):
                     request.append("%s_bytes[%d]" % (field.field_name, i))
 
-    _out("let request = [");
-    _out_indent_incr()
-    for byte in request:
-        _out("%s,", byte)
-    _out_indent_decr()
-    _out("];")
-    _out("assert_eq!(request.len(), %s);", request_length);
+    _emit_request()
+
+    total_length = " + ".join(["(*%s).len()" % r for r in requests])
+    _out("assert_eq!(%s, %s);", total_length, request_length);
+
+    slices = ", ".join(["IoSlice::new(%s)" % r for r in requests])
+
     if self.reply:
-        _out("c.send_request_with_reply(&[IoSlice::new(&request)])")
+        _out("c.send_request_with_reply(&[%s])", slices)
     else:
-        _out("c.send_request_without_reply(&[IoSlice::new(&request)])")
+        _out("c.send_request_without_reply(&[%s])", slices)
     _out_indent_decr()
     _out("}")
 
