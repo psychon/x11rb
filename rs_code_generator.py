@@ -134,11 +134,15 @@ def rs_enum(self, name):
     highest_value = max((int(value) for (ename, value) in self.values))
     if highest_value < 1 << 8:
         to_type = "u8"
+        larger_types = ["u16", "u32"]
     elif highest_value < 1 << 16:
         to_type = "u16"
+        larger_types = ["u32"]
     else:
         assert highest_value < 1 << 32
         to_type = "u32"
+        larger_types = []
+
     enum_sizes[rust_name] = to_type
     _out("impl Into<%s> for %s {", to_type, rust_name)
     _out_indent_incr()
@@ -158,6 +162,16 @@ def rs_enum(self, name):
     _out("}")
     _out_indent_decr()
     _out("}")
+    for larger_type in larger_types:
+        _out("impl Into<%s> for %s {", larger_type, rust_name)
+        _out_indent_incr()
+        _out("fn into(self) -> %s {", larger_type)
+        _out_indent_incr()
+        _out("Into::<%s>::into(self) as _", to_type)
+        _out_indent_decr()
+        _out("}")
+        _out_indent_decr()
+        _out("}")
     _out("")
 
 def rs_simple(self, name):
