@@ -522,7 +522,8 @@ def rs_request(self, name):
             request_length.append("(%s * %s.count_ones()) as usize" % (field.individual_field_size, field.field_name))
     request_length = " + ".join(request_length)
 
-    _out("let length: usize = (%s) / 4;", request_length)
+    _out("let length: usize = (%s + 3) / 4;", request_length)
+    request_length = "(%s + 3) / 4 * 4" % request_length
     for field in self.fields:
         if field.field_name == "major_opcode":
             request.append("%s_REQUEST" % _upper_snake_name(name))
@@ -559,8 +560,13 @@ def rs_request(self, name):
 
     _emit_request()
 
+    last_field = self.fields[-1]
+    if last_field.type.is_list and not last_field.type.fixed_size():
+        _out("let padding = &[0; 3][..(4 - (%s.len() %% 4)) %% 4];", last_field.field_name)
+        requests.append("&padding")
+
     total_length = " + ".join(["(*%s).len()" % r for r in requests])
-    _out("assert_eq!(%s, %s);", total_length, request_length);
+    _out("assert_eq!(%s, (%s + 3) / 4 * 4);", total_length, request_length);
 
     slices = ", ".join(["IoSlice::new(%s)" % r for r in requests])
 

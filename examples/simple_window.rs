@@ -27,8 +27,7 @@ fn main() {
     // The root window is hardcoded, because so far the generated code cannot tell me its id
     create_window(&conn, 24, win_id, 0x14d, 0, 0, 100, 100, 0, WindowClass::InputOutput, 0, &win_aux).unwrap();
 
-    // FIXME: Padding at end of the request is missing
-    let title = "Simple Window   ";
+    let title = "Simple Window";
     change_property(&conn, PropMode::Replace, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), 8, title.as_bytes()).unwrap();
     // FIXME: format != 8 is broken (because the XML uses <op> stuff)
 
