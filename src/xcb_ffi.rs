@@ -11,6 +11,7 @@ use libc::free;
 
 pub type SequenceNumber = u64;
 
+#[derive(Debug)]
 pub struct Connection(*mut raw_ffi::xcb_connection_t);
 
 pub enum ConnectionError {
@@ -161,6 +162,7 @@ impl Drop for Connection {
     }
 }
 
+#[derive(Debug)]
 pub struct Cookie<'a, R> {
     connection: &'a Connection,
     sequence_number: Option<SequenceNumber>,

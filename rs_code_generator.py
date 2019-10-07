@@ -122,6 +122,7 @@ def rs_enum(self, name):
             return ename[0].upper() + ename[1:]
 
     rust_name = _name(name)
+    _out("#[derive(Debug)]")
     _out("pub enum %s {", rust_name)
     _out_indent_incr()
     for (ename, value) in self.values:
@@ -188,6 +189,7 @@ def complex_type(self, name, generate_try_from, extra_name, name_transform=lambd
         print("skipping complicated complex type", extra_name, self, name)
         return "skipped"
 
+    _out("#[derive(Debug)]")
     _out("pub struct %s%s {", name_transform(_name(name)), extra_name)
     _out_indent_incr()
     for field in self.fields:
@@ -321,6 +323,7 @@ def rs_struct(self, name):
 
 def rs_union(self, name):
     rust_name = _name(name)
+    _out("#[derive(Debug)]")
     _out("pub enum %s {", rust_name)
     _out_indent_incr()
     for field in self.fields:
@@ -334,7 +337,7 @@ def _generate_aux(name, request, switch, mask_field):
     assert all(field.type.size == field_size for field in switch.type.fields)
     mask_field.individual_field_size = field_size
 
-    _out("#[derive(Default)]")
+    _out("#[derive(Debug, Default)]")
     _out("pub struct %s {", name)
     _out_indent_incr()
     for field in switch.type.fields:
@@ -518,6 +521,7 @@ def rs_request(self, name):
         # Work-around for some types not being supported currently and thus not
         # getting emitted
         if skipped == "skipped":
+            _out("#[derive(Debug)]")
             _out("pub struct %s%s {}", _name(name), 'Reply')
     _out("")
 
