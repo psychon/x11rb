@@ -165,49 +165,90 @@ def rs_simple(self, name):
 def emit_opcode(name, extra_name, opcode):
     _out("pub const %s_%s: u8 = %s;", _upper_snake_name(name), extra_name.upper(), opcode)
 
-def complex_type(self, name, extra_name, name_transform=lambda x: x):
+def mark_length_fields(self):
+    # Find length fields
+    length_fields = {}
+    for field in self.fields:
+        if field.type.is_list:
+            length_fields[field.type.expr.lenfield_name] = field
+
+    # Mark length fields as not visible and map them to their list
+    for field in self.fields:
+        if field.field_name in length_fields:
+            field.is_length_field_for = length_fields[field.field_name]
+            length_fields[field.field_name].has_length_field = field
+            field.visible = False
+
+def complex_type(self, name, generate_try_from, extra_name, name_transform=lambda x: x):
+    mark_length_fields(self)
+
+    skip = ['KeymapNotify', 'QueryKeymap', 'QueryFont', 'ListFonts', 'ListFontsWithInfo', 'GetFontPath', 'AllocColorCells', 'ListExtensions', 'GetKeyboardControl', 'ListHosts']
     is_fixed_size = all((field.type.fixed_size() and field.type.nmemb == 1) or field.type.is_pad for field in self.fields)
-    if not is_fixed_size:
+    if (extra_name == '' and not is_fixed_size) or name[1] in skip:
         print("skipping complicated complex type", extra_name, self, name)
-        return
+        return "skipped"
 
     _out("pub struct %s%s {", name_transform(_name(name)), extra_name)
     _out_indent_incr()
     for field in self.fields:
         if field.visible:
-            _out("pub %s: %s,", field.field_name, _to_rust_type(field.type.name))
+            field_name = _to_rust_variable(field.field_name)
+            if field.type.is_list:
+                assert field.type.nmemb is None  # Just because this is all that I have seen so far, could do [u8; 4] otherwise
+                _out("pub %s: Vec<%s>,", field_name, _to_rust_type(field.type.name))
+            else:
+                _out("pub %s: %s,", field_name, _to_rust_type(field.type.name))
     _out_indent_decr()
     _out("}")
 
-    _out("impl TryFrom<&[u8]> for %s%s {", name_transform(_name(name)), extra_name)
-    _out_indent_incr()
-    _out("type Error = MyTryError;")
-    _out("fn try_from(value: &[u8]) -> Result<Self, Self::Error> {")
-    _out_indent_incr()
-    offset = 0
-    for field in self.fields:
-        rust_type = _to_rust_type(field.type.name)
-        assert field.wire  # I *guess* that non-wire fields just have to be skipped
-        next_offset = offset + field.type.size
-        if field.visible:
-            _out("let %s = %s::from_ne_bytes(value.get(%s..%s).ok_or(MyTryError())?.try_into().unwrap());",
-                    field.field_name, rust_type, offset, next_offset)
-        offset = next_offset
+    if generate_try_from:
+        _out("impl TryFrom<&[u8]> for %s%s {", name_transform(_name(name)), extra_name)
+        _out_indent_incr()
+        _out("type Error = MyTryError;")
+        _out("fn try_from(value: &[u8]) -> Result<Self, Self::Error> {")
+        _out_indent_incr()
+        offset = 0
+        for field in self.fields:
+            rust_type = _to_rust_type(field.type.name)
+            assert field.wire  # I *guess* that non-wire fields just have to be skipped
+            next_offset = offset + field.type.size
+            if field.visible or hasattr(field, 'is_length_field_for'):
+                field_name = _to_rust_variable(field.field_name)
+                if field.type.is_list:
+                    _out("let %s: Result<Vec<_>, _> = (0..%s as usize)", field_name, field.has_length_field.field_name)
+                    _out_indent_incr()
+                    _out(".map(|i| %s + %s * i) // Map index to offsets", offset, field.type.size)
+                    _out(".map(|o| value.get(o..(o+%s)).ok_or(MyTryError())) // get bytes", field.type.size)
+                    _out(".collect();")
+                    _out_indent_decr()
+                    _out("let %s = %s? // fail if some index was out of range", field_name, field_name)
+                    _out_indent_incr()
+                    _out(".iter()")
+                    _out(".map(|&s| %s::from_ne_bytes(s.try_into().unwrap()))", rust_type)
+                    _out(".collect();")
+                    _out_indent_decr()
 
-    _out("Ok(%s%s {", name_transform(_name(name)), extra_name)
-    _out_indent_incr()
-    for field in self.fields:
-        if field.visible:
-            _out("%s,", field.field_name)
-    _out_indent_decr()
-    _out("})")
-    _out_indent_decr()
-    _out("}")
-    _out_indent_decr()
-    _out("}")
+                    next_offset = "FIXME need offset after variable length field"
+                else:
+                    _out("let %s = %s::from_ne_bytes(value.get(%s..%s).ok_or(MyTryError())?.try_into().unwrap());",
+                            field_name, rust_type, offset, next_offset)
+            offset = next_offset
+
+        _out("Ok(%s%s {", name_transform(_name(name)), extra_name)
+        _out_indent_incr()
+        for field in self.fields:
+            if field.visible:
+                _out("%s,", _to_rust_variable(field.field_name))
+        _out_indent_decr()
+        _out("})")
+        _out_indent_decr()
+        _out("}")
+        _out_indent_decr()
+        _out("}")
 
 def rs_struct(self, name):
-    complex_type(self, name, '', lambda name: _to_rust_identifier(name))
+    has_list = any(field.type.is_list for field in self.fields)
+    complex_type(self, name, has_list, '', lambda name: _to_rust_identifier(name))
 
     is_fixed_size = all(field.type.fixed_size() or field.type.is_pad for field in self.fields)
     if not is_fixed_size:
@@ -216,8 +257,42 @@ def rs_struct(self, name):
 
     length = sum((field.type.size * field.type.nmemb for field in self.fields))
 
+    _out("impl TryFrom<&[u8]> for %s {", _to_rust_identifier(_name(name)))
+    _out_indent_incr()
+    _out("type Error = MyTryError;")
+    _out("fn try_from(value: &[u8]) -> Result<Self, Self::Error> {")
+    _out_indent_incr()
+    _out("Ok(%s::from_ne_bytes(value.try_into().or(Err(MyTryError()))?))", _to_rust_identifier(_name(name)))
+    _out_indent_decr()
+    _out("}")
+    _out_indent_decr()
+    _out("}")
+
     _out("impl %s {", _to_rust_identifier(_name(name)))
     _out_indent_incr()
+    if not has_list:
+        _out("pub fn from_ne_bytes(bytes: &[u8; %s]) -> Self {", length)
+        _out_indent_incr()
+        offset = 0
+        for field in self.fields:
+            rust_type = _to_rust_type(field.type.name)
+            assert field.wire  # I *guess* that non-wire fields just have to be skipped
+            next_offset = offset + field.type.size
+            if field.visible:
+                values = ["bytes[%s]" % index for index in range(offset, next_offset)]
+                _out("let %s = %s::from_ne_bytes([%s]);", _to_rust_variable(field.field_name),
+                        rust_type, ", ".join(values))
+            offset = next_offset
+        _out("%s {", _to_rust_identifier(_name(name)))
+        _out_indent_incr()
+        for field in self.fields:
+            if field.visible:
+                _out("%s,", _to_rust_variable(field.field_name))
+        _out_indent_decr()
+        _out("}")
+    _out_indent_decr()
+    _out("}")
+
     _out("pub fn to_ne_bytes(&self) -> [u8; %s] {", length)
     _out_indent_incr()
 
@@ -329,16 +404,7 @@ def rs_request(self, name):
 
         _generate_aux(aux_name, self, switch, mask_field)
 
-    # Mark length fields as not visible
-    length_fields = {}
-    for field in self.fields:
-        if field.type.is_list:
-            length_fields[field.type.expr.lenfield_name] = field
-
-    for field in self.fields:
-        if field.field_name in length_fields:
-            field.is_length_field_for = length_fields[field.field_name]
-            field.visible = False
+    mark_length_fields(self)
 
     def _to_complex_rust_type(field_type):
         if field_type.is_switch:
@@ -448,11 +514,10 @@ def rs_request(self, name):
     _out("}")
 
     if self.reply:
-        complex_type(self.reply, name, 'Reply')
+        skipped = complex_type(self.reply, name, True, 'Reply')
         # Work-around for some types not being supported currently and thus not
         # getting emitted
-        is_fixed_size = all((field.type.fixed_size() and field.type.nmemb == 1) or field.type.is_pad for field in self.reply.fields)
-        if not is_fixed_size:
+        if skipped == "skipped":
             _out("pub struct %s%s {}", _name(name), 'Reply')
     _out("")
 
@@ -468,12 +533,12 @@ def rs_event(self, name):
         print("skipping XCB ClientMessage event (needs ClientMessageData)", self, name)
         return
     emit_opcode(name, 'Event', self.opcodes[name])
-    complex_type(self, name, 'Event')
+    complex_type(self, name, True, 'Event')
     _out("")
 
 def rs_error(self, name):
     emit_opcode(name, 'Event', self.opcodes[name])
-    complex_type(self, name, 'Error')
+    complex_type(self, name, True, 'Error')
     _out("")
 
 # We must create an "output" dictionary before any xcbgen imports
