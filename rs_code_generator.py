@@ -221,17 +221,27 @@ def rs_request(self, name):
                 result = "&[%s; %s]" % (result, field_type.nmemb)
         return result
 
+    lifetime = False
     args = ["c: &Connection"]
     for field in self.fields:
         if field.visible:
+            if field.type.is_list:
+                lifetime = True
             args.append("%s: %s" % (_to_rust_variable(field.field_name), _to_complex_rust_type(field.type)))
 
     if self.reply:
-        result_type = "Cookie<%sReply>" % _name(name)
+        if lifetime:
+            lifetime = "<'c>"
+            result_type = "Cookie<'c, %sReply>" % _name(name)
+            args[0] = "c: &'c Connection"
+        else:
+            lifetime = ""
+            result_type = "Cookie<%sReply>" % _name(name)
     else:
         result_type = "SequenceNumber"
+        lifetime = ""
 
-    _out("pub fn %s(%s) -> Result<%s, Box<dyn Error>> {", _lower_snake_name(name), ", ".join(args), result_type)
+    _out("pub fn %s%s(%s) -> Result<%s, Box<dyn Error>> {", _lower_snake_name(name), lifetime, ", ".join(args), result_type)
     _out_indent_incr()
 
     requests = []
