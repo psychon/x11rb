@@ -4,6 +4,7 @@ import getopt
 import sys
 import glob
 import re
+import string
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], "p:o:i:")
@@ -451,27 +452,44 @@ def rs_request(self, name):
                 result = "&[%s; %s]" % (result, field_type.nmemb)
         return result
 
-    lifetime = False
-    args = ["c: &Connection"]
+    need_lifetime = any(field.visible and field.type.is_list for field in self.fields)
+    if need_lifetime:
+        generics = ["'c"]
+        args = ["c: &'c Connection"]
+    else:
+        generics = []
+        args = ["c: &Connection"]
+    where = []
+
+    letters = iter(string.ascii_uppercase)
+
     for field in self.fields:
         if field.visible:
-            if field.type.is_list:
-                lifetime = True
-            args.append("%s: %s" % (_to_rust_variable(field.field_name), _to_complex_rust_type(field.type)))
+            rust_type = _to_complex_rust_type(field.type)
+            if field.enum is not None and not field.type.is_list:
+                letter = next(letters)
+                generics.append(letter)
+                where.append("%s: Into<%s>" % (letter, rust_type))
+                rust_type = letter
+            args.append("%s: %s" % (_to_rust_variable(field.field_name), rust_type))
 
     if self.reply:
-        if lifetime:
-            lifetime = "<'c>"
+        if need_lifetime:
             result_type = "Cookie<'c, %sReply>" % _name(name)
-            args[0] = "c: &'c Connection"
         else:
-            lifetime = ""
             result_type = "Cookie<%sReply>" % _name(name)
     else:
         result_type = "SequenceNumber"
+
+    if generics:
+        lifetime = "<%s>" % ", ".join(generics)
+    else:
         lifetime = ""
 
-    _out("pub fn %s%s(%s) -> Result<%s, Box<dyn Error>> {", _lower_snake_name(name), lifetime, ", ".join(args), result_type)
+    _out("pub fn %s%s(%s) -> Result<%s, Box<dyn Error>>", _lower_snake_name(name), lifetime, ", ".join(args), result_type)
+    if where:
+        _out("where %s", ", ".join(where))
+    _out("{")
     _out_indent_incr()
 
     requests = []
@@ -525,6 +543,8 @@ def rs_request(self, name):
         elif field.wire:
             if hasattr(field, "is_length_field_for"):
                 _out("let %s: %s = %s.len().try_into().or(Err(MyTryError()))?;", field.field_name, _to_rust_type(field.type.name), field.is_length_field_for.field_name)
+            if field.enum is not None:
+                _out("let %s = %s.into();", field.field_name, field.field_name);
             _out("let %s_bytes = %s.to_ne_bytes();", field.field_name, _to_rust_variable(field.field_name))
             if field.type.is_switch:
                 _emit_request()

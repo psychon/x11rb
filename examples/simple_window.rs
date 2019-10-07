@@ -25,9 +25,9 @@ fn main() {
     gc_aux.foreground = Some(0);
 
     // The root window is hardcoded, because so far the generated code cannot tell me its id
-    create_window(&conn, 24, win_id, 0x14d, 0, 0, 20, 20, 0, WindowClass::InputOutput.into(), 0, &win_aux).unwrap();
+    create_window(&conn, 24, win_id, 0x14d, 0, 0, 100, 100, 0, WindowClass::InputOutput, 0, &win_aux).unwrap();
 
-    create_gc(&conn, gc_id, win_id, &gc_aux);
+    create_gc(&conn, gc_id, win_id, &gc_aux).unwrap();
 
     map_window(&conn, win_id).unwrap();
 
@@ -47,7 +47,7 @@ fn main() {
                         Point { x: -10, y: 110 },
                         Point { x: 110, y: -10 },
                     ];
-                    poly_line(&conn, CoordMode::Origin.into(), win_id, gc_id, &points).unwrap();
+                    poly_line(&conn, CoordMode::Origin, win_id, gc_id, &points).unwrap();
                     conn.flush();
                 }
             }
