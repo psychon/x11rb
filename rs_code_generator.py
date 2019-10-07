@@ -243,9 +243,12 @@ def rs_union(self, name):
 def rs_request(self, name):
     emit_opcode(name, 'REQUEST', self.opcode)
 
-    is_simple = all(field.type.is_simple or field.type.is_pad for field in self.fields)
-    is_fixed_size = all((field.type.fixed_size() and field.type.nmemb == 1) or field.type.is_pad for field in self.fields)
-    if (not is_simple) or (not is_fixed_size):
+    has_switch = any(field.type.is_switch for field in self.fields)
+    skip = [
+            'QueryTextExtents', # has an <exprfield> odd_length that we do not support currently
+            'SetFontPath', # depends on the Str struct
+            ]
+    if has_switch or name[1] in skip:
         print("skipping complicated request", self, name)
         return
 
