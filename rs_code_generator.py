@@ -214,7 +214,10 @@ def rs_request(self, name):
     def _to_complex_rust_type(field_type):
         result = _to_rust_type(field_type.name)
         if field_type.is_list:
-            result = "&[%s; %s]" % (result, field_type.nmemb)
+            if field_type.nmemb is None:
+                result = "&[%s]" % result
+            else:
+                result = "&[%s; %s]" % (result, field_type.nmemb)
         return result
 
     args = ["c: &Connection"]
@@ -246,8 +249,14 @@ def rs_request(self, name):
         _out("];")
         del request[:]
 
-    request_length = sum((field.type.size * field.type.nmemb for field in self.fields))
-    _out("let length: usize = %s / 4;", request_length)
+    fixed_request_length = sum((field.type.size * field.type.nmemb for field in self.fields if field.type.nmemb is not None))
+    request_length = [ str(fixed_request_length) ]
+    for field in self.fields:
+        if field.type.nmemb is None:
+            request_length.append("%s * %s.len()" % (field.type.size, field.field_name))
+    request_length = " + ".join(request_length)
+
+    _out("let length: usize = (%s) / 4;", request_length)
     for field in self.fields:
         if field.field_name == "major_opcode":
             request.append("%s_REQUEST" % _upper_snake_name(name))
@@ -256,9 +265,19 @@ def rs_request(self, name):
                 request.append("0")
         else:
             if field.type.is_list:
-                assert field.type.size == 1
-                _emit_request()
-                requests.append(field.field_name)
+                if field.type.size == 1:
+                    _emit_request()
+                    requests.append(field.field_name)
+                else:
+                    _out("let mut %s_bytes = Vec::with_capacity(%s * %s.len());", field.field_name, field.type.size, field.field_name);
+                    _out("for value in %s {", field.field_name);
+                    _out_indent_incr()
+                    _out("%s_bytes.extend(value.to_ne_bytes().iter());", field.field_name)
+                    _out_indent_decr()
+                    _out("}")
+
+                    _emit_request()
+                    requests.append("&%s_bytes" % field.field_name)
             else:
                 _out("let %s_bytes = %s.to_ne_bytes();", field.field_name, _to_rust_variable(field.field_name))
                 for i in range(field.type.size):
