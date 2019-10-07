@@ -84,6 +84,10 @@ impl Connection {
         }
     }
 
+    pub fn generate_id(&self) -> u32 {
+        unsafe { raw_ffi::xcb_generate_id(self.0) }
+    }
+
     pub fn flush(&self) {
         unsafe { raw_ffi::xcb_flush(self.0); }
     }
@@ -275,5 +279,6 @@ mod raw_ffi {
         pub fn xcb_wait_for_reply64(c: *const xcb_connection_t, request: u64, e: *mut * mut xcb_generic_error_t) -> *mut c_void;
         pub fn xcb_wait_for_event(c: *const xcb_connection_t) -> *mut xcb_generic_event_t;
         pub fn xcb_flush(c: *const xcb_connection_t) -> c_int;
+        pub fn xcb_generate_id(c: *const xcb_connection_t) -> u32;
     }
 }
