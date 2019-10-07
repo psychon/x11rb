@@ -170,6 +170,7 @@ def complex_type(self, name, extra_name, name_transform=lambda x: x):
     offset = 0
     for field in self.fields:
         rust_type = _to_rust_type(field.type.name)
+        assert field.wire  # I *guess* that non-wire fields just have to be skipped
         next_offset = offset + field.type.size
         if field.visible:
             _out("let %s = %s::from_ne_bytes(value.get(%s..%s).ok_or(MyTryError())?.try_into().unwrap());",
