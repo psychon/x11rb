@@ -73,8 +73,6 @@ def _to_rust_type(name):
         return _to_rust_identifier(name)
 
 def _to_rust_identifier(name):
-    if name[0].isdigit():
-        name = 'M' + name
     name = re.sub('_(.)', lambda pat: pat.group(1).upper(), name.lower())
     return name[0].upper() + name[1:]
 
@@ -116,15 +114,19 @@ def rs_close(self):
 
 enum_sizes = {}
 def rs_enum(self, name):
+    has_all_upper = any(ename.isupper() and len(ename) > 1 for (ename, value) in self.values)
+    if has_all_upper:
+        print(name)
+
     def ename_to_rust(ename):
-        # if all upercase or number -> to_rust_identifier, else keep as is
-        if ename.isupper() or ename.isdigit():
-            return _to_rust_identifier(ename)
-        else:
-            return ename[0].upper() + ename[1:]
+        if ename[0].isdigit():
+            ename = 'M' + ename
+        return ename[0].upper() + ename[1:]
 
     rust_name = _name(name)
     _out("#[derive(Debug)]")
+    if has_all_upper:
+        _out("#[allow(non_camel_case_types)]")
     _out("pub enum %s {", rust_name)
     _out_indent_incr()
     for (ename, value) in self.values:
