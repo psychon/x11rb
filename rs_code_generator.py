@@ -424,8 +424,7 @@ def rs_request(self, name):
                 requests.append("&%s_bytes" % field.field_name)
         else:
             if hasattr(field, "is_length_field_for"):
-                _out("let %s = %s.len();", field.field_name, field.is_length_field_for.field_name)
-                _out("let %s: %s = %s.try_into().or(Err(MyTryError()))?;", field.field_name, _to_rust_type(field.type.name), field.field_name)
+                _out("let %s: %s = %s.len().try_into().or(Err(MyTryError()))?;", field.field_name, _to_rust_type(field.type.name), field.is_length_field_for.field_name)
             _out("let %s_bytes = %s.to_ne_bytes();", field.field_name, _to_rust_variable(field.field_name))
             if field.type.is_switch:
                 _emit_request()
