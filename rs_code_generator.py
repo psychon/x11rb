@@ -490,7 +490,7 @@ def rs_request(self, name):
         _out("];")
         del request[:]
 
-    fixed_request_length = sum((field.type.size * field.type.nmemb for field in self.fields if field.type.nmemb is not None))
+    fixed_request_length = sum((field.type.size * field.type.nmemb for field in self.fields if field.type.nmemb is not None and field.wire))
     request_length = [ str(fixed_request_length) ]
     for field in self.fields:
         if field.type.nmemb is None:
@@ -522,7 +522,7 @@ def rs_request(self, name):
 
                 _emit_request()
                 requests.append("&%s_bytes" % field.field_name)
-        else:
+        elif field.wire:
             if hasattr(field, "is_length_field_for"):
                 _out("let %s: %s = %s.len().try_into().or(Err(MyTryError()))?;", field.field_name, _to_rust_type(field.type.name), field.is_length_field_for.field_name)
             _out("let %s_bytes = %s.to_ne_bytes();", field.field_name, _to_rust_variable(field.field_name))
