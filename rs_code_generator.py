@@ -90,6 +90,7 @@ def rs_open(self):
     _out("use crate::xcb_ffi::SequenceNumber;")
     _out("use crate::xcb_ffi::Cookie;")
     _out("pub struct MyTryError();");
+    _out("")
 
 def rs_close(self):
     _out_indent_decr()
@@ -137,9 +138,11 @@ def rs_enum(self, name):
     _out("}")
     _out_indent_decr()
     _out("}")
+    _out("")
 
 def rs_simple(self, name):
     _out("pub type %s = %s;", _name(name), _to_rust_type(self.name))
+    _out("")
 
 def emit_opcode(name, extra_name, opcode):
     _out("pub const %s_%s: u8 = %s;", _upper_snake_name(name), extra_name.upper(), opcode)
@@ -187,6 +190,7 @@ def complex_type(self, name, extra_name, name_transform=lambda x: x):
 
 def rs_struct(self, name):
     complex_type(self, name, '', lambda name: _to_rust_identifier(name))
+    _out("")
 
 def rs_union(self, name):
     rust_name = _name(name)
@@ -196,6 +200,7 @@ def rs_union(self, name):
         _out("%s([%s; %s]),", _to_rust_identifier(field.field_name), _to_rust_type(field.type.member.name), field.type.expr.nmemb)
     _out_indent_decr()
     _out("}")
+    _out("")
 
 def rs_request(self, name):
     emit_opcode(name, 'REQUEST', self.opcode)
@@ -281,9 +286,11 @@ def rs_request(self, name):
         is_fixed_size = all((field.type.fixed_size() and field.type.nmemb == 1) or field.type.is_pad for field in self.reply.fields)
         if not (is_simple and is_fixed_size):
             _out("pub struct %s%s {}", _name(name), 'Reply')
+    _out("")
 
 def rs_eventstruct(self, name):
     print("eventstruct", self, name)
+    _out("")
 
 def rs_event(self, name):
     if self.is_ge_event:
@@ -291,10 +298,12 @@ def rs_event(self, name):
         return
     emit_opcode(name, 'Event', self.opcodes[name])
     complex_type(self, name, 'Event')
+    _out("")
 
 def rs_error(self, name):
     emit_opcode(name, 'Event', self.opcodes[name])
     complex_type(self, name, 'Error')
+    _out("")
 
 # We must create an "output" dictionary before any xcbgen imports
 output = {'open'       : rs_open,
@@ -322,5 +331,5 @@ for name in names:
 
 with open(output_file, 'w') as target:
     for line in _lines:
-        target.write(line)
+        target.write(line.rstrip())
         target.write('\n')
