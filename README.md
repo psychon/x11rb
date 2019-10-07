@@ -19,9 +19,12 @@ should send all your requests before waiting for the replies.
 
 ## Future work
 
+- big requests
 - FD passing
 - checked requests (needed?)
   - Add `connection.check_request(sequence)` and be done?
+- ListFonts support
+  - `MultiCookie` that is an iterator for replies?
 - thread safe (connection should be Send and Sync)
 - Rewrite it in Rust - a non-ffi based library
 
