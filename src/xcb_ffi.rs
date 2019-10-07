@@ -25,6 +25,7 @@ pub enum ConnectionError {
     UnknownError
 }
 
+#[derive(Debug)]
 pub struct CSlice {
     slice: &'static [u8]
 }
