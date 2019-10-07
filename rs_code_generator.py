@@ -191,6 +191,38 @@ def complex_type(self, name, extra_name, name_transform=lambda x: x):
 
 def rs_struct(self, name):
     complex_type(self, name, '', lambda name: _to_rust_identifier(name))
+    is_fixed_size = all(field.type.fixed_size() or field.type.is_pad for field in self.fields)
+    if not is_fixed_size:
+        return
+
+    length = sum((field.type.size * field.type.nmemb for field in self.fields))
+
+    _out("impl %s {", _to_rust_identifier(_name(name)))
+    _out_indent_incr()
+    _out("pub fn to_ne_bytes(&self) -> [u8; %s] {", length)
+    _out_indent_incr()
+
+    result_bytes = []
+    for field in self.fields:
+        if field.type.is_pad:
+            assert field.type.size == 1
+            for i in range(field.type.nmemb):
+                result_bytes.append("0")
+        else:
+            _out("let %s_bytes = self.%s.to_ne_bytes();", field.field_name, field.field_name)
+            for i in range(field.type.size):
+                result_bytes.append("%s_bytes[%d]" % (field.field_name, i))
+
+    _out("[")
+    _out_indent_incr()
+    for result_value in result_bytes:
+        _out("%s,", result_value)
+    _out_indent_decr()
+    _out("]")
+    _out_indent_decr()
+    _out("}")
+    _out_indent_decr()
+    _out("}")
     _out("")
 
 def rs_union(self, name):
