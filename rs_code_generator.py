@@ -329,6 +329,17 @@ def rs_request(self, name):
 
         _generate_aux(aux_name, self, switch, mask_field)
 
+    # Mark length fields as not visible
+    length_fields = {}
+    for field in self.fields:
+        if field.type.is_list:
+            length_fields[field.type.expr.lenfield_name] = field
+
+    for field in self.fields:
+        if field.field_name in length_fields:
+            field.is_length_field_for = length_fields[field.field_name]
+            field.visible = False
+
     def _to_complex_rust_type(field_type):
         if field_type.is_switch:
             return "&" + aux_name
@@ -412,6 +423,9 @@ def rs_request(self, name):
                 _emit_request()
                 requests.append("&%s_bytes" % field.field_name)
         else:
+            if hasattr(field, "is_length_field_for"):
+                _out("let %s = %s.len();", field.field_name, field.is_length_field_for.field_name)
+                _out("let %s: %s = %s.try_into().or(Err(MyTryError()))?;", field.field_name, _to_rust_type(field.type.name), field.field_name)
             _out("let %s_bytes = %s.to_ne_bytes();", field.field_name, _to_rust_variable(field.field_name))
             if field.type.is_switch:
                 _emit_request()
