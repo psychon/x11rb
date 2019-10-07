@@ -307,25 +307,24 @@ def rs_request(self, name):
             assert field.type.size == 1
             for i in range(field.type.nmemb):
                 request.append("0")
-        else:
-            if field.type.is_list:
-                if field.type.size == 1:
-                    _emit_request()
-                    requests.append(field.field_name)
-                else:
-                    _out("let mut %s_bytes = Vec::with_capacity(%s * %s.len());", field.field_name, field.type.size, field.field_name);
-                    _out("for value in %s {", field.field_name);
-                    _out_indent_incr()
-                    _out("%s_bytes.extend(value.to_ne_bytes().iter());", field.field_name)
-                    _out_indent_decr()
-                    _out("}")
-
-                    _emit_request()
-                    requests.append("&%s_bytes" % field.field_name)
+        elif field.type.is_list:
+            if field.type.size == 1:
+                _emit_request()
+                requests.append(field.field_name)
             else:
-                _out("let %s_bytes = %s.to_ne_bytes();", field.field_name, _to_rust_variable(field.field_name))
-                for i in range(field.type.size):
-                    request.append("%s_bytes[%d]" % (field.field_name, i))
+                _out("let mut %s_bytes = Vec::with_capacity(%s * %s.len());", field.field_name, field.type.size, field.field_name);
+                _out("for value in %s {", field.field_name);
+                _out_indent_incr()
+                _out("%s_bytes.extend(value.to_ne_bytes().iter());", field.field_name)
+                _out_indent_decr()
+                _out("}")
+
+                _emit_request()
+                requests.append("&%s_bytes" % field.field_name)
+        else:
+            _out("let %s_bytes = %s.to_ne_bytes();", field.field_name, _to_rust_variable(field.field_name))
+            for i in range(field.type.size):
+                request.append("%s_bytes[%d]" % (field.field_name, i))
 
     _emit_request()
 
