@@ -41,10 +41,13 @@ def _name(name):
     assert len(name) == 2, name
     return name[1]
 
-def _snake_name(name):
+def _lower_snake_name(name):
     name = _name(name)
     name = re.sub('([a-z0-9])([A-Z])', '\\1_\\2', name)
     return name.lower()
+
+def _upper_snake_name(name):
+    return _lower_snake_name(name).upper()
 
 rust_type_mapping = {
         'uint32_t': 'u32',
@@ -139,7 +142,7 @@ def rs_simple(self, name):
     _out("pub type %s = %s;", _name(name), _to_rust_type(self.name))
 
 def emit_opcode(name, extra_name, opcode):
-    _out("pub const %s_%s: u8 = %s;", _name(name).upper(), extra_name.upper(), opcode)
+    _out("pub const %s_%s: u8 = %s;", _upper_snake_name(name), extra_name.upper(), opcode)
 
 def complex_type(self, name, extra_name, name_transform=lambda x: x):
     is_simple = all(field.type.is_simple or field.type.is_pad for field in self.fields)
@@ -219,7 +222,7 @@ def rs_request(self, name):
     else:
         result_type = "SequenceNumber"
 
-    _out("pub fn %s(%s) -> Result<%s, Box<dyn Error>> {", _snake_name(name), ", ".join(args), result_type)
+    _out("pub fn %s(%s) -> Result<%s, Box<dyn Error>> {", _lower_snake_name(name), ", ".join(args), result_type)
     _out_indent_incr()
 
     request = []
@@ -227,7 +230,7 @@ def rs_request(self, name):
     _out("let length: usize = %s / 4;", request_length)
     for field in self.fields:
         if field.field_name == "major_opcode":
-            request.append("%s_REQUEST" % _name(name).upper())
+            request.append("%s_REQUEST" % _upper_snake_name(name))
         elif field.type.is_pad:
             for i in range(field.type.size):
                 request.append("0")
