@@ -53,6 +53,7 @@ rust_type_mapping = {
         'int32_t':  'i32',
         'int16_t':  'i16',
         'int8_t':   'i8',
+        'char':     'u8',
 }
 
 def _to_rust_type(name):
@@ -202,10 +203,16 @@ def rs_request(self, name):
         print("skipping complicated request", self, name)
         return
 
+    def _to_complex_rust_type(field_type):
+        result = _to_rust_type(field_type.name)
+        if field_type.is_list:
+            result = "&[%s; %s]" % (result, field_type.nmemb)
+        return result
+
     args = ["c: &Connection"]
     for field in self.fields:
         if field.visible:
-            args.append("%s: %s" % (_to_rust_variable(field.field_name), _to_rust_type(field.type.name)))
+            args.append("%s: %s" % (_to_rust_variable(field.field_name), _to_complex_rust_type(field.type)))
 
     if self.reply:
         result_type = "Cookie<%sReply>" % _name(name)
@@ -216,6 +223,8 @@ def rs_request(self, name):
     _out_indent_incr()
 
     request = []
+    request_length = sum((field.type.size * field.type.nmemb for field in self.fields))
+    _out("let length: usize = %s / 4;", request_length)
     for field in self.fields:
         if field.field_name == "major_opcode":
             request.append("%s_REQUEST" % _name(name).upper())
@@ -223,12 +232,14 @@ def rs_request(self, name):
             for i in range(field.type.size):
                 request.append("0")
         else:
-            if field.field_name == "length":
-                value = sum((field.type.size for field in self.fields))
-                _out("let %s: usize = %s / 4;", field.field_name, value)
-            _out("let %s_bytes = %s.to_ne_bytes();", field.field_name, _to_rust_variable(field.field_name))
-            for i in range(field.type.size):
-                request.append("%s_bytes[%d]" % (field.field_name, i))
+            if field.type.is_list:
+                assert field.type.size == 1
+                for i in range(field.type.nmemb):
+                    request.append("%s[%d]" % (field.field_name, i))
+            else:
+                _out("let %s_bytes = %s.to_ne_bytes();", field.field_name, _to_rust_variable(field.field_name))
+                for i in range(field.type.size):
+                    request.append("%s_bytes[%d]" % (field.field_name, i))
 
     _out("let request = [");
     _out_indent_incr()
@@ -236,6 +247,7 @@ def rs_request(self, name):
         _out("%s,", byte)
     _out_indent_decr()
     _out("];")
+    _out("assert_eq!(request.len(), %s);", request_length);
     if self.reply:
         _out("c.send_request_with_reply(&[IoSlice::new(&request)])")
     else:
