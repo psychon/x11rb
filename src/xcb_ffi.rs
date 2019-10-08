@@ -5,6 +5,7 @@ use std::ops::Deref;
 use std::marker::PhantomData;
 use std::convert::{TryFrom, TryInto};
 use std::error::Error;
+use std::ffi::CStr;
 use std::io::{IoSlice, Error as IOError, ErrorKind::{UnexpectedEof, InvalidData, Other}};
 use std::mem::forget;
 use libc::free;
@@ -14,6 +15,7 @@ pub type SequenceNumber = u64;
 #[derive(Debug)]
 pub struct Connection(*mut raw_ffi::xcb_connection_t);
 
+#[derive(Debug)]
 pub enum ConnectionError {
     ConnectionError,
     UnsupportedExtension,
@@ -73,14 +75,17 @@ impl ConnectionError {
 }
 
 impl Connection {
-    pub fn new() -> Result<Connection, ConnectionError>  {
+    pub fn connect(dpy_name: Option<&CStr>) -> Result<(Connection, usize), ConnectionError>  {
+        use libc::c_int;
         unsafe {
-            let connection = Connection(raw_ffi::xcb_connect(null(), null_mut()));
+            let mut screen: c_int = 0;
+            let dpy_ptr = dpy_name.map_or(null(), |s| s.as_ptr());
+            let connection = Connection(raw_ffi::xcb_connect(dpy_ptr, &mut screen));
             let error = raw_ffi::xcb_connection_has_error(connection.0);
             if error != 0 {
                 Err(ConnectionError::from_c_error(error.try_into().or(Err(ConnectionError::UnknownError))?))
             } else {
-                Ok(connection)
+                Ok((connection, screen as usize))
             }
         }
     }

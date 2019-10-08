@@ -6,11 +6,7 @@ use std::convert::TryFrom;
 
 
 fn main() {
-    let conn = Connection::new();
-    let conn = match conn {
-        Ok(conn) => conn,
-        Err(_) => panic!("")
-    };
+    let (conn, _screen) = Connection::connect(None).unwrap();
     println!("{:?}", no_operation(&conn).unwrap());
     println!("{:?}", get_input_focus(&conn).unwrap().reply());
 
