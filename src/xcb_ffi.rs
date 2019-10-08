@@ -104,7 +104,12 @@ impl Connection {
 
         let err = Err(ConnectionError::UnknownError);
         let slice = CSlice::new(wrapper.into_ptr(), length.try_into().or(err)?);
-        Setup::try_from(slice).or(Err(ConnectionError::UnknownError))
+        let result = Setup::try_from(&*slice);
+
+        // We must not free() xcb_setup_t that libxcb owns
+        forget(slice);
+
+        result.or(Err(ConnectionError::UnknownError))
     }
 
     pub fn setup(&self) -> &Setup {
