@@ -339,41 +339,83 @@ def complex_type(self, name, from_generic_type, extra_name, name_transform=lambd
     _out("}")
 
 def rs_struct(self, name):
-    has_list = any(field.type.is_list for field in self.fields)
+    has_variable_size_list = any(field.type.is_list and field.type.nmemb is None for field in self.fields)
     complex_type(self, name, False, '', lambda name: _to_rust_identifier(name))
 
-    if has_list:
-        pass
+    if has_variable_size_list:
+        length = None
+        wire_type = "Vec<u8>"
     else:
         length = sum((field.type.size * field.type.nmemb for field in self.fields))
+        wire_type = "[u8; %s]" % length
 
-        _out("impl %s {", _to_rust_identifier(_name(name)))
+    _out("impl %s {", _to_rust_identifier(_name(name)))
+    _out_indent_incr()
+
+    _out("pub fn to_ne_bytes(&self) -> %s {", wire_type)
+    _out_indent_incr()
+
+    if has_variable_size_list:
+        _out("let mut result = Vec::new();")
+
+    def _emit():
+        if not has_variable_size_list or not result_bytes:
+            return
+        _out("result.extend([")
         _out_indent_incr()
+        for result_value in result_bytes:
+            _out("%s,", result_value)
+        _out_indent_decr()
+        _out("].iter());")
+        del result_bytes[:]
 
-        _out("pub fn to_ne_bytes(&self) -> [u8; %s] {", length)
-        _out_indent_incr()
-
-        result_bytes = []
-        for field in self.fields:
-            if field.type.is_pad:
+    result_bytes = []
+    for field in self.fields:
+        if field.type.is_pad:
+            if has_variable_size_list and field.type.align != 1:
+                assert field.type.size == 1
+                assert field.type.nmemb == 1
+                _out("while result.len() %% %s != 0 {", field.type.align)
+                _out_indent_incr()
+                _out("result.push(0);")
+                _out_indent_decr()
+                _out("}")
+            else:
+                assert field.type.align == 1
                 assert field.type.size == 1
                 for i in range(field.type.nmemb):
                     result_bytes.append("0")
+        elif field.type.is_list and field.type.nmemb is None:
+            _emit()
+            _out("for obj in self.%s.iter() {", field.field_name)
+            _out_indent_incr()
+            _out("result.extend(obj.to_ne_bytes().iter());")
+            _out_indent_decr()
+            _out("}")
+        else:
+            if hasattr(field, "is_length_field_for"):
+                _out("let %s = self.%s.len() as %s;", field.field_name, field.is_length_field_for.field_name, _to_rust_type(field.type.name))
+                source = field.field_name
             else:
-                _out("let %s_bytes = self.%s.to_ne_bytes();", field.field_name, field.field_name)
-                for i in range(field.type.size):
-                    result_bytes.append("%s_bytes[%d]" % (field.field_name, i))
+                source = "self.%s" % field.field_name
+            _out("let %s_bytes = %s.to_ne_bytes();", field.field_name, source)
+            for i in range(field.type.size):
+                result_bytes.append("%s_bytes[%d]" % (field.field_name, i))
+    _emit()
 
+    if has_variable_size_list:
+        _out("result")
+    else:
         _out("[")
         _out_indent_incr()
         for result_value in result_bytes:
             _out("%s,", result_value)
         _out_indent_decr()
         _out("]")
-        _out_indent_decr()
-        _out("}")
-        _out_indent_decr()
-        _out("}")
+    _out_indent_decr()
+    _out("}")
+    _out_indent_decr()
+    _out("}")
 
     _out("")
 
