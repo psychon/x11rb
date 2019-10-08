@@ -585,7 +585,6 @@ def rs_request(self, name):
     request_length = " + ".join(request_length)
 
     _out("let length: usize = (%s + 3) / 4;", request_length)
-    request_length = "(%s + 3) / 4 * 4" % request_length
     for field in self.fields:
         if field.field_name == "major_opcode":
             request.append("%s_REQUEST" % _upper_snake_name(name))
