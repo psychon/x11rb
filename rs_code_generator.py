@@ -227,8 +227,7 @@ def mark_length_fields(self):
 def complex_type(self, name, generate_try_from, from_generic_type, extra_name, name_transform=lambda x: x):
     mark_length_fields(self)
 
-    skip = ['KeymapNotify', 'QueryKeymap', 'QueryFont', 'ListFonts', 'ListFontsWithInfo', 'GetFontPath', 'AllocColorCells', 'ListExtensions', 'GetKeyboardControl', 'ListHosts']
-    is_fixed_size = all((field.type.fixed_size() and field.type.nmemb == 1) or field.type.is_pad for field in self.fields)
+    skip = ['KeymapNotify', 'QueryKeymap', 'GetKeyboardControl']
 
     if name[1] in skip:
         print("skipping complicated complex type", extra_name, self, name)
