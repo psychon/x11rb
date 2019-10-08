@@ -181,11 +181,14 @@ impl Connection {
         }
     }
 
-    pub fn wait_for_event(&self) -> Result<GenericEvent, Box<dyn Error>> {
+    pub fn wait_for_event(&self) -> Result<Option<GenericEvent>, Box<dyn Error>> {
         unsafe {
             let event = raw_ffi::xcb_wait_for_event(self.0);
+            if event.is_null() {
+                return Ok(None);
+            }
             assert_ne!(35, (*event).response_type); // FIXME: XGE events may have sizes > 32
-            CSlice::new(event as _, 32).try_into()
+            Ok(Some(CSlice::new(event as _, 32).try_into()?))
         }
     }
 }

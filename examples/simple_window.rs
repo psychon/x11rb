@@ -41,6 +41,10 @@ fn main() {
 
     loop {
         let event = conn.wait_for_event().unwrap();
+        let event = match event {
+            None => return,
+            Some(event) => event
+        };
         println!("{:?}", event);
         if event.response_type() == EXPOSE_EVENT {
             let event = ExposeEvent::try_from(event);
