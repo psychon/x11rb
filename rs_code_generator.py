@@ -481,7 +481,6 @@ def rs_request(self, name):
 
     skip = [
             'QueryTextExtents', # has an <exprfield> odd_length that we do not support currently
-            'SetFontPath', # depends on the Str struct
             ]
     if name[1] in skip:
         print("skipping complicated request", self, name)
@@ -574,11 +573,27 @@ def rs_request(self, name):
         _out("];")
         del request[:]
 
+    def _emit_byte_conversion(field_name):
+        if field.type.size is not None:
+            _out("let mut %s_bytes = Vec::with_capacity(%s * %s.len());", field.field_name, field.type.size, field.field_name);
+        else:
+            _out("let mut %s_bytes = Vec::new();", field.field_name);
+        _out("for value in %s {", field_name);
+        _out_indent_incr()
+        _out("%s_bytes.extend(value.to_ne_bytes().iter());", field_name)
+        _out_indent_decr()
+        _out("}")
+
     fixed_request_length = sum((field.type.size * field.type.nmemb for field in self.fields if field.type.nmemb is not None and field.wire))
     request_length = [ str(fixed_request_length) ]
     for field in self.fields:
         if field.type.nmemb is None:
-            request_length.append("%s * %s.len()" % (field.type.size, field.field_name))
+            size = field.type.size
+            if size is None:
+                _emit_byte_conversion(field.field_name)
+                request_length.append("%s_bytes.len()" % field.field_name)
+            else:
+                request_length.append("%s * %s.len()" % (size, field.field_name))
         if hasattr(field, 'lenfield_for_switch'):
             _out("let %s = %s.value_mask();", field.field_name, field.lenfield_for_switch.field_name)
             request_length.append("(%s * %s.count_ones()) as usize" % (field.individual_field_size, field.field_name))
@@ -597,12 +612,8 @@ def rs_request(self, name):
                 _emit_request()
                 requests.append(field.field_name)
             else:
-                _out("let mut %s_bytes = Vec::with_capacity(%s * %s.len());", field.field_name, field.type.size, field.field_name);
-                _out("for value in %s {", field.field_name);
-                _out_indent_incr()
-                _out("%s_bytes.extend(value.to_ne_bytes().iter());", field.field_name)
-                _out_indent_decr()
-                _out("}")
+                if field.type.size is not None:
+                    _emit_byte_conversion(field.field_name)
 
                 _emit_request()
                 requests.append("&%s_bytes" % field.field_name)
