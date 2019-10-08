@@ -448,8 +448,8 @@ def rs_union(self, name):
         _out("pub fn as_%s(&self) -> %s {", _lower_snake_name(('xcb', field.field_name)), result_type)
         _out_indent_incr()
         _out("fn do_the_parse(value: &[u8]) -> Result<%s, MyTryError> {", result_type)
-        _out("let mut remaining = value;")
         _out_indent_incr()
+        _out("let mut remaining = value;")
         parts = _emit_parsing_code([field])
         _out("let _ = remaining;")
         assert len(parts) == 1
