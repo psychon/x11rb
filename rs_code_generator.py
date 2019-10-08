@@ -269,9 +269,8 @@ def complex_type(self, name, generate_try_from, from_generic_type, extra_name, n
                 _out("}")
                 parts.append(field.field_name)
             else:
-                _out("let v = %s::try_parse(remaining)?;", rust_type)
-                _out("let %s = v.0;", _to_rust_variable(field.field_name))
-                _out("remaining = v.1;")
+                _out("let (%s, r) = %s::try_parse(remaining)?;", _to_rust_variable(field.field_name), rust_type)
+                _out("remaining = r;")
                 if field.visible:
                     parts.append(_to_rust_variable(field.field_name))
         else:
