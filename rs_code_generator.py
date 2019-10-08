@@ -275,7 +275,16 @@ def complex_type(self, name, generate_try_from, from_generic_type, extra_name, n
                 if field.visible:
                     parts.append(_to_rust_variable(field.field_name))
         else:
-            _out("remaining = &remaining.get(%s..).ok_or(MyTryError())?;", field.type.size * field.type.nmemb)
+            if field.type.is_pad and field.type.align != 1:
+                assert field.type.size * field.type.nmemb == 1
+                align = field.type.align
+                _out("// Align offset to multiple of %s", align)
+                _out("let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;")
+                _out("let misalignment = (%s - (offset %% %s)) %% %s;", align, align, align)
+                length = "misalignment"
+            else:
+                length = field.type.size * field.type.nmemb
+            _out("remaining = &remaining.get(%s..).ok_or(MyTryError())?;", length)
 
     _out("let result = %s%s { %s };", name_transform(_name(name)), extra_name, ", ".join(parts))
     _out("Ok((result, remaining))")

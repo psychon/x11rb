@@ -6,7 +6,9 @@ use std::convert::TryFrom;
 
 
 fn main() {
-    let (conn, _screen) = Connection::connect(None).unwrap();
+    let (conn, screen_num) = Connection::connect(None).unwrap();
+    let screen = &conn.setup().roots[screen_num];
+
     println!("{:?}", no_operation(&conn).unwrap());
     println!("{:?}", get_input_focus(&conn).unwrap().reply());
 
@@ -20,8 +22,7 @@ fn main() {
     let mut gc_aux = CreateGCAux::default();
     gc_aux.foreground = Some(0);
 
-    // The root window is hardcoded, because so far the generated code cannot tell me its id
-    create_window(&conn, 24, win_id, 0x14d, 0, 0, 100, 100, 0, WindowClass::InputOutput, 0, &win_aux).unwrap();
+    create_window(&conn, 24, win_id, screen.root, 0, 0, 100, 100, 0, WindowClass::InputOutput, 0, &win_aux).unwrap();
 
     let title = "Simple Window";
     change_property(&conn, PropMode::Replace, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), 8, title.as_bytes()).unwrap();

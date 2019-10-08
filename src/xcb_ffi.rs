@@ -9,11 +9,12 @@ use std::ffi::CStr;
 use std::io::{IoSlice, Error as IOError, ErrorKind::{UnexpectedEof, InvalidData, Other}};
 use std::mem::forget;
 use libc::free;
+use super::generated::xproto::Setup;
 
 pub type SequenceNumber = u64;
 
 #[derive(Debug)]
-pub struct Connection(*mut raw_ffi::xcb_connection_t);
+pub struct Connection(*mut raw_ffi::xcb_connection_t, Setup);
 
 #[derive(Debug)]
 pub enum ConnectionError {
@@ -80,14 +81,34 @@ impl Connection {
         unsafe {
             let mut screen: c_int = 0;
             let dpy_ptr = dpy_name.map_or(null(), |s| s.as_ptr());
-            let connection = Connection(raw_ffi::xcb_connect(dpy_ptr, &mut screen));
-            let error = raw_ffi::xcb_connection_has_error(connection.0);
+            let connection = raw_ffi::xcb_connect(dpy_ptr, &mut screen);
+            let error = raw_ffi::xcb_connection_has_error(connection);
             if error != 0 {
                 Err(ConnectionError::from_c_error(error.try_into().or(Err(ConnectionError::UnknownError))?))
             } else {
-                Ok((connection, screen as usize))
+                let setup = raw_ffi::xcb_get_setup(connection);
+                Ok((Connection(connection, Self::parse_setup(setup)?), screen as usize))
             }
         }
+    }
+
+    unsafe fn parse_setup(setup: *const u8) -> Result<Setup, ConnectionError> {
+        // We know that the setup information has at least eight bytes
+        let wrapper = CSlice::new(setup, 8);
+
+        // The length field is in the last two bytes
+        let length = u16::from_ne_bytes([(*wrapper)[6], (*wrapper)[7]]);
+
+        // The length is in four-byte-units after the known header
+        let length = length * 4 + 8;
+
+        let err = Err(ConnectionError::UnknownError);
+        let slice = CSlice::new(wrapper.into_ptr(), length.try_into().or(err)?);
+        Setup::try_from(slice).or(Err(ConnectionError::UnknownError))
+    }
+
+    pub fn setup(&self) -> &Setup {
+        &self.1
     }
 
     pub fn generate_id(&self) -> u32 {
@@ -392,5 +413,6 @@ mod raw_ffi {
         pub fn xcb_wait_for_event(c: *const xcb_connection_t) -> *mut xcb_generic_event_t;
         pub fn xcb_flush(c: *const xcb_connection_t) -> c_int;
         pub fn xcb_generate_id(c: *const xcb_connection_t) -> u32;
+        pub fn xcb_get_setup(c: *const xcb_connection_t) -> *const u8;
     }
 }
