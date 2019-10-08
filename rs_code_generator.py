@@ -650,7 +650,7 @@ def rs_event(self, name):
     _out("")
 
 def rs_error(self, name):
-    emit_opcode(name, 'Event', self.opcodes[name])
+    emit_opcode(name, 'Error', self.opcodes[name])
     complex_type(self, name, True, 'GenericError', 'Error')
     _out("")
 
