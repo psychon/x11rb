@@ -8,8 +8,6 @@
         //unreachable_pub
         )]
 
-pub mod wire;
-pub mod thoughts;
 pub mod xcb_ffi;
 
 pub mod generated {
