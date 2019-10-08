@@ -224,7 +224,7 @@ def mark_length_fields(self):
             length_fields[field.field_name].has_length_field = field
             field.visible = False
 
-def complex_type(self, name, generate_try_from, from_generic_type, extra_name, name_transform=lambda x: x):
+def complex_type(self, name, from_generic_type, extra_name, name_transform=lambda x: x):
     mark_length_fields(self)
 
     _out("#[derive(Debug)]")
@@ -299,65 +299,53 @@ def complex_type(self, name, generate_try_from, from_generic_type, extra_name, n
     _out_indent_decr()
     _out("}")
 
-    if generate_try_from:
-        _out("impl TryFrom<CSlice> for %s%s {", name_transform(_name(name)), extra_name)
+    _out("impl TryFrom<CSlice> for %s%s {", name_transform(_name(name)), extra_name)
+    _out_indent_incr()
+    _out("type Error = Box<dyn Error>;")
+    _out("fn try_from(value: CSlice) -> Result<Self, Self::Error> {")
+    _out_indent_incr()
+    _out("match Self::try_from(&*value) {")
+    _out_indent_incr()
+    _out("Ok(v) => Ok(v),")
+    _out("Err(e) => Err(Box::new(e))")
+    _out_indent_decr()
+    _out("}")
+    _out_indent_decr()
+    _out("}")
+    _out_indent_decr()
+    _out("}")
+
+    if from_generic_type:
+        _out("impl TryFrom<%s> for %s%s {", from_generic_type, name_transform(_name(name)), extra_name)
         _out_indent_incr()
         _out("type Error = Box<dyn Error>;")
-        _out("fn try_from(value: CSlice) -> Result<Self, Self::Error> {")
+        _out("fn try_from(value: %s) -> Result<Self, Self::Error> {", from_generic_type)
         _out_indent_incr()
-        _out("match Self::try_from(&*value) {")
-        _out_indent_incr()
-        _out("Ok(v) => Ok(v),")
-        _out("Err(e) => Err(Box::new(e))")
-        _out_indent_decr()
-        _out("}")
+        _out("Self::try_from(Into::<CSlice>::into(value))")
         _out_indent_decr()
         _out("}")
         _out_indent_decr()
         _out("}")
 
-        if from_generic_type:
-            _out("impl TryFrom<%s> for %s%s {", from_generic_type, name_transform(_name(name)), extra_name)
-            _out_indent_incr()
-            _out("type Error = Box<dyn Error>;")
-            _out("fn try_from(value: %s) -> Result<Self, Self::Error> {", from_generic_type)
-            _out_indent_incr()
-            _out("Self::try_from(Into::<CSlice>::into(value))")
-            _out_indent_decr()
-            _out("}")
-            _out_indent_decr()
-            _out("}")
-
-        _out("impl TryFrom<&[u8]> for %s%s {", name_transform(_name(name)), extra_name)
-        _out_indent_incr()
-        _out("type Error = MyTryError;")
-        _out("fn try_from(value: &[u8]) -> Result<Self, Self::Error> {")
-        _out_indent_incr()
-        _out("Ok(Self::try_parse(value)?.0)")
-        _out_indent_decr()
-        _out("}")
-        _out_indent_decr()
-        _out("}")
+    _out("impl TryFrom<&[u8]> for %s%s {", name_transform(_name(name)), extra_name)
+    _out_indent_incr()
+    _out("type Error = MyTryError;")
+    _out("fn try_from(value: &[u8]) -> Result<Self, Self::Error> {")
+    _out_indent_incr()
+    _out("Ok(Self::try_parse(value)?.0)")
+    _out_indent_decr()
+    _out("}")
+    _out_indent_decr()
+    _out("}")
 
 def rs_struct(self, name):
     has_list = any(field.type.is_list for field in self.fields)
-    complex_type(self, name, has_list, False, '', lambda name: _to_rust_identifier(name))
+    complex_type(self, name, False, '', lambda name: _to_rust_identifier(name))
 
     if has_list:
         pass
     else:
         length = sum((field.type.size * field.type.nmemb for field in self.fields))
-
-        _out("impl TryFrom<&[u8]> for %s {", _to_rust_identifier(_name(name)))
-        _out_indent_incr()
-        _out("type Error = MyTryError;")
-        _out("fn try_from(value: &[u8]) -> Result<Self, Self::Error> {")
-        _out_indent_incr()
-        _out("Ok(Self::try_parse(value)?.0)")
-        _out_indent_decr()
-        _out("}")
-        _out_indent_decr()
-        _out("}")
 
         _out("impl %s {", _to_rust_identifier(_name(name)))
         _out_indent_incr()
@@ -610,7 +598,7 @@ def rs_request(self, name):
     _out("}")
 
     if self.reply:
-        complex_type(self.reply, name, True, False, 'Reply')
+        complex_type(self.reply, name, False, 'Reply')
 
     _out("")
 
@@ -626,12 +614,12 @@ def rs_event(self, name):
         print("skipping XCB ClientMessage event (needs ClientMessageData)", self, name)
         return
     emit_opcode(name, 'Event', self.opcodes[name])
-    complex_type(self, name, True, 'GenericEvent', 'Event')
+    complex_type(self, name, 'GenericEvent', 'Event')
     _out("")
 
 def rs_error(self, name):
     emit_opcode(name, 'Error', self.opcodes[name])
-    complex_type(self, name, True, 'GenericError', 'Error')
+    complex_type(self, name, 'GenericError', 'Error')
     _out("")
 
 # We must create an "output" dictionary before any xcbgen imports
