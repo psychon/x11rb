@@ -227,12 +227,6 @@ def mark_length_fields(self):
 def complex_type(self, name, generate_try_from, from_generic_type, extra_name, name_transform=lambda x: x):
     mark_length_fields(self)
 
-    skip = ['KeymapNotify', 'QueryKeymap', 'GetKeyboardControl']
-
-    if name[1] in skip:
-        print("skipping complicated complex type", extra_name, self, name)
-        return "skipped"
-
     _out("#[derive(Debug)]")
     _out("pub struct %s%s {", name_transform(_name(name)), extra_name)
     _out_indent_incr()
@@ -240,8 +234,10 @@ def complex_type(self, name, generate_try_from, from_generic_type, extra_name, n
         if field.visible:
             field_name = _to_rust_variable(field.field_name)
             if field.type.is_list:
-                assert field.type.nmemb is None  # Just because this is all that I have seen so far, could do [u8; 4] otherwise
-                _out("pub %s: Vec<%s>,", field_name, _to_rust_type(field.type.name))
+                if field.type.nmemb is None:
+                    _out("pub %s: Vec<%s>,", field_name, _to_rust_type(field.type.name))
+                else:
+                    _out("pub %s: [%s; %s],", field_name, _to_rust_type(field.type.name), field.type.nmemb)
             else:
                 _out("pub %s: %s,", field_name, _to_rust_type(field.type.name))
     _out_indent_decr()
@@ -257,7 +253,18 @@ def complex_type(self, name, generate_try_from, from_generic_type, extra_name, n
         assert field.wire  # I *guess* that non-wire fields just have to be skipped
         if field.visible or hasattr(field, 'is_length_field_for'):
             rust_type = _to_rust_type(field.type.name)
-            if field.type.is_list:
+            if field.type.is_list and field.type.nmemb is not None:
+                for i in range(field.type.nmemb):
+                    _out("let (%s_%s, r) = %s::try_parse(remaining)?;", field.field_name, i, _to_rust_type(field.type.name));
+                    _out("remaining = r;")
+                _out("let %s = [", field.field_name)
+                _out_indent_incr()
+                for i in range(field.type.nmemb):
+                    _out("%s_%s,", field.field_name, i)
+                _out_indent_decr()
+                _out("];")
+                parts.append(field.field_name)
+            elif field.type.is_list:
                 _out("let mut %s = Vec::with_capacity(%s.try_into().or(Err(MyTryError()))?);",
                         field.field_name, field.has_length_field.field_name)
                 _out("for _ in 0..%s {", field.has_length_field.field_name)
@@ -603,12 +610,8 @@ def rs_request(self, name):
     _out("}")
 
     if self.reply:
-        skipped = complex_type(self.reply, name, True, False, 'Reply')
-        # Work-around for some types not being supported currently and thus not
-        # getting emitted
-        if skipped == "skipped":
-            _out("#[derive(Debug)]")
-            _out("pub struct %s%s {}", _name(name), 'Reply')
+        complex_type(self.reply, name, True, False, 'Reply')
+
     _out("")
 
 def rs_eventstruct(self, name):
