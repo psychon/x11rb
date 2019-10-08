@@ -69,8 +69,10 @@ def _to_rust_type(name):
 
     if name in rust_type_mapping:
         return rust_type_mapping[name]
-    else:
+    elif name.isupper():
         return _to_rust_identifier(name)
+    else:
+        return name
 
 def _to_rust_identifier(name):
     name = re.sub('_(.)', lambda pat: pat.group(1).upper(), name.lower())
@@ -224,32 +226,9 @@ def mark_length_fields(self):
             length_fields[field.field_name].has_length_field = field
             field.visible = False
 
-def complex_type(self, name, from_generic_type, extra_name, name_transform=lambda x: x):
-    mark_length_fields(self)
-
-    _out("#[derive(Debug)]")
-    _out("pub struct %s%s {", name_transform(_name(name)), extra_name)
-    _out_indent_incr()
-    for field in self.fields:
-        if field.visible:
-            field_name = _to_rust_variable(field.field_name)
-            if field.type.is_list:
-                if field.type.nmemb is None:
-                    _out("pub %s: Vec<%s>,", field_name, _to_rust_type(field.type.name))
-                else:
-                    _out("pub %s: [%s; %s],", field_name, _to_rust_type(field.type.name), field.type.nmemb)
-            else:
-                _out("pub %s: %s,", field_name, _to_rust_type(field.type.name))
-    _out_indent_decr()
-    _out("}")
-
-    _out("impl TryParse for %s%s {", name_transform(_name(name)), extra_name)
-    _out_indent_incr()
-    _out("fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), MyTryError> {")
-    _out_indent_incr()
-    _out("let mut remaining = value;")
+def _emit_parsing_code(fields):
     parts = []
-    for field in self.fields:
+    for field in fields:
         assert field.wire  # I *guess* that non-wire fields just have to be skipped
         if field.visible or hasattr(field, 'is_length_field_for'):
             rust_type = _to_rust_type(field.type.name)
@@ -292,6 +271,33 @@ def complex_type(self, name, from_generic_type, extra_name, name_transform=lambd
                 length = field.type.size * field.type.nmemb
             _out("remaining = &remaining.get(%s..).ok_or(MyTryError())?;", length)
 
+    return parts
+
+def complex_type(self, name, from_generic_type, extra_name, name_transform=lambda x: x):
+    mark_length_fields(self)
+
+    _out("#[derive(Debug)]")
+    _out("pub struct %s%s {", name_transform(_name(name)), extra_name)
+    _out_indent_incr()
+    for field in self.fields:
+        if field.visible:
+            field_name = _to_rust_variable(field.field_name)
+            if field.type.is_list:
+                if field.type.nmemb is None:
+                    _out("pub %s: Vec<%s>,", field_name, _to_rust_type(field.type.name))
+                else:
+                    _out("pub %s: [%s; %s],", field_name, _to_rust_type(field.type.name), field.type.nmemb)
+            else:
+                _out("pub %s: %s,", field_name, _to_rust_type(field.type.name))
+    _out_indent_decr()
+    _out("}")
+
+    _out("impl TryParse for %s%s {", name_transform(_name(name)), extra_name)
+    _out_indent_incr()
+    _out("fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), MyTryError> {")
+    _out_indent_incr()
+    _out("let mut remaining = value;")
+    parts = _emit_parsing_code(self.fields)
     _out("let result = %s%s { %s };", name_transform(_name(name)), extra_name, ", ".join(parts))
     _out("Ok((result, remaining))")
     _out_indent_decr()
@@ -419,15 +425,57 @@ def rs_struct(self, name):
 
     _out("")
 
+def _to_complex_rust_type(field_type, aux_name, modifier):
+    if field_type.is_switch:
+        return modifier + aux_name
+    result = _to_rust_type(field_type.name)
+    if field_type.is_list:
+        if field_type.nmemb is None:
+            result = "%s[%s]" % (modifier, result)
+        else:
+            result = "%s[%s; %s]" % (modifier, result, field_type.nmemb)
+    return result
+
 def rs_union(self, name):
     rust_name = _name(name)
     _out("#[derive(Debug)]")
-    _out("pub enum %s {", rust_name)
+    _out("pub struct %s(Vec<u8>);", rust_name)
+
+    _out("impl %s {", rust_name)
     _out_indent_incr()
     for field in self.fields:
-        _out("%s([%s; %s]),", _to_rust_identifier(field.field_name), _to_rust_type(field.type.member.name), field.type.expr.nmemb)
+        result_type = _to_complex_rust_type(field.type, None, '')
+        _out("pub fn as_%s(&self) -> %s {", _lower_snake_name(('xcb', field.field_name)), result_type)
+        _out_indent_incr()
+        _out("fn do_the_parse(value: &[u8]) -> Result<%s, MyTryError> {", result_type)
+        _out("let mut remaining = value;")
+        _out_indent_incr()
+        parts = _emit_parsing_code([field])
+        _out("let _ = remaining;")
+        assert len(parts) == 1
+        _out("Ok(%s)", parts[0])
+        _out_indent_decr()
+        _out("}")
+        _out("do_the_parse(&self.0[..]).unwrap()")
+        _out_indent_decr()
+        _out("}")
     _out_indent_decr()
     _out("}")
+
+    fixed_length = max((field.type.size * field.type.nmemb for field in self.fields))
+
+    _out("impl TryParse for %s {", rust_name)
+    _out_indent_incr()
+    _out("fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), MyTryError> {")
+    _out_indent_incr()
+    _out("let inner = value[..%s].iter().copied().collect();", fixed_length)
+    _out("let result = %s(inner);", rust_name)
+    _out("Ok((result, &value[%s..]))", fixed_length)
+    _out_indent_decr()
+    _out("}")
+    _out_indent_decr()
+    _out("}")
+
     _out("")
 
 def _generate_aux(name, request, switch, mask_field):
@@ -503,19 +551,10 @@ def rs_request(self, name):
         mask_field.lenfield_for_switch = switch
 
         _generate_aux(aux_name, self, switch, mask_field)
+    else:
+        aux_name = None
 
     mark_length_fields(self)
-
-    def _to_complex_rust_type(field_type):
-        if field_type.is_switch:
-            return "&" + aux_name
-        result = _to_rust_type(field_type.name)
-        if field_type.is_list:
-            if field_type.nmemb is None:
-                result = "&[%s]" % result
-            else:
-                result = "&[%s; %s]" % (result, field_type.nmemb)
-        return result
 
     need_lifetime = any(field.visible and field.type.is_list for field in self.fields)
     if need_lifetime:
@@ -530,7 +569,7 @@ def rs_request(self, name):
 
     for field in self.fields:
         if field.visible:
-            rust_type = _to_complex_rust_type(field.type)
+            rust_type = _to_complex_rust_type(field.type, aux_name, '&')
             if field.enum is not None and not field.type.is_list:
                 letter = next(letters)
                 generics.append(letter)
@@ -661,9 +700,6 @@ def rs_eventstruct(self, name):
 def rs_event(self, name):
     if self.is_ge_event:
         print("skipping GE event", self, name)
-        return
-    if name == ('xcb', 'ClientMessage'):
-        print("skipping XCB ClientMessage event (needs ClientMessageData)", self, name)
         return
     emit_opcode(name, 'Event', self.opcodes[name])
     complex_type(self, name, 'GenericEvent', 'Event')
