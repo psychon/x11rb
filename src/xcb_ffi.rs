@@ -215,8 +215,8 @@ impl<R> Cookie<'_, R> {
     }
 }
 
-impl<'a, R> Cookie<'_, R>
-where R: TryFrom<CSlice, Error=Box<dyn Error>>,
+impl<R> Cookie<'_, R>
+where R: TryFrom<CSlice, Error=Box<dyn Error>>
 {
     pub fn reply(mut self) -> Result<R, Box<dyn Error>> {
         let reply = self.connection.wait_for_reply(self.sequence_number.take().unwrap())?;
@@ -325,16 +325,24 @@ impl Into<CSlice> for GenericError {
     }
 }
 
-impl TryFrom<CSlice> for GenericError {
+impl TryFrom<GenericEvent> for GenericError {
     type Error = Box<dyn Error>;
 
-    fn try_from(value: CSlice) -> Result<Self, Self::Error> {
-        let event: GenericEvent = value.try_into()?;
+    fn try_from(event: GenericEvent) -> Result<Self, Self::Error> {
         if event.response_type() != 0 {
             let err: IOError = InvalidData.into();
             return Err(err.into())
         }
         Ok(GenericError(event.into()))
+    }
+}
+
+impl TryFrom<CSlice> for GenericError {
+    type Error = Box<dyn Error>;
+
+    fn try_from(value: CSlice) -> Result<Self, Self::Error> {
+        let event: GenericEvent = value.try_into()?;
+        event.try_into()
     }
 }
 
