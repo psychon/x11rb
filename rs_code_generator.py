@@ -355,29 +355,6 @@ def rs_struct(self, name):
         _out("impl %s {", _to_rust_identifier(_name(name)))
         _out_indent_incr()
 
-        _out("pub fn from_ne_bytes(bytes: &[u8; %s]) -> Self {", length)
-        _out_indent_incr()
-        offset = 0
-        for field in self.fields:
-            rust_type = _to_rust_type(field.type.name)
-            assert field.wire  # I *guess* that non-wire fields just have to be skipped
-            next_offset = offset + field.type.size
-            if field.visible:
-                values = ["bytes[%s]" % index for index in range(offset, next_offset)]
-                _out("let %s = %s::from_ne_bytes([%s]);", _to_rust_variable(field.field_name),
-                        rust_type, ", ".join(values))
-            offset = next_offset
-        _out("%s {", _to_rust_identifier(_name(name)))
-        _out_indent_incr()
-        for field in self.fields:
-            if field.visible:
-                _out("%s,", _to_rust_variable(field.field_name))
-        _out_indent_decr()
-        _out("}")
-
-        _out_indent_decr()
-        _out("}")
-
         _out("pub fn to_ne_bytes(&self) -> [u8; %s] {", length)
         _out_indent_incr()
 
