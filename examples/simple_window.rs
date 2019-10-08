@@ -1,6 +1,6 @@
 extern crate x11rb;
 
-use x11rb::xcb_ffi::Connection;
+use x11rb::xcb_ffi::{Connection, Event};
 use x11rb::generated::xproto::*;
 use std::convert::TryFrom;
 
@@ -45,7 +45,7 @@ fn main() {
     loop {
         let event = conn.wait_for_event().unwrap();
         println!("{:?}", event);
-        if (*event)[0] == EXPOSE_EVENT {
+        if event.response_type() == EXPOSE_EVENT {
             let event = ExposeEvent::try_from(event);
             println!("{:?})", event);
             if let Ok(event) = event {

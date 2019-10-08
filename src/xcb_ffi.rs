@@ -5,7 +5,7 @@ use std::ops::Deref;
 use std::marker::PhantomData;
 use std::convert::{TryFrom, TryInto};
 use std::error::Error;
-use std::io::{IoSlice, Error as IOError, ErrorKind::Other};
+use std::io::{IoSlice, Error as IOError, ErrorKind::{UnexpectedEof, InvalidData, Other}};
 use std::mem::forget;
 use libc::free;
 
@@ -141,7 +141,7 @@ impl Connection {
                 let length = 32 + length_field * 4;
                 Ok(CSlice::new(header.into_ptr(), length))
             } else {
-                let error = CSlice::new(error as _, 32);
+                let error: GenericError = CSlice::new(error as _, 32).try_into()?;
 
                 // The return type is incorrect currently and I am lazy
                 let _ = error;
@@ -150,11 +150,11 @@ impl Connection {
         }
     }
 
-    pub fn wait_for_event(&self) -> Result<CSlice, Box<dyn Error>> {
+    pub fn wait_for_event(&self) -> Result<GenericEvent, Box<dyn Error>> {
         unsafe {
             let event = raw_ffi::xcb_wait_for_event(self.0);
             assert_ne!(35, (*event).response_type); // FIXME: XGE events may have sizes > 32
-            Ok(CSlice::new(event as _, 32))
+            CSlice::new(event as _, 32).try_into()
         }
     }
 }
@@ -198,6 +198,112 @@ impl<R> Drop for Cookie<'_, R> {
         if let Some(number) = self.sequence_number {
             self.connection.discard_reply(number);
         }
+    }
+}
+
+pub trait Event {
+    fn raw_bytes(&self) -> &[u8];
+
+    fn raw_response_type(&self) -> u8 {
+        self.raw_bytes()[0]
+    }
+
+    fn response_type(&self) -> u8 {
+        self.raw_response_type() & 0x7f
+    }
+
+    fn server_generated(&self) -> bool {
+        self.raw_response_type() & 0x80 == 0
+    }
+
+    fn raw_sequence_number(&self) -> Option<u16> {
+        use crate::generated::xproto::KEYMAP_NOTIFY_EVENT;
+        match self.response_type() {
+            KEYMAP_NOTIFY_EVENT => None,
+            _ => {
+                let bytes = self.raw_bytes();
+                Some(u16::from_ne_bytes([bytes[2], bytes[3]]))
+            }
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct GenericEvent(CSlice);
+
+impl Event for GenericEvent {
+    fn raw_bytes(&self) -> &[u8] {
+        &self.0
+    }
+}
+
+impl Into<CSlice> for GenericEvent {
+    fn into(self) -> CSlice {
+        self.0
+    }
+}
+
+// FIXME: Have these (or at least one of them?) generated
+const REPLY: u8 = 1;
+const XGE_EVENT: u8 = 35;
+
+impl TryFrom<CSlice> for GenericEvent {
+    type Error = Box<dyn Error>;
+
+    fn try_from(value: CSlice) -> Result<Self, Self::Error> {
+        if value.len() < 32 {
+            let err: IOError = UnexpectedEof.into();
+            return Err(err.into())
+        }
+        let length_field = u32::from_ne_bytes([value[4], value[5], value[6], value[7]]);
+        let other_error: IOError = Other.into();
+        let other_error: Result<_, Self::Error> = Err(other_error.into());
+        let length_field: usize = length_field.try_into().or(other_error)?;
+        let actual_length = value.len();
+        let event = GenericEvent(value);
+        let expected_length = match event.response_type() {
+            XGE_EVENT | REPLY => 32 + 4 * length_field,
+            _ => 32
+        };
+        if actual_length != expected_length {
+            let err: IOError = UnexpectedEof.into();
+            return Err(err.into())
+        }
+        Ok(event)
+    }
+}
+
+#[derive(Debug)]
+pub struct GenericError(CSlice);
+
+impl GenericError {
+    pub fn error_code(&self) -> u8 {
+        self.raw_bytes()[1]
+    }
+}
+
+impl Event for GenericError {
+    fn raw_bytes(&self) -> &[u8] {
+        &self.0
+    }
+}
+
+impl Into<CSlice> for GenericError {
+    fn into(self) -> CSlice {
+        self.0
+    }
+}
+
+impl TryFrom<CSlice> for GenericError {
+    type Error = Box<dyn Error>;
+
+    fn try_from(value: CSlice) -> Result<Self, Self::Error> {
+        let event: GenericEvent = value.try_into()?;
+        if event.response_type() != 0 {
+            let err: IOError = InvalidData.into();
+            return Err(err.into())
+        }
+        Ok(GenericError(event.into()))
     }
 }
 

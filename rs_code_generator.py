@@ -94,6 +94,7 @@ def rs_open(self):
     _out("use crate::xcb_ffi::SequenceNumber;")
     _out("use crate::xcb_ffi::Cookie;")
     _out("use crate::xcb_ffi::CSlice;")
+    _out("use crate::xcb_ffi::{GenericEvent, GenericError};")
     _out("#[derive(Default, Debug)]")
     _out("pub struct MyTryError();")
     _out("impl Error for MyTryError {}")
@@ -198,7 +199,7 @@ def mark_length_fields(self):
             length_fields[field.field_name].has_length_field = field
             field.visible = False
 
-def complex_type(self, name, generate_try_from, extra_name, name_transform=lambda x: x):
+def complex_type(self, name, generate_try_from, from_generic_type, extra_name, name_transform=lambda x: x):
     mark_length_fields(self)
 
     skip = ['KeymapNotify', 'QueryKeymap', 'QueryFont', 'ListFonts', 'ListFontsWithInfo', 'GetFontPath', 'AllocColorCells', 'ListExtensions', 'GetKeyboardControl', 'ListHosts']
@@ -237,6 +238,18 @@ def complex_type(self, name, generate_try_from, extra_name, name_transform=lambd
         _out("}")
         _out_indent_decr()
         _out("}")
+
+        if from_generic_type:
+            _out("impl TryFrom<%s> for %s%s {", from_generic_type, name_transform(_name(name)), extra_name)
+            _out_indent_incr()
+            _out("type Error = Box<dyn Error>;")
+            _out("fn try_from(value: %s) -> Result<Self, Self::Error> {", from_generic_type)
+            _out_indent_incr()
+            _out("Self::try_from(Into::<CSlice>::into(value))")
+            _out_indent_decr()
+            _out("}")
+            _out_indent_decr()
+            _out("}")
 
         _out("impl TryFrom<&[u8]> for %s%s {", name_transform(_name(name)), extra_name)
         _out_indent_incr()
@@ -286,7 +299,7 @@ def complex_type(self, name, generate_try_from, extra_name, name_transform=lambd
 
 def rs_struct(self, name):
     has_list = any(field.type.is_list for field in self.fields)
-    complex_type(self, name, has_list, '', lambda name: _to_rust_identifier(name))
+    complex_type(self, name, has_list, False, '', lambda name: _to_rust_identifier(name))
 
     is_fixed_size = all(field.type.fixed_size() or field.type.is_pad for field in self.fields)
     if not is_fixed_size:
@@ -578,7 +591,7 @@ def rs_request(self, name):
     _out("}")
 
     if self.reply:
-        skipped = complex_type(self.reply, name, True, 'Reply')
+        skipped = complex_type(self.reply, name, True, False, 'Reply')
         # Work-around for some types not being supported currently and thus not
         # getting emitted
         if skipped == "skipped":
@@ -598,12 +611,12 @@ def rs_event(self, name):
         print("skipping XCB ClientMessage event (needs ClientMessageData)", self, name)
         return
     emit_opcode(name, 'Event', self.opcodes[name])
-    complex_type(self, name, True, 'Event')
+    complex_type(self, name, True, 'GenericEvent', 'Event')
     _out("")
 
 def rs_error(self, name):
     emit_opcode(name, 'Event', self.opcodes[name])
-    complex_type(self, name, True, 'Error')
+    complex_type(self, name, True, 'GenericError', 'Error')
     _out("")
 
 # We must create an "output" dictionary before any xcbgen imports
