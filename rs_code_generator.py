@@ -108,6 +108,31 @@ def rs_open(self):
     _out_indent_decr()
     _out("}")
     _out("")
+    _out("trait TryParse: Sized {")
+    _out_indent_incr()
+    _out("fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), MyTryError>;")
+    _out_indent_decr()
+    _out("}")
+    for (size, name) in [(1, "u8"), (1, "i8"), (2, "u16"), (2, "i16"), (4, "u32"), (4, "i32")]:
+        _out("impl TryParse for %s {", name)
+        _out_indent_incr()
+        _out("fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), MyTryError> {")
+        _out_indent_incr()
+        _out("if value.len() < %s {", size)
+        _out_indent_incr()
+        _out("Err(MyTryError())")
+        _out_indent_decr()
+        _out("} else {")
+        _out_indent_incr()
+        result_bytes = ", ".join(["value[%s]" % i for i in range(size)])
+        _out("Ok((%s::from_ne_bytes([%s]), &value[%s..]))", name, result_bytes, size)
+        _out_indent_decr()
+        _out("}")
+        _out_indent_decr()
+        _out("}")
+        _out_indent_decr()
+        _out("}")
+    _out("")
 
 def rs_close(self):
     _out_indent_decr()
@@ -204,7 +229,8 @@ def complex_type(self, name, generate_try_from, from_generic_type, extra_name, n
 
     skip = ['KeymapNotify', 'QueryKeymap', 'QueryFont', 'ListFonts', 'ListFontsWithInfo', 'GetFontPath', 'AllocColorCells', 'ListExtensions', 'GetKeyboardControl', 'ListHosts']
     is_fixed_size = all((field.type.fixed_size() and field.type.nmemb == 1) or field.type.is_pad for field in self.fields)
-    if (extra_name == '' and not is_fixed_size) or name[1] in skip:
+
+    if name[1] in skip:
         print("skipping complicated complex type", extra_name, self, name)
         return "skipped"
 
@@ -219,6 +245,43 @@ def complex_type(self, name, generate_try_from, from_generic_type, extra_name, n
                 _out("pub %s: Vec<%s>,", field_name, _to_rust_type(field.type.name))
             else:
                 _out("pub %s: %s,", field_name, _to_rust_type(field.type.name))
+    _out_indent_decr()
+    _out("}")
+
+    _out("impl TryParse for %s%s {", name_transform(_name(name)), extra_name)
+    _out_indent_incr()
+    _out("fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), MyTryError> {")
+    _out_indent_incr()
+    _out("let mut remaining = value;")
+    parts = []
+    for field in self.fields:
+        assert field.wire  # I *guess* that non-wire fields just have to be skipped
+        if field.visible or hasattr(field, 'is_length_field_for'):
+            rust_type = _to_rust_type(field.type.name)
+            if field.type.is_list:
+                _out("let mut %s = Vec::with_capacity(%s.try_into().or(Err(MyTryError()))?);",
+                        field.field_name, field.has_length_field.field_name)
+                _out("for _ in 0..%s {", field.has_length_field.field_name)
+                _out_indent_incr()
+                _out("let (v, r) = %s::try_parse(remaining)?;", rust_type)
+                _out("%s.push(v);", field.field_name)
+                _out("remaining = r;")
+                _out_indent_decr()
+                _out("}")
+                parts.append(field.field_name)
+            else:
+                _out("let v = %s::try_parse(remaining)?;", rust_type)
+                _out("let %s = v.0;", _to_rust_variable(field.field_name))
+                _out("remaining = v.1;")
+                if field.visible:
+                    parts.append(_to_rust_variable(field.field_name))
+        else:
+            _out("remaining = &remaining.get(%s..).ok_or(MyTryError())?;", field.type.size * field.type.nmemb)
+
+    _out("let result = %s%s { %s };", name_transform(_name(name)), extra_name, ", ".join(parts))
+    _out("Ok((result, remaining))")
+    _out_indent_decr()
+    _out("}")
     _out_indent_decr()
     _out("}")
 
@@ -256,42 +319,7 @@ def complex_type(self, name, generate_try_from, from_generic_type, extra_name, n
         _out("type Error = MyTryError;")
         _out("fn try_from(value: &[u8]) -> Result<Self, Self::Error> {")
         _out_indent_incr()
-        offset = 0
-        for field in self.fields:
-            rust_type = _to_rust_type(field.type.name)
-            assert field.wire  # I *guess* that non-wire fields just have to be skipped
-            if field.visible or hasattr(field, 'is_length_field_for'):
-                field_name = _to_rust_variable(field.field_name)
-                if field.type.is_list:
-                    _out("let %s: Result<Vec<_>, _> = (0..%s as usize)", field_name, field.has_length_field.field_name)
-                    _out_indent_incr()
-                    _out(".map(|i| %s + %s * i) // Map index to offsets", offset, field.type.size)
-                    _out(".map(|o| value.get(o..(o+%s)).ok_or(MyTryError())) // get bytes", field.type.size)
-                    _out(".collect();")
-                    _out_indent_decr()
-                    _out("let %s = %s? // fail if some index was out of range", field_name, field_name)
-                    _out_indent_incr()
-                    _out(".iter()")
-                    _out(".map(|&s| %s::from_ne_bytes(s.try_into().unwrap()))", rust_type)
-                    _out(".collect();")
-                    _out_indent_decr()
-
-                    next_offset = "FIXME need offset after variable length field"
-                else:
-                    next_offset = offset + field.type.size * field.type.nmemb
-                    _out("let %s = %s::from_ne_bytes(value.get(%s..%s).ok_or(MyTryError())?.try_into().unwrap());",
-                            field_name, rust_type, offset, next_offset)
-            else:
-                next_offset = offset + field.type.size * field.type.nmemb
-            offset = next_offset
-
-        _out("Ok(%s%s {", name_transform(_name(name)), extra_name)
-        _out_indent_incr()
-        for field in self.fields:
-            if field.visible:
-                _out("%s,", _to_rust_variable(field.field_name))
-        _out_indent_decr()
-        _out("})")
+        _out("Ok(Self::try_parse(value)?.0)")
         _out_indent_decr()
         _out("}")
         _out_indent_decr()
@@ -301,27 +329,25 @@ def rs_struct(self, name):
     has_list = any(field.type.is_list for field in self.fields)
     complex_type(self, name, has_list, False, '', lambda name: _to_rust_identifier(name))
 
-    is_fixed_size = all(field.type.fixed_size() or field.type.is_pad for field in self.fields)
-    if not is_fixed_size:
-        print("skipping complicated struct", self, name)
-        return
+    if has_list:
+        pass
+    else:
+        length = sum((field.type.size * field.type.nmemb for field in self.fields))
 
-    length = sum((field.type.size * field.type.nmemb for field in self.fields))
+        _out("impl TryFrom<&[u8]> for %s {", _to_rust_identifier(_name(name)))
+        _out_indent_incr()
+        _out("type Error = MyTryError;")
+        _out("fn try_from(value: &[u8]) -> Result<Self, Self::Error> {")
+        _out_indent_incr()
+        _out("Ok(Self::try_parse(value)?.0)")
+        _out_indent_decr()
+        _out("}")
+        _out_indent_decr()
+        _out("}")
 
-    _out("impl TryFrom<&[u8]> for %s {", _to_rust_identifier(_name(name)))
-    _out_indent_incr()
-    _out("type Error = MyTryError;")
-    _out("fn try_from(value: &[u8]) -> Result<Self, Self::Error> {")
-    _out_indent_incr()
-    _out("Ok(%s::from_ne_bytes(value.try_into().or(Err(MyTryError()))?))", _to_rust_identifier(_name(name)))
-    _out_indent_decr()
-    _out("}")
-    _out_indent_decr()
-    _out("}")
+        _out("impl %s {", _to_rust_identifier(_name(name)))
+        _out_indent_incr()
 
-    _out("impl %s {", _to_rust_identifier(_name(name)))
-    _out_indent_incr()
-    if not has_list:
         _out("pub fn from_ne_bytes(bytes: &[u8; %s]) -> Self {", length)
         _out_indent_incr()
         offset = 0
@@ -341,33 +367,35 @@ def rs_struct(self, name):
                 _out("%s,", _to_rust_variable(field.field_name))
         _out_indent_decr()
         _out("}")
-    _out_indent_decr()
-    _out("}")
 
-    _out("pub fn to_ne_bytes(&self) -> [u8; %s] {", length)
-    _out_indent_incr()
+        _out_indent_decr()
+        _out("}")
 
-    result_bytes = []
-    for field in self.fields:
-        if field.type.is_pad:
-            assert field.type.size == 1
-            for i in range(field.type.nmemb):
-                result_bytes.append("0")
-        else:
-            _out("let %s_bytes = self.%s.to_ne_bytes();", field.field_name, field.field_name)
-            for i in range(field.type.size):
-                result_bytes.append("%s_bytes[%d]" % (field.field_name, i))
+        _out("pub fn to_ne_bytes(&self) -> [u8; %s] {", length)
+        _out_indent_incr()
 
-    _out("[")
-    _out_indent_incr()
-    for result_value in result_bytes:
-        _out("%s,", result_value)
-    _out_indent_decr()
-    _out("]")
-    _out_indent_decr()
-    _out("}")
-    _out_indent_decr()
-    _out("}")
+        result_bytes = []
+        for field in self.fields:
+            if field.type.is_pad:
+                assert field.type.size == 1
+                for i in range(field.type.nmemb):
+                    result_bytes.append("0")
+            else:
+                _out("let %s_bytes = self.%s.to_ne_bytes();", field.field_name, field.field_name)
+                for i in range(field.type.size):
+                    result_bytes.append("%s_bytes[%d]" % (field.field_name, i))
+
+        _out("[")
+        _out_indent_incr()
+        for result_value in result_bytes:
+            _out("%s,", result_value)
+        _out_indent_decr()
+        _out("]")
+        _out_indent_decr()
+        _out("}")
+        _out_indent_decr()
+        _out("}")
+
     _out("")
 
 def rs_union(self, name):
