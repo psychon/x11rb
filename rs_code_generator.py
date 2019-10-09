@@ -5,12 +5,13 @@ import sys
 import glob
 import re
 import string
+import os
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], "p:o:i:")
 except getopt.GetoptError as err:
     print(err)
-    print('Usage: %s [-p path] -i input -o output' % (sys.argv[0]))
+    print('Usage: %s [-p path] -i input -o output main_module' % (sys.argv[0]))
     sys.exit(1)
 
 for (opt, arg) in opts:
@@ -19,10 +20,17 @@ for (opt, arg) in opts:
     if opt == '-i':
         input_dir = arg
     if opt == '-o':
-        output_file = arg
+        output_dir = arg
+
+if not args:
+    print("Missing name for main module")
+    sys.exit()
+main_module = args.pop()
 if args:
     print('No further arguments expected')
     sys.exit(1)
+
+exts = []
 
 _lines = []
 _indent_level = 0
@@ -99,9 +107,16 @@ def _to_rust_variable(name):
 
 # Now the real fun begins
 
+def _write_output(filename):
+    output_file = os.path.join(output_dir, filename)
+    with open(output_file, 'w') as target:
+        for line in _lines:
+            target.write(line.rstrip())
+            target.write('\n')
+    del _lines[:]
+
 def rs_open(self):
-    _out("pub mod %s {", self.namespace.header)
-    _out_indent_incr()
+    assert not _lines
     _out("use std::convert::TryFrom;")
     _out("use std::convert::TryInto;")
     _out("use std::io::IoSlice;")
@@ -112,8 +127,10 @@ def rs_open(self):
     _out("")
 
 def rs_close(self):
-    _out_indent_decr()
-    _out("}")
+    global exts
+
+    _write_output("%s.rs" % self.namespace.header)
+    exts.append(self.namespace.header)
 
 enum_sizes = {}
 def rs_enum(self, name):
@@ -679,7 +696,9 @@ for name in names:
     module.resolve()
     module.generate()
 
+output_file = os.path.join(output_dir, "%s.rs" % main_module)
 with open(output_file, 'w') as target:
-    for line in _lines:
-        target.write(line.rstrip())
-        target.write('\n')
+    for ext in exts:
+        target.write("pub mod ")
+        target.write(ext)
+        target.write(";")
