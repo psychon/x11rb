@@ -1,13 +1,12 @@
 extern crate x11rb;
 
-use x11rb::xcb_ffi::Connection;
+use x11rb::xcb_ffi::XCBConnection;
 use x11rb::x11_utils::{Event, GenericError};
 use x11rb::generated::xproto::*;
 use std::convert::TryFrom;
 
-
 fn main() {
-    let (conn, screen_num) = Connection::connect(None).unwrap();
+    let (conn, screen_num) = XCBConnection::connect(None).unwrap();
     let screen = &conn.setup().roots[screen_num];
 
     let win_id = conn.generate_id();

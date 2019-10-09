@@ -4,14 +4,15 @@ use std::ffi::CStr;
 use std::io::IoSlice;
 use std::mem::forget;
 use crate::utils::CSlice;
-use crate::x11_utils::{Cookie, GenericError, GenericEvent, SequenceNumber, Event};
+use crate::x11_utils::{GenericError, GenericEvent, Event};
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
+use crate::connection::{Connection, Cookie, SequenceNumber};
 use super::generated::xproto::Setup;
 
 #[derive(Debug)]
-pub struct Connection(*mut raw_ffi::xcb_connection_t, Setup);
+pub struct XCBConnection(*mut raw_ffi::xcb_connection_t, Setup);
 
-impl Connection {
+impl XCBConnection {
     unsafe fn connection_error_from_connection(c: *const raw_ffi::xcb_connection_t) -> ConnectionError {
         Self::connection_error_from_c_error(raw_ffi::xcb_connection_has_error(c))
     }
@@ -32,7 +33,7 @@ impl Connection {
         }
     }
 
-    pub fn connect(dpy_name: Option<&CStr>) -> Result<(Connection, usize), ConnectionError>  {
+    pub fn connect(dpy_name: Option<&CStr>) -> Result<(XCBConnection, usize), ConnectionError>  {
         use libc::c_int;
         unsafe {
             let mut screen: c_int = 0;
@@ -44,7 +45,7 @@ impl Connection {
                 Err(Self::connection_error_from_c_error(error.try_into().or(Err(ConnectionError::UnknownError))?))
             } else {
                 let setup = raw_ffi::xcb_get_setup(connection);
-                Ok((Connection(connection, Self::parse_setup(setup)?), screen as usize))
+                Ok((XCBConnection(connection, Self::parse_setup(setup)?), screen as usize))
             }
         }
     }
@@ -80,16 +81,6 @@ impl Connection {
         unsafe { raw_ffi::xcb_flush(self.0); }
     }
 
-    pub fn send_request_with_reply<R>(&self, bufs: &[IoSlice]) -> Cookie<R>
-        where R: TryFrom<CSlice, Error=ParseError>
-    {
-        Cookie::new(self, self.send_request(bufs, true))
-    }
-
-    pub fn send_request_without_reply(&self, bufs: &[IoSlice]) -> SequenceNumber {
-        self.send_request(bufs, false)
-    }
-
     fn send_request(&self, bufs: &[IoSlice], has_reply: bool) -> SequenceNumber {
         let protocol_request = raw_ffi::xcb_protocol_request_t {
             count: bufs.len(),
@@ -104,32 +95,6 @@ impl Connection {
         // FIXME: xcb wants to be able to access bufs[-1] and bufs[-2]
         unsafe {
             raw_ffi::xcb_send_request64(self.0, flags, bufs.as_ptr(), &protocol_request)
-        }
-    }
-
-    pub(crate) fn discard_reply(&self, sequence: SequenceNumber) {
-        unsafe {
-            raw_ffi::xcb_discard_reply64(self.0, sequence);
-        }
-    }
-
-    pub(crate) fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<CSlice, ConnectionErrorOrX11Error> {
-        unsafe {
-            let mut error = null_mut();
-            let reply = raw_ffi::xcb_wait_for_reply64(self.0, sequence, &mut error);
-            assert!(reply == null_mut() || error == null_mut());
-            if reply != null_mut() {
-                let header = CSlice::new(reply as _, 32);
-
-                let length_field = u32::from_ne_bytes(header[4..8].try_into().unwrap());
-                let length_field: usize = length_field.try_into()?;
-
-                let length = 32 + length_field * 4;
-                Ok(CSlice::new(header.into_ptr(), length))
-            } else {
-                let error: GenericError = CSlice::new(error as _, 32).try_into()?;
-                Err(error.into())
-            }
         }
     }
 
@@ -157,7 +122,45 @@ impl Connection {
     }
 }
 
-impl Drop for Connection {
+impl Connection for XCBConnection {
+    fn send_request_with_reply<R>(&self, bufs: &[IoSlice]) -> Cookie<Self, R>
+        where R: TryFrom<CSlice, Error=ParseError>
+    {
+        Cookie::new(self, self.send_request(bufs, true))
+    }
+
+    fn send_request_without_reply(&self, bufs: &[IoSlice]) -> SequenceNumber {
+        self.send_request(bufs, false)
+    }
+
+    fn discard_reply(&self, sequence: SequenceNumber) {
+        unsafe {
+            raw_ffi::xcb_discard_reply64(self.0, sequence);
+        }
+    }
+
+    fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<CSlice, ConnectionErrorOrX11Error> {
+        unsafe {
+            let mut error = null_mut();
+            let reply = raw_ffi::xcb_wait_for_reply64(self.0, sequence, &mut error);
+            assert!(reply == null_mut() || error == null_mut());
+            if reply != null_mut() {
+                let header = CSlice::new(reply as _, 32);
+
+                let length_field = u32::from_ne_bytes(header[4..8].try_into().unwrap());
+                let length_field: usize = length_field.try_into()?;
+
+                let length = 32 + length_field * 4;
+                Ok(CSlice::new(header.into_ptr(), length))
+            } else {
+                let error: GenericError = CSlice::new(error as _, 32).try_into()?;
+                Err(error.into())
+            }
+        }
+    }
+}
+
+impl Drop for XCBConnection {
     fn drop(&mut self) {
         unsafe {
             raw_ffi::xcb_disconnect(self.0);

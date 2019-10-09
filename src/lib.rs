@@ -15,6 +15,7 @@ pub mod utils;
 #[macro_use]
 pub mod x11_utils;
 pub mod errors;
+pub mod connection;
 
 pub mod generated {
     include!(concat!(env!("OUT_DIR"), "/generated/mod.rs"));

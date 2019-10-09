@@ -120,9 +120,9 @@ def rs_open(self):
     _out("use std::convert::TryFrom;")
     _out("use std::convert::TryInto;")
     _out("use std::io::IoSlice;")
-    _out("use crate::xcb_ffi::Connection;")
     _out("use crate::utils::CSlice;")
-    _out("use crate::x11_utils::{GenericEvent, GenericError, Cookie, ListFontsWithInfoCookie, SequenceNumber, TryParse};")
+    _out("use crate::x11_utils::{GenericEvent, GenericError, TryParse};")
+    _out("use crate::connection::{SequenceNumber, Cookie, ListFontsWithInfoCookie, Connection};")
     _out("use crate::errors::{ParseError, ConnectionError};")
     _out("")
 
@@ -510,16 +510,18 @@ def rs_request(self, name):
 
     mark_length_fields(self)
 
+    letters = iter(string.ascii_uppercase)
+    connection_type = next(letters)
+
     need_lifetime = any(field.visible and field.type.is_list for field in self.fields)
     if need_lifetime:
         generics = ["'c"]
-        args = ["c: &'c Connection"]
+        args = ["c: &'c %s" % connection_type]
     else:
         generics = []
-        args = ["c: &Connection"]
+        args = ["c: &%s" % connection_type]
+    generics.append("%s: Connection" % connection_type)
     where = []
-
-    letters = iter(string.ascii_uppercase)
 
     for field in self.fields:
         if field.visible:
@@ -533,12 +535,12 @@ def rs_request(self, name):
 
     if is_list_fonts_with_info:
         assert need_lifetime
-        result_type = "ListFontsWithInfoCookie<'c>"
+        result_type = "ListFontsWithInfoCookie<'c, %s>" % connection_type
     elif self.reply:
         if need_lifetime:
-            result_type = "Cookie<'c, %sReply>" % _name(name)
+            result_type = "Cookie<'c, %s, %sReply>" % (connection_type, _name(name))
         else:
-            result_type = "Cookie<%sReply>" % _name(name)
+            result_type = "Cookie<%s, %sReply>" % (connection_type, _name(name))
     else:
         result_type = "SequenceNumber"
 

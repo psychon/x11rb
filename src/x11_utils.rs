@@ -1,78 +1,7 @@
-use std::marker::PhantomData;
 use std::convert::{TryFrom, TryInto};
 
 use crate::utils::CSlice;
-use crate::xcb_ffi::Connection;
-use crate::errors::{ParseError, ConnectionErrorOrX11Error};
-use crate::generated::xproto::ListFontsWithInfoReply;
-
-pub type SequenceNumber = u64;
-
-#[derive(Debug)]
-pub struct Cookie<'a, R> {
-    connection: &'a Connection,
-    sequence_number: Option<SequenceNumber>,
-    phantom: std::marker::PhantomData<R>
-}
-
-impl<R> Cookie<'_, R>
-where R: TryFrom<CSlice, Error=ParseError>
-{
-    pub(crate) fn new(connection: &Connection, sequence_number: SequenceNumber) -> Cookie<R> {
-        Cookie {
-            connection,
-            sequence_number: Some(sequence_number),
-            phantom: PhantomData
-        }
-    }
-
-    pub fn reply(mut self) -> Result<R, ConnectionErrorOrX11Error> {
-        let reply = self.connection.wait_for_reply(self.sequence_number.take().unwrap())?;
-        Ok(reply.try_into()?)
-    }
-}
-
-impl<R> Drop for Cookie<'_, R> {
-    fn drop(&mut self) {
-        if let Some(number) = self.sequence_number {
-            self.connection.discard_reply(number);
-        }
-    }
-}
-
-pub struct ListFontsWithInfoCookie<'a>(Cookie<'a, ListFontsWithInfoReply>);
-
-impl ListFontsWithInfoCookie<'_> {
-    pub(crate) fn new(cookie: Cookie<ListFontsWithInfoReply>) -> ListFontsWithInfoCookie {
-        ListFontsWithInfoCookie(cookie)
-    }
-}
-
-impl Iterator for ListFontsWithInfoCookie<'_> {
-    type Item = Result<ListFontsWithInfoReply, ConnectionErrorOrX11Error>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        let sequence = match self.0.sequence_number.take() {
-            None => return None,
-            Some(sequence) => sequence
-        };
-        let reply = self.0.connection.wait_for_reply(sequence);
-        let reply = match reply {
-            Err(e) => return Some(Err(e)),
-            Ok(v) => v
-        };
-        let reply: Result<ListFontsWithInfoReply, ParseError> = reply.try_into();
-        let reply = reply.map_err(ConnectionErrorOrX11Error::from);
-        if reply.is_ok() {
-            if !reply.as_ref().unwrap().name.is_empty() {
-                self.0.sequence_number = Some(sequence);
-            } else {
-                return None
-            }
-        }
-        Some(reply)
-    }
-}
+use crate::errors::ParseError;
 
 pub trait Event {
     fn raw_bytes(&self) -> &[u8];
