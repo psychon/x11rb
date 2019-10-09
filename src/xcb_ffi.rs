@@ -69,18 +69,6 @@ impl XCBConnection {
         Ok(result)
     }
 
-    pub fn setup(&self) -> &Setup {
-        &self.1
-    }
-
-    pub fn generate_id(&self) -> u32 {
-        unsafe { raw_ffi::xcb_generate_id(self.0) }
-    }
-
-    pub fn flush(&self) {
-        unsafe { raw_ffi::xcb_flush(self.0); }
-    }
-
     fn send_request(&self, bufs: &[IoSlice], has_reply: bool) -> SequenceNumber {
         let protocol_request = raw_ffi::xcb_protocol_request_t {
             count: bufs.len(),
@@ -95,18 +83,6 @@ impl XCBConnection {
         // FIXME: xcb wants to be able to access bufs[-1] and bufs[-2]
         unsafe {
             raw_ffi::xcb_send_request64(self.0, flags, bufs.as_ptr(), &protocol_request)
-        }
-    }
-
-    pub fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
-        unsafe {
-            let event = raw_ffi::xcb_wait_for_event(self.0);
-            if event.is_null() {
-                return Err(Self::connection_error_from_connection(self.0));
-            }
-            let generic_event: GenericEvent = CSlice::new(event as _, 32).try_into()?;
-            assert_ne!(35, generic_event.response_type()); // FIXME: XGE events may have sizes > 32
-            Ok(generic_event)
         }
     }
 
@@ -157,6 +133,30 @@ impl Connection for XCBConnection {
                 Err(error.into())
             }
         }
+    }
+
+    fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
+        unsafe {
+            let event = raw_ffi::xcb_wait_for_event(self.0);
+            if event.is_null() {
+                return Err(Self::connection_error_from_connection(self.0));
+            }
+            let generic_event: GenericEvent = CSlice::new(event as _, 32).try_into()?;
+            assert_ne!(35, generic_event.response_type()); // FIXME: XGE events may have sizes > 32
+            Ok(generic_event)
+        }
+    }
+
+    fn flush(&self) {
+        unsafe { raw_ffi::xcb_flush(self.0); }
+    }
+
+    fn generate_id(&self) -> u32 {
+        unsafe { raw_ffi::xcb_generate_id(self.0) }
+    }
+
+    fn setup(&self) -> &Setup {
+        &self.1
     }
 }
 

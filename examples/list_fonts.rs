@@ -2,11 +2,11 @@
 
 extern crate x11rb;
 
-use x11rb::xcb_ffi::Connection;
+use x11rb::xcb_ffi::XCBConnection;
 use x11rb::generated::xproto::*;
 
 fn main() {
-    let (conn, _) = Connection::connect(None).unwrap();
+    let (conn, _) = XCBConnection::connect(None).unwrap();
     let (ltr, rtl): (u8, u8) = (FontDraw::LeftToRight.into(), FontDraw::RightToLeft.into());
 
 

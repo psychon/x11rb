@@ -2,8 +2,9 @@ use std::io::IoSlice;
 use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
 use crate::utils::CSlice;
-use crate::errors::{ParseError, ConnectionErrorOrX11Error};
-use crate::generated::xproto::ListFontsWithInfoReply;
+use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
+use crate::x11_utils::GenericEvent;
+use crate::generated::xproto::{Setup, ListFontsWithInfoReply};
 
 pub type SequenceNumber = u64;
 
@@ -16,6 +17,14 @@ pub trait Connection: Sized {
     fn discard_reply(&self, sequence: SequenceNumber);
 
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<CSlice, ConnectionErrorOrX11Error>;
+
+    fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError>;
+
+    fn flush(&self);
+
+    fn setup(&self) -> &Setup;
+
+    fn generate_id(&self) -> u32;
 }
 
 #[derive(Debug)]
