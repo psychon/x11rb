@@ -1,124 +1,23 @@
 use std::ptr::{null, null_mut};
 use std::convert::{TryFrom, TryInto};
-use std::error::Error;
 use std::ffi::CStr;
 use std::io::IoSlice;
 use std::mem::forget;
 use crate::utils::CSlice;
 use crate::x11_utils::{Cookie, GenericError, GenericEvent, SequenceNumber, Event};
+use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 use super::generated::xproto::Setup;
 
 #[derive(Debug)]
 pub struct Connection(*mut raw_ffi::xcb_connection_t, Setup);
 
-#[derive(Debug)]
-pub enum ParseError {
-    ParseError
-}
-
-impl Error for ParseError {
-}
-
-impl std::fmt::Display for ParseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "FIXME")
-    }
-}
-
-impl From<std::convert::Infallible> for ParseError {
-    fn from(_: std::convert::Infallible) -> Self {
-        unreachable!()
-    }
-}
-
-impl From<std::num::TryFromIntError> for ParseError {
-    fn from(_: std::num::TryFromIntError) -> Self {
-        ParseError::ParseError
-    }
-}
-
-#[derive(Debug)]
-pub enum ConnectionError {
-    UnknownError,
-    ConnectionError,
-    UnsupportedExtension,
-    InsufficientMemory,
-    MaximumRequestLengthExceeded,
-    DisplayParsingError,
-    InvalidScreen,
-    FDPassingFailed,
-    ParseError,
-}
-
-impl Error for ConnectionError {
-}
-
-impl std::fmt::Display for ConnectionError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "FIXME")
-    }
-}
-
-impl From<ParseError> for ConnectionError {
-    fn from(err: ParseError) -> Self {
-        match err {
-            ParseError::ParseError => ConnectionError::ParseError
-        }
-    }
-}
-
-impl From<std::num::TryFromIntError> for ConnectionError {
-    fn from(err: std::num::TryFromIntError) -> Self {
-        Self::from(ParseError::from(err))
-    }
-}
-
-#[derive(Debug)]
-pub enum ConnectionErrorOrX11Error {
-    ConnectionError(ConnectionError),
-    X11Error(GenericError)
-}
-
-impl Error for ConnectionErrorOrX11Error {
-}
-
-impl std::fmt::Display for ConnectionErrorOrX11Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "FIXME")
-    }
-}
-
-impl From<ParseError> for ConnectionErrorOrX11Error {
-    fn from(err: ParseError) -> Self {
-        Self::from(ConnectionError::from(err))
-    }
-}
-
-impl From<std::num::TryFromIntError> for ConnectionErrorOrX11Error {
-    fn from(err: std::num::TryFromIntError) -> Self {
-        Self::from(ParseError::from(err))
-    }
-}
-
-impl From<ConnectionError> for ConnectionErrorOrX11Error {
-    fn from(err: ConnectionError) -> Self {
-        Self::ConnectionError(err)
-    }
-}
-
-impl From<GenericError> for ConnectionErrorOrX11Error {
-    fn from(err: GenericError) -> Self {
-        Self::X11Error(err)
-    }
-}
-
-impl ConnectionError {
-    unsafe fn from_connection(c: *const raw_ffi::xcb_connection_t) -> ConnectionError {
-        Self::from_c_error(raw_ffi::xcb_connection_has_error(c))
+impl Connection {
+    unsafe fn connection_error_from_connection(c: *const raw_ffi::xcb_connection_t) -> ConnectionError {
+        Self::connection_error_from_c_error(raw_ffi::xcb_connection_has_error(c))
     }
 
-    fn from_c_error(error: i32) -> ConnectionError {
-        use raw_ffi::connection_errors::*;
+    fn connection_error_from_c_error(error: i32) -> ConnectionError {
+        use crate::xcb_ffi::raw_ffi::connection_errors::*;
 
         assert_ne!(error, 0);
         match error {
@@ -132,9 +31,7 @@ impl ConnectionError {
             _ => ConnectionError::UnknownError
         }
     }
-}
 
-impl Connection {
     pub fn connect(dpy_name: Option<&CStr>) -> Result<(Connection, usize), ConnectionError>  {
         use libc::c_int;
         unsafe {
@@ -144,7 +41,7 @@ impl Connection {
             let error = raw_ffi::xcb_connection_has_error(connection);
             if error != 0 {
                 raw_ffi::xcb_disconnect(connection);
-                Err(ConnectionError::from_c_error(error.try_into().or(Err(ConnectionError::UnknownError))?))
+                Err(Self::connection_error_from_c_error(error.try_into().or(Err(ConnectionError::UnknownError))?))
             } else {
                 let setup = raw_ffi::xcb_get_setup(connection);
                 Ok((Connection(connection, Self::parse_setup(setup)?), screen as usize))
@@ -240,7 +137,7 @@ impl Connection {
         unsafe {
             let event = raw_ffi::xcb_wait_for_event(self.0);
             if event.is_null() {
-                return Err(ConnectionError::from_connection(self.0));
+                return Err(Self::connection_error_from_connection(self.0));
             }
             let generic_event: GenericEvent = CSlice::new(event as _, 32).try_into()?;
             assert_ne!(35, generic_event.response_type()); // FIXME: XGE events may have sizes > 32
@@ -254,7 +151,7 @@ impl Connection {
             if error == 0 {
                 None
             } else {
-                Some(ConnectionError::from_c_error(error))
+                Some(Self::connection_error_from_c_error(error))
             }
         }
     }

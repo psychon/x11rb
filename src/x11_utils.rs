@@ -2,7 +2,8 @@ use std::marker::PhantomData;
 use std::convert::{TryFrom, TryInto};
 
 use crate::utils::CSlice;
-use crate::xcb_ffi::{Connection, ParseError, ConnectionErrorOrX11Error};
+use crate::xcb_ffi::Connection;
+use crate::errors::{ParseError, ConnectionErrorOrX11Error};
 
 pub type SequenceNumber = u64;
 

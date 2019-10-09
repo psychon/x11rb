@@ -13,6 +13,7 @@ extern crate libc;
 pub mod xcb_ffi;
 pub mod utils;
 pub mod x11_utils;
+pub mod errors;
 
 pub mod generated {
     include!(concat!(env!("OUT_DIR"), "/bindings.rs"));

@@ -94,7 +94,7 @@ def rs_open(self):
     _out("use crate::xcb_ffi::Connection;")
     _out("use crate::utils::CSlice;")
     _out("use crate::x11_utils::{GenericEvent, GenericError, Cookie, SequenceNumber};")
-    _out("use crate::xcb_ffi::{ParseError, ConnectionError};")
+    _out("use crate::errors::{ParseError, ConnectionError};")
     _out("")
     _out("trait TryParse: Sized {")
     _out_indent_incr()
