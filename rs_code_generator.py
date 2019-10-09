@@ -532,6 +532,13 @@ def _generate_aux(name, request, switch, mask_field):
 
     _out("impl %s {", name)
     _out_indent_incr()
+
+    _out("pub fn new() -> Self {")
+    _out_indent_incr()
+    _out("Default::default()")
+    _out_indent_decr()
+    _out("}")
+
     _out("pub fn to_ne_bytes(&self) -> Vec<u8> {")
     _out_indent_incr()
     _out("let mut result = Vec::new();")
@@ -560,6 +567,15 @@ def _generate_aux(name, request, switch, mask_field):
     _out("mask")
     _out_indent_decr()
     _out("}")
+
+    for field in switch.type.fields:
+        _out("pub fn %s<I>(mut self, value: I) -> Self where I: Into<%s> {", field.field_name, _to_rust_type(field.type.name))
+        _out_indent_incr()
+        _out("self.%s = Some(Into::<%s>::into(value));", field.field_name, _to_rust_type(field.type.name))
+        _out("self")
+        _out_indent_decr()
+        _out("}")
+
     _out_indent_decr()
     _out("}")
 

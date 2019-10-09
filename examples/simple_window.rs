@@ -18,12 +18,13 @@ fn main() {
         (protocols.reply().unwrap().atom, delete.reply().unwrap().atom)
     };
 
-    let mut win_aux = CreateWindowAux::default();
-    win_aux.event_mask = Some(EventMask::Exposure | EventMask::StructureNotify | EventMask::NoEvent);
-    win_aux.background_pixel = Some(screen.white_pixel);
+    let win_aux = CreateWindowAux::new()
+        .event_mask(EventMask::Exposure | EventMask::StructureNotify | EventMask::NoEvent)
+        .background_pixel(screen.white_pixel)
+        .win_gravity(Gravity::NorthWest);
 
-    let mut gc_aux = CreateGCAux::default();
-    gc_aux.foreground = Some(screen.black_pixel);
+    let gc_aux = CreateGCAux::new()
+        .foreground(screen.black_pixel);
 
     let (mut width, mut height) = (100, 100);
 
