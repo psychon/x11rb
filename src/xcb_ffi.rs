@@ -276,8 +276,7 @@ impl Connection {
             if event.is_null() {
                 return Err(ConnectionError::from_connection(self.0));
             }
-            let generic_event: Result<GenericEvent, _> = CSlice::new(event as _, 32).try_into();
-            let generic_event = generic_event.or(Err(ConnectionError::UnknownError))?; // FIXME: error type
+            let generic_event: GenericEvent = CSlice::new(event as _, 32).try_into()?;
             assert_ne!(35, generic_event.response_type()); // FIXME: XGE events may have sizes > 32
             Ok(generic_event)
         }
@@ -377,14 +376,13 @@ impl Into<CSlice> for GenericEvent {
     }
 }
 
-// FIXME: Have these (or at least one of them?) generated
 const REPLY: u8 = 1;
-const XGE_EVENT: u8 = 35;
 
 impl TryFrom<CSlice> for GenericEvent {
     type Error = ParseError;
 
     fn try_from(value: CSlice) -> Result<Self, Self::Error> {
+        use super::generated::xproto::GE_GENERIC_EVENT;
         if value.len() < 32 {
             return Err(ParseError::ParseError);
         }
@@ -393,7 +391,7 @@ impl TryFrom<CSlice> for GenericEvent {
         let actual_length = value.len();
         let event = GenericEvent(value);
         let expected_length = match event.response_type() {
-            XGE_EVENT | REPLY => 32 + 4 * length_field,
+            GE_GENERIC_EVENT | REPLY => 32 + 4 * length_field,
             _ => 32
         };
         if actual_length != expected_length {
