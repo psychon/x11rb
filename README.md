@@ -99,8 +99,6 @@ of sending multiple requests and only afterwards wait for the replies.
 
 - Support extensions. Currently, only the core protocol is done.
 - big requests support
-- ListFonts support
-  - `MultiCookie` that is an iterator for replies?
 - InternAtom `only_if_exists` argument should be `bool`, but the python code in
   xcb-proto does not provide this information
 - The aux structs should be passed via something like AsRef to the request

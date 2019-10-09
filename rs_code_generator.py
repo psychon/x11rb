@@ -122,7 +122,7 @@ def rs_open(self):
     _out("use std::io::IoSlice;")
     _out("use crate::xcb_ffi::Connection;")
     _out("use crate::utils::CSlice;")
-    _out("use crate::x11_utils::{GenericEvent, GenericError, Cookie, SequenceNumber, TryParse};")
+    _out("use crate::x11_utils::{GenericEvent, GenericError, Cookie, ListFontsWithInfoCookie, SequenceNumber, TryParse};")
     _out("use crate::errors::{ParseError, ConnectionError};")
     _out("")
 
@@ -486,6 +486,8 @@ def _generate_aux(name, request, switch, mask_field):
 def rs_request(self, name):
     emit_opcode(name, 'REQUEST', self.opcode)
 
+    is_list_fonts_with_info = name == ('xcb', 'ListFontsWithInfo')
+
     switches = list(filter(lambda field: field.type.is_switch, self.fields))
     assert len(switches) <= 1
     if switches:
@@ -529,7 +531,10 @@ def rs_request(self, name):
                 rust_type = letter
             args.append("%s: %s" % (_to_rust_variable(field.field_name), rust_type))
 
-    if self.reply:
+    if is_list_fonts_with_info:
+        assert need_lifetime
+        result_type = "ListFontsWithInfoCookie<'c>"
+    elif self.reply:
         if need_lifetime:
             result_type = "Cookie<'c, %sReply>" % _name(name)
         else:
@@ -647,7 +652,10 @@ def rs_request(self, name):
 
         slices = ", ".join(["IoSlice::new(%s)" % r for r in requests])
 
-        if self.reply:
+        if is_list_fonts_with_info:
+            assert self.reply
+            _out("Ok(ListFontsWithInfoCookie::new(c.send_request_with_reply(&[%s])))", slices)
+        elif self.reply:
             _out("Ok(c.send_request_with_reply(&[%s]))", slices)
         else:
             _out("Ok(c.send_request_without_reply(&[%s]))", slices)
