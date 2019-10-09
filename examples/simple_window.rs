@@ -1,6 +1,7 @@
 extern crate x11rb;
 
-use x11rb::xcb_ffi::{Connection, Event, GenericError};
+use x11rb::xcb_ffi::Connection;
+use x11rb::x11_utils::{Event, GenericError};
 use x11rb::generated::xproto::*;
 use std::convert::TryFrom;
 
