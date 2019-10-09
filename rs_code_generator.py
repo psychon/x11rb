@@ -582,13 +582,6 @@ def _generate_aux(name, request, switch, mask_field):
 def rs_request(self, name):
     emit_opcode(name, 'REQUEST', self.opcode)
 
-    skip = [
-            'QueryTextExtents', # has an <exprfield> odd_length that we do not support currently
-            ]
-    if name[1] in skip:
-        print("skipping complicated request", self, name)
-        return
-
     switches = list(filter(lambda field: field.type.is_switch, self.fields))
     assert len(switches) <= 1
     if switches:
@@ -697,6 +690,24 @@ def rs_request(self, name):
     for field in self.fields:
         if field.field_name == "major_opcode":
             request.append("%s_REQUEST" % _upper_snake_name(name))
+        elif field.type.is_expr:
+            def expr_to_str(e):
+                if e.op is not None:
+                    return "%s %s %s" % (expr_to_str(e.lhs), e.op, expr_to_str(e.rhs))
+                elif e.nmemb is not None:
+                    return e.nmemb
+                else:
+                    assert e.lenfield_name is not None
+                    other_field = [field for field in self.fields if e.lenfield_name == field.field_name]
+                    assert len(other_field) == 1
+                    other_field = other_field[0]
+                    _out("let %s: %s = %s.len().try_into()?;", other_field.field_name, _to_rust_type(other_field.type.name), other_field.is_length_field_for.field_name)
+                    return e.lenfield_name
+
+            _out("let %s: %s = (%s).try_into().unwrap();", field.field_name, _to_rust_type(field.type.name), expr_to_str(field.type.expr))
+            _out("let %s_bytes = %s.to_ne_bytes();", field.field_name, _to_rust_variable(field.field_name))
+            for i in range(field.type.size):
+                request.append("%s_bytes[%d]" % (field.field_name, i))
         elif field.type.is_pad:
             assert field.type.size == 1
             for i in range(field.type.nmemb):
@@ -753,9 +764,6 @@ def rs_eventstruct(self, name):
     _out("")
 
 def rs_event(self, name):
-    if self.is_ge_event:
-        print("skipping GE event", self, name)
-        return
     emit_opcode(name, 'Event', self.opcodes[name])
     complex_type(self, name, 'GenericEvent', 'Event')
     _out("")
