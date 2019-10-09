@@ -172,3 +172,32 @@ implement_try_parse!(u16: [0, 1]);
 implement_try_parse!(i16: [0, 1]);
 implement_try_parse!(u32: [0, 1, 2, 3]);
 implement_try_parse!(i32: [0, 1, 2, 3]);
+
+#[macro_export]
+macro_rules! bitmask_binop {
+    ($t:ty, $u:ty) => {
+        impl std::ops::BitOr for $t {
+            type Output = $u;
+            fn bitor(self, other: Self) -> Self::Output {
+                Into::<Self::Output>::into(self) | Into::<Self::Output>::into(other)
+            }
+        }
+        impl std::ops::BitOr<$u> for $t {
+            type Output = $u;
+            fn bitor(self, other: $u) -> Self::Output {
+                Into::<Self::Output>::into(self) | other
+            }
+        }
+        impl std::ops::BitOr<$t> for $u {
+            type Output = $u;
+            fn bitor(self, other: $t) -> Self::Output {
+                self | Into::<Self::Output>::into(other)
+            }
+        }
+        impl std::ops::BitOrAssign<$t> for $u {
+            fn bitor_assign(&mut self, other: $t) {
+                *self |= Into::<Self>::into(other)
+            }
+        }
+    }
+}

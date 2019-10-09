@@ -12,6 +12,7 @@ extern crate libc;
 
 pub mod xcb_ffi;
 pub mod utils;
+#[macro_use]
 pub mod x11_utils;
 pub mod errors;
 
