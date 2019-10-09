@@ -94,7 +94,7 @@ def rs_open(self):
     _out("use crate::xcb_ffi::Connection;")
     _out("use crate::xcb_ffi::SequenceNumber;")
     _out("use crate::xcb_ffi::Cookie;")
-    _out("use crate::xcb_ffi::CSlice;")
+    _out("use crate::utils::CSlice;")
     _out("use crate::xcb_ffi::{GenericEvent, GenericError};")
     _out("use crate::xcb_ffi::{ParseError, ConnectionError};")
     _out("")

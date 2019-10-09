@@ -1,14 +1,11 @@
-extern crate libc;
-
 use std::ptr::{null, null_mut};
-use std::ops::Deref;
 use std::marker::PhantomData;
 use std::convert::{TryFrom, TryInto};
 use std::error::Error;
 use std::ffi::CStr;
 use std::io::IoSlice;
 use std::mem::forget;
-use libc::free;
+use crate::utils::CSlice;
 use super::generated::xproto::Setup;
 
 pub type SequenceNumber = u64;
@@ -114,35 +111,6 @@ impl From<ConnectionError> for ConnectionErrorOrX11Error {
 impl From<GenericError> for ConnectionErrorOrX11Error {
     fn from(err: GenericError) -> Self {
         Self::X11Error(err)
-    }
-}
-
-#[derive(Debug)]
-pub struct CSlice {
-    slice: &'static [u8]
-}
-impl CSlice {
-    unsafe fn new(ptr: *const u8, len: usize) -> CSlice {
-        let slice = std::slice::from_raw_parts(ptr, len);
-        CSlice{ slice }
-    }
-
-    fn into_ptr(self) -> *const u8 {
-        let ptr = self.slice.as_ptr();
-        forget(self);
-        ptr
-    }
-}
-impl Deref for CSlice {
-    type Target = [u8];
-
-    fn deref(&self) -> &[u8] {
-        self.slice
-    }
-}
-impl Drop for CSlice {
-    fn drop(&mut self) {
-        unsafe { free(self.slice.as_ptr() as _) }
     }
 }
 
