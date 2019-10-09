@@ -6,7 +6,7 @@ use std::marker::PhantomData;
 use std::convert::{TryFrom, TryInto};
 use std::error::Error;
 use std::ffi::CStr;
-use std::io::{IoSlice, Error as IOError, ErrorKind::{UnexpectedEof, InvalidData, Other}};
+use std::io::IoSlice;
 use std::mem::forget;
 use libc::free;
 use super::generated::xproto::Setup;
@@ -17,7 +17,34 @@ pub type SequenceNumber = u64;
 pub struct Connection(*mut raw_ffi::xcb_connection_t, Setup);
 
 #[derive(Debug)]
+pub enum ParseError {
+    ParseError
+}
+
+impl Error for ParseError {
+}
+
+impl std::fmt::Display for ParseError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "FIXME")
+    }
+}
+
+impl From<std::convert::Infallible> for ParseError {
+    fn from(_: std::convert::Infallible) -> Self {
+        unreachable!()
+    }
+}
+
+impl From<std::num::TryFromIntError> for ParseError {
+    fn from(_: std::num::TryFromIntError) -> Self {
+        ParseError::ParseError
+    }
+}
+
+#[derive(Debug)]
 pub enum ConnectionError {
+    UnknownError,
     ConnectionError,
     UnsupportedExtension,
     InsufficientMemory,
@@ -25,7 +52,69 @@ pub enum ConnectionError {
     DisplayParsingError,
     InvalidScreen,
     FDPassingFailed,
-    UnknownError
+    ParseError,
+}
+
+impl Error for ConnectionError {
+}
+
+impl std::fmt::Display for ConnectionError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "FIXME")
+    }
+}
+
+impl From<ParseError> for ConnectionError {
+    fn from(err: ParseError) -> Self {
+        match err {
+            ParseError::ParseError => ConnectionError::ParseError
+        }
+    }
+}
+
+impl From<std::num::TryFromIntError> for ConnectionError {
+    fn from(err: std::num::TryFromIntError) -> Self {
+        Self::from(ParseError::from(err))
+    }
+}
+
+#[derive(Debug)]
+pub enum ConnectionErrorOrX11Error {
+    ConnectionError(ConnectionError),
+    X11Error(GenericError)
+}
+
+impl Error for ConnectionErrorOrX11Error {
+}
+
+impl std::fmt::Display for ConnectionErrorOrX11Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "FIXME")
+    }
+}
+
+impl From<ParseError> for ConnectionErrorOrX11Error {
+    fn from(err: ParseError) -> Self {
+        Self::from(ConnectionError::from(err))
+    }
+}
+
+impl From<std::num::TryFromIntError> for ConnectionErrorOrX11Error {
+    fn from(err: std::num::TryFromIntError) -> Self {
+        Self::from(ParseError::from(err))
+    }
+}
+
+impl From<ConnectionError> for ConnectionErrorOrX11Error {
+    fn from(err: ConnectionError) -> Self {
+        Self::ConnectionError(err)
+    }
+}
+
+impl From<GenericError> for ConnectionErrorOrX11Error {
+    fn from(err: GenericError) -> Self {
+        Self::X11Error(err)
+    }
 }
 
 #[derive(Debug)]
@@ -58,7 +147,11 @@ impl Drop for CSlice {
 }
 
 impl ConnectionError {
-    fn from_c_error(error: u32) -> ConnectionError {
+    unsafe fn from_connection(c: *const raw_ffi::xcb_connection_t) -> ConnectionError {
+        Self::from_c_error(raw_ffi::xcb_connection_has_error(c))
+    }
+
+    fn from_c_error(error: i32) -> ConnectionError {
         use raw_ffi::connection_errors::*;
 
         assert_ne!(error, 0);
@@ -84,6 +177,7 @@ impl Connection {
             let connection = raw_ffi::xcb_connect(dpy_ptr, &mut screen);
             let error = raw_ffi::xcb_connection_has_error(connection);
             if error != 0 {
+                raw_ffi::xcb_disconnect(connection);
                 Err(ConnectionError::from_c_error(error.try_into().or(Err(ConnectionError::UnknownError))?))
             } else {
                 let setup = raw_ffi::xcb_get_setup(connection);
@@ -92,7 +186,7 @@ impl Connection {
         }
     }
 
-    unsafe fn parse_setup(setup: *const u8) -> Result<Setup, ConnectionError> {
+    unsafe fn parse_setup(setup: *const u8) -> Result<Setup, ParseError> {
         // We know that the setup information has at least eight bytes
         let wrapper = CSlice::new(setup, 8);
 
@@ -102,14 +196,13 @@ impl Connection {
         // The length is in four-byte-units after the known header
         let length = length * 4 + 8;
 
-        let err = Err(ConnectionError::UnknownError);
-        let slice = CSlice::new(wrapper.into_ptr(), length.try_into().or(err)?);
-        let result = Setup::try_from(&*slice);
+        let slice = CSlice::new(wrapper.into_ptr(), length.try_into()?);
+        let result = Setup::try_from(&*slice)?;
 
         // We must not free() xcb_setup_t that libxcb owns
         forget(slice);
 
-        result.or(Err(ConnectionError::UnknownError))
+        Ok(result)
     }
 
     pub fn setup(&self) -> &Setup {
@@ -124,15 +217,17 @@ impl Connection {
         unsafe { raw_ffi::xcb_flush(self.0); }
     }
 
-    pub fn send_request_with_reply<R>(&self, bufs: &[IoSlice]) -> Result<Cookie<R>, Box<dyn Error>> {
-        Ok(Cookie::new(self, self.send_request(bufs, true)?))
+    pub fn send_request_with_reply<R>(&self, bufs: &[IoSlice]) -> Cookie<R>
+        where R: TryFrom<CSlice, Error=ParseError>
+    {
+        Cookie::new(self, self.send_request(bufs, true))
     }
 
-    pub fn send_request_without_reply(&self, bufs: &[IoSlice]) -> Result<SequenceNumber, Box<dyn Error>> {
+    pub fn send_request_without_reply(&self, bufs: &[IoSlice]) -> SequenceNumber {
         self.send_request(bufs, false)
     }
 
-    fn send_request(&self, bufs: &[IoSlice], has_reply: bool) -> Result<SequenceNumber, Box<dyn Error>> {
+    fn send_request(&self, bufs: &[IoSlice], has_reply: bool) -> SequenceNumber {
         let protocol_request = raw_ffi::xcb_protocol_request_t {
             count: bufs.len(),
             ext: null_mut(),
@@ -144,10 +239,9 @@ impl Connection {
             flags |= raw_ffi::send_request_flags::CHECKED;
         }
         // FIXME: xcb wants to be able to access bufs[-1] and bufs[-2]
-        let sequence = unsafe {
+        unsafe {
             raw_ffi::xcb_send_request64(self.0, flags, bufs.as_ptr(), &protocol_request)
-        };
-        Ok(sequence)
+        }
     }
 
     fn discard_reply(&self, sequence: SequenceNumber) {
@@ -156,7 +250,7 @@ impl Connection {
         }
     }
 
-    fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<CSlice, Box<dyn Error>> {
+    fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<CSlice, ConnectionErrorOrX11Error> {
         unsafe {
             let mut error = null_mut();
             let reply = raw_ffi::xcb_wait_for_reply64(self.0, sequence, &mut error);
@@ -165,30 +259,38 @@ impl Connection {
                 let header = CSlice::new(reply as _, 32);
 
                 let length_field = u32::from_ne_bytes(header[4..8].try_into().unwrap());
-                let other_error: IOError = Other.into();
-                let other_error: Result<_, Box<dyn Error>> = Err(other_error.into());
-                let length_field: usize = length_field.try_into().or(other_error)?;
+                let length_field: usize = length_field.try_into()?;
 
                 let length = 32 + length_field * 4;
                 Ok(CSlice::new(header.into_ptr(), length))
             } else {
                 let error: GenericError = CSlice::new(error as _, 32).try_into()?;
-
-                // The return type is incorrect currently and I am lazy
-                let _ = error;
-                unimplemented!();
+                Err(error.into())
             }
         }
     }
 
-    pub fn wait_for_event(&self) -> Result<Option<GenericEvent>, Box<dyn Error>> {
+    pub fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
         unsafe {
             let event = raw_ffi::xcb_wait_for_event(self.0);
             if event.is_null() {
-                return Ok(None);
+                return Err(ConnectionError::from_connection(self.0));
             }
-            assert_ne!(35, (*event).response_type); // FIXME: XGE events may have sizes > 32
-            Ok(Some(CSlice::new(event as _, 32).try_into()?))
+            let generic_event: Result<GenericEvent, _> = CSlice::new(event as _, 32).try_into();
+            let generic_event = generic_event.or(Err(ConnectionError::UnknownError))?; // FIXME: error type
+            assert_ne!(35, generic_event.response_type()); // FIXME: XGE events may have sizes > 32
+            Ok(generic_event)
+        }
+    }
+
+    pub fn has_error(&self) -> Option<ConnectionError> {
+        unsafe {
+            let error = raw_ffi::xcb_connection_has_error(self.0);
+            if error == 0 {
+                None
+            } else {
+                Some(ConnectionError::from_c_error(error))
+            }
         }
     }
 }
@@ -208,7 +310,9 @@ pub struct Cookie<'a, R> {
     phantom: std::marker::PhantomData<R>
 }
 
-impl<R> Cookie<'_, R> {
+impl<R> Cookie<'_, R>
+where R: TryFrom<CSlice, Error=ParseError>
+{
     fn new(connection: &Connection, sequence_number: SequenceNumber) -> Cookie<R> {
         Cookie {
             connection,
@@ -216,12 +320,8 @@ impl<R> Cookie<'_, R> {
             phantom: PhantomData
         }
     }
-}
 
-impl<R> Cookie<'_, R>
-where R: TryFrom<CSlice, Error=Box<dyn Error>>
-{
-    pub fn reply(mut self) -> Result<R, Box<dyn Error>> {
+    pub fn reply(mut self) -> Result<R, ConnectionErrorOrX11Error> {
         let reply = self.connection.wait_for_reply(self.sequence_number.take().unwrap())?;
         Ok(reply.try_into()?)
     }
@@ -282,17 +382,14 @@ const REPLY: u8 = 1;
 const XGE_EVENT: u8 = 35;
 
 impl TryFrom<CSlice> for GenericEvent {
-    type Error = Box<dyn Error>;
+    type Error = ParseError;
 
     fn try_from(value: CSlice) -> Result<Self, Self::Error> {
         if value.len() < 32 {
-            let err: IOError = UnexpectedEof.into();
-            return Err(err.into())
+            return Err(ParseError::ParseError);
         }
         let length_field = u32::from_ne_bytes([value[4], value[5], value[6], value[7]]);
-        let other_error: IOError = Other.into();
-        let other_error: Result<_, Self::Error> = Err(other_error.into());
-        let length_field: usize = length_field.try_into().or(other_error)?;
+        let length_field: usize = length_field.try_into()?;
         let actual_length = value.len();
         let event = GenericEvent(value);
         let expected_length = match event.response_type() {
@@ -300,8 +397,7 @@ impl TryFrom<CSlice> for GenericEvent {
             _ => 32
         };
         if actual_length != expected_length {
-            let err: IOError = UnexpectedEof.into();
-            return Err(err.into())
+            return Err(ParseError::ParseError);
         }
         Ok(event)
     }
@@ -329,19 +425,18 @@ impl Into<CSlice> for GenericError {
 }
 
 impl TryFrom<GenericEvent> for GenericError {
-    type Error = Box<dyn Error>;
+    type Error = ParseError;
 
     fn try_from(event: GenericEvent) -> Result<Self, Self::Error> {
         if event.response_type() != 0 {
-            let err: IOError = InvalidData.into();
-            return Err(err.into())
+            return Err(ParseError::ParseError)
         }
         Ok(GenericError(event.into()))
     }
 }
 
 impl TryFrom<CSlice> for GenericError {
-    type Error = Box<dyn Error>;
+    type Error = ParseError;
 
     fn try_from(value: CSlice) -> Result<Self, Self::Error> {
         let event: GenericEvent = value.try_into()?;
@@ -375,38 +470,14 @@ mod raw_ffi {
         pub isvoid: u8
     }
 
-    #[allow(non_camel_case_types)]
-    #[repr(C)]
-    pub struct xcb_generic_error_t {
-        pub response_type: u8,
-        pub error_code: u8,
-        pub sequence: u16,
-        pub resource_id: u32,
-        pub minor_code: u16,
-        pub major_code: u8,
-        pub pad0: u8,
-        pub pad: [u32; 5],
-        pub full_sequence: u32
-    }
-
-    #[allow(non_camel_case_types)]
-    #[repr(C)]
-    pub struct xcb_generic_event_t {
-        pub response_type: u8,
-        pub pad0: u8,
-        pub sequence: u16,
-        pub pad: [u32; 7],
-        pub full_sequence: u32
-    }
-
     pub mod connection_errors {
-        pub const ERROR: u32 = 1;
-        pub const EXT_NOTSUPPORTED: u32 = 2;
-        pub const MEM_INSUFFICIENT: u32 = 3;
-        pub const REQ_LEN_EXCEED: u32 = 4;
-        pub const PARSE_ERR: u32 = 5;
-        pub const INVALID_SCREEN: u32 = 6;
-        pub const FDPASSING_FAILED: u32 = 7;
+        pub const ERROR: i32 = 1;
+        pub const EXT_NOTSUPPORTED: i32 = 2;
+        pub const MEM_INSUFFICIENT: i32 = 3;
+        pub const REQ_LEN_EXCEED: i32 = 4;
+        pub const PARSE_ERR: i32 = 5;
+        pub const INVALID_SCREEN: i32 = 6;
+        pub const FDPASSING_FAILED: i32 = 7;
     }
 
     pub mod send_request_flags {
@@ -425,8 +496,8 @@ mod raw_ffi {
         pub fn xcb_connection_has_error(c: *const xcb_connection_t) -> c_int;
         pub fn xcb_send_request64(c: *const xcb_connection_t, flags: c_int, vector: *const IoSlice, request: *const xcb_protocol_request_t) -> u64;
         pub fn xcb_discard_reply64(c: *const xcb_connection_t, sequence: u64);
-        pub fn xcb_wait_for_reply64(c: *const xcb_connection_t, request: u64, e: *mut * mut xcb_generic_error_t) -> *mut c_void;
-        pub fn xcb_wait_for_event(c: *const xcb_connection_t) -> *mut xcb_generic_event_t;
+        pub fn xcb_wait_for_reply64(c: *const xcb_connection_t, request: u64, e: *mut * mut c_void) -> *mut c_void;
+        pub fn xcb_wait_for_event(c: *const xcb_connection_t) -> *mut c_void;
         pub fn xcb_flush(c: *const xcb_connection_t) -> c_int;
         pub fn xcb_generate_id(c: *const xcb_connection_t) -> u32;
         pub fn xcb_get_setup(c: *const xcb_connection_t) -> *const u8;

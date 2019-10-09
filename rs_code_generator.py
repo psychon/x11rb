@@ -91,38 +91,26 @@ def rs_open(self):
     _out("use std::convert::TryFrom;")
     _out("use std::convert::TryInto;")
     _out("use std::io::IoSlice;")
-    _out("use std::error::Error;")
     _out("use crate::xcb_ffi::Connection;")
     _out("use crate::xcb_ffi::SequenceNumber;")
     _out("use crate::xcb_ffi::Cookie;")
     _out("use crate::xcb_ffi::CSlice;")
     _out("use crate::xcb_ffi::{GenericEvent, GenericError};")
-    _out("#[derive(Default, Debug)]")
-    _out("pub struct MyTryError();")
-    _out("impl Error for MyTryError {}")
-    _out("impl std::fmt::Display for MyTryError {")
-    _out_indent_incr()
-    _out("fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {")
-    _out_indent_incr()
-    _out("write!(f, \"My try error that I should replace with something proper eventually\")")
-    _out_indent_decr()
-    _out("}")
-    _out_indent_decr()
-    _out("}")
+    _out("use crate::xcb_ffi::{ParseError, ConnectionError};")
     _out("")
     _out("trait TryParse: Sized {")
     _out_indent_incr()
-    _out("fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), MyTryError>;")
+    _out("fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError>;")
     _out_indent_decr()
     _out("}")
     for (size, name) in [(1, "u8"), (1, "i8"), (2, "u16"), (2, "i16"), (4, "u32"), (4, "i32")]:
         _out("impl TryParse for %s {", name)
         _out_indent_incr()
-        _out("fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), MyTryError> {")
+        _out("fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {")
         _out_indent_incr()
         _out("if value.len() < %s {", size)
         _out_indent_incr()
-        _out("Err(MyTryError())")
+        _out("Err(ParseError::ParseError)")
         _out_indent_decr()
         _out("} else {")
         _out_indent_incr()
@@ -244,7 +232,7 @@ def _emit_parsing_code(fields):
                 _out("];")
                 parts.append(field.field_name)
             elif field.type.is_list:
-                _out("let mut %s = Vec::with_capacity(%s.try_into().or(Err(MyTryError()))?);",
+                _out("let mut %s = Vec::with_capacity(%s.try_into()?);",
                         field.field_name, field.has_length_field.field_name)
                 _out("for _ in 0..%s {", field.has_length_field.field_name)
                 _out_indent_incr()
@@ -269,7 +257,7 @@ def _emit_parsing_code(fields):
                 length = "misalignment"
             else:
                 length = field.type.size * field.type.nmemb
-            _out("remaining = &remaining.get(%s..).ok_or(MyTryError())?;", length)
+            _out("remaining = &remaining.get(%s..).ok_or(ParseError::ParseError)?;", length)
 
     return parts
 
@@ -294,7 +282,7 @@ def complex_type(self, name, from_generic_type, extra_name, name_transform=lambd
 
     _out("impl TryParse for %s%s {", name_transform(_name(name)), extra_name)
     _out_indent_incr()
-    _out("fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), MyTryError> {")
+    _out("fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {")
     _out_indent_incr()
     _out("let mut remaining = value;")
     parts = _emit_parsing_code(self.fields)
@@ -307,15 +295,10 @@ def complex_type(self, name, from_generic_type, extra_name, name_transform=lambd
 
     _out("impl TryFrom<CSlice> for %s%s {", name_transform(_name(name)), extra_name)
     _out_indent_incr()
-    _out("type Error = Box<dyn Error>;")
+    _out("type Error = ParseError;")
     _out("fn try_from(value: CSlice) -> Result<Self, Self::Error> {")
     _out_indent_incr()
-    _out("match Self::try_from(&*value) {")
-    _out_indent_incr()
-    _out("Ok(v) => Ok(v),")
-    _out("Err(e) => Err(Box::new(e))")
-    _out_indent_decr()
-    _out("}")
+    _out("Self::try_from(&*value)")
     _out_indent_decr()
     _out("}")
     _out_indent_decr()
@@ -324,7 +307,7 @@ def complex_type(self, name, from_generic_type, extra_name, name_transform=lambd
     if from_generic_type:
         _out("impl TryFrom<%s> for %s%s {", from_generic_type, name_transform(_name(name)), extra_name)
         _out_indent_incr()
-        _out("type Error = Box<dyn Error>;")
+        _out("type Error = ParseError;")
         _out("fn try_from(value: %s) -> Result<Self, Self::Error> {", from_generic_type)
         _out_indent_incr()
         _out("Self::try_from(Into::<CSlice>::into(value))")
@@ -335,7 +318,7 @@ def complex_type(self, name, from_generic_type, extra_name, name_transform=lambd
 
     _out("impl TryFrom<&[u8]> for %s%s {", name_transform(_name(name)), extra_name)
     _out_indent_incr()
-    _out("type Error = MyTryError;")
+    _out("type Error = ParseError;")
     _out("fn try_from(value: &[u8]) -> Result<Self, Self::Error> {")
     _out_indent_incr()
     _out("Ok(Self::try_parse(value)?.0)")
@@ -447,7 +430,7 @@ def rs_union(self, name):
         result_type = _to_complex_rust_type(field.type, None, '')
         _out("pub fn as_%s(&self) -> %s {", _lower_snake_name(('xcb', field.field_name)), result_type)
         _out_indent_incr()
-        _out("fn do_the_parse(value: &[u8]) -> Result<%s, MyTryError> {", result_type)
+        _out("fn do_the_parse(value: &[u8]) -> Result<%s, ParseError> {", result_type)
         _out_indent_incr()
         _out("let mut remaining = value;")
         parts = _emit_parsing_code([field])
@@ -466,7 +449,7 @@ def rs_union(self, name):
 
     _out("impl TryParse for %s {", rust_name)
     _out_indent_incr()
-    _out("fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), MyTryError> {")
+    _out("fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {")
     _out_indent_incr()
     _out("let inner = value[..%s].iter().copied().collect();", fixed_length)
     _out("let result = %s(inner);", rust_name)
@@ -590,7 +573,7 @@ def rs_request(self, name):
     else:
         lifetime = ""
 
-    _out("pub fn %s%s(%s) -> Result<%s, Box<dyn Error>>", _lower_snake_name(name), lifetime, ", ".join(args), result_type)
+    _out("pub fn %s%s(%s) -> Result<%s, ConnectionError>", _lower_snake_name(name), lifetime, ", ".join(args), result_type)
     if where:
         _out("where %s", ", ".join(where))
     _out("{")
@@ -658,7 +641,7 @@ def rs_request(self, name):
                 requests.append("&%s_bytes" % field.field_name)
         elif field.wire:
             if hasattr(field, "is_length_field_for"):
-                _out("let %s: %s = %s.len().try_into().or(Err(MyTryError()))?;", field.field_name, _to_rust_type(field.type.name), field.is_length_field_for.field_name)
+                _out("let %s: %s = %s.len().try_into()?;", field.field_name, _to_rust_type(field.type.name), field.is_length_field_for.field_name)
             if field.enum is not None:
                 _out("let %s = %s.into();", field.field_name, field.field_name);
             _out("let %s_bytes = %s.to_ne_bytes();", field.field_name, _to_rust_variable(field.field_name))
@@ -682,9 +665,9 @@ def rs_request(self, name):
     slices = ", ".join(["IoSlice::new(%s)" % r for r in requests])
 
     if self.reply:
-        _out("c.send_request_with_reply(&[%s])", slices)
+        _out("Ok(c.send_request_with_reply(&[%s]))", slices)
     else:
-        _out("c.send_request_without_reply(&[%s])", slices)
+        _out("Ok(c.send_request_without_reply(&[%s]))", slices)
     _out_indent_decr()
     _out("}")
 

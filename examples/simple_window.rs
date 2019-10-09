@@ -50,10 +50,13 @@ fn main() {
     conn.flush();
 
     loop {
-        let event = conn.wait_for_event().unwrap();
+        let event = conn.wait_for_event();
         let event = match event {
-            None => return,
-            Some(event) => event
+            Err(e) => {
+                eprintln!("Got connection error: {:?}", e);
+                return;
+            },
+            Ok(event) => event
         };
         match event.response_type() {
             EXPOSE_EVENT => {
