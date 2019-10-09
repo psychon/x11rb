@@ -54,7 +54,7 @@ impl Connection {
         let wrapper = CSlice::new(setup, 8);
 
         // The length field is in the last two bytes
-        let length = u16::from_ne_bytes([(*wrapper)[6], (*wrapper)[7]]);
+        let length = u16::from_ne_bytes([wrapper[6], wrapper[7]]);
 
         // The length is in four-byte-units after the known header
         let length = length * 4 + 8;

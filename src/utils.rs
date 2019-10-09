@@ -1,5 +1,5 @@
-use std::ops::Deref;
-use std::slice::from_raw_parts;
+use std::ops::{Deref, Index};
+use std::slice::{from_raw_parts, SliceIndex};
 use std::mem::forget;
 use libc::free;
 
@@ -33,6 +33,12 @@ impl CSlice {
     }
 }
 
+impl Drop for CSlice {
+    fn drop(&mut self) {
+        unsafe { free(self.slice.as_ptr() as _) }
+    }
+}
+
 impl Deref for CSlice {
     type Target = [u8];
 
@@ -41,9 +47,12 @@ impl Deref for CSlice {
     }
 }
 
-impl Drop for CSlice {
-    fn drop(&mut self) {
-        unsafe { free(self.slice.as_ptr() as _) }
+impl<I> Index<I> for CSlice
+where I: SliceIndex<[u8]>
+{
+    type Output = I::Output;
+
+    fn index(&self, index: I) -> &I::Output {
+        self.slice.index(index)
     }
 }
-
