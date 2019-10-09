@@ -147,3 +147,28 @@ impl TryFrom<CSlice> for GenericError {
     }
 }
 
+pub trait TryParse: Sized {
+    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError>;
+}
+
+macro_rules! implement_try_parse {
+    ($t:ty: [$($indicies: expr),*]) => {
+        impl TryParse for $t {
+            fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+                let len = std::mem::size_of::<$t>();
+                if value.len() < len {
+                    Err(ParseError::ParseError)
+                } else {
+                    Ok((<$t>::from_ne_bytes([ $(value[$indicies],)* ]), &value[len..]))
+                }
+            }
+        }
+    }
+}
+
+implement_try_parse!(u8: [0]);
+implement_try_parse!(i8: [0]);
+implement_try_parse!(u16: [0, 1]);
+implement_try_parse!(i16: [0, 1]);
+implement_try_parse!(u32: [0, 1, 2, 3]);
+implement_try_parse!(i32: [0, 1, 2, 3]);
