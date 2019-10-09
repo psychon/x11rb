@@ -19,10 +19,7 @@ fn main() {
     };
 
     let mut win_aux = CreateWindowAux::default();
-    // FIXME: Figure out how to make this nicer... somehow
-    let expose: u32 = EventMask::Exposure.into();
-    let structure: u32 = EventMask::StructureNotify.into();
-    win_aux.event_mask = Some(expose | structure);
+    win_aux.event_mask = Some(EventMask::Exposure | EventMask::StructureNotify | EventMask::NoEvent);
     win_aux.background_pixel = Some(screen.white_pixel);
 
     let mut gc_aux = CreateGCAux::default();

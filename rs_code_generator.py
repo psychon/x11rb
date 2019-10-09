@@ -123,6 +123,45 @@ def rs_open(self):
         _out_indent_decr()
         _out("}")
     _out("")
+    _out("macro_rules! bitmask_binop {")
+    _out_indent_incr()
+    _out("($t:ty, $u:ty) => {")
+    _out_indent_incr()
+    _out("impl std::ops::BitOr for $t {")
+    _out_indent_incr()
+    _out("type Output = $u;")
+    _out("fn bitor(self, other: Self) -> Self::Output {")
+    _out_indent_incr()
+    _out("Into::<Self::Output>::into(self) | Into::<Self::Output>::into(other)")
+    _out_indent_decr()
+    _out("}")
+    _out_indent_decr()
+    _out("}")
+    _out("impl std::ops::BitOr<$u> for $t {")
+    _out_indent_incr()
+    _out("type Output = $u;")
+    _out("fn bitor(self, other: $u) -> Self::Output {")
+    _out_indent_incr()
+    _out("Into::<Self::Output>::into(self) | other")
+    _out_indent_decr()
+    _out("}")
+    _out_indent_decr()
+    _out("}")
+    _out("impl std::ops::BitOr<$t> for $u {")
+    _out_indent_incr()
+    _out("type Output = $u;")
+    _out("fn bitor(self, other: $t) -> Self::Output {")
+    _out_indent_incr()
+    _out("self | Into::<Self::Output>::into(other)")
+    _out_indent_decr()
+    _out("}")
+    _out_indent_decr()
+    _out("}")
+    _out_indent_decr()
+    _out("}")
+    _out_indent_decr()
+    _out("}")
+    _out("")
 
 def rs_close(self):
     _out_indent_decr()
@@ -191,6 +230,14 @@ def rs_enum(self, name):
         _out("}")
         _out_indent_decr()
         _out("}")
+
+    def ok_for_bitmask(ename, value):
+        return ename in bits or value == "0"
+
+    looks_like_bitmask = all(ok_for_bitmask(ename, value) for (ename, value) in self.values)
+    if looks_like_bitmask and len(self.values) > 1:
+        _out("bitmask_binop!(%s, %s);", rust_name, to_type)
+
     _out("")
 
 def rs_simple(self, name):
