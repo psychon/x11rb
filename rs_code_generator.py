@@ -118,8 +118,6 @@ def rs_close(self):
 enum_sizes = {}
 def rs_enum(self, name):
     has_all_upper = any(ename.isupper() and len(ename) > 1 for (ename, value) in self.values)
-    if has_all_upper:
-        print(name)
 
     def ename_to_rust(ename):
         if ename[0].isdigit():
