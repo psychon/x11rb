@@ -78,9 +78,11 @@ def _upper_snake_name(name):
     return _lower_snake_name(name).upper()
 
 rust_type_mapping = {
+        'uint64_t': 'u64',
         'uint32_t': 'u32',
         'uint16_t': 'u16',
         'uint8_t':  'u8',
+        'int64_t':  'i64',
         'int32_t':  'i32',
         'int16_t':  'i16',
         'int8_t':   'i8',
@@ -539,6 +541,13 @@ def _generate_aux(name, request, switch, mask_field):
 def rs_request(self, name):
     emit_opcode(name, 'REQUEST', self.opcode)
 
+    has_fd = any(field.isfd for field in self.fields)
+    if has_fd:
+        _out("pub fn %s() {", _lower_snake_name(name))
+        _out_indent("unimplemented!(\"FD passing is not yet implemented\");")
+        _out("}")
+        return
+
     is_list_fonts_with_info = name == ('xcb', 'ListFontsWithInfo')
 
     switches = list(filter(lambda field: field.type.is_switch, self.fields))
@@ -729,7 +738,19 @@ def rs_request(self, name):
     _out("}")
 
     if self.reply:
-        complex_type(self.reply, name, False, 'Reply')
+        has_fd = any(field.isfd for field in self.reply.fields)
+        if has_fd:
+            _out("#[derive(Debug, Clone, Copy)]")
+            _out("pub struct %sReply {}", _name(name))
+            _out("impl TryFrom<Buffer> for %sReply {", _name(name))
+            with Indent():
+                _out("type Error = ParseError;")
+                _out("fn try_from(_value: Buffer) -> Result<Self, Self::Error> {")
+                _out_indent("unimplemented!(\"Replies with FDs are not yet supported\");")
+                _out("}")
+            _out("}")
+        else:
+            complex_type(self.reply, name, False, 'Reply')
 
     _out("")
 
@@ -768,10 +789,8 @@ unsupported = [
         "render.xml", # New assert uncovered problems
         "damage.xml", "xfixes.xml", "composite.xml", # depend on render.xml
         "dri2.xml",      # Causes an error in python around has_length_field: There is a weird alignment construction that causes two fields to reference the same length field (in 'Connect' request, second use is <op>)
-        "dri3.xml",      # failed assert field.wire (FDs?)
-        "present.xml",   # failed assert field.wire (FDs?)
+        "present.xml",   # depends on sync.xml
         "randr.xml",     # Causes an error in python around has_length_field; also lots of <op>s that reference a length field
-        "shm.xml",       # failed assert field.wire (FDs?)
         "sync.xml",      # <switch> with different sized fields: CreateAlarm has both CARD32 and INT64
         "xf86vidmode.xml", # Causes an error in python around has_length_field
         "xinput.xml",    # Problem in _to_rust_name()
