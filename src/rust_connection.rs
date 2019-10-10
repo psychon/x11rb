@@ -10,7 +10,7 @@ use std::collections::VecDeque;
 
 use crate::utils::Buffer;
 use crate::connection::{Connection, Cookie, SequenceNumber, ExtensionInformation};
-use crate::generated::xproto::{Setup, Setuprequest, QueryExtensionReply};
+use crate::generated::xproto::{Setup, SetupRequest, QueryExtensionReply};
 use crate::x11_utils::GenericEvent;
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 
@@ -58,7 +58,7 @@ impl ConnectionInner {
     }
 
     fn write_setup(stream: &mut TcpStream) -> Result<(), Box<dyn Error>> {
-        let request = Setuprequest {
+        let request = SetupRequest {
             byte_order: Self::byte_order(),
             protocol_major_version: 11,
             protocol_minor_version: 0,

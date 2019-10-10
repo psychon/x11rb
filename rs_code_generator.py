@@ -105,7 +105,13 @@ def _to_rust_type(name):
         return name
 
 def _to_rust_identifier(name):
-    name = re.sub('_(.)', lambda pat: pat.group(1).upper(), name.lower())
+    # If the NAME is all uppercase, turn it into Name (the upper() is done below)
+    if name.isupper():
+        name = name.lower()
+    # If the name contains "_", turn it into camel case
+    if "_" in name:
+        name = re.sub('_(.)', lambda pat: pat.group(1).upper(), name.lower())
+    # The first letter should always be upper case
     return name[0].upper() + name[1:]
 
 def _to_rust_variable(name):
