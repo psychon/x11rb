@@ -50,7 +50,7 @@ impl ConnectionInner {
             authorization_protocol_name: Vec::new(),
             authorization_protocol_data: Vec::new(),
         };
-        stream.write(&request.to_ne_bytes())?;
+        stream.write_all(&request.to_ne_bytes())?;
         Ok(())
     }
 
@@ -86,11 +86,15 @@ impl ConnectionInner {
     }
 
     fn wait_for_reply(&mut self, sequence: SequenceNumber) -> Result<CSlice, ConnectionErrorOrX11Error> {
+        // FIXME: Actually use the sequence number and handle things correctly.
+        // FIXME: Idea: Have this always return a CSlice and have the caller (Cookie and the multi
+        // reply cookie) tell apart reply and error.
         let _ = sequence;
         Ok(self.read_packet().map_err(|_| ConnectionError::UnknownError)?)
     }
 
     fn generate_id(&mut self) -> u32 {
+        // FIXME: use the XC_MISC extension to get a new range when the old one is used up
         assert!(self.next_id < self.max_id);
         let id = self.next_id;
         self.next_id += 1;
@@ -121,7 +125,8 @@ impl RustConnection {
         let seqno = inner.request;
         let _ = has_reply;
         // FIXME: We must always be able to read when we write
-        inner.stream.write_vectored(bufs).unwrap();
+        let written = inner.stream.write_vectored(bufs).unwrap();
+        assert_eq!(written, bufs.iter().map(|s| s.len()).sum(), "FIXME: Implement partial write handling");
         seqno
     }
 }
