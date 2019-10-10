@@ -1,6 +1,6 @@
 use std::convert::{TryFrom, TryInto};
 
-use crate::utils::CSlice;
+use crate::utils::Buffer;
 use crate::errors::ParseError;
 
 pub trait Event {
@@ -31,7 +31,7 @@ pub trait Event {
 }
 
 #[derive(Debug)]
-pub struct GenericEvent(CSlice);
+pub struct GenericEvent(Buffer);
 
 impl Event for GenericEvent {
     fn raw_bytes(&self) -> &[u8] {
@@ -39,18 +39,18 @@ impl Event for GenericEvent {
     }
 }
 
-impl Into<CSlice> for GenericEvent {
-    fn into(self) -> CSlice {
+impl Into<Buffer> for GenericEvent {
+    fn into(self) -> Buffer {
         self.0
     }
 }
 
 const REPLY: u8 = 1;
 
-impl TryFrom<CSlice> for GenericEvent {
+impl TryFrom<Buffer> for GenericEvent {
     type Error = ParseError;
 
-    fn try_from(value: CSlice) -> Result<Self, Self::Error> {
+    fn try_from(value: Buffer) -> Result<Self, Self::Error> {
         use super::generated::xproto::GE_GENERIC_EVENT;
         if value.len() < 32 {
             return Err(ParseError::ParseError);
@@ -71,7 +71,7 @@ impl TryFrom<CSlice> for GenericEvent {
 }
 
 #[derive(Debug)]
-pub struct GenericError(CSlice);
+pub struct GenericError(Buffer);
 
 impl GenericError {
     pub fn error_code(&self) -> u8 {
@@ -85,8 +85,8 @@ impl Event for GenericError {
     }
 }
 
-impl Into<CSlice> for GenericError {
-    fn into(self) -> CSlice {
+impl Into<Buffer> for GenericError {
+    fn into(self) -> Buffer {
         self.0
     }
 }
@@ -102,10 +102,10 @@ impl TryFrom<GenericEvent> for GenericError {
     }
 }
 
-impl TryFrom<CSlice> for GenericError {
+impl TryFrom<Buffer> for GenericError {
     type Error = ParseError;
 
-    fn try_from(value: CSlice) -> Result<Self, Self::Error> {
+    fn try_from(value: Buffer) -> Result<Self, Self::Error> {
         let event: GenericEvent = value.try_into()?;
         event.try_into()
     }

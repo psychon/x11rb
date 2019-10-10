@@ -120,7 +120,7 @@ def rs_open(self):
     _out("use std::convert::TryFrom;")
     _out("use std::convert::TryInto;")
     _out("use std::io::IoSlice;")
-    _out("use crate::utils::CSlice;")
+    _out("use crate::utils::Buffer;")
     _out("use crate::x11_utils::{GenericEvent, GenericError, TryParse};")
     _out("use crate::connection::{SequenceNumber, Cookie, ListFontsWithInfoCookie, Connection};")
     _out("use crate::errors::{ParseError, ConnectionError};")
@@ -290,10 +290,10 @@ def complex_type(self, name, from_generic_type, extra_name, name_transform=lambd
         _out("}")
     _out("}")
 
-    _out("impl TryFrom<CSlice> for %s%s {", name_transform(_name(name)), extra_name)
+    _out("impl TryFrom<Buffer> for %s%s {", name_transform(_name(name)), extra_name)
     with Indent():
         _out("type Error = ParseError;")
-        _out("fn try_from(value: CSlice) -> Result<Self, Self::Error> {")
+        _out("fn try_from(value: Buffer) -> Result<Self, Self::Error> {")
         _out_indent("Self::try_from(&*value)")
         _out("}")
     _out("}")
@@ -303,7 +303,7 @@ def complex_type(self, name, from_generic_type, extra_name, name_transform=lambd
         with Indent():
             _out("type Error = ParseError;")
             _out("fn try_from(value: %s) -> Result<Self, Self::Error> {", from_generic_type)
-            _out_indent("Self::try_from(Into::<CSlice>::into(value))")
+            _out_indent("Self::try_from(Into::<Buffer>::into(value))")
             _out("}")
         _out("}")
 

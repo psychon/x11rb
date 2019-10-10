@@ -1,7 +1,7 @@
 use std::io::IoSlice;
 use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
-use crate::utils::CSlice;
+use crate::utils::Buffer;
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 use crate::x11_utils::GenericEvent;
 use crate::generated::xproto::{Setup, ListFontsWithInfoReply};
@@ -10,13 +10,13 @@ pub type SequenceNumber = u64;
 
 pub trait Connection: Sized {
     fn send_request_with_reply<R>(&self, bufs: &[IoSlice]) -> Cookie<Self, R>
-        where R: TryFrom<CSlice, Error=ParseError>;
+        where R: TryFrom<Buffer, Error=ParseError>;
 
     fn send_request_without_reply(&self, bufs: &[IoSlice]) -> SequenceNumber;
 
     fn discard_reply(&self, sequence: SequenceNumber);
 
-    fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<CSlice, ConnectionErrorOrX11Error>;
+    fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error>;
 
     fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError>;
 
@@ -37,7 +37,7 @@ where C: Connection
 }
 
 impl<C, R> Cookie<'_, C, R>
-where R: TryFrom<CSlice, Error=ParseError>,
+where R: TryFrom<Buffer, Error=ParseError>,
       C: Connection
 {
     pub(crate) fn new(connection: &C, sequence_number: SequenceNumber) -> Cookie<C, R> {

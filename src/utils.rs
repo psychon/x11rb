@@ -56,3 +56,53 @@ where I: SliceIndex<[u8]>
         self.slice.index(index)
     }
 }
+
+/// A wrapper around some piece of raw bytes.
+///
+/// If trait associated type bounds were stable, the Connection trait could just use an associated
+/// type with bound Deref<[u8]>. Since this does not work, we get this enumeration that represents
+/// some owned bytes.
+#[derive(Debug)]
+pub enum Buffer {
+    CSlice(CSlice),
+    Vec(Vec<u8>)
+}
+
+impl Buffer {
+    /// Constructs a new buffer from the given parts. `libc::free` will be called on the given
+    /// pointer. In other words, this creates a `CSlice` variant of this enumeration.
+    ///
+    /// # Safety
+    ///
+    /// The same rules as for `CSlice::new` and `std::slice::from_raw_parts` apply. Additionally,
+    /// the given pointer must be safe to free with `libc::free`.
+    pub unsafe fn from_raw_parts(ptr: *const u8, len: usize) -> Self {
+        Self::CSlice(CSlice::new(ptr, len))
+    }
+
+    /// Constructs a new buffer containing the given `Vec`.
+    pub fn from_vec(vec: Vec<u8>) -> Self {
+        Self::Vec(vec)
+    }
+}
+
+impl Deref for Buffer {
+    type Target = [u8];
+
+    fn deref(&self) -> &[u8] {
+        match self {
+            Self::CSlice(ref slice) => slice.deref(),
+            Self::Vec(ref vec) => vec.deref()
+        }
+    }
+}
+
+impl<I> Index<I> for Buffer
+where I: SliceIndex<[u8]>
+{
+    type Output = I::Output;
+
+    fn index(&self, index: I) -> &I::Output {
+        self.deref().index(index)
+    }
+}

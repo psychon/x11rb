@@ -5,7 +5,7 @@ use std::convert::TryFrom;
 use std::iter::repeat;
 use std::cell::RefCell;
 
-use crate::utils::CSlice;
+use crate::utils::Buffer;
 use crate::connection::{Connection, Cookie, SequenceNumber};
 use crate::generated::xproto::{Setup, Setuprequest};
 use crate::x11_utils::GenericEvent;
@@ -63,7 +63,7 @@ impl ConnectionInner {
         Ok(Setup::try_from(&setup[..])?)
     }
 
-    fn read_packet(&mut self) -> Result<CSlice, Box<dyn Error>> {
+    fn read_packet(&mut self) -> Result<Buffer, Box<dyn Error>> {
         let mut buffer: Vec<_> = repeat(0).take(32).collect();
         self.stream.read_exact(&mut buffer)?;
         let extra_length = match buffer[0] {
@@ -76,18 +76,12 @@ impl ConnectionInner {
         buffer.extend(repeat(0).take(extra_length as usize));
         self.stream.read_exact(&mut buffer[32..])?;
 
-        // HACK FIXME turn the Vec into a CSlice, because the current API requires it
-        unsafe {
-            let ptr: *mut u8 = libc::malloc(buffer.len()) as _;
-            let slice = std::slice::from_raw_parts_mut(ptr, buffer.len());
-            slice[..].clone_from_slice(&buffer[..]);
-            Ok(CSlice::new(slice.as_ptr(), buffer.len()))
-        }
+        Ok(Buffer::from_vec(buffer))
     }
 
-    fn wait_for_reply(&mut self, sequence: SequenceNumber) -> Result<CSlice, ConnectionErrorOrX11Error> {
+    fn wait_for_reply(&mut self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
         // FIXME: Actually use the sequence number and handle things correctly.
-        // FIXME: Idea: Have this always return a CSlice and have the caller (Cookie and the multi
+        // FIXME: Idea: Have this always return a Buffer and have the caller (Cookie and the multi
         // reply cookie) tell apart reply and error.
         let _ = sequence;
         Ok(self.read_packet().map_err(|_| ConnectionError::UnknownError)?)
@@ -133,7 +127,7 @@ impl RustConnection {
 
 impl Connection for RustConnection {
     fn send_request_with_reply<R>(&self, bufs: &[IoSlice]) -> Cookie<Self, R>
-        where R: TryFrom<CSlice, Error=ParseError>
+        where R: TryFrom<Buffer, Error=ParseError>
     {
         Cookie::new(self, self.send_request(bufs, true))
     }
@@ -147,7 +141,7 @@ impl Connection for RustConnection {
         unimplemented!();
     }
 
-    fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<CSlice, ConnectionErrorOrX11Error> {
+    fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
         self.inner.borrow_mut().wait_for_reply(sequence)
     }
 

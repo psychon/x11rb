@@ -2,7 +2,7 @@ use std::ptr::{null, null_mut};
 use std::convert::{TryFrom, TryInto};
 use std::ffi::CStr;
 use std::io::IoSlice;
-use crate::utils::CSlice;
+use crate::utils::{CSlice, Buffer};
 use crate::x11_utils::{GenericError, GenericEvent, Event};
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 use crate::connection::{Connection, Cookie, SequenceNumber};
@@ -53,7 +53,7 @@ impl XCBConnection {
         use std::slice::from_raw_parts;
 
         // We know that the setup information has at least eight bytes.
-        // Use a slice instead of CSlice since we must not free() the xcb_setup_t that libxcb owns.
+        // Use a slice instead of Buffer::CSlice since we must not free() the xcb_setup_t that libxcb owns.
         let wrapper = from_raw_parts(setup, 8);
 
         // The length field is in the last two bytes
@@ -99,7 +99,7 @@ impl XCBConnection {
 
 impl Connection for XCBConnection {
     fn send_request_with_reply<R>(&self, bufs: &[IoSlice]) -> Cookie<Self, R>
-        where R: TryFrom<CSlice, Error=ParseError>
+        where R: TryFrom<Buffer, Error=ParseError>
     {
         Cookie::new(self, self.send_request(bufs, true))
     }
@@ -114,7 +114,7 @@ impl Connection for XCBConnection {
         }
     }
 
-    fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<CSlice, ConnectionErrorOrX11Error> {
+    fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
         unsafe {
             let mut error = null_mut();
             let reply = raw_ffi::xcb_wait_for_reply64(self.0, sequence, &mut error);
@@ -126,9 +126,9 @@ impl Connection for XCBConnection {
                 let length_field: usize = length_field.try_into()?;
 
                 let length = 32 + length_field * 4;
-                Ok(CSlice::new(header.into_ptr(), length))
+                Ok(Buffer::from_raw_parts(header.into_ptr(), length))
             } else {
-                let error: GenericError = CSlice::new(error as _, 32).try_into()?;
+                let error: GenericError = Buffer::from_raw_parts(error as _, 32).try_into()?;
                 Err(error.into())
             }
         }
@@ -140,7 +140,7 @@ impl Connection for XCBConnection {
             if event.is_null() {
                 return Err(Self::connection_error_from_connection(self.0));
             }
-            let generic_event: GenericEvent = CSlice::new(event as _, 32).try_into()?;
+            let generic_event: GenericEvent = Buffer::from_raw_parts(event as _, 32).try_into()?;
             assert_ne!(35, generic_event.response_type()); // FIXME: XGE events may have sizes > 32
             Ok(generic_event)
         }
