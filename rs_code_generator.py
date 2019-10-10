@@ -85,6 +85,8 @@ rust_type_mapping = {
         'int16_t':  'i16',
         'int8_t':   'i8',
         'char':     'u8',
+        'float':    'f32',
+        'double':   'f64',
 }
 
 def _to_rust_type(name):
@@ -148,7 +150,7 @@ def rs_open(self):
     _out("use std::io::IoSlice;")
     _out("use crate::utils::Buffer;")
     _out("#[allow(unused_imports)]")
-    _out("use crate::x11_utils::{GenericEvent, GenericError};")
+    _out("use crate::x11_utils::{GenericEvent, GenericError as X11GenericError};")
     _out("use crate::x11_utils::TryParse;")
     _out("#[allow(unused_imports)]")
     _out("use crate::connection::SequenceNumber;")
@@ -235,10 +237,18 @@ def rs_enum(self, name):
     _out("")
 
 def rs_simple(self, name):
-    _out("pub type %s = %s;", _name(name), _to_rust_type(self.name))
+    # FIXME: Figure out what to do with names. _to_rust_identifier() does the
+    # right thing here, but then we get both 'pub type Window = u32;' and 'enum
+    # Window', which the compiler does not like.
+    name = _name(name)
+    if '_' in name:
+        name = _to_rust_identifier(name)
+    _out("pub type %s = %s;", name, _to_rust_type(self.name))
     _out("")
 
 def emit_opcode(name, extra_name, opcode):
+    if opcode == "-1" and name == ('xcb', 'Glx', 'Generic'):
+        return # The XML has a comment saying "fake number"
     _out("pub const %s_%s: u8 = %s;", _upper_snake_name(name), extra_name.upper(), opcode)
 
 def mark_length_fields(self):
@@ -683,7 +693,11 @@ def rs_request(self, name):
                     _out("let %s: %s = %s.len().try_into()?;", _to_rust_variable(field.field_name), _to_rust_type(field.type.name), _to_rust_variable(field.is_length_field_for.field_name))
                 if field.enum is not None:
                     _out("let %s = %s.into();", field.field_name, field.field_name);
-                _out("let %s = %s.to_ne_bytes();", _to_rust_variable(field.field_name + "_bytes"), _to_rust_variable(field.field_name))
+                if field.type.name == ('float',):
+                    # FIXME: Switch to a trait that we can implement on f32
+                    _out("let %s = %s.to_bits().to_ne_bytes();", _to_rust_variable(field.field_name + "_bytes"), _to_rust_variable(field.field_name))
+                else:
+                    _out("let %s = %s.to_ne_bytes();", _to_rust_variable(field.field_name + "_bytes"), _to_rust_variable(field.field_name))
                 if field.type.is_switch:
                     _emit_request()
                     requests.append("&%s_bytes" % field.field_name)
@@ -728,7 +742,7 @@ def rs_event(self, name):
 
 def rs_error(self, name):
     emit_opcode(name, 'Error', self.opcodes[name])
-    complex_type(self, name, 'GenericError', 'Error')
+    complex_type(self, name, 'X11GenericError', 'Error')
     _out("")
 
 # We must create an "output" dictionary before any xcbgen imports
@@ -749,7 +763,6 @@ import xcbgen.xtypes as xtypes
 
 names = glob.glob(input_dir + "/*.xml")
 unsupported = [
-        "glx.xml",       # Has a new float type
         "dri2.xml",      # Causes an error in python around has_length_field
         "dri3.xml",      # failed assert field.wire (FDs?)
         "present.xml",   # failed assert field.wire (FDs?)

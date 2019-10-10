@@ -179,6 +179,22 @@ implement_try_parse!(u16: [0, 1]);
 implement_try_parse!(i16: [0, 1]);
 implement_try_parse!(u32: [0, 1, 2, 3]);
 implement_try_parse!(i32: [0, 1, 2, 3]);
+implement_try_parse!(u64: [0, 1, 2, 3, 4, 5, 6, 7]);
+implement_try_parse!(i64: [0, 1, 2, 3, 4, 5, 6, 7]);
+
+impl TryParse for f32 {
+    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (data, remaining) = u32::try_parse(value)?;
+        Ok((f32::from_bits(data), remaining))
+    }
+}
+
+impl TryParse for f64 {
+    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (data, remaining) = u64::try_parse(value)?;
+        Ok((f64::from_bits(data), remaining))
+    }
+}
 
 // This macro is used by the generated code to implement `std::ops::BitOr` and
 // `std::ops::BitOrAssign`.
