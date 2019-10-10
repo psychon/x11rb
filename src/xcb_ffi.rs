@@ -2,7 +2,6 @@ use std::ptr::{null, null_mut};
 use std::convert::{TryFrom, TryInto};
 use std::ffi::CStr;
 use std::io::IoSlice;
-use std::mem::forget;
 use crate::utils::CSlice;
 use crate::x11_utils::{GenericError, GenericEvent, Event};
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
@@ -51,8 +50,11 @@ impl XCBConnection {
     }
 
     unsafe fn parse_setup(setup: *const u8) -> Result<Setup, ParseError> {
-        // We know that the setup information has at least eight bytes
-        let wrapper = CSlice::new(setup, 8);
+        use std::slice::from_raw_parts;
+
+        // We know that the setup information has at least eight bytes.
+        // Use a slice instead of CSlice since we must not free() the xcb_setup_t that libxcb owns.
+        let wrapper = from_raw_parts(setup, 8);
 
         // The length field is in the last two bytes
         let length = u16::from_ne_bytes([wrapper[6], wrapper[7]]);
@@ -60,11 +62,8 @@ impl XCBConnection {
         // The length is in four-byte-units after the known header
         let length = length * 4 + 8;
 
-        let slice = CSlice::new(wrapper.into_ptr(), length.try_into()?);
+        let slice = from_raw_parts(wrapper.as_ptr(), length.try_into()?);
         let result = Setup::try_from(&*slice)?;
-
-        // We must not free() xcb_setup_t that libxcb owns
-        forget(slice);
 
         Ok(result)
     }
