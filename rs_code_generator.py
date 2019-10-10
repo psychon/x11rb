@@ -256,6 +256,8 @@ def mark_length_fields(self):
     length_fields = {}
     for field in self.fields:
         if field.type.is_list:
+            assert field.type.expr.lenfield_name not in length_fields, \
+                (self.name, field.field_name, length_fields[field.type.expr.lenfield_name].field_name)
             length_fields[field.type.expr.lenfield_name] = field
 
     # Mark length fields as not visible and map them to their list
@@ -763,13 +765,14 @@ import xcbgen.xtypes as xtypes
 
 names = glob.glob(input_dir + "/*.xml")
 unsupported = [
-        "dri2.xml",      # Causes an error in python around has_length_field
+        "render.xml", # New assert uncovered problems
+        "damage.xml", "xfixes.xml", "composite.xml", # depend on render.xml
+        "dri2.xml",      # Causes an error in python around has_length_field: There is a weird alignment construction that causes two fields to reference the same length field (in 'Connect' request, second use is <op>)
         "dri3.xml",      # failed assert field.wire (FDs?)
         "present.xml",   # failed assert field.wire (FDs?)
-        "randr.xml",     # Causes an error in python around has_length_field
-        "res.xml",       # Uses 'type' as a variable name
+        "randr.xml",     # Causes an error in python around has_length_field; also lots of <op>s that reference a length field
         "shm.xml",       # failed assert field.wire (FDs?)
-        "sync.xml",      # <switch> with different sized fields
+        "sync.xml",      # <switch> with different sized fields: CreateAlarm has both CARD32 and INT64
         "xf86vidmode.xml", # Causes an error in python around has_length_field
         "xinput.xml",    # Problem in _to_rust_name()
         "xkb.xml",       # Causes an error in python around has_length_field
