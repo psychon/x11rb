@@ -12,7 +12,7 @@
         missing_debug_implementations,
         //missing_docs,
         private_doc_tests,
-        //single_use_lifetimes,
+        single_use_lifetimes,
         trivial_casts,
         trivial_numeric_casts,
         //unreachable_pub

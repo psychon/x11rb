@@ -517,6 +517,7 @@ def rs_request(self, name):
     connection_type = next(letters)
 
     need_lifetime = any(field.visible and field.type.is_list for field in self.fields)
+    need_lifetime = need_lifetime and self.reply
     if need_lifetime:
         generics = ["'c"]
         args = ["c: &'c %s" % connection_type]
