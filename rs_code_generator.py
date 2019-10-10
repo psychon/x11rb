@@ -174,7 +174,6 @@ def rs_close(self):
     _write_output("%s.rs" % self.namespace.header)
     exts.append(self.namespace.header)
 
-enum_sizes = {}
 def rs_enum(self, name):
     has_all_upper = any(ename.isupper() and len(ename) > 1 for (ename, value) in self.values)
 
@@ -204,7 +203,6 @@ def rs_enum(self, name):
         to_type = "u32"
         larger_types = []
 
-    enum_sizes[rust_name] = to_type
     _out("impl Into<%s> for %s {", to_type, rust_name)
     with Indent():
         _out("fn into(self) -> %s {", to_type)
@@ -524,7 +522,7 @@ def _generate_aux(name, request, switch, mask_field):
                 assert expr.op == "enumref"
                 enum_name = _name(expr.lenfield_type.name)
                 _out("if self.%s.is_some() {", field.field_name)
-                _out_indent("mask |= Into::<%s>::into(Into::<%s>::into(%s::%s));", _to_rust_type(mask_field.type.name), enum_sizes[enum_name], enum_name, expr.lenfield_name)
+                _out_indent("mask |= Into::<%s>::into(%s::%s);", _to_rust_type(mask_field.type.name), enum_name, expr.lenfield_name)
                 _out("}")
             _out("mask")
         _out("}")
@@ -757,6 +755,7 @@ def rs_request(self, name):
 def rs_eventstruct(self, name):
     print("eventstruct", self, name)
     _out("")
+    assert False
 
 def rs_event(self, name):
     emit_opcode(name, 'Event', self.opcodes[name])
