@@ -129,6 +129,7 @@ where C: Connection
 ///
 /// `ListFontsWithInfo` generated more than one reply, but `Cookie` only allows getting one reply.
 /// This structure implements `Iterator` and allows to get all the replies.
+#[derive(Debug)]
 pub struct ListFontsWithInfoCookie<'a, C: Connection>(Cookie<'a, C, ListFontsWithInfoReply>);
 
 impl<C> ListFontsWithInfoCookie<'_, C>

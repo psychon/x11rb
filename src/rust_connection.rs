@@ -14,6 +14,7 @@ use crate::generated::xproto::{Setup, Setuprequest};
 use crate::x11_utils::GenericEvent;
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 
+#[derive(Debug)]
 struct ConnectionInner {
     stream: TcpStream,
 
@@ -194,6 +195,7 @@ impl ConnectionInner {
 }
 
 /// A connection to an X11 server implemented in pure rust
+#[derive(Debug)]
 pub struct RustConnection {
     inner: RefCell<ConnectionInner>,
     setup: Setup

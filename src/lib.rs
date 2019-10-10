@@ -8,10 +8,10 @@
 //!
 //! The examples that come with this library might be a good starting point for new users.
 
-#![deny(//missing_copy_implementations,
-        //missing_debug_implementations,
+#![deny(missing_copy_implementations,
+        missing_debug_implementations,
         //missing_docs,
-        //private_doc_tests,
+        private_doc_tests,
         //single_use_lifetimes,
         trivial_casts,
         trivial_numeric_casts,

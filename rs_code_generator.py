@@ -142,7 +142,7 @@ def rs_enum(self, name):
         return ename[0].upper() + ename[1:]
 
     rust_name = _name(name)
-    _out("#[derive(Debug)]")
+    _out("#[derive(Debug, Clone, Copy)]")
     if has_all_upper:
         _out("#[allow(non_camel_case_types)]")
     _out("pub enum %s {", rust_name)
@@ -264,7 +264,10 @@ def _emit_parsing_code(fields):
 def complex_type(self, name, from_generic_type, extra_name, name_transform=lambda x: x):
     mark_length_fields(self)
 
-    _out("#[derive(Debug)]")
+    if all(field.type.fixed_size and (not field.type.is_list or field.type.nmemb is not None) and not field.type.is_union for field in self.fields):
+        _out("#[derive(Debug, Clone, Copy)]")
+    else:
+        _out("#[derive(Debug, Clone)]")
     _out("pub struct %s%s {", name_transform(_name(name)), extra_name)
     with Indent():
         for field in self.fields:
@@ -398,7 +401,7 @@ def _to_complex_rust_type(field_type, aux_name, modifier):
 
 def rs_union(self, name):
     rust_name = _name(name)
-    _out("#[derive(Debug)]")
+    _out("#[derive(Debug, Clone)]")
     _out("pub struct %s(Vec<u8>);", rust_name)
 
     _out("impl %s {", rust_name)
@@ -438,7 +441,7 @@ def _generate_aux(name, request, switch, mask_field):
     assert all(field.type.size == field_size for field in switch.type.fields)
     mask_field.individual_field_size = field_size
 
-    _out("#[derive(Debug, Default)]")
+    _out("#[derive(Debug, Clone, Copy, Default)]")
     _out("pub struct %s {", name)
     for field in switch.type.fields:
         _out_indent("pub %s: Option<%s>,", field.field_name, _to_rust_type(field.type.name))
