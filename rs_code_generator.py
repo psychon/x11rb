@@ -272,8 +272,8 @@ def _emit_parsing_code(fields):
                 parts.append(field.field_name)
             elif field.type.is_list:
                 _out("let mut %s = Vec::with_capacity(%s.try_into()?);",
-                        field.field_name, field.has_length_field.field_name)
-                _out("for _ in 0..%s {", field.has_length_field.field_name)
+                        field.field_name, _to_rust_variable(field.has_length_field.field_name))
+                _out("for _ in 0..%s {", _to_rust_variable(field.has_length_field.field_name))
                 with Indent():
                     _out("let (v, r) = %s::try_parse(remaining)?;", rust_type)
                     _out("%s.push(v);", field.field_name)
@@ -405,13 +405,13 @@ def rs_struct(self, name):
                     _out("}")
                 else:
                     if hasattr(field, "is_length_field_for"):
-                        _out("let %s = self.%s.len() as %s;", field.field_name, field.is_length_field_for.field_name, _to_rust_type(field.type.name))
-                        source = field.field_name
+                        _out("let %s = self.%s.len() as %s;", _to_rust_variable(field.field_name), field.is_length_field_for.field_name, _to_rust_type(field.type.name))
+                        source = _to_rust_variable(field.field_name)
                     else:
                         source = "self.%s" % field.field_name
-                    _out("let %s_bytes = %s.to_ne_bytes();", field.field_name, source)
+                    _out("let %s_bytes = %s.to_ne_bytes();", _to_rust_variable(field.field_name), source)
                     for i in range(field.type.size):
-                        result_bytes.append("%s_bytes[%d]" % (field.field_name, i))
+                        result_bytes.append("%s_bytes[%d]" % (_to_rust_variable(field.field_name), i))
             _emit()
 
             if has_variable_size_list:
@@ -633,7 +633,7 @@ def rs_request(self, name):
                     _emit_byte_conversion(field.field_name)
                     request_length.append("%s_bytes.len()" % field.field_name)
                 else:
-                    request_length.append("%s * %s.len()" % (size, field.field_name))
+                    request_length.append("%s * %s.len()" % (size, _to_rust_variable(field.field_name)))
             if hasattr(field, 'lenfield_for_switch'):
                 _out("let %s = %s.value_mask();", field.field_name, field.lenfield_for_switch.field_name)
                 request_length.append("(%s * %s.count_ones()) as usize" % (field.individual_field_size, field.field_name))
@@ -671,7 +671,7 @@ def rs_request(self, name):
             elif field.type.is_list:
                 if field.type.size == 1:
                     _emit_request()
-                    requests.append(field.field_name)
+                    requests.append(_to_rust_variable(field.field_name))
                 else:
                     if field.type.size is not None:
                         _emit_byte_conversion(field.field_name)
@@ -680,7 +680,7 @@ def rs_request(self, name):
                     requests.append("&%s_bytes" % field.field_name)
             elif field.wire:
                 if hasattr(field, "is_length_field_for"):
-                    _out("let %s: %s = %s.len().try_into()?;", field.field_name, _to_rust_type(field.type.name), field.is_length_field_for.field_name)
+                    _out("let %s: %s = %s.len().try_into()?;", _to_rust_variable(field.field_name), _to_rust_type(field.type.name), _to_rust_variable(field.is_length_field_for.field_name))
                 if field.enum is not None:
                     _out("let %s = %s.into();", field.field_name, field.field_name);
                 _out("let %s = %s.to_ne_bytes();", _to_rust_variable(field.field_name + "_bytes"), _to_rust_variable(field.field_name))
@@ -764,7 +764,6 @@ unsupported = [
         "xf86vidmode.xml",
         "xinput.xml",
         "xkb.xml",
-        "xprint.xml",
         "xv.xml",
         "xvmc.xml",
         ]
