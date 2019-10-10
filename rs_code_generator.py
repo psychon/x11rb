@@ -263,8 +263,8 @@ def _emit_parsing_code(fields):
             rust_type = _to_rust_type(field.type.name)
             if field.type.is_list and field.type.nmemb is not None:
                 for i in range(field.type.nmemb):
-                    _out("let (%s_%s, r) = %s::try_parse(remaining)?;", field.field_name, i, _to_rust_type(field.type.name));
-                    _out("remaining = r;")
+                    _out("let (%s_%s, new_remaining) = %s::try_parse(remaining)?;", field.field_name, i, _to_rust_type(field.type.name));
+                    _out("remaining = new_remaining;")
                 _out("let %s = [", field.field_name)
                 for i in range(field.type.nmemb):
                     _out_indent("%s_%s,", field.field_name, i)
@@ -275,14 +275,14 @@ def _emit_parsing_code(fields):
                         field.field_name, _to_rust_variable(field.has_length_field.field_name))
                 _out("for _ in 0..%s {", _to_rust_variable(field.has_length_field.field_name))
                 with Indent():
-                    _out("let (v, r) = %s::try_parse(remaining)?;", rust_type)
+                    _out("let (v, new_remaining) = %s::try_parse(remaining)?;", rust_type)
                     _out("%s.push(v);", field.field_name)
-                    _out("remaining = r;")
+                    _out("remaining = new_remaining;")
                 _out("}")
                 parts.append(field.field_name)
             else:
-                _out("let (%s, r) = %s::try_parse(remaining)?;", _to_rust_variable(field.field_name), rust_type)
-                _out("remaining = r;")
+                _out("let (%s, new_remaining) = %s::try_parse(remaining)?;", _to_rust_variable(field.field_name), rust_type)
+                _out("remaining = new_remaining;")
                 if field.visible:
                     parts.append(_to_rust_variable(field.field_name))
         else:
@@ -408,10 +408,10 @@ def rs_struct(self, name):
                         _out("let %s = self.%s.len() as %s;", _to_rust_variable(field.field_name), field.is_length_field_for.field_name, _to_rust_type(field.type.name))
                         source = _to_rust_variable(field.field_name)
                     else:
-                        source = "self.%s" % field.field_name
-                    _out("let %s_bytes = %s.to_ne_bytes();", _to_rust_variable(field.field_name), source)
+                        source = "self.%s" % _to_rust_variable(field.field_name)
+                    _out("let %s = %s.to_ne_bytes();", _to_rust_variable(field.field_name + "_bytes"), source)
                     for i in range(field.type.size):
-                        result_bytes.append("%s_bytes[%d]" % (_to_rust_variable(field.field_name), i))
+                        result_bytes.append("%s[%d]" % (_to_rust_variable(field.field_name + "_bytes"), i))
             _emit()
 
             if has_variable_size_list:
@@ -749,23 +749,19 @@ import xcbgen.xtypes as xtypes
 
 names = glob.glob(input_dir + "/*.xml")
 unsupported = [
-        "damage.xml", # Depends on render
-        "glx.xml", # Has a new float type
-        "xfixes.xml", # depends on render
-        "composite.xml", # depends on render
-        "dri2.xml",
-        "dri3.xml",
-        "present.xml",
-        "randr.xml",
-        "render.xml",
-        "res.xml",
-        "shm.xml",
-        "sync.xml",
-        "xf86vidmode.xml",
-        "xinput.xml",
-        "xkb.xml",
-        "xv.xml",
-        "xvmc.xml",
+        "glx.xml",       # Has a new float type
+        "dri2.xml",      # Causes an error in python around has_length_field
+        "dri3.xml",      # failed assert field.wire (FDs?)
+        "present.xml",   # failed assert field.wire (FDs?)
+        "randr.xml",     # Causes an error in python around has_length_field
+        "res.xml",       # Uses 'type' as a variable name
+        "shm.xml",       # failed assert field.wire (FDs?)
+        "sync.xml",      # <switch> with different sized fields
+        "xf86vidmode.xml", # Causes an error in python around has_length_field
+        "xinput.xml",    # Problem in _to_rust_name()
+        "xkb.xml",       # Causes an error in python around has_length_field
+        "xv.xml",        # Causes an error in python around has_length_field
+        "xvmc.xml",      # Problem in _to_rust_type()
         ]
 names = [name for name in names if os.path.basename(name) not in unsupported]
 
