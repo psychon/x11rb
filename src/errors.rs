@@ -1,3 +1,5 @@
+//! This module contains the current mess that is error handling.
+
 use std::error::Error;
 
 use crate::x11_utils::GenericError;

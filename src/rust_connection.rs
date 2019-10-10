@@ -1,3 +1,5 @@
+//! A pure-rust implementation of a connection to an X11 server.
+
 use std::net::TcpStream;
 use std::io::{IoSlice, Write, Read};
 use std::error::Error;
@@ -191,12 +193,16 @@ impl ConnectionInner {
     }
 }
 
+/// A connection to an X11 server implemented in pure rust
 pub struct RustConnection {
     inner: RefCell<ConnectionInner>,
     setup: Setup
 }
 
 impl RustConnection {
+    /// Establish a new connection.
+    ///
+    /// FIXME: This currently hardcodes the display `127.0.0.1:1`.
     pub fn connect() -> Result<(RustConnection, usize), Box<dyn Error>> {
         let screen = 0;
         let stream = TcpStream::connect("127.0.0.1:6001")?;

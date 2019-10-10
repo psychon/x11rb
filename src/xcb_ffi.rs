@@ -1,3 +1,5 @@
+//! A FFI-based connection to an X11 server, using libxcb.
+
 use std::ptr::{null, null_mut};
 use std::convert::{TryFrom, TryInto};
 use std::ffi::CStr;
@@ -8,6 +10,10 @@ use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 use crate::connection::{Connection, Cookie, SequenceNumber};
 use super::generated::xproto::Setup;
 
+/// A connection to an X11 server.
+///
+/// This type wraps `*mut xcb_connection_t` that is provided by libxcb. It provides a rust
+/// interface to this C library.
 #[derive(Debug)]
 pub struct XCBConnection(*mut raw_ffi::xcb_connection_t, Setup);
 
@@ -32,6 +38,11 @@ impl XCBConnection {
         }
     }
 
+    /// Establish a new connection to an X11 server.
+    ///
+    /// If a `dpy_name` is provided, it describes the display that should be connected to, for
+    /// example `127.0.0.1:1`. If no value is provided, the `$DISPLAY` environment variable is
+    /// used.
     pub fn connect(dpy_name: Option<&CStr>) -> Result<(XCBConnection, usize), ConnectionError>  {
         use libc::c_int;
         unsafe {
@@ -85,6 +96,7 @@ impl XCBConnection {
         }
     }
 
+    /// Check if the underlying XCB connection is in an error state.
     pub fn has_error(&self) -> Option<ConnectionError> {
         unsafe {
             let error = raw_ffi::xcb_connection_has_error(self.0);

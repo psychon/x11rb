@@ -1,3 +1,13 @@
+//! X11 rust bindings.
+//!
+//! This library allows to interact with an X11 server from rust code. A connection to an X11
+//! server is represented by an implementation of the `Connection` trait.
+//!
+//! The client can interact with the server by sending requests. The server can answer requests and
+//! can also generate events.
+//!
+//! The examples that come with this library might be a good starting point for new users.
+
 #![deny(//missing_copy_implementations,
         //missing_debug_implementations,
         //missing_docs,
