@@ -88,11 +88,14 @@ rust_type_mapping = {
 }
 
 def _to_rust_type(name):
+    orig_name = name
     if type(name) == tuple:
         if name[0] == 'xcb':
             name = name[1:]
-        if len(name) == 1:
-            name = name[0]
+        if current_namespace.is_ext and name[0] == current_namespace.ext_name:
+            name = name[1:]
+        assert len(name) == 1, orig_name
+        name = name[0]
 
     if name in rust_type_mapping:
         return rust_type_mapping[name]
@@ -753,7 +756,6 @@ unsupported = [
         "res.xml",
         "shm.xml",
         "sync.xml",
-        "xevie.xml",
         "xf86dri.xml",
         "xf86vidmode.xml",
         "xinerama.xml",
