@@ -1,9 +1,10 @@
 use std::net::TcpStream;
 use std::io::{IoSlice, Write, Read};
 use std::error::Error;
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 use std::iter::repeat;
 use std::cell::RefCell;
+use std::collections::VecDeque;
 
 use crate::utils::Buffer;
 use crate::connection::{Connection, Cookie, SequenceNumber};
@@ -13,9 +14,16 @@ use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 
 struct ConnectionInner {
     stream: TcpStream,
-    request: SequenceNumber,
+
     next_id: u32,
-    max_id: u32
+    max_id: u32,
+
+    last_sequence_written: SequenceNumber,
+    checked_requests: VecDeque<SequenceNumber>,
+
+    last_sequence_read: SequenceNumber,
+    pending_events: VecDeque<Buffer>,
+    pending_replies: VecDeque<(SequenceNumber, Buffer)>,
 }
 
 impl ConnectionInner {
@@ -25,9 +33,13 @@ impl ConnectionInner {
         let (base, mask) = (setup.resource_id_base, setup.resource_id_mask);
         let result = ConnectionInner {
             stream,
-            request: 0,
             next_id: base,
-            max_id: base | mask
+            max_id: base | mask,
+            last_sequence_written: 0,
+            last_sequence_read: 0,
+            checked_requests: VecDeque::new(),
+            pending_events: VecDeque::new(),
+            pending_replies: VecDeque::new(),
         };
         Ok((result, setup))
     }
@@ -60,7 +72,7 @@ impl ConnectionInner {
         let length = u16::from_ne_bytes([setup[6], setup[7]]);
         setup.extend(repeat(0).take(length as usize * 4));
         stream.read_exact(&mut setup[8..])?;
-        Ok(Setup::try_from(&setup[..])?)
+        Ok((&setup[..]).try_into()?)
     }
 
     fn read_packet(&mut self) -> Result<Buffer, Box<dyn Error>> {
@@ -79,12 +91,95 @@ impl ConnectionInner {
         Ok(Buffer::from_vec(buffer))
     }
 
-    fn wait_for_reply(&mut self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
-        // FIXME: Actually use the sequence number and handle things correctly.
+    fn send_request(&mut self, bufs: &[IoSlice], has_reply: bool) -> Result<SequenceNumber, Box<dyn Error>> {
+        self.last_sequence_written += 1;
+        let seqno = self.last_sequence_written;
+
+        if has_reply {
+            self.checked_requests.push_back(seqno);
+        }
+
+        // FIXME: We must always be able to read when we write
+        let written = self.stream.write_vectored(bufs)?;
+        assert_eq!(written, bufs.iter().map(|s| s.len()).sum(), "FIXME: Implement partial write handling");
+        Ok(seqno)
+    }
+
+    // Extract the sequence number from a packet read from the X11 server. Thus, the packet must be
+    // a reply, an event, or an error. All of these have a u16 sequence number in bytes 2 and 3...
+    // except for KeymapNotify events.
+    fn extract_sequence_number(&mut self, buffer: &Buffer) -> Option<SequenceNumber> {
+        use crate::generated::xproto::KEYMAP_NOTIFY_EVENT;
+        if buffer[0] == KEYMAP_NOTIFY_EVENT {
+            return None;
+        }
+        // We get the u16 from the wire...
+        let number = u16::from_ne_bytes([buffer[2], buffer[3]]);
+
+        // ...and use our state to reconstruct the high bytes
+        let high_bytes = self.last_sequence_read & !(u16::max_value() as SequenceNumber);
+        let mut full_number = (number as SequenceNumber) | high_bytes;
+        if full_number < self.last_sequence_read {
+            full_number += u16::max_value() as SequenceNumber + 1;
+        }
+
+        // Update our state
+        self.last_sequence_read = full_number;
+        Some(full_number)
+    }
+
+    fn read_packet_and_enqueue(&mut self) -> Result<(), Box<dyn Error>> {
+        let packet = self.read_packet()?;
+        let kind = packet[0];
+
+        // extract_sequence_number() updates our state and is thus important to call even when we
+        // do not need the sequence number
+        let seqno = self.extract_sequence_number(&packet).unwrap_or(self.last_sequence_read);
+
+        if kind == 0 {
+            // It is an error. Let's see where we have to send it to.
+            let is_checked = if let Some(&sequence) = self.checked_requests.front() {
+                seqno == sequence
+            } else {
+                false
+            };
+            if is_checked {
+                self.pending_replies.push_back((seqno, packet));
+            } else {
+                self.pending_events.push_back(packet);
+            }
+        } else if kind == 1 {
+            // It is a reply
+            self.pending_replies.push_back((seqno, packet));
+        } else {
+            // It is an event
+            self.pending_events.push_back(packet);
+        }
+
+        Ok(())
+    }
+
+    fn wait_for_reply(&mut self, sequence: SequenceNumber) -> Result<Buffer, Box<dyn Error>> {
         // FIXME: Idea: Have this always return a Buffer and have the caller (Cookie and the multi
         // reply cookie) tell apart reply and error.
-        let _ = sequence;
-        Ok(self.read_packet().map_err(|_| ConnectionError::UnknownError)?)
+        loop {
+            for (index, (seqno, _packet)) in self.pending_replies.iter().enumerate() {
+                if *seqno == sequence {
+                    return Ok(self.pending_replies.remove(index).unwrap().1)
+                }
+            }
+            self.read_packet_and_enqueue()?;
+        }
+    }
+
+    fn wait_for_event(&mut self) -> Result<GenericEvent, Box<dyn Error>> {
+        loop {
+            let event = self.pending_events.pop_front();
+            if let Some(event) = event {
+                return Ok(event.try_into()?);
+            }
+            self.read_packet_and_enqueue()?;
+        }
     }
 
     fn generate_id(&mut self) -> u32 {
@@ -114,14 +209,7 @@ impl RustConnection {
     }
 
     fn send_request(&self, bufs: &[IoSlice], has_reply: bool) -> SequenceNumber {
-        let mut inner = self.inner.borrow_mut();
-        inner.request += 1;
-        let seqno = inner.request;
-        let _ = has_reply;
-        // FIXME: We must always be able to read when we write
-        let written = inner.stream.write_vectored(bufs).unwrap();
-        assert_eq!(written, bufs.iter().map(|s| s.len()).sum(), "FIXME: Implement partial write handling");
-        seqno
+        self.inner.borrow_mut().send_request(bufs, has_reply).unwrap()
     }
 }
 
@@ -142,11 +230,11 @@ impl Connection for RustConnection {
     }
 
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
-        self.inner.borrow_mut().wait_for_reply(sequence)
+        Ok(self.inner.borrow_mut().wait_for_reply(sequence).map_err(|_| ConnectionError::UnknownError)?)
     }
 
     fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
-        unimplemented!();
+        Ok(self.inner.borrow_mut().wait_for_event().map_err(|_| ConnectionError::UnknownError)?)
     }
 
     fn flush(&self) {
