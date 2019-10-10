@@ -108,6 +108,12 @@ def _to_rust_identifier(name):
 def _to_rust_variable(name):
     if name == "type":
         name = "type_"
+
+    # Check for camel case names and deal with them
+    if any(c.isupper() for c in name):
+        assert name[0].islower()
+        name = _lower_snake_name((name,))
+
     return name
 
 # Now the real fun begins
@@ -668,13 +674,13 @@ def rs_request(self, name):
                     _out("let %s: %s = %s.len().try_into()?;", field.field_name, _to_rust_type(field.type.name), field.is_length_field_for.field_name)
                 if field.enum is not None:
                     _out("let %s = %s.into();", field.field_name, field.field_name);
-                _out("let %s_bytes = %s.to_ne_bytes();", field.field_name, _to_rust_variable(field.field_name))
+                _out("let %s = %s.to_ne_bytes();", _to_rust_variable(field.field_name + "_bytes"), _to_rust_variable(field.field_name))
                 if field.type.is_switch:
                     _emit_request()
                     requests.append("&%s_bytes" % field.field_name)
                 else:
                     for i in range(field.type.size):
-                        request.append("%s_bytes[%d]" % (field.field_name, i))
+                        request.append("%s[%d]" % (_to_rust_variable(field.field_name + "_bytes"), i))
 
         _emit_request()
 
