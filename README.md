@@ -113,9 +113,6 @@ of sending multiple requests and only afterwards wait for the replies.
   - Add `connection.check_request(sequence)` and be done?
 - thread safety (connection should be Send and Sync)
   - The basic guarantee is provided by libxcb, so this should be easily doable.
-- Rewrite it in Rust - a non-ffi based library
-  - I know, I know, this may sound crazy, but libxcb is only used for sending
-    and receiving opaque packets. This can also be done in pure rust code.
 
 
 ## License
