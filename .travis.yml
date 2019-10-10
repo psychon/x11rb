@@ -1,0 +1,32 @@
+language: rust
+dist: bionic  # need at least xcb-proto 1.12, because commit a3da4e8c in xcb-proto changes our API
+rust:
+  - stable
+  - beta
+  - nightly
+matrix:
+  allow_failures:
+    - rust: nightly
+  fast_finish: true
+
+addons:
+  apt:
+    packages:
+      - xcb-proto
+      - python-xcbgen
+      - pkg-config
+
+script:
+  # Check the code generator against python 2 and 3. Both versions should
+  # produce identical output.
+  - PYDIR="$(pkg-config --variable=pythondir xcb-proto)"
+  - PROTO="$(pkg-config --variable=xcbincludedir xcb-proto)"
+  - echo $PYDIR
+  - echo $PROTO
+  - mkdir /tmp/py2 /tmp/py3
+  - python3 rs_code_generator.py -p "$PYDIR" -i "$PROTO" -o /tmp/py3 generated
+  - python2 rs_code_generator.py -p "$PYDIR" -i "$PROTO" -o /tmp/py2 generated
+  - diff -Nurp /tmp/py2 /tmp/py3
+
+  - cargo build --verbose --examples
+  - cargo test --verbose
