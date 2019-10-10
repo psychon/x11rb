@@ -6,10 +6,12 @@
 use std::io::IoSlice;
 use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
+use std::collections::HashMap;
+use std::cell::RefCell;
 use crate::utils::Buffer;
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 use crate::x11_utils::GenericEvent;
-use crate::generated::xproto::{Setup, ListFontsWithInfoReply, QueryExtensionReply};
+use crate::generated::xproto::{Setup, ListFontsWithInfoReply, QueryExtensionReply, query_extension};
 
 /// Number type used for referring to things that were sent to the server in responses from the
 /// server.
@@ -58,7 +60,7 @@ pub trait Connection: Sized {
     ///
     /// The returned object is guaranteed to have a non-zero `present` field. Extensions that are
     /// not present are instead returned as `None`.
-    fn extension_information(&self, extension_name: &'static str) -> Option<QueryExtensionReply>;
+    fn extension_information(&self, extension_name: &'static str) -> Option<&QueryExtensionReply>;
 
     /// Wait for the reply to a request.
     ///
@@ -174,5 +176,50 @@ where C: Connection
             }
         }
         Some(reply)
+    }
+}
+
+/// Helper for implementing `Connection::extension_information()`.
+#[derive(Debug, Default)]
+pub struct ExtensionInformation(RefCell<HashMap<&'static str, Option<Box<QueryExtensionReply>>>>);
+
+impl ExtensionInformation {
+    /// An implementation of `Connection::extension_information()`.
+    ///
+    /// The given connection is used for sending a `QueryExtension` request if needed.
+    pub fn extension_information<'s, C: Connection>(&'s self, conn: &C, extension_name: &'static str)
+            -> Option<&'s QueryExtensionReply> {
+        let mut map = self.0.borrow_mut();
+        // Insert the entry if it does not yet exist and get a reference
+        let result: &Option<Box<QueryExtensionReply>> = map
+            .entry(extension_name)
+            .or_insert_with(|| {
+                let info = query_extension(conn, extension_name.as_bytes()).ok();
+                let info = info.and_then(|c| c.reply().ok());
+                if let Some(info) = info {
+                    // If the extension is not present, we return None, else we box it
+                    if info.present == 0 {
+                        None
+                    } else {
+                        Some(Box::new(info))
+                    }
+                } else {
+                    // There was an error. Pretend the extension is not present.
+                    None
+                }
+            });
+        match result.as_ref() {
+            None => None,
+            Some(ref reply) => unsafe {
+                // We only ever allocate the boxes, but never free them (or modify their
+                // contents in any way). Thus, it is safe to pass out references to the
+                // contents of the box. But the borrow checker does not know that our boxes
+                // life as long as we do. Thus, we do some magic with raw pointers.
+                //
+                // If you know a way to avoid this unsafe code, please let me know!
+                let raw_ptr: *const QueryExtensionReply = &***reply;
+                Some(&*raw_ptr)
+            }
+        }
     }
 }

@@ -9,7 +9,7 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 
 use crate::utils::Buffer;
-use crate::connection::{Connection, Cookie, SequenceNumber};
+use crate::connection::{Connection, Cookie, SequenceNumber, ExtensionInformation};
 use crate::generated::xproto::{Setup, Setuprequest, QueryExtensionReply};
 use crate::x11_utils::GenericEvent;
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
@@ -198,7 +198,8 @@ impl ConnectionInner {
 #[derive(Debug)]
 pub struct RustConnection {
     inner: RefCell<ConnectionInner>,
-    setup: Setup
+    setup: Setup,
+    extension_information: ExtensionInformation,
 }
 
 impl RustConnection {
@@ -211,7 +212,8 @@ impl RustConnection {
         let (inner, setup) = ConnectionInner::connect(stream)?;
         let conn = RustConnection {
             inner: RefCell::new(inner),
-            setup
+            setup,
+            extension_information: Default::default()
         };
         Ok((conn, screen))
     }
@@ -237,9 +239,8 @@ impl Connection for RustConnection {
         unimplemented!();
     }
 
-    fn extension_information(&self, extension_name: &'static str) -> Option<QueryExtensionReply> {
-        let _ = extension_name;
-        unimplemented!();
+    fn extension_information(&self, extension_name: &'static str) -> Option<&QueryExtensionReply> {
+        self.extension_information.extension_information(self, extension_name)
     }
 
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
