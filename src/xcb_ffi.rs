@@ -8,7 +8,7 @@ use crate::utils::{CSlice, Buffer};
 use crate::x11_utils::{GenericError, GenericEvent, Event};
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 use crate::connection::{Connection, Cookie, SequenceNumber};
-use super::generated::xproto::Setup;
+use super::generated::xproto::{Setup, QueryExtensionReply};
 
 /// A connection to an X11 server.
 ///
@@ -124,6 +124,11 @@ impl Connection for XCBConnection {
         unsafe {
             raw_ffi::xcb_discard_reply64(self.0, sequence);
         }
+    }
+
+    fn extension_information(&self, extension_name: &'static str) -> Option<QueryExtensionReply> {
+        let _ = extension_name;
+        unimplemented!();
     }
 
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {

@@ -9,7 +9,7 @@ use std::marker::PhantomData;
 use crate::utils::Buffer;
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 use crate::x11_utils::GenericEvent;
-use crate::generated::xproto::{Setup, ListFontsWithInfoReply};
+use crate::generated::xproto::{Setup, ListFontsWithInfoReply, QueryExtensionReply};
 
 /// Number type used for referring to things that were sent to the server in responses from the
 /// server.
@@ -50,6 +50,15 @@ pub trait Connection: Sized {
     ///
     /// Users of this library will most likely not want to use this function directly.
     fn discard_reply(&self, sequence: SequenceNumber);
+
+    /// Get information about an extension.
+    ///
+    /// To send a request for some extension, the `QueryExtensionReply` for the extension is
+    /// necessary. This function provides this information.
+    ///
+    /// The returned object is guaranteed to have a non-zero `present` field. Extensions that are
+    /// not present are instead returned as `None`.
+    fn extension_information(&self, extension_name: &'static str) -> Option<QueryExtensionReply>;
 
     /// Wait for the reply to a request.
     ///

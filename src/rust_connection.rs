@@ -10,7 +10,7 @@ use std::collections::VecDeque;
 
 use crate::utils::Buffer;
 use crate::connection::{Connection, Cookie, SequenceNumber};
-use crate::generated::xproto::{Setup, Setuprequest};
+use crate::generated::xproto::{Setup, Setuprequest, QueryExtensionReply};
 use crate::x11_utils::GenericEvent;
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 
@@ -234,6 +234,11 @@ impl Connection for RustConnection {
 
     fn discard_reply(&self, sequence: SequenceNumber) {
         let _ = sequence;
+        unimplemented!();
+    }
+
+    fn extension_information(&self, extension_name: &'static str) -> Option<QueryExtensionReply> {
+        let _ = extension_name;
         unimplemented!();
     }
 

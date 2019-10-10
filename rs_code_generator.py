@@ -61,8 +61,13 @@ class Indent(object):
         _out_indent_decr()
 
 def _name(name):
-    assert len(name) == 2, name
-    return name[1]
+    orig_name = name
+    if name[0] == 'xcb':
+        name = name[1:]
+    if current_namespace.is_ext and name[0] == current_namespace.ext_name:
+        name = name[1:]
+    assert len(name) == 1, orig_name
+    return name[0]
 
 def _lower_snake_name(name):
     name = _name(name)
@@ -116,14 +121,32 @@ def _write_output(filename):
     del _lines[:]
 
 def rs_open(self):
+    global current_namespace
+
     assert not _lines
+
+    current_namespace = self.namespace
+
     _out("use std::convert::TryFrom;")
+    _out("#[allow(unused_imports)]")
     _out("use std::convert::TryInto;")
     _out("use std::io::IoSlice;")
     _out("use crate::utils::Buffer;")
-    _out("use crate::x11_utils::{GenericEvent, GenericError, TryParse};")
-    _out("use crate::connection::{SequenceNumber, Cookie, ListFontsWithInfoCookie, Connection};")
+    _out("#[allow(unused_imports)]")
+    _out("use crate::x11_utils::{GenericEvent, GenericError};")
+    _out("use crate::x11_utils::TryParse;")
+    _out("#[allow(unused_imports)]")
+    _out("use crate::connection::SequenceNumber;")
+    _out("use crate::connection::{Cookie, Connection};")
+    if not current_namespace.is_ext:
+        _out("use crate::connection::ListFontsWithInfoCookie;")
     _out("use crate::errors::{ParseError, ConnectionError};")
+
+    for (name, header) in self.imports:
+        assert name == header, (name, header) # I don't know what is going on here...
+        _out("#[allow(unused_imports)]")
+        _out("use super::%s::*;", header)
+
     _out("")
 
 def rs_close(self):
@@ -559,6 +582,10 @@ def rs_request(self, name):
     _out("{")
     with Indent():
 
+        if current_namespace.is_ext:
+            _out('let extension_information = c.extension_information("%s")' % current_namespace.ext_xname)
+            _out_indent(".ok_or(ConnectionError::UnsupportedExtension)?;")
+
         requests = []
         request = []
 
@@ -599,8 +626,11 @@ def rs_request(self, name):
 
         _out("let length: usize = (%s + 3) / 4;", request_length)
         for field in self.fields:
-            if field.field_name == "major_opcode":
-                request.append("%s_REQUEST" % _upper_snake_name(name))
+            if field.field_name == "major_opcode" or field.field_name == "minor_opcode":
+                if current_namespace.is_ext and field.field_name == "major_opcode":
+                    request.append('extension_information.major_opcode')
+                else:
+                    request.append("%s_REQUEST" % _upper_snake_name(name))
             elif field.type.is_expr:
                 def expr_to_str(e):
                     if e.op is not None:
@@ -703,12 +733,42 @@ from xcbgen.state import Module
 import xcbgen.xtypes as xtypes
 
 names = glob.glob(input_dir + "/*.xml")
-names = [input_dir + "/xproto.xml"]
+unsupported = [
+        "damage.xml", # Depends on render
+        "glx.xml", # Has a new float type
+        "xfixes.xml", # depends on render
+        "composite.xml", # depends on render
+        "dri2.xml",
+        "dri3.xml",
+        "present.xml",
+        "randr.xml",
+        "record.xml",
+        "render.xml",
+        "res.xml",
+        "shm.xml",
+        "sync.xml",
+        "xevie.xml",
+        "xf86dri.xml",
+        "xf86vidmode.xml",
+        "xinerama.xml",
+        "xinput.xml",
+        "xkb.xml",
+        "xprint.xml",
+        "xselinux.xml",
+        "xv.xml",
+        "xvmc.xml",
+        ]
+names = [name for name in names if os.path.basename(name) not in unsupported]
+
 for name in names:
     module = Module(name, None)
     module.register()
     module.resolve()
-    module.generate()
+    try:
+        module.generate()
+    except:
+        sys.stderr.write('Error occurred while generating: %s\n' % module.namespace.header)
+        raise
 
 output_file = os.path.join(output_dir, "%s.rs" % main_module)
 with open(output_file, 'w') as target:
@@ -716,3 +776,4 @@ with open(output_file, 'w') as target:
         target.write("pub mod ")
         target.write(ext)
         target.write(";")
+        target.write("\n")
