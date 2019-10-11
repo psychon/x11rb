@@ -1,9 +1,13 @@
 [package]
 name = "x11rb"
 version = "0.1.0"
+description = "Rust bindings to X11"
 authors = ["Uli Schlachter <psychon@znc.in>"]
+repository = "https://github.com/psychon/x11rb"
+readme = "README.md"
 edition = "2018"
 license = "MIT OR Apache-2.0"
+keywords = ["xcb", "X11"]
 
 [dependencies]
 libc = "0.2"
