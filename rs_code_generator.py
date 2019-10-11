@@ -721,7 +721,11 @@ def rs_request(self, name):
                     # FIXME: Switch to a trait that we can implement on f32
                     _out("let %s = %s.to_bits().to_ne_bytes();", _to_rust_variable(field.field_name + "_bytes"), _to_rust_variable(field.field_name))
                 else:
-                    _out("let %s = %s.to_ne_bytes();", _to_rust_variable(field.field_name + "_bytes"), _to_rust_variable(field.field_name))
+                    if field.field_name == "length":
+                        source = "TryInto::<%s>::try_into(length)?" % _to_rust_type(field.type.name)
+                    else:
+                        source = _to_rust_variable(field.field_name)
+                    _out("let %s = %s.to_ne_bytes();", _to_rust_variable(field.field_name + "_bytes"), source)
                 if field.type.is_switch:
                     _emit_request()
                     requests.append("&%s_bytes" % field.field_name)
