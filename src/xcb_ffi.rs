@@ -91,7 +91,7 @@ impl XCBConnection {
         if has_reply {
             flags |= raw_ffi::send_request_flags::CHECKED;
         }
-        // FIXME: xcb wants to be able to access bufs[-1] and bufs[-2]
+        // FIXME: xcb wants to be able to access bufs[-1] and bufs[-2] https://github.com/psychon/x11rb/issues/6
         unsafe {
             raw_ffi::xcb_send_request64(self.0, flags, bufs.as_ptr(), &protocol_request)
         }

@@ -34,9 +34,7 @@ fn main() {
 
     let title = "Simple Window";
     change_property(&conn, PropMode::Replace, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), 8, title.as_bytes()).unwrap();
-    // FIXME: format != 8 is broken, because the XML uses <op> stuff in a way that we cannot
-    // really use. Perhaps special-case change_property and make variants of it for the different
-    // valid formats?
+    // FIXME: format != 8 is currently broken, see https://github.com/psychon/x11rb/issues/7.
     change_property(&conn, PropMode::Replace, win_id, wm_protocols, Atom::WINDOW.into(), 32, &wm_delete_window.to_ne_bytes()).unwrap();
 
     let reply = get_property(&conn, 0, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), 0, 1024).unwrap();

@@ -98,21 +98,11 @@ something wrong. Also, it encourages people to write high-latency code instead
 of sending multiple requests and only afterwards wait for the replies.
 
 
-## Future work
+## Current state
 
-- Support extensions. Currently, only the core protocol is done.
-- big requests support
-- InternAtom `only_if_exists` argument should be `bool`, but the python code in
-  xcb-proto does not provide this information
-- The aux structs should be passed via something like AsRef to the request
-  functions. This should allow to pass both `obj` and `&obj`.
-- code size optimisation: have the generic functions resolve their arguments and
-  then call a common (internal) helper function
-- FD passing
-- checked requests (needed?)
-  - Add `connection.check_request(sequence)` and be done?
-- thread safety (connection should be Send and Sync)
-  - The basic guarantee is provided by libxcb, so this should be easily doable.
+The core X11 protocol and some extensions already work. There are some known
+problems and not all extensions are provided. For more information, have a look
+at the [known issues](https://github.com/psychon/x11rb/issues).
 
 
 ## License
