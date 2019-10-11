@@ -13,6 +13,31 @@ On Debian, the necessary packages are called `pkg-config`, `xcb-proto`, and
 `python-xcbgen`. I hope that other distros use similarly obvious naming.
 
 
+## Getting started with x11rb
+
+X11 is a big protocol. I would claim that most of it is not actually that
+complicated, but it is still difficult to get into it. A good starting point
+might be some [libxcb
+tutorial](https://www.x.org/releases/X11R7.7/doc/libxcb/tutorial/index.html).
+This tutorial was adapted in this crate [as an example](examples/tutorial.rs).
+A more in-depth look at the X11 protocol can be gained from the [protocol
+reference
+manual](https://www.x.org/releases/X11R7.6/doc/xproto/x11protocol.html), but
+this requires some existing basic understanding of X11. If you want to figure
+out what some specific request does, be sure to look it up in the specification!
+
+Most extensions can be understood by reading their specification. Most of them
+can be found [here](https://www.x.org/releases/current/doc/index.html#protocol).
+For example, [the specification of Composite
+0.4](https://www.x.org/releases/X11R7.5/doc/compositeproto/compositeproto.txt)
+consists of about six pages of text.
+
+The notable exception is the X keyboard extension, which is documented in a [PDF
+file with 168
+pages](https://www.x.org/releases/current/doc/kbproto/xkbproto.pdf) which I am
+never going to read completely.
+
+
 ## Motivation
 
 ![Motivation](https://imgs.xkcd.com/comics/standards.png)
@@ -96,18 +121,6 @@ to suggest improvements to it.
 No. If you have so many X11 connections that this would matter, you are doing
 something wrong. Also, it encourages people to write high-latency code instead
 of sending multiple requests and only afterwards wait for the replies.
-
-
-## Getting started with x11rb
-
-X11 is a big protocol. I would claim that most of it is not actually that
-complicated, but it is still difficult to get into it. A good starting point
-might be some [libxcb
-tutorial](https://www.x.org/releases/X11R7.7/doc/libxcb/tutorial/index.html).
-Most of the content should be easily adaptable to this crate. A more in-depth
-look can be gained from the [protocol reference
-manual](https://www.x.org/releases/X11R7.6/doc/xproto/x11protocol.html), but
-this requires some existing basic understanding of X11.
 
 
 ## Current state
