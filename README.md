@@ -98,6 +98,18 @@ something wrong. Also, it encourages people to write high-latency code instead
 of sending multiple requests and only afterwards wait for the replies.
 
 
+## Getting started with x11rb
+
+X11 is a big protocol. I would claim that most of it is not actually that
+complicated, but it is still difficult to get into it. A good starting point
+might be some [libxcb
+tutorial](https://www.x.org/releases/X11R7.7/doc/libxcb/tutorial/index.html).
+Most of the content should be easily adaptable to this crate. A more in-depth
+look can be gained from the [protocol reference
+manual](https://www.x.org/releases/X11R7.6/doc/xproto/x11protocol.html), but
+this requires some existing basic understanding of X11.
+
+
 ## Current state
 
 The core X11 protocol and some extensions already work. There are some known
