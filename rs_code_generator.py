@@ -218,12 +218,27 @@ def rs_enum(self, name):
             _out("}")
         _out("}")
     _out("}")
+
+    _out("impl Into<Option<%s>> for %s {", to_type, rust_name)
+    with Indent():
+        _out("fn into(self) -> Option<%s> {", to_type)
+        _out_indent("Some(self.into())")
+        _out("}")
+    _out("}")
+
     for larger_type in larger_types:
         _out("impl Into<%s> for %s {", larger_type, rust_name)
         with Indent():
             _out("fn into(self) -> %s {", larger_type)
             with Indent():
                 _out("Into::<%s>::into(self) as _", to_type)
+            _out("}")
+        _out("}")
+
+        _out("impl Into<Option<%s>> for %s {", larger_type, rust_name)
+        with Indent():
+            _out("fn into(self) -> Option<%s> {", larger_type)
+            _out_indent("Some(self.into())")
             _out("}")
         _out("}")
 
@@ -528,9 +543,9 @@ def _generate_aux(name, request, switch, mask_field):
         _out("}")
 
         for field in switch.type.fields:
-            _out("pub fn %s<I>(mut self, value: I) -> Self where I: Into<%s> {", field.field_name, _to_rust_type(field.type.name))
+            _out("pub fn %s<I>(mut self, value: I) -> Self where I: Into<Option<%s>> {", field.field_name, _to_rust_type(field.type.name))
             with Indent():
-                _out("self.%s = Some(Into::<%s>::into(value));", field.field_name, _to_rust_type(field.type.name))
+                _out("self.%s = value.into();", field.field_name)
                 _out("self")
             _out("}")
 
