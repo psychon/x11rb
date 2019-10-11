@@ -8,6 +8,23 @@ As you may know, the code generator uses an XML description of the X11 protocol
 from `xcb-proto`. This document will show some examples of the XML description
 followed by the Rust code that is generated for it.
 
+The following code is generated at the beginning of a module:
+```rust
+use std::convert::TryFrom;
+#[allow(unused_imports)]
+use std::convert::TryInto;
+use std::io::IoSlice;
+use crate::utils::Buffer;
+#[allow(unused_imports)]
+use crate::x11_utils::{GenericEvent, GenericError as X11GenericError};
+use crate::x11_utils::TryParse;
+#[allow(unused_imports)]
+use crate::connection::SequenceNumber;
+use crate::connection::{Cookie, Connection};
+use crate::connection::ListFontsWithInfoCookie;
+use crate::errors::{ParseError, ConnectionError};
+```
+
 ## XID types
 
 XIDs simply are numbers. They uniquely identify, for example, a window.
@@ -42,7 +59,7 @@ implemented for some inputs.
 We must also be able to send structs to the server. This is handled by the
 `to_ne_bytes()` method. 'ne' stands for 'native endian'.
 ```rust
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Point {
     pub x: i16,
     pub y: i16,
@@ -50,10 +67,10 @@ pub struct Point {
 impl TryParse for Point {
     fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let mut remaining = value;
-        let (x, r) = i16::try_parse(remaining)?;
-        remaining = r;
-        let (y, r) = i16::try_parse(remaining)?;
-        remaining = r;
+        let (x, new_remaining) = i16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (y, new_remaining) = i16::try_parse(remaining)?;
+        remaining = new_remaining;
         let result = Point { x, y };
         Ok((result, remaining))
     }
@@ -100,7 +117,7 @@ contain lists of other structs. This example demonstrates this.
 </struct>
 ```
 ```rust
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Depth {
     pub depth: u8,
     pub visuals: Vec<Visualtype>,
@@ -108,17 +125,17 @@ pub struct Depth {
 impl TryParse for Depth {
     fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let mut remaining = value;
-        let (depth, r) = u8::try_parse(remaining)?;
-        remaining = r;
+        let (depth, new_remaining) = u8::try_parse(remaining)?;
+        remaining = new_remaining;
         remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (visuals_len, r) = u16::try_parse(remaining)?;
-        remaining = r;
+        let (visuals_len, new_remaining) = u16::try_parse(remaining)?;
+        remaining = new_remaining;
         remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
         let mut visuals = Vec::with_capacity(visuals_len.try_into()?);
         for _ in 0..visuals_len {
-            let (v, r) = Visualtype::try_parse(remaining)?;
+            let (v, new_remaining) = Visualtype::try_parse(remaining)?;
             visuals.push(v);
-            remaining = r;
+            remaining = new_remaining;
         }
         let result = Depth { depth, visuals };
         Ok((result, remaining))
@@ -174,7 +191,7 @@ impl Depth {
 Depending on the largest value, appropriate `Into` implementations are
 generated.
 ```rust
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum BackingStore {
     NotUseful,
     WhenMapped,
@@ -189,14 +206,29 @@ impl Into<u8> for BackingStore {
         }
     }
 }
+impl Into<Option<u8>> for BackingStore {
+    fn into(self) -> Option<u8> {
+        Some(self.into())
+    }
+}
 impl Into<u16> for BackingStore {
     fn into(self) -> u16 {
         Into::<u8>::into(self) as _
     }
 }
+impl Into<Option<u16>> for BackingStore {
+    fn into(self) -> Option<u16> {
+        Some(self.into())
+    }
+}
 impl Into<u32> for BackingStore {
     fn into(self) -> u32 {
         Into::<u8>::into(self) as _
+    }
+}
+impl Into<Option<u32>> for BackingStore {
+    fn into(self) -> Option<u32> {
+        Some(self.into())
     }
 }
 ```
@@ -217,7 +249,7 @@ implementations of `BitOr` and `BitOrAssign`.
 </enum>
 ```
 ```rust
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub enum ConfigWindow {
     X,
     Y,
@@ -240,14 +272,29 @@ impl Into<u8> for ConfigWindow {
         }
     }
 }
+impl Into<Option<u8>> for ConfigWindow {
+    fn into(self) -> Option<u8> {
+        Some(self.into())
+    }
+}
 impl Into<u16> for ConfigWindow {
     fn into(self) -> u16 {
         Into::<u8>::into(self) as _
     }
 }
+impl Into<Option<u16>> for ConfigWindow {
+    fn into(self) -> Option<u16> {
+        Some(self.into())
+    }
+}
 impl Into<u32> for ConfigWindow {
     fn into(self) -> u32 {
         Into::<u8>::into(self) as _
+    }
+}
+impl Into<Option<u32>> for ConfigWindow {
+    fn into(self) -> Option<u32> {
+        Some(self.into())
     }
 }
 bitmask_binop!(ConfigWindow, u8);
@@ -268,52 +315,52 @@ ClientMessageData.
 </union>
 ```
 ```rust
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ClientMessageData(Vec<u8>);
 impl ClientMessageData {
     pub fn as_data8(&self) -> [u8; 20] {
         fn do_the_parse(value: &[u8]) -> Result<[u8; 20], ParseError> {
             let mut remaining = value;
-            let (data8_0, r) = u8::try_parse(remaining)?;
-            remaining = r;
-            let (data8_1, r) = u8::try_parse(remaining)?;
-            remaining = r;
-            let (data8_2, r) = u8::try_parse(remaining)?;
-            remaining = r;
-            let (data8_3, r) = u8::try_parse(remaining)?;
-            remaining = r;
-            let (data8_4, r) = u8::try_parse(remaining)?;
-            remaining = r;
-            let (data8_5, r) = u8::try_parse(remaining)?;
-            remaining = r;
-            let (data8_6, r) = u8::try_parse(remaining)?;
-            remaining = r;
-            let (data8_7, r) = u8::try_parse(remaining)?;
-            remaining = r;
-            let (data8_8, r) = u8::try_parse(remaining)?;
-            remaining = r;
-            let (data8_9, r) = u8::try_parse(remaining)?;
-            remaining = r;
-            let (data8_10, r) = u8::try_parse(remaining)?;
-            remaining = r;
-            let (data8_11, r) = u8::try_parse(remaining)?;
-            remaining = r;
-            let (data8_12, r) = u8::try_parse(remaining)?;
-            remaining = r;
-            let (data8_13, r) = u8::try_parse(remaining)?;
-            remaining = r;
-            let (data8_14, r) = u8::try_parse(remaining)?;
-            remaining = r;
-            let (data8_15, r) = u8::try_parse(remaining)?;
-            remaining = r;
-            let (data8_16, r) = u8::try_parse(remaining)?;
-            remaining = r;
-            let (data8_17, r) = u8::try_parse(remaining)?;
-            remaining = r;
-            let (data8_18, r) = u8::try_parse(remaining)?;
-            remaining = r;
-            let (data8_19, r) = u8::try_parse(remaining)?;
-            remaining = r;
+            let (data8_0, new_remaining) = u8::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data8_1, new_remaining) = u8::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data8_2, new_remaining) = u8::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data8_3, new_remaining) = u8::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data8_4, new_remaining) = u8::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data8_5, new_remaining) = u8::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data8_6, new_remaining) = u8::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data8_7, new_remaining) = u8::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data8_8, new_remaining) = u8::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data8_9, new_remaining) = u8::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data8_10, new_remaining) = u8::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data8_11, new_remaining) = u8::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data8_12, new_remaining) = u8::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data8_13, new_remaining) = u8::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data8_14, new_remaining) = u8::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data8_15, new_remaining) = u8::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data8_16, new_remaining) = u8::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data8_17, new_remaining) = u8::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data8_18, new_remaining) = u8::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data8_19, new_remaining) = u8::try_parse(remaining)?;
+            remaining = new_remaining;
             let data8 = [
                 data8_0,
                 data8_1,
@@ -344,26 +391,26 @@ impl ClientMessageData {
     pub fn as_data16(&self) -> [u16; 10] {
         fn do_the_parse(value: &[u8]) -> Result<[u16; 10], ParseError> {
             let mut remaining = value;
-            let (data16_0, r) = u16::try_parse(remaining)?;
-            remaining = r;
-            let (data16_1, r) = u16::try_parse(remaining)?;
-            remaining = r;
-            let (data16_2, r) = u16::try_parse(remaining)?;
-            remaining = r;
-            let (data16_3, r) = u16::try_parse(remaining)?;
-            remaining = r;
-            let (data16_4, r) = u16::try_parse(remaining)?;
-            remaining = r;
-            let (data16_5, r) = u16::try_parse(remaining)?;
-            remaining = r;
-            let (data16_6, r) = u16::try_parse(remaining)?;
-            remaining = r;
-            let (data16_7, r) = u16::try_parse(remaining)?;
-            remaining = r;
-            let (data16_8, r) = u16::try_parse(remaining)?;
-            remaining = r;
-            let (data16_9, r) = u16::try_parse(remaining)?;
-            remaining = r;
+            let (data16_0, new_remaining) = u16::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data16_1, new_remaining) = u16::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data16_2, new_remaining) = u16::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data16_3, new_remaining) = u16::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data16_4, new_remaining) = u16::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data16_5, new_remaining) = u16::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data16_6, new_remaining) = u16::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data16_7, new_remaining) = u16::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data16_8, new_remaining) = u16::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data16_9, new_remaining) = u16::try_parse(remaining)?;
+            remaining = new_remaining;
             let data16 = [
                 data16_0,
                 data16_1,
@@ -384,16 +431,16 @@ impl ClientMessageData {
     pub fn as_data32(&self) -> [u32; 5] {
         fn do_the_parse(value: &[u8]) -> Result<[u32; 5], ParseError> {
             let mut remaining = value;
-            let (data32_0, r) = u32::try_parse(remaining)?;
-            remaining = r;
-            let (data32_1, r) = u32::try_parse(remaining)?;
-            remaining = r;
-            let (data32_2, r) = u32::try_parse(remaining)?;
-            remaining = r;
-            let (data32_3, r) = u32::try_parse(remaining)?;
-            remaining = r;
-            let (data32_4, r) = u32::try_parse(remaining)?;
-            remaining = r;
+            let (data32_0, new_remaining) = u32::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data32_1, new_remaining) = u32::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data32_2, new_remaining) = u32::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data32_3, new_remaining) = u32::try_parse(remaining)?;
+            remaining = new_remaining;
+            let (data32_4, new_remaining) = u32::try_parse(remaining)?;
+            remaining = new_remaining;
             let data32 = [
                 data32_0,
                 data32_1,
@@ -437,7 +484,7 @@ impl TryParse for ClientMessageData {
 ```
 ```rust
 pub const KEY_PRESS_EVENT: u8 = 2;
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct KeyPressEvent {
     pub detail: u8,
     pub time: u32,
@@ -455,29 +502,29 @@ impl TryParse for KeyPressEvent {
     fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let mut remaining = value;
         remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (detail, r) = u8::try_parse(remaining)?;
-        remaining = r;
+        let (detail, new_remaining) = u8::try_parse(remaining)?;
+        remaining = new_remaining;
         remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (time, r) = u32::try_parse(remaining)?;
-        remaining = r;
-        let (root, r) = u32::try_parse(remaining)?;
-        remaining = r;
-        let (event, r) = u32::try_parse(remaining)?;
-        remaining = r;
-        let (child, r) = u32::try_parse(remaining)?;
-        remaining = r;
-        let (root_x, r) = i16::try_parse(remaining)?;
-        remaining = r;
-        let (root_y, r) = i16::try_parse(remaining)?;
-        remaining = r;
-        let (event_x, r) = i16::try_parse(remaining)?;
-        remaining = r;
-        let (event_y, r) = i16::try_parse(remaining)?;
-        remaining = r;
-        let (state, r) = u16::try_parse(remaining)?;
-        remaining = r;
-        let (same_screen, r) = u8::try_parse(remaining)?;
-        remaining = r;
+        let (time, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (root, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (event, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (child, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (root_x, new_remaining) = i16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (root_y, new_remaining) = i16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (event_x, new_remaining) = i16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (event_y, new_remaining) = i16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (state, new_remaining) = u16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (same_screen, new_remaining) = u8::try_parse(remaining)?;
+        remaining = new_remaining;
         remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
         let result = KeyPressEvent { detail, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen };
         Ok((result, remaining))
@@ -515,7 +562,7 @@ impl TryFrom<&[u8]> for KeyPressEvent {
 ```
 ```rust
 pub const REQUEST_ERROR: u8 = 1;
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct RequestError {
     pub bad_value: u32,
     pub minor_opcode: u16,
@@ -527,12 +574,12 @@ impl TryParse for RequestError {
         remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
         remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
         remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (bad_value, r) = u32::try_parse(remaining)?;
-        remaining = r;
-        let (minor_opcode, r) = u16::try_parse(remaining)?;
-        remaining = r;
-        let (major_opcode, r) = u8::try_parse(remaining)?;
-        remaining = r;
+        let (bad_value, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (minor_opcode, new_remaining) = u16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (major_opcode, new_remaining) = u8::try_parse(remaining)?;
+        remaining = new_remaining;
         remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
         let result = RequestError { bad_value, minor_opcode, major_opcode };
         Ok((result, remaining))
@@ -544,9 +591,9 @@ impl TryFrom<Buffer> for RequestError {
         Self::try_from(&*value)
     }
 }
-impl TryFrom<GenericError> for RequestError {
+impl TryFrom<X11GenericError> for RequestError {
     type Error = ParseError;
-    fn try_from(value: GenericError) -> Result<Self, Self::Error> {
+    fn try_from(value: X11GenericError) -> Result<Self, Self::Error> {
         Self::try_from(Into::<Buffer>::into(value))
     }
 }
@@ -607,7 +654,7 @@ pub fn get_input_focus<A: Connection>(c: &A) -> Result<Cookie<A, GetInputFocusRe
     assert_eq!((*&request0).len(), (4 + 3) / 4 * 4);
     Ok(c.send_request_with_reply(&[IoSlice::new(&request0)]))
 }
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct GetInputFocusReply {
     pub revert_to: u8,
     pub focus: u32,
@@ -616,12 +663,12 @@ impl TryParse for GetInputFocusReply {
     fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let mut remaining = value;
         remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (revert_to, r) = u8::try_parse(remaining)?;
-        remaining = r;
+        let (revert_to, new_remaining) = u8::try_parse(remaining)?;
+        remaining = new_remaining;
         remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
         remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (focus, r) = u32::try_parse(remaining)?;
-        remaining = r;
+        let (focus, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
         let result = GetInputFocusReply { revert_to, focus };
         Ok((result, remaining))
     }
@@ -687,7 +734,7 @@ generated.
 ```
 ```rust
 pub const CONFIGURE_WINDOW_REQUEST: u8 = 12;
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Copy, Default)]
 pub struct ConfigureWindowAux {
     pub x: Option<i32>,
     pub y: Option<i32>,
@@ -729,54 +776,54 @@ impl ConfigureWindowAux {
     pub fn value_mask(&self) -> u16 {
         let mut mask = 0;
         if self.x.is_some() {
-            mask |= Into::<u16>::into(Into::<u8>::into(ConfigWindow::X));
+            mask |= Into::<u16>::into(ConfigWindow::X);
         }
         if self.y.is_some() {
-            mask |= Into::<u16>::into(Into::<u8>::into(ConfigWindow::Y));
+            mask |= Into::<u16>::into(ConfigWindow::Y);
         }
         if self.width.is_some() {
-            mask |= Into::<u16>::into(Into::<u8>::into(ConfigWindow::Width));
+            mask |= Into::<u16>::into(ConfigWindow::Width);
         }
         if self.height.is_some() {
-            mask |= Into::<u16>::into(Into::<u8>::into(ConfigWindow::Height));
+            mask |= Into::<u16>::into(ConfigWindow::Height);
         }
         if self.border_width.is_some() {
-            mask |= Into::<u16>::into(Into::<u8>::into(ConfigWindow::BorderWidth));
+            mask |= Into::<u16>::into(ConfigWindow::BorderWidth);
         }
         if self.sibling.is_some() {
-            mask |= Into::<u16>::into(Into::<u8>::into(ConfigWindow::Sibling));
+            mask |= Into::<u16>::into(ConfigWindow::Sibling);
         }
         if self.stack_mode.is_some() {
-            mask |= Into::<u16>::into(Into::<u8>::into(ConfigWindow::StackMode));
+            mask |= Into::<u16>::into(ConfigWindow::StackMode);
         }
         mask
     }
-    pub fn x<I>(mut self, value: I) -> Self where I: Into<i32> {
-        self.x = Some(Into::<i32>::into(value));
+    pub fn x<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
+        self.x = value.into();
         self
     }
-    pub fn y<I>(mut self, value: I) -> Self where I: Into<i32> {
-        self.y = Some(Into::<i32>::into(value));
+    pub fn y<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
+        self.y = value.into();
         self
     }
-    pub fn width<I>(mut self, value: I) -> Self where I: Into<u32> {
-        self.width = Some(Into::<u32>::into(value));
+    pub fn width<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+        self.width = value.into();
         self
     }
-    pub fn height<I>(mut self, value: I) -> Self where I: Into<u32> {
-        self.height = Some(Into::<u32>::into(value));
+    pub fn height<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+        self.height = value.into();
         self
     }
-    pub fn border_width<I>(mut self, value: I) -> Self where I: Into<u32> {
-        self.border_width = Some(Into::<u32>::into(value));
+    pub fn border_width<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+        self.border_width = value.into();
         self
     }
-    pub fn sibling<I>(mut self, value: I) -> Self where I: Into<u32> {
-        self.sibling = Some(Into::<u32>::into(value));
+    pub fn sibling<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+        self.sibling = value.into();
         self
     }
-    pub fn stack_mode<I>(mut self, value: I) -> Self where I: Into<u32> {
-        self.stack_mode = Some(Into::<u32>::into(value));
+    pub fn stack_mode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+        self.stack_mode = value.into();
         self
     }
 }
