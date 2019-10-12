@@ -26,6 +26,7 @@ use x11rb::connection::{Connection, SequenceNumber};
 use x11rb::x11_utils::Event;
 use x11rb::errors::{ConnectionError, ConnectionErrorOrX11Error};
 use x11rb::generated::xproto::{self, *};
+use x11rb::wrapper::change_property8;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -1456,12 +1457,16 @@ fn example8() -> Result<(), ConnectionErrorOrX11Error> {
 //
 //    pub type ATOM = u32;
 //
-// To change the property of a window, we use the following function:
+// To change the property of a window, we use one of the following functions:
 //
-//    fn change_property<A: Connection, B>(c: &A, mode: B, window: u32, property: u32, type_: u32,
-//                                        format: u8, data: &[u8])
-//    -> Result<SequenceNumber, ConnectionError>
-//    where B: Into<u8>;
+//     fn change_property8<C: Connection, A>(c: &C, mode: A, window: u32, property: u32, type_: u32, data: &[u8])
+//     -> Result<SequenceNumber, ConnectionError> where A: Into<u8>;
+//
+//     fn change_property16<C: Connection, A>(c: &C, mode: A, window: u32, property: u32, type_: u32, data: &[u16])
+//     -> Result<SequenceNumber, ConnectionError> where A: Into<u8>;
+//
+//     fn change_property32<C: Connection, A>(c: &C, mode: A, window: u32, property: u32, type_: u32, data: &[u32])
+//     -> Result<SequenceNumber, ConnectionError> where A: Into<u8>;
 //
 // The `mode` parameter could be one of the following values (defined in enumeration
 // xcb_prop_mode_t in the xproto.h header file):
@@ -1500,13 +1505,13 @@ fn example9() -> Result<(), ConnectionErrorOrX11Error> {
 
     // Set the title of the window
     let title = "Hello World !";
-    change_property(&conn, PropMode::Replace, win, Atom::WM_NAME.into(), Atom::STRING.into(), // FIXME: Get rid of these ugly into()
-                    8, title.len() as _, title.as_bytes())?;
+    change_property8(&conn, PropMode::Replace, win, Atom::WM_NAME.into(), Atom::STRING.into(), // FIXME: Get rid of these ugly into()
+                     title.as_bytes())?;
 
     // Set the title of the window icon
     let title_icon = "Hello World ! (iconified)";
-    change_property(&conn, PropMode::Replace, win, Atom::WM_ICON_NAME.into(), Atom::STRING.into(), // FIXME: Get rid of these ugly into()
-                    8, title_icon.len() as _, title_icon.as_bytes())?;
+    change_property8(&conn, PropMode::Replace, win, Atom::WM_ICON_NAME.into(), Atom::STRING.into(), // FIXME: Get rid of these ugly into()
+                     title_icon.as_bytes())?;
 
     // Map the window on the screen
     map_window(&conn, win)?;
