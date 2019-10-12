@@ -706,6 +706,8 @@ def rs_request(self, name):
                 if field.type.size == 1:
                     _emit_request()
                     requests.append(_to_rust_variable(field.field_name))
+                    if field == self.fields[-1] and not field.type.fixed_size():
+                        _out("let %s_bytes = %s;", _to_rust_variable(field.field_name), _to_rust_variable(field.field_name))
                 else:
                     if field.type.size is not None:
                         _emit_byte_conversion(field.field_name)
@@ -737,7 +739,7 @@ def rs_request(self, name):
 
         last_field = self.fields[-1]
         if last_field.type.is_list and not last_field.type.fixed_size():
-            _out("let padding = &[0; 3][..(4 - (%s.len() %% 4)) %% 4];", last_field.field_name)
+            _out("let padding = &[0; 3][..(4 - (%s_bytes.len() %% 4)) %% 4];", last_field.field_name)
             requests.append("&padding")
 
         total_length = " + ".join(["(*%s).len()" % r for r in requests])
