@@ -32,33 +32,10 @@ if args:
 
 main_output_file = output_helper.Output()
 
-out = output_helper.Output()
-def _out(fmt, *args):
-    out.out(fmt, *args)
-def _out_indent(fmt, *args):
-    out.out_indent(fmt, *args)
-
-class Indent(object):
-    def __init__(self):
-        self.indent = output_helper.Indent(out)
-
-    def __enter__(self):
-        self.indent.__enter__()
-        return self
-
-    def __exit__(self, type, value, traceback):
-        self.indent.__exit__(type, value, traceback)
-
 
 # Now the real fun begins
 
 current_module = None
-
-def _write_output(filename):
-    global out
-    output_file = os.path.join(output_dir, filename)
-    out.write_file(output_file)
-    out = output_helper.Output()
 
 def rs_open(self):
     global current_module
