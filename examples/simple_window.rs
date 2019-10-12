@@ -47,14 +47,7 @@ fn main() {
     conn.flush();
 
     loop {
-        let event = conn.wait_for_event();
-        let event = match event {
-            Err(e) => {
-                eprintln!("Got connection error: {:?}", e);
-                return;
-            },
-            Ok(event) => event
-        };
+        let event = conn.wait_for_event().unwrap();
         match event.response_type() {
             EXPOSE_EVENT => {
                 let event = ExposeEvent::try_from(event);
