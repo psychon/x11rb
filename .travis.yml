@@ -28,5 +28,5 @@ script:
   - python2 rs_code_generator.py -p "$PYDIR" -i "$PROTO" -o /tmp/py2 generated
   - diff -Nurp /tmp/py2 /tmp/py3
 
-  - cargo build --verbose --examples
+  - cargo build --verbose --all-targets
   - cargo test --verbose
