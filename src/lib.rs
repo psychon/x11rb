@@ -31,3 +31,6 @@ pub mod rust_connection;
 pub mod generated {
     include!(concat!(env!("OUT_DIR"), "/generated/mod.rs"));
 }
+
+#[cfg(test)]
+mod regression_tests;
