@@ -101,10 +101,12 @@ instead of providing a foreign function interface to libxcb, the generated code
 reimplements the serialising and unserialising code that is provided by libxcb.
 libxcb is only used for receiving and sending opaque packets.
 
-This reimplementation is done without any uses of `unsafe` and thus should enjoy
+This reimplementation tries to avoid uses of `unsafe` and thus should enjoy
 Rust's usual safety guarantees. After all, the best way to trust the unsafe code
 coming out of your code generator is if your code generator does not generate
-any unsafe code.
+any unsafe code. Unsafe code is currently necessary for FFI binding to a handful
+of functions from libxcb (see `src/xcb_ffi.rs`) and a special append-only
+data-structure (see `ExtensionInformation` in `src/connection.rs`).
 
 This means that this project is even safer than libxcb, because libxcb forces
 its users to blindly trust length fields that come from the X11 server.
