@@ -1501,12 +1501,12 @@ fn example9() -> Result<(), ConnectionErrorOrX11Error> {
     // Set the title of the window
     let title = "Hello World !";
     change_property(&conn, PropMode::Replace, win, Atom::WM_NAME.into(), Atom::STRING.into(), // FIXME: Get rid of these ugly into()
-                    8, title.as_bytes())?;
+                    8, title.len() as _, title.as_bytes())?;
 
     // Set the title of the window icon
     let title_icon = "Hello World ! (iconified)";
     change_property(&conn, PropMode::Replace, win, Atom::WM_ICON_NAME.into(), Atom::STRING.into(), // FIXME: Get rid of these ugly into()
-                    8, title_icon.as_bytes())?;
+                    8, title_icon.len() as _, title_icon.as_bytes())?;
 
     // Map the window on the screen
     map_window(&conn, win)?;

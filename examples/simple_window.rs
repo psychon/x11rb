@@ -33,9 +33,8 @@ fn main() {
     create_window(&conn, 24, win_id, screen.root, 0, 0, width, height, 0, WindowClass::InputOutput, 0, &win_aux).unwrap();
 
     let title = "Simple Window";
-    change_property(&conn, PropMode::Replace, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), 8, title.as_bytes()).unwrap();
-    // FIXME: format != 8 is currently broken, see https://github.com/psychon/x11rb/issues/7.
-    change_property(&conn, PropMode::Replace, win_id, wm_protocols, Atom::WINDOW.into(), 32, &wm_delete_window.to_ne_bytes()).unwrap();
+    change_property(&conn, PropMode::Replace, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), 8, title.len() as _, title.as_bytes()).unwrap();
+    change_property(&conn, PropMode::Replace, win_id, wm_protocols, Atom::WINDOW.into(), 32, 1, &wm_delete_window.to_ne_bytes()).unwrap();
 
     let reply = get_property(&conn, 0, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), 0, 1024).unwrap();
     let reply = reply.reply().unwrap();
