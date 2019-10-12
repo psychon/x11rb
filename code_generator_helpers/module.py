@@ -18,21 +18,43 @@ rust_type_mapping = {
         'double':   'f64',
 }
 
-def mark_length_fields(self):
-    # Find length fields
-    length_fields = {}
-    for field in self.fields:
-        if field.type.is_list:
-            assert field.type.expr.lenfield_name not in length_fields, \
-                (self.name, field.field_name, length_fields[field.type.expr.lenfield_name].field_name)
-            length_fields[field.type.expr.lenfield_name] = field
+def get_references(expr):
+    if expr.op is not None:
+        if expr.op == 'calculate_len':
+            return []
+        return get_references(expr.lhs) + get_references(expr.rhs)
+    elif expr.nmemb is None:
+        return [expr.lenfield_name]
+    return []
 
-    # Mark length fields as not visible and map them to their list
+def mark_length_fields(self):
+    lists = list(filter(lambda field: field.type.is_list, self.fields))
+
+    # Partition the lists into "simple" (length depends on at most one length
+    # field) and "complicated" (things like x * y / 8)
+    simple_lists, complicated_lists = [], []
+
+    for field in lists:
+        if len(get_references(field.type.expr)) <= 1:
+            simple_lists.append(field)
+        else:
+            complicated_lists.append(field)
+
+    # Mark length fields for simple list as not visible and map them to their list
     for field in self.fields:
-        if field.field_name in length_fields:
-            field.is_length_field_for = length_fields[field.field_name]
-            length_fields[field.field_name].has_length_field = field
+        length_fields = list(filter(lambda list_field: field.field_name == list_field.type.expr.lenfield_name, simple_lists))
+        assert len(length_fields) <= 2, length_fields
+        if length_fields:
+            field.is_length_field_for = length_fields[0]
+            length_fields[0].has_length_field = field
             field.visible = False
+
+    # Map length fields for complicated lists similarly, but keep them visible
+    for list_field in complicated_lists:
+        length_fields = list(filter(lambda field: field.field_name == list_field.type.expr.lenfield_name, self.fields))
+        if length_fields:
+            list_field.has_length_fields = length_fields
+
 
 class Module(object):
     def __init__(self, outer_module):
@@ -388,9 +410,10 @@ class Module(object):
                     else:
                         request.append("%s_REQUEST" % self._upper_snake_name(name))
                 elif field.type.is_expr:
-                    def expr_to_str(e):
+                    # FIXME: Replace this with expr_to_str()
+                    def expr_to_str_and_emit(e):
                         if e.op is not None:
-                            return "%s %s %s" % (expr_to_str(e.lhs), e.op, expr_to_str(e.rhs))
+                            return "%s %s %s" % (expr_to_str_and_emit(e.lhs), e.op, expr_to_str_and_emit(e.rhs))
                         elif e.nmemb is not None:
                             return e.nmemb
                         else:
@@ -401,7 +424,7 @@ class Module(object):
                             self.out("let %s: %s = %s.len().try_into()?;", other_field.field_name, self._to_rust_type(other_field.type.name), other_field.is_length_field_for.field_name)
                             return e.lenfield_name
 
-                    self.out("let %s: %s = (%s).try_into().unwrap();", field.field_name, self._to_rust_type(field.type.name), expr_to_str(field.type.expr))
+                    self.out("let %s: %s = (%s).try_into().unwrap();", field.field_name, self._to_rust_type(field.type.name), expr_to_str_and_emit(field.type.expr))
                     self.out("let %s_bytes = %s.to_ne_bytes();", field.field_name, self._to_rust_variable(field.field_name))
                     for i in range(field.type.size):
                         request.append("%s_bytes[%d]" % (field.field_name, i))
@@ -514,9 +537,10 @@ class Module(object):
                     self.out("];")
                     parts.append(field.field_name)
                 elif field.type.is_list:
-                    self.out("let mut %s = Vec::with_capacity(%s.try_into()?);",
-                            field.field_name, self._to_rust_variable(field.has_length_field.field_name))
-                    self.out("for _ in 0..%s {", self._to_rust_variable(field.has_length_field.field_name))
+                    self.out("let list_length = %s;", self.expr_to_str(field.type.expr, 'usize'))
+                    self.out("let mut %s = Vec::with_capacity(list_length);", field.field_name,)
+                    self.out("for _ in 0..list_length {")
+                    #self.out("for _ in 0..%s {", self._to_rust_variable(field.has_length_field.field_name))
                     with Indent(self.out):
                         self.out("let (v, new_remaining) = %s::try_parse(remaining)?;", rust_type)
                         self.out("%s.push(v);", field.field_name)
@@ -714,3 +738,14 @@ class Module(object):
             name = self._lower_snake_name((name,))
 
         return name
+
+    def expr_to_str(self, e, type):
+        if e.op is not None:
+            if e.op == 'calculate_len':
+                return e.op
+            return "(%s) %s (%s)" % (self.expr_to_str(e.lhs, type), e.op, self.expr_to_str(e.rhs, type))
+        elif e.nmemb is not None:
+            return e.nmemb
+        else:
+            assert e.lenfield_name is not None
+            return "%s as %s" % (self._to_rust_variable(e.lenfield_name), type)
