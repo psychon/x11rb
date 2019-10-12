@@ -6,6 +6,7 @@ import glob
 import re
 import string
 import os
+import code_generator_helpers.output as output_helper
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], "p:o:i:")
@@ -30,35 +31,25 @@ if args:
     print('No further arguments expected')
     sys.exit(1)
 
-exts = []
+main_output_file = output_helper.Output()
 
-_lines = []
-_indent_level = 0
+out = output_helper.Output()
 def _out(fmt, *args):
-    indent = "".join(["    "] * _indent_level)
-    _lines.append(indent + (fmt % args))
-
+    out.out(fmt, *args)
 def _out_indent(fmt, *args):
-    indent = "".join(["    "] * (_indent_level + 1))
-    _lines.append(indent + (fmt % args))
-
-def _out_indent_incr():
-    global _indent_level
-    _indent_level += 1
-
-def _out_indent_decr():
-    global _indent_level
-    _indent_level -= 1
+    out.out_indent(fmt, *args)
 
 class Indent(object):
-    """A context manager that increases indentation level in the output."""
+    def __init__(self):
+        self.indent = output_helper.Indent(out)
 
     def __enter__(self):
-        _out_indent_incr()
+        self.indent.__enter__()
         return self
 
     def __exit__(self, type, value, traceback):
-        _out_indent_decr()
+        self.indent.__exit__(type, value, traceback)
+
 
 def _name(name):
     orig_name = name
@@ -132,17 +123,15 @@ def _to_rust_variable(name):
 # Now the real fun begins
 
 def _write_output(filename):
+    global out
     output_file = os.path.join(output_dir, filename)
-    with open(output_file, 'w') as target:
-        for line in _lines:
-            target.write(line.rstrip())
-            target.write('\n')
-    del _lines[:]
+    out.write_file(output_file)
+    out = output_helper.Output()
 
 def rs_open(self):
     global current_namespace
 
-    assert not _lines
+    assert not out
 
     current_namespace = self.namespace
 
@@ -169,10 +158,8 @@ def rs_open(self):
     _out("")
 
 def rs_close(self):
-    global exts
-
     _write_output("%s.rs" % self.namespace.header)
-    exts.append(self.namespace.header)
+    main_output_file.out("pub mod %s;", self.namespace.header)
 
 def rs_enum(self, name):
     has_all_upper = any(ename.isupper() and len(ename) > 1 for (ename, value) in self.values)
@@ -831,9 +818,4 @@ for name in names:
         raise
 
 output_file = os.path.join(output_dir, "%s.rs" % main_module)
-with open(output_file, 'w') as target:
-    for ext in exts:
-        target.write("pub mod ")
-        target.write(ext)
-        target.write(";")
-        target.write("\n")
+main_output_file.write_file(output_file)
