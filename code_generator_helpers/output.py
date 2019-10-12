@@ -6,24 +6,24 @@ class Output(object):
     done is the output actually written to a file.
     """
 
-    indent = "    "
+    indent_str = "    "
 
     def __init__(self):
         self._lines = []
         self._indent_level = 0
 
     def _out(self, extra, fmt, *args):
-        indent = "".join([self.indent] * (self._indent_level + extra))
+        indent = "".join([self.indent_str] * (self._indent_level + extra))
         self._lines.append(indent + (fmt % args))
 
-    def out(self, fmt, *args):
+    def __call__(self, fmt, *args):
         """
         Write the given output. The extra arguments are used for string
         interpolation with the format string.
         """
         self._out(0, fmt, *args)
 
-    def out_indent(self, fmt, *args):
+    def indent(self, fmt, *args):
         """
         Write the given output with one extra level of indentation. The extra
         arguments are used for string interpolation with the format string.
