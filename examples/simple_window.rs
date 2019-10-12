@@ -35,7 +35,7 @@ fn main() {
 
     let title = "Simple Window";
     change_property8(&conn, PropMode::Replace, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), title.as_bytes()).unwrap();
-    change_property32(&conn, PropMode::Replace, win_id, wm_protocols, Atom::WINDOW.into(), &[wm_delete_window]).unwrap();
+    change_property32(&conn, PropMode::Replace, win_id, wm_protocols, Atom::ATOM.into(), &[wm_delete_window]).unwrap();
 
     let reply = get_property(&conn, 0, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), 0, 1024).unwrap();
     let reply = reply.reply().unwrap();
@@ -75,6 +75,17 @@ fn main() {
                 if let Ok(event) = event {
                     width = event.width;
                     height = event.height;
+                }
+            },
+            CLIENT_MESSAGE_EVENT => {
+                let event = ClientMessageEvent::try_from(event);
+                println!("{:?})", event);
+                if let Ok(event) = event {
+                    let data = event.data.as_data32();
+                    if event.format == 32 && event.window == win_id && data[0] == wm_delete_window {
+                        println!("Window was asked to close");
+                        return;
+                    }
                 }
             }
             0 => { println!("Unknown error {:?}", GenericError::try_from(event)); },
