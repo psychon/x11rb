@@ -4,6 +4,7 @@ use std::ptr::{null, null_mut};
 use std::convert::{TryFrom, TryInto};
 use std::ffi::CStr;
 use std::io::IoSlice;
+use std::ops::Deref;
 use crate::utils::{CSlice, Buffer};
 use crate::x11_utils::{GenericError, GenericEvent, Event};
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
@@ -81,9 +82,22 @@ impl XCBConnection {
     }
 
     fn send_request(&self, bufs: &[IoSlice], has_reply: bool) -> SequenceNumber {
+        // XCB wants to access bufs[-1] and bufs[-2], so we need to add two empty items in front.
+        // For this, we derefence the IoSlices, add two new entries, and create new IoSlices.
+        let prepend = [&[][..], &[][..]];
+        let mut new_bufs = prepend
+            .iter()
+            .map(Deref::deref)
+            .chain(bufs
+                   .iter()
+                   .map(Deref::deref))
+            .map(IoSlice::new)
+            .collect::<Vec<_>>();
+
+        // Set up the information that libxcb needs
         let protocol_request = raw_ffi::xcb_protocol_request_t {
             count: bufs.len(),
-            ext: null_mut(),
+            ext: null_mut(), // Not needed since we always use raw
             opcode: 0,
             isvoid: if has_reply { 0 } else { 1 }
         };
@@ -91,9 +105,8 @@ impl XCBConnection {
         if has_reply {
             flags |= raw_ffi::send_request_flags::CHECKED;
         }
-        // FIXME: xcb wants to be able to access bufs[-1] and bufs[-2] https://github.com/psychon/x11rb/issues/6
         unsafe {
-            raw_ffi::xcb_send_request64(self.0, flags, bufs.as_ptr(), &protocol_request)
+            raw_ffi::xcb_send_request64(self.0, flags, &mut new_bufs[2], &protocol_request)
         }
     }
 
@@ -251,7 +264,7 @@ mod raw_ffi {
         pub fn xcb_connect(displayname: *const c_char, screenp: *mut c_int ) -> *mut xcb_connection_t;
         pub fn xcb_disconnect(c: *mut xcb_connection_t);
         pub fn xcb_connection_has_error(c: *const xcb_connection_t) -> c_int;
-        pub fn xcb_send_request64(c: *const xcb_connection_t, flags: c_int, vector: *const IoSlice, request: *const xcb_protocol_request_t) -> u64;
+        pub fn xcb_send_request64(c: *const xcb_connection_t, flags: c_int, vector: *mut IoSlice, request: *const xcb_protocol_request_t) -> u64;
         pub fn xcb_discard_reply64(c: *const xcb_connection_t, sequence: u64);
         pub fn xcb_wait_for_reply64(c: *const xcb_connection_t, request: u64, e: *mut * mut c_void) -> *mut c_void;
         pub fn xcb_wait_for_event(c: *const xcb_connection_t) -> *mut c_void;
