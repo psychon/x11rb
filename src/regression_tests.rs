@@ -67,6 +67,10 @@ impl Connection for FakeConnection {
         unimplemented!()
     }
 
+    fn poll_for_event(&self) -> Result<Option<GenericEvent>, ConnectionError> {
+        unimplemented!()
+    }
+
     fn flush(&self) {
         unimplemented!()
     }

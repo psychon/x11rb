@@ -185,6 +185,14 @@ impl ConnectionInner {
         }
     }
 
+    fn poll_for_event(&mut self) -> Result<Option<GenericEvent>, Box<dyn Error>> {
+        // FIXME: Check if something can be read from the wire
+        self.pending_events.pop_front()
+            .map(TryInto::try_into)
+            .transpose()
+            .map_err(Into::into)
+    }
+
     fn generate_id(&mut self) -> u32 {
         // FIXME: use the XC_MISC extension to get a new range when the old one is used up
         assert!(self.next_id < self.max_id);
@@ -249,6 +257,10 @@ impl Connection for RustConnection {
 
     fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
         Ok(self.inner.borrow_mut().wait_for_event().map_err(|_| ConnectionError::UnknownError)?)
+    }
+
+    fn poll_for_event(&self) -> Result<Option<GenericEvent>, ConnectionError> {
+        Ok(self.inner.borrow_mut().poll_for_event().map_err(|_| ConnectionError::UnknownError)?)
     }
 
     fn flush(&self) {

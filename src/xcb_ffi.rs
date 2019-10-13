@@ -163,6 +163,23 @@ impl Connection for XCBConnection {
         }
     }
 
+    fn poll_for_event(&self) -> Result<Option<GenericEvent>, ConnectionError> {
+        unsafe {
+            let event = raw_ffi::xcb_poll_for_event(self.0);
+            if event.is_null() {
+                let err = raw_ffi::xcb_connection_has_error(self.0);
+                if err == 0 {
+                    return Ok(None);
+                } else {
+                    return Err(Self::connection_error_from_c_error(err));
+                }
+            }
+            let generic_event: GenericEvent = Buffer::from_raw_parts(event as _, 32).try_into()?;
+            assert_ne!(35, generic_event.response_type()); // FIXME: XGE events may have sizes > 32
+            Ok(Some(generic_event))
+        }
+    }
+
     fn flush(&self) {
         unsafe { raw_ffi::xcb_flush(self.0); }
     }
@@ -238,6 +255,7 @@ mod raw_ffi {
         pub fn xcb_discard_reply64(c: *const xcb_connection_t, sequence: u64);
         pub fn xcb_wait_for_reply64(c: *const xcb_connection_t, request: u64, e: *mut * mut c_void) -> *mut c_void;
         pub fn xcb_wait_for_event(c: *const xcb_connection_t) -> *mut c_void;
+        pub fn xcb_poll_for_event(c: *const xcb_connection_t) -> *mut c_void;
         pub fn xcb_flush(c: *const xcb_connection_t) -> c_int;
         pub fn xcb_generate_id(c: *const xcb_connection_t) -> u32;
         pub fn xcb_get_setup(c: *const xcb_connection_t) -> *const u8;
