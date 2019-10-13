@@ -87,6 +87,10 @@ class Module(object):
             self.out("#[allow(unused_imports)]")
             self.out("use super::%s::*;", header)
 
+        if self.namespace.is_ext:
+            self.out("")
+            self.out("/// The X11 name of the extension for QueryExtension")
+            self.out("pub const X11_EXTENSION_NAME: &'static str = \"%s\";", self.namespace.ext_xname)
         self.out("")
 
     def close(self, outer_module):
