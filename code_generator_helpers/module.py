@@ -44,11 +44,15 @@ def mark_length_fields(self):
 
     # Mark length fields for simple list as not visible and map them to their list
     for field in self.fields:
-        length_fields = list(filter(lambda list_field: field.field_name == list_field.type.expr.lenfield_name, simple_lists))
-        assert len(length_fields) <= 2, length_fields
-        if length_fields:
-            field.is_length_field_for = length_fields[0]
-            length_fields[0].has_length_field = field
+        related_lists = list(filter(lambda list_field: field.field_name == list_field.type.expr.lenfield_name, simple_lists))
+        if len(related_lists) > 1:
+            # Well, okay, multiple lists share the same length field. These are
+            # complicated lists.
+            complicated_lists.extend(related_lists)
+        elif related_lists:
+            related_list, = related_lists
+            field.is_length_field_for = related_list
+            related_list.has_length_field = field
             field.visible = False
 
     # Map length fields for complicated lists similarly, but keep them visible
