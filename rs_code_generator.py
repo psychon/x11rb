@@ -96,17 +96,11 @@ import xcbgen.xtypes as xtypes
 
 names = glob.glob(input_dir + "/*.xml")
 unsupported = [
-        "render.xml", # New assert uncovered problems
-        "damage.xml", "xfixes.xml", "composite.xml", # depend on render.xml
-        "dri2.xml",      # Causes an error in python around has_length_field: There is a weird alignment construction that causes two fields to reference the same length field (in 'Connect' request, second use is <op>)
-        "present.xml",   # depends on sync.xml
-        "randr.xml",     # Causes an error in python around has_length_field; also lots of <op>s that reference a length field
+        "present.xml",   # depends on sync.xml, RedirectNotify event has a "notifies" list
+        "randr.xml",     # SetMonitor causes None * int in some length calculation
         "sync.xml",      # <switch> with different sized fields: CreateAlarm has both CARD32 and INT64
-        "xf86vidmode.xml", # Causes an error in python around has_length_field
-        "xinput.xml",    # Problem in _to_rust_name()
-        "xkb.xml",       # Causes an error in python around has_length_field
-        "xv.xml",        # Causes an error in python around has_length_field
-        "xvmc.xml",      # Problem in _to_rust_type()
+        "xinput.xml",    # InputInfo has a <switch name="info"> that causes problems
+        "xkb.xml",       # NoneType has no attribute op: DeviceLedInfo has a <popcount> in an <op>
         ]
 names = [name for name in names if os.path.basename(name) not in unsupported]
 
