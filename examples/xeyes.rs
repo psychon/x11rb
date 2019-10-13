@@ -8,6 +8,7 @@ use x11rb::xcb_ffi::XCBConnection;
 use x11rb::connection::Connection;
 use x11rb::x11_utils::Event;
 use x11rb::generated::xproto::*;
+use x11rb::generated::shape;
 use x11rb::wrapper::*;
 use x11rb::errors::ConnectionError;
 
@@ -149,6 +150,49 @@ fn compute_pupils(window_size: (u16, u16), mouse_position: (i16, i16)) -> ((i16,
      compute_pupil((border + half_width, border, width, height), mouse_position))
 }
 
+struct FreePixmap<'c, C: Connection>(&'c C, PIXMAP);
+impl<C: Connection> Drop for FreePixmap<'_, C> {
+    fn drop(&mut self) {
+        free_pixmap(self.0, self.1).unwrap();
+    }
+}
+struct FreeGC<'c, C: Connection>(&'c C, GCONTEXT);
+impl<C: Connection> Drop for FreeGC<'_, C> {
+    fn drop(&mut self) {
+        free_gc(self.0, self.1).unwrap();
+    }
+}
+
+fn shape_window<C: Connection>(conn: &C, win_id: WINDOW, window_size: (u16, u16))
+-> Result<(), ConnectionError>
+{
+    // Create a pixmap for the shape
+    let pixmap = conn.generate_id();
+    create_pixmap(conn, 1, pixmap, win_id, window_size.0, window_size.1)?;
+    let _free_pixmap = FreePixmap(conn, pixmap);
+
+    // Fill the pixmap with what will indicate "transparent"
+    let gc = create_gc_with_foreground(conn, pixmap, 0)?;
+    let _free_gc = FreeGC(conn, gc);
+
+    let rect = Rectangle {
+        x: 0,
+        y: 0,
+        width: window_size.0,
+        height: window_size.1
+    };
+    poly_fill_rectangle(conn, pixmap, gc, &[rect])?;
+
+    // Draw the eyes as "not transparent"
+    let values = ChangeGCAux::new().foreground(1);
+    change_gc(conn, gc, &values)?;
+    draw_eyes(conn, pixmap, gc, gc, window_size)?;
+
+    // Set the shape of the window
+    shape::mask(conn, shape::SO::Set, shape::SK::Bounding, win_id, 0, 0, pixmap)?;
+    Ok(())
+}
+
 fn setup_window<C: Connection>(conn: &C, screen: &Screen, window_size: (u16, u16),
                                wm_protocols: ATOM, wm_delete_window: ATOM)
 -> Result<WINDOW, ConnectionError>
@@ -191,6 +235,7 @@ fn main() {
     };
 
     let mut window_size = (700, 500);
+    let has_shape = conn.extension_information(shape::X11_EXTENSION_NAME).is_some();
     let win_id = setup_window(&conn, screen, window_size, wm_protocols, wm_delete_window).unwrap();
 
     let black_gc = create_gc_with_foreground(&conn, win_id, screen.black_pixel).unwrap();
@@ -199,6 +244,7 @@ fn main() {
     conn.flush();
 
     let mut need_repaint = false;
+    let mut need_reshape = false;
     let mut mouse_position = (0, 0);
 
     loop {
@@ -216,6 +262,7 @@ fn main() {
                 let event = ConfigureNotifyEvent::try_from(event);
                 if let Ok(event) = event {
                     window_size = (event.width, event.height);
+                    need_reshape = true;
                 }
             }
             MOTION_NOTIFY_EVENT => {
@@ -224,6 +271,9 @@ fn main() {
                     mouse_position = (event.event_x, event.event_y);
                     need_repaint = true;
                 }
+            }
+            MAP_NOTIFY_EVENT => {
+                need_reshape = true;
             }
             CLIENT_MESSAGE_EVENT => {
                 let event = ClientMessageEvent::try_from(event);
@@ -239,6 +289,10 @@ fn main() {
             _ => { println!("Unknown event {:?}", event); }
         }
 
+        if need_reshape && has_shape {
+            shape_window(&conn, win_id, window_size).unwrap();
+            need_reshape = false;
+        }
         if need_repaint {
             clear_area(&conn, 0, win_id, 0, 0, 0, 0).unwrap();
 
