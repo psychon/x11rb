@@ -72,6 +72,9 @@ pub trait Connection: Sized {
     /// Wait for a new event from the X11 server.
     fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError>;
 
+    /// Poll for a new event from the X11 server.
+    fn poll_for_event(&self) -> Result<Option<GenericEvent>, ConnectionError>;
+
     /// Send all pending requests to the server.
     ///
     /// Implementations of this trait may buffer requests for batched sending. When this method is
