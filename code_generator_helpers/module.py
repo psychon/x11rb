@@ -712,7 +712,9 @@ class Module(object):
         if type(name) == tuple:
             if name[0] == 'xcb':
                 name = name[1:]
-            if self.namespace.is_ext and name[0] == self.namespace.ext_name:
+            if self.namespace.is_ext and len(name) == 2:
+                # Well... let us assume that this is a use of a type from another
+                # crate. Since the crate's content was imported, we can do:
                 name = name[1:]
             assert len(name) == 1, orig_name
             name = name[0]
