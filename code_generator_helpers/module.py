@@ -96,9 +96,12 @@ class Module(object):
         has_all_upper = any(ename.isupper() and len(ename) > 1 for (ename, value) in enum.values)
 
         def ename_to_rust(ename):
-            ename = ename.replace('_', '')
             if ename[0].isdigit():
                 ename = 'M' + ename
+            if "_" in ename and not ename.isupper():
+                # xf86vidmode has a ModeFlag enum with items like
+                # Positive_HSync. Turn this into PositiveHSync.
+                ename = ename.replace('_', '')
             return ename[0].upper() + ename[1:]
 
         rust_name = self._name(name)
