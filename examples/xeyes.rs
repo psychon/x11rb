@@ -163,16 +163,22 @@ impl<C: Connection> Drop for FreeGC<'_, C> {
     }
 }
 
+fn create_pixmap_wrapper<'c, C: Connection>(conn: &'c C, depth: u8, drawable: DRAWABLE, size: (u16, u16))
+-> Result<FreePixmap<'c, C>, ConnectionError>
+{
+    let pixmap = conn.generate_id();
+    create_pixmap(conn, depth, pixmap, drawable, size.0, size.1)?;
+    Ok(FreePixmap(conn, pixmap))
+}
+
 fn shape_window<C: Connection>(conn: &C, win_id: WINDOW, window_size: (u16, u16))
 -> Result<(), ConnectionError>
 {
     // Create a pixmap for the shape
-    let pixmap = conn.generate_id();
-    create_pixmap(conn, 1, pixmap, win_id, window_size.0, window_size.1)?;
-    let _free_pixmap = FreePixmap(conn, pixmap);
+    let pixmap = create_pixmap_wrapper(conn, 1, win_id, window_size)?;
 
     // Fill the pixmap with what will indicate "transparent"
-    let gc = create_gc_with_foreground(conn, pixmap, 0)?;
+    let gc = create_gc_with_foreground(conn, pixmap.1, 0)?;
     let _free_gc = FreeGC(conn, gc);
 
     let rect = Rectangle {
@@ -181,15 +187,15 @@ fn shape_window<C: Connection>(conn: &C, win_id: WINDOW, window_size: (u16, u16)
         width: window_size.0,
         height: window_size.1
     };
-    poly_fill_rectangle(conn, pixmap, gc, &[rect])?;
+    poly_fill_rectangle(conn, pixmap.1, gc, &[rect])?;
 
     // Draw the eyes as "not transparent"
     let values = ChangeGCAux::new().foreground(1);
     change_gc(conn, gc, &values)?;
-    draw_eyes(conn, pixmap, gc, gc, window_size)?;
+    draw_eyes(conn, pixmap.1, gc, gc, window_size)?;
 
     // Set the shape of the window
-    shape::mask(conn, shape::SO::Set, shape::SK::Bounding, win_id, 0, 0, pixmap)?;
+    shape::mask(conn, shape::SO::Set, shape::SK::Bounding, win_id, 0, 0, pixmap.1)?;
     Ok(())
 }
 
@@ -219,6 +225,7 @@ fn create_gc_with_foreground<C: Connection>(conn: &C, win_id: WINDOW, foreground
 {
     let gc = conn.generate_id();
     let gc_aux = CreateGCAux::new()
+        .graphics_exposures(0)
         .foreground(foreground);
     create_gc(conn, gc, win_id, &gc_aux)?;
     Ok(gc)
@@ -237,6 +244,7 @@ fn main() {
     let mut window_size = (700, 500);
     let has_shape = conn.extension_information(shape::X11_EXTENSION_NAME).is_some();
     let win_id = setup_window(&conn, screen, window_size, wm_protocols, wm_delete_window).unwrap();
+    let mut pixmap = create_pixmap_wrapper(&conn, screen.root_depth, win_id, window_size).unwrap();
 
     let black_gc = create_gc_with_foreground(&conn, win_id, screen.black_pixel).unwrap();
     let white_gc = create_gc_with_foreground(&conn, win_id, screen.white_pixel).unwrap();
@@ -264,6 +272,8 @@ fn main() {
                     let event = ConfigureNotifyEvent::try_from(event);
                     if let Ok(event) = event {
                         window_size = (event.width, event.height);
+                        pixmap = create_pixmap_wrapper(&conn, screen.root_depth, win_id,
+                                                       window_size).unwrap();
                         need_reshape = true;
                     }
                 }
@@ -299,12 +309,14 @@ fn main() {
             need_reshape = false;
         }
         if need_repaint {
-            clear_area(&conn, 0, win_id, 0, 0, 0, 0).unwrap();
-
             // Draw new pupils
             let pos = compute_pupils(window_size, mouse_position);
-            draw_eyes(&conn, win_id, black_gc, white_gc, window_size).unwrap();
-            draw_pupils(&conn, win_id, black_gc, pos).unwrap();
+            draw_eyes(&conn, pixmap.1, black_gc, white_gc, window_size).unwrap();
+            draw_pupils(&conn, pixmap.1, black_gc, pos).unwrap();
+
+            // Copy drawing from pixmap to window
+            copy_area(&conn, pixmap.1, win_id, white_gc, 0, 0, 0, 0,
+                      window_size.0, window_size.1).unwrap();
 
             conn.flush();
             need_repaint = false;
