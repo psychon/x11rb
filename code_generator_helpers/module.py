@@ -227,6 +227,9 @@ class Module(object):
                         self.out("for obj in self.%s.iter() {", field.field_name)
                         self.out.indent("result.extend(obj.to_ne_bytes().iter());")
                         self.out("}")
+                    elif field.type.is_list and field.type.nmemb is not None and field.type.size == 1:
+                        for i in range(field.type.nmemb):
+                            result_bytes.append("self.%s[%d]" % (self._to_rust_variable(field.field_name), i))
                     else:
                         if hasattr(field, "is_length_field_for"):
                             self.out("let %s = self.%s.len() as %s;", self._to_rust_variable(field.field_name), field.is_length_field_for.field_name, self._to_rust_type(field.type.name))
