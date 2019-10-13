@@ -22,6 +22,8 @@ def get_references(expr):
     if expr.op is not None:
         if expr.op == 'calculate_len':
             return []
+        if expr.op == '~':
+            return get_references(expr.rhs)
         return get_references(expr.lhs) + get_references(expr.rhs)
     elif expr.nmemb is None:
         return [expr.lenfield_name]
@@ -743,6 +745,8 @@ class Module(object):
         if e.op is not None:
             if e.op == 'calculate_len':
                 return e.op
+            if e.op == '~':
+                return "!(%s)" % self.expr_to_str(e.rhs, type)
             return "(%s) %s (%s)" % (self.expr_to_str(e.lhs, type), e.op, self.expr_to_str(e.rhs, type))
         elif e.nmemb is not None:
             return e.nmemb
