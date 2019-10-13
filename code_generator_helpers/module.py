@@ -96,6 +96,7 @@ class Module(object):
         has_all_upper = any(ename.isupper() and len(ename) > 1 for (ename, value) in enum.values)
 
         def ename_to_rust(ename):
+            ename = ename.replace('_', '')
             if ename[0].isdigit():
                 ename = 'M' + ename
             return ename[0].upper() + ename[1:]
