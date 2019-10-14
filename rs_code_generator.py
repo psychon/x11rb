@@ -37,6 +37,7 @@ main_output_file = output_helper.Output()
 
 current_module = None
 
+
 def rs_open(self):
     global current_module
     assert current_module is None
@@ -52,47 +53,55 @@ def rs_close(self):
 
     main_output_file("pub mod %s;", self.namespace.header)
 
+
 def rs_enum(self, name):
     current_module.enum(self, name)
+
 
 def rs_simple(self, name):
     current_module.simple(self, name)
 
+
 def rs_struct(self, name):
     current_module.struct(self, name)
+
 
 def rs_union(self, name):
     current_module.union(self, name)
 
+
 def rs_request(self, name):
     current_module.request(self, name)
+
 
 def rs_eventstruct(self, name):
     print("eventstruct", self, name)
     assert False
     current_module.eventstruct(self, name)
 
+
 def rs_event(self, name):
     current_module.event(self, name)
+
 
 def rs_error(self, name):
     current_module.error(self, name)
 
+
 # We must create an "output" dictionary before any xcbgen imports
-output = {'open'       : rs_open,
-          'close'      : rs_close,
-          'simple'     : rs_simple,
-          'enum'       : rs_enum,
-          'struct'     : rs_struct,
-          'union'      : rs_union,
-          'request'    : rs_request,
+output = {'open':        rs_open,
+          'close':       rs_close,
+          'simple':      rs_simple,
+          'enum':        rs_enum,
+          'struct':      rs_struct,
+          'union':       rs_union,
+          'request':     rs_request,
           'eventstruct': rs_eventstruct,
-          'event'      : rs_event,
-          'error'      : rs_error,
+          'event':       rs_event,
+          'error':       rs_error,
           }
 
-from xcbgen.state import Module
-import xcbgen.xtypes as xtypes
+from xcbgen.state import Module  # noqa
 
 names = glob.glob(input_dir + "/*.xml")
 unsupported = [
@@ -110,7 +119,7 @@ for name in names:
     module.resolve()
     try:
         module.generate()
-    except:
+    except Exception:
         sys.stderr.write('Error occurred while generating: %s\n' % module.namespace.header)
         raise
 
