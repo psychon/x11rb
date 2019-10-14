@@ -15,6 +15,7 @@ addons:
       - xcb-proto
       - python-xcbgen
       - pkg-config
+      - pycodestyle
 
 script:
   # Check the code generator against python 2 and 3. Both versions should
@@ -30,3 +31,5 @@ script:
 
   - cargo build --verbose --all-targets
   - cargo test --verbose
+
+  - pycodestyle --show-pep8 --show-source $(git ls-files '*.py') --max-line-length=211
