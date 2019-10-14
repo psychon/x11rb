@@ -388,7 +388,7 @@ class Module(object):
                 if not request:
                     return
 
-                self.out("let request%d = [", len(requests));
+                self.out("let request%d = [", len(requests))
                 requests.append("&request%d" % len(requests))
                 for byte in request:
                     self.out.indent("%s,", byte)
@@ -397,10 +397,10 @@ class Module(object):
 
             def _emit_byte_conversion(field_name):
                 if field.type.size is not None:
-                    self.out("let mut %s_bytes = Vec::with_capacity(%s * %s.len());", field.field_name, field.type.size, field.field_name);
+                    self.out("let mut %s_bytes = Vec::with_capacity(%s * %s.len());", field.field_name, field.type.size, field.field_name)
                 else:
-                    self.out("let mut %s_bytes = Vec::new();", field.field_name);
-                self.out("for value in %s {", field_name);
+                    self.out("let mut %s_bytes = Vec::new();", field.field_name)
+                self.out("for value in %s {", field_name)
                 self.out.indent("%s_bytes.extend(value.to_ne_bytes().iter());", field_name)
                 self.out("}")
 
@@ -465,7 +465,7 @@ class Module(object):
                     if hasattr(field, "is_length_field_for"):
                         self.out("let %s: %s = %s.len().try_into()?;", self._to_rust_variable(field.field_name), self._to_rust_type(field.type.name), self._to_rust_variable(field.is_length_field_for.field_name))
                     if field.enum is not None:
-                        self.out("let %s = %s.into();", field.field_name, field.field_name);
+                        self.out("let %s = %s.into();", field.field_name, field.field_name)
                     if field.type.name == ('float',):
                         # FIXME: Switch to a trait that we can implement on f32
                         self.out("let %s = %s.to_bits().to_ne_bytes();", self._to_rust_variable(field.field_name + "_bytes"), self._to_rust_variable(field.field_name))
@@ -490,7 +490,7 @@ class Module(object):
                 requests.append("&padding")
 
             total_length = " + ".join(["(*%s).len()" % r for r in requests])
-            self.out("assert_eq!(%s, (%s + 3) / 4 * 4);", total_length, request_length);
+            self.out("assert_eq!(%s, (%s + 3) / 4 * 4);", total_length, request_length)
 
             slices = ", ".join(["IoSlice::new(%s)" % r for r in requests])
 
@@ -546,7 +546,7 @@ class Module(object):
                 rust_type = self._to_rust_type(field.type.name)
                 if field.type.is_list and field.type.nmemb is not None:
                     for i in range(field.type.nmemb):
-                        self.out("let (%s_%s, new_remaining) = %s::try_parse(remaining)?;", field.field_name, i, self._to_rust_type(field.type.name));
+                        self.out("let (%s_%s, new_remaining) = %s::try_parse(remaining)?;", field.field_name, i, self._to_rust_type(field.type.name))
                         self.out("remaining = new_remaining;")
                     self.out("let %s = [", field.field_name)
                     for i in range(field.type.nmemb):
@@ -557,7 +557,6 @@ class Module(object):
                     self.out("let list_length = %s;", self.expr_to_str(field.type.expr, 'usize'))
                     self.out("let mut %s = Vec::with_capacity(list_length);", field.field_name,)
                     self.out("for _ in 0..list_length {")
-                    #self.out("for _ in 0..%s {", self._to_rust_variable(field.has_length_field.field_name))
                     with Indent(self.out):
                         self.out("let (v, new_remaining) = %s::try_parse(remaining)?;", rust_type)
                         self.out("%s.push(v);", field.field_name)
