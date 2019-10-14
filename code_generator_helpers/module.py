@@ -18,6 +18,7 @@ rust_type_mapping = {
         'double':   'f64',
 }
 
+
 def get_references(expr):
     if expr.op is not None:
         if expr.op == 'calculate_len':
@@ -28,6 +29,7 @@ def get_references(expr):
     elif expr.nmemb is None:
         return [expr.lenfield_name]
     return []
+
 
 def mark_length_fields(self):
     lists = list(filter(lambda field: field.type.is_list, self.fields))
@@ -83,7 +85,7 @@ class Module(object):
         self.out("use crate::errors::{ParseError, ConnectionError};")
 
         for (name, header) in outer_module.imports:
-            assert name == header, (name, header) # I don't know what is going on here...
+            assert name == header, (name, header)  # I don't know what is going on here...
             self.out("#[allow(unused_imports)]")
             self.out("use super::%s::*;", header)
 
@@ -405,7 +407,7 @@ class Module(object):
                 self.out("}")
 
             fixed_request_length = sum((field.type.size * field.type.nmemb for field in obj.fields if field.type.nmemb is not None and field.wire))
-            request_length = [ str(fixed_request_length) ]
+            request_length = [str(fixed_request_length)]
             for field in obj.fields:
                 if field.type.nmemb is None:
                     size = field.type.size
@@ -535,7 +537,7 @@ class Module(object):
 
     def emit_opcode(self, name, extra_name, opcode):
         if opcode == "-1" and name == ('xcb', 'Glx', 'Generic'):
-            return # The XML has a comment saying "fake number"
+            return  # The XML has a comment saying "fake number"
         self.out("pub const %s_%s: u8 = %s;", self._upper_snake_name(name), extra_name.upper(), opcode)
 
     def _emit_parsing_code(self, fields):
