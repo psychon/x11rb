@@ -530,7 +530,13 @@ class Module(object):
 
     def event(self, event, name):
         self.emit_opcode(name, 'Event', event.opcodes[name])
-        self.complex_type(event, name, 'GenericEvent', 'Event')
+        if event.is_ge_event:
+            self.out("#[derive(Debug, Clone, Copy)]")
+            self.out("pub struct %sEvent {", self._name(name))
+            self.out.indent("pub generic_events_are_currently_not_supported: bool")
+            self.out("}")
+        else:
+            self.complex_type(event, name, 'GenericEvent', 'Event')
         self.out("")
 
     def error(self, error, name):
