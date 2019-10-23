@@ -748,6 +748,31 @@ impl ConfigureWindowAux {
     pub fn new() -> Self {
         Default::default()
     }
+    fn wire_length(&self) -> usize {
+        let mut result = 0;
+        if self.x.is_some() {
+            result += 4;
+        }
+        if self.y.is_some() {
+            result += 4;
+        }
+        if self.width.is_some() {
+            result += 4;
+        }
+        if self.height.is_some() {
+            result += 4;
+        }
+        if self.border_width.is_some() {
+            result += 4;
+        }
+        if self.sibling.is_some() {
+            result += 4;
+        }
+        if self.stack_mode.is_some() {
+            result += 4;
+        }
+        result
+    }
     pub fn to_ne_bytes(&self) -> Vec<u8> {
         let mut result = Vec::new();
         if let Some(value) = self.x {
@@ -830,8 +855,8 @@ impl ConfigureWindowAux {
 pub fn configure_window<A: Connection>(c: &A, window: u32, value_list: &ConfigureWindowAux) -> Result<SequenceNumber, ConnectionError>
 {
     let value_mask = value_list.value_mask();
-    let length: usize = (12 + (4 * value_mask.count_ones()) as usize + 3) / 4;
-    let length_bytes = length.to_ne_bytes();
+    let length: usize = (12 + value_list.wire_length() + 3) / 4;
+    let length_bytes = TryInto::<u16>::try_into(length)?.to_ne_bytes();
     let window_bytes = window.to_ne_bytes();
     let value_mask_bytes = value_mask.to_ne_bytes();
     let value_list_bytes = value_list.to_ne_bytes();
@@ -849,7 +874,7 @@ pub fn configure_window<A: Connection>(c: &A, window: u32, value_list: &Configur
         0,
         0,
     ];
-    assert_eq!((*&request0).len() + (*&value_list_bytes).len(), (12 + (4 * value_mask.count_ones()) as usize + 3) / 4 * 4);
+    assert_eq!((*&request0).len() + (*&value_list_bytes).len(), (12 + value_list.wire_length() + 3) / 4 * 4);
     Ok(c.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes)]))
 }
 ```
