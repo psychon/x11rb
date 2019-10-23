@@ -663,7 +663,7 @@ class Module(object):
         self.out("#[derive(Debug, Clone, Copy, Default)]")
         self.out("pub struct %s {", name)
         for field in switch.type.fields:
-            self.out.indent("pub %s: Option<%s>,", field.field_name, self._to_rust_type(field.type.name))
+            self.out.indent("pub %s: Option<%s>,", self._aux_field_name(field), self._to_rust_type(field.type.name))
         self.out("}")
 
         self.out("impl %s {", name)
@@ -677,7 +677,7 @@ class Module(object):
             with Indent(self.out):
                 self.out("let mut result = Vec::new();")
                 for field in switch.type.fields:
-                    self.out("if let Some(value) = self.%s {", field.field_name)
+                    self.out("if let Some(value) = self.%s {", self._aux_field_name(field))
                     self.out.indent("result.extend(value.to_ne_bytes().iter());")
                     self.out("}")
                 self.out("result")
@@ -690,16 +690,17 @@ class Module(object):
                     expr, = field.parent.expr
                     assert expr.op == "enumref"
                     enum_name = self._name(expr.lenfield_type.name)
-                    self.out("if self.%s.is_some() {", field.field_name)
+                    self.out("if self.%s.is_some() {", self._aux_field_name(field))
                     self.out.indent("mask |= Into::<%s>::into(%s::%s);", self._to_rust_type(mask_field.type.name), enum_name, expr.lenfield_name)
                     self.out("}")
                 self.out("mask")
             self.out("}")
 
             for field in switch.type.fields:
-                self.out("pub fn %s<I>(mut self, value: I) -> Self where I: Into<Option<%s>> {", field.field_name, self._to_rust_type(field.type.name))
+                aux_name = self._aux_field_name(field)
+                self.out("pub fn %s<I>(mut self, value: I) -> Self where I: Into<Option<%s>> {", aux_name, self._to_rust_type(field.type.name))
                 with Indent(self.out):
-                    self.out("self.%s = value.into();", field.field_name)
+                    self.out("self.%s = value.into();", aux_name)
                     self.out("self")
                 self.out("}")
 
@@ -721,6 +722,9 @@ class Module(object):
 
     def _upper_snake_name(self, name):
         return self._lower_snake_name(name).upper()
+
+    def _aux_field_name(self, field):
+        return self._lower_snake_name((field.field_name,))
 
     def _to_rust_type(self, name):
         orig_name = name
