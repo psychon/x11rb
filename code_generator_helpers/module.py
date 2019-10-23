@@ -373,7 +373,10 @@ class Module(object):
         else:
             lifetime = ""
 
-        self.out("pub fn %s%s(%s) -> Result<%s, ConnectionError>", self._lower_snake_name(name), lifetime, ", ".join(args), result_type)
+        function_name = self._lower_snake_name(name)
+        if function_name == "await":
+            function_name = "await_"
+        self.out("pub fn %s%s(%s) -> Result<%s, ConnectionError>", function_name, lifetime, ", ".join(args), result_type)
         if where:
             self.out("where %s", ", ".join(where))
         self.out("{")
