@@ -421,7 +421,7 @@ class Module(object):
                         request_length.append("%s * %s.len()" % (size, self._to_rust_variable(field.field_name)))
                 if hasattr(field, 'lenfield_for_switch'):
                     self.out("let %s = %s.value_mask();", field.field_name, field.lenfield_for_switch.field_name)
-                    request_length.append("(%s * %s.count_ones()) as usize" % (field.individual_field_size, field.field_name))
+                    request_length.append("%s.wire_length()" % field.lenfield_for_switch.field_name)
             request_length = " + ".join(request_length)
 
             self.out("let length: usize = (%s + 3) / 4;", request_length)
@@ -656,9 +656,10 @@ class Module(object):
         return result
 
     def _generate_aux(self, name, request, switch, mask_field):
-        field_size = switch.type.fields[0].type.size
-        assert all(field.type.size == field_size for field in switch.type.fields)
-        mask_field.individual_field_size = field_size
+        # This used to assert that all fields have the same size, but sync's
+        # CreateAlarm has both 32 bit and 64 bit numbers.
+        min_field_size = min(field.type.size for field in switch.type.fields)
+        assert all(field.type.size % min_field_size == 0 for field in switch.type.fields)
 
         self.out("#[derive(Debug, Clone, Copy, Default)]")
         self.out("pub struct %s {", name)
@@ -671,6 +672,16 @@ class Module(object):
 
             self.out("pub fn new() -> Self {")
             self.out.indent("Default::default()")
+            self.out("}")
+
+            self.out("fn wire_length(&self) -> usize {")
+            with Indent(self.out):
+                self.out("let mut result = 0;")
+                for field in switch.type.fields:
+                    self.out("if self.%s.is_some() {", self._aux_field_name(field))
+                    self.out.indent("result += %s;", field.type.size)
+                    self.out("}")
+                self.out("result")
             self.out("}")
 
             self.out("pub fn to_ne_bytes(&self) -> Vec<u8> {")
