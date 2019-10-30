@@ -412,7 +412,7 @@ class Module(object):
                 self.out.indent("%s_bytes.extend(value.to_ne_bytes().iter());", field_name)
                 self.out("}")
 
-            fixed_request_length = sum((field.type.size * field.type.nmemb for field in obj.fields if field.type.nmemb is not None and field.wire))
+            fixed_request_length = sum((field.type.size * field.type.nmemb for field in obj.fields if field.type.nmemb is not None and field.type.size is not None and field.wire))
             request_length = [str(fixed_request_length)]
             for field in obj.fields:
                 if field.type.nmemb is None:
@@ -422,6 +422,10 @@ class Module(object):
                         request_length.append("%s_bytes.len()" % field.field_name)
                     else:
                         request_length.append("%s * %s.len()" % (size, self._to_rust_variable(field.field_name)))
+                elif field.type.size is None:
+                    assert field.type.nmemb is not None
+                    self.out("let %s_bytes = %s.to_ne_bytes();", field.field_name, field.field_name)
+                    request_length.append("%s_bytes.len()" % field.field_name)
                 if hasattr(field, 'lenfield_for_switch'):
                     self.out("let %s = %s.value_mask();", field.field_name, field.lenfield_for_switch.field_name)
                     request_length.append("%s.wire_length()" % field.lenfield_for_switch.field_name)
@@ -477,13 +481,13 @@ class Module(object):
                     if field.type.name == ('float',):
                         # FIXME: Switch to a trait that we can implement on f32
                         self.out("let %s = %s.to_bits().to_ne_bytes();", self._to_rust_variable(field.field_name + "_bytes"), self._to_rust_variable(field.field_name))
-                    else:
+                    elif field.type.size is not None:  # Size None was already handled above
                         if field.field_name == "length":
                             source = "TryInto::<%s>::try_into(length)?" % self._to_rust_type(field.type.name)
                         else:
                             source = self._to_rust_variable(field.field_name)
                         self.out("let %s = %s.to_ne_bytes();", self._to_rust_variable(field.field_name + "_bytes"), source)
-                    if field.type.is_switch:
+                    if field.type.is_switch or field.type.size is None:
                         _emit_request()
                         requests.append("&%s_bytes" % field.field_name)
                     else:
