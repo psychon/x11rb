@@ -572,15 +572,16 @@ class Module(object):
                     self.out("];")
                     parts.append(field.field_name)
                 elif field.type.is_list:
+                    field_name = self._to_rust_variable(field.field_name)
                     self.out("let list_length = %s;", self.expr_to_str(field.type.expr, 'usize'))
-                    self.out("let mut %s = Vec::with_capacity(list_length);", field.field_name,)
+                    self.out("let mut %s = Vec::with_capacity(list_length);", field_name)
                     self.out("for _ in 0..list_length {")
                     with Indent(self.out):
                         self.out("let (v, new_remaining) = %s::try_parse(remaining)?;", rust_type)
-                        self.out("%s.push(v);", field.field_name)
+                        self.out("%s.push(v);", field_name)
                         self.out("remaining = new_remaining;")
                     self.out("}")
-                    parts.append(field.field_name)
+                    parts.append(field_name)
                 else:
                     self.out("let (%s, new_remaining) = %s::try_parse(remaining)?;", self._to_rust_variable(field.field_name), rust_type)
                     self.out("remaining = new_remaining;")
