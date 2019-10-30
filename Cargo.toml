@@ -14,3 +14,10 @@ libc = "0.2"
 
 [build-dependencies]
 pkg-config = "0.3"
+
+[features]
+default = ["vendor-xcb-proto"]
+
+# Enable use of the vendored copy of xcb-proto. Without this feature, pkg-config
+# is used to find it instead.
+vendor-xcb-proto = []

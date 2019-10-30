@@ -143,6 +143,10 @@ Licensed under either of
 
 at your option.
 
+The subdirectory xcb-proto-1.13 contains a vendored copy of the package of the
+same name. It is covered by the MIT license. See
+[xcb-proto-1.13/COPYING](xcb-proto-1.13/COPYING) for details.
+
 ## Contribution
 
 Unless you explicitly state otherwise, any contribution intentionally submitted

@@ -16,13 +16,27 @@ fn create_dir_if_not_exist(dir: &PathBuf) -> Result<()> {
     result
 }
 
+#[cfg(not(feature = "vendor-xcb-proto"))]
+fn get_paths() -> (String, String) {
+    let pythondir = pkg_config::get_variable("xcb-proto", "pythondir").unwrap();
+    let includedir = pkg_config::get_variable("xcb-proto", "xcbincludedir").unwrap();
+    (pythondir, includedir)
+}
+
+#[cfg(feature = "vendor-xcb-proto")]
+fn get_paths() -> (String, String) {
+    let dir = "xcb-proto-1.13/".to_string();
+    let pythondir = dir.clone();
+    let includedir = dir + "src";
+    (pythondir, includedir)
+}
+
 fn main() {
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
     let out_path = out_path.join("generated");
     create_dir_if_not_exist(&out_path).unwrap();
     let out_path = out_path.to_str().unwrap();
-    let pythondir = pkg_config::get_variable("xcb-proto", "pythondir").unwrap();
-    let includedir = pkg_config::get_variable("xcb-proto", "xcbincludedir").unwrap();
+    let (pythondir, includedir) = get_paths();
     let status = Command::new("python")
         .args(&["rs_code_generator.py", "-p", &pythondir, "-i", &includedir, "-o", out_path, "mod"])
         .status()
