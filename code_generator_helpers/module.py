@@ -464,6 +464,9 @@ class Module(object):
                     for i in range(field.type.nmemb):
                         request.append("0")
                 elif field.type.is_list:
+                    if not (hasattr(field, "has_length_field") or field.type.fixed_size()):
+                        self.out("assert_eq!(%s.len(), %s, \"Argument %s has an incorrect length\");",
+                                 self._to_rust_variable(field.field_name), self.expr_to_str(field.type.expr, "usize"), field.field_name)
                     if field.type.size == 1:
                         _emit_request()
                         requests.append(self._to_rust_variable(field.field_name))
