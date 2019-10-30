@@ -105,7 +105,6 @@ from xcbgen.state import Module  # noqa
 
 names = glob.glob(input_dir + "/*.xml")
 unsupported = [
-        "present.xml",   # depends on randr.xml
         "xinput.xml",    # InputInfo has a <switch name="info"> that causes problems
         "xkb.xml",       # NoneType has no attribute op: DeviceLedInfo has a <popcount> in an <op>
         ]
