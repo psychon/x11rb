@@ -87,7 +87,10 @@ class Module(object):
         for (name, header) in outer_module.imports:
             assert name == header, (name, header)  # I don't know what is going on here...
             self.out("#[allow(unused_imports)]")
-            self.out("use super::%s::*;", header)
+            if header == "xproto":
+                self.out("use super::%s::*;", header)
+            else:
+                self.out("use super::%s;", header)
 
         if self.namespace.is_ext:
             self.out("")
@@ -748,10 +751,13 @@ class Module(object):
         if type(name) == tuple:
             if name[0] == 'xcb':
                 name = name[1:]
-            if self.namespace.is_ext and len(name) == 2:
-                # Well... let us assume that this is a use of a type from another
-                # crate. Since the crate's content was imported, we can do:
+            if self.namespace.is_ext and name[0] == self.namespace.ext_name:
                 name = name[1:]
+            if len(name) == 2:
+                # If this is still a tuple, it should be a type from another module
+                # and we should have imported that module.
+                ext = name[0].lower()  # FIXME: How to get the name of the ext?
+                name = ext + "::" + name[1],
             assert len(name) == 1, orig_name
             name = name[0]
 
