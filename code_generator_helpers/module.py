@@ -358,7 +358,7 @@ class Module(object):
                     generics.append(letter)
                     where.append("%s: Into<%s>" % (letter, rust_type))
                     rust_type = letter
-                args.append("%s: %s" % (self._to_rust_variable(field.field_name), rust_type))
+                args.append("%s: %s" % (self._to_rust_variable(field.field_name), self._to_rust_identifier(rust_type)))
 
         if is_list_fonts_with_info:
             assert need_lifetime
@@ -583,7 +583,7 @@ class Module(object):
                     self.out("}")
                     parts.append(field_name)
                 else:
-                    self.out("let (%s, new_remaining) = %s::try_parse(remaining)?;", self._to_rust_variable(field.field_name), rust_type)
+                    self.out("let (%s, new_remaining) = %s::try_parse(remaining)?;", self._to_rust_variable(field.field_name), self._to_rust_identifier(rust_type))
                     self.out("remaining = new_remaining;")
                     if field.visible:
                         parts.append(self._to_rust_variable(field.field_name))
@@ -619,7 +619,7 @@ class Module(object):
                         else:
                             self.out("pub %s: [%s; %s],", field_name, self._to_rust_type(field.type.name), field.type.nmemb)
                     else:
-                        self.out("pub %s: %s,", field_name, self._to_rust_type(field.type.name))
+                        self.out("pub %s: %s,", field_name, self._to_rust_identifier(self._to_rust_type(field.type.name)))
         self.out("}")
 
         self.out("impl TryParse for %s%s {", name_transform(self._name(name)), extra_name)
@@ -774,6 +774,17 @@ class Module(object):
             return name
 
     def _to_rust_identifier(self, name):
+        if name in rust_type_mapping.values():
+            return name
+
+        prefix_end = name.rfind('::')
+        if prefix_end != -1:
+            prefix_end += 2
+            prefix = name[:prefix_end]
+            name = name[prefix_end:]
+        else:
+            prefix = ""
+
         # If the NAME is all uppercase, turn it into Name (the upper() is done below)
         if name.isupper():
             name = name.lower()
@@ -781,7 +792,7 @@ class Module(object):
         if "_" in name:
             name = re.sub('_(.)', lambda pat: pat.group(1).upper(), name.lower())
         # The first letter should always be upper case
-        return name[0].upper() + name[1:]
+        return prefix + name[0].upper() + name[1:]
 
     def _to_rust_variable(self, name):
         if name == "type":
