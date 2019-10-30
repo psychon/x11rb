@@ -79,7 +79,7 @@ class Module(object):
         self.out("use crate::x11_utils::TryParse;")
         self.out("#[allow(unused_imports)]")
         self.out("use crate::connection::SequenceNumber;")
-        self.out("use crate::connection::{Cookie, Connection};")
+        self.out("use crate::connection::{Cookie, Connection as X11Connection};")
         if not self.namespace.is_ext:
             self.out("use crate::connection::ListFontsWithInfoCookie;")
         self.out("use crate::errors::{ParseError, ConnectionError};")
@@ -347,7 +347,7 @@ class Module(object):
         else:
             generics = []
             args = ["c: &%s" % connection_type]
-        generics.append("%s: Connection" % connection_type)
+        generics.append("%s: X11Connection" % connection_type)
         where = []
 
         for field in obj.fields:
