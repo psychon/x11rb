@@ -73,9 +73,11 @@ class Module(object):
         self.out("#[allow(unused_imports)]")
         self.out("use std::convert::TryInto;")
         self.out("use std::io::IoSlice;")
+        self.out("#[allow(unused_imports)]")
+        self.out("use std::option::Option as RustOption;")
         self.out("use crate::utils::Buffer;")
         self.out("#[allow(unused_imports)]")
-        self.out("use crate::x11_utils::{GenericEvent, GenericError as X11GenericError};")
+        self.out("use crate::x11_utils::{GenericEvent as X11GenericEvent, GenericError as X11GenericError};")
         self.out("use crate::x11_utils::TryParse;")
         self.out("#[allow(unused_imports)]")
         self.out("use crate::connection::SequenceNumber;")
@@ -150,9 +152,9 @@ class Module(object):
             self.out("}")
         self.out("}")
 
-        self.out("impl Into<Option<%s>> for %s {", to_type, rust_name)
+        self.out("impl Into<RustOption<%s>> for %s {", to_type, rust_name)
         with Indent(self.out):
-            self.out("fn into(self) -> Option<%s> {", to_type)
+            self.out("fn into(self) -> RustOption<%s> {", to_type)
             self.out.indent("Some(self.into())")
             self.out("}")
         self.out("}")
@@ -166,9 +168,9 @@ class Module(object):
                 self.out("}")
             self.out("}")
 
-            self.out("impl Into<Option<%s>> for %s {", larger_type, rust_name)
+            self.out("impl Into<RustOption<%s>> for %s {", larger_type, rust_name)
             with Indent(self.out):
-                self.out("fn into(self) -> Option<%s> {", larger_type)
+                self.out("fn into(self) -> RustOption<%s> {", larger_type)
                 self.out.indent("Some(self.into())")
                 self.out("}")
             self.out("}")
@@ -543,7 +545,7 @@ class Module(object):
             self.out.indent("pub generic_events_are_currently_not_supported: bool")
             self.out("}")
         else:
-            self.complex_type(event, name, 'GenericEvent', 'Event')
+            self.complex_type(event, name, 'X11GenericEvent', 'Event')
         self.out("")
 
     def error(self, error, name):
@@ -678,7 +680,7 @@ class Module(object):
         self.out("#[derive(Debug, Clone, Copy, Default)]")
         self.out("pub struct %s {", name)
         for field in switch.type.fields:
-            self.out.indent("pub %s: Option<%s>,", self._aux_field_name(field), self._to_rust_type(field.type.name))
+            self.out.indent("pub %s: RustOption<%s>,", self._aux_field_name(field), self._to_rust_type(field.type.name))
         self.out("}")
 
         self.out("impl %s {", name)
@@ -723,7 +725,7 @@ class Module(object):
 
             for field in switch.type.fields:
                 aux_name = self._aux_field_name(field)
-                self.out("pub fn %s<I>(mut self, value: I) -> Self where I: Into<Option<%s>> {", aux_name, self._to_rust_type(field.type.name))
+                self.out("pub fn %s<I>(mut self, value: I) -> Self where I: Into<RustOption<%s>> {", aux_name, self._to_rust_type(field.type.name))
                 with Indent(self.out):
                     self.out("self.%s = value.into();", aux_name)
                     self.out("self")
