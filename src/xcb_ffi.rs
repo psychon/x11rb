@@ -5,6 +5,7 @@ use std::convert::{TryFrom, TryInto};
 use std::ffi::CStr;
 use std::io::IoSlice;
 use std::ops::Deref;
+use std::os::unix::io::{AsRawFd, RawFd};
 use crate::utils::{CSlice, Buffer};
 use crate::x11_utils::{GenericError, GenericEvent, Event};
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
@@ -214,9 +215,18 @@ impl Drop for XCBConnection {
     }
 }
 
+impl AsRawFd for XCBConnection {
+    fn as_raw_fd(&self) -> RawFd {
+        unsafe {
+            raw_ffi::xcb_get_file_descriptor(self.0)
+        }
+    }
+}
+
 mod raw_ffi {
     use libc::{c_void, c_int, c_char};
     use std::io::IoSlice;
+    use std::os::unix::io::RawFd;
 
     #[allow(non_camel_case_types)]
     #[repr(C)]
@@ -272,5 +282,6 @@ mod raw_ffi {
         pub fn xcb_flush(c: *const xcb_connection_t) -> c_int;
         pub fn xcb_generate_id(c: *const xcb_connection_t) -> u32;
         pub fn xcb_get_setup(c: *const xcb_connection_t) -> *const u8;
+        pub fn xcb_get_file_descriptor(c: *const xcb_connection_t) -> RawFd;
     }
 }
