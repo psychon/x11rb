@@ -764,7 +764,7 @@ class Module(object):
             self.out("///")
             self.out("/// # Fields")
             self.out("///")
-            for (field, text) in doc.fields.items():
+            for (field, text) in sorted(doc.fields.items()):
                 # Prevent rustdoc interpreting many leading spaces as code examples
                 text = re.sub(r"\n *", "\n", text)
                 self.out.with_prefixes("/// * `%s` - " % field, "/// ", text)
@@ -773,14 +773,14 @@ class Module(object):
             self.out("///")
             self.out("/// # Errors")
             self.out("///")
-            for (error, text) in doc.errors.items():
+            for (error, text) in sorted(doc.errors.items()):
                 self.out.with_prefixes("/// * `%s` - " % error, "///", text)
 
         if doc.see:
             self.out("///")
             self.out("/// # See")
             self.out("///")
-            for (see, text) in doc.see.items():
+            for (see, text) in sorted(doc.see.items()):
                 self.out("/// * %s: %s", see, text)
 
         if doc.example:
