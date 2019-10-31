@@ -2283,12 +2283,8 @@ fn example10() -> Result<(), ConnectionErrorOrX11Error> {
 //
 //     ConnectionNumber
 //
-// This number is the file descriptor that connects the client to the server. You just have to use that function:
-//
-// FIXME no wrapping exists yet, AsRawFD?
-//
-//            <pre class="code">int xcb_get_file_descriptor (xcb_connection_t *c);
-//            </pre>
+// This number is the file descriptor that connects the client to the server. You just have to use
+// the trait `std::os::unix::io::AsRawFd`.
 //
 //
 //     DefaultScreen
