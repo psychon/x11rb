@@ -23,6 +23,27 @@ class Output(object):
         """
         self._out(0, fmt, *args)
 
+    def with_prefix(self, prefix, text):
+        """
+        Write the given output. The text may contain line breaks. Every line is
+        prefixed with the given prefix.
+        """
+        for line in text.splitlines():
+            self("%s%s", prefix, line)
+
+    def with_prefixes(self, prefix1, prefix2, text):
+        """
+        Write the given output. The text may contain line breaks. Every line is
+        prefixed with a prefix. The first line gets the first prefix while
+        following lines get the following prefixes.
+        """
+        lines = text.splitlines()
+        if not lines:
+            return
+        self("%s%s", prefix1, lines[0])
+        for line in lines[1:]:
+            self("%s%s", prefix2, line)
+
     def indent(self, fmt, *args):
         """
         Write the given output with one extra level of indentation. The extra

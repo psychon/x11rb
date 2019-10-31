@@ -116,6 +116,7 @@ class Module(object):
             return ename[0].upper() + ename[1:]
 
         rust_name = self._name(name)
+        self._emit_doc(enum.doc)
         self.out("#[derive(Debug, Clone, Copy)]")
         if has_all_upper:
             self.out("#[allow(non_camel_case_types)]")
@@ -185,6 +186,7 @@ class Module(object):
         self.out("")
 
     def simple(self, simple, name):
+        assert not hasattr(simple, "doc")
         # FIXME: Figure out what to do with names. _to_rust_identifier() does the
         # right thing here, but then we get both 'pub type Window = u32;' and 'enum
         # Window', which the compiler does not like.
@@ -195,6 +197,7 @@ class Module(object):
         self.out("")
 
     def struct(self, struct, name):
+        assert not hasattr(struct, "doc")
         has_variable_size_list = any(field.type.is_list and field.type.nmemb is None for field in struct.fields)
         self.complex_type(struct, name, False, '', lambda name: self._to_rust_identifier(name))
 
@@ -268,6 +271,8 @@ class Module(object):
         self.out("")
 
     def union(self, enum, name):
+        assert not hasattr(enum, "doc")
+
         rust_name = self._name(name)
         self.out("#[derive(Debug, Clone)]")
         self.out("pub struct %s(Vec<u8>);", rust_name)
@@ -309,6 +314,7 @@ class Module(object):
 
         has_fd = any(field.isfd for field in obj.fields)
         if has_fd:
+            self._emit_doc(obj.doc)
             self.out("pub fn %s() {", self._lower_snake_name(name))
             self.out.indent("unimplemented!(\"FD passing is not yet implemented\");")
             self.out("}")
@@ -381,6 +387,7 @@ class Module(object):
         function_name = self._lower_snake_name(name)
         if function_name == "await":
             function_name = "await_"
+        self._emit_doc(obj.doc)
         self.out("pub fn %s%s(%s) -> Result<%s, ConnectionError>", function_name, lifetime, ", ".join(args), result_type)
         if where:
             self.out("where %s", ", ".join(where))
@@ -533,15 +540,18 @@ class Module(object):
                     self.out("}")
                 self.out("}")
             else:
+                self._emit_doc(obj.reply.doc)
                 self.complex_type(obj.reply, name, False, 'Reply')
 
         self.out("")
 
     def eventstruct(self, eventstruct, name):
+        assert False
         self.out("")
 
     def event(self, event, name):
         self.emit_opcode(name, 'Event', event.opcodes[name])
+        self._emit_doc(event.doc)
         if event.is_ge_event:
             self.out("#[derive(Debug, Clone, Copy)]")
             self.out("pub struct %sEvent {", self._name(name))
@@ -552,6 +562,7 @@ class Module(object):
         self.out("")
 
     def error(self, error, name):
+        assert not hasattr(error, "doc")
         self.emit_opcode(name, 'Error', error.opcodes[name])
         self.complex_type(error, name, 'X11GenericError', 'Error')
         self.out("")
@@ -735,6 +746,43 @@ class Module(object):
                 self.out("}")
 
         self.out("}")
+
+    def _emit_doc(self, doc):
+        if doc is None:
+            return
+        self.out("/// %s.", doc.brief)
+        self.out("///")
+        if doc.description:
+            self.out.with_prefix("/// ", doc.description)
+
+        if doc.fields:
+            self.out("///")
+            self.out("/// # Fields")
+            self.out("///")
+            for (field, text) in doc.fields.items():
+                self.out.with_prefixes("/// * `%s` - " % field, "/// ", text)
+
+        if doc.errors:
+            self.out("///")
+            self.out("/// # Errors")
+            self.out("///")
+            for (error, text) in doc.errors.items():
+                self.out.with_prefixes("/// * `%s` - " % error, "///", text)
+
+        if doc.see:
+            self.out("///")
+            self.out("/// # See")
+            self.out("///")
+            for (see, text) in doc.see.items():
+                self.out("/// * %s: %s", see, text)
+
+        if doc.example:
+            self.out("///")
+            self.out("/// # Example")
+            self.out("///")
+            self.out("/// ```")
+            self.out.with_prefix("/// ", doc.example)
+            self.out("/// ```")
 
     def _name(self, name):
         orig_name = name
