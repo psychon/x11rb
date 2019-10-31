@@ -312,6 +312,10 @@ class Module(object):
     def request(self, obj, name):
         self.emit_opcode(name, 'REQUEST', obj.opcode)
 
+        function_name = self._lower_snake_name(name)
+        if function_name == "await":
+            function_name = "await_"
+
         has_fd = any(field.isfd for field in obj.fields)
         if has_fd:
             self._emit_doc(obj.doc)
@@ -338,7 +342,7 @@ class Module(object):
             mask_field.visible = False
             mask_field.lenfield_for_switch = switch
 
-            self._generate_aux(aux_name, obj, switch, mask_field)
+            self._generate_aux(aux_name, obj, switch, mask_field, function_name)
         else:
             aux_name = None
 
@@ -384,9 +388,6 @@ class Module(object):
         else:
             lifetime = ""
 
-        function_name = self._lower_snake_name(name)
-        if function_name == "await":
-            function_name = "await_"
         self._emit_doc(obj.doc)
         self.out("pub fn %s%s(%s) -> Result<%s, ConnectionError>", function_name, lifetime, ", ".join(args), result_type)
         if where:
@@ -686,21 +687,23 @@ class Module(object):
                 result = "%s[%s; %s]" % (modifier, result, field_type.nmemb)
         return result
 
-    def _generate_aux(self, name, request, switch, mask_field):
+    def _generate_aux(self, name, request, switch, mask_field, request_function_name):
         # This used to assert that all fields have the same size, but sync's
         # CreateAlarm has both 32 bit and 64 bit numbers.
         min_field_size = min(field.type.size for field in switch.type.fields)
         assert all(field.type.size % min_field_size == 0 for field in switch.type.fields)
 
+        self.out("/// Auxiliary and optional information for the %s function.", request_function_name)
         self.out("#[derive(Debug, Clone, Copy, Default)]")
         self.out("pub struct %s {", name)
         for field in switch.type.fields:
-            self.out.indent("pub %s: RustOption<%s>,", self._aux_field_name(field), self._to_rust_type(field.type.name))
+            self.out.indent("%s: RustOption<%s>,", self._aux_field_name(field), self._to_rust_type(field.type.name))
         self.out("}")
 
         self.out("impl %s {", name)
         with Indent(self.out):
 
+            self.out("/// Create a new instance with all fields unset / not present.")
             self.out("pub fn new() -> Self {")
             self.out.indent("Default::default()")
             self.out("}")
@@ -715,7 +718,7 @@ class Module(object):
                 self.out("result")
             self.out("}")
 
-            self.out("pub fn to_ne_bytes(&self) -> Vec<u8> {")
+            self.out("fn to_ne_bytes(&self) -> Vec<u8> {")
             with Indent(self.out):
                 self.out("let mut result = Vec::new();")
                 for field in switch.type.fields:
@@ -725,7 +728,7 @@ class Module(object):
                 self.out("result")
             self.out("}")
 
-            self.out("pub fn value_mask(&self) -> %s {", self._to_rust_type(mask_field.type.name))
+            self.out("fn value_mask(&self) -> %s {", self._to_rust_type(mask_field.type.name))
             with Indent(self.out):
                 self.out("let mut mask = 0;")
                 for field in switch.type.fields:
@@ -740,6 +743,7 @@ class Module(object):
 
             for field in switch.type.fields:
                 aux_name = self._aux_field_name(field)
+                self.out("/// Set the %s field of this structure.", field.field_name)
                 self.out("pub fn %s<I>(mut self, value: I) -> Self where I: Into<RustOption<%s>> {", aux_name, self._to_rust_type(field.type.name))
                 with Indent(self.out):
                     self.out("self.%s = value.into();", aux_name)
