@@ -6,6 +6,7 @@ use std::ffi::CStr;
 use std::io::IoSlice;
 use std::ops::Deref;
 use std::os::unix::io::{AsRawFd, RawFd};
+use libc::c_void;
 use crate::utils::{CSlice, Buffer};
 use crate::x11_utils::{GenericError, GenericEvent, Event};
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
@@ -121,6 +122,14 @@ impl XCBConnection {
                 Some(Self::connection_error_from_c_error(error))
             }
         }
+    }
+
+    /// Get access to the raw libxcb `xcb_connection_t`.
+    ///
+    /// The returned pointer is valid for as long as the original object was not dropped. No
+    /// ownerhsip is transferred.
+    pub fn get_raw_xcb_connection(&self) -> *mut c_void {
+        self.0 as _
     }
 }
 
