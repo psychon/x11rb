@@ -60,6 +60,11 @@ class Output(object):
         self._indent_level -= 1
         assert self._indent_level >= 0
 
+    def copy_from(self, out):
+        """Copy the output from the given Output instance to this one."""
+        for line in out._lines:
+            self("%s", line)
+
     def write_file(self, filename):
         with open(filename, 'w') as target:
             for line in self._lines:

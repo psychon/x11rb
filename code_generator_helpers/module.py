@@ -107,6 +107,7 @@ def _emit_doc(out, doc):
 class Module(object):
     def __init__(self, outer_module):
         self.out = Output()
+        self.trait_out = Output()
         self.namespace = outer_module.namespace
 
         self.out("use std::convert::TryFrom;")
@@ -141,7 +142,12 @@ class Module(object):
         self.out("")
 
     def close(self, outer_module):
-        pass
+        self.out("/// Extension trait defining the requests of this extension.")
+        self.out("pub trait ConnectionExt: X11Connection {")
+        with Indent(self.out):
+            self.out.copy_from(self.trait_out)
+        self.out("}")
+        self.out("impl<C: X11Connection + ?Sized> ConnectionExt for C {}")
 
     def enum(self, enum, name):
         has_all_upper = any(ename.isupper() and len(ename) > 1 for (ename, value) in enum.values)
@@ -358,10 +364,10 @@ class Module(object):
 
         has_fd = any(field.isfd for field in obj.fields)
         if has_fd:
-            _emit_doc(self.out, obj.doc)
-            self.out("pub fn %s() {", self._lower_snake_name(name))
-            self.out.indent("unimplemented!(\"FD passing is not yet implemented\");")
-            self.out("}")
+            _emit_doc(self.trait_out, obj.doc)
+            self.trait_out("fn %s() {", self._lower_snake_name(name))
+            self.trait_out.indent("unimplemented!(\"FD passing is not yet implemented\");")
+            self.trait_out("}")
             return
 
         is_list_fonts_with_info = name == ('xcb', 'ListFontsWithInfo')
@@ -389,17 +395,15 @@ class Module(object):
         mark_length_fields(obj)
 
         letters = iter(string.ascii_uppercase)
-        connection_type = next(letters)
 
         need_lifetime = any(field.visible and field.type.is_list for field in obj.fields)
         need_lifetime = need_lifetime and obj.reply
         if need_lifetime:
             generics = ["'c"]
-            args = ["c: &'c %s" % connection_type]
+            args = ["&'c self"]
         else:
             generics = []
-            args = ["c: &%s" % connection_type]
-        generics.append("%s: X11Connection" % connection_type)
+            args = ["&self"]
         where = []
 
         for field in obj.fields:
@@ -414,12 +418,12 @@ class Module(object):
 
         if is_list_fonts_with_info:
             assert need_lifetime
-            result_type = "ListFontsWithInfoCookie<'c, %s>" % connection_type
+            result_type = "ListFontsWithInfoCookie<'c, Self>"
         elif obj.reply:
             if need_lifetime:
-                result_type = "Cookie<'c, %s, %sReply>" % (connection_type, self._name(name))
+                result_type = "Cookie<'c, Self, %sReply>" % self._name(name)
             else:
-                result_type = "Cookie<%s, %sReply>" % (connection_type, self._name(name))
+                result_type = "Cookie<Self, %sReply>" % self._name(name)
         else:
             result_type = "SequenceNumber"
 
@@ -428,16 +432,16 @@ class Module(object):
         else:
             lifetime = ""
 
-        _emit_doc(self.out, obj.doc)
-        self.out("pub fn %s%s(%s) -> Result<%s, ConnectionError>", function_name, lifetime, ", ".join(args), result_type)
+        _emit_doc(self.trait_out, obj.doc)
+        self.trait_out("fn %s%s(%s) -> Result<%s, ConnectionError>", function_name, lifetime, ", ".join(args), result_type)
         if where:
-            self.out("where %s", ", ".join(where))
-        self.out("{")
-        with Indent(self.out):
+            self.trait_out("where %s", ", ".join(where))
+        self.trait_out("{")
+        with Indent(self.trait_out):
 
             if self.namespace.is_ext:
-                self.out('let extension_information = c.extension_information("%s")' % self.namespace.ext_xname)
-                self.out.indent(".ok_or(ConnectionError::UnsupportedExtension)?;")
+                self.trait_out('let extension_information = self.extension_information("%s")' % self.namespace.ext_xname)
+                self.trait_out.indent(".ok_or(ConnectionError::UnsupportedExtension)?;")
 
             requests = []
             request = []
@@ -446,21 +450,21 @@ class Module(object):
                 if not request:
                     return
 
-                self.out("let request%d = [", len(requests))
+                self.trait_out("let request%d = [", len(requests))
                 requests.append("&request%d" % len(requests))
                 for byte in request:
-                    self.out.indent("%s,", byte)
-                self.out("];")
+                    self.trait_out.indent("%s,", byte)
+                self.trait_out("];")
                 del request[:]
 
             def _emit_byte_conversion(field_name):
                 if field.type.size is not None:
-                    self.out("let mut %s_bytes = Vec::with_capacity(%s * %s.len());", field.field_name, field.type.size, field.field_name)
+                    self.trait_out("let mut %s_bytes = Vec::with_capacity(%s * %s.len());", field.field_name, field.type.size, field.field_name)
                 else:
-                    self.out("let mut %s_bytes = Vec::new();", field.field_name)
-                self.out("for value in %s {", field_name)
-                self.out.indent("%s_bytes.extend(value.to_ne_bytes().iter());", field_name)
-                self.out("}")
+                    self.trait_out("let mut %s_bytes = Vec::new();", field.field_name)
+                self.trait_out("for value in %s {", field_name)
+                self.trait_out.indent("%s_bytes.extend(value.to_ne_bytes().iter());", field_name)
+                self.trait_out("}")
 
             fixed_request_length = sum((field.type.size * field.type.nmemb for field in obj.fields if field.type.nmemb is not None and field.type.size is not None and field.wire))
             request_length = [str(fixed_request_length)]
@@ -474,14 +478,14 @@ class Module(object):
                         request_length.append("%s * %s.len()" % (size, self._to_rust_variable(field.field_name)))
                 elif field.type.size is None:
                     assert field.type.nmemb is not None
-                    self.out("let %s_bytes = %s.to_ne_bytes();", field.field_name, field.field_name)
+                    self.trait_out("let %s_bytes = %s.to_ne_bytes();", field.field_name, field.field_name)
                     request_length.append("%s_bytes.len()" % field.field_name)
                 if hasattr(field, 'lenfield_for_switch'):
-                    self.out("let %s = %s.value_mask();", field.field_name, field.lenfield_for_switch.field_name)
+                    self.trait_out("let %s = %s.value_mask();", field.field_name, field.lenfield_for_switch.field_name)
                     request_length.append("%s.wire_length()" % field.lenfield_for_switch.field_name)
             request_length = " + ".join(request_length)
 
-            self.out("let length: usize = (%s + 3) / 4;", request_length)
+            self.trait_out("let length: usize = (%s + 3) / 4;", request_length)
             for field in obj.fields:
                 if field.field_name == "major_opcode" or field.field_name == "minor_opcode":
                     if self.namespace.is_ext and field.field_name == "major_opcode":
@@ -500,11 +504,11 @@ class Module(object):
                             other_field = [field for field in obj.fields if e.lenfield_name == field.field_name]
                             assert len(other_field) == 1
                             other_field = other_field[0]
-                            self.out("let %s: %s = %s.len().try_into()?;", other_field.field_name, self._to_rust_type(other_field.type.name), other_field.is_length_field_for.field_name)
+                            self.trait_out("let %s: %s = %s.len().try_into()?;", other_field.field_name, self._to_rust_type(other_field.type.name), other_field.is_length_field_for.field_name)
                             return e.lenfield_name
 
-                    self.out("let %s: %s = (%s).try_into().unwrap();", field.field_name, self._to_rust_type(field.type.name), expr_to_str_and_emit(field.type.expr))
-                    self.out("let %s_bytes = %s.to_ne_bytes();", field.field_name, self._to_rust_variable(field.field_name))
+                    self.trait_out("let %s: %s = (%s).try_into().unwrap();", field.field_name, self._to_rust_type(field.type.name), expr_to_str_and_emit(field.type.expr))
+                    self.trait_out("let %s_bytes = %s.to_ne_bytes();", field.field_name, self._to_rust_variable(field.field_name))
                     for i in range(field.type.size):
                         request.append("%s_bytes[%d]" % (field.field_name, i))
                 elif field.type.is_pad:
@@ -513,13 +517,13 @@ class Module(object):
                         request.append("0")
                 elif field.type.is_list:
                     if not (hasattr(field, "has_length_field") or field.type.fixed_size()):
-                        self.out("assert_eq!(%s.len(), %s, \"Argument %s has an incorrect length\");",
+                        self.trait_out("assert_eq!(%s.len(), %s, \"Argument %s has an incorrect length\");",
                                  self._to_rust_variable(field.field_name), self.expr_to_str(field.type.expr, "usize"), field.field_name)
                     if field.type.size == 1:
                         _emit_request()
                         requests.append(self._to_rust_variable(field.field_name))
                         if field == obj.fields[-1] and not field.type.fixed_size():
-                            self.out("let %s_bytes = %s;", self._to_rust_variable(field.field_name), self._to_rust_variable(field.field_name))
+                            self.trait_out("let %s_bytes = %s;", self._to_rust_variable(field.field_name), self._to_rust_variable(field.field_name))
                     else:
                         if field.type.size is not None:
                             _emit_byte_conversion(field.field_name)
@@ -528,18 +532,18 @@ class Module(object):
                         requests.append("&%s_bytes" % field.field_name)
                 elif field.wire:
                     if hasattr(field, "is_length_field_for"):
-                        self.out("let %s: %s = %s.len().try_into()?;", self._to_rust_variable(field.field_name), self._to_rust_type(field.type.name), self._to_rust_variable(field.is_length_field_for.field_name))
+                        self.trait_out("let %s: %s = %s.len().try_into()?;", self._to_rust_variable(field.field_name), self._to_rust_type(field.type.name), self._to_rust_variable(field.is_length_field_for.field_name))
                     if field.enum is not None:
-                        self.out("let %s = %s.into();", field.field_name, field.field_name)
+                        self.trait_out("let %s = %s.into();", field.field_name, field.field_name)
                     if field.type.name == ('float',):
                         # FIXME: Switch to a trait that we can implement on f32
-                        self.out("let %s = %s.to_bits().to_ne_bytes();", self._to_rust_variable(field.field_name + "_bytes"), self._to_rust_variable(field.field_name))
+                        self.trait_out("let %s = %s.to_bits().to_ne_bytes();", self._to_rust_variable(field.field_name + "_bytes"), self._to_rust_variable(field.field_name))
                     elif field.type.size is not None:  # Size None was already handled above
                         if field.field_name == "length":
                             source = "TryInto::<%s>::try_into(length)?" % self._to_rust_type(field.type.name)
                         else:
                             source = self._to_rust_variable(field.field_name)
-                        self.out("let %s = %s.to_ne_bytes();", self._to_rust_variable(field.field_name + "_bytes"), source)
+                        self.trait_out("let %s = %s.to_ne_bytes();", self._to_rust_variable(field.field_name + "_bytes"), source)
                     if field.type.is_switch or field.type.size is None:
                         _emit_request()
                         requests.append("&%s_bytes" % field.field_name)
@@ -551,22 +555,23 @@ class Module(object):
 
             last_field = obj.fields[-1]
             if last_field.type.is_list and not last_field.type.fixed_size():
-                self.out("let padding = &[0; 3][..(4 - (%s_bytes.len() %% 4)) %% 4];", last_field.field_name)
+                self.trait_out("let padding = &[0; 3][..(4 - (%s_bytes.len() %% 4)) %% 4];", last_field.field_name)
                 requests.append("&padding")
 
             total_length = " + ".join(["(*%s).len()" % r for r in requests])
-            self.out("assert_eq!(%s, (%s + 3) / 4 * 4);", total_length, request_length)
+            self.trait_out("assert_eq!(%s, (%s + 3) / 4 * 4);", total_length, request_length)
 
             slices = ", ".join(["IoSlice::new(%s)" % r for r in requests])
 
             if is_list_fonts_with_info:
                 assert obj.reply
-                self.out("Ok(ListFontsWithInfoCookie::new(c.send_request_with_reply(&[%s])))", slices)
+                self.trait_out("Ok(ListFontsWithInfoCookie::new(self.send_request_with_reply(&[%s])))", slices)
             elif obj.reply:
-                self.out("Ok(c.send_request_with_reply(&[%s]))", slices)
+                self.trait_out("Ok(self.send_request_with_reply(&[%s]))", slices)
             else:
-                self.out("Ok(c.send_request_without_reply(&[%s]))", slices)
-        self.out("}")
+                self.trait_out("Ok(self.send_request_without_reply(&[%s]))", slices)
+        self.trait_out("}")
+        self.trait_out("")
 
         if obj.reply:
             has_fd = any(field.isfd for field in obj.reply.fields)

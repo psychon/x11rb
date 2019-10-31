@@ -5,7 +5,7 @@ use std::cell::RefCell;
 
 use super::connection::{Connection, Cookie, SequenceNumber};
 use super::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
-use super::generated::xproto::{Setup, QueryExtensionReply, poly_segment, Segment};
+use super::generated::xproto::{Setup, QueryExtensionReply, ConnectionExt, Segment};
 use super::utils::Buffer;
 use super::x11_utils::GenericEvent;
 
@@ -94,7 +94,7 @@ fn test_poly_segment() -> Result<(), ConnectionErrorOrX11Error> {
         Segment { x1: 5, y1: 6, x2: 7, y2: 8 },
     ];
     let length: u16 = (12 + segments.len() * 8) as u16 / 4;
-    poly_segment(&conn, drawable, gc, &segments)?;
+    conn.poly_segment(drawable, gc, &segments)?;
 
     let mut expected = Vec::new();
     expected.push(super::generated::xproto::POLY_SEGMENT_REQUEST);

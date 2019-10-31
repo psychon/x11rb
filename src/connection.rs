@@ -11,7 +11,7 @@ use std::cell::RefCell;
 use crate::utils::Buffer;
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 use crate::x11_utils::GenericEvent;
-use crate::generated::xproto::{Setup, ListFontsWithInfoReply, QueryExtensionReply, query_extension};
+use crate::generated::xproto::{Setup, ListFontsWithInfoReply, QueryExtensionReply, ConnectionExt};
 
 /// Number type used for referring to things that were sent to the server in responses from the
 /// server.
@@ -197,7 +197,7 @@ impl ExtensionInformation {
         let result: &Option<Box<QueryExtensionReply>> = map
             .entry(extension_name)
             .or_insert_with(|| {
-                let info = query_extension(conn, extension_name.as_bytes()).ok();
+                let info = conn.query_extension(extension_name.as_bytes()).ok();
                 let info = info.and_then(|c| c.reply().ok());
                 if let Some(info) = info {
                     // If the extension is not present, we return None, else we box it
