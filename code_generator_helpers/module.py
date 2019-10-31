@@ -518,7 +518,7 @@ class Module(object):
                 elif field.type.is_list:
                     if not (hasattr(field, "has_length_field") or field.type.fixed_size()):
                         self.trait_out("assert_eq!(%s.len(), %s, \"Argument %s has an incorrect length\");",
-                                 self._to_rust_variable(field.field_name), self.expr_to_str(field.type.expr, "usize"), field.field_name)
+                                       self._to_rust_variable(field.field_name), self.expr_to_str(field.type.expr, "usize"), field.field_name)
                     if field.type.size == 1:
                         _emit_request()
                         requests.append(self._to_rust_variable(field.field_name))
@@ -532,7 +532,10 @@ class Module(object):
                         requests.append("&%s_bytes" % field.field_name)
                 elif field.wire:
                     if hasattr(field, "is_length_field_for"):
-                        self.trait_out("let %s: %s = %s.len().try_into()?;", self._to_rust_variable(field.field_name), self._to_rust_type(field.type.name), self._to_rust_variable(field.is_length_field_for.field_name))
+                        self.trait_out("let %s: %s = %s.len().try_into()?;",
+                                       self._to_rust_variable(field.field_name),
+                                       self._to_rust_type(field.type.name),
+                                       self._to_rust_variable(field.is_length_field_for.field_name))
                     if field.enum is not None:
                         self.trait_out("let %s = %s.into();", field.field_name, field.field_name)
                     if field.type.name == ('float',):
