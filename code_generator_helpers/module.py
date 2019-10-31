@@ -64,6 +64,46 @@ def mark_length_fields(self):
             list_field.has_length_fields = length_fields
 
 
+def _emit_doc(out, doc):
+    if doc is None:
+        return
+    out("/// %s.", doc.brief)
+    out("///")
+    if doc.description:
+        out.with_prefix("/// ", doc.description)
+
+    if doc.fields:
+        out("///")
+        out("/// # Fields")
+        out("///")
+        for (field, text) in sorted(doc.fields.items()):
+            # Prevent rustdoc interpreting many leading spaces as code examples
+            text = re.sub(r"\n *", "\n", text)
+            out.with_prefixes("/// * `%s` - " % field, "/// ", text)
+
+    if doc.errors:
+        out("///")
+        out("/// # Errors")
+        out("///")
+        for (error, text) in sorted(doc.errors.items()):
+            out.with_prefixes("/// * `%s` - " % error, "///", text)
+
+    if doc.see:
+        out("///")
+        out("/// # See")
+        out("///")
+        for (see, text) in sorted(doc.see.items()):
+            out("/// * %s: %s", see, text)
+
+    if doc.example:
+        out("///")
+        out("/// # Example")
+        out("///")
+        out("/// ```text")
+        out.with_prefix("/// ", doc.example)
+        out("/// ```")
+
+
 class Module(object):
     def __init__(self, outer_module):
         self.out = Output()
@@ -116,7 +156,7 @@ class Module(object):
             return ename[0].upper() + ename[1:]
 
         rust_name = self._name(name)
-        self._emit_doc(enum.doc)
+        _emit_doc(self.out, enum.doc)
         self.out("#[derive(Debug, Clone, Copy)]")
         if has_all_upper:
             self.out("#[allow(non_camel_case_types)]")
@@ -318,7 +358,7 @@ class Module(object):
 
         has_fd = any(field.isfd for field in obj.fields)
         if has_fd:
-            self._emit_doc(obj.doc)
+            _emit_doc(self.out, obj.doc)
             self.out("pub fn %s() {", self._lower_snake_name(name))
             self.out.indent("unimplemented!(\"FD passing is not yet implemented\");")
             self.out("}")
@@ -388,7 +428,7 @@ class Module(object):
         else:
             lifetime = ""
 
-        self._emit_doc(obj.doc)
+        _emit_doc(self.out, obj.doc)
         self.out("pub fn %s%s(%s) -> Result<%s, ConnectionError>", function_name, lifetime, ", ".join(args), result_type)
         if where:
             self.out("where %s", ", ".join(where))
@@ -541,7 +581,7 @@ class Module(object):
                     self.out("}")
                 self.out("}")
             else:
-                self._emit_doc(obj.reply.doc)
+                _emit_doc(self.out, obj.reply.doc)
                 self.complex_type(obj.reply, name, False, 'Reply')
 
         self.out("")
@@ -552,7 +592,7 @@ class Module(object):
 
     def event(self, event, name):
         self.emit_opcode(name, 'Event', event.opcodes[name])
-        self._emit_doc(event.doc)
+        _emit_doc(self.out, event.doc)
         if event.is_ge_event:
             self.out("#[derive(Debug, Clone, Copy)]")
             self.out("pub struct %sEvent {", self._name(name))
@@ -751,45 +791,6 @@ class Module(object):
                 self.out("}")
 
         self.out("}")
-
-    def _emit_doc(self, doc):
-        if doc is None:
-            return
-        self.out("/// %s.", doc.brief)
-        self.out("///")
-        if doc.description:
-            self.out.with_prefix("/// ", doc.description)
-
-        if doc.fields:
-            self.out("///")
-            self.out("/// # Fields")
-            self.out("///")
-            for (field, text) in sorted(doc.fields.items()):
-                # Prevent rustdoc interpreting many leading spaces as code examples
-                text = re.sub(r"\n *", "\n", text)
-                self.out.with_prefixes("/// * `%s` - " % field, "/// ", text)
-
-        if doc.errors:
-            self.out("///")
-            self.out("/// # Errors")
-            self.out("///")
-            for (error, text) in sorted(doc.errors.items()):
-                self.out.with_prefixes("/// * `%s` - " % error, "///", text)
-
-        if doc.see:
-            self.out("///")
-            self.out("/// # See")
-            self.out("///")
-            for (see, text) in sorted(doc.see.items()):
-                self.out("/// * %s: %s", see, text)
-
-        if doc.example:
-            self.out("///")
-            self.out("/// # Example")
-            self.out("///")
-            self.out("/// ```text")
-            self.out.with_prefix("/// ", doc.example)
-            self.out("/// ```")
 
     def _name(self, name):
         orig_name = name
