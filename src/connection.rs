@@ -7,7 +7,7 @@ use std::io::IoSlice;
 use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
 use std::collections::HashMap;
-use std::cell::RefCell;
+use std::sync::Mutex;
 use crate::utils::Buffer;
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 use crate::x11_utils::GenericEvent;
@@ -184,7 +184,7 @@ where C: Connection
 
 /// Helper for implementing `Connection::extension_information()`.
 #[derive(Debug, Default)]
-pub struct ExtensionInformation(RefCell<HashMap<&'static str, Option<Box<QueryExtensionReply>>>>);
+pub struct ExtensionInformation(Mutex<HashMap<&'static str, Option<Box<QueryExtensionReply>>>>);
 
 impl ExtensionInformation {
     /// An implementation of `Connection::extension_information()`.
@@ -192,7 +192,11 @@ impl ExtensionInformation {
     /// The given connection is used for sending a `QueryExtension` request if needed.
     pub fn extension_information<'s, C: Connection>(&'s self, conn: &C, extension_name: &'static str)
             -> Option<&'s QueryExtensionReply> {
-        let mut map = self.0.borrow_mut();
+        let mut guard = match self.0.lock() {
+            Ok(guard) => guard,
+            Err(_) => return None
+        };
+        let map = &mut *guard;
         // Insert the entry if it does not yet exist and get a reference
         let result: &Option<Box<QueryExtensionReply>> = map
             .entry(extension_name)
