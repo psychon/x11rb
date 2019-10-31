@@ -8,8 +8,8 @@ use x11rb::xcb_ffi::XCBConnection;
 use x11rb::connection::Connection;
 use x11rb::x11_utils::Event;
 use x11rb::generated::xproto::*;
-use x11rb::generated::shape;
-use x11rb::wrapper::*;
+use x11rb::generated::shape::{self, ConnectionExt as _};
+use x11rb::wrapper::ConnectionExt as _;
 use x11rb::errors::ConnectionError;
 
 const PUPIL_SIZE: i16 = 50;
@@ -31,7 +31,7 @@ fn draw_eyes<C: Connection>(conn: &C, win_id: WINDOW, black: GCONTEXT, white: GC
     };
     let mut arc2 = arc1.clone();
     arc2.x = arc2.width as i16;
-    poly_fill_arc(conn, win_id, black, &[arc1, arc2])?;
+    conn.poly_fill_arc(win_id, black, &[arc1, arc2])?;
 
     // Draw the white inner part
     for mut arc in [&mut arc1, &mut arc2].iter_mut() {
@@ -40,7 +40,7 @@ fn draw_eyes<C: Connection>(conn: &C, win_id: WINDOW, black: GCONTEXT, white: GC
         arc.width -= 2 * EYE_SIZE as u16;
         arc.height -= 2 * EYE_SIZE as u16;
     }
-    poly_fill_arc(conn, win_id, white, &[arc1, arc2])?;
+    conn.poly_fill_arc(win_id, white, &[arc1, arc2])?;
 
     Ok(())
 }
@@ -67,7 +67,7 @@ fn draw_pupils<C: Connection>(conn: &C, win_id: WINDOW, gc: GCONTEXT,
     arc2.y = y2;
 
     // Do the drawing
-    poly_fill_arc(conn, win_id, gc, &[arc1, arc2])?;
+    conn.poly_fill_arc(win_id, gc, &[arc1, arc2])?;
     Ok(())
 }
 
@@ -153,13 +153,13 @@ fn compute_pupils(window_size: (u16, u16), mouse_position: (i16, i16)) -> ((i16,
 struct FreePixmap<'c, C: Connection>(&'c C, PIXMAP);
 impl<C: Connection> Drop for FreePixmap<'_, C> {
     fn drop(&mut self) {
-        free_pixmap(self.0, self.1).unwrap();
+        self.0.free_pixmap(self.1).unwrap();
     }
 }
 struct FreeGC<'c, C: Connection>(&'c C, GCONTEXT);
 impl<C: Connection> Drop for FreeGC<'_, C> {
     fn drop(&mut self) {
-        free_gc(self.0, self.1).unwrap();
+        self.0.free_gc(self.1).unwrap();
     }
 }
 
@@ -167,7 +167,7 @@ fn create_pixmap_wrapper<'c, C: Connection>(conn: &'c C, depth: u8, drawable: DR
 -> Result<FreePixmap<'c, C>, ConnectionError>
 {
     let pixmap = conn.generate_id();
-    create_pixmap(conn, depth, pixmap, drawable, size.0, size.1)?;
+    conn.create_pixmap(depth, pixmap, drawable, size.0, size.1)?;
     Ok(FreePixmap(conn, pixmap))
 }
 
@@ -187,15 +187,15 @@ fn shape_window<C: Connection>(conn: &C, win_id: WINDOW, window_size: (u16, u16)
         width: window_size.0,
         height: window_size.1
     };
-    poly_fill_rectangle(conn, pixmap.1, gc, &[rect])?;
+    conn.poly_fill_rectangle(pixmap.1, gc, &[rect])?;
 
     // Draw the eyes as "not transparent"
     let values = ChangeGCAux::new().foreground(1);
-    change_gc(conn, gc, &values)?;
+    conn.change_gc(gc, &values)?;
     draw_eyes(conn, pixmap.1, gc, gc, window_size)?;
 
     // Set the shape of the window
-    shape::mask(conn, shape::SO::Set, shape::SK::Bounding, win_id, 0, 0, pixmap.1)?;
+    conn.mask(shape::SO::Set, shape::SK::Bounding, win_id, 0, 0, pixmap.1)?;
     Ok(())
 }
 
@@ -208,14 +208,14 @@ fn setup_window<C: Connection>(conn: &C, screen: &Screen, window_size: (u16, u16
         .event_mask(EventMask::Exposure | EventMask::StructureNotify | EventMask::PointerMotion)
         .background_pixel(screen.white_pixel);
 
-    create_window(conn, 24, win_id, screen.root, 0, 0, window_size.0, window_size.1, 0,
+    conn.create_window(24, win_id, screen.root, 0, 0, window_size.0, window_size.1, 0,
                   WindowClass::InputOutput, 0, &win_aux)?;
 
     let title = "xeyes";
-    change_property8(conn, PropMode::Replace, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), title.as_bytes()).unwrap();
-    change_property32(conn, PropMode::Replace, win_id, wm_protocols, Atom::ATOM.into(), &[wm_delete_window]).unwrap();
+    conn.change_property8(PropMode::Replace, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), title.as_bytes()).unwrap();
+    conn.change_property32(PropMode::Replace, win_id, wm_protocols, Atom::ATOM.into(), &[wm_delete_window]).unwrap();
 
-    map_window(conn, win_id).unwrap();
+    conn.map_window(win_id).unwrap();
 
     Ok(win_id)
 }
@@ -227,7 +227,7 @@ fn create_gc_with_foreground<C: Connection>(conn: &C, win_id: WINDOW, foreground
     let gc_aux = CreateGCAux::new()
         .graphics_exposures(0)
         .foreground(foreground);
-    create_gc(conn, gc, win_id, &gc_aux)?;
+    conn.create_gc(gc, win_id, &gc_aux)?;
     Ok(gc)
 }
 
@@ -236,8 +236,8 @@ fn main() {
     let screen = &conn.setup().roots[screen_num];
 
     let (wm_protocols, wm_delete_window) = {
-        let protocols = intern_atom(&conn, 0, "WM_PROTOCOLS".as_bytes()).unwrap();
-        let delete = intern_atom(&conn, 0, "WM_DELETE_WINDOW".as_bytes()).unwrap();
+        let protocols = conn.intern_atom(0, "WM_PROTOCOLS".as_bytes()).unwrap();
+        let delete = conn.intern_atom(0, "WM_DELETE_WINDOW".as_bytes()).unwrap();
         (protocols.reply().unwrap().atom, delete.reply().unwrap().atom)
     };
 
@@ -315,7 +315,7 @@ fn main() {
             draw_pupils(&conn, pixmap.1, black_gc, pos).unwrap();
 
             // Copy drawing from pixmap to window
-            copy_area(&conn, pixmap.1, win_id, white_gc, 0, 0, 0, 0,
+            conn.copy_area(pixmap.1, win_id, white_gc, 0, 0, 0, 0,
                       window_size.0, window_size.1).unwrap();
 
             conn.flush();

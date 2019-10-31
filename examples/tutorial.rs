@@ -26,7 +26,7 @@ use x11rb::connection::{Connection, SequenceNumber};
 use x11rb::x11_utils::Event;
 use x11rb::errors::{ConnectionError, ConnectionErrorOrX11Error};
 use x11rb::generated::xproto::{self, *};
-use x11rb::wrapper::change_property8;
+use x11rb::wrapper::ConnectionExt as _;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -214,7 +214,7 @@ fn example1() -> Result<(), ConnectionErrorOrX11Error> {
     // Bad use
     let start = Instant::now();
     for i in 0..COUNT {
-        atoms[i] = intern_atom(&conn, 0, names[i].as_bytes())?.reply()?.atom;
+        atoms[i] = conn.intern_atom(0, names[i].as_bytes())?.reply()?.atom;
     }
     let diff = start.elapsed();
     println!("bad use time:  {:?}", diff);
@@ -222,7 +222,7 @@ fn example1() -> Result<(), ConnectionErrorOrX11Error> {
     // Good use
     let start = Instant::now();
     let cookies = names.iter()
-        .map(|name| intern_atom(&conn, 0, name.as_bytes()))
+        .map(|name| conn.intern_atom(0, name.as_bytes()))
         .collect::<Vec<_>>();
     for (i, atom) in cookies.into_iter().enumerate() {
         atoms[i] = atom?.reply()?.atom;
@@ -385,7 +385,7 @@ where B: Into<u16> {
 // newly created windows are not mapped on the screen (they are invisible). In order to make our
 // window visible, we use the function `map_window()`, whose prototype is
 //
-//   pub fn map_window<A: Connection>(c: &A, window: u32) -> Result<SequenceNumber, ConnectionError>;
+//   fn map_window(&self, window: u32) -> Result<SequenceNumber, ConnectionError>;
 //
 // Finally, here is a small program to create a window of size 150x150 pixels, positioned at the top-left corner of the screen:
 
@@ -402,19 +402,18 @@ fn example4() -> Result<(), ConnectionErrorOrX11Error> {
     const COPY_FROM_PARENT: u8 = 0; // FIXME: XCB_COPY_FROM_PARENT is a define that is in the hand-written part of xcb
 
     // Create the window
-    create_window(&conn,                    // connection
-                  COPY_FROM_PARENT,         // depth (same as root)
-                  win,                      // window Id
-                  screen.root,              // parent window
-                  0, 0,                     // x, y
-                  150, 150,                 // width, height
-                  10,                       // border width
-                  WindowClass::InputOutput, // class
-                  screen.root_visual,       // visual
-                  &Default::default())?;    // masks, not used yet
+    conn.create_window(COPY_FROM_PARENT,         // depth (same as root)
+                       win,                      // window Id
+                       screen.root,              // parent window
+                       0, 0,                     // x, y
+                       150, 150,                 // width, height
+                       10,                       // border width
+                       WindowClass::InputOutput, // class
+                       screen.root_visual,       // visual
+                       &Default::default())?;    // masks, not used yet
 
     // Map the window on the screen
-    map_window(&conn, win)?;
+    conn.map_window(win)?;
 
     // Make sure commands are sent before the sleep, so window is shown
     conn.flush();
@@ -528,7 +527,7 @@ fn example5() -> Result<(), ConnectionErrorOrX11Error> {
     let win = screen.root;
     let black = conn.generate_id();
     let values = CreateGCAux::default().foreground(screen.black_pixel);
-    create_gc(&conn, black, win, &values)?;
+    conn.create_gc(black, win, &values)?;
 
     Ok(())
 }
@@ -555,7 +554,7 @@ fn example5() -> Result<(), ConnectionErrorOrX11Error> {
 // use to display strings. See Subsections Drawing with a color and [Assigning a Font to a Graphic
 // Context]. This is done by using this function:
 //
-//   fn change_gc<A: Connection>(c: &A, gc: u32, value_list: &ChangeGCAux) -> Result<SequenceNumber, ConnectionError>;
+//   fn change_gc(&self, gc: u32, value_list: &ChangeGCAux) -> Result<SequenceNumber, ConnectionError>;
 //
 // [Some more XCB-specific explanations skipped]
 //
@@ -568,8 +567,8 @@ fn example5() -> Result<(), ConnectionErrorOrX11Error> {
 //
 // To draw a point, or several points, we use
 //
-//    fn poly_point<A: Connection, B>(c: &A, coordinate_mode: B, drawable: u32, gc: u32,
-//                                    points: &[Point]) -> Result<SequenceNumber, ConnectionError>
+//    fn poly_point<B>(&self, coordinate_mode: B, drawable: u32, gc: u32,
+//                     points: &[Point]) -> Result<SequenceNumber, ConnectionError>
 //    where B: Into<u8>;
 //
 // The `coordinate_mode` parameter specifies the coordinate mode. Available values are
@@ -594,14 +593,16 @@ fn example5() -> Result<(), ConnectionErrorOrX11Error> {
 //
 // To draw a line, or a polygonal line, we use
 //
-//     fn poly_line<A: Connection, B>(c: &A, coordinate_mode: B, drawable: u32, gc: u32, points: &[Point]) -> Result<SequenceNumber, ConnectionError>;
+//     fn poly_line<A>(&self, coordinate_mode: A, drawable: u32, gc: u32, points: &[Point])
+//     -> Result<SequenceNumber, ConnectionError>
+//     where A: Into<u8>
 //
 // This function will draw the line between the first and the second points, then the line between
 // the second and the third points, and so on.
 //
 // To draw a segment, or several segments, we use
 //
-//     fn poly_segment<A: Connection>(c: &A, drawable: u32, gc: u32, segments: &[Segment]) -> Result<SequenceNumber, ConnectionError>;
+//     fn poly_segment(&self, drawable: u32, gc: u32, segments: &[Segment]) -> Result<SequenceNumber, ConnectionError>;
 //
 // The `xcb_segment_t` type is just a structure with four fields (the coordinates of the two points that define the segment):
 //
@@ -614,7 +615,7 @@ fn example5() -> Result<(), ConnectionErrorOrX11Error> {
 //
 // To draw a rectangle, or several rectangles, we use
 //
-//     fn poly_rectangle<A: Connection>(c: &A, drawable: u32, gc: u32, rectangles: &[Rectangle]) -> Result<SequenceNumber, ConnectionError>;
+//     fn poly_rectangle(&self, drawable: u32, gc: u32, rectangles: &[Rectangle]) -> Result<SequenceNumber, ConnectionError>;
 //
 // The `xcb_rectangle_t` type is just a structure with four fields (the coordinates of the top-left
 // corner of the rectangle, and its width and height):
@@ -628,7 +629,7 @@ fn example5() -> Result<(), ConnectionErrorOrX11Error> {
 //
 // To draw an elliptical arc, or several elliptical arcs, we use
 //
-//     fn poly_arc<A: Connection>(c: &A, drawable: u32, gc: u32, arcs: &[Arc]) -> Result<SequenceNumber, ConnectionError>;
+//     fn poly_arc(&self, drawable: u32, gc: u32, arcs: &[Arc]) -> Result<SequenceNumber, ConnectionError>;
 //
 // The `xcb_arc_t` type is a structure with six fields:
 //
@@ -650,8 +651,8 @@ fn example5() -> Result<(), ConnectionErrorOrX11Error> {
 //
 // To Fill a polygon defined by the points given as arguments , we use
 //
-// fn fill_poly<A: Connection, B, C>(c: &A, drawable: u32, gc: u32, shape: B, coordinate_mode: C, points: &[Point]) -> Result<SequenceNumber, ConnectionError>
-// where B: Into<u8>, C: Into<u8>;
+//  fn fill_poly<A, B>(&self, drawable: u32, gc: u32, shape: A, coordinate_mode: B, points: &[Point]) -> Result<SequenceNumber, ConnectionError>
+//  where A: Into<u8>, B: Into<u8>
 //
 // The `shape` parameter specifies a shape that helps the server to improve performance. Available values are
 //
@@ -663,11 +664,11 @@ fn example5() -> Result<(), ConnectionErrorOrX11Error> {
 //
 // To fill one or several rectangles, we use
 //
-//    fn poly_fill_rectangle<A: Connection>(c: &A, drawable: u32, gc: u32, rectangles: &[Rectangle]) -> Result<SequenceNumber, ConnectionError>;
+//    fn poly_fill_rectangle(&self, drawable: u32, gc: u32, rectangles: &[Rectangle]) -> Result<SequenceNumber, ConnectionError>;
 //
 // To fill one or several arcs, we use
 //
-//    fn poly_fill_arc<A: Connection>(c: &A, drawable: u32, gc: u32, arcs: &[Arc]) -> Result<SequenceNumber, ConnectionError>;
+//    fn poly_fill_arc(&self, drawable: u32, gc: u32, arcs: &[Arc]) -> Result<SequenceNumber, ConnectionError>;
 //
 // To illustrate these functions, here is an example that draws four points, a polygonal line, two
 // segments, two rectangles and two arcs. Remark that we use events for the first time, as an
@@ -713,7 +714,7 @@ fn example6() -> Result<(), ConnectionErrorOrX11Error> {
     let values = CreateGCAux::default()
         .foreground(screen.black_pixel)
         .graphics_exposures(0);
-    create_gc(&conn, foreground, win, &values)?;
+    conn.create_gc(foreground, win, &values)?;
 
     // Ask for our window's Id
     let win = conn.generate_id();
@@ -723,19 +724,18 @@ fn example6() -> Result<(), ConnectionErrorOrX11Error> {
     let values = CreateWindowAux::default()
         .background_pixel(screen.white_pixel)
         .event_mask(EventMask::Exposure);
-    create_window(&conn,                    // Connection
-                  COPY_FROM_PARENT,         // depth
-                  win,                      // window Id
-                  screen.root,              // parent window
-                  0, 0,                     // x, y
-                  150, 150,                 // width, height
-                  10,                       // border_width
-                  WindowClass::InputOutput, // class
-                  screen.root_visual,       // visual
-                  &values)?;
+    conn.create_window(COPY_FROM_PARENT,         // depth
+                       win,                      // window Id
+                       screen.root,              // parent window
+                       0, 0,                     // x, y
+                       150, 150,                 // width, height
+                       10,                       // border_width
+                       WindowClass::InputOutput, // class
+                       screen.root_visual,       // visual
+                       &values)?;
 
     // Map the window on the screen
-    map_window(&conn, win)?;
+    conn.map_window(win)?;
 
     // We flush the request
     conn.flush();
@@ -745,19 +745,19 @@ fn example6() -> Result<(), ConnectionErrorOrX11Error> {
         match event.response_type() {
             xproto::EXPOSE_EVENT => {
                 // We draw the points
-                poly_point(&conn, CoordMode::Origin, win, foreground, &points)?;
+                conn.poly_point(CoordMode::Origin, win, foreground, &points)?;
 
                 // We draw the polygonal line
-                poly_line(&conn, CoordMode::Previous, win, foreground, &polyline)?;
+                conn.poly_line(CoordMode::Previous, win, foreground, &polyline)?;
 
                 // We draw the segments
-                poly_segment(&conn, win, foreground, &segments)?;
+                conn.poly_segment(win, foreground, &segments)?;
 
                 // We draw the rectangles
-                poly_rectangle(&conn, win, foreground, &rectangles)?;
+                conn.poly_rectangle(win, foreground, &rectangles)?;
 
                 // We draw the arcs
-                poly_arc(&conn, win, foreground, &arcs)?;
+                conn.poly_arc(win, foreground, &arcs)?;
 
                 // We flush the request
                 conn.flush();
@@ -796,10 +796,10 @@ fn example_expose<C: Connection>(conn: &C, depth: u8, screen: &Screen) -> Result
     let values = CreateWindowAux::default()
         .event_mask(EventMask::Exposure);
     let win = conn.generate_id();
-    create_window(conn, depth, win, screen.root,
-                  0, 0, 150, 150, 10,
-                  WindowClass::InputOutput, screen.root_visual,
-                  &values)?;
+    conn.create_window(depth, win, screen.root,
+                       0, 0, 150, 150, 10,
+                       WindowClass::InputOutput, screen.root_visual,
+                       &values)?;
     Ok(())
 }
 
@@ -813,10 +813,10 @@ fn example_or<C: Connection>(conn: &C, depth: u8, screen: &Screen) -> Result<(),
     let values = CreateWindowAux::default()
         .event_mask(EventMask::Exposure | EventMask::ButtonPress);
     let win = conn.generate_id();
-    create_window(conn, depth, win, screen.root,
-                  0, 0, 150, 150, 10,
-                  WindowClass::InputOutput, screen.root_visual,
-                  &values)?;
+    conn.create_window(depth, win, screen.root,
+                       0, 0, 150, 150, 10,
+                       WindowClass::InputOutput, screen.root_visual,
+                       &values)?;
     Ok(())
 }
 
@@ -860,7 +860,7 @@ fn example_or<C: Connection>(conn: &C, depth: u8, screen: &Screen) -> Result<(),
 fn example_change_event_mask<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ConnectionErrorOrX11Error> {
     let values = ChangeWindowAttributesAux::default()
         .event_mask(EventMask::Exposure | EventMask::ButtonPress);
-    change_window_attributes(conn, win, &values)?;
+    conn.change_window_attributes(win, &values)?;
     Ok(())
 }
 
@@ -1197,19 +1197,18 @@ fn example7() -> Result<(), ConnectionErrorOrX11Error> {
                     EventMask::ButtonRelease | EventMask::PointerMotion |
                     EventMask::EnterWindow   | EventMask::LeaveWindow   |
                     EventMask::KeyPress      | EventMask::KeyRelease);
-    create_window(&conn,                    // Connection
-                  COPY_FROM_PARENT,         // depth
-                  win,                      // window Id
-                  screen.root,              // parent window
-                  0, 0,                     // x, y
-                  150, 150,                 // width, height
-                  10,                       // border_width
-                  WindowClass::InputOutput, // class
-                  screen.root_visual,       // visual
-                  &values)?;
+    conn.create_window(COPY_FROM_PARENT,         // depth
+                       win,                      // window Id
+                       screen.root,              // parent window
+                       0, 0,                     // x, y
+                       150, 150,                 // width, height
+                       10,                       // border_width
+                       WindowClass::InputOutput, // class
+                       screen.root_visual,       // visual
+                       &values)?;
 
     // Map the window on the screen
-    map_window(&conn, win)?;
+    conn.map_window(win)?;
     conn.flush();
 
     loop {
@@ -1300,7 +1299,7 @@ fn example7() -> Result<(), ConnectionErrorOrX11Error> {
 //
 // To open a font, we use the following function:
 //
-//   pub fn open_font<A: Connection>(c: &A, fid: u32, name: &[u8]) -> Result<SequenceNumber, ConnectionError>;
+//   pub fn open_font(&self, fid: u32, name: &[u8]) -> Result<SequenceNumber, ConnectionError>;
 //
 // The `fid` parameter is the font Id defined by `xcb_generate_id()` (see above). The `name`
 // parameter is the name of the font you want to open. Use the command `xlsfonts` in a terminal to
@@ -1325,10 +1324,10 @@ fn example_assign_font<C: Connection>(conn: &C, screen: &Screen, window: WINDOW,
         .foreground(screen.black_pixel)
         .background(screen.white_pixel)
         .font(font);
-    create_gc(conn, gc, window, &values)?;
+    conn.create_gc(gc, window, &values)?;
 
     // The font is not needed anymore, so we close it
-    close_font(conn, font)?;
+    conn.close_font(font)?;
 
     Ok(())
 }
@@ -1339,7 +1338,7 @@ fn example_assign_font<C: Connection>(conn: &C, screen: &Screen, window: WINDOW,
 //
 // To draw a text in a drawable, we use the following function:
 //
-//    pub fn image_text8<A: Connection>(c: &A, drawable: u32, gc: u32, x: i16, y: i16, string: &[u8])
+//    pub fn image_text8(&self, drawable: u32, gc: u32, x: i16, y: i16, string: &[u8])
 //    -> Result<SequenceNumber, ConnectionError>;
 //
 // The `string` parameter is the text to draw. The location of the drawing is given by the
@@ -1359,8 +1358,8 @@ fn text_draw<C: Connection>(conn: &C, screen: &Screen, window: WINDOW, x1: i16, 
 {
     let gc = gc_font_get(conn, screen, window, "7x13")?;
 
-    image_text8(conn, window, gc, x1, y1, label.as_bytes())?;
-    free_gc(conn, gc)?;
+    conn.image_text8(window, gc, x1, y1, label.as_bytes())?;
+    conn.free_gc(gc)?;
 
     Ok(())
 }
@@ -1370,16 +1369,16 @@ fn gc_font_get<C: Connection>(conn: &C, screen: &Screen, window: WINDOW, font_na
 {
     let font = conn.generate_id();
 
-    open_font(conn, font, font_name.as_bytes())?;
+    conn.open_font(font, font_name.as_bytes())?;
 
     let gc = conn.generate_id();
     let values = CreateGCAux::default()
         .foreground(screen.black_pixel)
         .background(screen.white_pixel)
         .font(font);
-    create_gc(conn, gc, window, &values)?;
+    conn.create_gc(gc, window, &values)?;
 
-    close_font(conn, font)?;
+    conn.close_font(font)?;
 
     Ok(gc)
 }
@@ -1402,13 +1401,13 @@ fn example8() -> Result<(), ConnectionErrorOrX11Error> {
                     EventMask::ButtonPress |
                     EventMask::Exposure |
                     EventMask::PointerMotion);
-    create_window(&conn, screen.root_depth,
-                  window, screen.root,
-                  20, 200, WIDTH, HEIGHT,
-                  0, WindowClass::InputOutput,
-                  screen.root_visual,
-                  &values)?;
-    map_window(&conn, window)?;
+    conn.create_window(screen.root_depth,
+                       window, screen.root,
+                       20, 200, WIDTH, HEIGHT,
+                       0, WindowClass::InputOutput,
+                       screen.root_visual,
+                       &values)?;
+    conn.map_window(window)?;
 
     conn.flush();
 
@@ -1459,14 +1458,17 @@ fn example8() -> Result<(), ConnectionErrorOrX11Error> {
 //
 // To change the property of a window, we use one of the following functions:
 //
-//     fn change_property8<C: Connection, A>(c: &C, mode: A, window: u32, property: u32, type_: u32, data: &[u8])
-//     -> Result<SequenceNumber, ConnectionError> where A: Into<u8>;
+//    fn change_property8<A>(&self, mode: A, window: u32, property: u32, type_: u32, data: &[u8])
+//    -> Result<SequenceNumber, ConnectionError>
+//    where A: Into<u8>
 //
-//     fn change_property16<C: Connection, A>(c: &C, mode: A, window: u32, property: u32, type_: u32, data: &[u16])
-//     -> Result<SequenceNumber, ConnectionError> where A: Into<u8>;
+//    fn change_property16<A>(&self, mode: A, window: u32, property: u32, type_: u32, data: &[u16])
+//    -> Result<SequenceNumber, ConnectionError>
+//    where A: Into<u8>
 //
-//     fn change_property32<C: Connection, A>(c: &C, mode: A, window: u32, property: u32, type_: u32, data: &[u32])
-//     -> Result<SequenceNumber, ConnectionError> where A: Into<u8>;
+//    fn change_property32<A>(&self, mode: A, window: u32, property: u32, type_: u32, data: &[u32])
+//    -> Result<SequenceNumber, ConnectionError>
+//    where A: Into<u8>
 //
 // The `mode` parameter could be one of the following values (defined in enumeration
 // xcb_prop_mode_t in the xproto.h header file):
@@ -1499,22 +1501,22 @@ fn example9() -> Result<(), ConnectionErrorOrX11Error> {
     let win = conn.generate_id();
 
     // Create the window
-    create_window(&conn, 0, win, screen.root, 0, 0, 250, 150,
-                  10, WindowClass::InputOutput, screen.root_visual,
-                  &Default::default())?;
+    conn.create_window(0, win, screen.root, 0, 0, 250, 150,
+                       10, WindowClass::InputOutput, screen.root_visual,
+                       &Default::default())?;
 
     // Set the title of the window
     let title = "Hello World !";
-    change_property8(&conn, PropMode::Replace, win, Atom::WM_NAME.into(), Atom::STRING.into(), // FIXME: Get rid of these ugly into()
-                     title.as_bytes())?;
+    conn.change_property8(PropMode::Replace, win, Atom::WM_NAME.into(), Atom::STRING.into(), // FIXME: Get rid of these ugly into()
+                          title.as_bytes())?;
 
     // Set the title of the window icon
     let title_icon = "Hello World ! (iconified)";
-    change_property8(&conn, PropMode::Replace, win, Atom::WM_ICON_NAME.into(), Atom::STRING.into(), // FIXME: Get rid of these ugly into()
-                     title_icon.as_bytes())?;
+    conn.change_property8(PropMode::Replace, win, Atom::WM_ICON_NAME.into(), Atom::STRING.into(), // FIXME: Get rid of these ugly into()
+                          title_icon.as_bytes())?;
 
     // Map the window on the screen
-    map_window(&conn, win)?;
+    conn.map_window(win)?;
 
     conn.flush();
 
@@ -1548,14 +1550,14 @@ fn example9() -> Result<(), ConnectionErrorOrX11Error> {
 //
 // To map a window, you use the following function:
 //
-//     fn map_window<A: Connection>(c: &A, window: u32) -> Result<SequenceNumber, ConnectionError>;
+//     fn map_window(&self, window: u32) -> Result<SequenceNumber, ConnectionError>;
 //
 // To have a simple example, see the examples above. The mapping operation will cause an `Expose`
 // event to be sent to our application, unless the window is completely covered by other windows.
 //
 // Un-mapping a window is also simple. You use the function
 //
-//    fn unmap_window<A: Connection>(c: &A, window: u32) -> Result<SequenceNumber, ConnectionError>;
+//    fn unmap_window(&self, window: u32) -> Result<SequenceNumber, ConnectionError>;
 //
 // The utilization of this function is the same as `xcb_map_window()`.
 //
@@ -1568,7 +1570,7 @@ fn example9() -> Result<(), ConnectionErrorOrX11Error> {
 // receive, etc). If we want to modify them, but the window is already created, we can change them
 // by using the following function:
 //
-//     fn configure_window<A: Connection>(c: &A, window: u32, value_list: &ConfigureWindowAux) -> Result<SequenceNumber, ConnectionError>;
+//     fn configure_window(&self, window: u32, value_list: &ConfigureWindowAux) -> Result<SequenceNumber, ConnectionError>;
 //
 // We set the `value_mask` to one or several mask values that are in the xcb_config_window_t enumeration in the xproto.h header:
 //
@@ -1597,7 +1599,7 @@ fn example_move<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ConnectionEr
     let values = ConfigureWindowAux::default()
         .x(10)
         .y(20);
-    configure_window(conn, win, &values)?;
+    conn.configure_window(win, &values)?;
     Ok(())
 }
 
@@ -1618,7 +1620,7 @@ fn example_resize<C: Connection>(conn: &C, win: WINDOW) -> Result<(), Connection
     let values = ConfigureWindowAux::default()
         .width(10)
         .height(20);
-    configure_window(conn, win, &values)?;
+    conn.configure_window(win, &values)?;
     Ok(())
 }
 
@@ -1635,7 +1637,7 @@ fn example_move_resize<C: Connection>(conn: &C, win: WINDOW) -> Result<(), Conne
         .y(20)
         .width(200)
         .height(300);
-    configure_window(conn, win, &values)?;
+    conn.configure_window(win, &values)?;
     Ok(())
 }
 
@@ -1655,7 +1657,7 @@ fn example_stack_above<C: Connection>(conn: &C, win: WINDOW) -> Result<(), Conne
     // Move the window on the top of the stack
     let values = ConfigureWindowAux::default()
         .stack_mode(StackMode::Above);
-    configure_window(conn, win, &values)?;
+    conn.configure_window(win, &values)?;
     Ok(())
 }
 
@@ -1665,7 +1667,7 @@ fn example_stack_below<C: Connection>(conn: &C, win: WINDOW) -> Result<(), Conne
     // Move the window to the bottom of the stack
     let values = ConfigureWindowAux::default()
         .stack_mode(StackMode::Below);
-    configure_window(conn, win, &values)?;
+    conn.configure_window(win, &values)?;
     Ok(())
 }
 
@@ -1690,7 +1692,7 @@ pub struct RenamedGetGeometryReply {
 
 // x11rb fills this structure with two functions:
 //
-//     fn get_geometry<A: Connection>(c: &A, drawable: u32) -> Result<Cookie<A, GetGeometryReply>, ConnectionError>;
+//     fn get_geometry(&self, drawable: u32) -> Result<Cookie<A, GetGeometryReply>, ConnectionError>;
 //
 // and the .reply() function on the returned cookie
 //
@@ -1699,7 +1701,7 @@ pub struct RenamedGetGeometryReply {
 #[allow(unused)]
 fn example_get_geometry<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ConnectionErrorOrX11Error>
 {
-    let geom = get_geometry(conn, win)?.reply()?;
+    let geom = conn.get_geometry(win)?.reply()?;
 
     // Do something with the fields of geom
 
@@ -1726,7 +1728,7 @@ fn example_get_geometry<C: Connection>(conn: &C, win: WINDOW) -> Result<(), Conn
 //
 // x11rb fills this structure with two functions:
 //
-//    fn query_tree<A: Connection>(c: &A, window: u32) -> Result<Cookie<A, QueryTreeReply>, ConnectionError>;
+//    fn query_tree(&self, window: u32) -> Result<Cookie<A, QueryTreeReply>, ConnectionError>;
 //
 // and the .reply() function on the returned cookie
 //
@@ -1741,8 +1743,9 @@ fn example_get_geometry<C: Connection>(conn: &C, win: WINDOW) -> Result<(), Conn
 //
 // As usual, we need two functions to fill this structure:
 //
-//     fn translate_coordinates<A: Connection>(c: &A, src_window: u32, dst_window: u32, src_x: i16, src_y: i16)
-//     -> Result<Cookie<A, TranslateCoordinatesReply>, ConnectionError>;
+//
+//    fn translate_coordinates(&self, src_window: u32, dst_window: u32, src_x: i16, src_y: i16)
+//    -> Result<Cookie<Self, TranslateCoordinatesReply>, ConnectionError>
 //
 // and the .reply() function on the returned cookie
 //
@@ -1751,8 +1754,8 @@ fn example_get_geometry<C: Connection>(conn: &C, win: WINDOW) -> Result<(), Conn
 #[allow(unused)]
 fn example_get_and_query<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ConnectionErrorOrX11Error>
 {
-    let geom = get_geometry(conn, win)?;
-    let tree = query_tree(conn, win)?;
+    let geom = conn.get_geometry(win)?;
+    let tree = conn.query_tree(win)?;
     let geom = geom.reply()?;
     let tree = tree.reply();
 
@@ -1790,7 +1793,7 @@ fn example_get_and_query<C: Connection>(conn: &C, win: WINDOW) -> Result<(), Con
 //
 // XCB supplies these two functions to fill it:
 //
-//    fn get_window_attributes<A: Connection>(c: &A, window: u32) -> Result<Cookie<A, GetWindowAttributesReply>, ConnectionError>;
+//    fn get_window_attributes(&self, window: u32) -> Result<Cookie<A, GetWindowAttributesReply>, ConnectionError>;
 //
 // and the .reply() function on the returned cookie
 //
@@ -1799,7 +1802,7 @@ fn example_get_and_query<C: Connection>(conn: &C, win: WINDOW) -> Result<(), Con
 #[allow(unused)]
 fn example_get_attributes<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ConnectionErrorOrX11Error>
 {
-    let geom = get_window_attributes(conn, win)?.reply()?;
+    let geom = conn.get_window_attributes(win)?.reply()?;
 
     // Do something with the fields of attr
 
@@ -1883,9 +1886,9 @@ fn example_get_colormap<C: Connection>(conn: &C)
 //
 // Then, we create the color map with
 //
-//     fn create_colormap<A: Connection, B>(c: &A, alloc: B, mid: u32, window: u32, visual: u32)
+//     fn create_colormap<A>(&self, alloc: A, mid: u32, window: u32, visual: u32)
 //     -> Result<SequenceNumber, ConnectionError>
-//     where B: Into<u8>;
+//     where A: Into<u8>
 //
 // Here is an example of creation of a new color map:
 
@@ -1893,7 +1896,7 @@ fn example_get_colormap<C: Connection>(conn: &C)
 fn example_create_colormap<C: Connection>(conn: &C, win: WINDOW, screen: &Screen) -> Result<(), ConnectionErrorOrX11Error>
 {
     let cmap = conn.generate_id();
-    create_colormap(conn, ColormapAlloc::None, cmap, win, screen.root_visual)?;
+    conn.create_colormap(ColormapAlloc::None, cmap, win, screen.root_visual)?;
 
     Ok(())
 }
@@ -1903,7 +1906,7 @@ fn example_create_colormap<C: Connection>(conn: &C, win: WINDOW, screen: &Screen
 //
 // To free a color map, it suffices to use this function:
 //
-//     fn free_colormap<A: Connection>(c: &A, cmap: u32) -> Result<SequenceNumber, ConnectionError>;
+//     fn free_colormap(&self, cmap: u32) -> Result<SequenceNumber, ConnectionError>;
 //
 //
 //     Allocating and freeing a color entry
@@ -1921,7 +1924,7 @@ fn example_create_colormap<C: Connection>(conn: &C, win: WINDOW, screen: &Screen
 //
 // XCB supplies these two functions to fill it:
 //
-// pub fn alloc_color<A: Connection>(c: &A, cmap: u32, red: u16, green: u16, blue: u16) -> Result<Cookie<A, AllocColorReply>, ConnectionError>;
+//     fn alloc_color(&self, cmap: u32, red: u16, green: u16, blue: u16) -> Result<Cookie<A, AllocColorReply>, ConnectionError>;
 //
 // and the .reply() function on the returned cookie
 //
@@ -1932,8 +1935,8 @@ fn example_create_colormap<C: Connection>(conn: &C, win: WINDOW, screen: &Screen
 fn example_fill_colormap<C: Connection>(conn: &C, win: WINDOW, screen: &Screen) -> Result<(), ConnectionErrorOrX11Error>
 {
     let cmap = conn.generate_id();
-    create_colormap(conn, ColormapAlloc::None, cmap, win, screen.root_visual)?;
-    let _rep = alloc_color(conn, cmap, 65535, 0, 0)?.reply()?;
+    conn.create_colormap(ColormapAlloc::None, cmap, win, screen.root_visual)?;
+    let _rep = conn.alloc_color(cmap, 65535, 0, 0)?.reply()?;
 
     // Do something with r.pixel or the components
 
@@ -2008,7 +2011,7 @@ fn example_fill_colormap<C: Connection>(conn: &C, win: WINDOW, screen: &Screen) 
 //
 // Then, XCB supplies the following function to create new pixmaps:
 //
-//     fn create_pixmap<A: Connection>(c: &A, depth: u8, pid: u32, drawable: u32, width: u16, height: u16) -> Result<SequenceNumber, ConnectionError>
+//     fn create_pixmap(&self, depth: u8, pid: u32, drawable: u32, width: u16, height: u16) -> Result<SequenceNumber, ConnectionError>
 //
 // **TODO**: Explain the drawable parameter, and give an example (like xpoints.c)
 //
@@ -2018,8 +2021,8 @@ fn example_fill_colormap<C: Connection>(conn: &C, win: WINDOW, screen: &Screen) 
 //
 // Once we got a handle to a pixmap, we can draw it on some window, using the following function:
 //
-//     fn copy_area<A: Connection>(c: &A, src_drawable: u32, dst_drawable: u32, gc: u32, src_x: i16,
-//                                 src_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16)
+//     fn copy_area(&self, src_drawable: u32, dst_drawable: u32, gc: u32, src_x: i16,
+//                  src_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16)
 //     -> Result<SequenceNumber, ConnectionError>;
 //
 // As you can see, we could copy the whole pixmap, as well as only a given rectangle of the pixmap.
@@ -2042,7 +2045,7 @@ fn example_fill_colormap<C: Connection>(conn: &C, win: WINDOW, screen: &Screen) 
 // Finally, when we are done using a given pixmap, we should free it, in order to free resources of
 // the X server. This is done using this function:
 //
-//     fn free_pixmap<A: Connection>(c: &A, pixmap: u32) -> Result<SequenceNumber, ConnectionError>;
+//     fn free_pixmap(&self, pixmap: u32) -> Result<SequenceNumber, ConnectionError>;
 //
 // Of course, after having freed it, we must not try accessing the pixmap again.
 //
@@ -2067,7 +2070,7 @@ fn example_fill_colormap<C: Connection>(conn: &C, win: WINDOW, screen: &Screen) 
 // In the first method, we use a special font named "cursor", and the function
 // `xcb_create_glyph_cursor`:
 //
-//     fn create_glyph_cursor<A: Connection>(c: &A, cid: u32, source_font: u32, mask_font: u32,
+//     fn create_glyph_cursor(&self, cid: u32, source_font: u32, mask_font: u32,
 //                           source_char: u16, mask_char: u16, fore_red: u16, fore_green: u16,
 //                           fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16)
 //     -> Result<SequenceNumber, ConnectionError>;
@@ -2082,13 +2085,13 @@ fn example_fill_colormap<C: Connection>(conn: &C, win: WINDOW, screen: &Screen) 
 fn example_create_glyph_cursor<C: Connection>(conn: &C, win: WINDOW, screen: &Screen) -> Result<(), ConnectionErrorOrX11Error>
 {
     let font = conn.generate_id();
-    open_font(conn, font, "cursor".as_bytes())?;
+    conn.open_font(font, "cursor".as_bytes())?;
 
     let cursor = conn.generate_id();
-    create_glyph_cursor(conn, cursor, font, font,
-                        58, 58 + 1,
-                        0, 0, 0,
-                        0, 0, 0);
+    conn.create_glyph_cursor(cursor, font, font,
+                             58, 58 + 1,
+                             0, 0, 0,
+                             0, 0, 0);
 
     Ok(())
 }
@@ -2098,7 +2101,7 @@ fn example_create_glyph_cursor<C: Connection>(conn: &C, win: WINDOW, screen: &Sc
 //
 // The cursor is destroyed by using the function
 //
-//     fn free_cursor<A: Connection>(c: &A, cursor: u32) -> Result<SequenceNumber, ConnectionError>;
+//     fn free_cursor(&self, cursor: u32) -> Result<SequenceNumber, ConnectionError>;
 //
 // In the second method, we create a new cursor by using a pair of pixmaps, with depth of one (that
 // is, two colors pixmaps). One pixmap defines the shape of the cursor, while the other works as a
@@ -2119,7 +2122,7 @@ fn example_change_window_cursor<C: Connection>(conn: &C, win: WINDOW, cursor: CU
 {
     let values = ChangeWindowAttributesAux::default()
         .cursor(cursor);
-    change_window_attributes(conn, win, &values)?;
+    conn.change_window_attributes(win, &values)?;
 
     Ok(())
 }
@@ -2152,9 +2155,9 @@ fn button_draw<C: Connection>(conn: &C, screen: &Screen, window: WINDOW, x1: i16
         Point { x: x1, y: y1 - height },
         Point { x: x1, y: y1 },
     ];
-    poly_line(conn, CoordMode::Origin, window, gc, &points)?;
-    image_text8(conn, window, gc, x1 + inset + 1, y1 - inset - 1, label.as_bytes())?;
-    free_gc(conn, gc)?;
+    conn.poly_line(CoordMode::Origin, window, gc, &points)?;
+    conn.image_text8(window, gc, x1 + inset + 1, y1 - inset - 1, label.as_bytes())?;
+    conn.free_gc(gc)?;
     Ok(())
 }
 
@@ -2164,27 +2167,27 @@ fn cursor_set<C: Connection>(conn: &C, screen: &Screen, window: WINDOW, cursor_i
 -> Result<(), ConnectionErrorOrX11Error>
 {
     let font = conn.generate_id();
-    open_font(conn, font, "cursor".as_bytes())?;
+    conn.open_font(font, "cursor".as_bytes())?;
 
     let cursor = conn.generate_id();
-    create_glyph_cursor(conn, cursor, font, font,
-                        cursor_id, cursor_id + 1,
-                        0, 0, 0,
-                        0, 0, 0)?;
+    conn.create_glyph_cursor(cursor, font, font,
+                             cursor_id, cursor_id + 1,
+                             0, 0, 0,
+                             0, 0, 0)?;
 
     let gc = conn.generate_id();
     let values = CreateGCAux::default()
         .foreground(screen.black_pixel)
         .background(screen.black_pixel)
         .font(font);
-    create_gc(conn, gc, window, &values)?;
+    conn.create_gc(gc, window, &values)?;
 
     let values = ChangeWindowAttributesAux::default()
         .cursor(cursor);
-    change_window_attributes(conn, window, &values)?;
+    conn.change_window_attributes(window, &values)?;
 
-    free_cursor(conn, cursor)?;
-    close_font(conn, font)?;
+    conn.free_cursor(cursor)?;
+    conn.close_font(font)?;
     Ok(())
 }
 
@@ -2205,11 +2208,11 @@ fn example10() -> Result<(), ConnectionErrorOrX11Error> {
         .event_mask(EventMask::KeyRelease |
                     EventMask::ButtonPress |
                     EventMask::Exposure);
-    create_window(&conn, screen.root_depth, window, screen.root,
-                  20, 200, WIDTH as u16, HEIGHT as u16,
-                  0, WindowClass::InputOutput,
-                  screen.root_visual, &values)?;
-    map_window(&conn, window)?;
+    conn.create_window(screen.root_depth, window, screen.root,
+                       20, 200, WIDTH as u16, HEIGHT as u16,
+                       0, WindowClass::InputOutput,
+                       screen.root_visual, &values)?;
+    conn.map_window(window)?;
 
     cursor_set(&conn, screen, window, 68)?;
 
@@ -2512,7 +2515,7 @@ fn example_create_default_gc<C: Connection>(conn: &C, screen_num: usize) -> Resu
         .foreground(screen.black_pixel)
         .background(screen.white_pixel);
     let gc = conn.generate_id();
-    create_gc(conn, gc, screen.root, &values)?;
+    conn.create_gc(gc, screen.root, &values)?;
     Ok(gc)
 }
 
