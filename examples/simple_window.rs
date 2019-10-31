@@ -6,7 +6,7 @@ use x11rb::xcb_ffi::XCBConnection;
 use x11rb::x11_utils::{Event, GenericError};
 use x11rb::generated::xproto::*;
 use x11rb::connection::Connection;
-use x11rb::wrapper::*;
+use x11rb::wrapper::ConnectionExt as _;
 
 fn main() {
     let (conn, screen_num) = XCBConnection::connect(None).unwrap();
@@ -16,8 +16,8 @@ fn main() {
     let gc_id = conn.generate_id();
 
     let (wm_protocols, wm_delete_window) = {
-        let protocols = intern_atom(&conn, 0, "WM_PROTOCOLS".as_bytes()).unwrap();
-        let delete = intern_atom(&conn, 0, "WM_DELETE_WINDOW".as_bytes()).unwrap();
+        let protocols = conn.intern_atom(0, "WM_PROTOCOLS".as_bytes()).unwrap();
+        let delete = conn.intern_atom(0, "WM_DELETE_WINDOW".as_bytes()).unwrap();
         (protocols.reply().unwrap().atom, delete.reply().unwrap().atom)
     };
 
@@ -31,19 +31,19 @@ fn main() {
 
     let (mut width, mut height) = (100, 100);
 
-    create_window(&conn, 24, win_id, screen.root, 0, 0, width, height, 0, WindowClass::InputOutput, 0, &win_aux).unwrap();
+    conn.create_window(24, win_id, screen.root, 0, 0, width, height, 0, WindowClass::InputOutput, 0, &win_aux).unwrap();
 
     let title = "Simple Window";
-    change_property8(&conn, PropMode::Replace, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), title.as_bytes()).unwrap();
-    change_property32(&conn, PropMode::Replace, win_id, wm_protocols, Atom::ATOM.into(), &[wm_delete_window]).unwrap();
+    conn.change_property8(PropMode::Replace, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), title.as_bytes()).unwrap();
+    conn.change_property32(PropMode::Replace, win_id, wm_protocols, Atom::ATOM.into(), &[wm_delete_window]).unwrap();
 
-    let reply = get_property(&conn, 0, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), 0, 1024).unwrap();
+    let reply = conn.get_property(0, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), 0, 1024).unwrap();
     let reply = reply.reply().unwrap();
     assert_eq!(reply.value, title.as_bytes());
 
-    create_gc(&conn, gc_id, win_id, &gc_aux).unwrap();
+    conn.create_gc(gc_id, win_id, &gc_aux).unwrap();
 
-    map_window(&conn, win_id).unwrap();
+    conn.map_window(win_id).unwrap();
 
     conn.flush();
 
@@ -64,7 +64,7 @@ fn main() {
                             Point { x: -10, y: height + 10 },
                             Point { x: width + 10, y: -10 },
                         ];
-                        poly_line(&conn, CoordMode::Origin, win_id, gc_id, &points).unwrap();
+                        conn.poly_line(CoordMode::Origin, win_id, gc_id, &points).unwrap();
                         conn.flush();
                     }
                 }

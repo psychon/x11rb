@@ -3,14 +3,14 @@
 extern crate x11rb;
 
 use x11rb::xcb_ffi::XCBConnection;
-use x11rb::generated::xproto::*;
+use x11rb::generated::xproto::{ConnectionExt, FontDraw};
 
 fn main() {
     let (conn, _) = XCBConnection::connect(None).unwrap();
     let (ltr, rtl): (u8, u8) = (FontDraw::LeftToRight.into(), FontDraw::RightToLeft.into());
 
     println!("DIR  MIN  MAX EXIST DFLT PROP ASC DESC NAME");
-    for reply in list_fonts_with_info(&conn, u16::max_value(), "*".as_bytes()).unwrap() {
+    for reply in conn.list_fonts_with_info(u16::max_value(), "*".as_bytes()).unwrap() {
         let reply = reply.unwrap();
 
         let dir = if reply.draw_direction == ltr {
