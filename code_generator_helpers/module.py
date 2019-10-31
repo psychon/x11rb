@@ -765,6 +765,8 @@ class Module(object):
             self.out("/// # Fields")
             self.out("///")
             for (field, text) in doc.fields.items():
+                # Prevent rustdoc interpreting many leading spaces as code examples
+                text = re.sub(r"\n *", "\n", text)
                 self.out.with_prefixes("/// * `%s` - " % field, "/// ", text)
 
         if doc.errors:
@@ -785,7 +787,7 @@ class Module(object):
             self.out("///")
             self.out("/// # Example")
             self.out("///")
-            self.out("/// ```")
+            self.out("/// ```text")
             self.out.with_prefix("/// ", doc.example)
             self.out("/// ```")
 
