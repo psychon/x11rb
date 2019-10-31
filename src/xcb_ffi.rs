@@ -18,7 +18,7 @@ use super::generated::xproto::{Setup, QueryExtensionReply};
 /// This type wraps `*mut xcb_connection_t` that is provided by libxcb. It provides a rust
 /// interface to this C library.
 #[derive(Debug)]
-pub struct XCBConnection(*mut raw_ffi::xcb_connection_t, Setup, ExtensionInformation);
+pub struct XCBConnection(raw_ffi::XCBConnectionWrapper, Setup, ExtensionInformation);
 
 impl XCBConnection {
     unsafe fn connection_error_from_connection(c: *const raw_ffi::xcb_connection_t) -> ConnectionError {
@@ -58,7 +58,7 @@ impl XCBConnection {
                 Err(Self::connection_error_from_c_error(error.try_into().or(Err(ConnectionError::UnknownError))?))
             } else {
                 let setup = raw_ffi::xcb_get_setup(connection);
-                let conn = XCBConnection(connection, Self::parse_setup(setup)?, Default::default());
+                let conn = XCBConnection(raw_ffi::XCBConnectionWrapper(connection), Self::parse_setup(setup)?, Default::default());
                 Ok((conn, screen as usize))
             }
         }
@@ -108,14 +108,14 @@ impl XCBConnection {
             flags |= raw_ffi::send_request_flags::CHECKED;
         }
         unsafe {
-            raw_ffi::xcb_send_request64(self.0, flags, &mut new_bufs[2], &protocol_request)
+            raw_ffi::xcb_send_request64((self.0).0, flags, &mut new_bufs[2], &protocol_request)
         }
     }
 
     /// Check if the underlying XCB connection is in an error state.
     pub fn has_error(&self) -> Option<ConnectionError> {
         unsafe {
-            let error = raw_ffi::xcb_connection_has_error(self.0);
+            let error = raw_ffi::xcb_connection_has_error((self.0).0);
             if error == 0 {
                 None
             } else {
@@ -129,7 +129,7 @@ impl XCBConnection {
     /// The returned pointer is valid for as long as the original object was not dropped. No
     /// ownerhsip is transferred.
     pub fn get_raw_xcb_connection(&self) -> *mut c_void {
-        self.0 as _
+        (self.0).0 as _
     }
 }
 
@@ -146,7 +146,7 @@ impl Connection for XCBConnection {
 
     fn discard_reply(&self, sequence: SequenceNumber) {
         unsafe {
-            raw_ffi::xcb_discard_reply64(self.0, sequence);
+            raw_ffi::xcb_discard_reply64((self.0).0, sequence);
         }
     }
 
@@ -157,7 +157,7 @@ impl Connection for XCBConnection {
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
         unsafe {
             let mut error = null_mut();
-            let reply = raw_ffi::xcb_wait_for_reply64(self.0, sequence, &mut error);
+            let reply = raw_ffi::xcb_wait_for_reply64((self.0).0, sequence, &mut error);
             assert!(reply == null_mut() || error == null_mut());
             if reply != null_mut() {
                 let header = CSlice::new(reply as _, 32);
@@ -176,9 +176,9 @@ impl Connection for XCBConnection {
 
     fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
         unsafe {
-            let event = raw_ffi::xcb_wait_for_event(self.0);
+            let event = raw_ffi::xcb_wait_for_event((self.0).0);
             if event.is_null() {
-                return Err(Self::connection_error_from_connection(self.0));
+                return Err(Self::connection_error_from_connection((self.0).0));
             }
             let generic_event: GenericEvent = Buffer::from_raw_parts(event as _, 32).try_into()?;
             assert_ne!(35, generic_event.response_type()); // FIXME: XGE events may have sizes > 32
@@ -188,9 +188,9 @@ impl Connection for XCBConnection {
 
     fn poll_for_event(&self) -> Result<Option<GenericEvent>, ConnectionError> {
         unsafe {
-            let event = raw_ffi::xcb_poll_for_event(self.0);
+            let event = raw_ffi::xcb_poll_for_event((self.0).0);
             if event.is_null() {
-                let err = raw_ffi::xcb_connection_has_error(self.0);
+                let err = raw_ffi::xcb_connection_has_error((self.0).0);
                 if err == 0 {
                     return Ok(None);
                 } else {
@@ -204,11 +204,11 @@ impl Connection for XCBConnection {
     }
 
     fn flush(&self) {
-        unsafe { raw_ffi::xcb_flush(self.0); }
+        unsafe { raw_ffi::xcb_flush((self.0).0); }
     }
 
     fn generate_id(&self) -> u32 {
-        unsafe { raw_ffi::xcb_generate_id(self.0) }
+        unsafe { raw_ffi::xcb_generate_id((self.0).0) }
     }
 
     fn setup(&self) -> &Setup {
@@ -219,7 +219,7 @@ impl Connection for XCBConnection {
 impl Drop for XCBConnection {
     fn drop(&mut self) {
         unsafe {
-            raw_ffi::xcb_disconnect(self.0);
+            raw_ffi::xcb_disconnect((self.0).0 as *mut raw_ffi::xcb_connection_t);
         }
     }
 }
@@ -227,7 +227,7 @@ impl Drop for XCBConnection {
 impl AsRawFd for XCBConnection {
     fn as_raw_fd(&self) -> RawFd {
         unsafe {
-            raw_ffi::xcb_get_file_descriptor(self.0)
+            raw_ffi::xcb_get_file_descriptor((self.0).0)
         }
     }
 }
@@ -242,6 +242,14 @@ mod raw_ffi {
     pub struct xcb_connection_t {
         _unused: [u8; 0]
     }
+
+    #[derive(Debug)]
+    pub struct XCBConnectionWrapper(pub *const xcb_connection_t);
+
+    // libxcb is fully thread-safe (well, except for xcb_disconnect()), so the following is
+    // actually fine and safe:
+    unsafe impl Send for XCBConnectionWrapper {}
+    unsafe impl Sync for XCBConnectionWrapper {}
 
     #[allow(non_camel_case_types)]
     #[repr(C)]
