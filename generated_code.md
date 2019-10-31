@@ -14,13 +14,15 @@ use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
 use std::io::IoSlice;
+#[allow(unused_imports)]
+use std::option::Option as RustOption;
 use crate::utils::Buffer;
 #[allow(unused_imports)]
-use crate::x11_utils::{GenericEvent, GenericError as X11GenericError};
+use crate::x11_utils::{GenericEvent as X11GenericEvent, GenericError as X11GenericError};
 use crate::x11_utils::TryParse;
 #[allow(unused_imports)]
 use crate::connection::SequenceNumber;
-use crate::connection::{Cookie, Connection};
+use crate::connection::{Cookie, Connection as X11Connection};
 use crate::connection::ListFontsWithInfoCookie;
 use crate::errors::{ParseError, ConnectionError};
 ```
@@ -131,8 +133,9 @@ impl TryParse for Depth {
         let (visuals_len, new_remaining) = u16::try_parse(remaining)?;
         remaining = new_remaining;
         remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let mut visuals = Vec::with_capacity(visuals_len.try_into()?);
-        for _ in 0..visuals_len {
+        let list_length = visuals_len as usize;
+        let mut visuals = Vec::with_capacity(list_length);
+        for _ in 0..list_length {
             let (v, new_remaining) = Visualtype::try_parse(remaining)?;
             visuals.push(v);
             remaining = new_remaining;
@@ -206,8 +209,8 @@ impl Into<u8> for BackingStore {
         }
     }
 }
-impl Into<Option<u8>> for BackingStore {
-    fn into(self) -> Option<u8> {
+impl Into<RustOption<u8>> for BackingStore {
+    fn into(self) -> RustOption<u8> {
         Some(self.into())
     }
 }
@@ -216,8 +219,8 @@ impl Into<u16> for BackingStore {
         Into::<u8>::into(self) as _
     }
 }
-impl Into<Option<u16>> for BackingStore {
-    fn into(self) -> Option<u16> {
+impl Into<RustOption<u16>> for BackingStore {
+    fn into(self) -> RustOption<u16> {
         Some(self.into())
     }
 }
@@ -226,8 +229,8 @@ impl Into<u32> for BackingStore {
         Into::<u8>::into(self) as _
     }
 }
-impl Into<Option<u32>> for BackingStore {
-    fn into(self) -> Option<u32> {
+impl Into<RustOption<u32>> for BackingStore {
+    fn into(self) -> RustOption<u32> {
         Some(self.into())
     }
 }
@@ -272,8 +275,8 @@ impl Into<u8> for ConfigWindow {
         }
     }
 }
-impl Into<Option<u8>> for ConfigWindow {
-    fn into(self) -> Option<u8> {
+impl Into<RustOption<u8>> for ConfigWindow {
+    fn into(self) -> RustOption<u8> {
         Some(self.into())
     }
 }
@@ -282,8 +285,8 @@ impl Into<u16> for ConfigWindow {
         Into::<u8>::into(self) as _
     }
 }
-impl Into<Option<u16>> for ConfigWindow {
-    fn into(self) -> Option<u16> {
+impl Into<RustOption<u16>> for ConfigWindow {
+    fn into(self) -> RustOption<u16> {
         Some(self.into())
     }
 }
@@ -292,8 +295,8 @@ impl Into<u32> for ConfigWindow {
         Into::<u8>::into(self) as _
     }
 }
-impl Into<Option<u32>> for ConfigWindow {
-    fn into(self) -> Option<u32> {
+impl Into<RustOption<u32>> for ConfigWindow {
+    fn into(self) -> RustOption<u32> {
         Some(self.into())
     }
 }
@@ -536,9 +539,9 @@ impl TryFrom<Buffer> for KeyPressEvent {
         Self::try_from(&*value)
     }
 }
-impl TryFrom<GenericEvent> for KeyPressEvent {
+impl TryFrom<X11GenericEvent> for KeyPressEvent {
     type Error = ParseError;
-    fn try_from(value: GenericEvent) -> Result<Self, Self::Error> {
+    fn try_from(value: X11GenericEvent) -> Result<Self, Self::Error> {
         Self::try_from(Into::<Buffer>::into(value))
     }
 }
@@ -607,17 +610,31 @@ impl TryFrom<&[u8]> for RequestError {
 
 ## Requests
 
+For requests, we generate an extension trait. The generic structure looks like
+this:
+```rust
+/// Extension trait defining the requests of this extension.
+pub trait ConnectionExt: X11Connection {
+    // Following code examples are in here
+}
+impl<C: X11Connection + ?Sized> ConnectionExt for C {}
+```
+
 ### Request without a reply
 
 ```xml
 <request name="NoOperation" opcode="127" />
 ```
+This code is generated in the module:
 ```rust
 pub const NO_OPERATION_REQUEST: u8 = 127;
-pub fn no_operation<A: Connection>(c: &A) -> Result<SequenceNumber, ConnectionError>
+```
+And this code is in the extension trait:
+```rust
+fn no_operation(&self) -> Result<SequenceNumber, ConnectionError>
 {
     let length: usize = (4 + 3) / 4;
-    let length_bytes = length.to_ne_bytes();
+    let length_bytes = TryInto::<u16>::try_into(length)?.to_ne_bytes();
     let request0 = [
         NO_OPERATION_REQUEST,
         0,
@@ -625,7 +642,7 @@ pub fn no_operation<A: Connection>(c: &A) -> Result<SequenceNumber, ConnectionEr
         length_bytes[1],
     ];
     assert_eq!((*&request0).len(), (4 + 3) / 4 * 4);
-    Ok(c.send_request_without_reply(&[IoSlice::new(&request0)]))
+    Ok(self.send_request_without_reply(&[IoSlice::new(&request0)]))
 }
 ```
 
@@ -639,21 +656,9 @@ pub fn no_operation<A: Connection>(c: &A) -> Result<SequenceNumber, ConnectionEr
   </reply>
 </request>
 ```
+This code is generated in the module:
 ```rust
 pub const GET_INPUT_FOCUS_REQUEST: u8 = 43;
-pub fn get_input_focus<A: Connection>(c: &A) -> Result<Cookie<A, GetInputFocusReply>, ConnectionError>
-{
-    let length: usize = (4 + 3) / 4;
-    let length_bytes = length.to_ne_bytes();
-    let request0 = [
-        GET_INPUT_FOCUS_REQUEST,
-        0,
-        length_bytes[0],
-        length_bytes[1],
-    ];
-    assert_eq!((*&request0).len(), (4 + 3) / 4 * 4);
-    Ok(c.send_request_with_reply(&[IoSlice::new(&request0)]))
-}
 #[derive(Debug, Clone, Copy)]
 pub struct GetInputFocusReply {
     pub revert_to: u8,
@@ -684,6 +689,22 @@ impl TryFrom<&[u8]> for GetInputFocusReply {
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
     }
+}
+```
+And this code is in the extension trait:
+```rust
+fn get_input_focus(&self) -> Result<Cookie<Self, GetInputFocusReply>, ConnectionError>
+{
+    let length: usize = (4 + 3) / 4;
+    let length_bytes = TryInto::<u16>::try_into(length)?.to_ne_bytes();
+    let request0 = [
+        GET_INPUT_FOCUS_REQUEST,
+        0,
+        length_bytes[0],
+        length_bytes[1],
+    ];
+    assert_eq!((*&request0).len(), (4 + 3) / 4 * 4);
+    Ok(self.send_request_with_reply(&[IoSlice::new(&request0)]))
 }
 ```
 
@@ -732,17 +753,18 @@ generated.
   <doc>[SNIP]</doc>
 </request>
 ```
+This code is generated in the module:
 ```rust
 pub const CONFIGURE_WINDOW_REQUEST: u8 = 12;
 #[derive(Debug, Clone, Copy, Default)]
 pub struct ConfigureWindowAux {
-    pub x: Option<i32>,
-    pub y: Option<i32>,
-    pub width: Option<u32>,
-    pub height: Option<u32>,
-    pub border_width: Option<u32>,
-    pub sibling: Option<u32>,
-    pub stack_mode: Option<u32>,
+    x: RustOption<i32>,
+    y: RustOption<i32>,
+    width: RustOption<u32>,
+    height: RustOption<u32>,
+    border_width: RustOption<u32>,
+    sibling: RustOption<u32>,
+    stack_mode: RustOption<u32>,
 }
 impl ConfigureWindowAux {
     pub fn new() -> Self {
@@ -773,7 +795,7 @@ impl ConfigureWindowAux {
         }
         result
     }
-    pub fn to_ne_bytes(&self) -> Vec<u8> {
+    fn to_ne_bytes(&self) -> Vec<u8> {
         let mut result = Vec::new();
         if let Some(value) = self.x {
             result.extend(value.to_ne_bytes().iter());
@@ -798,7 +820,7 @@ impl ConfigureWindowAux {
         }
         result
     }
-    pub fn value_mask(&self) -> u16 {
+    fn value_mask(&self) -> u16 {
         let mut mask = 0;
         if self.x.is_some() {
             mask |= Into::<u16>::into(ConfigWindow::X);
@@ -823,36 +845,39 @@ impl ConfigureWindowAux {
         }
         mask
     }
-    pub fn x<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
+    pub fn x<I>(mut self, value: I) -> Self where I: Into<RustOption<i32>> {
         self.x = value.into();
         self
     }
-    pub fn y<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
+    pub fn y<I>(mut self, value: I) -> Self where I: Into<RustOption<i32>> {
         self.y = value.into();
         self
     }
-    pub fn width<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn width<I>(mut self, value: I) -> Self where I: Into<RustOption<u32>> {
         self.width = value.into();
         self
     }
-    pub fn height<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn height<I>(mut self, value: I) -> Self where I: Into<RustOption<u32>> {
         self.height = value.into();
         self
     }
-    pub fn border_width<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn border_width<I>(mut self, value: I) -> Self where I: Into<RustOption<u32>> {
         self.border_width = value.into();
         self
     }
-    pub fn sibling<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn sibling<I>(mut self, value: I) -> Self where I: Into<RustOption<u32>> {
         self.sibling = value.into();
         self
     }
-    pub fn stack_mode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn stack_mode<I>(mut self, value: I) -> Self where I: Into<RustOption<u32>> {
         self.stack_mode = value.into();
         self
     }
 }
-pub fn configure_window<A: Connection>(c: &A, window: u32, value_list: &ConfigureWindowAux) -> Result<SequenceNumber, ConnectionError>
+```
+And this code is in the extension trait:
+```rust
+fn configure_window(&self, window: u32, value_list: &ConfigureWindowAux) -> Result<SequenceNumber, ConnectionError>
 {
     let value_mask = value_list.value_mask();
     let length: usize = (12 + value_list.wire_length() + 3) / 4;
@@ -875,6 +900,6 @@ pub fn configure_window<A: Connection>(c: &A, window: u32, value_list: &Configur
         0,
     ];
     assert_eq!((*&request0).len() + (*&value_list_bytes).len(), (12 + value_list.wire_length() + 3) / 4 * 4);
-    Ok(c.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes)]))
+    Ok(self.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes)]))
 }
 ```
