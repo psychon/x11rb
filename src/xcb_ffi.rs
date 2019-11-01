@@ -83,7 +83,7 @@ impl XCBConnection {
         Ok(result)
     }
 
-    fn send_request(&self, bufs: &[IoSlice], has_reply: bool) -> SequenceNumber {
+    fn send_request(&self, bufs: &[IoSlice], has_reply: bool) -> Result<SequenceNumber, ConnectionError> {
         // XCB wants to access bufs[-1] and bufs[-2], so we need to add two empty items in front.
         // For this, we derefence the IoSlices, add two new entries, and create new IoSlices.
         let prepend = [&[][..], &[][..]];
@@ -107,8 +107,11 @@ impl XCBConnection {
         if has_reply {
             flags |= raw_ffi::send_request_flags::CHECKED;
         }
-        unsafe {
-            raw_ffi::xcb_send_request64((self.0).0, flags, &mut new_bufs[2], &protocol_request)
+        let seqno = unsafe { raw_ffi::xcb_send_request64((self.0).0, flags, &mut new_bufs[2], &protocol_request) };
+        if seqno == 0 {
+            unsafe { Err(XCBConnection::connection_error_from_connection((self.0).0)) }
+        } else {
+            Ok(seqno)
         }
     }
 
@@ -134,13 +137,13 @@ impl XCBConnection {
 }
 
 impl Connection for XCBConnection {
-    fn send_request_with_reply<R>(&self, bufs: &[IoSlice]) -> Cookie<Self, R>
+    fn send_request_with_reply<R>(&self, bufs: &[IoSlice]) -> Result<Cookie<Self, R>, ConnectionError>
         where R: TryFrom<Buffer, Error=ParseError>
     {
-        Cookie::new(self, self.send_request(bufs, true))
+        Ok(Cookie::new(self, self.send_request(bufs, true)?))
     }
 
-    fn send_request_without_reply(&self, bufs: &[IoSlice]) -> SequenceNumber {
+    fn send_request_without_reply(&self, bufs: &[IoSlice]) -> Result<SequenceNumber, ConnectionError> {
         self.send_request(bufs, false)
     }
 

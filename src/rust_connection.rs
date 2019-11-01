@@ -226,19 +226,19 @@ impl RustConnection {
         Ok((conn, screen))
     }
 
-    fn send_request(&self, bufs: &[IoSlice], has_reply: bool) -> SequenceNumber {
-        self.inner.borrow_mut().send_request(bufs, has_reply).unwrap()
+    fn send_request(&self, bufs: &[IoSlice], has_reply: bool) -> Result<SequenceNumber, ConnectionError> {
+        self.inner.borrow_mut().send_request(bufs, has_reply).or(Err(ConnectionError::UnknownError))
     }
 }
 
 impl Connection for RustConnection {
-    fn send_request_with_reply<R>(&self, bufs: &[IoSlice]) -> Cookie<Self, R>
+    fn send_request_with_reply<R>(&self, bufs: &[IoSlice]) -> Result<Cookie<Self, R>, ConnectionError>
         where R: TryFrom<Buffer, Error=ParseError>
     {
-        Cookie::new(self, self.send_request(bufs, true))
+        Ok(Cookie::new(self, self.send_request(bufs, true)?))
     }
 
-    fn send_request_without_reply(&self, bufs: &[IoSlice]) -> SequenceNumber {
+    fn send_request_without_reply(&self, bufs: &[IoSlice]) -> Result<SequenceNumber, ConnectionError> {
         self.send_request(bufs, false)
     }
 

@@ -40,15 +40,15 @@ impl FakeConnection {
 }
 
 impl Connection for FakeConnection {
-    fn send_request_with_reply<R>(&self, _bufs: &[IoSlice]) -> Cookie<Self, R>
+    fn send_request_with_reply<R>(&self, _bufs: &[IoSlice]) -> Result<Cookie<Self, R>, ConnectionError>
     where R: TryFrom<Buffer, Error=ParseError>
     {
         unimplemented!()
     }
 
-    fn send_request_without_reply(&self, bufs: &[IoSlice]) -> SequenceNumber {
+    fn send_request_without_reply(&self, bufs: &[IoSlice]) -> Result<SequenceNumber, ConnectionError> {
         self.0.borrow_mut().push(SavedRequest::new(false, bufs));
-        0
+        Ok(0)
     }
 
     fn discard_reply(&self, _sequence: SequenceNumber) {
