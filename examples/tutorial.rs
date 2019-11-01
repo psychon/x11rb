@@ -212,7 +212,7 @@ fn example1() -> Result<(), ConnectionErrorOrX11Error> {
     // Bad use
     let start = Instant::now();
     for i in 0..COUNT {
-        atoms[i] = conn.intern_atom(0, names[i].as_bytes())?.reply()?.atom;
+        atoms[i] = conn.intern_atom(false, names[i].as_bytes())?.reply()?.atom;
     }
     let diff = start.elapsed();
     println!("bad use time:  {:?}", diff);
@@ -220,7 +220,7 @@ fn example1() -> Result<(), ConnectionErrorOrX11Error> {
     // Good use
     let start = Instant::now();
     let cookies = names.iter()
-        .map(|name| conn.intern_atom(0, name.as_bytes()))
+        .map(|name| conn.intern_atom(false, name.as_bytes()))
         .collect::<Vec<_>>();
     for (i, atom) in cookies.into_iter().enumerate() {
         atoms[i] = atom?.reply()?.atom;

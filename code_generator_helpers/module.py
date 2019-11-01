@@ -423,7 +423,10 @@ class Module(object):
                     generics.append(letter)
                     where.append("%s: Into<%s>" % (letter, rust_type))
                     rust_type = letter
-                args.append("%s: %s" % (self._to_rust_variable(field.field_name), self._to_rust_identifier(rust_type)))
+                rust_type = self._to_rust_identifier(rust_type)
+                if name == ('xcb', 'InternAtom') and field.field_name == 'only_if_exists':
+                    rust_type = 'bool'
+                args.append("%s: %s" % (self._to_rust_variable(field.field_name), rust_type))
 
         if is_list_fonts_with_info:
             assert need_lifetime
@@ -554,6 +557,8 @@ class Module(object):
                         # FIXME: Switch to a trait that we can implement on f32
                         self.trait_out("let %s = %s.to_bits().to_ne_bytes();", self._to_rust_variable(field.field_name + "_bytes"), self._to_rust_variable(field.field_name))
                     elif field.type.size is not None:  # Size None was already handled above
+                        if (name == ('xcb', 'InternAtom') and field.field_name == 'only_if_exists'):
+                            self.trait_out("let %s = %s as %s;", field.field_name, field.field_name, self._to_rust_type(field.type.name))
                         if field.field_name == "length":
                             source = "TryInto::<%s>::try_into(length).unwrap_or(0)" % self._to_rust_type(field.type.name)
                         else:
