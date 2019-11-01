@@ -413,7 +413,12 @@ class Module(object):
         for field in obj.fields:
             if field.visible:
                 rust_type = self._to_complex_rust_type(field.type, aux_name, '&')
-                if field.enum is not None and not field.type.is_list:
+                if (field.enum is not None and not field.type.is_list) or \
+                        (name == ('xcb', 'SendEvent') and field.field_name == 'event'):
+                    if name == ('xcb', 'SendEvent') and field.field_name == 'event':
+                        # Turn &[u8; 32] into [u8; 32]
+                        assert rust_type[0] == '&'
+                        rust_type = rust_type[1:]
                     letter = next(letters)
                     generics.append(letter)
                     where.append("%s: Into<%s>" % (letter, rust_type))
@@ -520,6 +525,9 @@ class Module(object):
                     for i in range(field.type.nmemb):
                         request.append("0")
                 elif field.type.is_list:
+                    if name == ('xcb', 'SendEvent') and field.field_name == 'event':
+                        self.trait_out("let %s = %s.into();", field.field_name, field.field_name)
+                        self.trait_out("let %s = &%s;", field.field_name, field.field_name)
                     if not (hasattr(field, "has_length_field") or field.type.fixed_size()):
                         self.trait_out("assert_eq!(%s.len(), %s, \"Argument %s has an incorrect length\");",
                                        self._to_rust_variable(field.field_name), self.expr_to_str(field.type.expr, "usize"), field.field_name)
