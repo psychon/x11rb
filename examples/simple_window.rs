@@ -51,41 +51,34 @@ fn main() {
         let event = conn.wait_for_event().unwrap();
         match event.response_type() {
             EXPOSE_EVENT => {
-                let event = ExposeEvent::try_from(event);
+                let event = ExposeEvent::from(event);
                 println!("{:?})", event);
-                if let Ok(event) = event {
-                    if event.count == 0 {
-                        // We ought to clear the background before drawing something new, but...
-                        // whatever
-                        let (width, height): (i16, i16) = (width as _, height as _);
-                        let points = [
-                            Point { x: width, y: height },
-                            Point { x: -10, y: -10 },
-                            Point { x: -10, y: height + 10 },
-                            Point { x: width + 10, y: -10 },
-                        ];
-                        conn.poly_line(CoordMode::Origin, win_id, gc_id, &points).unwrap();
-                        conn.flush();
-                    }
+                if event.count == 0 {
+                    // We ought to clear the background before drawing something new, but...
+                    // whatever
+                    let (width, height): (i16, i16) = (width as _, height as _);
+                    let points = [
+                        Point { x: width, y: height },
+                        Point { x: -10, y: -10 },
+                        Point { x: -10, y: height + 10 },
+                        Point { x: width + 10, y: -10 },
+                    ];
+                    conn.poly_line(CoordMode::Origin, win_id, gc_id, &points).unwrap();
+                    conn.flush();
                 }
             },
             CONFIGURE_NOTIFY_EVENT => {
-                let event = ConfigureNotifyEvent::try_from(event);
-                println!("{:?})", event);
-                if let Ok(event) = event {
-                    width = event.width;
-                    height = event.height;
-                }
+                let event = ConfigureNotifyEvent::from(event);
+                width = event.width;
+                height = event.height;
             },
             CLIENT_MESSAGE_EVENT => {
-                let event = ClientMessageEvent::try_from(event);
+                let event = ClientMessageEvent::from(event);
                 println!("{:?})", event);
-                if let Ok(event) = event {
-                    let data = event.data.as_data32();
-                    if event.format == 32 && event.window == win_id && data[0] == wm_delete_window {
-                        println!("Window was asked to close");
-                        return;
-                    }
+                let data = event.data.as_data32();
+                if event.format == 32 && event.window == win_id && data[0] == wm_delete_window {
+                    println!("Window was asked to close");
+                    return;
                 }
             }
             0 => { println!("Unknown error {:?}", GenericError::try_from(event)); },

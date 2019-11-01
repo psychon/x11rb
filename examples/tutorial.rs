@@ -19,8 +19,6 @@
 
 extern crate x11rb;
 
-use std::convert::TryFrom;
-
 use x11rb::xcb_ffi::XCBConnection;
 use x11rb::connection::{Connection, SequenceNumber};
 use x11rb::x11_utils::Event;
@@ -899,12 +897,12 @@ fn example_wait_for_event<C: Connection>(conn: &C) -> Result<(), ConnectionError
         match event.response_type() {
             xproto::EXPOSE_EVENT => {
                 // Handle the expose event type
-                let ev = ExposeEvent::try_from(event)?;
+                let ev = ExposeEvent::from(event);
                 // ....
             },
             xproto::BUTTON_PRESS_EVENT => {
                 // Handle the button press event type
-                let ev = ButtonPressEvent::try_from(event)?;
+                let ev = ButtonPressEvent::from(event);
                 // ....
             },
             _ => {
@@ -1215,12 +1213,12 @@ fn example7() -> Result<(), ConnectionErrorOrX11Error> {
         let event = conn.wait_for_event()?;
         match event.response_type() {
             xproto::EXPOSE_EVENT => {
-                let ev = ExposeEvent::try_from(event)?;
+                let ev = ExposeEvent::from(event);
                 println!("Window {} exposed. Region to be redrawn at location ({},{}) \
                          with dimensions ({},{})", ev.window, ev.x, ev.y, ev.width, ev.height);
             },
             xproto::BUTTON_PRESS_EVENT => {
-                let ev = ButtonPressEvent::try_from(event)?;
+                let ev = ButtonPressEvent::from(event);
                 print_modifiers(ev.state);
                 match ev.detail {
                     4 => println!("Wheel Button up in window {}, at coordinates ({},{})",
@@ -1232,33 +1230,33 @@ fn example7() -> Result<(), ConnectionErrorOrX11Error> {
                 }
             },
             xproto::BUTTON_RELEASE_EVENT => {
-                let ev = ButtonReleaseEvent::try_from(event)?;
+                let ev = ButtonReleaseEvent::from(event);
                 print_modifiers(ev.state);
                 println!("Button {} released in window {}, at coordinates ({},{})",
                          ev.detail, ev.event, ev.event_x, ev.event_y);
             },
             xproto::MOTION_NOTIFY_EVENT => {
-                let ev = MotionNotifyEvent::try_from(event)?;
+                let ev = MotionNotifyEvent::from(event);
                 println!("Mouse moved in window {} at coordinates ({},{})",
                          ev.event, ev.event_x, ev.event_y);
             },
             xproto::ENTER_NOTIFY_EVENT => {
-                let ev = EnterNotifyEvent::try_from(event)?;
+                let ev = EnterNotifyEvent::from(event);
                 println!("Mouse entered window {} at coordinates ({},{})",
                          ev.event, ev.event_x, ev.event_y);
             },
             xproto::LEAVE_NOTIFY_EVENT => {
-                let ev = LeaveNotifyEvent::try_from(event)?;
+                let ev = LeaveNotifyEvent::from(event);
                 println!("Mouse left window {} at coordinates ({},{})",
                          ev.event, ev.event_x, ev.event_y);
             },
             xproto::KEY_PRESS_EVENT => {
-                let ev = KeyPressEvent::try_from(event)?;
+                let ev = KeyPressEvent::from(event);
                 print_modifiers(ev.state);
                 println!("Key pressed in window {}", ev.event);
             },
             xproto::KEY_RELEASE_EVENT => {
-                let ev = KeyReleaseEvent::try_from(event)?;
+                let ev = KeyReleaseEvent::from(event);
                 print_modifiers(ev.state);
                 println!("Key released in window {}", ev.event);
             },
@@ -1420,7 +1418,7 @@ fn example8() -> Result<(), ConnectionErrorOrX11Error> {
                 conn.flush();
             },
             xproto::KEY_RELEASE_EVENT => {
-                let ev = KeyReleaseEvent::try_from(event)?;
+                let ev = KeyReleaseEvent::from(event);
                 if ev.detail == 9 {
                     // ESC
                     return Ok(())
@@ -2234,7 +2232,7 @@ fn example10() -> Result<(), ConnectionErrorOrX11Error> {
                 conn.flush();
             },
             xproto::BUTTON_PRESS_EVENT => {
-                let ev = ButtonPressEvent::try_from(event)?;
+                let ev = ButtonPressEvent::from(event);
                 let length = "click here to change cursor".len() as i16;
 
                 if (ev.event_x >= (WIDTH - 7 * length) / 2) &&
@@ -2252,7 +2250,7 @@ fn example10() -> Result<(), ConnectionErrorOrX11Error> {
                 conn.flush();
             },
             xproto::KEY_RELEASE_EVENT => {
-                let ev = KeyReleaseEvent::try_from(event)?;
+                let ev = KeyReleaseEvent::from(event);
                 if ev.detail == 9 {
                     // ESC
                     return Ok(());
