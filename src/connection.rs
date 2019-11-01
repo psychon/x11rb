@@ -32,7 +32,7 @@ pub trait Connection: Sized {
     /// Users of this library will most likely not want to use this function directly. Instead, the
     /// generated code will take the supplied arguments, construct byte buffers, and call this
     /// method.
-    fn send_request_with_reply<R>(&self, bufs: &[IoSlice]) -> Cookie<Self, R>
+    fn send_request_with_reply<R>(&self, bufs: &[IoSlice]) -> Result<Cookie<Self, R>, ConnectionError>
         where R: TryFrom<Buffer, Error=ParseError>;
 
     /// Send a request without a reply to the server.
@@ -43,7 +43,7 @@ pub trait Connection: Sized {
     /// Users of this library will most likely not want to use this function directly. Instead, the
     /// generated code will take the supplied arguments, construct byte buffers, and call this
     /// method.
-    fn send_request_without_reply(&self, bufs: &[IoSlice]) -> SequenceNumber;
+    fn send_request_without_reply(&self, bufs: &[IoSlice]) -> Result<SequenceNumber, ConnectionError>;
 
     /// A reply to an error should be discarded.
     ///
