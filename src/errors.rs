@@ -4,7 +4,7 @@ use std::error::Error;
 
 use crate::x11_utils::GenericError;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ParseError {
     ParseError
 }
@@ -30,7 +30,7 @@ impl From<std::num::TryFromIntError> for ParseError {
     }
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ConnectionError {
     UnknownError,
     ConnectionError,
