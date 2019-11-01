@@ -32,6 +32,13 @@ pub trait Connection: Sized {
     /// Users of this library will most likely not want to use this function directly. Instead, the
     /// generated code will take the supplied arguments, construct byte buffers, and call this
     /// method.
+    ///
+    /// The provided buffers must contain at least a single element and the first buffer must have
+    /// at least four bytes. The length field must be set correctly, unless the request is larger
+    /// than 2^18 bytes, because in this case, the length field would overflow. The connection
+    /// automatically uses the BIG-REQUESTS extension for such large requests.
+    ///
+    /// In any case, the request may not be larger than the server's maximum request length.
     fn send_request_with_reply<R>(&self, bufs: &[IoSlice]) -> Result<Cookie<Self, R>, ConnectionError>
         where R: TryFrom<Buffer, Error=ParseError>;
 
@@ -43,6 +50,13 @@ pub trait Connection: Sized {
     /// Users of this library will most likely not want to use this function directly. Instead, the
     /// generated code will take the supplied arguments, construct byte buffers, and call this
     /// method.
+    ///
+    /// The provided buffers must contain at least a single element and the first buffer must have
+    /// at least four bytes. The length field must be set correctly, unless the request is larger
+    /// than 2^18 bytes, because in this case, the length field would overflow. The connection
+    /// automatically uses the BIG-REQUESTS extension for such large requests.
+    ///
+    /// In any case, the request may not be larger than the server's maximum request length.
     fn send_request_without_reply(&self, bufs: &[IoSlice]) -> Result<SequenceNumber, ConnectionError>;
 
     /// A reply to an error should be discarded.
@@ -95,6 +109,136 @@ pub trait Connection: Sized {
     /// called to generate an identifier. Next, `generated::xproto::create_window` can be called to
     /// actually create the window.
     fn generate_id(&self) -> u32;
+
+    /// The maximum number of bytes that the X11 server accepts in a request.
+    fn maximum_request_bytes(&self) -> usize;
+
+    /// Check the request length and use BIG-REQUESTS if necessary.
+    ///
+    /// Users of this library will most likely not want to use this function directly.
+    ///
+    /// This function is provided by the trait. It examines the given request buffers and checks
+    /// that the length field is set correctly.
+    ///
+    /// If the request has more than 2^18 bytes, this function handles using the BIG-REQUESTS
+    /// extension. The request is rewritten to include the correct length field. For this case, the
+    /// `storage` parameter is needed. This function uses it to store the necessary buffers.
+    ///
+    /// When using this function, it is recommended to allocate the `storage` parameter with
+    /// `Default::default()`.
+    ///
+    /// Example usage:
+    /// ```
+    /// use std::io::IoSlice;
+    /// use std::convert::TryFrom;
+    /// use x11rb::connection::{Cookie, Connection, SequenceNumber};
+    /// use x11rb::errors::{ParseError, ConnectionError};
+    /// use x11rb::utils::Buffer;
+    ///
+    /// struct MyConnection();
+    ///
+    /// impl Connection for MyConnection {
+    ///     // [snip, other functions here]
+    ///     # fn discard_reply(&self, sequence: SequenceNumber) {
+    ///     #    unimplemented!()
+    ///     # }
+    ///     # fn extension_information(&self, ext: &'static str)
+    ///     # -> Option<&x11rb::generated::xproto::QueryExtensionReply> {
+    ///     #    unimplemented!()
+    ///     # }
+    ///     # fn wait_for_reply(&self, sequence: SequenceNumber)
+    ///     # -> Result<Buffer, x11rb::errors::ConnectionErrorOrX11Error> {
+    ///     #    unimplemented!()
+    ///     # }
+    ///     # fn wait_for_event(&self) -> Result<x11rb::x11_utils::GenericEvent, ConnectionError> {
+    ///     #    unimplemented!()
+    ///     # }
+    ///     # fn poll_for_event(&self)
+    ///     # -> Result<Option<x11rb::x11_utils::GenericEvent>, ConnectionError> {
+    ///     #    unimplemented!()
+    ///     # }
+    ///     # fn flush(&self) {
+    ///     #    unimplemented!()
+    ///     # }
+    ///     # fn setup(&self) -> &x11rb::generated::xproto::Setup {
+    ///     #    unimplemented!()
+    ///     # }
+    ///     # fn generate_id(&self) -> u32 {
+    ///     #    unimplemented!()
+    ///     # }
+    ///     # fn maximum_request_bytes(&self) -> usize {
+    ///     #    unimplemented!()
+    ///     # }
+    ///
+    ///     fn send_request_with_reply<R>(&self, bufs: &[IoSlice]) -> Result<Cookie<Self, R>, ConnectionError>
+    ///     where R: TryFrom<Buffer, Error=ParseError> {
+    ///         Ok(Cookie::new(self, self.send_request(bufs, true)?))
+    ///     }
+    ///
+    ///     fn send_request_without_reply(&self, bufs: &[IoSlice]) -> Result<SequenceNumber, ConnectionError> {
+    ///         self.send_request(bufs, false)
+    ///     }
+    /// }
+    ///
+    /// impl MyConnection {
+    ///     fn send_request(&self, bufs: &[IoSlice], has_reply: bool)
+    ///     -> Result<SequenceNumber, ConnectionError>
+    ///     {
+    ///         let mut storage = Default::default();
+    ///         let bufs = self.compute_length_field(bufs, &mut storage)?;
+    ///         unimplemented!("Now send bufs to the X11 server");
+    ///     }
+    /// }
+    /// ```
+    fn compute_length_field<'b>(&self, request_buffers: &'b [IoSlice<'b>], storage: &'b mut (Vec<IoSlice<'b>>, [u8; 8])) -> Result<&'b [IoSlice<'b>], ConnectionError>
+    {
+        // Compute the total length of the request
+        let length: usize = request_buffers.iter()
+            .map(|buf| buf.len())
+            .sum();
+        assert_eq!(length % 4, 0, "The length of X11 requests must be a multiple of 4, got {}", length);
+        let wire_length = length / 4;
+
+        let first_buf = &request_buffers[0];
+
+        // If the length fits into an u16, just return the request as-is
+        if let Ok(wire_length) = TryInto::<u16>::try_into(wire_length) {
+            // Check that the request contains the correct length field
+            let length_field = u16::from_ne_bytes([first_buf[2], first_buf[3]]);
+            assert_eq!(wire_length, length_field, "Length field contains incorrect value");
+            return Ok(request_buffers)
+        }
+
+        // Check that the total length is not too large
+        if length > self.maximum_request_bytes() {
+            return Err(ConnectionError::MaximumRequestLengthExceeded);
+        }
+
+        // Okay, we need to use big requests.
+        let wire_length: u32 = wire_length.try_into().expect("X11 request larger than 2^34 bytes?!?");
+        let wire_length = wire_length.to_ne_bytes();
+
+        // Now construct the new IoSlices
+
+        // Replacement for the first four bytes of the request
+        storage.1.copy_from_slice(&[
+            // First part of the request
+            first_buf[0], first_buf[1],
+            // length field zero indicates big requests
+            0, 0,
+            // New bytes: extended length
+            wire_length[0], wire_length[1], wire_length[2], wire_length[3]
+        ]);
+        storage.0.push(IoSlice::new(&storage.1));
+
+        // The remaining part of the first buffer of the request
+        storage.0.push(IoSlice::new(&first_buf[4..]));
+
+        // and the rest of the request
+        storage.0.extend(request_buffers[1..].iter().map(std::ops::Deref::deref).map(IoSlice::new));
+
+        Ok(&storage.0[..])
+    }
 }
 
 /// A handle to a response from the X11 server.
@@ -114,7 +258,11 @@ impl<C, R> Cookie<'_, C, R>
 where R: TryFrom<Buffer, Error=ParseError>,
       C: Connection
 {
-    pub(crate) fn new(connection: &C, sequence_number: SequenceNumber) -> Cookie<C, R> {
+    /// Construct a new cookie.
+    ///
+    /// This function should only be used by implementations of
+    /// `Connection::send_request_with_reply`.
+    pub fn new(connection: &C, sequence_number: SequenceNumber) -> Cookie<C, R> {
         Cookie {
             connection,
             sequence_number: Some(sequence_number),
