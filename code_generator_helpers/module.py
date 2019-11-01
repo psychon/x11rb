@@ -637,7 +637,7 @@ class Module(object):
         parts = []
         for field in fields:
             assert field.wire  # I *guess* that non-wire fields just have to be skipped
-            if field.visible or hasattr(field, 'is_length_field_for'):
+            if not field.type.is_pad:
                 rust_type = self._to_rust_type(field.type.name)
                 if field.type.is_list and field.type.nmemb is not None:
                     for i in range(field.type.nmemb):
@@ -662,10 +662,11 @@ class Module(object):
                 else:
                     self.out("let (%s, new_remaining) = %s::try_parse(remaining)?;", self._to_rust_variable(field.field_name), self._to_rust_identifier(rust_type))
                     self.out("remaining = new_remaining;")
-                    if field.visible:
+                    if not hasattr(field, 'is_length_field_for'):
                         parts.append(self._to_rust_variable(field.field_name))
             else:
-                if field.type.is_pad and field.type.align != 1:
+                assert field.type.is_pad
+                if field.type.align != 1:
                     assert field.type.size * field.type.nmemb == 1
                     align = field.type.align
                     self.out("// Align offset to multiple of %s", align)
@@ -688,7 +689,7 @@ class Module(object):
         self.out("pub struct %s%s {", name_transform(self._name(name)), extra_name)
         with Indent(self.out):
             for field in complex.fields:
-                if field.visible:
+                if field.visible or (not field.type.is_pad and not hasattr(field, "is_length_field_for")):
                     field_name = self._to_rust_variable(field.field_name)
                     if field.type.is_list:
                         if field.type.nmemb is None:
