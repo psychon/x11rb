@@ -245,7 +245,7 @@ class Module(object):
     def struct(self, struct, name):
         assert not hasattr(struct, "doc")
         has_variable_size_list = any(field.type.is_list and field.type.nmemb is None for field in struct.fields)
-        self.complex_type(struct, name, False, '', lambda name: self._to_rust_identifier(name))
+        self.complex_type(struct, name, '', lambda name: self._to_rust_identifier(name))
 
         if has_variable_size_list:
             length = None
@@ -590,7 +590,7 @@ class Module(object):
                 self.out("}")
             else:
                 _emit_doc(self.out, obj.reply.doc)
-                self.complex_type(obj.reply, name, False, 'Reply')
+                self.complex_type(obj.reply, name, 'Reply')
 
         self.out("")
 
@@ -607,14 +607,25 @@ class Module(object):
             self.out.indent("pub generic_events_are_currently_not_supported: bool")
             self.out("}")
         else:
-            self.complex_type(event, name, 'X11GenericEvent', 'Event')
+            self.complex_type(event, name, 'Event')
+            self._emit_from_generic(name, 'X11GenericEvent', 'Event')
         self.out("")
 
     def error(self, error, name):
         assert not hasattr(error, "doc")
         self.emit_opcode(name, 'Error', error.opcodes[name])
-        self.complex_type(error, name, 'X11GenericError', 'Error')
+        self.complex_type(error, name, 'Error')
+        self._emit_from_generic(name, 'X11GenericError', 'Error')
         self.out("")
+
+    def _emit_from_generic(self, name, from_generic_type, extra_name):
+        self.out("impl TryFrom<%s> for %s%s {", from_generic_type, self._name(name), extra_name)
+        with Indent(self.out):
+            self.out("type Error = ParseError;")
+            self.out("fn try_from(value: %s) -> Result<Self, Self::Error> {", from_generic_type)
+            self.out.indent("Self::try_from(Into::<Buffer>::into(value))")
+            self.out("}")
+        self.out("}")
 
     def emit_opcode(self, name, extra_name, opcode):
         if opcode == "-1" and name == ('xcb', 'Glx', 'Generic'):
@@ -667,7 +678,7 @@ class Module(object):
 
         return parts
 
-    def complex_type(self, complex, name, from_generic_type, extra_name, name_transform=lambda x: x):
+    def complex_type(self, complex, name, extra_name, name_transform=lambda x: x):
         mark_length_fields(complex)
 
         if all(field.type.fixed_size and (not field.type.is_list or field.type.nmemb is not None) and not field.type.is_union for field in complex.fields):
@@ -706,15 +717,6 @@ class Module(object):
             self.out.indent("Self::try_from(&*value)")
             self.out("}")
         self.out("}")
-
-        if from_generic_type:
-            self.out("impl TryFrom<%s> for %s%s {", from_generic_type, name_transform(self._name(name)), extra_name)
-            with Indent(self.out):
-                self.out("type Error = ParseError;")
-                self.out("fn try_from(value: %s) -> Result<Self, Self::Error> {", from_generic_type)
-                self.out.indent("Self::try_from(Into::<Buffer>::into(value))")
-                self.out("}")
-            self.out("}")
 
         self.out("impl TryFrom<&[u8]> for %s%s {", name_transform(self._name(name)), extra_name)
         with Indent(self.out):
