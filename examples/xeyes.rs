@@ -234,8 +234,8 @@ fn main() {
     let screen = &conn.setup().roots[screen_num];
 
     let (wm_protocols, wm_delete_window) = {
-        let protocols = conn.intern_atom(0, "WM_PROTOCOLS".as_bytes()).unwrap();
-        let delete = conn.intern_atom(0, "WM_DELETE_WINDOW".as_bytes()).unwrap();
+        let protocols = conn.intern_atom(false, "WM_PROTOCOLS".as_bytes()).unwrap();
+        let delete = conn.intern_atom(false, "WM_DELETE_WINDOW".as_bytes()).unwrap();
         (protocols.reply().unwrap().atom, delete.reply().unwrap().atom)
     };
 
