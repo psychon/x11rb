@@ -339,6 +339,10 @@ class Module(object):
                     self.out("}")
                     self.out("do_the_parse(&self.0[..]).unwrap()")
                 self.out("}")
+
+            self.out("fn to_ne_bytes(&self) -> &[u8] {")
+            self.out.indent("&self.0")
+            self.out("}")
         self.out("}")
 
         fixed_length = max((field.type.size * field.type.nmemb for field in enum.fields))
@@ -609,6 +613,7 @@ class Module(object):
         else:
             self.complex_type(event, name, 'Event')
             self._emit_from_generic(name, 'X11GenericEvent', 'Event')
+            self._emit_serialise(event, name, 'Event')
         self.out("")
 
     def error(self, error, name):
@@ -616,6 +621,7 @@ class Module(object):
         self.emit_opcode(name, 'Error', error.opcodes[name])
         self.complex_type(error, name, 'Error')
         self._emit_from_generic(name, 'X11GenericError', 'Error')
+        self._emit_serialise(error, name, 'Error')
         self.out("")
 
     def _emit_from_generic(self, name, from_generic_type, extra_name):
@@ -624,6 +630,47 @@ class Module(object):
             self.out("fn from(value: %s) -> Self {", from_generic_type)
             self.out.indent("Self::try_from(Into::<Buffer>::into(value))" +
                             ".expect(\"Buffer should be large enough so that parsing cannot fail\")")
+            self.out("}")
+        self.out("}")
+
+    def _emit_serialise(self, obj, name, extra_name):
+        self.out("impl Into<[u8; 32]> for %s%s {", self._name(name), extra_name)
+        with Indent(self.out):
+            self.out("fn into(self) -> [u8; 32] {")
+            with Indent(self.out):
+                parts = []
+                for field in obj.fields:
+                    field_name = self._to_rust_variable(field.field_name)
+                    if field.wire:
+                        if field.type.is_pad:
+                            assert field.type.align == 1
+                            assert field.type.size == 1
+                            for i in range(field.type.nmemb):
+                                parts.append("0")
+                        elif field.type.is_list:
+                            assert field.type.nmemb is not None and field.type.size == 1
+                            for i in range(field.type.nmemb):
+                                parts.append("self.%s[%d]" % (field_name, i))
+                        elif field.type.size == 1:
+                            parts.append("self.%s" % field_name)
+                        else:
+                            self.out("let %s = self.%s.to_ne_bytes();", field_name, field_name)
+                            for i in range(field.type.size):
+                                parts.append("%s[%d]" % (field_name, i))
+
+                assert len(parts) <= 32
+                if len(parts) < 32:
+                    parts.append("/* trailing padding */ 0")
+                    while len(parts) < 32:
+                        parts.append("0")
+
+                self.out("[")
+                with Indent(self.out):
+                    while len(parts) > 8:
+                        self.out("%s,", ", ".join(parts[:8]))
+                        parts = parts[8:]
+                    self.out("%s", ", ".join(parts))
+                self.out("]")
             self.out("}")
         self.out("}")
 
