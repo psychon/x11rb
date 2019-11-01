@@ -5,7 +5,7 @@ use std::cell::RefCell;
 
 use super::connection::{Connection, Cookie, SequenceNumber};
 use super::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
-use super::generated::xproto::{Setup, QueryExtensionReply, ConnectionExt, Segment};
+use super::generated::xproto::{Setup, QueryExtensionReply, ConnectionExt, Segment, KeymapNotifyEvent};
 use super::utils::Buffer;
 use super::x11_utils::GenericEvent;
 
@@ -160,5 +160,31 @@ fn test_too_large_request() -> Result<(), ConnectionError> {
     let y: i16 = 7;
     let res = conn.poly_text16(drawable, gc, x, y, &big_buffer);
     assert_eq!(ConnectionError::MaximumRequestLengthExceeded, res.unwrap_err());
+    Ok(())
+}
+
+#[test]
+fn test_send_event() -> Result<(), ConnectionError> {
+    // Prepare the event
+    let buffer: [u8; 32] = [11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+                            14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
+                            26, 27, 28, 29, 30];
+    let event = KeymapNotifyEvent::try_from(&buffer[..])?;
+
+    // "Send" it
+    let conn = FakeConnection::default();
+    let propagate = 42;
+    let destination = 0x1337;
+    let event_mask = 7;
+    conn.send_event(propagate, destination, event_mask, event)?;
+
+    let mut expected = Vec::new();
+    expected.push(super::generated::xproto::SEND_EVENT_REQUEST);
+    expected.push(propagate);
+    expected.extend(&((12u16 + 32u16) / 4).to_ne_bytes());
+    expected.extend(&destination.to_ne_bytes());
+    expected.extend(&event_mask.to_ne_bytes());
+    expected.extend(buffer.iter());
+    conn.check_requests(&[(false, expected)]);
     Ok(())
 }
