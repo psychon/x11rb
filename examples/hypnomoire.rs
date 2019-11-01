@@ -8,7 +8,6 @@ use std::thread;
 use std::time::Duration;
 use std::sync::{Arc, Mutex};
 use std::f64::consts::PI;
-use std::convert::TryFrom;
 use x11rb::xcb_ffi::XCBConnection;
 use x11rb::connection::Connection;
 use x11rb::errors::ConnectionErrorOrX11Error;
@@ -141,34 +140,32 @@ fn event_thread<C: Connection>(conn: Arc<C>, windows: Vec<Arc<Mutex<Window>>>, w
 
         match event.response_type() {
             EXPOSE_EVENT => {
-                if let Ok(event) = ExposeEvent::try_from(event) {
-                    if let Some(state) = find_window_by_id(&windows, event.window) {
-                        let state = state.lock().unwrap();
-                        conn.copy_area(state.pixmap, state.window, white, event.x as _, event.y as _,
-                                       event.x as _, event.y as _, event.width, event.height)?;
-                        if event.count == 0 {
-                            conn.flush();
-                        }
-                    } else {
-                        eprintln!("Expose on unknown window!");
+                let event = ExposeEvent::from(event);
+                if let Some(state) = find_window_by_id(&windows, event.window) {
+                    let state = state.lock().unwrap();
+                    conn.copy_area(state.pixmap, state.window, white, event.x as _, event.y as _,
+                                   event.x as _, event.y as _, event.width, event.height)?;
+                    if event.count == 0 {
+                        conn.flush();
                     }
+                } else {
+                    eprintln!("Expose on unknown window!");
                 }
             },
             BUTTON_RELEASE_EVENT => {
-                if let Ok(event) = ButtonReleaseEvent::try_from(event) {
-                    if let Some(state) = find_window_by_id(&windows, event.event) {
-                        let mut state = state.lock().unwrap();
-                        // FIXME: Make this matching somehow nicer
-                        if event.detail == ButtonIndex::M1.into() {
-                            state.angle_velocity *= -1.0;
-                        } else if event.detail == ButtonIndex::M4.into() {
-                            state.angle_velocity += 0.001;
-                        } else if event.detail == ButtonIndex::M5.into() {
-                            state.angle_velocity -= 0.001;
-                        }
-                    } else {
-                        eprintln!("ButtonRelease on unknown window!");
+                let event = ButtonReleaseEvent::from(event);
+                if let Some(state) = find_window_by_id(&windows, event.event) {
+                    let mut state = state.lock().unwrap();
+                    // FIXME: Make this matching somehow nicer
+                    if event.detail == ButtonIndex::M1.into() {
+                        state.angle_velocity *= -1.0;
+                    } else if event.detail == ButtonIndex::M4.into() {
+                        state.angle_velocity += 0.001;
+                    } else if event.detail == ButtonIndex::M5.into() {
+                        state.angle_velocity -= 0.001;
                     }
+                } else {
+                    eprintln!("ButtonRelease on unknown window!");
                 }
             },
             _ => {}

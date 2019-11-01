@@ -2,8 +2,6 @@
 
 extern crate x11rb;
 
-use std::convert::TryFrom;
-
 use x11rb::xcb_ffi::XCBConnection;
 use x11rb::connection::Connection;
 use x11rb::x11_utils::Event;
@@ -261,40 +259,32 @@ fn main() {
         while let Some(event) = event_option {
             match event.response_type() {
                 EXPOSE_EVENT => {
-                    let event = ExposeEvent::try_from(event);
-                    if let Ok(event) = event {
-                        if event.count == 0 {
-                            need_repaint = true;
-                        }
+                    let event = ExposeEvent::from(event);
+                    if event.count == 0 {
+                        need_repaint = true;
                     }
                 }
                 CONFIGURE_NOTIFY_EVENT => {
-                    let event = ConfigureNotifyEvent::try_from(event);
-                    if let Ok(event) = event {
-                        window_size = (event.width, event.height);
-                        pixmap = create_pixmap_wrapper(&conn, screen.root_depth, win_id,
-                                                       window_size).unwrap();
-                        need_reshape = true;
-                    }
+                    let event = ConfigureNotifyEvent::from(event);
+                    window_size = (event.width, event.height);
+                    pixmap = create_pixmap_wrapper(&conn, screen.root_depth, win_id,
+                                                   window_size).unwrap();
+                    need_reshape = true;
                 }
                 MOTION_NOTIFY_EVENT => {
-                    let event = MotionNotifyEvent::try_from(event);
-                    if let Ok(event) = event {
-                        mouse_position = (event.event_x, event.event_y);
-                        need_repaint = true;
-                    }
+                    let event = MotionNotifyEvent::from(event);
+                    mouse_position = (event.event_x, event.event_y);
+                    need_repaint = true;
                 }
                 MAP_NOTIFY_EVENT => {
                     need_reshape = true;
                 }
                 CLIENT_MESSAGE_EVENT => {
-                    let event = ClientMessageEvent::try_from(event);
-                    if let Ok(event) = event {
-                        let data = event.data.as_data32();
-                        if event.format == 32 && event.window == win_id && data[0] == wm_delete_window {
-                            println!("Window was asked to close");
-                            return;
-                        }
+                    let event = ClientMessageEvent::from(event);
+                    let data = event.data.as_data32();
+                    if event.format == 32 && event.window == win_id && data[0] == wm_delete_window {
+                        println!("Window was asked to close");
+                        return;
                     }
                 }
                 0 => { println!("Unknown error {:?}", event); },
