@@ -619,11 +619,11 @@ class Module(object):
         self.out("")
 
     def _emit_from_generic(self, name, from_generic_type, extra_name):
-        self.out("impl TryFrom<%s> for %s%s {", from_generic_type, self._name(name), extra_name)
+        self.out("impl From<%s> for %s%s {", from_generic_type, self._name(name), extra_name)
         with Indent(self.out):
-            self.out("type Error = ParseError;")
-            self.out("fn try_from(value: %s) -> Result<Self, Self::Error> {", from_generic_type)
-            self.out.indent("Self::try_from(Into::<Buffer>::into(value))")
+            self.out("fn from(value: %s) -> Self {", from_generic_type)
+            self.out.indent("Self::try_from(Into::<Buffer>::into(value))" +
+                            ".expect(\"Buffer should be large enough so that parsing cannot fail\")")
             self.out("}")
         self.out("}")
 
