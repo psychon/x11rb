@@ -14,7 +14,7 @@ impl Error for ParseError {
 
 impl std::fmt::Display for ParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "FIXME")
+        write!(f, "Error while parsing (not enough data?)")
     }
 }
 
@@ -48,7 +48,17 @@ impl Error for ConnectionError {
 
 impl std::fmt::Display for ConnectionError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "FIXME")
+        match self {
+            ConnectionError::UnknownError => write!(f, "Unknown connection error"),
+            ConnectionError::ConnectionError => write!(f, "Error with the underlying connection"),
+            ConnectionError::UnsupportedExtension => write!(f, "Unsupported extension"),
+            ConnectionError::InsufficientMemory => write!(f, "Insufficient memory"),
+            ConnectionError::MaximumRequestLengthExceeded => write!(f, "Maximum request length exceeded"),
+            ConnectionError::DisplayParsingError => write!(f, "Display parsing error"),
+            ConnectionError::InvalidScreen => write!(f, "Invalid screen"),
+            ConnectionError::FDPassingFailed => write!(f, "FD passing failed"),
+            ConnectionError::ParseError => write!(f, "Parsing error"),
+        }
     }
 }
 
@@ -77,7 +87,10 @@ impl Error for ConnectionErrorOrX11Error {
 
 impl std::fmt::Display for ConnectionErrorOrX11Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "FIXME")
+        match self {
+            ConnectionErrorOrX11Error::ConnectionError(e) => write!(f, "{}", e),
+            ConnectionErrorOrX11Error::X11Error(e) => write!(f, "X11 error {:?}", e),
+        }
     }
 }
 
