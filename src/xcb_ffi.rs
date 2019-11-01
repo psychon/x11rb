@@ -84,17 +84,19 @@ impl XCBConnection {
     }
 
     fn send_request(&self, bufs: &[IoSlice], has_reply: bool) -> Result<SequenceNumber, ConnectionError> {
-        // XCB wants to access bufs[-1] and bufs[-2], so we need to add two empty items in front.
         // For this, we derefence the IoSlices, add two new entries, and create new IoSlices.
-        let prepend = [&[][..], &[][..]];
-        let mut new_bufs = prepend
-            .iter()
-            .map(Deref::deref)
-            .chain(bufs
-                   .iter()
-                   .map(Deref::deref))
-            .map(IoSlice::new)
-            .collect::<Vec<_>>();
+        let mut new_bufs = Vec::with_capacity(2 + bufs.len());
+
+        // XCB wants to access bufs[-1] and bufs[-2], so we need to add two empty items in front.
+        new_bufs.push(&[][..]);
+        new_bufs.push(&[][..]);
+
+        // Add the actual request buffers
+        let mut storage = Default::default();
+        new_bufs.extend(self.compute_length_field(bufs, &mut storage)?.iter().map(Deref::deref));
+
+        // Now wrap the buffers with IoSlice
+        let mut new_bufs = new_bufs.into_iter().map(IoSlice::new).collect::<Vec<_>>();
 
         // Set up the information that libxcb needs
         let protocol_request = raw_ffi::xcb_protocol_request_t {
@@ -217,6 +219,10 @@ impl Connection for XCBConnection {
     fn setup(&self) -> &Setup {
         &self.1
     }
+
+    fn maximum_request_bytes(&self) -> usize {
+        4 * unsafe { raw_ffi::xcb_get_maximum_request_length((self.0).0) as usize }
+    }
 }
 
 impl Drop for XCBConnection {
@@ -303,5 +309,6 @@ mod raw_ffi {
         pub fn xcb_generate_id(c: *const xcb_connection_t) -> u32;
         pub fn xcb_get_setup(c: *const xcb_connection_t) -> *const u8;
         pub fn xcb_get_file_descriptor(c: *const xcb_connection_t) -> RawFd;
+        pub fn xcb_get_maximum_request_length(c: *const xcb_connection_t) -> u32;
     }
 }

@@ -47,6 +47,9 @@ impl Connection for FakeConnection {
     }
 
     fn send_request_without_reply(&self, bufs: &[IoSlice]) -> Result<SequenceNumber, ConnectionError> {
+        let mut storage = Default::default();
+        let bufs = self.compute_length_field(bufs, &mut storage)?;
+
         self.0.borrow_mut().push(SavedRequest::new(false, bufs));
         Ok(0)
     }
@@ -82,6 +85,11 @@ impl Connection for FakeConnection {
     fn generate_id(&self) -> u32 {
         unimplemented!()
     }
+
+    fn maximum_request_bytes(&self) -> usize {
+        // Must be at least 4 * 2^16 so that we can test BIG-REQUESTS
+        2usize.pow(19)
+    }
 }
 
 #[test]
@@ -107,5 +115,50 @@ fn test_poly_segment() -> Result<(), ConnectionErrorOrX11Error> {
         expected.extend(&x.to_ne_bytes());
     }
     conn.check_requests(&[(false, expected)]);
+    Ok(())
+}
+
+#[test]
+fn test_big_requests() -> Result<(), ConnectionError> {
+    let conn = FakeConnection::default();
+    let big_buffer = [0; 262145 /* 2^18 + 1 */];
+    let drawable: u32 = 42;
+    let gc: u32 = 0x1337;
+    let x: i16 = 21;
+    let y: i16 = 7;
+    let padding = 3; // big_buffer's size rounded up to a multiple of 4
+    let length: u32 = (16 + big_buffer.len() as u32 + padding) / 4;
+    conn.poly_text16(drawable, gc, x, y, &big_buffer)?;
+
+    let mut expected = Vec::new();
+    expected.push(super::generated::xproto::POLY_TEXT16_REQUEST);
+    expected.push(0); // padding
+    // Length of zero: we use big requests
+    expected.push(0);
+    expected.push(0);
+    // Actual length
+    expected.extend(&length.to_ne_bytes());
+
+    expected.extend(&drawable.to_ne_bytes());
+    expected.extend(&gc.to_ne_bytes());
+    expected.extend(&x.to_ne_bytes());
+    expected.extend(&y.to_ne_bytes());
+    expected.extend(big_buffer.iter());
+    expected.extend((0..padding).map(|_| 0));
+
+    conn.check_requests(&[(false, expected)]);
+    Ok(())
+}
+
+#[test]
+fn test_too_large_request() -> Result<(), ConnectionError> {
+    let conn = FakeConnection::default();
+    let big_buffer = [0; 524289 /* 2^19 + 1 */];
+    let drawable: u32 = 42;
+    let gc: u32 = 0x1337;
+    let x: i16 = 21;
+    let y: i16 = 7;
+    let res = conn.poly_text16(drawable, gc, x, y, &big_buffer);
+    assert_eq!(ConnectionError::MaximumRequestLengthExceeded, res.unwrap_err());
     Ok(())
 }

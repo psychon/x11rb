@@ -543,7 +543,7 @@ class Module(object):
                         self.trait_out("let %s = %s.to_bits().to_ne_bytes();", self._to_rust_variable(field.field_name + "_bytes"), self._to_rust_variable(field.field_name))
                     elif field.type.size is not None:  # Size None was already handled above
                         if field.field_name == "length":
-                            source = "TryInto::<%s>::try_into(length)?" % self._to_rust_type(field.type.name)
+                            source = "TryInto::<%s>::try_into(length).unwrap_or(0)" % self._to_rust_type(field.type.name)
                         else:
                             source = self._to_rust_variable(field.field_name)
                         self.trait_out("let %s = %s.to_ne_bytes();", self._to_rust_variable(field.field_name + "_bytes"), source)

@@ -235,6 +235,9 @@ impl Connection for RustConnection {
     fn send_request_with_reply<R>(&self, bufs: &[IoSlice]) -> Result<Cookie<Self, R>, ConnectionError>
         where R: TryFrom<Buffer, Error=ParseError>
     {
+        let mut storage = Default::default();
+        let bufs = self.compute_length_field(bufs, &mut storage)?;
+
         Ok(Cookie::new(self, self.send_request(bufs, true)?))
     }
 
@@ -273,5 +276,9 @@ impl Connection for RustConnection {
 
     fn generate_id(&self) -> u32 {
         self.inner.borrow_mut().generate_id()
+    }
+
+    fn maximum_request_bytes(&self) -> usize {
+        unimplemented!()
     }
 }
