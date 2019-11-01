@@ -634,7 +634,7 @@ class Module(object):
         self.out("}")
 
     def _emit_serialise(self, obj, name, extra_name):
-        self.out("impl Into<[u8; 32]> for %s%s {", self._name(name), extra_name)
+        self.out("impl Into<[u8; 32]> for &%s%s {", self._name(name), extra_name)
         with Indent(self.out):
             self.out("fn into(self) -> [u8; 32] {")
             with Indent(self.out):
@@ -671,6 +671,13 @@ class Module(object):
                         parts = parts[8:]
                     self.out("%s", ", ".join(parts))
                 self.out("]")
+            self.out("}")
+        self.out("}")
+
+        self.out("impl Into<[u8; 32]> for %s%s {", self._name(name), extra_name)
+        with Indent(self.out):
+            self.out("fn into(self) -> [u8; 32] {")
+            self.out.indent("(&self).into()")
             self.out("}")
         self.out("}")
 
