@@ -5,37 +5,14 @@ Feel free to open issues for any problems or questions you might have.
 
 ## Building
 
-This crate depends on `xcb-proto`. It uses `pkg-config` to find it. In a
+This crate depends on `xcb-proto`. When the `vendor-xcb-proto` is enabled, which
+it is by default, a copy of xcb-proto that comes with the source code is used.
+
+When that feature is disabled, `pkg-config` is used to find `xcb-proto`.  In a
 nutshell, if you can run `pkg-config --modversion xcb-proto` successfully, you
-should be fine.
-
-On Debian, the necessary packages are called `pkg-config`, `xcb-proto`, and
-`python-xcbgen`. I hope that other distros use similarly obvious naming.
-
-
-## Getting started with x11rb
-
-X11 is a big protocol. I would claim that most of it is not actually that
-complicated, but it is still difficult to get into it. A good starting point
-might be some [libxcb
-tutorial](https://www.x.org/releases/X11R7.7/doc/libxcb/tutorial/index.html).
-This tutorial was adapted in this crate [as an example](examples/tutorial.rs).
-A more in-depth look at the X11 protocol can be gained from the [protocol
-reference
-manual](https://www.x.org/releases/X11R7.6/doc/xproto/x11protocol.html), but
-this requires some existing basic understanding of X11. If you want to figure
-out what some specific request does, be sure to look it up in the specification!
-
-Most extensions can be understood by reading their specification. Most of them
-can be found [here](https://www.x.org/releases/current/doc/index.html#protocol).
-For example, [the specification of Composite
-0.4](https://www.x.org/releases/X11R7.5/doc/compositeproto/compositeproto.txt)
-consists of about six pages of text.
-
-The notable exception is the X keyboard extension, which is documented in a [PDF
-file with 168
-pages](https://www.x.org/releases/current/doc/kbproto/xkbproto.pdf) which I am
-never going to read completely.
+should be fine. On Debian, the necessary packages are called `pkg-config`,
+`xcb-proto`, and `python-xcbgen`. I hope that other distros use similarly
+obvious naming.
 
 
 ## Motivation
@@ -114,8 +91,8 @@ its users to blindly trust length fields that come from the X11 server.
 The downside of this is possibly slower code. However, if your bottleneck is in
 talking to the X11 server, you are seriously doing something wrong.
 
-Examples of the generated code [can be found here](generated_code.md). Feel free
-to suggest improvements to it.
+Examples of the generated code [can be found here](doc/generated_code.md). Feel
+free to suggest improvements to it.
 
 
 ## Does this support async/await

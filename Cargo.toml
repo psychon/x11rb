@@ -19,5 +19,6 @@ pkg-config = "0.3"
 default = ["vendor-xcb-proto"]
 
 # Enable use of the vendored copy of xcb-proto. Without this feature, pkg-config
-# is used to find it instead.
+# is used to find it instead. Without this feature, no stable API can be
+# guaranteed, because the protocol description can differ.
 vendor-xcb-proto = []
