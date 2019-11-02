@@ -1,6 +1,6 @@
 [package]
 name = "x11rb"
-version = "0.1.0"
+version = "0.2.0"
 description = "Rust bindings to X11"
 authors = ["Uli Schlachter <psychon@znc.in>"]
 repository = "https://github.com/psychon/x11rb"
