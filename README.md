@@ -108,6 +108,8 @@ The core X11 protocol and some extensions already work. There are some known
 problems and not all extensions are provided. For more information, have a look
 at the [known issues](https://github.com/psychon/x11rb/issues).
 
+The changelog is available in a [separate file](doc/changelog.md).
+
 
 ## License
 
