@@ -1,6 +1,9 @@
 language: rust
 dist: bionic  # need at least xcb-proto 1.12, because commit a3da4e8c in xcb-proto changes our API
 rust:
+  # std::io::IoSlice was stabilised in 1.36.0, but 1.36.0 fails with a weird
+  # error enabled by deny(single_use_lifetimes).
+  - 1.37.0
   - stable
   - beta
   - nightly
