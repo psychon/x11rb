@@ -4,9 +4,9 @@ use std::convert::TryInto;
 
 use super::generated::xproto::ConnectionExt as XProtoConnectionExt;
 use super::connection::SequenceNumber;
-use super::errors::ConnectionError;
+use super::errors::{ConnectionError, ConnectionErrorOrX11Error};
 
-/// Extension trait that makes change_property easier to use
+/// Extension trait that simplifies API use
 pub trait ConnectionExt: XProtoConnectionExt {
     /// Change a property on a window with format 8.
     fn change_property8<A>(&self, mode: A, window: u32, property: u32, type_: u32, data: &[u8])
@@ -38,6 +38,19 @@ pub trait ConnectionExt: XProtoConnectionExt {
             data_u8.extend(&item.to_ne_bytes());
         }
         self.change_property(mode, window, property, type_, 32, data.len().try_into()?, &data_u8)
+    }
+
+    /// Synchronise with the X11 server.
+    ///
+    /// This function synchronises with the X11 server. This means that all requests that are still
+    /// in the output buffer are sent to the server. Then, we wait until the X11 server processed
+    /// all requests.
+    fn sync(&self) -> Result<(), ConnectionErrorOrX11Error> {
+        // When a new request is generated, it is appended to the output buffer. Thus, this causes
+        // all previous requests to be sent.
+        // The X11 server is single-threaded and processes requests in-order. Thus, it will only
+        // reply to our GetInputFocus after everything before was processed.
+        self.get_input_focus()?.reply().and(Ok(()))
     }
 }
 impl<C: XProtoConnectionExt + ?Sized> ConnectionExt for C {}
