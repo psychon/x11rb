@@ -585,11 +585,11 @@ class Module(object):
 
             if is_list_fonts_with_info:
                 assert obj.reply
-                self.trait_out("Ok(ListFontsWithInfoCookie::new(self.send_request_with_reply(&[%s])?))", slices)
+                self.trait_out("Ok(ListFontsWithInfoCookie::new(self.send_request_with_reply(&[%s], &[])?))", slices)
             elif obj.reply:
-                self.trait_out("Ok(self.send_request_with_reply(&[%s])?)", slices)
+                self.trait_out("Ok(self.send_request_with_reply(&[%s], &[])?)", slices)
             else:
-                self.trait_out("Ok(self.send_request_without_reply(&[%s])?)", slices)
+                self.trait_out("Ok(self.send_request_without_reply(&[%s], &[])?)", slices)
         self.trait_out("}")
         self.trait_out("")
 

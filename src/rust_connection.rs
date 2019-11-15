@@ -7,6 +7,7 @@ use std::convert::{TryFrom, TryInto};
 use std::iter::repeat;
 use std::cell::RefCell;
 use std::collections::VecDeque;
+use std::os::unix::io::RawFd;
 
 use crate::utils::Buffer;
 use crate::connection::{Connection, Cookie, SequenceNumber, ExtensionInformation};
@@ -94,7 +95,9 @@ impl ConnectionInner {
         Ok(Buffer::from_vec(buffer))
     }
 
-    fn send_request(&mut self, bufs: &[IoSlice], has_reply: bool) -> Result<SequenceNumber, Box<dyn Error>> {
+    fn send_request(&mut self, bufs: &[IoSlice], fds: &[RawFd], has_reply: bool) -> Result<SequenceNumber, Box<dyn Error>> {
+        assert_eq!(fds.len(), 0);
+
         self.last_sequence_written += 1;
         let seqno = self.last_sequence_written;
 
@@ -226,23 +229,23 @@ impl RustConnection {
         Ok((conn, screen))
     }
 
-    fn send_request(&self, bufs: &[IoSlice], has_reply: bool) -> Result<SequenceNumber, ConnectionError> {
-        self.inner.borrow_mut().send_request(bufs, has_reply).or(Err(ConnectionError::UnknownError))
+    fn send_request(&self, bufs: &[IoSlice], fds: &[RawFd], has_reply: bool) -> Result<SequenceNumber, ConnectionError> {
+        self.inner.borrow_mut().send_request(bufs, fds, has_reply).or(Err(ConnectionError::UnknownError))
     }
 }
 
 impl Connection for RustConnection {
-    fn send_request_with_reply<R>(&self, bufs: &[IoSlice]) -> Result<Cookie<Self, R>, ConnectionError>
+    fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: &[RawFd]) -> Result<Cookie<Self, R>, ConnectionError>
         where R: TryFrom<Buffer, Error=ParseError>
     {
         let mut storage = Default::default();
         let bufs = self.compute_length_field(bufs, &mut storage)?;
 
-        Ok(Cookie::new(self, self.send_request(bufs, true)?))
+        Ok(Cookie::new(self, self.send_request(bufs, fds, true)?))
     }
 
-    fn send_request_without_reply(&self, bufs: &[IoSlice]) -> Result<SequenceNumber, ConnectionError> {
-        self.send_request(bufs, false)
+    fn send_request_without_reply(&self, bufs: &[IoSlice], fds: &[RawFd]) -> Result<SequenceNumber, ConnectionError> {
+        self.send_request(bufs, fds, false)
     }
 
     fn discard_reply(&self, sequence: SequenceNumber) {
