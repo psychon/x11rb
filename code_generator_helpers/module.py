@@ -116,6 +116,8 @@ class Module(object):
         self.out("use std::io::IoSlice;")
         self.out("#[allow(unused_imports)]")
         self.out("use std::option::Option as RustOption;")
+        self.out("#[allow(unused_imports)]")
+        self.out("use std::os::unix::io::RawFd;")
         self.out("use crate::utils::Buffer;")
         self.out("#[allow(unused_imports)]")
         self.out("use crate::x11_utils::{GenericEvent as X11GenericEvent, GenericError as X11GenericError};")
@@ -326,7 +328,8 @@ class Module(object):
         self.out("impl %s {", rust_name)
         with Indent(self.out):
             for field in enum.fields:
-                result_type = self._to_complex_rust_type(field.type, None, '')
+                assert not field.isfd
+                result_type = self._to_complex_rust_type(field, None, '')
                 self.out("pub fn as_%s(&self) -> %s {", self._lower_snake_name(('xcb', field.field_name)), result_type)
                 with Indent(self.out):
                     self.out("fn do_the_parse(value: &[u8]) -> Result<%s, ParseError> {", result_type)
@@ -366,14 +369,6 @@ class Module(object):
         if function_name == "await":
             function_name = "await_"
 
-        has_fd = any(field.isfd for field in obj.fields)
-        if has_fd:
-            _emit_doc(self.trait_out, obj.doc)
-            self.trait_out("fn %s() {", self._lower_snake_name(name))
-            self.trait_out.indent("unimplemented!(\"FD passing is not yet implemented\");")
-            self.trait_out("}")
-            return
-
         is_list_fonts_with_info = name == ('xcb', 'ListFontsWithInfo')
 
         switches = list(filter(lambda field: field.type.is_switch, obj.fields))
@@ -410,9 +405,10 @@ class Module(object):
             args = ["&self"]
         where = []
 
+        fds, fds_is_list = [], False
         for field in obj.fields:
             if field.visible:
-                rust_type = self._to_complex_rust_type(field.type, aux_name, '&')
+                rust_type = self._to_complex_rust_type(field, aux_name, '&')
                 if (field.enum is not None and not field.type.is_list) or \
                         (name == ('xcb', 'SendEvent') and field.field_name == 'event'):
                     if name == ('xcb', 'SendEvent') and field.field_name == 'event':
@@ -427,6 +423,10 @@ class Module(object):
                 if name == ('xcb', 'InternAtom') and field.field_name == 'only_if_exists':
                     rust_type = 'bool'
                 args.append("%s: %s" % (self._to_rust_variable(field.field_name), rust_type))
+                if field.isfd:
+                    fds.append(self._to_rust_variable(field.field_name))
+                    if field.type.is_list:
+                        fds_is_list = True
 
         if is_list_fonts_with_info:
             assert need_lifetime
@@ -481,6 +481,8 @@ class Module(object):
             fixed_request_length = sum((field.type.size * field.type.nmemb for field in obj.fields if field.type.nmemb is not None and field.type.size is not None and field.wire))
             request_length = [str(fixed_request_length)]
             for field in obj.fields:
+                if not field.wire:
+                    continue
                 if field.type.nmemb is None:
                     size = field.type.size
                     if size is None:
@@ -499,6 +501,8 @@ class Module(object):
 
             self.trait_out("let length: usize = (%s + 3) / 4;", request_length)
             for field in obj.fields:
+                if not field.wire:
+                    continue
                 if field.field_name == "major_opcode" or field.field_name == "minor_opcode":
                     if self.namespace.is_ext and field.field_name == "major_opcode":
                         request.append('extension_information.major_opcode')
@@ -574,6 +578,8 @@ class Module(object):
             _emit_request()
 
             last_field = obj.fields[-1]
+            if last_field.isfd:
+                last_field = obj.fields[-2]
             if last_field.type.is_list and not last_field.type.fixed_size():
                 self.trait_out("let padding = &[0; 3][..(4 - (%s_bytes.len() %% 4)) %% 4];", last_field.field_name)
                 requests.append("&padding")
@@ -583,13 +589,23 @@ class Module(object):
 
             slices = ", ".join(["IoSlice::new(%s)" % r for r in requests])
 
+            if fds:
+                if not fds_is_list:
+                    self.trait_out("let fds = [%s];", ", ".join(fds))
+                    fds = "&fds"
+                else:
+                    # There may (currently) be only a single list of FDs
+                    fds, = fds
+            else:
+                fds = "&[]"
+
             if is_list_fonts_with_info:
                 assert obj.reply
-                self.trait_out("Ok(ListFontsWithInfoCookie::new(self.send_request_with_reply(&[%s], &[])?))", slices)
+                self.trait_out("Ok(ListFontsWithInfoCookie::new(self.send_request_with_reply(&[%s], %s)?))", slices, fds)
             elif obj.reply:
-                self.trait_out("Ok(self.send_request_with_reply(&[%s], &[])?)", slices)
+                self.trait_out("Ok(self.send_request_with_reply(&[%s], %s)?)", slices, fds)
             else:
-                self.trait_out("Ok(self.send_request_without_reply(&[%s], &[])?)", slices)
+                self.trait_out("Ok(self.send_request_without_reply(&[%s], %s)?)", slices, fds)
         self.trait_out("}")
         self.trait_out("")
 
@@ -794,15 +810,18 @@ class Module(object):
             self.out("}")
         self.out("}")
 
-    def _to_complex_rust_type(self, field_type, aux_name, modifier):
-        if field_type.is_switch:
+    def _to_complex_rust_type(self, field, aux_name, modifier):
+        if field.type.is_switch:
             return modifier + aux_name
-        result = self._to_rust_type(field_type.name)
-        if field_type.is_list:
-            if field_type.nmemb is None:
+        if not field.isfd:
+            result = self._to_rust_type(field.type.name)
+        else:
+            result = "RawFd"
+        if field.type.is_list:
+            if field.type.nmemb is None:
                 result = "%s[%s]" % (modifier, result)
             else:
-                result = "%s[%s; %s]" % (modifier, result, field_type.nmemb)
+                result = "%s[%s; %s]" % (modifier, result, field.type.nmemb)
         return result
 
     def _generate_aux(self, name, request, switch, mask_field, request_function_name):
