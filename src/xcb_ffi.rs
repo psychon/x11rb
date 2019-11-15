@@ -84,8 +84,6 @@ impl XCBConnection {
     }
 
     fn send_request(&self, bufs: &[IoSlice], fds: &[RawFd], has_reply: bool) -> Result<SequenceNumber, ConnectionError> {
-        assert_eq!(fds.len(), 0);
-
         // For this, we derefence the IoSlices, add two new entries, and create new IoSlices.
         let mut new_bufs = Vec::with_capacity(2 + bufs.len());
 
@@ -111,7 +109,13 @@ impl XCBConnection {
         if has_reply {
             flags |= raw_ffi::send_request_flags::CHECKED;
         }
-        let seqno = unsafe { raw_ffi::xcb_send_request64((self.0).0, flags, &mut new_bufs[2], &protocol_request) };
+        let seqno = if fds.is_empty() {
+            unsafe { raw_ffi::xcb_send_request64((self.0).0, flags, &mut new_bufs[2], &protocol_request) }
+        } else {
+            let num_fds = fds.len().try_into().unwrap();
+            let fds_ptr = fds.as_ptr();
+            unsafe { raw_ffi::xcb_send_request_with_fds64((self.0).0, flags, &mut new_bufs[2], &protocol_request, num_fds, fds_ptr) }
+        };
         if seqno == 0 {
             unsafe { Err(XCBConnection::connection_error_from_connection((self.0).0)) }
         } else {
@@ -244,7 +248,7 @@ impl AsRawFd for XCBConnection {
 }
 
 mod raw_ffi {
-    use libc::{c_void, c_int, c_char};
+    use libc::{c_void, c_int, c_char, c_uint};
     use std::io::IoSlice;
     use std::os::unix::io::RawFd;
 
@@ -303,6 +307,7 @@ mod raw_ffi {
         pub fn xcb_disconnect(c: *mut xcb_connection_t);
         pub fn xcb_connection_has_error(c: *const xcb_connection_t) -> c_int;
         pub fn xcb_send_request64(c: *const xcb_connection_t, flags: c_int, vector: *mut IoSlice, request: *const xcb_protocol_request_t) -> u64;
+        pub fn xcb_send_request_with_fds64(c: *const xcb_connection_t, flags: c_int, vector: *mut IoSlice, request: *const xcb_protocol_request_t, num_fds: c_uint, fds: *const c_int) -> u64;
         pub fn xcb_discard_reply64(c: *const xcb_connection_t, sequence: u64);
         pub fn xcb_wait_for_reply64(c: *const xcb_connection_t, request: u64, e: *mut * mut c_void) -> *mut c_void;
         pub fn xcb_wait_for_event(c: *const xcb_connection_t) -> *mut c_void;
