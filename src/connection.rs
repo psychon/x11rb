@@ -8,6 +8,7 @@ use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
 use std::collections::HashMap;
 use std::sync::Mutex;
+use std::os::unix::io::RawFd;
 use crate::utils::Buffer;
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 use crate::x11_utils::GenericEvent;
@@ -29,6 +30,10 @@ pub trait Connection: Sized {
     /// The `bufs` parameter describes the raw bytes that should be sent. The returned cookie
     /// allows to get the response.
     ///
+    /// The `fds` parameter contains a list of file descriptors that should be sent with the
+    /// request. Ownership of these FDs is transferred to the connection. This means that the
+    /// connection will close the FDs after they were sent.
+    ///
     /// Users of this library will most likely not want to use this function directly. Instead, the
     /// generated code will take the supplied arguments, construct byte buffers, and call this
     /// method.
@@ -39,7 +44,8 @@ pub trait Connection: Sized {
     /// automatically uses the BIG-REQUESTS extension for such large requests.
     ///
     /// In any case, the request may not be larger than the server's maximum request length.
-    fn send_request_with_reply<R>(&self, bufs: &[IoSlice]) -> Result<Cookie<Self, R>, ConnectionError>
+    fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: &[RawFd])
+        -> Result<Cookie<Self, R>, ConnectionError>
         where R: TryFrom<Buffer, Error=ParseError>;
 
     /// Send a request without a reply to the server.
@@ -47,6 +53,10 @@ pub trait Connection: Sized {
     /// The `bufs` parameter describes the raw bytes that should be sent. The sequence number of
     /// the request is returned, but most likely not useful to users.
     ///
+    /// The `fds` parameter contains a list of file descriptors that should be sent with the
+    /// request. Ownership of these FDs is transferred to the connection. This means that the
+    /// connection will close the FDs after they were sent.
+    ///
     /// Users of this library will most likely not want to use this function directly. Instead, the
     /// generated code will take the supplied arguments, construct byte buffers, and call this
     /// method.
@@ -57,7 +67,8 @@ pub trait Connection: Sized {
     /// automatically uses the BIG-REQUESTS extension for such large requests.
     ///
     /// In any case, the request may not be larger than the server's maximum request length.
-    fn send_request_without_reply(&self, bufs: &[IoSlice]) -> Result<SequenceNumber, ConnectionError>;
+    fn send_request_without_reply(&self, bufs: &[IoSlice], fds: &[RawFd])
+        -> Result<SequenceNumber, ConnectionError>;
 
     /// A reply to an error should be discarded.
     ///
@@ -131,6 +142,7 @@ pub trait Connection: Sized {
     /// ```
     /// use std::io::IoSlice;
     /// use std::convert::TryFrom;
+    /// use std::os::unix::io::RawFd;
     /// use x11rb::connection::{Cookie, Connection, SequenceNumber};
     /// use x11rb::errors::{ParseError, ConnectionError};
     /// use x11rb::utils::Buffer;
@@ -170,23 +182,23 @@ pub trait Connection: Sized {
     ///     #    unimplemented!()
     ///     # }
     ///
-    ///     fn send_request_with_reply<R>(&self, bufs: &[IoSlice]) -> Result<Cookie<Self, R>, ConnectionError>
+    ///     fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: &[RawFd]) -> Result<Cookie<Self, R>, ConnectionError>
     ///     where R: TryFrom<Buffer, Error=ParseError> {
-    ///         Ok(Cookie::new(self, self.send_request(bufs, true)?))
+    ///         Ok(Cookie::new(self, self.send_request(bufs, fds, true)?))
     ///     }
     ///
-    ///     fn send_request_without_reply(&self, bufs: &[IoSlice]) -> Result<SequenceNumber, ConnectionError> {
-    ///         self.send_request(bufs, false)
+    ///     fn send_request_without_reply(&self, bufs: &[IoSlice], fds: &[RawFd]) -> Result<SequenceNumber, ConnectionError> {
+    ///         self.send_request(bufs, fds, false)
     ///     }
     /// }
     ///
     /// impl MyConnection {
-    ///     fn send_request(&self, bufs: &[IoSlice], has_reply: bool)
+    ///     fn send_request(&self, bufs: &[IoSlice], fds: &[RawFd], has_reply: bool)
     ///     -> Result<SequenceNumber, ConnectionError>
     ///     {
     ///         let mut storage = Default::default();
     ///         let bufs = self.compute_length_field(bufs, &mut storage)?;
-    ///         unimplemented!("Now send bufs to the X11 server");
+    ///         unimplemented!("Now send bufs and fds to the X11 server");
     ///     }
     /// }
     /// ```

@@ -83,7 +83,9 @@ impl XCBConnection {
         Ok(result)
     }
 
-    fn send_request(&self, bufs: &[IoSlice], has_reply: bool) -> Result<SequenceNumber, ConnectionError> {
+    fn send_request(&self, bufs: &[IoSlice], fds: &[RawFd], has_reply: bool) -> Result<SequenceNumber, ConnectionError> {
+        assert_eq!(fds.len(), 0);
+
         // For this, we derefence the IoSlices, add two new entries, and create new IoSlices.
         let mut new_bufs = Vec::with_capacity(2 + bufs.len());
 
@@ -139,14 +141,14 @@ impl XCBConnection {
 }
 
 impl Connection for XCBConnection {
-    fn send_request_with_reply<R>(&self, bufs: &[IoSlice]) -> Result<Cookie<Self, R>, ConnectionError>
+    fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: &[RawFd]) -> Result<Cookie<Self, R>, ConnectionError>
         where R: TryFrom<Buffer, Error=ParseError>
     {
-        Ok(Cookie::new(self, self.send_request(bufs, true)?))
+        Ok(Cookie::new(self, self.send_request(bufs, fds, true)?))
     }
 
-    fn send_request_without_reply(&self, bufs: &[IoSlice]) -> Result<SequenceNumber, ConnectionError> {
-        self.send_request(bufs, false)
+    fn send_request_without_reply(&self, bufs: &[IoSlice], fds: &[RawFd]) -> Result<SequenceNumber, ConnectionError> {
+        self.send_request(bufs, fds, false)
     }
 
     fn discard_reply(&self, sequence: SequenceNumber) {
