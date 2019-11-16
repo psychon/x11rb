@@ -10,7 +10,7 @@ use libc::c_void;
 use crate::utils::{CSlice, Buffer, RawFdContainer};
 use crate::x11_utils::{GenericError, GenericEvent, Event};
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
-use crate::connection::{Connection, Cookie, SequenceNumber, ExtensionInformation};
+use crate::connection::{Connection, Cookie, CookieWithFds, SequenceNumber, ExtensionInformation};
 use super::generated::xproto::{Setup, QueryExtensionReply};
 
 /// A connection to an X11 server.
@@ -83,7 +83,7 @@ impl XCBConnection {
         Ok(result)
     }
 
-    fn send_request(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>, has_reply: bool) -> Result<SequenceNumber, ConnectionError> {
+    fn send_request(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>, has_reply: bool, reply_has_fds: bool) -> Result<SequenceNumber, ConnectionError> {
         // For this, we derefence the IoSlices, add two new entries, and create new IoSlices.
         let mut new_bufs = Vec::with_capacity(2 + bufs.len());
 
@@ -106,8 +106,12 @@ impl XCBConnection {
             isvoid: if has_reply { 0 } else { 1 }
         };
         let mut flags = raw_ffi::send_request_flags::RAW;
+        assert!(has_reply || !reply_has_fds);
         if has_reply {
             flags |= raw_ffi::send_request_flags::CHECKED;
+        }
+        if reply_has_fds {
+            flags |= raw_ffi::send_request_flags::REPLY_FDS;
         }
 
         // Convert the FDs into an array of ints. libxcb will close the FDs.
@@ -152,11 +156,17 @@ impl Connection for XCBConnection {
     fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<Cookie<Self, R>, ConnectionError>
         where R: TryFrom<Buffer, Error=ParseError>
     {
-        Ok(Cookie::new(self, self.send_request(bufs, fds, true)?))
+        Ok(Cookie::new(self, self.send_request(bufs, fds, true, false)?))
+    }
+
+    fn send_request_with_reply_with_fds<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<CookieWithFds<Self, R>, ConnectionError>
+        where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>
+    {
+        Ok(CookieWithFds::new(self, self.send_request(bufs, fds, true, true)?))
     }
 
     fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<SequenceNumber, ConnectionError> {
-        self.send_request(bufs, fds, false)
+        self.send_request(bufs, fds, false, false)
     }
 
     fn discard_reply(&self, sequence: SequenceNumber) {
@@ -195,6 +205,11 @@ impl Connection for XCBConnection {
                 Err(error.into())
             }
         }
+    }
+
+    fn wait_for_reply_with_fds(&self, sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
+        let _ = sequence;
+        unimplemented!()
     }
 
     fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
@@ -313,7 +328,7 @@ mod raw_ffi {
         pub(crate) const CHECKED: c_int = 1;
         pub(crate) const RAW: c_int = 2;
         //pub(crate) const DISCARD_REPLY: c_int = 4;
-        //pub(crate) const REPLY_FDS: c_int = 8;
+        pub(crate) const REPLY_FDS: c_int = 8;
     }
 
     #[link(name = "xcb")]
