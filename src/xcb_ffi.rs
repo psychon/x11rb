@@ -266,12 +266,12 @@ mod raw_ffi {
 
     #[allow(non_camel_case_types)]
     #[repr(C)]
-    pub struct xcb_connection_t {
+    pub(crate) struct xcb_connection_t {
         _unused: [u8; 0]
     }
 
     #[derive(Debug)]
-    pub struct XCBConnectionWrapper(pub *const xcb_connection_t);
+    pub(crate) struct XCBConnectionWrapper(pub(crate) *const xcb_connection_t);
 
     // libxcb is fully thread-safe (well, except for xcb_disconnect()), so the following is
     // actually fine and safe:
@@ -280,54 +280,54 @@ mod raw_ffi {
 
     #[allow(non_camel_case_types)]
     #[repr(C)]
-    pub struct xcb_extension_t {
-        pub name: *const c_char,
-        pub global_id: c_int
+    pub(crate) struct xcb_extension_t {
+        pub(crate) name: *const c_char,
+        pub(crate) global_id: c_int
     }
 
     #[allow(non_camel_case_types)]
     #[repr(C)]
-    pub struct xcb_protocol_request_t {
-        pub count: usize,
-        pub ext: *mut xcb_extension_t,
-        pub opcode: u8,
-        pub isvoid: u8
+    pub(crate) struct xcb_protocol_request_t {
+        pub(crate) count: usize,
+        pub(crate) ext: *mut xcb_extension_t,
+        pub(crate) opcode: u8,
+        pub(crate) isvoid: u8
     }
 
-    pub mod connection_errors {
-        pub const ERROR: i32 = 1;
-        pub const EXT_NOTSUPPORTED: i32 = 2;
-        pub const MEM_INSUFFICIENT: i32 = 3;
-        pub const REQ_LEN_EXCEED: i32 = 4;
-        pub const PARSE_ERR: i32 = 5;
-        pub const INVALID_SCREEN: i32 = 6;
-        pub const FDPASSING_FAILED: i32 = 7;
+    pub(crate) mod connection_errors {
+        pub(crate) const ERROR: i32 = 1;
+        pub(crate) const EXT_NOTSUPPORTED: i32 = 2;
+        pub(crate) const MEM_INSUFFICIENT: i32 = 3;
+        pub(crate) const REQ_LEN_EXCEED: i32 = 4;
+        pub(crate) const PARSE_ERR: i32 = 5;
+        pub(crate) const INVALID_SCREEN: i32 = 6;
+        pub(crate) const FDPASSING_FAILED: i32 = 7;
     }
 
-    pub mod send_request_flags {
+    pub(crate) mod send_request_flags {
         use libc::c_int;
 
-        pub const CHECKED: c_int = 1;
-        pub const RAW: c_int = 2;
-        //pub const DISCARD_REPLY: c_int = 4;
-        //pub const REPLY_FDS: c_int = 8;
+        pub(crate) const CHECKED: c_int = 1;
+        pub(crate) const RAW: c_int = 2;
+        //pub(crate) const DISCARD_REPLY: c_int = 4;
+        //pub(crate) const REPLY_FDS: c_int = 8;
     }
 
     #[link(name = "xcb")]
     extern {
-        pub fn xcb_connect(displayname: *const c_char, screenp: *mut c_int ) -> *mut xcb_connection_t;
-        pub fn xcb_disconnect(c: *mut xcb_connection_t);
-        pub fn xcb_connection_has_error(c: *const xcb_connection_t) -> c_int;
-        pub fn xcb_send_request64(c: *const xcb_connection_t, flags: c_int, vector: *mut IoSlice, request: *const xcb_protocol_request_t) -> u64;
-        pub fn xcb_send_request_with_fds64(c: *const xcb_connection_t, flags: c_int, vector: *mut IoSlice, request: *const xcb_protocol_request_t, num_fds: c_uint, fds: *const c_int) -> u64;
-        pub fn xcb_discard_reply64(c: *const xcb_connection_t, sequence: u64);
-        pub fn xcb_wait_for_reply64(c: *const xcb_connection_t, request: u64, e: *mut * mut c_void) -> *mut c_void;
-        pub fn xcb_wait_for_event(c: *const xcb_connection_t) -> *mut c_void;
-        pub fn xcb_poll_for_event(c: *const xcb_connection_t) -> *mut c_void;
-        pub fn xcb_flush(c: *const xcb_connection_t) -> c_int;
-        pub fn xcb_generate_id(c: *const xcb_connection_t) -> u32;
-        pub fn xcb_get_setup(c: *const xcb_connection_t) -> *const u8;
-        pub fn xcb_get_file_descriptor(c: *const xcb_connection_t) -> RawFd;
-        pub fn xcb_get_maximum_request_length(c: *const xcb_connection_t) -> u32;
+        pub(crate) fn xcb_connect(displayname: *const c_char, screenp: *mut c_int ) -> *mut xcb_connection_t;
+        pub(crate) fn xcb_disconnect(c: *mut xcb_connection_t);
+        pub(crate) fn xcb_connection_has_error(c: *const xcb_connection_t) -> c_int;
+        pub(crate) fn xcb_send_request64(c: *const xcb_connection_t, flags: c_int, vector: *mut IoSlice, request: *const xcb_protocol_request_t) -> u64;
+        pub(crate) fn xcb_send_request_with_fds64(c: *const xcb_connection_t, flags: c_int, vector: *mut IoSlice, request: *const xcb_protocol_request_t, num_fds: c_uint, fds: *const c_int) -> u64;
+        pub(crate) fn xcb_discard_reply64(c: *const xcb_connection_t, sequence: u64);
+        pub(crate) fn xcb_wait_for_reply64(c: *const xcb_connection_t, request: u64, e: *mut * mut c_void) -> *mut c_void;
+        pub(crate) fn xcb_wait_for_event(c: *const xcb_connection_t) -> *mut c_void;
+        pub(crate) fn xcb_poll_for_event(c: *const xcb_connection_t) -> *mut c_void;
+        pub(crate) fn xcb_flush(c: *const xcb_connection_t) -> c_int;
+        pub(crate) fn xcb_generate_id(c: *const xcb_connection_t) -> u32;
+        pub(crate) fn xcb_get_setup(c: *const xcb_connection_t) -> *const u8;
+        pub(crate) fn xcb_get_file_descriptor(c: *const xcb_connection_t) -> RawFd;
+        pub(crate) fn xcb_get_maximum_request_length(c: *const xcb_connection_t) -> u32;
     }
 }
