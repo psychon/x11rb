@@ -173,7 +173,15 @@ impl Connection for XCBConnection {
         unsafe {
             let mut error = null_mut();
             let reply = raw_ffi::xcb_wait_for_reply64((self.0).0, sequence, &mut error);
+
+            // At least one of these pointers must be NULL.
             assert!(reply == null_mut() || error == null_mut());
+
+            // If both pointers are NULL, the xcb connection must be in an error state
+            if reply == null_mut() && error == null_mut() {
+                Err(Self::connection_error_from_connection((self.0).0))?
+            }
+
             if reply != null_mut() {
                 let header = CSlice::new(reply as _, 32);
 
