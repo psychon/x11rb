@@ -2,12 +2,11 @@ use std::io::IoSlice;
 use std::convert::TryFrom;
 use std::ops::Deref;
 use std::cell::RefCell;
-use std::os::unix::io::RawFd;
 
 use super::connection::{Connection, Cookie, SequenceNumber};
 use super::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 use super::generated::xproto::{Setup, QueryExtensionReply, ConnectionExt, Segment, KeymapNotifyEvent};
-use super::utils::Buffer;
+use super::utils::{Buffer, RawFdContainer};
 use super::x11_utils::GenericEvent;
 
 #[derive(Debug)]
@@ -41,13 +40,13 @@ impl FakeConnection {
 }
 
 impl Connection for FakeConnection {
-    fn send_request_with_reply<R>(&self, _bufs: &[IoSlice], _fds: &[RawFd]) -> Result<Cookie<Self, R>, ConnectionError>
+    fn send_request_with_reply<R>(&self, _bufs: &[IoSlice], _fds: Vec<RawFdContainer>) -> Result<Cookie<Self, R>, ConnectionError>
     where R: TryFrom<Buffer, Error=ParseError>
     {
         unimplemented!()
     }
 
-    fn send_request_without_reply(&self, bufs: &[IoSlice], fds: &[RawFd]) -> Result<SequenceNumber, ConnectionError> {
+    fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<SequenceNumber, ConnectionError> {
         assert_eq!(fds.len(), 0);
 
         let mut storage = Default::default();
