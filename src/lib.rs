@@ -69,10 +69,12 @@
         single_use_lifetimes,
         trivial_casts,
         trivial_numeric_casts,
-        //unreachable_pub
+        unreachable_pub,
+        unused_extern_crates,
+        unused_import_braces,
+        unused_qualifications,
+        unused_results,
         )]
-
-extern crate libc;
 
 pub mod xcb_ffi;
 pub mod utils;

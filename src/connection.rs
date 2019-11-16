@@ -263,7 +263,7 @@ where C: Connection
 {
     connection: &'a C,
     sequence_number: Option<SequenceNumber>,
-    phantom: std::marker::PhantomData<R>
+    phantom: PhantomData<R>
 }
 
 impl<C, R> Cookie<'_, C, R>
