@@ -122,8 +122,11 @@ class Module(object):
         self.out("use crate::x11_utils::{GenericEvent as X11GenericEvent, GenericError as X11GenericError};")
         self.out("use crate::x11_utils::TryParse;")
         self.out("#[allow(unused_imports)]")
+        self.out("use crate::x11_utils::TryParseFd;")
+        self.out("#[allow(unused_imports)]")
         self.out("use crate::connection::SequenceNumber;")
-        self.out("use crate::connection::{Cookie, Connection as X11Connection};")
+        self.out("#[allow(unused_imports)]")
+        self.out("use crate::connection::{Cookie, CookieWithFds, Connection as X11Connection};")
         if not self.namespace.is_ext:
             self.out("use crate::connection::ListFontsWithInfoCookie;")
         self.out("use crate::errors::{ParseError, ConnectionError};")
@@ -432,10 +435,14 @@ class Module(object):
             assert need_lifetime
             result_type = "ListFontsWithInfoCookie<'c, Self>"
         elif obj.reply:
-            if need_lifetime:
-                result_type = "Cookie<'c, Self, %sReply>" % self._name(name)
+            if any(field.isfd for field in obj.reply.fields):
+                cookie = "CookieWithFds"
             else:
-                result_type = "Cookie<Self, %sReply>" % self._name(name)
+                cookie = "Cookie"
+            if need_lifetime:
+                result_type = "%s<'c, Self, %sReply>" % (cookie, self._name(name))
+            else:
+                result_type = "%s<Self, %sReply>" % (cookie, self._name(name))
         else:
             result_type = "SequenceNumber"
 
@@ -603,27 +610,18 @@ class Module(object):
                 assert obj.reply
                 self.trait_out("Ok(ListFontsWithInfoCookie::new(self.send_request_with_reply(&[%s], %s)?))", slices, fds)
             elif obj.reply:
-                self.trait_out("Ok(self.send_request_with_reply(&[%s], %s)?)", slices, fds)
+                if any(field.isfd for field in obj.reply.fields):
+                    self.trait_out("Ok(self.send_request_with_reply_with_fds(&[%s], %s)?)", slices, fds)
+                else:
+                    self.trait_out("Ok(self.send_request_with_reply(&[%s], %s)?)", slices, fds)
             else:
                 self.trait_out("Ok(self.send_request_without_reply(&[%s], %s)?)", slices, fds)
         self.trait_out("}")
         self.trait_out("")
 
         if obj.reply:
-            has_fd = any(field.isfd for field in obj.reply.fields)
-            if has_fd:
-                self.out("#[derive(Debug, Clone, Copy)]")
-                self.out("pub struct %sReply {}", self._name(name))
-                self.out("impl TryFrom<Buffer> for %sReply {", self._name(name))
-                with Indent(self.out):
-                    self.out("type Error = ParseError;")
-                    self.out("fn try_from(_value: Buffer) -> Result<Self, Self::Error> {")
-                    self.out.indent("unimplemented!(\"Replies with FDs are not yet supported\");")
-                    self.out("}")
-                self.out("}")
-            else:
-                _emit_doc(self.out, obj.reply.doc)
-                self.complex_type(obj.reply, name, 'Reply')
+            _emit_doc(self.out, obj.reply.doc)
+            self.complex_type(obj.reply, name, 'Reply')
 
         self.out("")
 
@@ -719,8 +717,20 @@ class Module(object):
     def _emit_parsing_code(self, fields):
         parts = []
         for field in fields:
-            assert field.wire  # I *guess* that non-wire fields just have to be skipped
-            if not field.type.is_pad:
+            if not field.wire:
+                assert field.isfd  # What other kind of non-wire fields is there?
+                field_name = self._to_rust_variable(field.field_name)
+                if field.type.is_simple:
+                    self.out("if fds.is_empty() { return Err(ParseError::ParseError) }")
+                    self.out("let %s = fds.remove(0);", field_name)
+                else:
+                    assert field.type.is_list
+                    self.out("let fds_len = %s;", self.expr_to_str(field.type.expr, 'usize'))
+                    self.out("if fds.len() < fds_len { return Err(ParseError::ParseError) }")
+                    self.out("let mut %s = fds.split_off(fds_len);", field_name)
+                    self.out("std::mem::swap(fds, &mut %s);", field_name)
+                parts.append(field_name)
+            elif not field.type.is_pad:
                 rust_type = self._to_rust_type(field.type.name)
                 if field.type.is_list and field.type.nmemb is not None:
                     for i in range(field.type.nmemb):
@@ -765,7 +775,13 @@ class Module(object):
     def complex_type(self, complex, name, extra_name, name_transform=lambda x: x):
         mark_length_fields(complex)
 
-        if all(field.type.fixed_size and (not field.type.is_list or field.type.nmemb is not None) and not field.type.is_union for field in complex.fields):
+        fixed_size = all(field.type.fixed_size for field in complex.fields)
+        no_variable_length_list = all(not field.type.is_list or field.type.nmemb is not None for field in complex.fields)
+        no_union = all(not field.type.is_union for field in complex.fields)
+        has_fds = any(field.isfd for field in complex.fields)
+        if has_fds:
+            self.out("#[derive(Debug)]")
+        elif fixed_size and no_variable_length_list and no_union:
             self.out("#[derive(Debug, Clone, Copy)]")
         else:
             self.out("#[derive(Debug, Clone)]")
@@ -774,18 +790,28 @@ class Module(object):
             for field in complex.fields:
                 if field.visible or (not field.type.is_pad and not hasattr(field, "is_length_field_for")):
                     field_name = self._to_rust_variable(field.field_name)
+                    if field.isfd:
+                        rust_type = "RawFdContainer"
+                    else:
+                        rust_type = self._to_rust_type(field.type.name)
                     if field.type.is_list:
                         if field.type.nmemb is None:
-                            self.out("pub %s: Vec<%s>,", field_name, self._to_rust_type(field.type.name))
+                            self.out("pub %s: Vec<%s>,", field_name, rust_type)
                         else:
-                            self.out("pub %s: [%s; %s],", field_name, self._to_rust_type(field.type.name), field.type.nmemb)
+                            self.out("pub %s: [%s; %s],", field_name, rust_type, field.type.nmemb)
                     else:
-                        self.out("pub %s: %s,", field_name, self._to_rust_identifier(self._to_rust_type(field.type.name)))
+                        self.out("pub %s: %s,", field_name, self._to_rust_identifier(rust_type))
         self.out("}")
 
-        self.out("impl TryParse for %s%s {", name_transform(self._name(name)), extra_name)
+        if has_fds:
+            trait = "TryParseFd"
+            method = "try_parse_fd<'a>(value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError>"
+        else:
+            trait = "TryParse"
+            method = "try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError>"
+        self.out("impl %s for %s%s {", trait, name_transform(self._name(name)), extra_name)
         with Indent(self.out):
-            self.out("fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {")
+            self.out("fn %s {", method)
             with Indent(self.out):
                 self.out("let mut remaining = value;")
                 parts = self._emit_parsing_code(complex.fields)
@@ -794,19 +820,34 @@ class Module(object):
             self.out("}")
         self.out("}")
 
-        self.out("impl TryFrom<Buffer> for %s%s {", name_transform(self._name(name)), extra_name)
+        if has_fds:
+            value = "(Buffer, Vec<RawFdContainer>)"
+        else:
+            value = "Buffer"
+        self.out("impl TryFrom<%s> for %s%s {", value, name_transform(self._name(name)), extra_name)
         with Indent(self.out):
             self.out("type Error = ParseError;")
-            self.out("fn try_from(value: Buffer) -> Result<Self, Self::Error> {")
-            self.out.indent("Self::try_from(&*value)")
+            self.out("fn try_from(value: %s) -> Result<Self, Self::Error> {", value)
+            if has_fds:
+                self.out.indent("Self::try_from((&*value.0, value.1))")
+            else:
+                self.out.indent("Self::try_from(&*value)")
             self.out("}")
         self.out("}")
 
-        self.out("impl TryFrom<&[u8]> for %s%s {", name_transform(self._name(name)), extra_name)
+        if has_fds:
+            value = "(&[u8], Vec<RawFdContainer>)"
+        else:
+            value = "&[u8]"
+        self.out("impl TryFrom<%s> for %s%s {", value, name_transform(self._name(name)), extra_name)
         with Indent(self.out):
             self.out("type Error = ParseError;")
-            self.out("fn try_from(value: &[u8]) -> Result<Self, Self::Error> {")
-            self.out.indent("Ok(Self::try_parse(value)?.0)")
+            self.out("fn try_from(value: %s) -> Result<Self, Self::Error> {", value)
+            if has_fds:
+                self.out.indent("let (value, mut fds) = value;")
+                self.out.indent("Ok(Self::try_parse_fd(value, &mut fds)?.0)")
+            else:
+                self.out.indent("Ok(Self::try_parse(value)?.0)")
             self.out("}")
         self.out("}")
 
