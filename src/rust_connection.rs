@@ -7,9 +7,8 @@ use std::convert::{TryFrom, TryInto};
 use std::iter::repeat;
 use std::cell::RefCell;
 use std::collections::VecDeque;
-use std::os::unix::io::RawFd;
 
-use crate::utils::Buffer;
+use crate::utils::{Buffer, RawFdContainer};
 use crate::connection::{Connection, Cookie, SequenceNumber, ExtensionInformation};
 use crate::generated::xproto::{Setup, SetupRequest, QueryExtensionReply};
 use crate::x11_utils::GenericEvent;
@@ -95,7 +94,7 @@ impl ConnectionInner {
         Ok(Buffer::from_vec(buffer))
     }
 
-    fn send_request(&mut self, bufs: &[IoSlice], fds: &[RawFd], has_reply: bool) -> Result<SequenceNumber, Box<dyn Error>> {
+    fn send_request(&mut self, bufs: &[IoSlice], fds: Vec<RawFdContainer>, has_reply: bool) -> Result<SequenceNumber, Box<dyn Error>> {
         assert_eq!(fds.len(), 0);
 
         self.last_sequence_written += 1;
@@ -229,13 +228,13 @@ impl RustConnection {
         Ok((conn, screen))
     }
 
-    fn send_request(&self, bufs: &[IoSlice], fds: &[RawFd], has_reply: bool) -> Result<SequenceNumber, ConnectionError> {
+    fn send_request(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>, has_reply: bool) -> Result<SequenceNumber, ConnectionError> {
         self.inner.borrow_mut().send_request(bufs, fds, has_reply).or(Err(ConnectionError::UnknownError))
     }
 }
 
 impl Connection for RustConnection {
-    fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: &[RawFd]) -> Result<Cookie<Self, R>, ConnectionError>
+    fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<Cookie<Self, R>, ConnectionError>
         where R: TryFrom<Buffer, Error=ParseError>
     {
         let mut storage = Default::default();
@@ -244,7 +243,7 @@ impl Connection for RustConnection {
         Ok(Cookie::new(self, self.send_request(bufs, fds, true)?))
     }
 
-    fn send_request_without_reply(&self, bufs: &[IoSlice], fds: &[RawFd]) -> Result<SequenceNumber, ConnectionError> {
+    fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<SequenceNumber, ConnectionError> {
         self.send_request(bufs, fds, false)
     }
 

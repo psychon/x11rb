@@ -7,7 +7,7 @@ use std::io::IoSlice;
 use std::ops::Deref;
 use std::os::unix::io::{AsRawFd, RawFd};
 use libc::c_void;
-use crate::utils::{CSlice, Buffer};
+use crate::utils::{CSlice, Buffer, RawFdContainer};
 use crate::x11_utils::{GenericError, GenericEvent, Event};
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 use crate::connection::{Connection, Cookie, SequenceNumber, ExtensionInformation};
@@ -83,7 +83,7 @@ impl XCBConnection {
         Ok(result)
     }
 
-    fn send_request(&self, bufs: &[IoSlice], fds: &[RawFd], has_reply: bool) -> Result<SequenceNumber, ConnectionError> {
+    fn send_request(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>, has_reply: bool) -> Result<SequenceNumber, ConnectionError> {
         // For this, we derefence the IoSlices, add two new entries, and create new IoSlices.
         let mut new_bufs = Vec::with_capacity(2 + bufs.len());
 
@@ -109,6 +109,10 @@ impl XCBConnection {
         if has_reply {
             flags |= raw_ffi::send_request_flags::CHECKED;
         }
+
+        // Convert the FDs into an array of ints. libxcb will close the FDs.
+        let fds: Vec<_> = fds.into_iter().map(RawFdContainer::into_raw_fd).collect();
+
         let seqno = if fds.is_empty() {
             unsafe { raw_ffi::xcb_send_request64((self.0).0, flags, &mut new_bufs[2], &protocol_request) }
         } else {
@@ -145,13 +149,13 @@ impl XCBConnection {
 }
 
 impl Connection for XCBConnection {
-    fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: &[RawFd]) -> Result<Cookie<Self, R>, ConnectionError>
+    fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<Cookie<Self, R>, ConnectionError>
         where R: TryFrom<Buffer, Error=ParseError>
     {
         Ok(Cookie::new(self, self.send_request(bufs, fds, true)?))
     }
 
-    fn send_request_without_reply(&self, bufs: &[IoSlice], fds: &[RawFd]) -> Result<SequenceNumber, ConnectionError> {
+    fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<SequenceNumber, ConnectionError> {
         self.send_request(bufs, fds, false)
     }
 

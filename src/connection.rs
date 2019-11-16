@@ -8,8 +8,7 @@ use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
 use std::collections::HashMap;
 use std::sync::Mutex;
-use std::os::unix::io::RawFd;
-use crate::utils::Buffer;
+use crate::utils::{Buffer, RawFdContainer};
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 use crate::x11_utils::GenericEvent;
 use crate::generated::xproto::{Setup, ListFontsWithInfoReply, QueryExtensionReply, ConnectionExt};
@@ -44,7 +43,7 @@ pub trait Connection: Sized {
     /// automatically uses the BIG-REQUESTS extension for such large requests.
     ///
     /// In any case, the request may not be larger than the server's maximum request length.
-    fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: &[RawFd])
+    fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
         -> Result<Cookie<Self, R>, ConnectionError>
         where R: TryFrom<Buffer, Error=ParseError>;
 
@@ -67,7 +66,7 @@ pub trait Connection: Sized {
     /// automatically uses the BIG-REQUESTS extension for such large requests.
     ///
     /// In any case, the request may not be larger than the server's maximum request length.
-    fn send_request_without_reply(&self, bufs: &[IoSlice], fds: &[RawFd])
+    fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
         -> Result<SequenceNumber, ConnectionError>;
 
     /// A reply to an error should be discarded.
@@ -142,10 +141,9 @@ pub trait Connection: Sized {
     /// ```
     /// use std::io::IoSlice;
     /// use std::convert::TryFrom;
-    /// use std::os::unix::io::RawFd;
     /// use x11rb::connection::{Cookie, Connection, SequenceNumber};
     /// use x11rb::errors::{ParseError, ConnectionError};
-    /// use x11rb::utils::Buffer;
+    /// use x11rb::utils::{Buffer, RawFdContainer};
     ///
     /// struct MyConnection();
     ///
@@ -182,18 +180,20 @@ pub trait Connection: Sized {
     ///     #    unimplemented!()
     ///     # }
     ///
-    ///     fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: &[RawFd]) -> Result<Cookie<Self, R>, ConnectionError>
+    ///     fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
+    ///     -> Result<Cookie<Self, R>, ConnectionError>
     ///     where R: TryFrom<Buffer, Error=ParseError> {
     ///         Ok(Cookie::new(self, self.send_request(bufs, fds, true)?))
     ///     }
     ///
-    ///     fn send_request_without_reply(&self, bufs: &[IoSlice], fds: &[RawFd]) -> Result<SequenceNumber, ConnectionError> {
+    ///     fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
+    ///     -> Result<SequenceNumber, ConnectionError> {
     ///         self.send_request(bufs, fds, false)
     ///     }
     /// }
     ///
     /// impl MyConnection {
-    ///     fn send_request(&self, bufs: &[IoSlice], fds: &[RawFd], has_reply: bool)
+    ///     fn send_request(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>, has_reply: bool)
     ///     -> Result<SequenceNumber, ConnectionError>
     ///     {
     ///         let mut storage = Default::default();
