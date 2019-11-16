@@ -9,7 +9,7 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 
 use crate::utils::{Buffer, RawFdContainer};
-use crate::connection::{Connection, Cookie, SequenceNumber, ExtensionInformation};
+use crate::connection::{Connection, Cookie, CookieWithFds, SequenceNumber, ExtensionInformation};
 use crate::generated::xproto::{Setup, SetupRequest, QueryExtensionReply};
 use crate::x11_utils::GenericEvent;
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
@@ -243,6 +243,13 @@ impl Connection for RustConnection {
         Ok(Cookie::new(self, self.send_request(bufs, fds, true)?))
     }
 
+    fn send_request_with_reply_with_fds<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<CookieWithFds<Self, R>, ConnectionError>
+        where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>
+    {
+        let _ = (bufs, fds);
+        unimplemented!()
+    }
+
     fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<SequenceNumber, ConnectionError> {
         self.send_request(bufs, fds, false)
     }
@@ -258,6 +265,11 @@ impl Connection for RustConnection {
 
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
         Ok(self.inner.borrow_mut().wait_for_reply(sequence).map_err(|_| ConnectionError::UnknownError)?)
+    }
+
+    fn wait_for_reply_with_fds(&self, sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
+        let _ = sequence;
+        unimplemented!();
     }
 
     fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {

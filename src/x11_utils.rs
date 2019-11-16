@@ -1,6 +1,6 @@
 use std::convert::{TryFrom, TryInto};
 
-use crate::utils::Buffer;
+use crate::utils::{RawFdContainer, Buffer};
 use crate::errors::ParseError;
 
 /// Common information on events and errors.
@@ -154,6 +154,15 @@ pub trait TryParse: Sized {
     /// If parsing is successful, an instance of the type and a slice for the remaining data should
     /// be returned. Otherwise, an error is returned.
     fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError>;
+}
+
+/// A type implementing this trait can be parsed from some raw bytes and a list of FDs.
+pub trait TryParseFd: Sized {
+    /// Try to parse the given values into an instance of this type.
+    ///
+    /// If parsing is successful, an instance of the type and a slice for the remaining data should
+    /// be returned. Otherwise, an error is returned.
+    fn try_parse_fd<'a>(value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError>;
 }
 
 // Now implement TryParse for some primitive data types that we need.

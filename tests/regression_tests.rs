@@ -3,7 +3,7 @@ use std::convert::TryFrom;
 use std::ops::Deref;
 use std::cell::RefCell;
 
-use x11rb::connection::{Connection, Cookie, SequenceNumber};
+use x11rb::connection::{Connection, Cookie, CookieWithFds, SequenceNumber};
 use x11rb::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 use x11rb::generated::xproto::{Setup, QueryExtensionReply, ConnectionExt, Segment, KeymapNotifyEvent};
 use x11rb::utils::{Buffer, RawFdContainer};
@@ -46,6 +46,12 @@ impl Connection for FakeConnection {
         unimplemented!()
     }
 
+    fn send_request_with_reply_with_fds<R>(&self, _bufs: &[IoSlice], _fds: Vec<RawFdContainer>) -> Result<CookieWithFds<Self, R>, ConnectionError>
+    where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>
+    {
+        unimplemented!()
+    }
+
     fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<SequenceNumber, ConnectionError> {
         assert_eq!(fds.len(), 0);
 
@@ -65,6 +71,10 @@ impl Connection for FakeConnection {
     }
 
     fn wait_for_reply(&self, _sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
+        unimplemented!()
+    }
+
+    fn wait_for_reply_with_fds(&self, _sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
         unimplemented!()
     }
 

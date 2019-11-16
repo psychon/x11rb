@@ -47,6 +47,29 @@ pub trait Connection: Sized {
         -> Result<Cookie<Self, R>, ConnectionError>
         where R: TryFrom<Buffer, Error=ParseError>;
 
+    /// Send a request with a reply containing file descriptors to the server.
+    ///
+    /// The `bufs` parameter describes the raw bytes that should be sent. The returned cookie
+    /// allows to get the response.
+    ///
+    /// The `fds` parameter contains a list of file descriptors that should be sent with the
+    /// request. Ownership of these FDs is transferred to the connection. This means that the
+    /// connection will close the FDs after they were sent.
+    ///
+    /// Users of this library will most likely not want to use this function directly. Instead, the
+    /// generated code will take the supplied arguments, construct byte buffers, and call this
+    /// method.
+    ///
+    /// The provided buffers must contain at least a single element and the first buffer must have
+    /// at least four bytes. The length field must be set correctly, unless the request is larger
+    /// than 2^18 bytes, because in this case, the length field would overflow. The connection
+    /// automatically uses the BIG-REQUESTS extension for such large requests.
+    ///
+    /// In any case, the request may not be larger than the server's maximum request length.
+    fn send_request_with_reply_with_fds<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
+        -> Result<CookieWithFds<Self, R>, ConnectionError>
+        where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>;
+
     /// Send a request without a reply to the server.
     ///
     /// The `bufs` parameter describes the raw bytes that should be sent. The sequence number of
@@ -92,6 +115,13 @@ pub trait Connection: Sized {
     ///
     /// Users of this library will most likely not want to use this function directly.
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error>;
+
+    /// Wait for the reply to a request that has FDs.
+    ///
+    /// The given sequence number identifies the request for which replies are expected.
+    ///
+    /// Users of this library will most likely not want to use this function directly.
+    fn wait_for_reply_with_fds(&self, sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error>;
 
     /// Wait for a new event from the X11 server.
     fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError>;
@@ -141,7 +171,7 @@ pub trait Connection: Sized {
     /// ```
     /// use std::io::IoSlice;
     /// use std::convert::TryFrom;
-    /// use x11rb::connection::{Cookie, Connection, SequenceNumber};
+    /// use x11rb::connection::{Cookie, CookieWithFds, Connection, SequenceNumber};
     /// use x11rb::errors::{ParseError, ConnectionError};
     /// use x11rb::utils::{Buffer, RawFdContainer};
     ///
@@ -158,6 +188,10 @@ pub trait Connection: Sized {
     ///     # }
     ///     # fn wait_for_reply(&self, sequence: SequenceNumber)
     ///     # -> Result<Buffer, x11rb::errors::ConnectionErrorOrX11Error> {
+    ///     #    unimplemented!()
+    ///     # }
+    ///     # fn wait_for_reply_with_fds(&self, sequence: SequenceNumber)
+    ///     # -> Result<(Buffer, Vec<RawFdContainer>), x11rb::errors::ConnectionErrorOrX11Error> {
     ///     #    unimplemented!()
     ///     # }
     ///     # fn wait_for_event(&self) -> Result<x11rb::x11_utils::GenericEvent, ConnectionError> {
@@ -183,17 +217,24 @@ pub trait Connection: Sized {
     ///     fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
     ///     -> Result<Cookie<Self, R>, ConnectionError>
     ///     where R: TryFrom<Buffer, Error=ParseError> {
-    ///         Ok(Cookie::new(self, self.send_request(bufs, fds, true)?))
+    ///         Ok(Cookie::new(self, self.send_request(bufs, fds, true, false)?))
+    ///     }
+    ///
+    ///     fn send_request_with_reply_with_fds<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
+    ///     -> Result<CookieWithFds<Self, R>, ConnectionError>
+    ///     where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError> {
+    ///         Ok(CookieWithFds::new(self, self.send_request(bufs, fds, true, true)?))
     ///     }
     ///
     ///     fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
     ///     -> Result<SequenceNumber, ConnectionError> {
-    ///         self.send_request(bufs, fds, false)
+    ///         self.send_request(bufs, fds, false, false)
     ///     }
     /// }
     ///
     /// impl MyConnection {
-    ///     fn send_request(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>, has_reply: bool)
+    ///     fn send_request(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>,
+    ///                     has_reply: bool, reply_has_fds: bool)
     ///     -> Result<SequenceNumber, ConnectionError>
     ///     {
     ///         let mut storage = Default::default();
@@ -253,6 +294,44 @@ pub trait Connection: Sized {
     }
 }
 
+#[derive(Debug)]
+struct RawCookie<'a, C>
+where C: Connection
+{
+    connection: &'a C,
+    sequence_number: Option<SequenceNumber>,
+}
+
+impl<C> RawCookie<'_, C>
+where C: Connection
+{
+    /// Construct a new raw cookie.
+    ///
+    /// This function should only be used by implementations of
+    /// `Connection::send_request_with_reply`.
+    fn new(connection: &C, sequence_number: SequenceNumber) -> RawCookie<C> {
+        RawCookie {
+            connection,
+            sequence_number: Some(sequence_number)
+        }
+    }
+
+    /// Consume this instance and get the contained sequence number out.
+    fn to_sequence_number(mut self) -> SequenceNumber {
+        self.sequence_number.take().unwrap()
+    }
+}
+
+impl<C> Drop for RawCookie<'_, C>
+where C: Connection
+{
+    fn drop(&mut self) {
+        if let Some(number) = self.sequence_number {
+            self.connection.discard_reply(number);
+        }
+    }
+}
+
 /// A handle to a response from the X11 server.
 ///
 /// When sending a request to the X11 server, this library returns a `Cookie`. This `Cookie` can
@@ -261,8 +340,7 @@ pub trait Connection: Sized {
 pub struct Cookie<'a, C, R>
 where C: Connection
 {
-    connection: &'a C,
-    sequence_number: Option<SequenceNumber>,
+    raw_cookie: RawCookie<'a, C>,
     phantom: PhantomData<R>
 }
 
@@ -276,26 +354,53 @@ where R: TryFrom<Buffer, Error=ParseError>,
     /// `Connection::send_request_with_reply`.
     pub fn new(connection: &C, sequence_number: SequenceNumber) -> Cookie<C, R> {
         Cookie {
-            connection,
-            sequence_number: Some(sequence_number),
+            raw_cookie: RawCookie::new(connection, sequence_number),
             phantom: PhantomData
         }
     }
 
     /// Get the reply that the server sent.
-    pub fn reply(mut self) -> Result<R, ConnectionErrorOrX11Error> {
-        let reply = self.connection.wait_for_reply(self.sequence_number.take().unwrap())?;
+    pub fn reply(self) -> Result<R, ConnectionErrorOrX11Error> {
+        let conn = self.raw_cookie.connection;
+        let reply = conn.wait_for_reply(self.raw_cookie.to_sequence_number())?;
         Ok(reply.try_into()?)
     }
 }
 
-impl<C, R> Drop for Cookie<'_, C, R>
+/// A handle to a response containing `RawFd` from the X11 server.
+///
+/// When sending a request to the X11 server, this library returns a `Cookie`. This `Cookie` can
+/// then later be used to get the response that the server sent.
+///
+/// This variant of `Cookie` represents a response that can contain `RawFd`s.
+#[derive(Debug)]
+pub struct CookieWithFds<'a, C, R>
 where C: Connection
 {
-    fn drop(&mut self) {
-        if let Some(number) = self.sequence_number {
-            self.connection.discard_reply(number);
+    raw_cookie: RawCookie<'a, C>,
+    phantom: PhantomData<R>
+}
+
+impl<C, R> CookieWithFds<'_, C, R>
+where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>,
+      C: Connection
+{
+    /// Construct a new cookie.
+    ///
+    /// This function should only be used by implementations of
+    /// `Connection::send_request_with_reply`.
+    pub fn new(connection: &C, sequence_number: SequenceNumber) -> CookieWithFds<C, R> {
+        CookieWithFds {
+            raw_cookie: RawCookie::new(connection, sequence_number),
+            phantom: PhantomData
         }
+    }
+
+    /// Get the reply that the server sent.
+    pub fn reply(self) -> Result<R, ConnectionErrorOrX11Error> {
+        let conn = self.raw_cookie.connection;
+        let reply = conn.wait_for_reply_with_fds(self.raw_cookie.to_sequence_number())?;
+        Ok(reply.try_into()?)
     }
 }
 
@@ -320,11 +425,11 @@ where C: Connection
     type Item = Result<ListFontsWithInfoReply, ConnectionErrorOrX11Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let sequence = match self.0.sequence_number.take() {
+        let sequence = match self.0.raw_cookie.sequence_number.take() {
             None => return None,
             Some(sequence) => sequence
         };
-        let reply = self.0.connection.wait_for_reply(sequence);
+        let reply = self.0.raw_cookie.connection.wait_for_reply(sequence);
         let reply = match reply {
             Err(e) => return Some(Err(e)),
             Ok(v) => v
@@ -333,7 +438,7 @@ where C: Connection
         let reply = reply.map_err(ConnectionErrorOrX11Error::from);
         if reply.is_ok() {
             if !reply.as_ref().unwrap().name.is_empty() {
-                self.0.sequence_number = Some(sequence);
+                self.0.raw_cookie.sequence_number = Some(sequence);
             } else {
                 return None
             }
