@@ -227,7 +227,10 @@ impl Connection for XCBConnection {
     }
 
     fn flush(&self) {
-        unsafe { raw_ffi::xcb_flush((self.0).0); }
+        // xcb_flush() returns 0 if the connection is in (or just entered) an error state, else 1.
+        // Adding a Result<(), ConnectionError> as a return value here would be too noisy, I think,
+        // so just ignore this return value.
+        let _ = unsafe { raw_ffi::xcb_flush((self.0).0) };
     }
 
     fn generate_id(&self) -> u32 {
