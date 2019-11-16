@@ -208,8 +208,22 @@ impl Connection for XCBConnection {
     }
 
     fn wait_for_reply_with_fds(&self, sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
-        let _ = sequence;
-        unimplemented!()
+        let buffer = self.wait_for_reply(sequence)?;
+
+        // Get a pointer to the array of integers where libxcb saved the FD numbers
+        let fd_ptr = match &buffer {
+            &Buffer::Vec(_) => unreachable!(), // wait_for_reply() always returns a CSlice
+            &Buffer::CSlice(ref slice) => {
+                // libxcb saves the list of FDs after the data of the reply
+                (unsafe { slice.as_ptr().add(slice.len()) }) as *const RawFd
+            }
+        };
+
+        // The number of FDs is in the second byte (= buffer[1]) in all replies.
+        let vector = unsafe { std::slice::from_raw_parts(fd_ptr, buffer[1] as usize) };
+        let vector = vector.iter().map(|&fd| RawFdContainer::new(fd)).collect();
+
+        Ok((buffer, vector))
     }
 
     fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
