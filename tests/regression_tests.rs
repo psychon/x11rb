@@ -3,11 +3,11 @@ use std::convert::TryFrom;
 use std::ops::Deref;
 use std::cell::RefCell;
 
-use super::connection::{Connection, Cookie, SequenceNumber};
-use super::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
-use super::generated::xproto::{Setup, QueryExtensionReply, ConnectionExt, Segment, KeymapNotifyEvent};
-use super::utils::{Buffer, RawFdContainer};
-use super::x11_utils::GenericEvent;
+use x11rb::connection::{Connection, Cookie, SequenceNumber};
+use x11rb::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
+use x11rb::generated::xproto::{Setup, QueryExtensionReply, ConnectionExt, Segment, KeymapNotifyEvent};
+use x11rb::utils::{Buffer, RawFdContainer};
+use x11rb::x11_utils::GenericEvent;
 
 #[derive(Debug)]
 struct SavedRequest {
@@ -107,7 +107,7 @@ fn test_poly_segment() -> Result<(), ConnectionErrorOrX11Error> {
     conn.poly_segment(drawable, gc, &segments)?;
 
     let mut expected = Vec::new();
-    expected.push(super::generated::xproto::POLY_SEGMENT_REQUEST);
+    expected.push(x11rb::generated::xproto::POLY_SEGMENT_REQUEST);
     expected.push(0); // padding
     expected.extend(&length.to_ne_bytes()); // length, not in the xml
     expected.extend(&drawable.to_ne_bytes());
@@ -133,7 +133,7 @@ fn test_big_requests() -> Result<(), ConnectionError> {
     conn.poly_text16(drawable, gc, x, y, &big_buffer)?;
 
     let mut expected = Vec::new();
-    expected.push(super::generated::xproto::POLY_TEXT16_REQUEST);
+    expected.push(x11rb::generated::xproto::POLY_TEXT16_REQUEST);
     expected.push(0); // padding
     // Length of zero: we use big requests
     expected.push(0);
@@ -181,7 +181,7 @@ fn test_send_event() -> Result<(), ConnectionError> {
     conn.send_event(propagate, destination, event_mask, event)?;
 
     let mut expected = Vec::new();
-    expected.push(super::generated::xproto::SEND_EVENT_REQUEST);
+    expected.push(x11rb::generated::xproto::SEND_EVENT_REQUEST);
     expected.push(propagate);
     expected.extend(&((12u16 + 32u16) / 4).to_ne_bytes());
     expected.extend(&destination.to_ne_bytes());
