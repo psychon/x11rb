@@ -117,8 +117,7 @@ class Module(object):
         self.out("#[allow(unused_imports)]")
         self.out("use std::option::Option as RustOption;")
         self.out("#[allow(unused_imports)]")
-        self.out("use std::os::unix::io::RawFd;")
-        self.out("use crate::utils::Buffer;")
+        self.out("use crate::utils::{Buffer, RawFdContainer};")
         self.out("#[allow(unused_imports)]")
         self.out("use crate::x11_utils::{GenericEvent as X11GenericEvent, GenericError as X11GenericError};")
         self.out("use crate::x11_utils::TryParse;")
@@ -410,6 +409,7 @@ class Module(object):
             if field.visible:
                 rust_type = self._to_complex_rust_type(field, aux_name, '&')
                 if (field.enum is not None and not field.type.is_list) or \
+                        (field.isfd and not field.type.is_list) or \
                         (name == ('xcb', 'SendEvent') and field.field_name == 'event'):
                     if name == ('xcb', 'SendEvent') and field.field_name == 'event':
                         # Turn &[u8; 32] into [u8; 32]
@@ -424,7 +424,7 @@ class Module(object):
                     rust_type = 'bool'
                 args.append("%s: %s" % (self._to_rust_variable(field.field_name), rust_type))
                 if field.isfd:
-                    fds.append(self._to_rust_variable(field.field_name))
+                    fds.append("%s.into()" % self._to_rust_variable(field.field_name))
                     if field.type.is_list:
                         fds_is_list = True
 
@@ -591,13 +591,13 @@ class Module(object):
 
             if fds:
                 if not fds_is_list:
-                    self.trait_out("let fds = [%s];", ", ".join(fds))
-                    fds = "&fds"
+                    self.trait_out("let fds = vec!(%s);", ", ".join(fds))
+                    fds = "fds"
                 else:
                     # There may (currently) be only a single list of FDs
                     fds, = fds
             else:
-                fds = "&[]"
+                fds = "Vec::new()"
 
             if is_list_fonts_with_info:
                 assert obj.reply
@@ -815,13 +815,16 @@ class Module(object):
             return modifier + aux_name
         if not field.isfd:
             result = self._to_rust_type(field.type.name)
+            if field.type.is_list:
+                if field.type.nmemb is None:
+                    result = "%s[%s]" % (modifier, result)
+                else:
+                    result = "%s[%s; %s]" % (modifier, result, field.type.nmemb)
         else:
-            result = "RawFd"
-        if field.type.is_list:
-            if field.type.nmemb is None:
-                result = "%s[%s]" % (modifier, result)
-            else:
-                result = "%s[%s; %s]" % (modifier, result, field.type.nmemb)
+            result = "RawFdContainer"
+            if field.type.is_list:
+                assert field.type.nmemb is None
+                result = "Vec<RawFdContainer>"
         return result
 
     def _generate_aux(self, name, request, switch, mask_field, request_function_name):

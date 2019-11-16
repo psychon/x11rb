@@ -2,7 +2,6 @@ extern crate x11rb;
 
 use std::fs::{remove_file, File, OpenOptions};
 use std::io::{Write, Result as IOResult};
-use std::os::unix::io::IntoRawFd;
 
 use x11rb::xcb_ffi::XCBConnection;
 use x11rb::connection::Connection;
@@ -70,7 +69,7 @@ fn real_main<C: Connection>(conn: &C, screen_num: usize, file: File) -> Result<(
 
 
     let shmseg = conn.generate_id();
-    shm::ConnectionExt::attach_fd(conn, shmseg, file.into_raw_fd(), 0)?;
+    shm::ConnectionExt::attach_fd(conn, shmseg, file, 0)?;
 
     let content = get_shared_memory_content_at_offset(conn, screen, shmseg, 0)?;
     assert_eq!(content[..], TEMP_FILE_CONTENT[0..4]);
