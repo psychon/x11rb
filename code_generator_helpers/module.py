@@ -732,7 +732,8 @@ class Module(object):
         parts = []
         for field in fields:
             if not field.wire:
-                assert field.isfd  # What other kind of non-wire fields is there?
+                if not field.isfd:
+                    continue
                 field_name = self._to_rust_variable(field.field_name)
                 if field.type.is_simple:
                     self.out("if fds.is_empty() { return Err(ParseError::ParseError) }")
@@ -756,12 +757,17 @@ class Module(object):
                     self.out("];")
                     parts.append(field.field_name)
                 elif field.type.is_list:
+                    try_parse_args = ["remaining"]
+                    if hasattr(field.type, "member"):
+                        if hasattr(field.type.member, "extra_try_parse_args"):
+                            try_parse_args += field.type.member.extra_try_parse_args
+
                     field_name = self._to_rust_variable(field.field_name)
                     self.out("let list_length = %s;", self.expr_to_str(field.type.expr, 'usize'))
                     self.out("let mut %s = Vec::with_capacity(list_length);", field_name)
                     self.out("for _ in 0..list_length {")
                     with Indent(self.out):
-                        self.out("let (v, new_remaining) = %s::try_parse(remaining)?;", rust_type)
+                        self.out("let (v, new_remaining) = %s::try_parse(%s)?;", rust_type, ", ".join(try_parse_args))
                         self.out("%s.push(v);", field_name)
                         self.out("remaining = new_remaining;")
                     self.out("}")
@@ -818,12 +824,34 @@ class Module(object):
                         self.out("pub %s: %s,", field_name, self._to_rust_identifier(rust_type))
         self.out("}")
 
-        if impl_try_from:
+        # Collect all the fields that appear on the wire in the parent object
+        wire_fields = [field.field_name for field in complex.fields if field.wire]
+        # Collect all fields that are referenced
+        referenced = []
+        for field in complex.fields:
+            if field.type.is_list:
+                referenced.extend(get_references(field.type.expr))
+        # Collect all the fields that appear "out of thin air"
+        unresolved = [field for field in referenced if field not in wire_fields]
+
+        if impl_try_from and not unresolved:
             method = "fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError>"
             self.out("impl TryParse for %s%s {", name_transform(self._name(name)), extra_name)
         else:
             if has_fds:
                 method = "fn try_parse_fd<'a>(value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError>"
+            elif impl_try_from:
+                # Turn missing values into extra arguments
+                assert unresolved
+                unresolved_args, extra_args = [], []
+                for field in complex.fields:
+                    if field.field_name in unresolved:
+                        field_type = self._to_complex_rust_type(field, None, '')
+                        unresolved_args.append("%s: %s" % (field.field_name, field_type))
+                        extra_args.append(field.field_name)
+                method = "pub fn try_parse(value: &[u8], %s) -> Result<(Self, &[u8]), ParseError>" % ", ".join(unresolved_args)
+
+                complex.extra_try_parse_args = extra_args
             else:
                 method = "pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError>"
             self.out("impl %s%s {", name_transform(self._name(name)), extra_name)
@@ -836,6 +864,11 @@ class Module(object):
                 self.out("Ok((result, remaining))")
             self.out("}")
         self.out("}")
+
+        if unresolved:
+            # The remaining traits cannot be implemented
+            self.out("// Skipping TryFrom implementations because of unresolved members")
+            return
 
         if has_fds:
             value = "(Buffer, Vec<RawFdContainer>)"
