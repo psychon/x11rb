@@ -106,6 +106,16 @@ def _emit_doc(out, doc):
         out("/// ```")
 
 
+def ename_to_rust(ename):
+    if ename[0].isdigit():
+        ename = 'M' + ename
+    if "_" in ename and not ename.isupper():
+        # xf86vidmode has a ModeFlag enum with items like
+        # Positive_HSync. Turn this into PositiveHSync.
+        ename = ename.replace('_', '')
+    return ename[0].upper() + ename[1:]
+
+
 class Module(object):
     def __init__(self, outer_module):
         self.out = Output()
@@ -155,15 +165,6 @@ class Module(object):
 
     def enum(self, enum, name):
         has_all_upper = any(ename.isupper() and len(ename) > 1 for (ename, value) in enum.values)
-
-        def ename_to_rust(ename):
-            if ename[0].isdigit():
-                ename = 'M' + ename
-            if "_" in ename and not ename.isupper():
-                # xf86vidmode has a ModeFlag enum with items like
-                # Positive_HSync. Turn this into PositiveHSync.
-                ename = ename.replace('_', '')
-            return ename[0].upper() + ename[1:]
 
         rust_name = self._name(name)
         _emit_doc(self.out, enum.doc)
@@ -927,7 +928,8 @@ class Module(object):
                     assert expr.op == "enumref"
                     enum_name = self._name(expr.lenfield_type.name)
                     self.out("if self.%s.is_some() {", self._aux_field_name(field))
-                    self.out.indent("mask |= Into::<%s>::into(%s::%s);", self._to_rust_type(mask_field.type.name), enum_name, expr.lenfield_name)
+                    self.out.indent("mask |= Into::<%s>::into(%s::%s);", self._to_rust_type(mask_field.type.name),
+                                    enum_name, ename_to_rust(expr.lenfield_name))
                     self.out("}")
                 self.out("mask")
             self.out("}")
