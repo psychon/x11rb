@@ -24,7 +24,7 @@ def get_references(expr):
         if expr.op == 'calculate_len':
             return []
         if expr.op == 'sumof':
-            return [expr.lenfield_name]
+            return []
         if expr.op == '~':
             return get_references(expr.rhs)
         return get_references(expr.lhs) + get_references(expr.rhs)
@@ -48,6 +48,12 @@ def mark_length_fields(self):
 
     # Mark length fields for simple list as not visible and map them to their list
     for field in self.fields:
+        if not field.type.is_simple:
+            # Skip things that cannot possibly be length fields. This is
+            # necessary so that xinput's ListInputDevices "devices" field is not
+            # marked as a length field and hidden.
+            continue
+
         related_lists = list(filter(lambda list_field: field.field_name == list_field.type.expr.lenfield_name, simple_lists))
         if len(related_lists) > 1:
             # Well, okay, multiple lists share the same length field. These are
