@@ -247,7 +247,7 @@ class Module(object):
     def struct(self, struct, name):
         assert not hasattr(struct, "doc")
         has_variable_size_list = any(field.type.is_list and field.type.nmemb is None for field in struct.fields)
-        self.complex_type(struct, name, '', lambda name: self._to_rust_identifier(name))
+        self.complex_type(struct, name, '', True, lambda name: self._to_rust_identifier(name))
 
         if has_variable_size_list:
             length = None
@@ -619,7 +619,7 @@ class Module(object):
 
         if obj.reply:
             _emit_doc(self.out, obj.reply.doc)
-            self.complex_type(obj.reply, name, 'Reply')
+            self.complex_type(obj.reply, name, 'Reply', False)
 
         self.out("")
 
@@ -636,7 +636,7 @@ class Module(object):
             self.out.indent("pub generic_events_are_currently_not_supported: bool")
             self.out("}")
         else:
-            self.complex_type(event, name, 'Event')
+            self.complex_type(event, name, 'Event', False)
             self._emit_from_generic(name, 'X11GenericEvent', 'Event')
             self._emit_serialise(event, name, 'Event')
         self.out("")
@@ -644,7 +644,7 @@ class Module(object):
     def error(self, error, name):
         assert not hasattr(error, "doc")
         self.emit_opcode(name, 'Error', error.opcodes[name])
-        self.complex_type(error, name, 'Error')
+        self.complex_type(error, name, 'Error', False)
         self._emit_from_generic(name, 'X11GenericError', 'Error')
         self._emit_serialise(error, name, 'Error')
         self.out("")
@@ -770,13 +770,14 @@ class Module(object):
 
         return parts
 
-    def complex_type(self, complex, name, extra_name, name_transform=lambda x: x):
+    def complex_type(self, complex, name, extra_name, impl_try_from, name_transform=lambda x: x):
         mark_length_fields(complex)
 
         fixed_size = all(field.type.fixed_size for field in complex.fields)
         no_variable_length_list = all(not field.type.is_list or field.type.nmemb is not None for field in complex.fields)
         no_union = all(not field.type.is_union for field in complex.fields)
         has_fds = any(field.isfd for field in complex.fields)
+        assert not (impl_try_from and has_fds)
         if has_fds:
             self.out("#[derive(Debug)]")
         elif fixed_size and no_variable_length_list and no_union:
@@ -801,14 +802,17 @@ class Module(object):
                         self.out("pub %s: %s,", field_name, self._to_rust_identifier(rust_type))
         self.out("}")
 
-        if has_fds:
-            method = "try_parse_fd<'a>(value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError>"
-            self.out("impl %s%s {", name_transform(self._name(name)), extra_name)
-        else:
-            method = "try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError>"
+        if impl_try_from:
+            method = "fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError>"
             self.out("impl TryParse for %s%s {", name_transform(self._name(name)), extra_name)
+        else:
+            if has_fds:
+                method = "fn try_parse_fd<'a>(value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError>"
+            else:
+                method = "pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError>"
+            self.out("impl %s%s {", name_transform(self._name(name)), extra_name)
         with Indent(self.out):
-            self.out("fn %s {", method)
+            self.out("%s {", method)
             with Indent(self.out):
                 self.out("let mut remaining = value;")
                 parts = self._emit_parsing_code(complex.fields)
