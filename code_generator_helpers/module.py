@@ -675,9 +675,16 @@ class Module(object):
                             for i in range(field.type.nmemb):
                                 parts.append("0")
                         elif field.type.is_list:
-                            assert field.type.nmemb is not None and field.type.size == 1
+                            assert field.type.nmemb is not None
+                            assert field.type.size is not None
                             for i in range(field.type.nmemb):
-                                parts.append("self.%s[%d]" % (field_name, i))
+                                if field.type.size == 1:
+                                    parts.append("self.%s[%d]" % (field_name, i))
+                                else:
+                                    self.out("let %s_%d = self.%s[%d].to_ne_bytes();",
+                                             field_name, i, field_name, i)
+                                    for n in range(field.type.size):
+                                        parts.append("%s_%d[%d]" % (field_name, i, n))
                         elif field.type.size == 1:
                             parts.append("self.%s" % field_name)
                         else:
