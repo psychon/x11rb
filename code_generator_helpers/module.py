@@ -23,6 +23,8 @@ def get_references(expr):
     if expr.op is not None:
         if expr.op == 'calculate_len':
             return []
+        if expr.op == 'sumof':
+            return [expr.lenfield_name]
         if expr.op == '~':
             return get_references(expr.rhs)
         return get_references(expr.lhs) + get_references(expr.rhs)
@@ -1012,6 +1014,11 @@ class Module(object):
         if e.op is not None:
             if e.op == 'calculate_len':
                 return e.op
+            if e.op == 'sumof':
+                assert e.rhs.op is None
+                assert e.rhs.nmemb is None
+                field_name = e.rhs.lenfield_name
+                return "%s.iter().map(|x| x.%s as usize).sum()" % (e.lenfield_name, field_name)
             if e.op == '~':
                 return "!(%s)" % self.expr_to_str(e.rhs, type)
             return "(%s) %s (%s)" % (self.expr_to_str(e.lhs, type), e.op, self.expr_to_str(e.rhs, type))
