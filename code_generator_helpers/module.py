@@ -122,8 +122,6 @@ class Module(object):
         self.out("use crate::x11_utils::{GenericEvent as X11GenericEvent, GenericError as X11GenericError};")
         self.out("use crate::x11_utils::TryParse;")
         self.out("#[allow(unused_imports)]")
-        self.out("use crate::x11_utils::TryParseFd;")
-        self.out("#[allow(unused_imports)]")
         self.out("use crate::connection::SequenceNumber;")
         self.out("#[allow(unused_imports)]")
         self.out("use crate::connection::{Cookie, CookieWithFds, Connection as X11Connection};")
@@ -804,12 +802,11 @@ class Module(object):
         self.out("}")
 
         if has_fds:
-            trait = "TryParseFd"
             method = "try_parse_fd<'a>(value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError>"
+            self.out("impl %s%s {", name_transform(self._name(name)), extra_name)
         else:
-            trait = "TryParse"
             method = "try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError>"
-        self.out("impl %s for %s%s {", trait, name_transform(self._name(name)), extra_name)
+            self.out("impl TryParse for %s%s {", name_transform(self._name(name)), extra_name)
         with Indent(self.out):
             self.out("fn %s {", method)
             with Indent(self.out):
