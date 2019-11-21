@@ -359,11 +359,20 @@ where R: TryFrom<Buffer, Error=ParseError>,
         }
     }
 
+    /// Get the sequence number of the request that generated this cookie.
+    pub fn sequence_number(&self) -> SequenceNumber {
+        self.raw_cookie.sequence_number.unwrap()
+    }
+
+    /// Get the raw reply that the server sent.
+    pub fn raw_reply(self) -> Result<Buffer, ConnectionErrorOrX11Error> {
+        let conn = self.raw_cookie.connection;
+        Ok(conn.wait_for_reply(self.raw_cookie.to_sequence_number())?)
+    }
+
     /// Get the reply that the server sent.
     pub fn reply(self) -> Result<R, ConnectionErrorOrX11Error> {
-        let conn = self.raw_cookie.connection;
-        let reply = conn.wait_for_reply(self.raw_cookie.to_sequence_number())?;
-        Ok(reply.try_into()?)
+        Ok(self.raw_reply()?.try_into()?)
     }
 }
 
@@ -396,11 +405,20 @@ where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>,
         }
     }
 
+    /// Get the sequence number of the request that generated this cookie.
+    pub fn sequence_number(&self) -> SequenceNumber {
+        self.raw_cookie.sequence_number.unwrap()
+    }
+
+    /// Get the raw reply that the server sent.
+    pub fn raw_reply(self) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
+        let conn = self.raw_cookie.connection;
+        Ok(conn.wait_for_reply_with_fds(self.raw_cookie.to_sequence_number())?)
+    }
+
     /// Get the reply that the server sent.
     pub fn reply(self) -> Result<R, ConnectionErrorOrX11Error> {
-        let conn = self.raw_cookie.connection;
-        let reply = conn.wait_for_reply_with_fds(self.raw_cookie.to_sequence_number())?;
-        Ok(reply.try_into()?)
+        Ok(self.raw_reply()?.try_into()?)
     }
 }
 
@@ -416,6 +434,11 @@ where C: Connection
 {
     pub(crate) fn new(cookie: Cookie<C, ListFontsWithInfoReply>) -> ListFontsWithInfoCookie<C> {
         ListFontsWithInfoCookie(cookie)
+    }
+
+    /// Get the sequence number of the request that generated this cookie.
+    pub fn sequence_number(&self) -> SequenceNumber {
+        self.0.sequence_number()
     }
 }
 
