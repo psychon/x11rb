@@ -34,15 +34,12 @@ def get_references(expr):
 def mark_length_fields(self):
     lists = list(filter(lambda field: field.type.is_list, self.fields))
 
-    # Partition the lists into "simple" (length depends on at most one length
-    # field) and "complicated" (things like x * y / 8)
-    simple_lists, complicated_lists = [], []
+    # Collect a all "simple" lists (length depends on at most one length field)
+    simple_lists = []
 
     for field in lists:
         if len(get_references(field.type.expr)) <= 1:
             simple_lists.append(field)
-        else:
-            complicated_lists.append(field)
 
     # Mark length fields for simple list as not visible and map them to their list
     for field in self.fields:
@@ -53,21 +50,11 @@ def mark_length_fields(self):
             continue
 
         related_lists = list(filter(lambda list_field: field.field_name == list_field.type.expr.lenfield_name, simple_lists))
-        if len(related_lists) > 1:
-            # Well, okay, multiple lists share the same length field. These are
-            # complicated lists.
-            complicated_lists.extend(related_lists)
-        elif related_lists:
+        if len(related_lists) == 1:
             related_list, = related_lists
             field.is_length_field_for = related_list
             related_list.has_length_field = field
             field.visible = False
-
-    # Map length fields for complicated lists similarly, but keep them visible
-    for list_field in complicated_lists:
-        length_fields = list(filter(lambda field: field.field_name == list_field.type.expr.lenfield_name, self.fields))
-        if length_fields:
-            list_field.has_length_fields = length_fields
 
 
 def _emit_doc(out, doc):
