@@ -155,18 +155,19 @@ class Module(object):
         self.out("impl<C: X11Connection + ?Sized> ConnectionExt for C {}")
 
     def enum(self, enum, name):
-        has_all_upper = any(ename.isupper() and len(ename) > 1 for (ename, value) in enum.values)
-
         rust_name = self._name(name)
         _emit_doc(self.out, enum.doc)
         self.out("#[derive(Debug, Clone, Copy)]")
-        if has_all_upper:
+        # Is any of the variants all upper-case?
+        if any(ename.isupper() and len(ename) > 1 for (ename, value) in enum.values):
             self.out("#[allow(non_camel_case_types)]")
         self.out("pub enum %s {", rust_name)
         for (ename, value) in enum.values:
             self.out.indent("%s,", ename_to_rust(ename))
         self.out("}")
 
+        # Guess which types this enum can be represented in. We do this based on the
+        # highest value that appears in any of the variants.
         highest_value = max((int(value) for (ename, value) in enum.values))
         if highest_value < 1 << 8:
             to_type = "u8"
@@ -218,11 +219,13 @@ class Module(object):
                 self.out("}")
             self.out("}")
 
+        # Is this enum a bitmask? It is all values are bits or the special value zero...
         def ok_for_bitmask(ename, value):
             return ename in bits or value == "0"
 
         looks_like_bitmask = all(ok_for_bitmask(ename, value) for (ename, value) in enum.values)
-        if looks_like_bitmask and len(enum.values) > 1:
+        # ...but not if all values are the special value zero
+        if looks_like_bitmask and any(value != "0" for (ename, value) in enum.values):
             self.out("bitmask_binop!(%s, %s);", rust_name, to_type)
 
         self.out("")
@@ -240,13 +243,20 @@ class Module(object):
 
     def struct(self, struct, name):
         assert not hasattr(struct, "doc")
-        has_variable_size_list = any(field.type.is_list and field.type.nmemb is None for field in struct.fields)
+
+        # Emit the struct definition itself
         self.complex_type(struct, name, '', True, lambda name: self._to_rust_identifier(name))
 
+        # And now emit some functions for the struct.
+
+        has_variable_size_list = any(field.type.is_list and field.type.nmemb is None for field in struct.fields)
         if has_variable_size_list:
+            # For a variable size list, we do not know beforehand the size of the
+            # serialised data. Thus, return a Vec.
             length = None
             wire_type = "Vec<u8>"
         else:
+            # Everything is fixed-size so we can return an array.
             length = sum((field.type.size * field.type.nmemb for field in struct.fields))
             wire_type = "[u8; %s]" % length
 
@@ -258,19 +268,30 @@ class Module(object):
                 if has_variable_size_list:
                     self.out("let mut result = Vec::new();")
 
-                def _emit():
-                    if not has_variable_size_list or not result_bytes:
-                        return
-                    self.out("result.extend([")
-                    for result_value in result_bytes:
-                        self.out.indent("%s,", result_value)
-                    self.out("].iter());")
-                    del result_bytes[:]
+                    def _emit():
+                        if not has_variable_size_list or not result_bytes:
+                            return
+                        self.out("result.extend([")
+                        for result_value in result_bytes:
+                            self.out.indent("%s,", result_value)
+                        self.out("].iter());")
+                        del result_bytes[:]
+                    _final_emit = _emit
+                else:
+                    def _emit():
+                        assert False, "We do not have a variable size list, but we do?"
 
+                    def _final_emit():
+                        pass
+
+                # This gathers the bytes of the result; its content is copied to
+                # result:Vec<u8> by _emit(). This happens in front of variable sized lists
                 result_bytes = []
+
                 for field in struct.fields:
                     if field.type.is_pad:
                         if has_variable_size_list and field.type.align != 1:
+                            # Align the output buffer to a multiple of field.type.align
                             assert field.type.size == 1
                             assert field.type.nmemb == 1
                             self.out("while result.len() %% %s != 0 {", field.type.align)
@@ -282,23 +303,37 @@ class Module(object):
                             for i in range(field.type.nmemb):
                                 result_bytes.append("0")
                     elif field.type.is_list and field.type.nmemb is None:
+                        # This is a variable sized list, so emit bytes to 'result' and
+                        # then add this list directly to 'result'
                         _emit()
                         self.out("for obj in self.%s.iter() {", field.field_name)
                         self.out.indent("result.extend(obj.to_ne_bytes().iter());")
                         self.out("}")
                     elif field.type.is_list and field.type.nmemb is not None and field.type.size == 1:
+                        # Fixed-sized list with byte-sized members
+                        field_name = self._to_rust_variable(field.field_name)
                         for i in range(field.type.nmemb):
-                            result_bytes.append("self.%s[%d]" % (self._to_rust_variable(field.field_name), i))
+                            result_bytes.append("self.%s[%d]" % (field_name, i))
                     else:
+                        # Fixed-sized list with "large" members. We have first serialise
+                        # the members individually and then assemble that into the output.
+                        field_name = self._to_rust_variable(field.field_name)
+                        field_name_bytes = self._to_rust_variable(field.field_name + "_bytes")
                         if hasattr(field, "is_length_field_for"):
-                            self.out("let %s = self.%s.len() as %s;", self._to_rust_variable(field.field_name), field.is_length_field_for.field_name, self._to_rust_type(field.type.name))
-                            source = self._to_rust_variable(field.field_name)
+                            # This field is a length field for some list. We get the value
+                            # for this field as the length of the list.
+                            self.out("let %s = self.%s.len() as %s;", field_name,
+                                     field.is_length_field_for.field_name, self._to_rust_type(field.type.name))
+                            source = field_name
                         else:
-                            source = "self.%s" % self._to_rust_variable(field.field_name)
-                        self.out("let %s = %s.to_ne_bytes();", self._to_rust_variable(field.field_name + "_bytes"), source)
+                            # Get the value of this field from "self".
+                            source = "self.%s" % field_name
+                        # First serialise the value itself...
+                        self.out("let %s = %s.to_ne_bytes();", field_name_bytes, source)
+                        # ...then copy to the output.
                         for i in range(field.type.size):
-                            result_bytes.append("%s[%d]" % (self._to_rust_variable(field.field_name + "_bytes"), i))
-                _emit()
+                            result_bytes.append("%s[%d]" % (field_name_bytes, i))
+                _final_emit()
 
                 if has_variable_size_list:
                     self.out("result")
