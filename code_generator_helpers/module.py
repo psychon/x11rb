@@ -554,7 +554,9 @@ class Module(object):
                             other_field = [field for field in obj.fields if e.lenfield_name == field.field_name]
                             assert len(other_field) == 1
                             other_field = other_field[0]
-                            self.trait_out("let %s: %s = %s.len().try_into()?;", other_field.field_name, self._to_rust_type(other_field.type.name), other_field.is_length_field_for.field_name)
+                            self.trait_out("let %s: %s = %s.len().try_into()?;",
+                                           other_field.field_name, self._to_rust_type(other_field.type.name),
+                                           other_field.is_length_field_for.field_name)
                             return e.lenfield_name
 
                     self.trait_out("let %s: %s = (%s).try_into().unwrap();", field.field_name, self._to_rust_type(field.type.name), expr_to_str_and_emit(field.type.expr))
