@@ -21,9 +21,7 @@ rust_type_mapping = {
 
 def get_references(expr):
     if expr.op is not None:
-        if expr.op == 'calculate_len':
-            return []
-        if expr.op == 'sumof':
+        if expr.op in ['calculate_len', 'sumof']:
             return []
         if expr.op == '~':
             return get_references(expr.rhs)
