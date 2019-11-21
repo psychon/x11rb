@@ -299,7 +299,7 @@ struct RawCookie<'a, C>
 where C: Connection
 {
     connection: &'a C,
-    sequence_number: Option<SequenceNumber>,
+    sequence_number: SequenceNumber,
 }
 
 impl<C> RawCookie<'_, C>
@@ -312,13 +312,16 @@ where C: Connection
     fn new(connection: &C, sequence_number: SequenceNumber) -> RawCookie<C> {
         RawCookie {
             connection,
-            sequence_number: Some(sequence_number)
+            sequence_number: sequence_number
         }
     }
 
     /// Consume this instance and get the contained sequence number out.
-    fn to_sequence_number(mut self) -> SequenceNumber {
-        self.sequence_number.take().unwrap()
+    fn to_sequence_number(self) -> SequenceNumber {
+        let number = self.sequence_number;
+        // Prevent drop() from running
+        std::mem::forget(self);
+        number
     }
 }
 
@@ -326,9 +329,7 @@ impl<C> Drop for RawCookie<'_, C>
 where C: Connection
 {
     fn drop(&mut self) {
-        if let Some(number) = self.sequence_number {
-            self.connection.discard_reply(number);
-        }
+        self.connection.discard_reply(self.sequence_number);
     }
 }
 
@@ -361,7 +362,7 @@ where R: TryFrom<Buffer, Error=ParseError>,
 
     /// Get the sequence number of the request that generated this cookie.
     pub fn sequence_number(&self) -> SequenceNumber {
-        self.raw_cookie.sequence_number.unwrap()
+        self.raw_cookie.sequence_number
     }
 
     /// Get the raw reply that the server sent.
@@ -407,7 +408,7 @@ where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>,
 
     /// Get the sequence number of the request that generated this cookie.
     pub fn sequence_number(&self) -> SequenceNumber {
-        self.raw_cookie.sequence_number.unwrap()
+        self.raw_cookie.sequence_number
     }
 
     /// Get the raw reply that the server sent.
@@ -427,18 +428,18 @@ where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>,
 /// `ListFontsWithInfo` generated more than one reply, but `Cookie` only allows getting one reply.
 /// This structure implements `Iterator` and allows to get all the replies.
 #[derive(Debug)]
-pub struct ListFontsWithInfoCookie<'a, C: Connection>(Cookie<'a, C, ListFontsWithInfoReply>);
+pub struct ListFontsWithInfoCookie<'a, C: Connection>(Option<RawCookie<'a, C>>);
 
 impl<C> ListFontsWithInfoCookie<'_, C>
 where C: Connection
 {
     pub(crate) fn new(cookie: Cookie<C, ListFontsWithInfoReply>) -> ListFontsWithInfoCookie<C> {
-        ListFontsWithInfoCookie(cookie)
+        ListFontsWithInfoCookie(Some(cookie.raw_cookie))
     }
 
     /// Get the sequence number of the request that generated this cookie.
-    pub fn sequence_number(&self) -> SequenceNumber {
-        self.0.sequence_number()
+    pub fn sequence_number(&self) -> Option<SequenceNumber> {
+        self.0.as_ref().map(|x| x.sequence_number)
     }
 }
 
@@ -448,11 +449,11 @@ where C: Connection
     type Item = Result<ListFontsWithInfoReply, ConnectionErrorOrX11Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        let sequence = match self.0.raw_cookie.sequence_number.take() {
+        let cookie = match self.0.take() {
             None => return None,
-            Some(sequence) => sequence
+            Some(cookie) => cookie
         };
-        let reply = self.0.raw_cookie.connection.wait_for_reply(sequence);
+        let reply = cookie.connection.wait_for_reply(cookie.sequence_number);
         let reply = match reply {
             Err(e) => return Some(Err(e)),
             Ok(v) => v
@@ -460,8 +461,9 @@ where C: Connection
         let reply: Result<ListFontsWithInfoReply, ParseError> = reply.try_into();
         let reply = reply.map_err(ConnectionErrorOrX11Error::from);
         if reply.is_ok() {
+            // Is this an indicator that no more replies follow?
             if !reply.as_ref().unwrap().name.is_empty() {
-                self.0.raw_cookie.sequence_number = Some(sequence);
+                self.0 = Some(cookie);
             } else {
                 return None
             }
