@@ -347,8 +347,8 @@ class Module(object):
 
         self.out("")
 
-    def union(self, enum, name):
-        assert not hasattr(enum, "doc")
+    def union(self, union, name):
+        assert not hasattr(union, "doc")
 
         rust_name = self._name(name)
         self.out("#[derive(Debug, Clone)]")
@@ -356,7 +356,7 @@ class Module(object):
 
         self.out("impl %s {", rust_name)
         with Indent(self.out):
-            for field in enum.fields:
+            for field in union.fields:
                 assert not field.isfd
                 result_type = self._to_complex_rust_type(field, None, '')
                 self.out("pub fn as_%s(&self) -> %s {", self._lower_snake_name(('xcb', field.field_name)), result_type)
@@ -377,7 +377,9 @@ class Module(object):
             self.out("}")
         self.out("}")
 
-        fixed_length = max((field.type.size * field.type.nmemb for field in enum.fields))
+        # Get the size of the union; all variants must have the same size
+        fixed_length = union.fields[0].type.size * union.fields[0].type.nmemb
+        assert all(field.type.size * field.type.nmemb == fixed_length for field in union.fields)
 
         self.out("impl TryParse for %s {", rust_name)
         with Indent(self.out):
@@ -400,6 +402,7 @@ class Module(object):
 
         is_list_fonts_with_info = name == ('xcb', 'ListFontsWithInfo')
 
+        # Does this have a <switch>? If so, we generate an *Aux structure
         switches = list(filter(lambda field: field.type.is_switch, obj.fields))
         assert len(switches) <= 1
         if switches:
@@ -422,9 +425,15 @@ class Module(object):
 
         mark_length_fields(obj)
 
+        # Now start constructing the function prototype of the function for
+        # sending requests.
+
+        # Iterator of letters, used for naming generic parameters
         letters = iter(string.ascii_uppercase)
 
-        need_lifetime = any(field.visible and field.type.is_list for field in obj.fields)
+        # We need a lifetime if there are more than one references in the
+        # arguments. Right now that means: Any lists?
+        need_lifetime = any(field.type.is_list for field in obj.fields)
         need_lifetime = need_lifetime and obj.reply
         if need_lifetime:
             generics = ["'c"]
@@ -432,12 +441,20 @@ class Module(object):
         else:
             generics = []
             args = ["&self"]
+        # list of "where" conditions to add to the prototype
         where = []
 
+        # Now collect the arguments of the function. 'fds' will collect all file
+        # descriptors in the request. fds_is_list indicates a list of FDs.
         fds, fds_is_list = [], False
         for field in obj.fields:
             if field.visible:
                 rust_type = self._to_complex_rust_type(field, aux_name, '&')
+
+                # Does this argument have a generic type? This is yes if
+                # - it comes from an enum, or
+                # - it is a FD (but not a list of FDs)
+                # - It is the "event" argument of SendEvent
                 if (field.enum is not None and not field.type.is_list) or \
                         (field.isfd and not field.type.is_list) or \
                         (name == ('xcb', 'SendEvent') and field.field_name == 'event'):
@@ -450,6 +467,7 @@ class Module(object):
                     where.append("%s: Into<%s>" % (letter, rust_type))
                     rust_type = letter
                 rust_type = self._to_rust_identifier(rust_type)
+
                 if name == ('xcb', 'InternAtom') and field.field_name == 'only_if_exists':
                     rust_type = 'bool'
                 args.append("%s: %s" % (self._to_rust_variable(field.field_name), rust_type))
@@ -458,6 +476,7 @@ class Module(object):
                     if field.type.is_list:
                         fds_is_list = True
 
+        # Figure out the return type of the request function
         if is_list_fonts_with_info:
             assert need_lifetime
             result_type = "ListFontsWithInfoCookie<'c, Self>"
@@ -474,12 +493,13 @@ class Module(object):
             result_type = "SequenceNumber"
 
         if generics:
-            lifetime = "<%s>" % ", ".join(generics)
+            generics = "<%s>" % ", ".join(generics)
         else:
-            lifetime = ""
+            generics = ""
 
+        # Finally: Actually emit the function prototype
         _emit_doc(self.trait_out, obj.doc)
-        self.trait_out("fn %s%s(%s) -> Result<%s, ConnectionError>", function_name, lifetime, ", ".join(args), result_type)
+        self.trait_out("fn %s%s(%s) -> Result<%s, ConnectionError>", function_name, generics, ", ".join(args), result_type)
         if where:
             self.trait_out("where %s", ", ".join(where))
         self.trait_out("{")
@@ -489,9 +509,16 @@ class Module(object):
                 self.trait_out('let extension_information = self.extension_information("%s")' % self.namespace.ext_xname)
                 self.trait_out.indent(".ok_or(ConnectionError::UnsupportedExtension)?;")
 
+            # Now generate code for serialising the request. The request bytes
+            # will be collected in a number of arrays. Some of them are
+            # constructed in this function and others are passed in.
+
+            # List of arrays to send
             requests = []
+            # The latest array of byte that is being constructed
             request = []
 
+            # This function adds the current 'request' to the list of 'requests'
             def _emit_request():
                 if not request:
                     return
@@ -503,42 +530,75 @@ class Module(object):
                 self.trait_out("];")
                 del request[:]
 
-            def _emit_byte_conversion(field_name):
+            # Emit the code for converting a list to bytes.
+            def _emit_byte_conversion(field):
+                field_name = field.field_name
                 if field.type.size is not None:
-                    self.trait_out("let mut %s_bytes = Vec::with_capacity(%s * %s.len());", field.field_name, field.type.size, field.field_name)
+                    self.trait_out("let mut %s_bytes = Vec::with_capacity(%s * %s.len());",
+                                   field_name, field.type.size, field_name)
                 else:
-                    self.trait_out("let mut %s_bytes = Vec::new();", field.field_name)
+                    self.trait_out("let mut %s_bytes = Vec::new();", field_name)
                 self.trait_out("for value in %s {", field_name)
                 self.trait_out.indent("%s_bytes.extend(value.to_ne_bytes().iter());", field_name)
                 self.trait_out("}")
 
-            fixed_request_length = sum((field.type.size * field.type.nmemb for field in obj.fields if field.type.nmemb is not None and field.type.size is not None and field.wire))
+            # Get the length of all fixed-length parts of the request
+            fixed_request_length = 0
+            for field in obj.fields:
+                if field.wire and field.type.nmemb is not None and field.type.size is not None:
+                    fixed_request_length += field.type.size * field.type.nmemb
+
+            # This list collects expression that describe the wire length of the
+            # request when summed.
             request_length = [str(fixed_request_length)]
+
+            # Collect the request length and emit some byte conversions
             for field in obj.fields:
                 if not field.wire:
                     continue
                 if field.type.nmemb is None:
                     size = field.type.size
                     if size is None:
-                        _emit_byte_conversion(field.field_name)
+                        # Variable length list with variable sized items:
+                        # xproto::SetFontPath seems to be the only example
+                        _emit_byte_conversion(field)
                         request_length.append("%s_bytes.len()" % field.field_name)
                     else:
+                        # Variable length list with fixed sized items
                         request_length.append("%s * %s.len()" % (size, self._to_rust_variable(field.field_name)))
                 elif field.type.size is None:
+                    # Variable sized element. Only example seems to be RandR's
+                    # SetMonitor request. MonitorInfo contains a list.
                     assert field.type.nmemb is not None
                     self.trait_out("let %s_bytes = %s.to_ne_bytes();", field.field_name, field.field_name)
                     request_length.append("%s_bytes.len()" % field.field_name)
                 if hasattr(field, 'lenfield_for_switch'):
+                    # This our special Aux-argument that represents a <switch>
                     self.trait_out("let %s = %s.value_mask();", field.field_name, field.lenfield_for_switch.field_name)
                     request_length.append("%s.wire_length()" % field.lenfield_for_switch.field_name)
             request_length = " + ".join(request_length)
 
+            # Get the last field of the request
+            last_field = obj.fields[-1]
+            if last_field.isfd:
+                last_field = obj.fields[-2]
+            # If the last field is a variable sized list, we must pad the
+            # request to a multiple of 4 bytes.
+            need_trailing_padding = last_field.type.is_list and not last_field.type.fixed_size()
+
+            # The "length" variable contains the request length in four byte
+            # quantities. This rounds up to a multiple of four, because we
             self.trait_out("let length: usize = (%s + 3) / 4;", request_length)
+
+            # Now construct the actual request bytes
             for field in obj.fields:
                 if not field.wire:
                     continue
-                if field.field_name == "major_opcode" or field.field_name == "minor_opcode":
-                    if self.namespace.is_ext and field.field_name == "major_opcode":
+                field_name = field.field_name
+                rust_variable = self._to_rust_variable(field_name)
+                if field_name == "major_opcode" or field_name == "minor_opcode":
+                    # This is a special case for "magic" fields that we compute
+                    if self.namespace.is_ext and field_name == "major_opcode":
                         request.append('extension_information.major_opcode')
                     else:
                         request.append("%s_REQUEST" % self._upper_snake_name(name))
@@ -551,7 +611,7 @@ class Module(object):
                             return e.nmemb
                         else:
                             assert e.lenfield_name is not None
-                            other_field = [field for field in obj.fields if e.lenfield_name == field.field_name]
+                            other_field = [f for f in obj.fields if e.lenfield_name == f.field_name]
                             assert len(other_field) == 1
                             other_field = other_field[0]
                             self.trait_out("let %s: %s = %s.len().try_into()?;",
@@ -559,69 +619,94 @@ class Module(object):
                                            other_field.is_length_field_for.field_name)
                             return e.lenfield_name
 
-                    self.trait_out("let %s: %s = (%s).try_into().unwrap();", field.field_name, self._to_rust_type(field.type.name), expr_to_str_and_emit(field.type.expr))
-                    self.trait_out("let %s_bytes = %s.to_ne_bytes();", field.field_name, self._to_rust_variable(field.field_name))
+                    # First compute the expression in its actual type, then
+                    # convert it to bytes, then append the bytes to request
+                    self.trait_out("let %s: %s = (%s).try_into().unwrap();", field_name,
+                                   self._to_rust_type(field.type.name), expr_to_str_and_emit(field.type.expr))
+                    self.trait_out("let %s_bytes = %s.to_ne_bytes();", field_name,
+                                   rust_variable)
                     for i in range(field.type.size):
-                        request.append("%s_bytes[%d]" % (field.field_name, i))
+                        request.append("%s_bytes[%d]" % (field_name, i))
                 elif field.type.is_pad:
+                    # Padding of a fixed size
                     assert field.type.size == 1
                     for i in range(field.type.nmemb):
                         request.append("0")
                 elif field.type.is_list:
-                    if name == ('xcb', 'SendEvent') and field.field_name == 'event':
-                        self.trait_out("let %s = %s.into();", field.field_name, field.field_name)
-                        self.trait_out("let %s = &%s;", field.field_name, field.field_name)
+                    # We faked the type of SendEvent's event argument before,
+                    # now we have to convert it for the following code
+                    if name == ('xcb', 'SendEvent') and field_name == 'event':
+                        self.trait_out("let %s = %s.into();", field_name, field_name)
+                        self.trait_out("let %s = &%s;", field_name, field_name)
+
+                    # Lists without a "simple" length field or with a fixed size
+                    # could be passed incorrectly be the caller; check this.
                     if not (hasattr(field, "has_length_field") or field.type.fixed_size()):
                         self.trait_out("assert_eq!(%s.len(), %s, \"Argument %s has an incorrect length\");",
-                                       self._to_rust_variable(field.field_name), self.expr_to_str(field.type.expr, "usize"), field.field_name)
+                                       rust_variable, self.expr_to_str(field.type.expr, "usize"), field_name)
                     if field.type.size == 1:
+                        # This list has u8 entries, we can avoid a copy
                         _emit_request()
-                        requests.append(self._to_rust_variable(field.field_name))
-                        if field == obj.fields[-1] and not field.type.fixed_size():
-                            self.trait_out("let %s_bytes = %s;", self._to_rust_variable(field.field_name), self._to_rust_variable(field.field_name))
+                        requests.append(rust_variable)
+                        if need_trailing_padding and field == obj.fields[-1]:
+                            self.trait_out("let %s_bytes = %s;", rust_variable, rust_variable)
                     else:
                         if field.type.size is not None:
-                            _emit_byte_conversion(field.field_name)
+                            _emit_byte_conversion(field)
+                        # else: Already called _emit_byte_conversion() above
 
                         _emit_request()
-                        requests.append("&%s_bytes" % field.field_name)
+                        requests.append("&%s_bytes" % field_name)
                 elif field.wire:
                     if hasattr(field, "is_length_field_for"):
-                        self.trait_out("let %s: %s = %s.len().try_into()?;",
-                                       self._to_rust_variable(field.field_name),
+                        # This is a length field for some list, get the length.
+                        # (Needed because this is not a function argument)
+                        self.trait_out("let %s: %s = %s.len().try_into()?;", rust_variable,
                                        self._to_rust_type(field.type.name),
                                        self._to_rust_variable(field.is_length_field_for.field_name))
                     if field.enum is not None:
-                        self.trait_out("let %s = %s.into();", field.field_name, field.field_name)
+                        # This is a generic parameter, call Into::into
+                        self.trait_out("let %s = %s.into();", field_name, field_name)
+                    field_bytes = self._to_rust_variable(field_name + "_bytes")
                     if field.type.name == ('float',):
                         # FIXME: Switch to a trait that we can implement on f32
-                        self.trait_out("let %s = %s.to_bits().to_ne_bytes();", self._to_rust_variable(field.field_name + "_bytes"), self._to_rust_variable(field.field_name))
+                        self.trait_out("let %s = %s.to_bits().to_ne_bytes();", field_bytes, rust_variable)
                     elif field.type.size is not None:  # Size None was already handled above
-                        if (name == ('xcb', 'InternAtom') and field.field_name == 'only_if_exists'):
-                            self.trait_out("let %s = %s as %s;", field.field_name, field.field_name, self._to_rust_type(field.type.name))
-                        if field.field_name == "length":
+                        if (name == ('xcb', 'InternAtom') and field_name == 'only_if_exists'):
+                            # We faked a bool argument, convert to u8
+                            self.trait_out("let %s = %s as %s;", field_name, field_name, self._to_rust_type(field.type.name))
+                        if field_name == "length":
+                            # This is the request length which we explicitly
+                            # calculated above. If it does not fit into u16,
+                            # Connection::compute_length_field() fixes this.
                             source = "TryInto::<%s>::try_into(length).unwrap_or(0)" % self._to_rust_type(field.type.name)
                         else:
-                            source = self._to_rust_variable(field.field_name)
-                        self.trait_out("let %s = %s.to_ne_bytes();", self._to_rust_variable(field.field_name + "_bytes"), source)
+                            source = rust_variable
+                        self.trait_out("let %s = %s.to_ne_bytes();", field_bytes, source)
                     if field.type.is_switch or field.type.size is None:
+                        # We have a byte array that we can directly send
                         _emit_request()
-                        requests.append("&%s_bytes" % field.field_name)
+                        requests.append("&" + field_bytes)
                     else:
+                        # Copy the bytes to the request array
                         for i in range(field.type.size):
-                            request.append("%s[%d]" % (self._to_rust_variable(field.field_name + "_bytes"), i))
+                            request.append("%s[%d]" % (field_bytes, i))
 
+            # Emit everything that is still in 'request'
             _emit_request()
+            assert not request
 
-            last_field = obj.fields[-1]
-            if last_field.isfd:
-                last_field = obj.fields[-2]
-            if last_field.type.is_list and not last_field.type.fixed_size():
+            if need_trailing_padding:
+                # Add zero bytes so that the total length is a multiple of 4
                 self.trait_out("let padding = &[0; 3][..(4 - (%s_bytes.len() %% 4)) %% 4];", last_field.field_name)
                 requests.append("&padding")
 
+            # Emit an assert that checks that the sum of all the byte arrays in
+            # 'requests' is the same as our computed length field
             total_length = " + ".join(["(*%s).len()" % r for r in requests])
             self.trait_out("assert_eq!(%s, (%s + 3) / 4 * 4);", total_length, request_length)
+
+            # Now we actually send the request
 
             slices = ", ".join(["IoSlice::new(%s)" % r for r in requests])
 
@@ -690,6 +775,7 @@ class Module(object):
         self.out("}")
 
     def _emit_serialise(self, obj, name, extra_name):
+        # Emit code for serialising an event or an error into an [u8; 32]
         self.out("impl Into<[u8; 32]> for &%s%s {", self._name(name), extra_name)
         with Indent(self.out):
             self.out("fn into(self) -> [u8; 32] {")
@@ -751,12 +837,16 @@ class Module(object):
         self.out("pub const %s_%s: u8 = %s;", self._upper_snake_name(name), extra_name.upper(), opcode)
 
     def _emit_parsing_code(self, fields):
+        """Emit the code for parsing the given fields. After this code runs, the
+        fields will be available as rust variables. The list of variable names
+        is returned."""
         parts = []
         for field in fields:
+            field_name = self._to_rust_variable(field.field_name)
+            rust_type = self._to_rust_type(field.type.name)
             if not field.wire:
                 if not field.isfd:
                     continue
-                field_name = self._to_rust_variable(field.field_name)
                 if field.type.is_simple:
                     self.out("if fds.is_empty() { return Err(ParseError::ParseError) }")
                     self.out("let %s = fds.remove(0);", field_name)
@@ -767,40 +857,7 @@ class Module(object):
                     self.out("let mut %s = fds.split_off(fds_len);", field_name)
                     self.out("std::mem::swap(fds, &mut %s);", field_name)
                 parts.append(field_name)
-            elif not field.type.is_pad:
-                rust_type = self._to_rust_type(field.type.name)
-                if field.type.is_list and field.type.nmemb is not None:
-                    for i in range(field.type.nmemb):
-                        self.out("let (%s_%s, new_remaining) = %s::try_parse(remaining)?;", field.field_name, i, self._to_rust_type(field.type.name))
-                        self.out("remaining = new_remaining;")
-                    self.out("let %s = [", field.field_name)
-                    for i in range(field.type.nmemb):
-                        self.out.indent("%s_%s,", field.field_name, i)
-                    self.out("];")
-                    parts.append(field.field_name)
-                elif field.type.is_list:
-                    try_parse_args = ["remaining"]
-                    if hasattr(field.type, "member"):
-                        if hasattr(field.type.member, "extra_try_parse_args"):
-                            try_parse_args += field.type.member.extra_try_parse_args
-
-                    field_name = self._to_rust_variable(field.field_name)
-                    self.out("let list_length = %s;", self.expr_to_str(field.type.expr, 'usize'))
-                    self.out("let mut %s = Vec::with_capacity(list_length);", field_name)
-                    self.out("for _ in 0..list_length {")
-                    with Indent(self.out):
-                        self.out("let (v, new_remaining) = %s::try_parse(%s)?;", rust_type, ", ".join(try_parse_args))
-                        self.out("%s.push(v);", field_name)
-                        self.out("remaining = new_remaining;")
-                    self.out("}")
-                    parts.append(field_name)
-                else:
-                    self.out("let (%s, new_remaining) = %s::try_parse(remaining)?;", self._to_rust_variable(field.field_name), self._to_rust_identifier(rust_type))
-                    self.out("remaining = new_remaining;")
-                    if not hasattr(field, 'is_length_field_for'):
-                        parts.append(self._to_rust_variable(field.field_name))
-            else:
-                assert field.type.is_pad
+            elif field.type.is_pad:
                 if field.type.align != 1:
                     assert field.type.size * field.type.nmemb == 1
                     align = field.type.align
@@ -811,17 +868,51 @@ class Module(object):
                 else:
                     length = field.type.size * field.type.nmemb
                 self.out("remaining = &remaining.get(%s..).ok_or(ParseError::ParseError)?;", length)
+            elif field.type.is_list and field.type.nmemb is not None:
+                for i in range(field.type.nmemb):
+                    self.out("let (%s_%s, new_remaining) = %s::try_parse(remaining)?;",
+                             field.field_name, i, self._to_rust_type(field.type.name))
+                    self.out("remaining = new_remaining;")
+                self.out("let %s = [", field.field_name)
+                for i in range(field.type.nmemb):
+                    self.out.indent("%s_%s,", field.field_name, i)
+                self.out("];")
+                parts.append(field.field_name)
+            elif field.type.is_list:
+                try_parse_args = ["remaining"]
+                if hasattr(field.type, "member"):
+                    if hasattr(field.type.member, "extra_try_parse_args"):
+                        try_parse_args += field.type.member.extra_try_parse_args
+
+                self.out("let list_length = %s;", self.expr_to_str(field.type.expr, 'usize'))
+                self.out("let mut %s = Vec::with_capacity(list_length);", field_name)
+                self.out("for _ in 0..list_length {")
+                with Indent(self.out):
+                    self.out("let (v, new_remaining) = %s::try_parse(%s)?;", rust_type, ", ".join(try_parse_args))
+                    self.out("%s.push(v);", field_name)
+                    self.out("remaining = new_remaining;")
+                self.out("}")
+                parts.append(field_name)
+            else:
+                self.out("let (%s, new_remaining) = %s::try_parse(remaining)?;",
+                         field_name, self._to_rust_identifier(rust_type))
+                self.out("remaining = new_remaining;")
+                if not hasattr(field, 'is_length_field_for'):
+                    parts.append(self._to_rust_variable(field.field_name))
 
         return parts
 
-    def complex_type(self, complex, name, extra_name, impl_try_from, name_transform=lambda x: x):
+    def complex_type(self, complex, name, extra_name, impl_try_parse, name_transform=lambda x: x):
+        """Emit a complex type as a struct. This also adds some parsing code and
+        a to_ne_bytes() implementation."""
+
         mark_length_fields(complex)
 
         fixed_size = all(field.type.fixed_size for field in complex.fields)
         no_variable_length_list = all(not field.type.is_list or field.type.nmemb is not None for field in complex.fields)
         no_union = all(not field.type.is_union for field in complex.fields)
         has_fds = any(field.isfd for field in complex.fields)
-        assert not (impl_try_from and has_fds)
+        assert not (impl_try_parse and has_fds)
         if has_fds:
             self.out("#[derive(Debug)]")
         elif fixed_size and no_variable_length_list and no_union:
@@ -853,16 +944,18 @@ class Module(object):
         for field in complex.fields:
             if field.type.is_list:
                 referenced.extend(get_references(field.type.expr))
-        # Collect all the fields that appear "out of thin air"
+        # Collect all the fields that appear "out of thin air": They are
+        # referenced, but not on the wire.
         unresolved = [field for field in referenced if field not in wire_fields]
 
-        if impl_try_from and not unresolved:
+        if impl_try_parse and not unresolved:
             method = "fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError>"
             self.out("impl TryParse for %s%s {", name_transform(self._name(name)), extra_name)
         else:
             if has_fds:
-                method = "fn try_parse_fd<'a>(value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError>"
-            elif impl_try_from:
+                method = "fn try_parse_fd<'a>(value: &'a [u8], fds: &mut Vec<RawFdContainer>)"
+                method += " -> Result<(Self, &'a [u8]), ParseError>"
+            elif impl_try_parse:
                 # Turn missing values into extra arguments
                 assert unresolved
                 unresolved_args, extra_args = [], []
@@ -871,7 +964,8 @@ class Module(object):
                         field_type = self._to_complex_rust_type(field, None, '')
                         unresolved_args.append("%s: %s" % (field.field_name, field_type))
                         extra_args.append(field.field_name)
-                method = "pub fn try_parse(value: &[u8], %s) -> Result<(Self, &[u8]), ParseError>" % ", ".join(unresolved_args)
+                method = "pub fn try_parse(value: &[u8], %s) -> Result<(Self, &[u8]), ParseError>"
+                method = method % ", ".join(unresolved_args)
 
                 complex.extra_try_parse_args = extra_args
             else:
@@ -942,7 +1036,8 @@ class Module(object):
 
     def _generate_aux(self, name, request, switch, mask_field, request_function_name):
         # This used to assert that all fields have the same size, but sync's
-        # CreateAlarm has both 32 bit and 64 bit numbers.
+        # CreateAlarm has both 32 bit and 64 bit numbers. Now we assert that all
+        # sizes are a multiple of the smallest size.
         min_field_size = min(field.type.size for field in switch.type.fields)
         assert all(field.type.size % min_field_size == 0 for field in switch.type.fields)
 
@@ -998,7 +1093,8 @@ class Module(object):
             for field in switch.type.fields:
                 aux_name = self._aux_field_name(field)
                 self.out("/// Set the %s field of this structure.", field.field_name)
-                self.out("pub fn %s<I>(mut self, value: I) -> Self where I: Into<RustOption<%s>> {", aux_name, self._to_rust_type(field.type.name))
+                self.out("pub fn %s<I>(mut self, value: I) -> Self where I: Into<RustOption<%s>> {",
+                         aux_name, self._to_rust_type(field.type.name))
                 with Indent(self.out):
                     self.out("self.%s = value.into();", aux_name)
                     self.out("self")
@@ -1007,6 +1103,8 @@ class Module(object):
         self.out("}")
 
     def _name(self, name):
+        """Get the name as a string. xcbgen represents names as tuples like
+        ('xcb', 'RandR', 'MonitorInfo'). This function produces MonitorInfo."""
         orig_name = name
         if name[0] == 'xcb':
             name = name[1:]
@@ -1016,17 +1114,22 @@ class Module(object):
         return name[0]
 
     def _lower_snake_name(self, name):
+        """Convert a name tuple to a lowercase snake name. MonitorInfo is turned
+        into monitor_info."""
         name = self._name(name)
         name = re.sub('([a-z0-9])([A-Z])', '\\1_\\2', name)
         return name.lower()
 
     def _upper_snake_name(self, name):
+        """Convert a name tuple to a uppercase snake name. MonitorInfo is turned
+        into MONITOR_INFO."""
         return self._lower_snake_name(name).upper()
 
     def _aux_field_name(self, field):
         return self._lower_snake_name((field.field_name,))
 
     def _to_rust_type(self, name):
+        """Convert an xcbgen name tuple to a rust type."""
         orig_name = name
         if type(name) == tuple:
             if name[0] == 'xcb':
