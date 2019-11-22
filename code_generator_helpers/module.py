@@ -57,6 +57,47 @@ def mark_length_fields(self):
             field.visible = False
 
 
+def compute_copy_clone(obj_type):
+    if hasattr(obj_type, "computed_rust_copy_clone"):
+        return
+    obj_type.computed_rust_copy_clone = True
+
+    copy, clone = True, True
+    if obj_type.is_container:
+        if obj_type.is_union:
+            # These are represented as a type containing Vec
+            copy = False
+
+        for field in obj_type.fields:
+            compute_copy_clone(field.type)
+            copy &= field.type.is_rust_copy
+            clone &= field.type.is_rust_clone
+
+            # Sigh, FDs are weird and need special care
+            if hasattr(field, "isfd") and field.isfd:
+                # RawFdContainer cannot be cloned
+                copy, clone = False, False
+    elif obj_type.is_list:
+        if obj_type.nmemb is None:
+            # Variable length list, represented as Vec
+            copy = False
+    else:
+        assert obj_type.is_simple or obj_type.is_pad, obj_type
+
+    obj_type.is_rust_copy = copy
+    obj_type.is_rust_clone = clone
+
+
+def is_copy(obj):
+    compute_copy_clone(obj)
+    return obj.is_rust_copy
+
+
+def is_clone(obj):
+    compute_copy_clone(obj)
+    return obj.is_rust_clone
+
+
 def _emit_doc(out, doc):
     if doc is None:
         return
@@ -911,17 +952,16 @@ class Module(object):
 
         mark_length_fields(complex)
 
-        fixed_size = all(field.type.fixed_size for field in complex.fields)
-        no_variable_length_list = all(not field.type.is_list or field.type.nmemb is not None for field in complex.fields)
-        no_union = all(not field.type.is_union for field in complex.fields)
         has_fds = any(field.isfd for field in complex.fields)
         assert not (impl_try_parse and has_fds)
-        if has_fds:
-            self.out("#[derive(Debug)]")
-        elif fixed_size and no_variable_length_list and no_union:
-            self.out("#[derive(Debug, Clone, Copy)]")
+        if is_clone(complex):
+            if is_copy(complex):
+                self.out("#[derive(Debug, Clone, Copy)]")
+            else:
+                self.out("#[derive(Debug, Clone)]")
         else:
-            self.out("#[derive(Debug, Clone)]")
+            self.out("#[derive(Debug)]")
+
         self.out("pub struct %s%s {", name_transform(self._name(name)), extra_name)
         with Indent(self.out):
             for field in complex.fields:
