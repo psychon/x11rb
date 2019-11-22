@@ -585,10 +585,13 @@ class Module(object):
             # If the last field is a variable sized list, we must pad the
             # request to a multiple of 4 bytes.
             need_trailing_padding = last_field.type.is_list and not last_field.type.fixed_size()
+            if need_trailing_padding:
+                # This will cause the division by 4 to "round up"
+                request_length += " + 3"
 
             # The "length" variable contains the request length in four byte
             # quantities. This rounds up to a multiple of four, because we
-            self.trait_out("let length: usize = (%s + 3) / 4;", request_length)
+            self.trait_out("let length: usize = (%s) / 4;", request_length)
 
             # Now construct the actual request bytes
             for field in obj.fields:
@@ -704,7 +707,7 @@ class Module(object):
             # Emit an assert that checks that the sum of all the byte arrays in
             # 'requests' is the same as our computed length field
             total_length = " + ".join(["(*%s).len()" % r for r in requests])
-            self.trait_out("assert_eq!(%s, (%s + 3) / 4 * 4);", total_length, request_length)
+            self.trait_out("assert_eq!(%s, length * 4);", total_length)
 
             # Now we actually send the request
 
