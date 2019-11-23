@@ -35,7 +35,7 @@ fn main() {
 
     let (mut width, mut height) = (100, 100);
 
-    conn.create_window(24, win_id, screen.root, 0, 0, width, height, 0, WindowClass::InputOutput, 0, &win_aux).unwrap();
+    conn.create_window(screen.root_depth, win_id, screen.root, 0, 0, width, height, 0, WindowClass::InputOutput, 0, &win_aux).unwrap();
 
     util::start_timeout_thread(conn1.clone(), win_id);
 
