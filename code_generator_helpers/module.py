@@ -418,17 +418,14 @@ class Module(object):
             self.out("}")
         self.out("}")
 
-        # Get the size of the union; all variants must have the same size
-        fixed_length = union.fields[0].type.get_total_size()
-        assert all(field.type.get_total_size() == fixed_length for field in union.fields)
-
         self.out("impl TryParse for %s {", rust_name)
         with Indent(self.out):
             self.out("fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {")
             with Indent(self.out):
-                self.out("let inner = value[..%s].iter().copied().collect();", fixed_length)
+                union_size = union.get_total_size()
+                self.out("let inner = value[..%s].iter().copied().collect();", union_size)
                 self.out("let result = %s(inner);", rust_name)
-                self.out("Ok((result, &value[%s..]))", fixed_length)
+                self.out("Ok((result, &value[%s..]))", union_size)
             self.out("}")
         self.out("}")
 
