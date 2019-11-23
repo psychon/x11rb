@@ -298,7 +298,7 @@ class Module(object):
             wire_type = "Vec<u8>"
         else:
             # Everything is fixed-size so we can return an array.
-            length = sum((field.type.size * field.type.nmemb for field in struct.fields))
+            length = sum((field.type.get_total_size() for field in struct.fields))
             wire_type = "[u8; %s]" % length
 
         self.out("impl %s {", self._to_rust_identifier(self._name(name)))
@@ -419,8 +419,8 @@ class Module(object):
         self.out("}")
 
         # Get the size of the union; all variants must have the same size
-        fixed_length = union.fields[0].type.size * union.fields[0].type.nmemb
-        assert all(field.type.size * field.type.nmemb == fixed_length for field in union.fields)
+        fixed_length = union.fields[0].type.get_total_size()
+        assert all(field.type.get_total_size() == fixed_length for field in union.fields)
 
         self.out("impl TryParse for %s {", rust_name)
         with Indent(self.out):
@@ -944,7 +944,7 @@ class Module(object):
                     self.out("let misalignment = (%s - (offset %% %s)) %% %s;", align, align, align)
                     length = "misalignment"
                 else:
-                    length = field.type.size * field.type.nmemb
+                    length = field.type.get_total_size()
                 self.out("remaining = &remaining.get(%s..).ok_or(ParseError::ParseError)?;", length)
             elif field.type.is_list and field.type.nmemb is not None:
                 for i in range(field.type.nmemb):
