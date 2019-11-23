@@ -586,8 +586,8 @@ class Module(object):
             # Get the length of all fixed-length parts of the request
             fixed_request_length = 0
             for field in obj.fields:
-                if field.wire and field.type.nmemb is not None and field.type.size is not None:
-                    fixed_request_length += field.type.size * field.type.nmemb
+                if field.wire and field.type.fixed_size():
+                        fixed_request_length += field.type.get_total_size()
 
             # This list collects expression that describe the wire length of the
             # request when summed.
