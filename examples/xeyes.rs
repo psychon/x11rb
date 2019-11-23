@@ -206,8 +206,8 @@ fn setup_window<C: Connection>(conn: &C, screen: &Screen, window_size: (u16, u16
         .event_mask(EventMask::Exposure | EventMask::StructureNotify | EventMask::PointerMotion)
         .background_pixel(screen.white_pixel);
 
-    conn.create_window(24, win_id, screen.root, 0, 0, window_size.0, window_size.1, 0,
-                  WindowClass::InputOutput, 0, &win_aux)?;
+    conn.create_window(screen.root_depth, win_id, screen.root, 0, 0, window_size.0, window_size.1,
+                       0, WindowClass::InputOutput, 0, &win_aux)?;
 
     let title = "xeyes";
     conn.change_property8(PropMode::Replace, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), title.as_bytes()).unwrap();
