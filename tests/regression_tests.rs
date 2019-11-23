@@ -40,10 +40,10 @@ impl FakeConnection {
 }
 
 impl Connection for FakeConnection {
-    fn send_request_with_reply<R>(&self, _bufs: &[IoSlice], _fds: Vec<RawFdContainer>) -> Result<Cookie<Self, R>, ConnectionError>
+    fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<Cookie<Self, R>, ConnectionError>
     where R: TryFrom<Buffer, Error=ParseError>
     {
-        unimplemented!()
+        Ok(Cookie::new(self, self.send_request_without_reply(bufs, fds)?))
     }
 
     fn send_request_with_reply_with_fds<R>(&self, _bufs: &[IoSlice], _fds: Vec<RawFdContainer>) -> Result<CookieWithFds<Self, R>, ConnectionError>
@@ -197,6 +197,27 @@ fn test_send_event() -> Result<(), ConnectionError> {
     expected.extend(&destination.to_ne_bytes());
     expected.extend(&event_mask.to_ne_bytes());
     expected.extend(buffer.iter());
+    conn.check_requests(&[(false, expected)]);
+    Ok(())
+}
+
+#[test]
+fn test_get_keyboard_mapping() -> Result<(), ConnectionError> {
+    let conn = FakeConnection::default();
+    let cookie = conn.get_keyboard_mapping(1, 2)?;
+
+    // Prevent call to discard_reply(), we only check request sending
+    std::mem::forget(cookie);
+
+    let mut expected = Vec::new();
+    let length: u16 = 2;
+    expected.push(101); // request major code
+    expected.push(0); // padding
+    expected.extend(&length.to_ne_bytes()); // length, not in the xml
+    expected.push(1); // first keycode
+    expected.push(2); // length
+    expected.extend(&[0, 0]); // padding
+
     conn.check_requests(&[(false, expected)]);
     Ok(())
 }

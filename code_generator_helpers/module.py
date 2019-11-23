@@ -584,10 +584,23 @@ class Module(object):
                 self.trait_out("}")
 
             # Get the length of all fixed-length parts of the request
-            fixed_request_length = 0
+            fixed_request_length, has_variable_length = 0, False
             for field in obj.fields:
-                if field.wire and field.type.fixed_size():
+                if field.wire:
+                    if field.type.fixed_size():
                         fixed_request_length += field.type.get_total_size()
+                    else:
+                        has_variable_length = True
+
+            # The XML does not describe trailing padding in requests. Everything
+            # is implicitly padded to a four byte boundary. Variably sized
+            # requests are handled below.
+            if has_variable_length:
+                trailing_padding = 0
+            else:
+                padded_length = (fixed_request_length + 3) // 4
+                trailing_padding = padded_length * 4 - fixed_request_length
+                fixed_request_length += trailing_padding
 
             # This list collects expression that describe the wire length of the
             # request when summed.
@@ -735,6 +748,10 @@ class Module(object):
                         # Copy the bytes to the request array
                         for i in range(field.type.size):
                             request.append("%s[%d]" % (field_bytes, i))
+
+            if trailing_padding:
+                request.append("0 /* trailing padding */")
+                request.extend(["0"] * (trailing_padding - 1))
 
             # Emit everything that is still in 'request'
             _emit_request()
