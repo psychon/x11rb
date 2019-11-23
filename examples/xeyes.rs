@@ -231,6 +231,11 @@ fn create_gc_with_foreground<C: Connection>(conn: &C, win_id: WINDOW, foreground
 
 fn main() {
     let (conn, screen_num) = XCBConnection::connect(None).expect("Failed to connect to the X11 server");
+
+    // The following is only needed for start_timeout_thread(), which is used for 'tests'
+    let conn1 = std::sync::Arc::new(conn);
+    let conn = &*conn1;
+
     let screen = &conn.setup().roots[screen_num];
 
     let (wm_protocols, wm_delete_window) = {
@@ -241,17 +246,19 @@ fn main() {
 
     let mut window_size = (700, 500);
     let has_shape = conn.extension_information(shape::X11_EXTENSION_NAME).is_some();
-    let win_id = setup_window(&conn, screen, window_size, wm_protocols, wm_delete_window).unwrap();
-    let mut pixmap = create_pixmap_wrapper(&conn, screen.root_depth, win_id, window_size).unwrap();
+    let win_id = setup_window(conn, screen, window_size, wm_protocols, wm_delete_window).unwrap();
+    let mut pixmap = create_pixmap_wrapper(conn, screen.root_depth, win_id, window_size).unwrap();
 
-    let black_gc = create_gc_with_foreground(&conn, win_id, screen.black_pixel).unwrap();
-    let white_gc = create_gc_with_foreground(&conn, win_id, screen.white_pixel).unwrap();
+    let black_gc = create_gc_with_foreground(conn, win_id, screen.black_pixel).unwrap();
+    let white_gc = create_gc_with_foreground(conn, win_id, screen.white_pixel).unwrap();
 
     conn.flush();
 
     let mut need_repaint = false;
     let mut need_reshape = false;
     let mut mouse_position = (0, 0);
+
+    util::start_timeout_thread(conn1.clone(), win_id);
 
     loop {
         let event = conn.wait_for_event().unwrap();
@@ -267,7 +274,7 @@ fn main() {
                 CONFIGURE_NOTIFY_EVENT => {
                     let event = ConfigureNotifyEvent::from(event);
                     window_size = (event.width, event.height);
-                    pixmap = create_pixmap_wrapper(&conn, screen.root_depth, win_id,
+                    pixmap = create_pixmap_wrapper(conn, screen.root_depth, win_id,
                                                    window_size).unwrap();
                     need_reshape = true;
                 }
@@ -295,14 +302,14 @@ fn main() {
         }
 
         if need_reshape && has_shape {
-            shape_window(&conn, win_id, window_size).unwrap();
+            shape_window(conn, win_id, window_size).unwrap();
             need_reshape = false;
         }
         if need_repaint {
             // Draw new pupils
             let pos = compute_pupils(window_size, mouse_position);
-            draw_eyes(&conn, pixmap.1, black_gc, white_gc, window_size).unwrap();
-            draw_pupils(&conn, pixmap.1, black_gc, pos).unwrap();
+            draw_eyes(conn, pixmap.1, black_gc, white_gc, window_size).unwrap();
+            draw_pupils(conn, pixmap.1, black_gc, pos).unwrap();
 
             // Copy drawing from pixmap to window
             conn.copy_area(pixmap.1, win_id, white_gc, 0, 0, 0, 0,
@@ -313,3 +320,5 @@ fn main() {
         }
     }
 }
+
+include!("integration_test_util/util.rs");

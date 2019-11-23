@@ -10,8 +10,12 @@ use x11rb::wrapper::ConnectionExt as _;
 
 fn main() {
     let (conn, screen_num) = XCBConnection::connect(None).unwrap();
-    let screen = &conn.setup().roots[screen_num];
 
+    // The following is only needed for start_timeout_thread(), which is used for 'tests'
+    let conn1 = std::sync::Arc::new(conn);
+    let conn = &*conn1;
+
+    let screen = &conn.setup().roots[screen_num];
     let win_id = conn.generate_id();
     let gc_id = conn.generate_id();
 
@@ -32,6 +36,8 @@ fn main() {
     let (mut width, mut height) = (100, 100);
 
     conn.create_window(24, win_id, screen.root, 0, 0, width, height, 0, WindowClass::InputOutput, 0, &win_aux).unwrap();
+
+    util::start_timeout_thread(conn1.clone(), win_id);
 
     let title = "Simple Window";
     conn.change_property8(PropMode::Replace, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), title.as_bytes()).unwrap();
@@ -86,3 +92,5 @@ fn main() {
         }
     }
 }
+
+include!("integration_test_util/util.rs");

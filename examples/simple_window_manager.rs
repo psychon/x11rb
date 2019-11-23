@@ -288,12 +288,19 @@ fn become_wm<C: Connection>(conn: &C, screen: &Screen) -> Result<(), ConnectionE
 
 fn main() {
     let (conn, screen_num) = XCBConnection::connect(None).unwrap();
+
+    // The following is only needed for start_timeout_thread(), which is used for 'tests'
+    let conn1 = std::sync::Arc::new(conn);
+    let conn = &*conn1;
+
     let screen = &conn.setup().roots[screen_num];
 
-    become_wm(&conn, &screen).unwrap();
+    become_wm(conn, screen).unwrap();
 
-    let mut wm_state = WMState::new(&conn, screen_num).unwrap();
+    let mut wm_state = WMState::new(conn, screen_num).unwrap();
     wm_state.scan_windows().unwrap();
+
+    util::start_timeout_thread(conn1.clone(), screen.root);
 
     loop {
         wm_state.refresh().unwrap();
@@ -302,8 +309,15 @@ fn main() {
         let event = conn.wait_for_event().unwrap();
         let mut event_option = Some(event);
         while let Some(event) = event_option {
+            if event.response_type() == CLIENT_MESSAGE_EVENT {
+                // This is start_timeout_thread() signaling us to close (most likely).
+                return
+            }
+
             wm_state.handle_event(event).unwrap();
             event_option = conn.poll_for_event().unwrap();
         }
     }
 }
+
+include!("integration_test_util/util.rs");
