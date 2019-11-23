@@ -583,6 +583,22 @@ class Module(object):
                 self.trait_out.indent("%s_bytes.extend(value.to_ne_bytes().iter());", field_name)
                 self.trait_out("}")
 
+            # Emit padding to align the request to the given alignment
+            pad_count = 0
+            def _emit_padding_for_alignment(align):
+                nonlocal pad_count
+                pad_count += 1
+
+                pad = "" if pad_count == 1 else pad_count
+
+                nonlocal total_length
+                total_length = " + ".join(["(*%s).len()" % r for r in requests])
+                self.trait_out("let length_so_far = %s;", total_length)
+                self.trait_out("let padding%s = &[0; %d][..(%d - (length_so_far %% %d)) %% %d];",
+                               pad, align - 1, align, align, align)
+                requests.append("&padding%s" % pad)
+                total_length = "length_so_far + padding%s.len()" % pad
+
             # Get the length of all fixed-length parts of the request
             fixed_request_length, has_variable_length = 0, False
             for field in obj.fields:
@@ -679,10 +695,16 @@ class Module(object):
                     for i in range(field.type.size):
                         request.append("%s_bytes[%d]" % (field_name, i))
                 elif field.type.is_pad:
-                    # Padding of a fixed size
-                    assert field.type.size == 1
-                    for i in range(field.type.nmemb):
-                        request.append("0")
+                    if field.type.fixed_size():
+                        # Padding of a fixed size, we simply emit zero bytes
+                        assert field.type.size == 1
+                        for i in range(field.type.nmemb):
+                            request.append("0")
+                    else:
+                        # Padding of a variable length, we have to get the
+                        # length so far and add padding
+                        assert field.type.size == 1 and field.type.nmemb == 1
+                        _emit_padding_for_alignment(4)
                 elif field.type.is_list:
                     # We faked the type of SendEvent's event argument before,
                     # now we have to convert it for the following code
@@ -749,13 +771,11 @@ class Module(object):
             _emit_request()
             assert not request
 
-            total_length = " + ".join(["(*%s).len()" % r for r in requests])
             if has_variable_length:
                 # Add zero bytes so that the total length is a multiple of 4
-                self.trait_out("let length_so_far = %s;", total_length)
-                self.trait_out("let padding = &[0; 3][..(4 - (length_so_far %% 4)) %% 4];")
-                total_length = "length_so_far + padding.len()"
-                requests.append("&padding")
+                _emit_padding_for_alignment(4)
+            else:
+                total_length = " + ".join(["(*%s).len()" % r for r in requests])
 
             # Emit an assert that checks that the sum of all the byte arrays in
             # 'requests' is the same as our computed length field
