@@ -632,15 +632,9 @@ class Module(object):
                     request_length.append("%s.wire_length()" % field.lenfield_for_switch.field_name)
             request_length = " + ".join(request_length)
 
-            # Get the last field of the request
-            last_field = obj.fields[-1]
-            if last_field.isfd:
-                last_field = obj.fields[-2]
-            # If the last field is a variable sized list, we must pad the
-            # request to a multiple of 4 bytes.
-            need_trailing_padding = last_field.type.is_list and not last_field.type.fixed_size()
-            if need_trailing_padding:
-                # This will cause the division by 4 to "round up"
+            if has_variable_length:
+                # This will cause the division by 4 to "round up". Code below
+                # will actually add padding bytes.
                 request_length += " + 3"
 
             # The "length" variable contains the request length in four byte
@@ -705,8 +699,6 @@ class Module(object):
                         # This list has u8 entries, we can avoid a copy
                         _emit_request()
                         requests.append(rust_variable)
-                        if need_trailing_padding and field == obj.fields[-1]:
-                            self.trait_out("let %s_bytes = %s;", rust_variable, rust_variable)
                     else:
                         if field.type.size is not None:
                             _emit_byte_conversion(field)
@@ -757,14 +749,16 @@ class Module(object):
             _emit_request()
             assert not request
 
-            if need_trailing_padding:
+            total_length = " + ".join(["(*%s).len()" % r for r in requests])
+            if has_variable_length:
                 # Add zero bytes so that the total length is a multiple of 4
-                self.trait_out("let padding = &[0; 3][..(4 - (%s_bytes.len() %% 4)) %% 4];", last_field.field_name)
+                self.trait_out("let length_so_far = %s;", total_length)
+                self.trait_out("let padding = &[0; 3][..(4 - (length_so_far %% 4)) %% 4];")
+                total_length = "length_so_far + padding.len()"
                 requests.append("&padding")
 
             # Emit an assert that checks that the sum of all the byte arrays in
             # 'requests' is the same as our computed length field
-            total_length = " + ".join(["(*%s).len()" % r for r in requests])
             self.trait_out("assert_eq!(%s, length * 4);", total_length)
 
             # Now we actually send the request
