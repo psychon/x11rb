@@ -82,7 +82,9 @@ fn run<C: Connection>(conn: Arc<C>, window_state: Arc<Mutex<Window>>,
                        screen.root_visual,
                        &CreateWindowAux::new()
                            .background_pixel(screen.white_pixel)
-                           .event_mask(EventMask::ButtonRelease | EventMask::Exposure)
+                           .event_mask(EventMask::ButtonRelease |
+                                       EventMask::Exposure |
+                                       EventMask::StructureNotify)
                            .do_not_propogate_mask(EventMask::ButtonPress))?;
     conn.map_window(window)?;
 
@@ -130,10 +132,13 @@ fn run<C: Connection>(conn: Arc<C>, window_state: Arc<Mutex<Window>>,
     }
 }
 
-fn event_thread<C: Connection>(conn: Arc<C>, windows: Vec<Arc<Mutex<Window>>>, white: GCONTEXT)
+fn event_thread<C>(conn_arc: Arc<C>, windows: Vec<Arc<Mutex<Window>>>, white: GCONTEXT)
 -> Result<(), ConnectionErrorOrX11Error>
+where C: Connection + Send + Sync + 'static
 {
-    let conn = &*conn;
+    let mut first_window_mapped = false;
+
+    let conn = &*conn_arc;
 
     loop {
         let event = conn.wait_for_event()?;
@@ -168,6 +173,19 @@ fn event_thread<C: Connection>(conn: Arc<C>, windows: Vec<Arc<Mutex<Window>>>, w
                     eprintln!("ButtonRelease on unknown window!");
                 }
             },
+            MAP_NOTIFY_EVENT => {
+                if !first_window_mapped {
+                    first_window_mapped = true;
+
+                    let event = MapNotifyEvent::from(event);
+                    util::start_timeout_thread(conn_arc.clone(), event.window);
+                }
+            },
+            CLIENT_MESSAGE_EVENT => {
+                // We simply assume that this is a message to close. Since we are the main thread,
+                // everything closes when we exit.
+                return Ok(());
+            },
             _ => {}
         }
     }
@@ -181,3 +199,5 @@ fn find_window_by_id(windows: &Vec<Arc<Mutex<Window>>>, window: WINDOW) -> Optio
                 .unwrap_or(false))
         .next()
 }
+
+include!("integration_test_util/util.rs");

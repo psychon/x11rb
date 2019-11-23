@@ -19,6 +19,7 @@ addons:
       - python-xcbgen
       - pkg-config
       - pycodestyle
+      - xvfb
 
 script:
   # Check the code generator against python 2 and 3. Both versions should
@@ -36,3 +37,14 @@ script:
   - cargo test --verbose
 
   - pycodestyle --show-pep8 --show-source $(git ls-files '*.py' | grep -v xcb-proto-1.13) --max-line-length=130
+
+  # Run the examples as 'integration tests'. For this, there is a special
+  # timeout mode where the examples close automatically after some time.
+  - |
+    for example in examples/*.rs; do
+        example=${example/examples\//}
+        example=${example/.rs/}
+        if [ "$example" != tutorial ] ; then
+            X11RB_EXAMPLE_TIMEOUT=1 xvfb-run -a cargo run --example "$example" || exit 1
+        fi
+    done
