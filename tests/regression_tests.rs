@@ -5,9 +5,9 @@ use std::cell::RefCell;
 
 use x11rb::connection::{Connection, Cookie, CookieWithFds, SequenceNumber};
 use x11rb::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
-use x11rb::generated::xproto::{Setup, QueryExtensionReply, ConnectionExt, Segment, KeymapNotifyEvent};
+use x11rb::generated::xproto::{Setup, QueryExtensionReply, ConnectionExt, Segment, KeymapNotifyEvent, ClientMessageData};
 use x11rb::utils::{Buffer, RawFdContainer};
-use x11rb::x11_utils::GenericEvent;
+use x11rb::x11_utils::{GenericEvent, TryParse};
 
 #[derive(Debug)]
 struct SavedRequest {
@@ -220,4 +220,12 @@ fn test_get_keyboard_mapping() -> Result<(), ConnectionError> {
 
     conn.check_requests(&[(false, expected)]);
     Ok(())
+}
+
+#[test]
+fn test_client_message_data_parse() {
+    let short_array = [0, 0, 0];
+    let err = ClientMessageData::try_parse(&short_array);
+    assert!(err.is_err());
+    assert_eq!(err.unwrap_err(), ParseError::ParseError);
 }

@@ -423,7 +423,9 @@ class Module(object):
             self.out("fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {")
             with Indent(self.out):
                 union_size = union.get_total_size()
-                self.out("let inner = value[..%s].iter().copied().collect();", union_size)
+                self.out("let inner = value.get(..%s)", union_size)
+                self.out.indent(".ok_or(ParseError::ParseError)?")
+                self.out.indent(".iter().copied().collect();")
                 self.out("let result = %s(inner);", rust_name)
                 self.out("Ok((result, &value[%s..]))", union_size)
             self.out("}")
