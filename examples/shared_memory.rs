@@ -38,11 +38,17 @@ fn check_shm_version<C: Connection>(conn: &C) -> Result<Option<(u16, u16)>, Conn
 fn get_shared_memory_content_at_offset<C: Connection>(conn: &C, screen: &xproto::Screen, shmseg: shm::SEG, offset: u32)
 -> Result<Vec<u8>, ConnectionErrorOrX11Error>
 {
+    let width = match screen.root_depth {
+        24 => 1,
+        16 => 2,
+        8 => 4,
+        _ => panic!("I do not know how to handle depth {}", screen.root_depth)
+    };
     let pixmap = conn.generate_id();
-    shm::ConnectionExt::create_pixmap(conn, pixmap, screen.root, 1, 1, screen.root_depth, shmseg, offset)?;
+    shm::ConnectionExt::create_pixmap(conn, pixmap, screen.root, width, 1, screen.root_depth, shmseg, offset)?;
     let pixmap = FreePixmap(conn, pixmap);
 
-    let image = xproto::ConnectionExt::get_image(conn, ImageFormat::ZPixmap, pixmap.1, 0, 0, 1, 1, !0)?.reply()?;
+    let image = xproto::ConnectionExt::get_image(conn, ImageFormat::ZPixmap, pixmap.1, 0, 0, width, 1, !0)?.reply()?;
     Ok(image.data)
 }
 
