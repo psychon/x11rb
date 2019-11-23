@@ -559,16 +559,26 @@ class Module(object):
             # The latest array of byte that is being constructed
             request = []
 
+            # Add the given byte array to requests
+            def _emit_add_to_requests(part):
+                if requests:
+                    add = "length_so_far + "
+                else:
+                    add = ""
+                self.trait_out("let length_so_far = %s(%s).len();",
+                               add, part)
+                requests.append(part)
+
             # This function adds the current 'request' to the list of 'requests'
             def _emit_request():
                 if not request:
                     return
 
                 self.trait_out("let request%d = [", len(requests))
-                requests.append("&request%d" % len(requests))
                 for byte in request:
                     self.trait_out.indent("%s,", byte)
                 self.trait_out("];")
+                _emit_add_to_requests("&request%d" % len(requests))
                 del request[:]
 
             # Emit the code for converting a list to bytes.
@@ -583,21 +593,16 @@ class Module(object):
                 self.trait_out.indent("%s_bytes.extend(value.to_ne_bytes().iter());", field_name)
                 self.trait_out("}")
 
+            pad_count = []
+
             # Emit padding to align the request to the given alignment
-            pad_count = 0
             def _emit_padding_for_alignment(align):
-                nonlocal pad_count
-                pad_count += 1
+                _emit_request()
 
-                pad = "" if pad_count == 1 else pad_count
-
-                nonlocal total_length
-                total_length = " + ".join(["(*%s).len()" % r for r in requests])
-                self.trait_out("let length_so_far = %s;", total_length)
+                pad_count.append('')
                 self.trait_out("let padding%s = &[0; %d][..(%d - (length_so_far %% %d)) %% %d];",
-                               pad, align - 1, align, align, align)
-                requests.append("&padding%s" % pad)
-                total_length = "length_so_far + padding%s.len()" % pad
+                               len(pad_count), align - 1, align, align, align)
+                _emit_add_to_requests("&padding%s" % len(pad_count))
 
             # Get the length of all fixed-length parts of the request
             fixed_request_length, has_variable_length = 0, False
@@ -720,14 +725,14 @@ class Module(object):
                     if field.type.size == 1:
                         # This list has u8 entries, we can avoid a copy
                         _emit_request()
-                        requests.append(rust_variable)
+                        _emit_add_to_requests(rust_variable)
                     else:
                         if field.type.size is not None:
                             _emit_byte_conversion(field)
                         # else: Already called _emit_byte_conversion() above
 
                         _emit_request()
-                        requests.append("&%s_bytes" % field_name)
+                        _emit_add_to_requests("&%s_bytes" % field_name)
                 elif field.wire:
                     if hasattr(field, "is_length_field_for"):
                         # This is a length field for some list, get the length.
@@ -757,7 +762,7 @@ class Module(object):
                     if field.type.is_switch or field.type.size is None:
                         # We have a byte array that we can directly send
                         _emit_request()
-                        requests.append("&" + field_bytes)
+                        _emit_add_to_requests("&" + field_bytes)
                     else:
                         # Copy the bytes to the request array
                         for i in range(field.type.size):
@@ -774,12 +779,10 @@ class Module(object):
             if has_variable_length:
                 # Add zero bytes so that the total length is a multiple of 4
                 _emit_padding_for_alignment(4)
-            else:
-                total_length = " + ".join(["(*%s).len()" % r for r in requests])
 
             # Emit an assert that checks that the sum of all the byte arrays in
             # 'requests' is the same as our computed length field
-            self.trait_out("assert_eq!(%s, length * 4);", total_length)
+            self.trait_out("assert_eq!(length_so_far, length * 4);")
 
             # Now we actually send the request
 
