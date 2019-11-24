@@ -3,6 +3,7 @@ extern crate x11rb;
 use std::fs::{remove_file, File, OpenOptions};
 use std::io::{Write, Result as IOResult};
 use std::ptr::null_mut;
+#[cfg(unix)]
 use std::os::unix::io::AsRawFd;
 
 use libc::{mmap, PROT_READ, PROT_WRITE, MAP_SHARED, MAP_FAILED};
