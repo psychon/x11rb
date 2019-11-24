@@ -1,8 +1,14 @@
 use std::ops::{Deref, Index};
 use std::slice::{from_raw_parts, SliceIndex};
 use std::mem::forget;
+#[cfg(unix)]
 use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
 use libc::{free, close};
+#[cfg(not(unix))]
+use libc::c_int;
+
+#[cfg(not(unix))]
+type RawFd = c_int;
 
 /// Wrapper around a slice that was allocated in C code.
 #[derive(Debug)]
@@ -114,9 +120,11 @@ pub struct RawFdContainer(RawFd);
 
 impl Drop for RawFdContainer {
     fn drop(&mut self) {
-        let result = unsafe { close(self.0) };
-        if result != 0 {
-            panic!("Close failed in some RawFdContainer");
+        if cfg!(unix) {
+            let result = unsafe { close(self.0) };
+            if result != 0 {
+                panic!("Close failed in some RawFdContainer");
+            }
         }
     }
 }
@@ -126,7 +134,11 @@ impl RawFdContainer {
     ///
     /// The `RawFdContainer` takes ownership of the `RawFd` and closes it on drop.
     pub fn new(fd: RawFd) -> RawFdContainer {
-        RawFdContainer(fd)
+        if cfg!(unix) {
+            RawFdContainer(fd)
+        } else {
+            unimplemented!("RawFdContainer is only implemented on Unix-like systems");
+        }
     }
 
     /// Get the `RawFd` out of this `RawFdContainer`.
@@ -140,12 +152,14 @@ impl RawFdContainer {
     }
 }
 
+#[cfg(unix)]
 impl<T: IntoRawFd> From<T> for RawFdContainer {
     fn from(fd: T) -> RawFdContainer {
         RawFdContainer::new(fd.into_raw_fd())
     }
 }
 
+#[cfg(unix)]
 impl AsRawFd for RawFdContainer {
     fn as_raw_fd(&self) -> RawFd {
         self.0

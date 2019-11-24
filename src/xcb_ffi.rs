@@ -5,6 +5,7 @@ use std::convert::{TryFrom, TryInto};
 use std::ffi::CStr;
 use std::io::IoSlice;
 use std::ops::Deref;
+#[cfg(unix)]
 use std::os::unix::io::{AsRawFd, RawFd};
 use libc::c_void;
 use crate::utils::{CSlice, Buffer, RawFdContainer};
@@ -207,6 +208,7 @@ impl Connection for XCBConnection {
         }
     }
 
+    #[cfg(unix)]
     fn wait_for_reply_with_fds(&self, sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
         let buffer = self.wait_for_reply(sequence)?;
 
@@ -224,6 +226,11 @@ impl Connection for XCBConnection {
         let vector = vector.iter().map(|&fd| RawFdContainer::new(fd)).collect();
 
         Ok((buffer, vector))
+    }
+
+    #[cfg(not(unix))]
+    fn wait_for_reply_with_fds(&self, _sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
+        unimplemented!("FD passing is currently only implemented on Unix-like systems")
     }
 
     fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
@@ -283,6 +290,7 @@ impl Drop for XCBConnection {
     }
 }
 
+#[cfg(unix)]
 impl AsRawFd for XCBConnection {
     fn as_raw_fd(&self) -> RawFd {
         unsafe {
@@ -294,7 +302,6 @@ impl AsRawFd for XCBConnection {
 mod raw_ffi {
     use libc::{c_void, c_int, c_char, c_uint};
     use std::io::IoSlice;
-    use std::os::unix::io::RawFd;
 
     #[allow(non_camel_case_types)]
     #[repr(C)]
@@ -359,7 +366,8 @@ mod raw_ffi {
         pub(crate) fn xcb_flush(c: *const xcb_connection_t) -> c_int;
         pub(crate) fn xcb_generate_id(c: *const xcb_connection_t) -> u32;
         pub(crate) fn xcb_get_setup(c: *const xcb_connection_t) -> *const u8;
-        pub(crate) fn xcb_get_file_descriptor(c: *const xcb_connection_t) -> RawFd;
+        #[cfg(unix)]
+        pub(crate) fn xcb_get_file_descriptor(c: *const xcb_connection_t) -> c_int;
         pub(crate) fn xcb_get_maximum_request_length(c: *const xcb_connection_t) -> u32;
     }
 }
