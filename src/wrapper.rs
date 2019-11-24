@@ -3,14 +3,14 @@
 use std::convert::TryInto;
 
 use super::generated::xproto::ConnectionExt as XProtoConnectionExt;
-use super::connection::SequenceNumber;
+use super::connection::VoidCookie;
 use super::errors::{ConnectionError, ConnectionErrorOrX11Error};
 
 /// Extension trait that simplifies API use
 pub trait ConnectionExt: XProtoConnectionExt {
     /// Change a property on a window with format 8.
     fn change_property8<A>(&self, mode: A, window: u32, property: u32, type_: u32, data: &[u8])
-    -> Result<SequenceNumber, ConnectionError>
+    -> Result<VoidCookie<Self>, ConnectionError>
     where A: Into<u8>
     {
         self.change_property(mode, window, property, type_, 8, data.len().try_into()?, data)
@@ -18,7 +18,7 @@ pub trait ConnectionExt: XProtoConnectionExt {
 
     /// Change a property on a window with format 16.
     fn change_property16<A>(&self, mode: A, window: u32, property: u32, type_: u32, data: &[u16])
-    -> Result<SequenceNumber, ConnectionError>
+    -> Result<VoidCookie<Self>, ConnectionError>
     where A: Into<u8>
     {
         let mut data_u8 = Vec::with_capacity(data.len() * 2);
@@ -30,7 +30,7 @@ pub trait ConnectionExt: XProtoConnectionExt {
 
     /// Change a property on a window with format 32.
     fn change_property32<A>(&self, mode: A, window: u32, property: u32, type_: u32, data: &[u32])
-    -> Result<SequenceNumber, ConnectionError>
+    -> Result<VoidCookie<Self>, ConnectionError>
     where A: Into<u8>
     {
         let mut data_u8 = Vec::with_capacity(data.len() * 4);

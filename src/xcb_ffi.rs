@@ -11,7 +11,7 @@ use libc::c_void;
 use crate::utils::{CSlice, Buffer, RawFdContainer};
 use crate::x11_utils::{GenericError, GenericEvent, Event};
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
-use crate::connection::{Connection, Cookie, CookieWithFds, SequenceNumber, ExtensionInformation};
+use crate::connection::{Connection, VoidCookie, Cookie, CookieWithFds, SequenceNumber, ExtensionInformation, RequestKind, DiscardMode};
 use super::generated::xproto::{Setup, QueryExtensionReply};
 
 /// A connection to an X11 server.
@@ -166,21 +166,23 @@ impl Connection for XCBConnection {
         Ok(CookieWithFds::new(self, self.send_request(bufs, fds, true, true)?))
     }
 
-    fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<SequenceNumber, ConnectionError> {
-        self.send_request(bufs, fds, false, false)
+    fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<VoidCookie<Self>, ConnectionError> {
+        Ok(VoidCookie::new(self, self.send_request(bufs, fds, false, false)?))
     }
 
-    fn discard_reply(&self, sequence: SequenceNumber) {
+    fn discard_reply(&self, sequence: SequenceNumber, kind: RequestKind, mode: DiscardMode) {
         unsafe {
             raw_ffi::xcb_discard_reply64((self.0).0, sequence);
         }
+        let _ = (kind, mode);
+        unimplemented!("This has to be rewritten to handle the 'kind' and 'mode' argument");
     }
 
     fn extension_information(&self, extension_name: &'static str) -> Option<&QueryExtensionReply> {
         self.2.extension_information(self, extension_name)
     }
 
-    fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
+    fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
         unsafe {
             let mut error = null_mut();
             let reply = raw_ffi::xcb_wait_for_reply64((self.0).0, sequence, &mut error);
@@ -208,9 +210,17 @@ impl Connection for XCBConnection {
         }
     }
 
+    fn wait_for_reply(&self, _sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError> {
+        unimplemented!();
+    }
+
+    fn check_for_error(&self, _sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError> {
+        unimplemented!();
+    }
+
     #[cfg(unix)]
     fn wait_for_reply_with_fds(&self, sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
-        let buffer = self.wait_for_reply(sequence)?;
+        let buffer = self.wait_for_reply_or_error(sequence)?;
 
         // Get a pointer to the array of integers where libxcb saved the FD numbers
         let fd_ptr = match &buffer {

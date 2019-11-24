@@ -3,11 +3,11 @@ use std::convert::TryFrom;
 use std::ops::Deref;
 use std::cell::RefCell;
 
-use x11rb::connection::{Connection, Cookie, CookieWithFds, SequenceNumber};
+use x11rb::connection::{Connection, Cookie, CookieWithFds, VoidCookie, SequenceNumber, RequestKind, DiscardMode};
 use x11rb::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 use x11rb::generated::xproto::{Setup, QueryExtensionReply, ConnectionExt, Segment, KeymapNotifyEvent, ClientMessageData};
 use x11rb::utils::{Buffer, RawFdContainer};
-use x11rb::x11_utils::{GenericEvent, TryParse};
+use x11rb::x11_utils::{GenericEvent, GenericError, TryParse};
 
 #[derive(Debug)]
 struct SavedRequest {
@@ -37,22 +37,8 @@ impl FakeConnection {
         }
         assert_eq!(expected.len(), vec.len());
     }
-}
 
-impl Connection for FakeConnection {
-    fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<Cookie<Self, R>, ConnectionError>
-    where R: TryFrom<Buffer, Error=ParseError>
-    {
-        Ok(Cookie::new(self, self.send_request_without_reply(bufs, fds)?))
-    }
-
-    fn send_request_with_reply_with_fds<R>(&self, _bufs: &[IoSlice], _fds: Vec<RawFdContainer>) -> Result<CookieWithFds<Self, R>, ConnectionError>
-    where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>
-    {
-        unimplemented!()
-    }
-
-    fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<SequenceNumber, ConnectionError> {
+    fn internal_send_request(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<SequenceNumber, ConnectionError> {
         assert_eq!(fds.len(), 0);
 
         let mut storage = Default::default();
@@ -61,20 +47,46 @@ impl Connection for FakeConnection {
         self.0.borrow_mut().push(SavedRequest::new(false, bufs));
         Ok(0)
     }
+}
 
-    fn discard_reply(&self, _sequence: SequenceNumber) {
+impl Connection for FakeConnection {
+    fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<Cookie<Self, R>, ConnectionError>
+    where R: TryFrom<Buffer, Error=ParseError>
+    {
+        Ok(Cookie::new(self, self.internal_send_request(bufs, fds)?))
+    }
+
+    fn send_request_with_reply_with_fds<R>(&self, _bufs: &[IoSlice], _fds: Vec<RawFdContainer>) -> Result<CookieWithFds<Self, R>, ConnectionError>
+    where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>
+    {
         unimplemented!()
+    }
+
+    fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<VoidCookie<Self>, ConnectionError> {
+        Ok(VoidCookie::new(self, self.internal_send_request(bufs, fds)?))
+    }
+
+    fn discard_reply(&self, _sequence: SequenceNumber, _kind: RequestKind, _mode: DiscardMode) {
+        // Just ignore this
     }
 
     fn extension_information(&self, _extension_name: &'static str) -> Option<&QueryExtensionReply> {
         unimplemented!()
     }
 
-    fn wait_for_reply(&self, _sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
+    fn wait_for_reply_or_error(&self, _sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
+        unimplemented!()
+    }
+
+    fn wait_for_reply(&self, _sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError> {
         unimplemented!()
     }
 
     fn wait_for_reply_with_fds(&self, _sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
+        unimplemented!()
+    }
+
+    fn check_for_error(&self, _sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError> {
         unimplemented!()
     }
 

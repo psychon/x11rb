@@ -166,9 +166,7 @@ class Module(object):
         self.out("use crate::x11_utils::{GenericEvent as X11GenericEvent, GenericError as X11GenericError};")
         self.out("use crate::x11_utils::TryParse;")
         self.out("#[allow(unused_imports)]")
-        self.out("use crate::connection::SequenceNumber;")
-        self.out("#[allow(unused_imports)]")
-        self.out("use crate::connection::{Cookie, CookieWithFds, Connection as X11Connection};")
+        self.out("use crate::connection::{Cookie, CookieWithFds, VoidCookie, Connection as X11Connection};")
         if not self.namespace.is_ext:
             self.out("use crate::connection::ListFontsWithInfoCookie;")
         self.out("use crate::errors::{ParseError, ConnectionError};")
@@ -474,7 +472,6 @@ class Module(object):
         # We need a lifetime if there are more than one references in the
         # arguments. Right now that means: Any lists?
         need_lifetime = any(field.type.is_list for field in obj.fields)
-        need_lifetime = need_lifetime and obj.reply
         if need_lifetime:
             generics = ["'c"]
             args = ["&'c self"]
@@ -530,7 +527,10 @@ class Module(object):
             else:
                 result_type = "%s<Self, %sReply>" % (cookie, self._name(name))
         else:
-            result_type = "SequenceNumber"
+            if need_lifetime:
+                result_type = "VoidCookie<'c, Self>"
+            else:
+                result_type = "VoidCookie<Self>"
 
         if generics:
             generics = "<%s>" % ", ".join(generics)
