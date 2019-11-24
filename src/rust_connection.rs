@@ -9,9 +9,9 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 
 use crate::utils::{Buffer, RawFdContainer};
-use crate::connection::{Connection, Cookie, CookieWithFds, SequenceNumber, ExtensionInformation};
+use crate::connection::{Connection, Cookie, CookieWithFds, VoidCookie, SequenceNumber, ExtensionInformation, RequestKind, DiscardMode};
 use crate::generated::xproto::{Setup, SetupRequest, QueryExtensionReply};
-use crate::x11_utils::GenericEvent;
+use crate::x11_utils::{GenericEvent, GenericError};
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 
 #[derive(Debug)]
@@ -250,12 +250,14 @@ impl Connection for RustConnection {
         unimplemented!()
     }
 
-    fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<SequenceNumber, ConnectionError> {
-        self.send_request(bufs, fds, false)
+    fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<VoidCookie<Self>, ConnectionError> {
+        // FIXME: Shouldn't this call compute_length_field? (Or rather: the implementation from
+        // send_request_with_reply() should be moved to send_request())
+        Ok(VoidCookie::new(self, self.send_request(bufs, fds, false)?))
     }
 
-    fn discard_reply(&self, sequence: SequenceNumber) {
-        let _ = sequence;
+    fn discard_reply(&self, sequence: SequenceNumber, kind: RequestKind, mode: DiscardMode) {
+        let _ = (sequence, kind, mode);
         unimplemented!();
     }
 
@@ -263,12 +265,19 @@ impl Connection for RustConnection {
         self.extension_information.extension_information(self, extension_name)
     }
 
-    fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
+    fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
         Ok(self.inner.borrow_mut().wait_for_reply(sequence).map_err(|_| ConnectionError::UnknownError)?)
     }
 
-    fn wait_for_reply_with_fds(&self, sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
-        let _ = sequence;
+    fn wait_for_reply(&self, _sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError> {
+        unimplemented!();
+    }
+
+    fn check_for_error(&self, _sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError> {
+        unimplemented!();
+    }
+
+    fn wait_for_reply_with_fds(&self, _sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
         unimplemented!();
     }
 

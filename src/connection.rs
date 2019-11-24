@@ -4,13 +4,13 @@
 //! used by each concrete implementation of the X11 protocol.
 
 use std::io::IoSlice;
-use std::convert::{TryFrom, TryInto};
+use std::convert::{TryFrom, TryInto, Into};
 use std::marker::PhantomData;
 use std::collections::HashMap;
 use std::sync::Mutex;
 use crate::utils::{Buffer, RawFdContainer};
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
-use crate::x11_utils::GenericEvent;
+use crate::x11_utils::{GenericEvent, GenericError};
 use crate::generated::xproto::{Setup, ListFontsWithInfoReply, QueryExtensionReply, ConnectionExt};
 
 /// Number type used for referring to things that were sent to the server in responses from the
@@ -90,7 +90,7 @@ pub trait Connection: Sized {
     ///
     /// In any case, the request may not be larger than the server's maximum request length.
     fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
-        -> Result<SequenceNumber, ConnectionError>;
+        -> Result<VoidCookie<Self>, ConnectionError>;
 
     /// A reply to an error should be discarded.
     ///
@@ -98,7 +98,7 @@ pub trait Connection: Sized {
     /// replies that are received later can be ignored.
     ///
     /// Users of this library will most likely not want to use this function directly.
-    fn discard_reply(&self, sequence: SequenceNumber);
+    fn discard_reply(&self, sequence: SequenceNumber, kind: RequestKind, mode: DiscardMode);
 
     /// Get information about an extension.
     ///
@@ -111,10 +111,20 @@ pub trait Connection: Sized {
 
     /// Wait for the reply to a request.
     ///
-    /// The given sequence number identifies the request for which replies are expected.
+    /// The given sequence number identifies the request for which replies are expected. If the X11
+    /// server answered the request with an error, that error is returned as an `Err`.
     ///
     /// Users of this library will most likely not want to use this function directly.
-    fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error>;
+    fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error>;
+
+    /// Wait for the reply to a request.
+    ///
+    /// The given sequence number identifies the request for which replies are expected. If the X11
+    /// server answered the request with an error, this function returns `None` and the error is
+    /// instead returned by `wait_for_event()` or `poll_for_event()`.
+    ///
+    /// Users of this library will most likely not want to use this function directly.
+    fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError>;
 
     /// Wait for the reply to a request that has FDs.
     ///
@@ -122,6 +132,13 @@ pub trait Connection: Sized {
     ///
     /// Users of this library will most likely not want to use this function directly.
     fn wait_for_reply_with_fds(&self, sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error>;
+
+    /// Check whether a request that does not have a reply caused an X11 error.
+    ///
+    /// The given sequence number identifies the request for which the check should be performed.
+    ///
+    /// Users of this library will most likely not want to use this function directly.
+    fn check_for_error(&self, sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError>;
 
     /// Wait for a new event from the X11 server.
     fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError>;
@@ -171,7 +188,7 @@ pub trait Connection: Sized {
     /// ```
     /// use std::io::IoSlice;
     /// use std::convert::TryFrom;
-    /// use x11rb::connection::{Cookie, CookieWithFds, Connection, SequenceNumber};
+    /// use x11rb::connection::{Cookie, CookieWithFds, VoidCookie, Connection, SequenceNumber};
     /// use x11rb::errors::{ParseError, ConnectionError};
     /// use x11rb::utils::{Buffer, RawFdContainer};
     ///
@@ -179,19 +196,29 @@ pub trait Connection: Sized {
     ///
     /// impl Connection for MyConnection {
     ///     // [snip, other functions here]
-    ///     # fn discard_reply(&self, sequence: SequenceNumber) {
+    ///     # fn discard_reply(&self, sequence: SequenceNumber,
+    ///     #                  kind: x11rb::connection::RequestKind,
+    ///     #                  mode: x11rb::connection::DiscardMode) {
     ///     #    unimplemented!()
     ///     # }
     ///     # fn extension_information(&self, ext: &'static str)
     ///     # -> Option<&x11rb::generated::xproto::QueryExtensionReply> {
     ///     #    unimplemented!()
     ///     # }
-    ///     # fn wait_for_reply(&self, sequence: SequenceNumber)
+    ///     # fn wait_for_reply_or_error(&self, sequence: SequenceNumber)
     ///     # -> Result<Buffer, x11rb::errors::ConnectionErrorOrX11Error> {
+    ///     #    unimplemented!()
+    ///     # }
+    ///     # fn wait_for_reply(&self, sequence: SequenceNumber)
+    ///     # -> Result<Option<Buffer>, x11rb::errors::ConnectionError> {
     ///     #    unimplemented!()
     ///     # }
     ///     # fn wait_for_reply_with_fds(&self, sequence: SequenceNumber)
     ///     # -> Result<(Buffer, Vec<RawFdContainer>), x11rb::errors::ConnectionErrorOrX11Error> {
+    ///     #    unimplemented!()
+    ///     # }
+    ///     # fn check_for_error(&self, sequence: SequenceNumber)
+    ///     # ->Result<Option<x11rb::x11_utils::GenericError>, ConnectionError> {
     ///     #    unimplemented!()
     ///     # }
     ///     # fn wait_for_event(&self) -> Result<x11rb::x11_utils::GenericEvent, ConnectionError> {
@@ -227,8 +254,8 @@ pub trait Connection: Sized {
     ///     }
     ///
     ///     fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
-    ///     -> Result<SequenceNumber, ConnectionError> {
-    ///         self.send_request(bufs, fds, false, false)
+    ///     -> Result<VoidCookie<Self>, ConnectionError> {
+    ///         Ok(VoidCookie::new(self, self.send_request(bufs, fds, false, false)?))
     ///     }
     /// }
     ///
@@ -294,6 +321,83 @@ pub trait Connection: Sized {
     }
 }
 
+/// Does a request have a response?
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum RequestKind {
+    /// The request has no response, i.e. its type is "void".
+    IsVoid,
+    /// The request has a response.
+    HasResponse
+}
+
+/// Variants describing which responses to a request should be discarded.
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum DiscardMode {
+    /// Only discard the actual reply. Errors go to the main loop.
+    DiscardReply,
+    /// Ignore any kind of response that this request generates.
+    DiscardReplyAndError,
+}
+
+/// A handle to a possible error from the X11 server.
+///
+/// When sending a request for which no reply is expected, this library returns a `VoidCookie`.
+/// This `VoidCookie` can then later be used to check if the X11 server sent an error.
+#[derive(Debug)]
+pub struct VoidCookie<'a, C>
+where C: Connection
+{
+    connection: &'a C,
+    sequence_number: SequenceNumber,
+}
+
+impl<'a, C> VoidCookie<'a, C>
+where C: Connection
+{
+    /// Construct a new cookie.
+    ///
+    /// This function should only be used by implementations of
+    /// `Connection::send_request_without_reply`.
+    pub fn new(connection: &C, sequence_number: SequenceNumber) -> VoidCookie<C> {
+        VoidCookie { connection, sequence_number }
+    }
+
+    /// Get the sequence number of the request that generated this cookie.
+    pub fn sequence_number(&self) -> SequenceNumber {
+        self.sequence_number
+    }
+
+    fn consume(self) -> (&'a C, SequenceNumber) {
+        let result = (self.connection, self.sequence_number);
+        std::mem::forget(self);
+        result
+    }
+
+    /// Check if the original request caused an X11 error.
+    pub fn check(self) -> Result<Option<GenericError>, ConnectionError> {
+        let (connection, sequence) = self.consume();
+        connection.check_for_error(sequence)
+    }
+
+    /// Ignore all errors to this request.
+    ///
+    /// Without calling this method, an error becomes available on the connection as an event after
+    /// this cookie was dropped. This function causes errors to be ignored instead.
+    pub fn ignore_error(self) {
+        let (connection, sequence) = self.consume();
+        connection.discard_reply(sequence, RequestKind::IsVoid, DiscardMode::DiscardReplyAndError)
+    }
+}
+
+impl<C> Drop for VoidCookie<'_, C>
+where C: Connection
+{
+    fn drop(&mut self) {
+        self.connection.discard_reply(self.sequence_number, RequestKind::IsVoid, DiscardMode::DiscardReply)
+    }
+}
+
+/// Internal helper for a cookie with an response
 #[derive(Debug)]
 struct RawCookie<'a, C>
 where C: Connection
@@ -329,7 +433,7 @@ impl<C> Drop for RawCookie<'_, C>
 where C: Connection
 {
     fn drop(&mut self) {
-        self.connection.discard_reply(self.sequence_number);
+        self.connection.discard_reply(self.sequence_number, RequestKind::HasResponse, DiscardMode::DiscardReply);
     }
 }
 
@@ -368,12 +472,34 @@ where R: TryFrom<Buffer, Error=ParseError>,
     /// Get the raw reply that the server sent.
     pub fn raw_reply(self) -> Result<Buffer, ConnectionErrorOrX11Error> {
         let conn = self.raw_cookie.connection;
+        Ok(conn.wait_for_reply_or_error(self.raw_cookie.to_sequence_number())?)
+    }
+
+    /// Get the raw reply that the server sent, but have errors handled as events.
+    pub fn raw_reply_unchecked(self) -> Result<Option<Buffer>, ConnectionError> {
+        let conn = self.raw_cookie.connection;
         Ok(conn.wait_for_reply(self.raw_cookie.to_sequence_number())?)
     }
 
     /// Get the reply that the server sent.
     pub fn reply(self) -> Result<R, ConnectionErrorOrX11Error> {
         Ok(self.raw_reply()?.try_into()?)
+    }
+
+    /// Get the reply that the server sent, but have errors handled as events.
+    pub fn reply_unchecked(self) -> Result<Option<R>, ConnectionError> {
+        self.raw_reply_unchecked()?
+            .map(TryInto::try_into)
+            .transpose()
+            .map_err(Into::into)
+    }
+
+    /// Discard all responses to the request this cookie represents, even errors.
+    ///
+    /// Without this function, errors are treated as events after the cookie is dropped.
+    pub fn discard_reply_and_errors(self) {
+        let conn = self.raw_cookie.connection;
+        conn.discard_reply(self.raw_cookie.to_sequence_number(), RequestKind::HasResponse, DiscardMode::DiscardReplyAndError)
     }
 }
 
@@ -453,7 +579,7 @@ where C: Connection
             None => return None,
             Some(cookie) => cookie
         };
-        let reply = cookie.connection.wait_for_reply(cookie.sequence_number);
+        let reply = cookie.connection.wait_for_reply_or_error(cookie.sequence_number);
         let reply = match reply {
             Err(e) => return Some(Err(e)),
             Ok(v) => v
