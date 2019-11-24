@@ -108,9 +108,7 @@ impl XCBConnection {
         };
         let mut flags = raw_ffi::send_request_flags::RAW;
         assert!(has_reply || !reply_has_fds);
-        if has_reply {
-            flags |= raw_ffi::send_request_flags::CHECKED;
-        }
+        flags |= raw_ffi::send_request_flags::CHECKED;
         if reply_has_fds {
             flags |= raw_ffi::send_request_flags::REPLY_FDS;
         }
@@ -214,8 +212,14 @@ impl Connection for XCBConnection {
         unimplemented!();
     }
 
-    fn check_for_error(&self, _sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError> {
-        unimplemented!();
+    fn check_for_error(&self, sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError> {
+        let cookie = raw_ffi::xcb_void_cookie_t { sequence: sequence as _ };
+        let error = unsafe { raw_ffi::xcb_request_check((self.0).0, cookie) };
+        if error == null_mut() {
+            Ok(None)
+        } else {
+            unsafe { Ok(Some(Buffer::from_raw_parts(error as _, 32).try_into()?)) }
+        }
     }
 
     #[cfg(unix)]
@@ -336,6 +340,12 @@ mod raw_ffi {
 
     #[allow(non_camel_case_types)]
     #[repr(C)]
+    pub(crate) struct xcb_void_cookie_t {
+        pub(crate) sequence: c_uint
+    }
+
+    #[allow(non_camel_case_types)]
+    #[repr(C)]
     pub(crate) struct xcb_protocol_request_t {
         pub(crate) count: usize,
         pub(crate) ext: *mut xcb_extension_t,
@@ -371,6 +381,7 @@ mod raw_ffi {
         pub(crate) fn xcb_send_request_with_fds64(c: *const xcb_connection_t, flags: c_int, vector: *mut IoSlice, request: *const xcb_protocol_request_t, num_fds: c_uint, fds: *const c_int) -> u64;
         pub(crate) fn xcb_discard_reply64(c: *const xcb_connection_t, sequence: u64);
         pub(crate) fn xcb_wait_for_reply64(c: *const xcb_connection_t, request: u64, e: *mut * mut c_void) -> *mut c_void;
+        pub(crate) fn xcb_request_check(c: *const xcb_connection_t, void_cookie: xcb_void_cookie_t) -> *mut c_void;
         pub(crate) fn xcb_wait_for_event(c: *const xcb_connection_t) -> *mut c_void;
         pub(crate) fn xcb_poll_for_event(c: *const xcb_connection_t) -> *mut c_void;
         pub(crate) fn xcb_flush(c: *const xcb_connection_t) -> c_int;
