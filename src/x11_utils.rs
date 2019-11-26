@@ -97,6 +97,12 @@ impl TryFrom<Buffer> for GenericEvent {
     }
 }
 
+impl From<GenericError> for GenericEvent {
+    fn from(value: GenericError) -> Self {
+        GenericEvent(value.into())
+    }
+}
+
 /// A generic error.
 ///
 /// This struct is similar to `GenericEvent`, but is specific to error packets. It allows access to
