@@ -22,7 +22,79 @@ use super::generated::xproto::{Setup, QueryExtensionReply};
 pub struct XCBConnection {
     conn: raw_ffi::XCBConnectionWrapper,
     setup: Setup,
-    ext_info: ExtensionInformation
+    ext_info: ExtensionInformation,
+    errors: pending_errors::PendingErrors
+}
+
+mod pending_errors {
+    use std::cmp::Reverse;
+    use std::sync::Mutex;
+    use std::convert::TryInto;
+    use std::collections::{BinaryHeap, VecDeque};
+
+    use super::XCBConnection;
+    use crate::connection::SequenceNumber;
+    use crate::x11_utils::GenericError;
+
+    #[derive(Debug, Default)]
+    struct PendingErrorsInner {
+        in_flight: BinaryHeap<Reverse<SequenceNumber>>,
+        pending: VecDeque<GenericError>,
+    }
+
+    /// A management struct for pending X11 errors
+    #[derive(Debug, Default)]
+    pub(crate) struct PendingErrors {
+        inner: Mutex<PendingErrorsInner>
+    }
+
+    impl PendingErrors {
+        pub(crate) fn append_error(&self, error: GenericError) {
+            self.inner.lock().unwrap().pending.push_back(error)
+        }
+
+        pub(crate) fn discard_reply(&self, sequence: SequenceNumber) {
+            self.inner.lock().unwrap().in_flight.push(Reverse(sequence));
+        }
+
+        pub(crate) fn get(&self, conn: &XCBConnection) -> Option<GenericError> {
+            let mut inner = self.inner.lock().unwrap();
+
+            // Check if we already have an element at hand
+            let err = inner.pending.pop_front();
+            if err.is_some() {
+                return err;
+            }
+
+            // Check if any of the still in-flight responses got a reply/error
+            while let Some(Reverse(seqno)) = inner.in_flight.peek() {
+                let result = match conn.poll_for_reply(*seqno) {
+                    Err(()) => {
+                        // This request was not answered/errored yet, so later request will not
+                        // have answers as well.
+                        return None;
+                    },
+                    Ok(reply) => reply
+                };
+
+                let seqno = *seqno;
+                std::mem::forget(seqno);
+                let seqno2 = inner.in_flight.pop();
+                assert_eq!(Some(Reverse(seqno)), seqno2);
+
+                if let Some(result) = result {
+                    // Is this an error?
+                    if let Ok(error) = result.try_into() {
+                        return Some(error);
+                    } else {
+                        // It's a reply, just ignore it
+                    }
+                }
+            }
+
+            None
+        }
+    }
 }
 
 impl XCBConnection {
@@ -66,7 +138,8 @@ impl XCBConnection {
                 let conn = XCBConnection {
                     conn: raw_ffi::XCBConnectionWrapper(connection),
                     setup: Self::parse_setup(setup)?,
-                    ext_info: Default::default()
+                    ext_info: Default::default(),
+                    errors: Default::default()
                 };
                 Ok((conn, screen as usize))
             }
@@ -157,6 +230,44 @@ impl XCBConnection {
     pub fn get_raw_xcb_connection(&self) -> *mut c_void {
         (self.conn).0 as _
     }
+
+    /// Check if a reply to the given request already received.
+    ///
+    /// Return Err(()) when the reply was not yet received. Returns Ok(None) when there can be no
+    /// reply. Returns Ok(buffer) with the reply if there is one (this buffer can be an error or a
+    /// reply).
+    fn poll_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Buffer>, ()> {
+        unsafe {
+            let mut reply = null_mut();
+            let mut error = null_mut();
+            let found = raw_ffi::xcb_poll_for_reply((self.conn).0, sequence as _, &mut reply, &mut error);
+            if found == 0 {
+                return Err(());
+            }
+            assert_eq!(found, 1);
+            match (reply == null_mut(), error == null_mut()) {
+                (true, true) => Ok(None),
+                (true, false) => Ok(Some(XCBConnection::wrap_error(error as _))),
+                (false, true) => Ok(Some(XCBConnection::wrap_reply(reply as _))),
+                (false, false) => unreachable!()
+            }
+        }
+    }
+
+    unsafe fn wrap_reply(reply: *const u8) -> Buffer {
+        let header = CSlice::new(reply, 32);
+
+        let length_field = u32::from_ne_bytes(header[4..8].try_into().unwrap());
+        let length_field: usize = length_field.try_into()
+            .expect("usize should have at least 32 bits");
+
+        let length = 32 + length_field * 4;
+        Buffer::from_raw_parts(header.into_ptr(), length)
+    }
+
+    unsafe fn wrap_error(error: *const u8) -> Buffer {
+         Buffer::from_raw_parts(error, 32)
+    }
 }
 
 impl Connection for XCBConnection {
@@ -176,12 +287,15 @@ impl Connection for XCBConnection {
         Ok(VoidCookie::new(self, self.send_request(bufs, fds, false, false)?))
     }
 
-    fn discard_reply(&self, sequence: SequenceNumber, kind: RequestKind, mode: DiscardMode) {
-        unsafe {
-            raw_ffi::xcb_discard_reply64((self.conn).0, sequence);
+    fn discard_reply(&self, sequence: SequenceNumber, _kind: RequestKind, mode: DiscardMode) {
+        match mode {
+            DiscardMode::DiscardReplyAndError => unsafe {
+                // libxcb can throw away everything for us
+                raw_ffi::xcb_discard_reply64((self.conn).0, sequence);
+            },
+            // We have to check for errors ourselves
+            DiscardMode::DiscardReply => self.errors.discard_reply(sequence)
         }
-        let _ = (kind, mode);
-        unimplemented!("This has to be rewritten to handle the 'kind' and 'mode' argument");
     }
 
     fn extension_information(&self, extension_name: &'static str) -> Option<&QueryExtensionReply> {
@@ -202,22 +316,26 @@ impl Connection for XCBConnection {
             }
 
             if reply != null_mut() {
-                let header = CSlice::new(reply as _, 32);
-
-                let length_field = u32::from_ne_bytes(header[4..8].try_into().unwrap());
-                let length_field: usize = length_field.try_into()?;
-
-                let length = 32 + length_field * 4;
-                Ok(Buffer::from_raw_parts(header.into_ptr(), length))
+                Ok(XCBConnection::wrap_reply(reply as _))
             } else {
-                let error: GenericError = Buffer::from_raw_parts(error as _, 32).try_into()?;
+                let error: GenericError = XCBConnection::wrap_error(error as _).try_into()?;
                 Err(error.into())
             }
         }
     }
 
-    fn wait_for_reply(&self, _sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError> {
-        unimplemented!();
+    fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError> {
+        use ConnectionErrorOrX11Error::*;
+        match self.wait_for_reply_or_error(sequence) {
+            Ok(buffer) => Ok(Some(buffer)),
+            Err(err) => match err {
+                ConnectionError(err) => Err(err),
+                X11Error(err) => {
+                    self.errors.append_error(err.into());
+                    Ok(None)
+                }
+            }
+        }
     }
 
     fn check_for_error(&self, sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError> {
@@ -256,6 +374,9 @@ impl Connection for XCBConnection {
     }
 
     fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
+        if let Some(error) = self.errors.get(self) {
+            return Ok(error.into());
+        }
         unsafe {
             let event = raw_ffi::xcb_wait_for_event((self.conn).0);
             if event.is_null() {
@@ -268,6 +389,9 @@ impl Connection for XCBConnection {
     }
 
     fn poll_for_event(&self) -> Result<Option<GenericEvent>, ConnectionError> {
+        if let Some(error) = self.errors.get(self) {
+            return Ok(Some(error.into()));
+        }
         unsafe {
             let event = raw_ffi::xcb_poll_for_event((self.conn).0);
             if event.is_null() {
@@ -388,7 +512,8 @@ mod raw_ffi {
         pub(crate) fn xcb_send_request64(c: *const xcb_connection_t, flags: c_int, vector: *mut IoSlice, request: *const xcb_protocol_request_t) -> u64;
         pub(crate) fn xcb_send_request_with_fds64(c: *const xcb_connection_t, flags: c_int, vector: *mut IoSlice, request: *const xcb_protocol_request_t, num_fds: c_uint, fds: *const c_int) -> u64;
         pub(crate) fn xcb_discard_reply64(c: *const xcb_connection_t, sequence: u64);
-        pub(crate) fn xcb_wait_for_reply64(c: *const xcb_connection_t, request: u64, e: *mut * mut c_void) -> *mut c_void;
+        pub(crate) fn xcb_wait_for_reply64(c: *const xcb_connection_t, request: u64, e: *mut *mut c_void) -> *mut c_void;
+        pub(crate) fn xcb_poll_for_reply(c: *const xcb_connection_t, request: c_uint, reply: *mut *mut c_void, e: *mut *mut c_void) -> c_int;
         pub(crate) fn xcb_request_check(c: *const xcb_connection_t, void_cookie: xcb_void_cookie_t) -> *mut c_void;
         pub(crate) fn xcb_wait_for_event(c: *const xcb_connection_t) -> *mut c_void;
         pub(crate) fn xcb_poll_for_event(c: *const xcb_connection_t) -> *mut c_void;
