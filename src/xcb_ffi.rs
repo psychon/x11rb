@@ -446,8 +446,11 @@ impl AsRawFd for XCBConnection {
 }
 
 mod raw_ffi {
-    use libc::{c_void, c_int, c_char, c_uint};
+    #[cfg(not(test))]
     use std::io::IoSlice;
+    use libc::{c_int, c_char, c_uint};
+    #[cfg(not(test))]
+    use libc::c_void;
 
     #[allow(non_camel_case_types)]
     #[repr(C)]
@@ -504,6 +507,7 @@ mod raw_ffi {
         pub(crate) const REPLY_FDS: c_int = 8;
     }
 
+    #[cfg(not(test))]
     #[link(name = "xcb")]
     extern {
         pub(crate) fn xcb_connect(displayname: *const c_char, screenp: *mut c_int ) -> *mut xcb_connection_t;
@@ -523,5 +527,223 @@ mod raw_ffi {
         #[cfg(unix)]
         pub(crate) fn xcb_get_file_descriptor(c: *const xcb_connection_t) -> c_int;
         pub(crate) fn xcb_get_maximum_request_length(c: *const xcb_connection_t) -> u32;
+    }
+
+    #[cfg(test)]
+    mod mock {
+        use std::io::IoSlice;
+        use std::ffi::CStr;
+        use std::cell::RefCell;
+        use libc::{c_void, c_int, c_char, c_uint};
+        use super::{xcb_connection_t, xcb_protocol_request_t, xcb_void_cookie_t};
+
+        thread_local!(pub(crate) static SETUP_BYTES: RefCell<Option<Vec<u8>>> = RefCell::new(None));
+
+        #[repr(C)]
+        struct ConnectionMock {
+            xcb_conn: xcb_connection_t,
+            error: c_int,
+            setup: *const u8,
+        }
+
+        pub(crate) unsafe fn xcb_connect(displayname: *const c_char, screenp: *mut c_int ) -> *mut xcb_connection_t {
+            // Test that the provided displayname is correct
+            if CStr::from_ptr(displayname).to_str().unwrap() != "display name" {
+                panic!("Did not get the expected displayname");
+            }
+            std::ptr::write(screenp, 0);
+            let mock = ConnectionMock {
+                xcb_conn: xcb_connection_t { _unused: Default::default() },
+                error: 0,
+                setup: SETUP_BYTES.with(|f| f.borrow().as_ref().unwrap().as_ptr()),
+            };
+            Box::into_raw(Box::new(mock)) as _
+        }
+
+        pub(crate) unsafe fn xcb_disconnect(c: *mut xcb_connection_t) {
+            let _ = Box::from_raw(c);
+        }
+
+        pub(crate) unsafe fn xcb_connection_has_error(c: *const xcb_connection_t) -> c_int {
+            std::ptr::read(c as *const ConnectionMock).error
+        }
+
+        pub(crate) unsafe fn xcb_send_request64(_c: *const xcb_connection_t, _flags: c_int, _vector: *mut IoSlice, _request: *const xcb_protocol_request_t) -> u64 {
+            unimplemented!();
+        }
+
+        pub(crate) unsafe fn xcb_send_request_with_fds64(_c: *const xcb_connection_t, _flags: c_int, _vector: *mut IoSlice, _request: *const xcb_protocol_request_t, _num_fds: c_uint, _fds: *const c_int) -> u64 {
+            unimplemented!();
+        }
+
+        pub(crate) unsafe fn xcb_discard_reply64(_c: *const xcb_connection_t, _sequence: u64) {
+            unimplemented!();
+        }
+
+        pub(crate) unsafe fn xcb_wait_for_reply64(_c: *const xcb_connection_t, _request: u64, _e: *mut *mut c_void) -> *mut c_void {
+            unimplemented!();
+        }
+
+        pub(crate) unsafe fn xcb_poll_for_reply(_c: *const xcb_connection_t, _request: c_uint, _reply: *mut *mut c_void, _e: *mut *mut c_void) -> c_int {
+            unimplemented!();
+        }
+
+        pub(crate) unsafe fn xcb_request_check(_c: *const xcb_connection_t, _void_cookie: xcb_void_cookie_t) -> *mut c_void {
+            unimplemented!();
+        }
+
+        pub(crate) unsafe fn xcb_wait_for_event(_c: *const xcb_connection_t) -> *mut c_void {
+            unimplemented!();
+        }
+
+        pub(crate) unsafe fn xcb_poll_for_event(_c: *const xcb_connection_t) -> *mut c_void {
+            unimplemented!();
+        }
+
+        pub(crate) unsafe fn xcb_flush(_c: *const xcb_connection_t) -> c_int {
+            unimplemented!();
+        }
+
+        pub(crate) unsafe fn xcb_generate_id(_c: *const xcb_connection_t) -> u32 {
+            unimplemented!();
+        }
+
+        pub(crate) unsafe fn xcb_get_setup(c: *const xcb_connection_t) -> *const u8 {
+            std::ptr::read(c as *mut ConnectionMock).setup
+        }
+
+        #[cfg(unix)]
+        pub(crate) unsafe fn xcb_get_file_descriptor(_c: *const xcb_connection_t) -> c_int {
+            unimplemented!();
+        }
+
+        pub(crate) unsafe fn xcb_get_maximum_request_length(_c: *const xcb_connection_t) -> u32 {
+            unimplemented!();
+        }
+    }
+
+    #[cfg(test)]
+    pub(crate) use mock::*;
+}
+
+#[cfg(test)]
+mod test {
+    use std::ffi::CString;
+    use super::{XCBConnection, ConnectionError, Connection};
+    use super::raw_ffi::SETUP_BYTES;
+
+    fn default_setup() {
+        let mut s = Vec::new();
+        // 58
+        let vendor_len: u16 = 2;
+        let num_pixmap_formats: u8 = 1;
+        let roots_len: u8 = 18;
+        let header: u16 = 10;
+        let length: u16 = header + vendor_len + 2 * num_pixmap_formats as u16 + roots_len as u16;
+
+        s.extend(&[1, 0]); // Status "success" and padding
+        s.extend(&11u16.to_ne_bytes()); // major version
+        s.extend(&0u16.to_ne_bytes()); // minor version
+        s.extend(&length.to_ne_bytes()); // length
+        s.extend(&0x12345678u32.to_ne_bytes()); // release number
+        s.extend(&0x10000000u32.to_ne_bytes()); // resource id base
+        s.extend(&0x000000ffu32.to_ne_bytes()); // resource id mask
+        s.extend(&0u32.to_ne_bytes()); // motion buffer size
+        s.extend(&6u16.to_ne_bytes()); // vendor length
+        s.extend(&0x100u16.to_ne_bytes()); // maximum request length
+        s.push(1); // roots length
+        s.push(num_pixmap_formats); // pixmap formats length
+        s.push(1); // image byte order: MSB first
+        s.push(1); // bitmap format bit order: MSB first
+        s.push(0); // scanline unit
+        s.push(0); // scanline pad
+        s.push(0); // min keycode
+        s.push(0xff); // max keycode
+        s.extend(&[0, 0, 0, 0]); // padding
+        assert_eq!(s.len(), header as usize * 4);
+
+        s.extend("Vendor  ".bytes()); // vendor + padding
+        assert_eq!(s.len(), (header + vendor_len) as usize * 4);
+
+        // Pixmap formats, we said above there is one entry
+        s.push(15); // depth
+        s.push(42); // bits per pixel
+        s.push(21); // scanline pad
+        s.extend(&[0, 0, 0, 0, 0]); // padding
+        assert_eq!(s.len(), (header + vendor_len + 2 * num_pixmap_formats as u16) as usize * 4);
+
+        // Screens, we said above there is one entry
+        s.extend(&1u32.to_ne_bytes()); // root window
+        s.extend(&2u32.to_ne_bytes()); // default colormap
+        s.extend(&3u32.to_ne_bytes()); // white pixel
+        s.extend(&4u32.to_ne_bytes()); // black pixel
+        s.extend(&0u32.to_ne_bytes()); // current input masks
+        s.extend(&0u16.to_ne_bytes()); // width in pixels
+        s.extend(&0u16.to_ne_bytes()); // height in pixels
+        s.extend(&0u16.to_ne_bytes()); // width in mm
+        s.extend(&0u16.to_ne_bytes()); // height in mm
+        s.extend(&0u16.to_ne_bytes()); // min installed maps
+        s.extend(&0u16.to_ne_bytes()); // max installed maps
+        s.extend(&0u32.to_ne_bytes()); // root visual
+        s.extend(&[0, 0, 0, 1]); // backing stores, save unders, root depths, allowed depths len
+
+        // one depth entry
+        s.extend(&[99, 0]); // depth and padding
+        s.extend(&1u16.to_ne_bytes()); // width visuals len
+        s.extend(&[0, 0, 0, 0]); // padding
+
+        // one visualtype entry
+        s.extend(&80u32.to_ne_bytes()); // visualid
+        s.extend(&[2, 4]); // class and bits per rgb value
+        s.extend(&81u16.to_ne_bytes()); // colormap entries
+        s.extend(&82u32.to_ne_bytes()); // red mask
+        s.extend(&83u32.to_ne_bytes()); // green mask
+        s.extend(&84u32.to_ne_bytes()); // blue mask
+        s.extend(&[0, 0, 0, 0]); // padding
+
+        assert_eq!(s.len(), length as usize * 4);
+
+        s.extend(std::iter::repeat(0).take(1000)); // padding
+        SETUP_BYTES.with(|f| *f.borrow_mut() = Some(s));
+    }
+
+    #[test]
+    fn xcb_connect_and_setup() -> Result<(), ConnectionError> {
+        default_setup();
+        let str = CString::new("display name").unwrap();
+        let (conn, screen) = XCBConnection::connect(Some(&str)).expect("Failed to 'connect'");
+        assert_eq!(screen, 0);
+
+        let setup = &conn.setup();
+        assert_eq!((1, 11, 0), (setup.status, setup.protocol_major_version, setup.protocol_minor_version));
+        assert_eq!(0x12345678, setup.release_number);
+        assert_eq!((0, 0xff), (setup.min_keycode, setup.max_keycode));
+        assert_eq!("Vendor".as_bytes(), &setup.vendor[..]);
+
+        assert_eq!(1, setup.pixmap_formats.len());
+        let format = &setup.pixmap_formats[0];
+        assert_eq!(15, format.depth);
+        assert_eq!(42, format.bits_per_pixel);
+        assert_eq!(21, format.scanline_pad);
+
+        assert_eq!(1, setup.roots.len());
+        let root = &setup.roots[0];
+        assert_eq!((1, 2, 3, 4), (root.root, root.default_colormap, root.white_pixel, root.black_pixel));
+
+        assert_eq!(1, root.allowed_depths.len());
+        let depth = &root.allowed_depths[0];
+        assert_eq!(99, depth.depth);
+
+        assert_eq!(1, depth.visuals.len());
+        let visual = &depth.visuals[0];
+        assert_eq!(80, visual.visual_id);
+        assert_eq!(2, visual.class);
+        assert_eq!(4, visual.bits_per_rgb_value);
+        assert_eq!(81, visual.colormap_entries);
+        assert_eq!(82, visual.red_mask);
+        assert_eq!(83, visual.green_mask);
+        assert_eq!(84, visual.blue_mask);
+
+        Ok(())
     }
 }
