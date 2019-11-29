@@ -16,13 +16,13 @@ use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
 use std::option::Option as RustOption;
-use crate::utils::Buffer;
 #[allow(unused_imports)]
-use crate::x11_utils::{GenericEvent as X11GenericEvent, GenericError as X11GenericError};
+use crate::utils::{Buffer, RawFdContainer};
+#[allow(unused_imports)]
+use crate::x11_utils::{GenericEvent as X11GenericEvent, GenericError as X11GenericError, Event as _};
 use crate::x11_utils::TryParse;
 #[allow(unused_imports)]
-use crate::connection::SequenceNumber;
-use crate::connection::{Cookie, Connection as X11Connection};
+use crate::connection::{Cookie, CookieWithFds, VoidCookie, Connection as X11Connection};
 use crate::connection::ListFontsWithInfoCookie;
 use crate::errors::{ParseError, ConnectionError};
 ```
@@ -75,6 +75,12 @@ impl TryParse for Point {
         remaining = new_remaining;
         let result = Point { x, y };
         Ok((result, remaining))
+    }
+}
+impl TryFrom<&Buffer> for Point {
+    type Error = ParseError;
+    fn try_from(value: &Buffer) -> Result<Self, Self::Error> {
+        Self::try_from(&**value)
     }
 }
 impl TryFrom<Buffer> for Point {
@@ -142,6 +148,12 @@ impl TryParse for Depth {
         }
         let result = Depth { depth, visuals };
         Ok((result, remaining))
+    }
+}
+impl TryFrom<&Buffer> for Depth {
+    type Error = ParseError;
+    fn try_from(value: &Buffer) -> Result<Self, Self::Error> {
+        Self::try_from(&**value)
     }
 }
 impl TryFrom<Buffer> for Depth {
@@ -456,10 +468,15 @@ impl ClientMessageData {
         }
         do_the_parse(&self.0[..]).unwrap()
     }
+    fn to_ne_bytes(&self) -> &[u8] {
+        &self.0
+    }
 }
 impl TryParse for ClientMessageData {
     fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let inner = value[..20].iter().copied().collect();
+        let inner = value.get(..20)
+            .ok_or(ParseError::ParseError)?
+            .iter().copied().collect();
         let result = ClientMessageData(inner);
         Ok((result, &value[20..]))
     }
@@ -486,10 +503,14 @@ impl TryParse for ClientMessageData {
 </event>
 ```
 ```rust
+/// Opcode for the KeyPress event
 pub const KEY_PRESS_EVENT: u8 = 2;
+/// [SNIP]
 #[derive(Debug, Clone, Copy)]
 pub struct KeyPressEvent {
+    pub response_type: u8,
     pub detail: u8,
+    pub sequence: u16,
     pub time: u32,
     pub root: u32,
     pub event: u32,
@@ -501,13 +522,15 @@ pub struct KeyPressEvent {
     pub state: u16,
     pub same_screen: u8,
 }
-impl TryParse for KeyPressEvent {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl KeyPressEvent {
+    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let mut remaining = value;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (response_type, new_remaining) = u8::try_parse(remaining)?;
+        remaining = new_remaining;
         let (detail, new_remaining) = u8::try_parse(remaining)?;
         remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (sequence, new_remaining) = u16::try_parse(remaining)?;
+        remaining = new_remaining;
         let (time, new_remaining) = u32::try_parse(remaining)?;
         remaining = new_remaining;
         let (root, new_remaining) = u32::try_parse(remaining)?;
@@ -529,8 +552,14 @@ impl TryParse for KeyPressEvent {
         let (same_screen, new_remaining) = u8::try_parse(remaining)?;
         remaining = new_remaining;
         remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let result = KeyPressEvent { detail, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen };
+        let result = KeyPressEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen };
         Ok((result, remaining))
+    }
+}
+impl TryFrom<&Buffer> for KeyPressEvent {
+    type Error = ParseError;
+    fn try_from(value: &Buffer) -> Result<Self, Self::Error> {
+        Self::try_from(&**value)
     }
 }
 impl TryFrom<Buffer> for KeyPressEvent {
@@ -539,16 +568,45 @@ impl TryFrom<Buffer> for KeyPressEvent {
         Self::try_from(&*value)
     }
 }
-impl TryFrom<X11GenericEvent> for KeyPressEvent {
-    type Error = ParseError;
-    fn try_from(value: X11GenericEvent) -> Result<Self, Self::Error> {
-        Self::try_from(Into::<Buffer>::into(value))
-    }
-}
 impl TryFrom<&[u8]> for KeyPressEvent {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl From<X11GenericEvent> for KeyPressEvent {
+    fn from(value: X11GenericEvent) -> Self {
+        Self::try_from(Into::<Buffer>::into(value)).expect("Buffer should be large enough so that parsing cannot fail")
+    }
+}
+impl From<&X11GenericEvent> for KeyPressEvent {
+    fn from(value: &X11GenericEvent) -> Self {
+        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+    }
+}
+impl Into<[u8; 32]> for &KeyPressEvent {
+    fn into(self) -> [u8; 32] {
+        let sequence = self.sequence.to_ne_bytes();
+        let time = self.time.to_ne_bytes();
+        let root = self.root.to_ne_bytes();
+        let event = self.event.to_ne_bytes();
+        let child = self.child.to_ne_bytes();
+        let root_x = self.root_x.to_ne_bytes();
+        let root_y = self.root_y.to_ne_bytes();
+        let event_x = self.event_x.to_ne_bytes();
+        let event_y = self.event_y.to_ne_bytes();
+        let state = self.state.to_ne_bytes();
+        [
+            self.response_type, self.detail, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
+            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
+            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], self.same_screen, 0
+        ]
+    }
+}
+impl Into<[u8; 32]> for KeyPressEvent {
+    fn into(self) -> [u8; 32] {
+        (&self).into()
     }
 }
 ```
@@ -564,19 +622,26 @@ impl TryFrom<&[u8]> for KeyPressEvent {
 </error>
 ```
 ```rust
+/// Opcode for the KeyPress event
 pub const REQUEST_ERROR: u8 = 1;
 #[derive(Debug, Clone, Copy)]
 pub struct RequestError {
+    pub response_type: u8,
+    pub error_code: u8,
+    pub sequence: u16,
     pub bad_value: u32,
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl TryParse for RequestError {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl RequestError {
+    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let mut remaining = value;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (response_type, new_remaining) = u8::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (error_code, new_remaining) = u8::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (sequence, new_remaining) = u16::try_parse(remaining)?;
+        remaining = new_remaining;
         let (bad_value, new_remaining) = u32::try_parse(remaining)?;
         remaining = new_remaining;
         let (minor_opcode, new_remaining) = u16::try_parse(remaining)?;
@@ -584,8 +649,14 @@ impl TryParse for RequestError {
         let (major_opcode, new_remaining) = u8::try_parse(remaining)?;
         remaining = new_remaining;
         remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let result = RequestError { bad_value, minor_opcode, major_opcode };
+        let result = RequestError { response_type, error_code, sequence, bad_value, minor_opcode, major_opcode };
         Ok((result, remaining))
+    }
+}
+impl TryFrom<&Buffer> for RequestError {
+    type Error = ParseError;
+    fn try_from(value: &Buffer) -> Result<Self, Self::Error> {
+        Self::try_from(&**value)
     }
 }
 impl TryFrom<Buffer> for RequestError {
@@ -594,16 +665,38 @@ impl TryFrom<Buffer> for RequestError {
         Self::try_from(&*value)
     }
 }
-impl TryFrom<X11GenericError> for RequestError {
-    type Error = ParseError;
-    fn try_from(value: X11GenericError) -> Result<Self, Self::Error> {
-        Self::try_from(Into::<Buffer>::into(value))
-    }
-}
 impl TryFrom<&[u8]> for RequestError {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl From<X11GenericError> for RequestError {
+    fn from(value: X11GenericError) -> Self {
+        Self::try_from(Into::<Buffer>::into(value)).expect("Buffer should be large enough so that parsing cannot fail")
+    }
+}
+impl From<&X11GenericError> for RequestError {
+    fn from(value: &X11GenericError) -> Self {
+        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+    }
+}
+impl Into<[u8; 32]> for &RequestError {
+    fn into(self) -> [u8; 32] {
+        let sequence = self.sequence.to_ne_bytes();
+        let bad_value = self.bad_value.to_ne_bytes();
+        let minor_opcode = self.minor_opcode.to_ne_bytes();
+        [
+            self.response_type, self.error_code, sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
+            minor_opcode[0], minor_opcode[1], self.major_opcode, 0, /* trailing padding */ 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0
+        ]
+    }
+}
+impl Into<[u8; 32]> for RequestError {
+    fn into(self) -> [u8; 32] {
+        (&self).into()
     }
 }
 ```
@@ -627,22 +720,24 @@ impl<C: X11Connection + ?Sized> ConnectionExt for C {}
 ```
 This code is generated in the module:
 ```rust
+/// Opcode for the NoOperation request
 pub const NO_OPERATION_REQUEST: u8 = 127;
 ```
 And this code is in the extension trait:
 ```rust
-fn no_operation(&self) -> Result<SequenceNumber, ConnectionError>
+fn no_operation(&self) -> Result<VoidCookie<Self>, ConnectionError>
 {
-    let length: usize = (4 + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length)?.to_ne_bytes();
+    let length: usize = (4) / 4;
+    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).to_ne_bytes();
     let request0 = [
         NO_OPERATION_REQUEST,
         0,
         length_bytes[0],
         length_bytes[1],
     ];
-    assert_eq!((*&request0).len(), (4 + 3) / 4 * 4);
-    Ok(self.send_request_without_reply(&[IoSlice::new(&request0)]))
+    let length_so_far = (&request0).len();
+    assert_eq!(length_so_far, length * 4);
+    Ok(self.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 ```
 
@@ -658,24 +753,37 @@ fn no_operation(&self) -> Result<SequenceNumber, ConnectionError>
 ```
 This code is generated in the module:
 ```rust
+/// Opcode for the GetInputFocus request
 pub const GET_INPUT_FOCUS_REQUEST: u8 = 43;
 #[derive(Debug, Clone, Copy)]
 pub struct GetInputFocusReply {
+    pub response_type: u8,
     pub revert_to: u8,
+    pub sequence: u16,
+    pub length: u32,
     pub focus: u32,
 }
-impl TryParse for GetInputFocusReply {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl GetInputFocusReply {
+    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let mut remaining = value;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (response_type, new_remaining) = u8::try_parse(remaining)?;
+        remaining = new_remaining;
         let (revert_to, new_remaining) = u8::try_parse(remaining)?;
         remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let (sequence, new_remaining) = u16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (length, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
         let (focus, new_remaining) = u32::try_parse(remaining)?;
         remaining = new_remaining;
-        let result = GetInputFocusReply { revert_to, focus };
+        let result = GetInputFocusReply { response_type, revert_to, sequence, length, focus };
         Ok((result, remaining))
+    }
+}
+impl TryFrom<&Buffer> for GetInputFocusReply {
+    type Error = ParseError;
+    fn try_from(value: &Buffer) -> Result<Self, Self::Error> {
+        Self::try_from(&**value)
     }
 }
 impl TryFrom<Buffer> for GetInputFocusReply {
@@ -695,16 +803,17 @@ And this code is in the extension trait:
 ```rust
 fn get_input_focus(&self) -> Result<Cookie<Self, GetInputFocusReply>, ConnectionError>
 {
-    let length: usize = (4 + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length)?.to_ne_bytes();
+    let length: usize = (4) / 4;
+    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).to_ne_bytes();
     let request0 = [
         GET_INPUT_FOCUS_REQUEST,
         0,
         length_bytes[0],
         length_bytes[1],
     ];
-    assert_eq!((*&request0).len(), (4 + 3) / 4 * 4);
-    Ok(self.send_request_with_reply(&[IoSlice::new(&request0)]))
+    let length_so_far = (&request0).len();
+    assert_eq!(length_so_far, length * 4);
+    Ok(self.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 ```
 
@@ -755,7 +864,9 @@ generated.
 ```
 This code is generated in the module:
 ```rust
+/// Opcode for the ConfigureWindow request
 pub const CONFIGURE_WINDOW_REQUEST: u8 = 12;
+/// Auxiliary and optional information for the configure_window function.
 #[derive(Debug, Clone, Copy, Default)]
 pub struct ConfigureWindowAux {
     x: RustOption<i32>,
@@ -767,6 +878,7 @@ pub struct ConfigureWindowAux {
     stack_mode: RustOption<u32>,
 }
 impl ConfigureWindowAux {
+    /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
         Default::default()
     }
@@ -845,30 +957,37 @@ impl ConfigureWindowAux {
         }
         mask
     }
+    /// Set the x field of this structure.
     pub fn x<I>(mut self, value: I) -> Self where I: Into<RustOption<i32>> {
         self.x = value.into();
         self
     }
+    /// Set the y field of this structure.
     pub fn y<I>(mut self, value: I) -> Self where I: Into<RustOption<i32>> {
         self.y = value.into();
         self
     }
+    /// Set the width field of this structure.
     pub fn width<I>(mut self, value: I) -> Self where I: Into<RustOption<u32>> {
         self.width = value.into();
         self
     }
+    /// Set the height field of this structure.
     pub fn height<I>(mut self, value: I) -> Self where I: Into<RustOption<u32>> {
         self.height = value.into();
         self
     }
+    /// Set the border_width field of this structure.
     pub fn border_width<I>(mut self, value: I) -> Self where I: Into<RustOption<u32>> {
         self.border_width = value.into();
         self
     }
+    /// Set the sibling field of this structure.
     pub fn sibling<I>(mut self, value: I) -> Self where I: Into<RustOption<u32>> {
         self.sibling = value.into();
         self
     }
+    /// Set the stack_mode field of this structure.
     pub fn stack_mode<I>(mut self, value: I) -> Self where I: Into<RustOption<u32>> {
         self.stack_mode = value.into();
         self
@@ -877,11 +996,12 @@ impl ConfigureWindowAux {
 ```
 And this code is in the extension trait:
 ```rust
-fn configure_window(&self, window: u32, value_list: &ConfigureWindowAux) -> Result<SequenceNumber, ConnectionError>
+/// [SNIP]
+fn configure_window(&self, window: u32, value_list: &ConfigureWindowAux) -> Result<VoidCookie<Self>, ConnectionError>
 {
     let value_mask = value_list.value_mask();
     let length: usize = (12 + value_list.wire_length() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length)?.to_ne_bytes();
+    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).to_ne_bytes();
     let window_bytes = window.to_ne_bytes();
     let value_mask_bytes = value_mask.to_ne_bytes();
     let value_list_bytes = value_list.to_ne_bytes();
@@ -899,7 +1019,11 @@ fn configure_window(&self, window: u32, value_list: &ConfigureWindowAux) -> Resu
         0,
         0,
     ];
-    assert_eq!((*&request0).len() + (*&value_list_bytes).len(), (12 + value_list.wire_length() + 3) / 4 * 4);
-    Ok(self.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes)]))
+    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&value_list_bytes).len();
+    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding1).len();
+    assert_eq!(length_so_far, length * 4);
+    Ok(self.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding1)], Vec::new())?)
 }
 ```
