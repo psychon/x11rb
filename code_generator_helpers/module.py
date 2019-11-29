@@ -163,7 +163,7 @@ class Module(object):
         self.out("#[allow(unused_imports)]")
         self.out("use crate::utils::{Buffer, RawFdContainer};")
         self.out("#[allow(unused_imports)]")
-        self.out("use crate::x11_utils::{GenericEvent as X11GenericEvent, GenericError as X11GenericError};")
+        self.out("use crate::x11_utils::{GenericEvent as X11GenericEvent, GenericError as X11GenericError, Event as _};")
         self.out("use crate::x11_utils::TryParse;")
         self.out("#[allow(unused_imports)]")
         self.out("use crate::connection::{Cookie, CookieWithFds, VoidCookie, Connection as X11Connection};")
@@ -850,6 +850,13 @@ class Module(object):
                             ".expect(\"Buffer should be large enough so that parsing cannot fail\")")
             self.out("}")
         self.out("}")
+        self.out("impl From<&%s> for %s%s {", from_generic_type, self._name(name), extra_name)
+        with Indent(self.out):
+            self.out("fn from(value: &%s) -> Self {", from_generic_type)
+            self.out.indent("Self::try_from(value.raw_bytes())" +
+                            ".expect(\"Buffer should be large enough so that parsing cannot fail\")")
+            self.out("}")
+        self.out("}")
 
     def _emit_serialise(self, obj, name, extra_name):
         # Emit code for serialising an event or an error into an [u8; 32]
@@ -1065,7 +1072,7 @@ class Module(object):
         if has_fds:
             value = "(Buffer, Vec<RawFdContainer>)"
         else:
-            value = "Buffer"
+            value = "&Buffer"
         self.out("impl TryFrom<%s> for %s%s {", value, name_transform(self._name(name)), extra_name)
         with Indent(self.out):
             self.out("type Error = ParseError;")
@@ -1073,9 +1080,18 @@ class Module(object):
             if has_fds:
                 self.out.indent("Self::try_from((&*value.0, value.1))")
             else:
-                self.out.indent("Self::try_from(&*value)")
+                self.out.indent("Self::try_from(&**value)")
             self.out("}")
         self.out("}")
+
+        if not has_fds:
+            self.out("impl TryFrom<Buffer> for %s%s {", name_transform(self._name(name)), extra_name)
+            with Indent(self.out):
+                self.out("type Error = ParseError;")
+                self.out("fn try_from(value: Buffer) -> Result<Self, Self::Error> {")
+                self.out.indent("Self::try_from(&*value)")
+                self.out("}")
+            self.out("}")
 
         if has_fds:
             value = "(&[u8], Vec<RawFdContainer>)"
