@@ -3,7 +3,6 @@
 
 extern crate x11rb;
 
-use std::convert::TryFrom;
 use std::process::exit;
 use std::collections::HashSet;
 
@@ -11,8 +10,7 @@ use x11rb::xcb_ffi::XCBConnection;
 use x11rb::connection::Connection;
 use x11rb::generated::xproto::*;
 use x11rb::errors::ConnectionErrorOrX11Error;
-use x11rb::x11_utils::{GenericError, GenericEvent, Event};
-use x11rb::wrapper::ConnectionExt as _;
+use x11rb::x11_utils::{GenericEvent, Event};
 
 const TITLEBAR_HEIGHT: u16 = 20;
 
@@ -268,15 +266,11 @@ impl<'a, C: Connection> WMState<'a, C> {
 
 fn become_wm<C: Connection>(conn: &C, screen: &Screen) -> Result<(), ConnectionErrorOrX11Error>
 {
+    // Try to become the window manager. This causes an error if there is already another WM.
     let change = ChangeWindowAttributesAux::default()
         .event_mask(EventMask::SubstructureRedirect | EventMask::SubstructureNotify | EventMask::EnterWindow);
-    // FIXME: This would need checked requests: https://github.com/psychon/x11rb/issues/3
-    // Now... work around this. We want to check if there were errors in response to the
-    // change_window_attributes() request. Instead, we just check for any errors.
-    conn.change_window_attributes(screen.root, &change)?;
-    conn.sync()?;
-    if let Some(event) = conn.poll_for_event()? {
-        let error = GenericError::try_from(event).expect("Got an unexpected event?!?");
+    let error = conn.change_window_attributes(screen.root, &change)?.check()?;
+    if let Some(error) = error {
         if error.error_code() == ACCESS_ERROR {
             eprintln!("Another WM is already running.");
             exit(1);
