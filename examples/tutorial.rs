@@ -1348,8 +1348,9 @@ fn example_assign_font<C: Connection>(conn: &C, screen: &Screen, window: WINDOW,
 //
 // This example draw a text at 10 pixels (for the base line) of the bottom of a window. Pressing
 // the Esc key exits the program.
-
-// FIXME: This whole example uses checked requests in the original
+//
+// (This whole example uses checked requests in the original, but that does not really seem useful
+// to me, so I changed it.)
 
 fn text_draw<C: Connection>(conn: &C, screen: &Screen, window: WINDOW, x1: i16, y1: i16, label: &str)
 -> Result<(), ConnectionErrorOrX11Error>
