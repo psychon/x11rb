@@ -12,6 +12,7 @@ use x11rb::connection::Connection;
 use x11rb::generated::xproto::ConnectionExt;
 use x11rb::errors::ConnectionErrorOrX11Error;
 use x11rb::x11_utils::Event;
+use x11rb::wrapper::ConnectionExt as _;
 
 const INVALID_WINDOW: u32 = 0;
 
@@ -60,8 +61,7 @@ fn main() -> Result<(), ConnectionErrorOrX11Error> {
     //   std::mem::drop(conn.destroy_window(INVALID_WINDOW)?);
 
     // Synchronise with the server so that all errors are already received.
-    // FIXME: Add a wrapper to simplify this.
-    conn.get_input_focus()?.reply()?;
+    conn.sync()?;
 
     // Now check if the things above really caused errors. This is the part that is supposed to
     // turn this example into a (bad) integration test.

@@ -430,9 +430,11 @@ fn example4() -> Result<(), ConnectionErrorOrX11Error> {
 // }
 //
 // This function flushes all pending requests to the X server (much like the fflush() function is
-// used to flush standard output). The second function is xcb_aux_sync():
+// used to flush standard output). The second function is xcb_aux_sync() / sync():
 //
-//  FIXME There is no xcb_aux_sync() equivalent yet. However, it is just get_input_focus(&conn)?.reply();
+// trait ConnectionExt {
+//     fn sync(&self) -> Result<(), ConnectionErrorOrX11Error>;
+// }
 //
 // This functions also flushes all pending requests to the X server, and then waits until the X
 // server finishing processing these requests. In a normal program, this will not be necessary
