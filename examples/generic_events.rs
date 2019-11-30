@@ -32,7 +32,7 @@ fn main() -> Result<(), ConnectionErrorOrX11Error>
 
     // Ask for present ConfigureNotify events
     let event_id = conn.generate_id();
-    present::ConnectionExt::select_input(&conn, event_id, win_id, present::EventMask::ConfigureNotify.into())?;
+    present::select_input(&conn, event_id, win_id, present::EventMask::ConfigureNotify.into())?;
 
     // Cause an event
     conn.configure_window(win_id, &ConfigureWindowAux::new().width(20))?;
