@@ -823,15 +823,12 @@ class Module(object):
     def event(self, event, name):
         self.emit_opcode(name, 'Event', event.opcodes[name])
         _emit_doc(self.out, event.doc)
-        if event.is_ge_event:
-            self.out("#[derive(Debug, Clone, Copy)]")
-            self.out("pub struct %sEvent {", self._name(name))
-            self.out.indent("pub generic_events_are_currently_not_supported: bool")
-            self.out("}")
-        else:
-            self.complex_type(event, name, 'Event', False)
+        self.complex_type(event, name, 'Event', False)
+        if not event.is_ge_event:
             self._emit_from_generic(name, 'X11GenericEvent', 'Event')
             self._emit_serialise(event, name, 'Event')
+        else:
+            self._emit_tryfrom_generic(name, 'X11GenericEvent', 'Event')
         self.out("")
 
     def error(self, error, name):
@@ -855,6 +852,22 @@ class Module(object):
             self.out("fn from(value: &%s) -> Self {", from_generic_type)
             self.out.indent("Self::try_from(value.raw_bytes())" +
                             ".expect(\"Buffer should be large enough so that parsing cannot fail\")")
+            self.out("}")
+        self.out("}")
+
+    def _emit_tryfrom_generic(self, name, from_generic_type, extra_name):
+        self.out("impl TryFrom<%s> for %s%s {", from_generic_type, self._name(name), extra_name)
+        with Indent(self.out):
+            self.out("type Error = ParseError;")
+            self.out("fn try_from(value: %s) -> Result<Self, Self::Error> {", from_generic_type)
+            self.out.indent("Self::try_from(Into::<Buffer>::into(value))")
+            self.out("}")
+        self.out("}")
+        self.out("impl TryFrom<&%s> for %s%s {", from_generic_type, self._name(name), extra_name)
+        with Indent(self.out):
+            self.out("type Error = ParseError;")
+            self.out("fn try_from(value: &%s) -> Result<Self, Self::Error> {", from_generic_type)
+            self.out.indent("Self::try_from(value.raw_bytes())")
             self.out("}")
         self.out("}")
 
@@ -968,9 +981,15 @@ class Module(object):
                     if hasattr(field.type.member, "extra_try_parse_args"):
                         try_parse_args += field.type.member.extra_try_parse_args
 
-                self.out("let list_length = %s;", self.expr_to_str(field.type.expr, 'usize'))
-                self.out("let mut %s = Vec::with_capacity(list_length);", field_name)
-                self.out("for _ in 0..list_length {")
+                if field.type.expr.op != 'calculate_len':
+                    self.out("let list_length = %s;", self.expr_to_str(field.type.expr, 'usize'))
+                    self.out("let mut %s = Vec::with_capacity(list_length);", field_name)
+                    self.out("for _ in 0..list_length {")
+                else:
+                    self.out("// Length is 'everything left in the input'")
+                    self.out("let mut %s = Vec::new();", field_name)
+                    self.out("while remaining.len() != 0 {")
+
                 with Indent(self.out):
                     self.out("let (v, new_remaining) = %s::try_parse(%s)?;", rust_type, ", ".join(try_parse_args))
                     self.out("%s.push(v);", field_name)
