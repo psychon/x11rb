@@ -472,12 +472,9 @@ class Module(object):
         # We need a lifetime if there are more than one references in the
         # arguments. Right now that means: Any lists?
         need_lifetime = any(field.type.is_list for field in obj.fields)
-        if need_lifetime:
-            generics = ["'c"]
-            args = ["&'c self"]
-        else:
-            generics = []
-            args = ["&self"]
+        generics = []
+        args = ["overwritten-later"]
+        arg_names = ["self"]
         # list of "where" conditions to add to the prototype
         where = []
 
@@ -508,6 +505,7 @@ class Module(object):
                 if name == ('xcb', 'InternAtom') and field.field_name == 'only_if_exists':
                     rust_type = 'bool'
                 args.append("%s: %s" % (self._to_rust_variable(field.field_name), rust_type))
+                arg_names.append(self._to_rust_variable(field.field_name))
                 if field.isfd:
                     fds.append("%s.into()" % self._to_rust_variable(field.field_name))
                     if field.type.is_list:
@@ -516,38 +514,67 @@ class Module(object):
         # Figure out the return type of the request function
         if is_list_fonts_with_info:
             assert need_lifetime
-            result_type = "ListFontsWithInfoCookie<'c, Self>"
+            result_type_trait = "ListFontsWithInfoCookie<'c, Self>"
+            result_type_func = "ListFontsWithInfoCookie<'c, Conn>"
         elif obj.reply:
             if any(field.isfd for field in obj.reply.fields):
                 cookie = "CookieWithFds"
             else:
                 cookie = "Cookie"
             if need_lifetime:
-                result_type = "%s<'c, Self, %sReply>" % (cookie, self._name(name))
+                result_type_trait = "%s<'c, Self, %sReply>" % (cookie, self._name(name))
+                result_type_func = "%s<'c, Conn, %sReply>" % (cookie, self._name(name))
             else:
-                result_type = "%s<Self, %sReply>" % (cookie, self._name(name))
+                result_type_trait = "%s<Self, %sReply>" % (cookie, self._name(name))
+                result_type_func = "%s<Conn, %sReply>" % (cookie, self._name(name))
         else:
             if need_lifetime:
-                result_type = "VoidCookie<'c, Self>"
+                result_type_trait = "VoidCookie<'c, Self>"
             else:
-                result_type = "VoidCookie<Self>"
+                result_type_trait = "VoidCookie<Self>"
+            result_type_func = "VoidCookie<'c, Conn>"
 
-        if generics:
-            generics = "<%s>" % ", ".join(generics)
+        # Finally: Actually emit the function prototype.
+        if need_lifetime:
+            prefix_generics = ["'c"]
         else:
-            generics = ""
+            prefix_generics = []
 
-        # Finally: Actually emit the function prototype
+        # First for the trait, this just calls the global function
+        if need_lifetime:
+            args[0] = "&'c self"
+        else:
+            args[0] = "&self"
+        if prefix_generics or generics:
+            generics_str = "<%s>" % ", ".join(prefix_generics + generics)
+        else:
+            generics_str = ""
+
         _emit_doc(self.trait_out, obj.doc)
-        self.trait_out("fn %s%s(%s) -> Result<%s, ConnectionError>", function_name, generics, ", ".join(args), result_type)
+        self.trait_out("fn %s%s(%s) -> Result<%s, ConnectionError>", function_name,
+                       generics_str, ", ".join(args), result_type_trait)
         if where:
             self.trait_out("where %s", ", ".join(where))
         self.trait_out("{")
-        with Indent(self.trait_out):
+        if function_name in arg_names:
+            self.trait_out.indent("self::%s(%s)", function_name, ", ".join(arg_names))
+        else:
+            self.trait_out.indent("%s(%s)", function_name, ", ".join(arg_names))
+        self.trait_out("}")
+        self.trait_out("")
 
+        # Then emit the global function that actually does all the work
+        args[0] = "conn: &'c Conn"
+        generics_str = "<%s>" % ", ".join(["'c", "Conn"] + generics)
+        _emit_doc(self.out, obj.doc)
+        self.out("pub fn %s%s(%s) -> Result<%s, ConnectionError>", function_name, generics_str, ", ".join(args), result_type_func)
+        prefix_where = ['Conn: X11Connection']
+        self.out("where %s", ", ".join(prefix_where + where))
+        self.out("{")
+        with Indent(self.out):
             if self.namespace.is_ext:
-                self.trait_out('let extension_information = self.extension_information("%s")' % self.namespace.ext_xname)
-                self.trait_out.indent(".ok_or(ConnectionError::UnsupportedExtension)?;")
+                self.out('let extension_information = conn.extension_information("%s")' % self.namespace.ext_xname)
+                self.out.indent(".ok_or(ConnectionError::UnsupportedExtension)?;")
 
             # Now generate code for serialising the request. The request bytes
             # will be collected in a number of arrays. Some of them are
@@ -564,8 +591,8 @@ class Module(object):
                     add = "length_so_far + "
                 else:
                     add = ""
-                self.trait_out("let length_so_far = %s(%s).len();",
-                               add, part)
+                self.out("let length_so_far = %s(%s).len();",
+                         add, part)
                 requests.append(part)
 
             # This function adds the current 'request' to the list of 'requests'
@@ -573,10 +600,10 @@ class Module(object):
                 if not request:
                     return
 
-                self.trait_out("let request%d = [", len(requests))
+                self.out("let request%d = [", len(requests))
                 for byte in request:
-                    self.trait_out.indent("%s,", byte)
-                self.trait_out("];")
+                    self.out.indent("%s,", byte)
+                self.out("];")
                 _emit_add_to_requests("&request%d" % len(requests))
                 del request[:]
 
@@ -584,13 +611,13 @@ class Module(object):
             def _emit_byte_conversion(field):
                 field_name = field.field_name
                 if field.type.size is not None:
-                    self.trait_out("let mut %s_bytes = Vec::with_capacity(%s * %s.len());",
-                                   field_name, field.type.size, field_name)
+                    self.out("let mut %s_bytes = Vec::with_capacity(%s * %s.len());",
+                             field_name, field.type.size, field_name)
                 else:
-                    self.trait_out("let mut %s_bytes = Vec::new();", field_name)
-                self.trait_out("for value in %s {", field_name)
-                self.trait_out.indent("%s_bytes.extend(value.to_ne_bytes().iter());", field_name)
-                self.trait_out("}")
+                    self.out("let mut %s_bytes = Vec::new();", field_name)
+                self.out("for value in %s {", field_name)
+                self.out.indent("%s_bytes.extend(value.to_ne_bytes().iter());", field_name)
+                self.out("}")
 
             pad_count = []
 
@@ -599,8 +626,8 @@ class Module(object):
                 _emit_request()
 
                 pad_count.append('')
-                self.trait_out("let padding%s = &[0; %d][..(%d - (length_so_far %% %d)) %% %d];",
-                               len(pad_count), align - 1, align, align, align)
+                self.out("let padding%s = &[0; %d][..(%d - (length_so_far %% %d)) %% %d];",
+                         len(pad_count), align - 1, align, align, align)
                 _emit_add_to_requests("&padding%s" % len(pad_count))
 
             # Get the length of all fixed-length parts of the request
@@ -644,11 +671,11 @@ class Module(object):
                     # Variable sized element. Only example seems to be RandR's
                     # SetMonitor request. MonitorInfo contains a list.
                     assert field.type.nmemb is not None
-                    self.trait_out("let %s_bytes = %s.to_ne_bytes();", field.field_name, field.field_name)
+                    self.out("let %s_bytes = %s.to_ne_bytes();", field.field_name, field.field_name)
                     request_length.append("%s_bytes.len()" % field.field_name)
                 if hasattr(field, 'lenfield_for_switch'):
                     # This our special Aux-argument that represents a <switch>
-                    self.trait_out("let %s = %s.value_mask();", field.field_name, field.lenfield_for_switch.field_name)
+                    self.out("let %s = %s.value_mask();", field.field_name, field.lenfield_for_switch.field_name)
                     request_length.append("%s.wire_length()" % field.lenfield_for_switch.field_name)
             request_length = " + ".join(request_length)
 
@@ -659,7 +686,7 @@ class Module(object):
 
             # The "length" variable contains the request length in four byte
             # quantities. This rounds up to a multiple of four, because we
-            self.trait_out("let length: usize = (%s) / 4;", request_length)
+            self.out("let length: usize = (%s) / 4;", request_length)
 
             # Now construct the actual request bytes
             for field in obj.fields:
@@ -685,17 +712,17 @@ class Module(object):
                             other_field = [f for f in obj.fields if e.lenfield_name == f.field_name]
                             assert len(other_field) == 1
                             other_field = other_field[0]
-                            self.trait_out("let %s: %s = %s.len().try_into()?;",
-                                           other_field.field_name, self._to_rust_type(other_field.type.name),
-                                           other_field.is_length_field_for.field_name)
+                            self.out("let %s: %s = %s.len().try_into()?;",
+                                     other_field.field_name, self._to_rust_type(other_field.type.name),
+                                     other_field.is_length_field_for.field_name)
                             return e.lenfield_name
 
                     # First compute the expression in its actual type, then
                     # convert it to bytes, then append the bytes to request
-                    self.trait_out("let %s: %s = (%s).try_into().unwrap();", field_name,
-                                   self._to_rust_type(field.type.name), expr_to_str_and_emit(field.type.expr))
-                    self.trait_out("let %s_bytes = %s.to_ne_bytes();", field_name,
-                                   rust_variable)
+                    self.out("let %s: %s = (%s).try_into().unwrap();", field_name,
+                             self._to_rust_type(field.type.name), expr_to_str_and_emit(field.type.expr))
+                    self.out("let %s_bytes = %s.to_ne_bytes();", field_name,
+                             rust_variable)
                     for i in range(field.type.size):
                         request.append("%s_bytes[%d]" % (field_name, i))
                 elif field.type.is_pad:
@@ -713,14 +740,14 @@ class Module(object):
                     # We faked the type of SendEvent's event argument before,
                     # now we have to convert it for the following code
                     if name == ('xcb', 'SendEvent') and field_name == 'event':
-                        self.trait_out("let %s = %s.into();", field_name, field_name)
-                        self.trait_out("let %s = &%s;", field_name, field_name)
+                        self.out("let %s = %s.into();", field_name, field_name)
+                        self.out("let %s = &%s;", field_name, field_name)
 
                     # Lists without a "simple" length field or with a fixed size
                     # could be passed incorrectly be the caller; check this.
                     if not (hasattr(field, "has_length_field") or field.type.fixed_size()):
-                        self.trait_out("assert_eq!(%s.len(), %s, \"Argument %s has an incorrect length\");",
-                                       rust_variable, self.expr_to_str(field.type.expr, "usize"), field_name)
+                        self.out("assert_eq!(%s.len(), %s, \"Argument %s has an incorrect length\");",
+                                 rust_variable, self.expr_to_str(field.type.expr, "usize"), field_name)
                     if field.type.size == 1:
                         # This list has u8 entries, we can avoid a copy
                         _emit_request()
@@ -736,20 +763,20 @@ class Module(object):
                     if hasattr(field, "is_length_field_for"):
                         # This is a length field for some list, get the length.
                         # (Needed because this is not a function argument)
-                        self.trait_out("let %s: %s = %s.len().try_into()?;", rust_variable,
-                                       self._to_rust_type(field.type.name),
-                                       self._to_rust_variable(field.is_length_field_for.field_name))
+                        self.out("let %s: %s = %s.len().try_into()?;", rust_variable,
+                                 self._to_rust_type(field.type.name),
+                                 self._to_rust_variable(field.is_length_field_for.field_name))
                     if field.enum is not None:
                         # This is a generic parameter, call Into::into
-                        self.trait_out("let %s = %s.into();", field_name, field_name)
+                        self.out("let %s = %s.into();", field_name, field_name)
                     field_bytes = self._to_rust_variable(field_name + "_bytes")
                     if field.type.name == ('float',):
                         # FIXME: Switch to a trait that we can implement on f32
-                        self.trait_out("let %s = %s.to_bits().to_ne_bytes();", field_bytes, rust_variable)
+                        self.out("let %s = %s.to_bits().to_ne_bytes();", field_bytes, rust_variable)
                     elif field.type.size is not None:  # Size None was already handled above
                         if (name == ('xcb', 'InternAtom') and field_name == 'only_if_exists'):
                             # We faked a bool argument, convert to u8
-                            self.trait_out("let %s = %s as %s;", field_name, field_name, self._to_rust_type(field.type.name))
+                            self.out("let %s = %s as %s;", field_name, field_name, self._to_rust_type(field.type.name))
                         if field_name == "length":
                             # This is the request length which we explicitly
                             # calculated above. If it does not fit into u16,
@@ -757,7 +784,7 @@ class Module(object):
                             source = "TryInto::<%s>::try_into(length).unwrap_or(0)" % self._to_rust_type(field.type.name)
                         else:
                             source = rust_variable
-                        self.trait_out("let %s = %s.to_ne_bytes();", field_bytes, source)
+                        self.out("let %s = %s.to_ne_bytes();", field_bytes, source)
                     if field.type.is_switch or field.type.size is None:
                         # We have a byte array that we can directly send
                         _emit_request()
@@ -781,7 +808,7 @@ class Module(object):
 
             # Emit an assert that checks that the sum of all the byte arrays in
             # 'requests' is the same as our computed length field
-            self.trait_out("assert_eq!(length_so_far, length * 4);")
+            self.out("assert_eq!(length_so_far, length * 4);")
 
             # Now we actually send the request
 
@@ -789,7 +816,7 @@ class Module(object):
 
             if fds:
                 if not fds_is_list:
-                    self.trait_out("let fds = vec!(%s);", ", ".join(fds))
+                    self.out("let fds = vec!(%s);", ", ".join(fds))
                     fds = "fds"
                 else:
                     # There may (currently) be only a single list of FDs
@@ -799,16 +826,15 @@ class Module(object):
 
             if is_list_fonts_with_info:
                 assert obj.reply
-                self.trait_out("Ok(ListFontsWithInfoCookie::new(self.send_request_with_reply(&[%s], %s)?))", slices, fds)
+                self.out("Ok(ListFontsWithInfoCookie::new(conn.send_request_with_reply(&[%s], %s)?))", slices, fds)
             elif obj.reply:
                 if any(field.isfd for field in obj.reply.fields):
-                    self.trait_out("Ok(self.send_request_with_reply_with_fds(&[%s], %s)?)", slices, fds)
+                    self.out("Ok(conn.send_request_with_reply_with_fds(&[%s], %s)?)", slices, fds)
                 else:
-                    self.trait_out("Ok(self.send_request_with_reply(&[%s], %s)?)", slices, fds)
+                    self.out("Ok(conn.send_request_with_reply(&[%s], %s)?)", slices, fds)
             else:
-                self.trait_out("Ok(self.send_request_without_reply(&[%s], %s)?)", slices, fds)
-        self.trait_out("}")
-        self.trait_out("")
+                self.out("Ok(conn.send_request_without_reply(&[%s], %s)?)", slices, fds)
+        self.out("}")
 
         if obj.reply:
             _emit_doc(self.out, obj.reply.doc)
