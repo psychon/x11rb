@@ -9,7 +9,7 @@ use std::ops::Deref;
 use std::os::unix::io::{AsRawFd, RawFd};
 use libc::c_void;
 use crate::utils::{CSlice, Buffer, RawFdContainer};
-use crate::x11_utils::{GenericError, GenericEvent, Event};
+use crate::x11_utils::{GenericError, GenericEvent};
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 use crate::connection::{Connection, VoidCookie, Cookie, CookieWithFds, SequenceNumber, ExtensionInformation, RequestKind, DiscardMode};
 use super::generated::xproto::{Setup, QueryExtensionReply};
@@ -268,6 +268,19 @@ impl XCBConnection {
     unsafe fn wrap_error(error: *const u8) -> Buffer {
          Buffer::from_raw_parts(error, 32)
     }
+
+    unsafe fn wrap_event(event: *const u8) -> Result<GenericEvent, ParseError> {
+        let mut length = 32;
+        // The first byte contains the event type, check for XGE events
+        if (*event & 0x7f) == super::generated::xproto::GE_GENERIC_EVENT {
+            // Read the length field of the event to get its length
+            let slice = std::slice::from_raw_parts(event, 8);
+            let length_field = u32::from_ne_bytes([slice[4], slice[5], slice[6], slice[7]]);
+            let length_field: usize = length_field.try_into()?;
+            length += length_field * 4;
+        }
+        Ok(Buffer::from_raw_parts(event, length).try_into()?)
+    }
 }
 
 impl Connection for XCBConnection {
@@ -344,7 +357,7 @@ impl Connection for XCBConnection {
         if error == null_mut() {
             Ok(None)
         } else {
-            unsafe { Ok(Some(Buffer::from_raw_parts(error as _, 32).try_into()?)) }
+            unsafe { Ok(Some(XCBConnection::wrap_error(error as _).try_into()?)) }
         }
     }
 
@@ -382,9 +395,7 @@ impl Connection for XCBConnection {
             if event.is_null() {
                 return Err(Self::connection_error_from_connection((self.conn).0));
             }
-            let generic_event: GenericEvent = Buffer::from_raw_parts(event as _, 32).try_into()?;
-            assert_ne!(35, generic_event.response_type()); // FIXME: XGE events may have sizes > 32
-            Ok(generic_event)
+            Ok(XCBConnection::wrap_event(event as _)?)
         }
     }
 
@@ -402,9 +413,7 @@ impl Connection for XCBConnection {
                     return Err(Self::connection_error_from_c_error(err));
                 }
             }
-            let generic_event: GenericEvent = Buffer::from_raw_parts(event as _, 32).try_into()?;
-            assert_ne!(35, generic_event.response_type()); // FIXME: XGE events may have sizes > 32
-            Ok(Some(generic_event))
+            Ok(Some(XCBConnection::wrap_event(event as _)?))
         }
     }
 
