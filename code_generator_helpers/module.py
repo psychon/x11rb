@@ -429,6 +429,34 @@ class Module(object):
             self.out("}")
         self.out("}")
 
+        # Check that all fields have different types
+        field_types = [field.type for field in union.fields]
+        assert len(field_types) == len(set(field_types))
+
+        for field in union.fields:
+            assert not field.isfd
+            rust_type = self._to_complex_rust_type(field, None, '')
+            self.out("impl From<%s> for %s {", rust_type, rust_name)
+            with Indent(self.out):
+                self.out("fn from(value: %s) -> Self {", rust_type)
+                if field.type.is_list:
+                    if field.type.name != ('uint8_t',):
+                        assert field.type.fixed_size()
+                        with Indent(self.out):
+                            for i in range(field.type.nmemb):
+                                self.out("let value%d = value[%d].to_ne_bytes();",
+                                         i, i)
+                            self.out("let value = [")
+                            for i in range(field.type.nmemb):
+                                for n in range(field.type.size):
+                                    self.out.indent("value%d[%d],", i, n)
+                            self.out("];")
+                    self.out.indent("Self(value.to_vec())")
+                else:
+                    self.out.indent("Self(value.to_ne_bytes().to_vec())")
+                self.out("}")
+            self.out("}")
+
         self.out("")
 
     def request(self, obj, name):
