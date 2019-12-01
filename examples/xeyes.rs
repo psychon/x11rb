@@ -3,7 +3,7 @@
 extern crate x11rb;
 
 use x11rb::xcb_ffi::XCBConnection;
-use x11rb::connection::Connection;
+use x11rb::connection::{RequestConnection as _, Connection};
 use x11rb::x11_utils::Event;
 use x11rb::generated::xproto::*;
 use x11rb::generated::shape::{self, ConnectionExt as _};

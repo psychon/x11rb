@@ -9,7 +9,7 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 
 use crate::utils::{Buffer, RawFdContainer};
-use crate::connection::{Connection, Cookie, CookieWithFds, VoidCookie, SequenceNumber, ExtensionInformation, RequestKind, DiscardMode};
+use crate::connection::{RequestConnection, Connection, Cookie, CookieWithFds, VoidCookie, SequenceNumber, ExtensionInformation, RequestKind, DiscardMode};
 use crate::generated::xproto::{Setup, SetupRequest, QueryExtensionReply};
 use crate::x11_utils::{GenericEvent, GenericError};
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
@@ -233,7 +233,7 @@ impl RustConnection {
     }
 }
 
-impl Connection for RustConnection {
+impl RequestConnection for RustConnection {
     fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<Cookie<Self, R>, ConnectionError>
         where R: TryFrom<Buffer, Error=ParseError>
     {
@@ -281,6 +281,12 @@ impl Connection for RustConnection {
         unimplemented!();
     }
 
+    fn maximum_request_bytes(&self) -> usize {
+        unimplemented!()
+    }
+}
+
+impl Connection for RustConnection {
     fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
         Ok(self.inner.borrow_mut().wait_for_event().map_err(|_| ConnectionError::UnknownError)?)
     }
@@ -299,9 +305,5 @@ impl Connection for RustConnection {
 
     fn generate_id(&self) -> u32 {
         self.inner.borrow_mut().generate_id()
-    }
-
-    fn maximum_request_bytes(&self) -> usize {
-        unimplemented!()
     }
 }
