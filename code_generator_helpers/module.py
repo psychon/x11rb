@@ -505,8 +505,8 @@ class Module(object):
         letters = iter(string.ascii_uppercase)
 
         # We need a lifetime if there are more than one references in the
-        # arguments. Right now that means: Any lists?
-        need_lifetime = any(field.type.is_list for field in obj.fields)
+        # arguments. Right now that means: Any lists? An aux argument?
+        need_lifetime = switches or any(field.type.is_list for field in obj.fields)
         generics = []
         args = ["overwritten-later"]
         arg_names = ["self"]
@@ -567,9 +567,10 @@ class Module(object):
         else:
             if need_lifetime:
                 result_type_trait = "VoidCookie<'c, Self>"
+                result_type_func = "VoidCookie<'c, Conn>"
             else:
                 result_type_trait = "VoidCookie<Self>"
-            result_type_func = "VoidCookie<'c, Conn>"
+                result_type_func = "VoidCookie<Conn>"
 
         # Finally: Actually emit the function prototype.
         if need_lifetime:
@@ -601,8 +602,13 @@ class Module(object):
         self.trait_out("")
 
         # Then emit the global function that actually does all the work
-        args[0] = "conn: &'c Conn"
-        generics_str = "<%s>" % ", ".join(["'c", "Conn"] + generics)
+        if need_lifetime:
+            args[0] = "conn: &'c Conn"
+            prefix_generics = ["'c", "Conn"]
+        else:
+            args[0] = "conn: &Conn"
+            prefix_generics = ["Conn"]
+        generics_str = "<%s>" % ", ".join(prefix_generics + generics)
         _emit_doc(self.out, obj.doc)
         self.out("pub fn %s%s(%s) -> Result<%s, ConnectionError>", function_name, generics_str, ", ".join(args), result_type_func)
         prefix_where = ['Conn: RequestConnection + ?Sized']
