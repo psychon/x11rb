@@ -323,7 +323,7 @@ impl RequestConnection for XCBConnection {
 
             // If both pointers are NULL, the xcb connection must be in an error state
             if reply.is_null() && error.is_null() {
-                Err(Self::connection_error_from_connection((self.conn).0))?
+                return Err(Self::connection_error_from_connection((self.conn).0).into());
             }
 
             if !reply.is_null() {
