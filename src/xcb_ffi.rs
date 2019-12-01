@@ -67,8 +67,8 @@ mod pending_errors {
             }
 
             // Check if any of the still in-flight responses got a reply/error
-            while let Some(Reverse(seqno)) = inner.in_flight.peek() {
-                let result = match conn.poll_for_reply(*seqno) {
+            while let Some(&Reverse(seqno)) = inner.in_flight.peek() {
+                let result = match conn.poll_for_reply(seqno) {
                     Err(()) => {
                         // This request was not answered/errored yet, so later request will not
                         // have answers as well.
@@ -77,8 +77,6 @@ mod pending_errors {
                     Ok(reply) => reply
                 };
 
-                let seqno = *seqno;
-                std::mem::forget(seqno);
                 let seqno2 = inner.in_flight.pop();
                 assert_eq!(Some(Reverse(seqno)), seqno2);
 
@@ -366,9 +364,9 @@ impl RequestConnection for XCBConnection {
         let buffer = self.wait_for_reply_or_error(sequence)?;
 
         // Get a pointer to the array of integers where libxcb saved the FD numbers
-        let fd_ptr = match &buffer {
-            &Buffer::Vec(_) => unreachable!(), // wait_for_reply() always returns a CSlice
-            &Buffer::CSlice(ref slice) => {
+        let fd_ptr = match buffer {
+            Buffer::Vec(_) => unreachable!(), // wait_for_reply() always returns a CSlice
+            Buffer::CSlice(ref slice) => {
                 // libxcb saves the list of FDs after the data of the reply
                 (unsafe { slice.as_ptr().add(slice.len()) }) as *const RawFd
             }

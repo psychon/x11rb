@@ -154,6 +154,13 @@ class Module(object):
         self.trait_out = Output()
         self.namespace = outer_module.namespace
 
+        self.out("#![allow(clippy::unreadable_literal)]")
+        self.out("#![allow(clippy::too_many_arguments)]")
+        self.out("#![allow(clippy::needless_lifetimes)]")
+        self.out("#![allow(clippy::identity_op)]")
+        self.out("#![allow(clippy::trivially_copy_pass_by_ref)]")
+        self.out("#![allow(clippy::eq_op)]")
+        self.out("#![allow(clippy::erasing_op)]")
         self.out("use std::convert::TryFrom;")
         self.out("#[allow(unused_imports)]")
         self.out("use std::convert::TryInto;")
@@ -182,7 +189,7 @@ class Module(object):
         if self.namespace.is_ext:
             self.out("")
             self.out("/// The X11 name of the extension for QueryExtension")
-            self.out("pub const X11_EXTENSION_NAME: &'static str = \"%s\";", self.namespace.ext_xname)
+            self.out("pub const X11_EXTENSION_NAME: &str = \"%s\";", self.namespace.ext_xname)
         self.out("")
 
     def close(self, outer_module):
