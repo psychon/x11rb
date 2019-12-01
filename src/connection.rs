@@ -64,7 +64,7 @@ pub type SequenceNumber = u64;
 /// This trait only contains functions that are used by other parts of this library. This means
 /// that users of this library will most likely not need these functions, unless they want to
 /// implement their own X11 connection.
-pub trait RequestConnection: Sized {
+pub trait RequestConnection {
     /// Send a request with a reply to the server.
     ///
     /// The `bufs` parameter describes the raw bytes that should be sent. The returned cookie
@@ -373,14 +373,14 @@ pub enum DiscardMode {
 /// This `VoidCookie` can then later be used to check if the X11 server sent an error.
 #[derive(Debug)]
 pub struct VoidCookie<'a, C>
-where C: RequestConnection
+where C: RequestConnection + ?Sized
 {
     connection: &'a C,
     sequence_number: SequenceNumber,
 }
 
 impl<'a, C> VoidCookie<'a, C>
-where C: RequestConnection
+where C: RequestConnection + ?Sized
 {
     /// Construct a new cookie.
     ///
@@ -418,7 +418,7 @@ where C: RequestConnection
 }
 
 impl<C> Drop for VoidCookie<'_, C>
-where C: RequestConnection
+where C: RequestConnection + ?Sized
 {
     fn drop(&mut self) {
         self.connection.discard_reply(self.sequence_number, RequestKind::IsVoid, DiscardMode::DiscardReply)
@@ -428,14 +428,14 @@ where C: RequestConnection
 /// Internal helper for a cookie with an response
 #[derive(Debug)]
 struct RawCookie<'a, C>
-where C: RequestConnection
+where C: RequestConnection + ?Sized
 {
     connection: &'a C,
     sequence_number: SequenceNumber,
 }
 
 impl<C> RawCookie<'_, C>
-where C: RequestConnection
+where C: RequestConnection + ?Sized
 {
     /// Construct a new raw cookie.
     ///
@@ -458,7 +458,7 @@ where C: RequestConnection
 }
 
 impl<C> Drop for RawCookie<'_, C>
-where C: RequestConnection
+where C: RequestConnection + ?Sized
 {
     fn drop(&mut self) {
         self.connection.discard_reply(self.sequence_number, RequestKind::HasResponse, DiscardMode::DiscardReply);
@@ -471,7 +471,7 @@ where C: RequestConnection
 /// then later be used to get the response that the server sent.
 #[derive(Debug)]
 pub struct Cookie<'a, C, R>
-where C: RequestConnection
+where C: RequestConnection + ?Sized
 {
     raw_cookie: RawCookie<'a, C>,
     phantom: PhantomData<R>
@@ -479,7 +479,7 @@ where C: RequestConnection
 
 impl<C, R> Cookie<'_, C, R>
 where R: TryFrom<Buffer, Error=ParseError>,
-      C: RequestConnection
+      C: RequestConnection + ?Sized
 {
     /// Construct a new cookie.
     ///
@@ -539,7 +539,7 @@ where R: TryFrom<Buffer, Error=ParseError>,
 /// This variant of `Cookie` represents a response that can contain `RawFd`s.
 #[derive(Debug)]
 pub struct CookieWithFds<'a, C, R>
-where C: RequestConnection
+where C: RequestConnection + ?Sized
 {
     raw_cookie: RawCookie<'a, C>,
     phantom: PhantomData<R>
@@ -547,7 +547,7 @@ where C: RequestConnection
 
 impl<C, R> CookieWithFds<'_, C, R>
 where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>,
-      C: RequestConnection
+      C: RequestConnection + ?Sized
 {
     /// Construct a new cookie.
     ///
@@ -582,10 +582,10 @@ where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>,
 /// `ListFontsWithInfo` generated more than one reply, but `Cookie` only allows getting one reply.
 /// This structure implements `Iterator` and allows to get all the replies.
 #[derive(Debug)]
-pub struct ListFontsWithInfoCookie<'a, C: RequestConnection>(Option<RawCookie<'a, C>>);
+pub struct ListFontsWithInfoCookie<'a, C: RequestConnection + ?Sized>(Option<RawCookie<'a, C>>);
 
 impl<C> ListFontsWithInfoCookie<'_, C>
-where C: RequestConnection
+where C: RequestConnection + ?Sized
 {
     pub(crate) fn new(cookie: Cookie<C, ListFontsWithInfoReply>) -> ListFontsWithInfoCookie<C> {
         ListFontsWithInfoCookie(Some(cookie.raw_cookie))
@@ -598,7 +598,7 @@ where C: RequestConnection
 }
 
 impl<C> Iterator for ListFontsWithInfoCookie<'_, C>
-where C: RequestConnection
+where C: RequestConnection + ?Sized
 {
     type Item = Result<ListFontsWithInfoReply, ConnectionErrorOrX11Error>;
 
