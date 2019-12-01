@@ -542,9 +542,11 @@ class Module(object):
                 args.append("%s: %s" % (self._to_rust_variable(field.field_name), rust_type))
                 arg_names.append(self._to_rust_variable(field.field_name))
                 if field.isfd:
-                    fds.append("%s.into()" % self._to_rust_variable(field.field_name))
                     if field.type.is_list:
                         fds_is_list = True
+                        fds.append(self._to_rust_variable(field.field_name))
+                    else:
+                        fds.append("%s.into()" % self._to_rust_variable(field.field_name))
 
         # Figure out the return type of the request function
         if is_list_fonts_with_info:
@@ -1049,7 +1051,7 @@ class Module(object):
                 else:
                     self.out("// Length is 'everything left in the input'")
                     self.out("let mut %s = Vec::new();", field_name)
-                    self.out("while remaining.len() != 0 {")
+                    self.out("while !remaining.is_empty() {")
 
                 with Indent(self.out):
                     self.out("let (v, new_remaining) = %s::try_parse(%s)?;", rust_type, ", ".join(try_parse_args))
