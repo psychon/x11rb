@@ -254,7 +254,7 @@ class Module(object):
             with Indent(self.out):
                 self.out("fn into(self) -> %s {", larger_type)
                 with Indent(self.out):
-                    self.out("Into::<%s>::into(self) as _", to_type)
+                    self.out("Into::<%s>::into(self).into()", to_type)
                 self.out("}")
             self.out("}")
 

@@ -243,7 +243,7 @@ impl XCBConnection {
                 return Err(());
             }
             assert_eq!(found, 1);
-            match (reply == null_mut(), error == null_mut()) {
+            match (reply.is_null(), error.is_null()) {
                 (true, true) => Ok(None),
                 (true, false) => Ok(Some(XCBConnection::wrap_error(error as _))),
                 (false, true) => Ok(Some(XCBConnection::wrap_reply(reply as _))),
@@ -319,14 +319,14 @@ impl RequestConnection for XCBConnection {
             let reply = raw_ffi::xcb_wait_for_reply64((self.conn).0, sequence, &mut error);
 
             // At least one of these pointers must be NULL.
-            assert!(reply == null_mut() || error == null_mut());
+            assert!(reply.is_null() || error.is_null());
 
             // If both pointers are NULL, the xcb connection must be in an error state
-            if reply == null_mut() && error == null_mut() {
+            if reply.is_null() && error.is_null() {
                 Err(Self::connection_error_from_connection((self.conn).0))?
             }
 
-            if reply != null_mut() {
+            if !reply.is_null() {
                 Ok(XCBConnection::wrap_reply(reply as _))
             } else {
                 let error: GenericError = XCBConnection::wrap_error(error as _).try_into()?;
@@ -342,7 +342,7 @@ impl RequestConnection for XCBConnection {
             Err(err) => match err {
                 ConnectionError(err) => Err(err),
                 X11Error(err) => {
-                    self.errors.append_error(err.into());
+                    self.errors.append_error(err);
                     Ok(None)
                 }
             }
@@ -352,7 +352,7 @@ impl RequestConnection for XCBConnection {
     fn check_for_error(&self, sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError> {
         let cookie = raw_ffi::xcb_void_cookie_t { sequence: sequence as _ };
         let error = unsafe { raw_ffi::xcb_request_check((self.conn).0, cookie) };
-        if error == null_mut() {
+        if error.is_null() {
             Ok(None)
         } else {
             unsafe { Ok(Some(XCBConnection::wrap_error(error as _).try_into()?)) }
@@ -367,7 +367,9 @@ impl RequestConnection for XCBConnection {
         let fd_ptr = match buffer {
             Buffer::Vec(_) => unreachable!(), // wait_for_reply() always returns a CSlice
             Buffer::CSlice(ref slice) => {
-                // libxcb saves the list of FDs after the data of the reply
+                // libxcb saves the list of FDs after the data of the reply. Since the reply's
+                // length is encoded in "number of 4 bytes block", the following pointer is aligned
+                // correctly (if malloc() returned an alloced chunk, which it does).
                 (unsafe { slice.as_ptr().add(slice.len()) }) as *const RawFd
             }
         };

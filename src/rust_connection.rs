@@ -122,10 +122,10 @@ impl ConnectionInner {
         let number = u16::from_ne_bytes([buffer[2], buffer[3]]);
 
         // ...and use our state to reconstruct the high bytes
-        let high_bytes = self.last_sequence_read & !(u16::max_value() as SequenceNumber);
-        let mut full_number = (number as SequenceNumber) | high_bytes;
+        let high_bytes = self.last_sequence_read & !SequenceNumber::from(u16::max_value());
+        let mut full_number = SequenceNumber::from(number) | high_bytes;
         if full_number < self.last_sequence_read {
-            full_number += u16::max_value() as SequenceNumber + 1;
+            full_number += SequenceNumber::from(u16::max_value()) + 1;
         }
 
         // Update our state
