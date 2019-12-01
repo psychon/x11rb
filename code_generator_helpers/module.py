@@ -603,7 +603,7 @@ class Module(object):
         generics_str = "<%s>" % ", ".join(["'c", "Conn"] + generics)
         _emit_doc(self.out, obj.doc)
         self.out("pub fn %s%s(%s) -> Result<%s, ConnectionError>", function_name, generics_str, ", ".join(args), result_type_func)
-        prefix_where = ['Conn: RequestConnection']
+        prefix_where = ['Conn: RequestConnection + ?Sized']
         self.out("where %s", ", ".join(prefix_where + where))
         self.out("{")
         with Indent(self.out):
