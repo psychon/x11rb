@@ -166,7 +166,7 @@ class Module(object):
         self.out("use crate::x11_utils::{GenericEvent as X11GenericEvent, GenericError as X11GenericError, Event as _};")
         self.out("use crate::x11_utils::TryParse;")
         self.out("#[allow(unused_imports)]")
-        self.out("use crate::connection::{Cookie, CookieWithFds, VoidCookie, Connection as X11Connection};")
+        self.out("use crate::connection::{Cookie, CookieWithFds, VoidCookie, RequestConnection};")
         if not self.namespace.is_ext:
             self.out("use crate::connection::ListFontsWithInfoCookie;")
         self.out("use crate::errors::{ParseError, ConnectionError};")
@@ -187,11 +187,11 @@ class Module(object):
 
     def close(self, outer_module):
         self.out("/// Extension trait defining the requests of this extension.")
-        self.out("pub trait ConnectionExt: X11Connection {")
+        self.out("pub trait ConnectionExt: RequestConnection {")
         with Indent(self.out):
             self.out.copy_from(self.trait_out)
         self.out("}")
-        self.out("impl<C: X11Connection + ?Sized> ConnectionExt for C {}")
+        self.out("impl<C: RequestConnection + ?Sized> ConnectionExt for C {}")
 
     def enum(self, enum, name):
         rust_name = self._name(name)
@@ -596,7 +596,7 @@ class Module(object):
         generics_str = "<%s>" % ", ".join(["'c", "Conn"] + generics)
         _emit_doc(self.out, obj.doc)
         self.out("pub fn %s%s(%s) -> Result<%s, ConnectionError>", function_name, generics_str, ", ".join(args), result_type_func)
-        prefix_where = ['Conn: X11Connection']
+        prefix_where = ['Conn: RequestConnection']
         self.out("where %s", ", ".join(prefix_where + where))
         self.out("{")
         with Indent(self.out):

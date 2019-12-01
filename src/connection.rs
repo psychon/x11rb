@@ -59,8 +59,12 @@ use crate::generated::xproto::{Setup, ListFontsWithInfoReply, QueryExtensionRepl
 /// caused an error.
 pub type SequenceNumber = u64;
 
-/// A connection to an X11 server.
-pub trait Connection: Sized {
+/// A connection to an X11 server for sending requests.
+///
+/// This trait only contains functions that are used by other parts of this library. This means
+/// that users of this library will most likely not need these functions, unless they want to
+/// implement their own X11 connection.
+pub trait RequestConnection: Sized {
     /// Send a request with a reply to the server.
     ///
     /// The `bufs` parameter describes the raw bytes that should be sent. The returned cookie
@@ -177,33 +181,6 @@ pub trait Connection: Sized {
     /// Users of this library will most likely not want to use this function directly.
     fn check_for_error(&self, sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError>;
 
-    /// Wait for a new event from the X11 server.
-    fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError>;
-
-    /// Poll for a new event from the X11 server.
-    fn poll_for_event(&self) -> Result<Option<GenericEvent>, ConnectionError>;
-
-    /// Send all pending requests to the server.
-    ///
-    /// Implementations of this trait may buffer requests for batched sending. When this method is
-    /// called, all pending requests are sent.
-    ///
-    /// You do not have to call this method before `wait_for_reply()`. If the request you want to
-    /// wait for was not yet sent, it will be sent by `wait_for_reply()`.
-    fn flush(&self);
-
-    /// Get the setup information sent by the X11 server.
-    ///
-    /// The setup information contains X11 server, for example the window id of the root window.
-    fn setup(&self) -> &Setup;
-
-    /// Generate a new X11 identifier.
-    ///
-    /// This method can, for example, be used for creating a new window. First, this method is
-    /// called to generate an identifier. Next, `generated::xproto::create_window` can be called to
-    /// actually create the window.
-    fn generate_id(&self) -> u32;
-
     /// The maximum number of bytes that the X11 server accepts in a request.
     fn maximum_request_bytes(&self) -> usize;
 
@@ -225,13 +202,13 @@ pub trait Connection: Sized {
     /// ```
     /// use std::io::IoSlice;
     /// use std::convert::TryFrom;
-    /// use x11rb::connection::{Cookie, CookieWithFds, VoidCookie, Connection, SequenceNumber};
+    /// use x11rb::connection::{Cookie, CookieWithFds, VoidCookie, RequestConnection, SequenceNumber};
     /// use x11rb::errors::{ParseError, ConnectionError};
     /// use x11rb::utils::{Buffer, RawFdContainer};
     ///
     /// struct MyConnection();
     ///
-    /// impl Connection for MyConnection {
+    /// impl RequestConnection for MyConnection {
     ///     // [snip, other functions here]
     ///     # fn discard_reply(&self, sequence: SequenceNumber,
     ///     #                  kind: x11rb::connection::RequestKind,
@@ -256,22 +233,6 @@ pub trait Connection: Sized {
     ///     # }
     ///     # fn check_for_error(&self, sequence: SequenceNumber)
     ///     # ->Result<Option<x11rb::x11_utils::GenericError>, ConnectionError> {
-    ///     #    unimplemented!()
-    ///     # }
-    ///     # fn wait_for_event(&self) -> Result<x11rb::x11_utils::GenericEvent, ConnectionError> {
-    ///     #    unimplemented!()
-    ///     # }
-    ///     # fn poll_for_event(&self)
-    ///     # -> Result<Option<x11rb::x11_utils::GenericEvent>, ConnectionError> {
-    ///     #    unimplemented!()
-    ///     # }
-    ///     # fn flush(&self) {
-    ///     #    unimplemented!()
-    ///     # }
-    ///     # fn setup(&self) -> &x11rb::generated::xproto::Setup {
-    ///     #    unimplemented!()
-    ///     # }
-    ///     # fn generate_id(&self) -> u32 {
     ///     #    unimplemented!()
     ///     # }
     ///     # fn maximum_request_bytes(&self) -> usize {
@@ -358,6 +319,36 @@ pub trait Connection: Sized {
     }
 }
 
+/// A connection to an X11 server.
+pub trait Connection: RequestConnection {
+    /// Wait for a new event from the X11 server.
+    fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError>;
+
+    /// Poll for a new event from the X11 server.
+    fn poll_for_event(&self) -> Result<Option<GenericEvent>, ConnectionError>;
+
+    /// Send all pending requests to the server.
+    ///
+    /// Implementations of this trait may buffer requests for batched sending. When this method is
+    /// called, all pending requests are sent.
+    ///
+    /// You do not have to call this method before `wait_for_reply()`. If the request you want to
+    /// wait for was not yet sent, it will be sent by `wait_for_reply()`.
+    fn flush(&self);
+
+    /// Get the setup information sent by the X11 server.
+    ///
+    /// The setup information contains X11 server, for example the window id of the root window.
+    fn setup(&self) -> &Setup;
+
+    /// Generate a new X11 identifier.
+    ///
+    /// This method can, for example, be used for creating a new window. First, this method is
+    /// called to generate an identifier. Next, `generated::xproto::create_window` can be called to
+    /// actually create the window.
+    fn generate_id(&self) -> u32;
+}
+
 /// Does a request have a response?
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum RequestKind {
@@ -382,14 +373,14 @@ pub enum DiscardMode {
 /// This `VoidCookie` can then later be used to check if the X11 server sent an error.
 #[derive(Debug)]
 pub struct VoidCookie<'a, C>
-where C: Connection
+where C: RequestConnection
 {
     connection: &'a C,
     sequence_number: SequenceNumber,
 }
 
 impl<'a, C> VoidCookie<'a, C>
-where C: Connection
+where C: RequestConnection
 {
     /// Construct a new cookie.
     ///
@@ -427,7 +418,7 @@ where C: Connection
 }
 
 impl<C> Drop for VoidCookie<'_, C>
-where C: Connection
+where C: RequestConnection
 {
     fn drop(&mut self) {
         self.connection.discard_reply(self.sequence_number, RequestKind::IsVoid, DiscardMode::DiscardReply)
@@ -437,19 +428,19 @@ where C: Connection
 /// Internal helper for a cookie with an response
 #[derive(Debug)]
 struct RawCookie<'a, C>
-where C: Connection
+where C: RequestConnection
 {
     connection: &'a C,
     sequence_number: SequenceNumber,
 }
 
 impl<C> RawCookie<'_, C>
-where C: Connection
+where C: RequestConnection
 {
     /// Construct a new raw cookie.
     ///
     /// This function should only be used by implementations of
-    /// `Connection::send_request_with_reply`.
+    /// `RequestConnection::send_request_with_reply`.
     fn new(connection: &C, sequence_number: SequenceNumber) -> RawCookie<C> {
         RawCookie {
             connection,
@@ -467,7 +458,7 @@ where C: Connection
 }
 
 impl<C> Drop for RawCookie<'_, C>
-where C: Connection
+where C: RequestConnection
 {
     fn drop(&mut self) {
         self.connection.discard_reply(self.sequence_number, RequestKind::HasResponse, DiscardMode::DiscardReply);
@@ -480,7 +471,7 @@ where C: Connection
 /// then later be used to get the response that the server sent.
 #[derive(Debug)]
 pub struct Cookie<'a, C, R>
-where C: Connection
+where C: RequestConnection
 {
     raw_cookie: RawCookie<'a, C>,
     phantom: PhantomData<R>
@@ -488,12 +479,12 @@ where C: Connection
 
 impl<C, R> Cookie<'_, C, R>
 where R: TryFrom<Buffer, Error=ParseError>,
-      C: Connection
+      C: RequestConnection
 {
     /// Construct a new cookie.
     ///
     /// This function should only be used by implementations of
-    /// `Connection::send_request_with_reply`.
+    /// `RequestConnection::send_request_with_reply`.
     pub fn new(connection: &C, sequence_number: SequenceNumber) -> Cookie<C, R> {
         Cookie {
             raw_cookie: RawCookie::new(connection, sequence_number),
@@ -548,7 +539,7 @@ where R: TryFrom<Buffer, Error=ParseError>,
 /// This variant of `Cookie` represents a response that can contain `RawFd`s.
 #[derive(Debug)]
 pub struct CookieWithFds<'a, C, R>
-where C: Connection
+where C: RequestConnection
 {
     raw_cookie: RawCookie<'a, C>,
     phantom: PhantomData<R>
@@ -556,12 +547,12 @@ where C: Connection
 
 impl<C, R> CookieWithFds<'_, C, R>
 where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>,
-      C: Connection
+      C: RequestConnection
 {
     /// Construct a new cookie.
     ///
     /// This function should only be used by implementations of
-    /// `Connection::send_request_with_reply`.
+    /// `RequestConnection::send_request_with_reply`.
     pub fn new(connection: &C, sequence_number: SequenceNumber) -> CookieWithFds<C, R> {
         CookieWithFds {
             raw_cookie: RawCookie::new(connection, sequence_number),
@@ -591,10 +582,10 @@ where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>,
 /// `ListFontsWithInfo` generated more than one reply, but `Cookie` only allows getting one reply.
 /// This structure implements `Iterator` and allows to get all the replies.
 #[derive(Debug)]
-pub struct ListFontsWithInfoCookie<'a, C: Connection>(Option<RawCookie<'a, C>>);
+pub struct ListFontsWithInfoCookie<'a, C: RequestConnection>(Option<RawCookie<'a, C>>);
 
 impl<C> ListFontsWithInfoCookie<'_, C>
-where C: Connection
+where C: RequestConnection
 {
     pub(crate) fn new(cookie: Cookie<C, ListFontsWithInfoReply>) -> ListFontsWithInfoCookie<C> {
         ListFontsWithInfoCookie(Some(cookie.raw_cookie))
@@ -607,7 +598,7 @@ where C: Connection
 }
 
 impl<C> Iterator for ListFontsWithInfoCookie<'_, C>
-where C: Connection
+where C: RequestConnection
 {
     type Item = Result<ListFontsWithInfoReply, ConnectionErrorOrX11Error>;
 
@@ -635,15 +626,15 @@ where C: Connection
     }
 }
 
-/// Helper for implementing `Connection::extension_information()`.
+/// Helper for implementing `RequestConnection::extension_information()`.
 #[derive(Debug, Default)]
 pub struct ExtensionInformation(Mutex<HashMap<&'static str, Option<QueryExtensionReply>>>);
 
 impl ExtensionInformation {
-    /// An implementation of `Connection::extension_information()`.
+    /// An implementation of `RequestConnection::extension_information()`.
     ///
     /// The given connection is used for sending a `QueryExtension` request if needed.
-    pub fn extension_information<C: Connection>(&self, conn: &C, extension_name: &'static str)
+    pub fn extension_information<C: RequestConnection>(&self, conn: &C, extension_name: &'static str)
             -> Option<QueryExtensionReply> {
         // If locking the mutex fails, just return None
         self.0.lock().ok()

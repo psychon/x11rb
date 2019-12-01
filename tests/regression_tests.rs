@@ -3,11 +3,11 @@ use std::convert::TryFrom;
 use std::ops::Deref;
 use std::cell::RefCell;
 
-use x11rb::connection::{Connection, Cookie, CookieWithFds, VoidCookie, SequenceNumber, RequestKind, DiscardMode};
+use x11rb::connection::{RequestConnection, Cookie, CookieWithFds, VoidCookie, SequenceNumber, RequestKind, DiscardMode};
 use x11rb::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
-use x11rb::generated::xproto::{Setup, QueryExtensionReply, ConnectionExt, Segment, KeymapNotifyEvent, ClientMessageData};
+use x11rb::generated::xproto::{QueryExtensionReply, ConnectionExt, Segment, KeymapNotifyEvent, ClientMessageData};
 use x11rb::utils::{Buffer, RawFdContainer};
-use x11rb::x11_utils::{GenericEvent, GenericError, TryParse};
+use x11rb::x11_utils::{GenericError, TryParse};
 
 #[derive(Debug)]
 struct SavedRequest {
@@ -49,7 +49,7 @@ impl FakeConnection {
     }
 }
 
-impl Connection for FakeConnection {
+impl RequestConnection for FakeConnection {
     fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<Cookie<Self, R>, ConnectionError>
     where R: TryFrom<Buffer, Error=ParseError>
     {
@@ -87,26 +87,6 @@ impl Connection for FakeConnection {
     }
 
     fn check_for_error(&self, _sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError> {
-        unimplemented!()
-    }
-
-    fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
-        unimplemented!()
-    }
-
-    fn poll_for_event(&self) -> Result<Option<GenericEvent>, ConnectionError> {
-        unimplemented!()
-    }
-
-    fn flush(&self) {
-        unimplemented!()
-    }
-
-    fn setup(&self) -> &Setup {
-        unimplemented!()
-    }
-
-    fn generate_id(&self) -> u32 {
         unimplemented!()
     }
 

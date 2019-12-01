@@ -4,7 +4,7 @@
 use std::process::exit;
 use std::convert::TryFrom;
 
-use x11rb::connection::Connection;
+use x11rb::connection::{RequestConnection as _, Connection as _};
 use x11rb::xcb_ffi::XCBConnection;
 use x11rb::generated::xproto::{CreateWindowAux, ConfigureWindowAux, WindowClass, ConnectionExt as _, GE_GENERIC_EVENT, GeGenericEvent};
 use x11rb::generated::present;

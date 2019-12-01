@@ -11,7 +11,7 @@ use libc::c_void;
 use crate::utils::{CSlice, Buffer, RawFdContainer};
 use crate::x11_utils::{GenericError, GenericEvent};
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
-use crate::connection::{Connection, VoidCookie, Cookie, CookieWithFds, SequenceNumber, ExtensionInformation, RequestKind, DiscardMode};
+use crate::connection::{RequestConnection, Connection, VoidCookie, Cookie, CookieWithFds, SequenceNumber, ExtensionInformation, RequestKind, DiscardMode};
 use super::generated::xproto::{Setup, QueryExtensionReply};
 
 /// A connection to an X11 server.
@@ -283,7 +283,7 @@ impl XCBConnection {
     }
 }
 
-impl Connection for XCBConnection {
+impl RequestConnection for XCBConnection {
     fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<Cookie<Self, R>, ConnectionError>
         where R: TryFrom<Buffer, Error=ParseError>
     {
@@ -386,6 +386,12 @@ impl Connection for XCBConnection {
         unimplemented!("FD passing is currently only implemented on Unix-like systems")
     }
 
+    fn maximum_request_bytes(&self) -> usize {
+        4 * unsafe { raw_ffi::xcb_get_maximum_request_length((self.conn).0) as usize }
+    }
+}
+
+impl Connection for XCBConnection {
     fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
         if let Some(error) = self.errors.get(self) {
             return Ok(error.into());
@@ -430,10 +436,6 @@ impl Connection for XCBConnection {
 
     fn setup(&self) -> &Setup {
         &self.setup
-    }
-
-    fn maximum_request_bytes(&self) -> usize {
-        4 * unsafe { raw_ffi::xcb_get_maximum_request_length((self.conn).0) as usize }
     }
 }
 
