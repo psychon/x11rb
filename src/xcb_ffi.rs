@@ -311,7 +311,7 @@ impl Connection for XCBConnection {
         }
     }
 
-    fn extension_information(&self, extension_name: &'static str) -> Option<&QueryExtensionReply> {
+    fn extension_information(&self, extension_name: &'static str) -> Option<QueryExtensionReply> {
         self.ext_info.extension_information(self, extension_name)
     }
 

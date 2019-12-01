@@ -261,7 +261,7 @@ impl Connection for RustConnection {
         unimplemented!();
     }
 
-    fn extension_information(&self, extension_name: &'static str) -> Option<&QueryExtensionReply> {
+    fn extension_information(&self, extension_name: &'static str) -> Option<QueryExtensionReply> {
         self.extension_information.extension_information(self, extension_name)
     }
 
