@@ -449,7 +449,7 @@ where C: RequestConnection + ?Sized
     }
 
     /// Consume this instance and get the contained sequence number out.
-    fn to_sequence_number(self) -> SequenceNumber {
+    fn into_sequence_number(self) -> SequenceNumber {
         let number = self.sequence_number;
         // Prevent drop() from running
         std::mem::forget(self);
@@ -500,13 +500,13 @@ where R: TryFrom<Buffer, Error=ParseError>,
     /// Get the raw reply that the server sent.
     pub fn raw_reply(self) -> Result<Buffer, ConnectionErrorOrX11Error> {
         let conn = self.raw_cookie.connection;
-        Ok(conn.wait_for_reply_or_error(self.raw_cookie.to_sequence_number())?)
+        Ok(conn.wait_for_reply_or_error(self.raw_cookie.into_sequence_number())?)
     }
 
     /// Get the raw reply that the server sent, but have errors handled as events.
     pub fn raw_reply_unchecked(self) -> Result<Option<Buffer>, ConnectionError> {
         let conn = self.raw_cookie.connection;
-        Ok(conn.wait_for_reply(self.raw_cookie.to_sequence_number())?)
+        Ok(conn.wait_for_reply(self.raw_cookie.into_sequence_number())?)
     }
 
     /// Get the reply that the server sent.
@@ -527,7 +527,7 @@ where R: TryFrom<Buffer, Error=ParseError>,
     /// Without this function, errors are treated as events after the cookie is dropped.
     pub fn discard_reply_and_errors(self) {
         let conn = self.raw_cookie.connection;
-        conn.discard_reply(self.raw_cookie.to_sequence_number(), RequestKind::HasResponse, DiscardMode::DiscardReplyAndError)
+        conn.discard_reply(self.raw_cookie.into_sequence_number(), RequestKind::HasResponse, DiscardMode::DiscardReplyAndError)
     }
 }
 
@@ -568,7 +568,7 @@ where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>,
     /// Get the raw reply that the server sent.
     pub fn raw_reply(self) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
         let conn = self.raw_cookie.connection;
-        Ok(conn.wait_for_reply_with_fds(self.raw_cookie.to_sequence_number())?)
+        Ok(conn.wait_for_reply_with_fds(self.raw_cookie.into_sequence_number())?)
     }
 
     /// Get the reply that the server sent.
