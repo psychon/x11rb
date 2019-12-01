@@ -453,7 +453,7 @@ where C: Connection
     fn new(connection: &C, sequence_number: SequenceNumber) -> RawCookie<C> {
         RawCookie {
             connection,
-            sequence_number: sequence_number
+            sequence_number,
         }
     }
 
