@@ -156,7 +156,6 @@ class Module(object):
 
         self.out("#![allow(clippy::unreadable_literal)]")
         self.out("#![allow(clippy::too_many_arguments)]")
-        self.out("#![allow(clippy::needless_lifetimes)]")
         self.out("#![allow(clippy::identity_op)]")
         self.out("#![allow(clippy::trivially_copy_pass_by_ref)]")
         self.out("#![allow(clippy::eq_op)]")
@@ -507,6 +506,9 @@ class Module(object):
         # We need a lifetime if there are more than one references in the
         # arguments. Right now that means: Any lists? An aux argument?
         need_lifetime = switches or any(field.type.is_list for field in obj.fields)
+        if name == ('xcb', 'SendEvent'):
+            # We do "magic" below to replace the &[u8; 32] argument with Into<[u8;32]>
+            need_lifetime = False
         generics = []
         args = ["overwritten-later"]
         arg_names = ["self"]
