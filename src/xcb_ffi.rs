@@ -1,5 +1,7 @@
 //! A FFI-based connection to an X11 server, using libxcb.
 
+#![allow(clippy::cast_ptr_alignment)] // FIXME: Remove this
+
 use std::ptr::{null, null_mut};
 use std::convert::{TryFrom, TryInto};
 use std::ffi::CStr;
