@@ -10,7 +10,7 @@ fn main() {
     let (ltr, rtl): (u8, u8) = (FontDraw::LeftToRight.into(), FontDraw::RightToLeft.into());
 
     println!("DIR  MIN  MAX EXIST DFLT PROP ASC DESC NAME");
-    for reply in conn.list_fonts_with_info(u16::max_value(), "*".as_bytes()).unwrap() {
+    for reply in conn.list_fonts_with_info(u16::max_value(), b"*").unwrap() {
         let reply = reply.unwrap();
 
         let dir = if reply.draw_direction == ltr {
@@ -24,7 +24,7 @@ fn main() {
         let (min, max, indicator) = if reply.min_byte1 == 0 && reply.max_byte1 == 0 {
             (reply.min_char_or_byte2, reply.max_char_or_byte2, ' ')
         } else {
-            (reply.min_byte1 as u16, reply.max_byte1 as u16, '*')
+            (u16::from(reply.min_byte1), u16::from(reply.max_byte1), '*')
         };
 
         let all = if reply.all_chars_exist != 0 { "all" } else { "some" };

@@ -24,11 +24,11 @@ fn draw_eyes<C: Connection>(conn: &C, win_id: WINDOW, black: GCONTEXT, white: GC
         y: 0,
         width: window_size.0 / 2,
         height: window_size.1,
-        angle1: 0*64,
+        angle1: 0,
         angle2: 360*64
     };
-    let mut arc2 = arc1.clone();
-    arc2.x = arc2.width as i16;
+    let mut arc2 = arc1;
+    arc2.x = arc2.width as _;
     conn.poly_fill_arc(win_id, black, &[arc1, arc2])?;
 
     // Draw the white inner part
@@ -60,7 +60,7 @@ fn draw_pupils<C: Connection>(conn: &C, win_id: WINDOW, gc: GCONTEXT,
         angle1: 90 * 64,
         angle2: 360*64
     };
-    let mut arc2 = arc1.clone();
+    let mut arc2 = arc1;
     arc2.x = x2;
     arc2.y = y2;
 
@@ -82,18 +82,18 @@ fn compute_pupil(area: (i16, i16, i16, i16), mouse: (i16, i16)) -> (i16, i16)
     // What is the center of the eye?
     let center_x = area.0 + area.2 / 2;
     let center_y = area.1 + area.3 / 2;
-    let (w, h) = (area.2 as f64 / 2.0, area.3 as f64 / 2.0);
+    let (w, h) = (f64::from(area.2) / 2.0, f64::from(area.3) / 2.0);
 
     // Is the mouse exactly on the center?
     if (center_x, center_y) == mouse {
         return mouse;
     }
 
-    let center = (center_x as f64, center_y as f64);
-    let mouse = (mouse.0 as f64, mouse.1 as f64);
+    let center = (f64::from(center_x), f64::from(center_y));
+    let mouse = (f64::from(mouse.0), f64::from(mouse.1));
 
     // Calculate the offset of the mouse position from the center
-    let diff = (mouse.0 as f64 - center.0, mouse.1 as f64 - center.1);
+    let diff = (mouse.0 - center.0, mouse.1 - center.1);
 
     // An eclipse is described by this equation, where the angle 'a' is varied over all values, but
     // does not actually describe the angle from the center due to the different scaling in x and y
@@ -120,10 +120,10 @@ fn compute_pupil(area: (i16, i16, i16, i16), mouse: (i16, i16)) -> (i16, i16)
     //   a = arctan((y * w) / (x * h))
     //
     // However, due to tan() being the way it is, we actually need:
-    let a = (diff.1 * w).atan2(diff.0 * h);
+    let angle = (diff.1 * w).atan2(diff.0 * h);
 
     // Now compute the corresponding point on the ellipse (relative to the center)
-    let (cx, cy) = (w * a.cos(), h * a.sin());
+    let (cx, cy) = (w * angle.cos(), h * angle.sin());
 
     // ...and also compute the actual point
     let (x, y) = ((center.0 + cx) as _, (center.1 + cy) as _);
@@ -161,8 +161,8 @@ impl<C: Connection> Drop for FreeGC<'_, C> {
     }
 }
 
-fn create_pixmap_wrapper<'c, C: Connection>(conn: &'c C, depth: u8, drawable: DRAWABLE, size: (u16, u16))
--> Result<FreePixmap<'c, C>, ConnectionError>
+fn create_pixmap_wrapper<C: Connection>(conn: &C, depth: u8, drawable: DRAWABLE, size: (u16, u16))
+-> Result<FreePixmap<C>, ConnectionError>
 {
     let pixmap = conn.generate_id();
     conn.create_pixmap(depth, pixmap, drawable, size.0, size.1)?;
@@ -239,8 +239,8 @@ fn main() {
     let screen = &conn.setup().roots[screen_num];
 
     let (wm_protocols, wm_delete_window) = {
-        let protocols = conn.intern_atom(false, "WM_PROTOCOLS".as_bytes()).unwrap();
-        let delete = conn.intern_atom(false, "WM_DELETE_WINDOW".as_bytes()).unwrap();
+        let protocols = conn.intern_atom(false, b"WM_PROTOCOLS").unwrap();
+        let delete = conn.intern_atom(false, b"WM_DELETE_WINDOW").unwrap();
         (protocols.reply().unwrap().atom, delete.reply().unwrap().atom)
     };
 

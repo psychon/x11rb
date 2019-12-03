@@ -59,7 +59,7 @@ impl<'a, C: Connection> WMState<'a, C> {
         let screen = &conn.setup().roots[screen_num];
         let black_gc = conn.generate_id();
         let font = conn.generate_id();
-        conn.open_font(font, "9x15".as_bytes())?;
+        conn.open_font(font, b"9x15")?;
 
         let gc_aux = CreateGCAux::new()
             .graphics_exposures(0)
@@ -69,8 +69,8 @@ impl<'a, C: Connection> WMState<'a, C> {
         conn.create_gc(black_gc, screen.root, &gc_aux)?;
         conn.close_font(font)?;
 
-        let wm_protocols = conn.intern_atom(false, "WM_PROTOCOLS".as_bytes())?;
-        let wm_delete_window = conn.intern_atom(false, "WM_DELETE_WINDOW".as_bytes())?;
+        let wm_protocols = conn.intern_atom(false, b"WM_PROTOCOLS")?;
+        let wm_delete_window = conn.intern_atom(false, b"WM_DELETE_WINDOW")?;
 
         Ok(WMState {
             conn,
@@ -165,14 +165,12 @@ impl<'a, C: Connection> WMState<'a, C> {
 
     fn find_window_by_id(&self, win: WINDOW) -> Option<&WindowState> {
         self.windows.iter()
-            .filter(|state| state.window == win || state.frame_window == win)
-            .next()
+            .find(|state| state.window == win || state.frame_window == win)
     }
 
     fn find_window_by_id_mut(&mut self, win: WINDOW) -> Option<&mut WindowState> {
         self.windows.iter_mut()
-            .filter(|state| state.window == win || state.frame_window == win)
-            .next()
+            .find(|state| state.window == win || state.frame_window == win)
     }
 
     /// Handle the given event
@@ -197,7 +195,7 @@ impl<'a, C: Connection> WMState<'a, C> {
                     return true;
                 }
                 conn.destroy_window(state.frame_window).unwrap();
-                return false;
+                false
             });
         Ok(())
     }
@@ -209,16 +207,16 @@ impl<'a, C: Connection> WMState<'a, C> {
         }
         let mut aux = ConfigureWindowAux::default();
         if event.value_mask & Into::<u16>::into(ConfigWindow::X) != 0 {
-            aux = aux.x(event.x as i32);
+            aux = aux.x(i32::from(event.x));
         }
         if event.value_mask & Into::<u16>::into(ConfigWindow::Y) != 0 {
-            aux = aux.y(event.y as i32);
+            aux = aux.y(i32::from(event.y));
         }
         if event.value_mask & Into::<u16>::into(ConfigWindow::Width) != 0 {
-            aux = aux.width(event.width as u32);
+            aux = aux.width(u32::from(event.width));
         }
         if event.value_mask & Into::<u16>::into(ConfigWindow::Height) != 0 {
-            aux = aux.height(event.height as u32);
+            aux = aux.height(u32::from(event.height));
         }
         println!("Configure: {:?}", aux);
         self.conn.configure_window(event.window, &aux)?;

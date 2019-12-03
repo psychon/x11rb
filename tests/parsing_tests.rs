@@ -9,15 +9,15 @@ fn get_setup_data() -> Vec<u8> {
     let num_pixmap_formats: u8 = 1;
     let roots_len: u8 = 18;
     let header: u16 = 10;
-    let length: u16 = header + vendor_len + 2 * num_pixmap_formats as u16 + roots_len as u16;
+    let length: u16 = header + vendor_len + 2 * u16::from(num_pixmap_formats) + u16::from(roots_len);
 
     s.extend(&[1, 0]); // Status "success" and padding
     s.extend(&11u16.to_ne_bytes()); // major version
     s.extend(&0u16.to_ne_bytes()); // minor version
     s.extend(&length.to_ne_bytes()); // length
-    s.extend(&0x12345678u32.to_ne_bytes()); // release number
-    s.extend(&0x10000000u32.to_ne_bytes()); // resource id base
-    s.extend(&0x000000ffu32.to_ne_bytes()); // resource id mask
+    s.extend(&0x1234_5678u32.to_ne_bytes()); // release number
+    s.extend(&0x1000_0000u32.to_ne_bytes()); // resource id base
+    s.extend(&0x0000_00ffu32.to_ne_bytes()); // resource id mask
     s.extend(&0u32.to_ne_bytes()); // motion buffer size
     s.extend(&6u16.to_ne_bytes()); // vendor length
     s.extend(&0x100u16.to_ne_bytes()); // maximum request length
@@ -40,7 +40,7 @@ fn get_setup_data() -> Vec<u8> {
     s.push(42); // bits per pixel
     s.push(21); // scanline pad
     s.extend(&[0, 0, 0, 0, 0]); // padding
-    assert_eq!(s.len(), (header + vendor_len + 2 * num_pixmap_formats as u16) as usize * 4);
+    assert_eq!(s.len(), 4 * usize::from(header + vendor_len + 2 * u16::from(num_pixmap_formats)));
 
     // Screens, we said above there is one entry
     s.extend(&1u32.to_ne_bytes()); // root window
@@ -73,7 +73,7 @@ fn get_setup_data() -> Vec<u8> {
 
     assert_eq!(s.len(), length as usize * 4);
 
-    return s;
+    s
 }
 
 #[test]
@@ -84,9 +84,9 @@ fn parse_setup() -> Result<(), ParseError> {
     assert_eq!(remaining.len(), 0);
 
     assert_eq!((1, 11, 0), (setup.status, setup.protocol_major_version, setup.protocol_minor_version));
-    assert_eq!(0x12345678, setup.release_number);
+    assert_eq!(0x1234_5678, setup.release_number);
     assert_eq!((0, 0xff), (setup.min_keycode, setup.max_keycode));
-    assert_eq!("Vendor".as_bytes(), &setup.vendor[..]);
+    assert_eq!(b"Vendor", &setup.vendor[..]);
 
     assert_eq!(1, setup.pixmap_formats.len());
     let format = &setup.pixmap_formats[0];

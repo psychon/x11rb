@@ -125,7 +125,7 @@ fn test_poly_segment() -> Result<(), ConnectionErrorOrX11Error> {
 #[test]
 fn test_big_requests() -> Result<(), ConnectionError> {
     let conn = FakeConnection::default();
-    let big_buffer = [0; 262145 /* 2^18 + 1 */];
+    let big_buffer = [0; (1 << 18) + 1];
     let drawable: u32 = 42;
     let gc: u32 = 0x1337;
     let x: i16 = 21;
@@ -157,7 +157,7 @@ fn test_big_requests() -> Result<(), ConnectionError> {
 #[test]
 fn test_too_large_request() -> Result<(), ConnectionError> {
     let conn = FakeConnection::default();
-    let big_buffer = [0; 524289 /* 2^19 + 1 */];
+    let big_buffer = [0; (1 << 19) + 1];
     let drawable: u32 = 42;
     let gc: u32 = 0x1337;
     let x: i16 = 21;

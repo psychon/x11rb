@@ -361,7 +361,7 @@ pub type WINDOW = u32;
 //
 // Then, XCB supplies the following function to create new windows:
 
-#[allow(unused)]
+#[allow(unused, clippy::too_many_arguments)]
 fn own_create_window<A: Connection, B>(c: &A,               // The connection to use
                                        depth: u8,           // Depth of the screen
                                        wid: u32,            // Id of the window
@@ -742,27 +742,26 @@ fn example6() -> Result<(), ConnectionErrorOrX11Error> {
 
     loop {
         let event = conn.wait_for_event()?;
-        match event.response_type() {
-            xproto::EXPOSE_EVENT => {
-                // We draw the points
-                conn.poly_point(CoordMode::Origin, win, foreground, &points)?;
+        if event.response_type()  == xproto::EXPOSE_EVENT {
+            // We draw the points
+            conn.poly_point(CoordMode::Origin, win, foreground, &points)?;
 
-                // We draw the polygonal line
-                conn.poly_line(CoordMode::Previous, win, foreground, &polyline)?;
+            // We draw the polygonal line
+            conn.poly_line(CoordMode::Previous, win, foreground, &polyline)?;
 
-                // We draw the segments
-                conn.poly_segment(win, foreground, &segments)?;
+            // We draw the segments
+            conn.poly_segment(win, foreground, &segments)?;
 
-                // We draw the rectangles
-                conn.poly_rectangle(win, foreground, &rectangles)?;
+            // We draw the rectangles
+            conn.poly_rectangle(win, foreground, &rectangles)?;
 
-                // We draw the arcs
-                conn.poly_arc(win, foreground, &arcs)?;
+            // We draw the arcs
+            conn.poly_arc(win, foreground, &arcs)?;
 
-                // We flush the request
-                conn.flush();
-            },
-            _ => {} // Unknown event type, ignore it
+            // We flush the request
+            conn.flush();
+        } else {
+            // Unknown event type, ignore it
         }
     }
 }
@@ -2086,7 +2085,7 @@ fn example_fill_colormap<C: Connection>(conn: &C, win: WINDOW, screen: &Screen) 
 fn example_create_glyph_cursor<C: Connection>(conn: &C, win: WINDOW, screen: &Screen) -> Result<(), ConnectionErrorOrX11Error>
 {
     let font = conn.generate_id();
-    conn.open_font(font, "cursor".as_bytes())?;
+    conn.open_font(font, b"cursor")?;
 
     let cursor = conn.generate_id();
     conn.create_glyph_cursor(cursor, font, font,
@@ -2168,7 +2167,7 @@ fn cursor_set<C: Connection>(conn: &C, screen: &Screen, window: WINDOW, cursor_i
 -> Result<(), ConnectionErrorOrX11Error>
 {
     let font = conn.generate_id();
-    conn.open_font(font, "cursor".as_bytes())?;
+    conn.open_font(font, b"cursor")?;
 
     let cursor = conn.generate_id();
     conn.create_glyph_cursor(cursor, font, font,

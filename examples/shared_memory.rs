@@ -95,7 +95,7 @@ fn receive_fd<C: Connection>(conn: &C, screen_num: usize) -> Result<(), Connecti
     let addr = unsafe { mmap(null_mut(), segment_size as _, PROT_READ|PROT_WRITE, MAP_SHARED, shm_fd.as_raw_fd(), 0) };
     if addr == MAP_FAILED {
         shm::detach(conn, shmseg)?;
-        Err(ConnectionError::InsufficientMemory)?
+        return Err(ConnectionError::InsufficientMemory.into());
     }
 
     unsafe {

@@ -93,7 +93,7 @@ fn run<C: Connection>(conn: Arc<C>, window_state: Arc<Mutex<Window>>,
     conn.poly_fill_rectangle(pixmap, white, &[rect])?;
 
     let mut theta: f64 = 0.0;
-    let radius = default_size as f64 + 1.0;
+    let radius = f64::from(default_size) + 1.0;
 
     loop {
         let guard = window_state.lock().unwrap();
@@ -191,13 +191,12 @@ where C: Connection + Send + Sync + 'static
     }
 }
 
-fn find_window_by_id(windows: &Vec<Arc<Mutex<Window>>>, window: WINDOW) -> Option<&Arc<Mutex<Window>>>
+fn find_window_by_id(windows: &[Arc<Mutex<Window>>], window: WINDOW) -> Option<&Arc<Mutex<Window>>>
 {
     windows.iter()
-        .filter(|state| state.lock()
+        .find(|state| state.lock()
                 .map(|state| state.window == window)
                 .unwrap_or(false))
-        .next()
 }
 
 include!("integration_test_util/util.rs");
