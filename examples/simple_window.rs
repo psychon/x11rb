@@ -20,8 +20,8 @@ fn main() {
     let gc_id = conn.generate_id();
 
     let (wm_protocols, wm_delete_window) = {
-        let protocols = conn.intern_atom(false, "WM_PROTOCOLS".as_bytes()).unwrap();
-        let delete = conn.intern_atom(false, "WM_DELETE_WINDOW".as_bytes()).unwrap();
+        let protocols = conn.intern_atom(false, b"WM_PROTOCOLS").unwrap();
+        let delete = conn.intern_atom(false, b"WM_DELETE_WINDOW").unwrap();
         (protocols.reply().unwrap().atom, delete.reply().unwrap().atom)
     };
 
