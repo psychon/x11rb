@@ -76,7 +76,10 @@
         unused_qualifications,
         unused_results,
         )]
+#![cfg_attr(not(feature = "allow-unsafe-code"),
+            deny(unsafe_code))]
 
+#[cfg(feature = "allow-unsafe-code")]
 pub mod xcb_ffi;
 pub mod utils;
 #[macro_use]
