@@ -51,3 +51,5 @@ script:
             X11RB_EXAMPLE_TIMEOUT=1 xvfb-run -a cargo run --example "$example" || exit 1
         fi
     done
+
+  - cargo build --verbose --all-targets --no-default-features

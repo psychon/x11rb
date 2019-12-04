@@ -1,68 +1,78 @@
 use std::ops::{Deref, Index};
-use std::slice::{from_raw_parts, SliceIndex};
+use std::slice::SliceIndex;
 use std::mem::forget;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
-use libc::{free, close};
 #[cfg(not(unix))]
 use libc::c_int;
 
 #[cfg(not(unix))]
 type RawFd = c_int;
 
-/// Wrapper around a slice that was allocated in C code.
-#[derive(Debug)]
-pub struct CSlice {
-    slice: &'static [u8]
-}
+#[cfg(feature = "allow-unsafe-code")]
+mod unsafe_code {
+    use std::ops::{Deref, Index};
+    use std::slice::{from_raw_parts, SliceIndex};
+    use std::mem::forget;
+    use libc::free;
 
-impl CSlice {
-    /// Constructs a new `CSlice` from the given parts. `libc::free` will be called on the given
-    /// pointer when the slice is dropped.
-    ///
-    /// # Safety
-    ///
-    /// The same rules as for `std::slice::from_raw_parts` apply. Additionally, the given pointer
-    /// must be safe to free with `libc::free`.
-    pub unsafe fn new(ptr: *const u8, len: usize) -> CSlice {
-        let slice = from_raw_parts(ptr, len);
-        CSlice{ slice }
+    /// Wrapper around a slice that was allocated in C code.
+    #[derive(Debug)]
+    pub struct CSlice {
+        slice: &'static [u8]
     }
 
-    /// Convert `self` into a raw part.
-    ///
-    /// Ownership of the returned pointer is given to the caller. Specifically, `libc::free` will
-    /// not be called on it by `CSlice`.
-    pub fn into_ptr(self) -> *const u8 {
-        let ptr = self.slice.as_ptr();
-        forget(self);
-        ptr
+    impl CSlice {
+        /// Constructs a new `CSlice` from the given parts. `libc::free` will be called on the given
+        /// pointer when the slice is dropped.
+        ///
+        /// # Safety
+        ///
+        /// The same rules as for `std::slice::from_raw_parts` apply. Additionally, the given pointer
+        /// must be safe to free with `libc::free`.
+        pub unsafe fn new(ptr: *const u8, len: usize) -> CSlice {
+            let slice = from_raw_parts(ptr, len);
+            CSlice{ slice }
+        }
+
+        /// Convert `self` into a raw part.
+        ///
+        /// Ownership of the returned pointer is given to the caller. Specifically, `libc::free` will
+        /// not be called on it by `CSlice`.
+        pub fn into_ptr(self) -> *const u8 {
+            let ptr = self.slice.as_ptr();
+            forget(self);
+            ptr
+        }
+    }
+
+    impl Drop for CSlice {
+        fn drop(&mut self) {
+            unsafe { free(self.slice.as_ptr() as _) }
+        }
+    }
+
+    impl Deref for CSlice {
+        type Target = [u8];
+
+        fn deref(&self) -> &[u8] {
+            self.slice
+        }
+    }
+
+    impl<I> Index<I> for CSlice
+    where I: SliceIndex<[u8]>
+    {
+        type Output = I::Output;
+
+        fn index(&self, index: I) -> &I::Output {
+            self.slice.index(index)
+        }
     }
 }
 
-impl Drop for CSlice {
-    fn drop(&mut self) {
-        unsafe { free(self.slice.as_ptr() as _) }
-    }
-}
-
-impl Deref for CSlice {
-    type Target = [u8];
-
-    fn deref(&self) -> &[u8] {
-        self.slice
-    }
-}
-
-impl<I> Index<I> for CSlice
-where I: SliceIndex<[u8]>
-{
-    type Output = I::Output;
-
-    fn index(&self, index: I) -> &I::Output {
-        self.slice.index(index)
-    }
-}
+#[cfg(feature = "allow-unsafe-code")]
+pub use unsafe_code::CSlice;
 
 /// A wrapper around some piece of raw bytes.
 ///
@@ -71,6 +81,7 @@ where I: SliceIndex<[u8]>
 /// some owned bytes.
 #[derive(Debug)]
 pub enum Buffer {
+    #[cfg(feature = "allow-unsafe-code")]
     CSlice(CSlice),
     Vec(Vec<u8>)
 }
@@ -83,6 +94,7 @@ impl Buffer {
     ///
     /// The same rules as for `CSlice::new` and `std::slice::from_raw_parts` apply. Additionally,
     /// the given pointer must be safe to free with `libc::free`.
+    #[cfg(feature = "allow-unsafe-code")]
     pub unsafe fn from_raw_parts(ptr: *const u8, len: usize) -> Self {
         Self::CSlice(CSlice::new(ptr, len))
     }
@@ -98,6 +110,7 @@ impl Deref for Buffer {
 
     fn deref(&self) -> &[u8] {
         match self {
+            #[cfg(feature = "allow-unsafe-code")]
             Self::CSlice(ref slice) => slice.deref(),
             Self::Vec(ref vec) => vec.deref()
         }
@@ -126,7 +139,9 @@ pub struct RawFdContainer(RawFd);
 
 impl Drop for RawFdContainer {
     fn drop(&mut self) {
-        if cfg!(unix) {
+        #[cfg(all(unix, feature = "allow-unsafe-code"))]
+        {
+            use libc::close;
             let result = unsafe { close(self.0) };
             if result != 0 {
                 panic!("Close failed in some RawFdContainer");
@@ -141,7 +156,11 @@ impl RawFdContainer {
     /// The `RawFdContainer` takes ownership of the `RawFd` and closes it on drop.
     pub fn new(fd: RawFd) -> RawFdContainer {
         if cfg!(unix) {
-            RawFdContainer(fd)
+            if cfg!(feature = "allow-unsafe-code") {
+                RawFdContainer(fd)
+            } else {
+                unimplemented!("RawFdContainer requires the allow-unsafe-code feature");
+            }
         } else {
             unimplemented!("RawFdContainer is only implemented on Unix-like systems");
         }
