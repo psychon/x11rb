@@ -7,7 +7,7 @@ use x11rb::connection::{RequestConnection as _, Connection};
 use x11rb::x11_utils::Event;
 use x11rb::generated::xproto::*;
 use x11rb::generated::shape::{self, ConnectionExt as _};
-use x11rb::wrapper::ConnectionExt as _;
+use x11rb::wrapper::{ConnectionExt as _, LazyAtom};
 use x11rb::errors::ConnectionError;
 use x11rb::COPY_DEPTH_FROM_PARENT;
 
@@ -239,15 +239,12 @@ fn main() {
 
     let screen = &conn.setup().roots[screen_num];
 
-    let (wm_protocols, wm_delete_window) = {
-        let protocols = conn.intern_atom(false, b"WM_PROTOCOLS").unwrap();
-        let delete = conn.intern_atom(false, b"WM_DELETE_WINDOW").unwrap();
-        (protocols.reply().unwrap().atom, delete.reply().unwrap().atom)
-    };
+    let mut wm_protocols = LazyAtom::new(conn, false, b"WM_PROTOCOLS");
+    let mut wm_delete_window = LazyAtom::new(conn, false, b"WM_DELETE_WINDOW");
 
     let mut window_size = (700, 500);
     let has_shape = conn.extension_information(shape::X11_EXTENSION_NAME).is_some();
-    let win_id = setup_window(conn, screen, window_size, wm_protocols, wm_delete_window).unwrap();
+    let win_id = setup_window(conn, screen, window_size, wm_protocols.atom().unwrap(), wm_delete_window.atom().unwrap()).unwrap();
     let mut pixmap = create_pixmap_wrapper(conn, screen.root_depth, win_id, window_size).unwrap();
 
     let black_gc = create_gc_with_foreground(conn, win_id, screen.black_pixel).unwrap();
@@ -290,7 +287,7 @@ fn main() {
                 CLIENT_MESSAGE_EVENT => {
                     let event = ClientMessageEvent::from(event);
                     let data = event.data.as_data32();
-                    if event.format == 32 && event.window == win_id && data[0] == wm_delete_window {
+                    if event.format == 32 && event.window == win_id && data[0] == wm_delete_window.atom().unwrap() {
                         println!("Window was asked to close");
                         return;
                     }

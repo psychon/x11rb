@@ -6,7 +6,7 @@ use x11rb::xcb_ffi::XCBConnection;
 use x11rb::x11_utils::{Event, GenericError};
 use x11rb::generated::xproto::*;
 use x11rb::connection::Connection;
-use x11rb::wrapper::ConnectionExt as _;
+use x11rb::wrapper::{ConnectionExt as _, LazyAtom};
 
 fn main() {
     let (conn, screen_num) = XCBConnection::connect(None).unwrap();
@@ -19,11 +19,8 @@ fn main() {
     let win_id = conn.generate_id();
     let gc_id = conn.generate_id();
 
-    let (wm_protocols, wm_delete_window) = {
-        let protocols = conn.intern_atom(false, b"WM_PROTOCOLS").unwrap();
-        let delete = conn.intern_atom(false, b"WM_DELETE_WINDOW").unwrap();
-        (protocols.reply().unwrap().atom, delete.reply().unwrap().atom)
-    };
+    let mut wm_protocols = LazyAtom::new(conn, false, b"WM_PROTOCOLS");
+    let mut wm_delete_window = LazyAtom::new(conn, false, b"WM_DELETE_WINDOW");
 
     let win_aux = CreateWindowAux::new()
         .event_mask(EventMask::Exposure | EventMask::StructureNotify | EventMask::NoEvent)
@@ -41,7 +38,7 @@ fn main() {
 
     let title = "Simple Window";
     conn.change_property8(PropMode::Replace, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), title.as_bytes()).unwrap();
-    conn.change_property32(PropMode::Replace, win_id, wm_protocols, Atom::ATOM.into(), &[wm_delete_window]).unwrap();
+    conn.change_property32(PropMode::Replace, win_id, wm_protocols.atom().unwrap(), Atom::ATOM.into(), &[wm_delete_window.atom().unwrap()]).unwrap();
 
     let reply = conn.get_property(0, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), 0, 1024).unwrap();
     let reply = reply.reply().unwrap();
@@ -82,7 +79,7 @@ fn main() {
                 let event = ClientMessageEvent::from(event);
                 println!("{:?})", event);
                 let data = event.data.as_data32();
-                if event.format == 32 && event.window == win_id && data[0] == wm_delete_window {
+                if event.format == 32 && event.window == win_id && data[0] == wm_delete_window.atom().unwrap() {
                     println!("Window was asked to close");
                     return;
                 }
