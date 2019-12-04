@@ -114,6 +114,12 @@ where I: SliceIndex<[u8]>
     }
 }
 
+impl Clone for Buffer {
+    fn clone(&self) -> Self {
+        Buffer::Vec(self.deref().to_vec())
+    }
+}
+
 /// A simple wrapper around RawFd that closes the fd on drop.
 #[derive(Debug, Hash, PartialEq, Eq)]
 pub struct RawFdContainer(RawFd);
