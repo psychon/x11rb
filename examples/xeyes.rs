@@ -7,8 +7,9 @@ use x11rb::connection::{RequestConnection as _, Connection};
 use x11rb::x11_utils::Event;
 use x11rb::generated::xproto::*;
 use x11rb::generated::shape::{self, ConnectionExt as _};
-use x11rb::wrapper::{ConnectionExt as _, COPY_DEPTH_FROM_PARENT};
+use x11rb::wrapper::ConnectionExt as _;
 use x11rb::errors::ConnectionError;
+use x11rb::COPY_DEPTH_FROM_PARENT;
 
 const PUPIL_SIZE: i16 = 50;
 const EYE_SIZE: i16 = 50;

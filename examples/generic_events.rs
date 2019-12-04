@@ -10,7 +10,7 @@ use x11rb::generated::xproto::{CreateWindowAux, ConfigureWindowAux, WindowClass,
 use x11rb::generated::present;
 use x11rb::errors::ConnectionErrorOrX11Error;
 use x11rb::x11_utils::Event;
-use x11rb::wrapper::COPY_DEPTH_FROM_PARENT;
+use x11rb::COPY_DEPTH_FROM_PARENT;
 
 fn main() -> Result<(), ConnectionErrorOrX11Error>
 {
