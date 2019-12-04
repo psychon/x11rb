@@ -24,7 +24,7 @@ use x11rb::connection::{Connection, SequenceNumber};
 use x11rb::x11_utils::Event;
 use x11rb::errors::{ConnectionError, ConnectionErrorOrX11Error};
 use x11rb::generated::xproto::{self, *};
-use x11rb::wrapper::ConnectionExt as _;
+use x11rb::wrapper::{ConnectionExt as _, COPY_DEPTH_FROM_PARENT};
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -397,10 +397,8 @@ fn example4() -> Result<(), ConnectionErrorOrX11Error> {
     // Ask for our window's Id
     let win = conn.generate_id();
 
-    const COPY_FROM_PARENT: u8 = 0; // FIXME: XCB_COPY_FROM_PARENT is a define that is in the hand-written part of xcb
-
     // Create the window
-    conn.create_window(COPY_FROM_PARENT,         // depth (same as root)
+    conn.create_window(COPY_DEPTH_FROM_PARENT,   // depth (same as root)
                        win,                      // window Id
                        screen.root,              // parent window
                        0, 0,                     // x, y
@@ -720,11 +718,10 @@ fn example6() -> Result<(), ConnectionErrorOrX11Error> {
     let win = conn.generate_id();
 
     // Create the window
-    const COPY_FROM_PARENT: u8 = 0; // FIXME: XCB_COPY_FROM_PARENT is a define that is in the hand-written part of xcb
     let values = CreateWindowAux::default()
         .background_pixel(screen.white_pixel)
         .event_mask(EventMask::Exposure);
-    conn.create_window(COPY_FROM_PARENT,         // depth
+    conn.create_window(COPY_DEPTH_FROM_PARENT,   // depth
                        win,                      // window Id
                        screen.root,              // parent window
                        0, 0,                     // x, y
@@ -1189,14 +1186,13 @@ fn example7() -> Result<(), ConnectionErrorOrX11Error> {
     let win = conn.generate_id();
 
     // Create the window
-    const COPY_FROM_PARENT: u8 = 0; // FIXME: XCB_COPY_FROM_PARENT is a define that is in the hand-written part of xcb
     let values = CreateWindowAux::default()
         .background_pixel(screen.white_pixel)
         .event_mask(EventMask::Exposure      | EventMask::ButtonPress   |
                     EventMask::ButtonRelease | EventMask::PointerMotion |
                     EventMask::EnterWindow   | EventMask::LeaveWindow   |
                     EventMask::KeyPress      | EventMask::KeyRelease);
-    conn.create_window(COPY_FROM_PARENT,         // depth
+    conn.create_window(COPY_DEPTH_FROM_PARENT,   // depth
                        win,                      // window Id
                        screen.root,              // parent window
                        0, 0,                     // x, y

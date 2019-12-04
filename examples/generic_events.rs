@@ -10,6 +10,7 @@ use x11rb::generated::xproto::{CreateWindowAux, ConfigureWindowAux, WindowClass,
 use x11rb::generated::present;
 use x11rb::errors::ConnectionErrorOrX11Error;
 use x11rb::x11_utils::Event;
+use x11rb::wrapper::COPY_DEPTH_FROM_PARENT;
 
 fn main() -> Result<(), ConnectionErrorOrX11Error>
 {
@@ -28,7 +29,7 @@ fn main() -> Result<(), ConnectionErrorOrX11Error>
     let win_id = conn.generate_id();
     let win_aux = CreateWindowAux::new()
         .background_pixel(screen.white_pixel);
-    conn.create_window(screen.root_depth, win_id, screen.root, 0, 0, 10, 10, 0, WindowClass::InputOutput, 0, &win_aux)?;
+    conn.create_window(COPY_DEPTH_FROM_PARENT, win_id, screen.root, 0, 0, 10, 10, 0, WindowClass::InputOutput, 0, &win_aux)?;
 
     // Ask for present ConfigureNotify events
     let event_id = conn.generate_id();
