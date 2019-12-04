@@ -2,8 +2,8 @@
 
 use std::convert::TryInto;
 
-use super::generated::xproto::ConnectionExt as XProtoConnectionExt;
-use super::connection::VoidCookie;
+use super::generated::xproto::{ConnectionExt as XProtoConnectionExt, InternAtomReply, ATOM};
+use super::connection::{VoidCookie, Connection, Cookie};
 use super::errors::{ConnectionError, ConnectionErrorOrX11Error};
 
 /// Extension trait that simplifies API use
@@ -54,3 +54,57 @@ pub trait ConnectionExt: XProtoConnectionExt {
     }
 }
 impl<C: XProtoConnectionExt + ?Sized> ConnectionExt for C {}
+
+/// A type allowing to lazily query atoms.
+///
+/// To avoid round-trips, X11 clients should not send requests and then synchronously wait for the
+/// reply. This is especially true for atoms, because a typical application will need many atoms.
+/// Doing one round-trip for each atom can be quite slow. This type represents an atom that is
+/// lazily resolved on its first use. Thus, this type hides the involved latency and simplifies
+/// code.
+#[derive(Debug)]
+pub enum LazyAtom<'c, C: Connection> {
+    Pending(Cookie<'c, C, InternAtomReply>),
+    Resolved(Result<ATOM, ConnectionErrorOrX11Error>),
+}
+
+impl<'c, C: Connection> LazyAtom<'c, C> {
+    /// Create a new LazyAtom by sending an `InternAtom` request.
+    ///
+    /// The meaning of the arguments is identical to xproto's `InternAtom` request.
+    pub fn new(conn: &'c C, only_if_exists: bool, name: &[u8]) -> Self {
+        match conn.intern_atom(only_if_exists, name) {
+            Ok(cookie) => LazyAtom::Pending(cookie),
+            Err(err) => LazyAtom::Resolved(Err(err.into()))
+        }
+    }
+
+    /// Create a new LazyAtom for the given resolved atom.
+    ///
+    /// This function just wraps an existing atom. The resulting LazyAtom will always return
+    /// `Ok(atom)` from `atom()`.
+    pub fn new_for_atom(atom: ATOM) -> Self {
+        LazyAtom::Resolved(Ok(atom))
+    }
+
+    /// Get the atom that is contained in this type.
+    ///
+    /// This function gets the answer from the X11 server if it was not yet fetched. It returns the atom value.
+    pub fn atom(&mut self) -> Result<ATOM, ConnectionErrorOrX11Error> {
+        match self {
+            LazyAtom::Pending(_) => {
+                // We need to move the cookie out of self to call reply()
+                if let LazyAtom::Pending(cookie) = std::mem::replace(self, LazyAtom::Resolved(Ok(0))) {
+                    // Now get the reply and replace self again with the correct value
+                    let reply = cookie.reply()
+                        .map(|reply| reply.atom);
+                    *self = LazyAtom::Resolved(reply.clone());
+                    reply
+                } else {
+                    unreachable!()
+                }
+            },
+            LazyAtom::Resolved(result) => result.clone(),
+        }
+    }
+}
