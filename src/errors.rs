@@ -76,7 +76,7 @@ impl From<std::num::TryFromIntError> for ConnectionError {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum ConnectionErrorOrX11Error {
     ConnectionError(ConnectionError),
     X11Error(GenericError)
