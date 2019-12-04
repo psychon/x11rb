@@ -12,8 +12,8 @@ use x11rb::xcb_ffi::XCBConnection;
 use x11rb::connection::Connection;
 use x11rb::errors::ConnectionErrorOrX11Error;
 use x11rb::x11_utils::Event;
-use x11rb::wrapper::COPY_DEPTH_FROM_PARENT;
 use x11rb::generated::xproto::*;
+use x11rb::COPY_DEPTH_FROM_PARENT;
 
 /// Lag angle for the follow line
 const LAG: f64 = 0.3;

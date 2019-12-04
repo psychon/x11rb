@@ -45,7 +45,7 @@
 //! use x11rb::xcb_ffi::XCBConnection;
 //! use x11rb::generated::xproto::*;
 //! use x11rb::errors::ConnectionErrorOrX11Error;
-//! use x11rb::wrapper::COPY_DEPTH_FROM_PARENT;
+//! use x11rb::COPY_DEPTH_FROM_PARENT;
 //!
 //! fn main() -> Result<(), ConnectionErrorOrX11Error> {
 //!     let (conn, screen_num) = XCBConnection::connect(None)?;
@@ -89,3 +89,25 @@ pub mod generated {
     include!(concat!(env!("OUT_DIR"), "/generated/mod.rs"));
 }
 pub mod wrapper;
+
+use generated::xproto::{KEYSYM, TIMESTAMP};
+
+/// The universal null resource or null atom parameter value for many core X requests
+pub const NONE: u32 = 0;
+
+/// This constant can be used for many parameters in `create_window`
+pub const COPY_FROM_PARENT: u32 = 0;
+
+/// This constant can be used for the depth parameter in `create_window`. It indicates to use the
+/// parent window's depth.
+pub const COPY_DEPTH_FROM_PARENT: u8 = 0;
+
+/// This constant can be used for the class parameter in `create_window`. It indicates to use the
+/// parent window's class.
+pub const COPY_CLASS_FROM_PARENT: u16 = 0;
+
+/// This constant can be used in most request that take a timestamp argument
+pub const CURRENT_TIME: TIMESTAMP = 0;
+
+/// This constant can be used to fill unused entries in `KEYSYM` tables
+pub const NO_SYMBOL: KEYSYM = 0;

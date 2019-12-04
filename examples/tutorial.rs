@@ -24,7 +24,8 @@ use x11rb::connection::{Connection, SequenceNumber};
 use x11rb::x11_utils::Event;
 use x11rb::errors::{ConnectionError, ConnectionErrorOrX11Error};
 use x11rb::generated::xproto::{self, *};
-use x11rb::wrapper::{ConnectionExt as _, COPY_DEPTH_FROM_PARENT};
+use x11rb::wrapper::ConnectionExt as _;
+use x11rb::COPY_DEPTH_FROM_PARENT;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //
