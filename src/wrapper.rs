@@ -2,9 +2,29 @@
 
 use std::convert::TryInto;
 
-use super::generated::xproto::ConnectionExt as XProtoConnectionExt;
+use super::generated::xproto::{ConnectionExt as XProtoConnectionExt, KEYSYM, TIMESTAMP};
 use super::connection::VoidCookie;
 use super::errors::{ConnectionError, ConnectionErrorOrX11Error};
+
+/// The universal null resource or null atom parameter value for many core X requests
+pub const NONE: u32 = 0;
+
+/// This constant can be used for many parameters in `create_window`
+pub const COPY_FROM_PARENT: u32 = 0;
+
+/// This constant can be used for the depth parameter in `create_window`. It indicates to use the
+/// parent window's depth.
+pub const COPY_DEPTH_FROM_PARENT: u8 = 0;
+
+/// This constant can be used for the class parameter in `create_window`. It indicates to use the
+/// parent window's class.
+pub const COPY_CLASS_FROM_PARENT: u16 = 0;
+
+/// This constant can be used in most request that take a timestamp argument
+pub const CURRENT_TIME: TIMESTAMP = 0;
+
+/// This constant can be used to fill unused entries in `KEYSYM` tables
+pub const NO_SYMBOL: KEYSYM = 0;
 
 /// Extension trait that simplifies API use
 pub trait ConnectionExt: XProtoConnectionExt {
