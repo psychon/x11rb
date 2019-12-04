@@ -45,12 +45,13 @@
 //! use x11rb::xcb_ffi::XCBConnection;
 //! use x11rb::generated::xproto::*;
 //! use x11rb::errors::ConnectionErrorOrX11Error;
+//! use x11rb::wrapper::COPY_DEPTH_FROM_PARENT;
 //!
 //! fn main() -> Result<(), ConnectionErrorOrX11Error> {
 //!     let (conn, screen_num) = XCBConnection::connect(None)?;
 //!     let screen = &conn.setup().roots[screen_num];
 //!     let win_id = conn.generate_id();
-//!     conn.create_window(24, win_id, screen.root, 0, 0, 100, 100, 0, WindowClass::InputOutput,
+//!     conn.create_window(COPY_DEPTH_FROM_PARENT, win_id, screen.root, 0, 0, 100, 100, 0, WindowClass::InputOutput,
 //!                        0, &CreateWindowAux::new().background_pixel(screen.white_pixel))?;
 //!     conn.map_window(win_id)?;
 //!     conn.flush();

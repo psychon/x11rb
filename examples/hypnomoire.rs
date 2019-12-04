@@ -12,6 +12,7 @@ use x11rb::xcb_ffi::XCBConnection;
 use x11rb::connection::Connection;
 use x11rb::errors::ConnectionErrorOrX11Error;
 use x11rb::x11_utils::Event;
+use x11rb::wrapper::COPY_DEPTH_FROM_PARENT;
 use x11rb::generated::xproto::*;
 
 /// Lag angle for the follow line
@@ -75,7 +76,7 @@ fn run<C: Connection>(conn: Arc<C>, window_state: Arc<Mutex<Window>>,
         guard.angle_velocity = 0.05;
     }
 
-    conn.create_window(screen.root_depth, window, screen.root,
+    conn.create_window(COPY_DEPTH_FROM_PARENT, window, screen.root,
                        0, 0, /* x and y */
                        default_size, default_size, /* width and height */
                        0, WindowClass::InputOutput,

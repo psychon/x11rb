@@ -11,6 +11,7 @@ use x11rb::connection::Connection;
 use x11rb::generated::xproto::*;
 use x11rb::errors::ConnectionErrorOrX11Error;
 use x11rb::x11_utils::{GenericEvent, Event};
+use x11rb::wrapper::COPY_DEPTH_FROM_PARENT;
 
 const TITLEBAR_HEIGHT: u16 = 20;
 
@@ -122,7 +123,7 @@ impl<'a, C: Connection> WMState<'a, C> {
         let win_aux = CreateWindowAux::new()
             .event_mask(EventMask::Exposure | EventMask::SubstructureNotify | EventMask::ButtonRelease)
             .background_pixel(screen.white_pixel);
-        self.conn.create_window(screen.root_depth, frame_win, screen.root, geom.x, geom.y, geom.width,
+        self.conn.create_window(COPY_DEPTH_FROM_PARENT, frame_win, screen.root, geom.x, geom.y, geom.width,
                                 geom.height + TITLEBAR_HEIGHT, 1, WindowClass::InputOutput, 0, &win_aux)?;
 
         self.conn.reparent_window(win, frame_win, 0, TITLEBAR_HEIGHT as _)?;
