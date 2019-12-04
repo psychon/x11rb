@@ -57,7 +57,7 @@ pub trait Event {
 ///
 /// Examine the event's `response_type()` and use `TryInto::try_into()` to convert the event to the
 /// desired type.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct GenericEvent(Buffer);
 
 impl Event for GenericEvent {
@@ -108,7 +108,7 @@ impl From<GenericError> for GenericEvent {
 /// This struct is similar to `GenericEvent`, but is specific to error packets. It allows access to
 /// the contained error code. This error code allows you to pick the right error type for
 /// conversion via `TryInto::try_into()`.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct GenericError(Buffer);
 
 impl GenericError {
