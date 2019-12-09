@@ -57,71 +57,44 @@ def mark_length_fields(self):
             field.visible = False
 
 
-def compute_copy_clone(obj_type):
-    if hasattr(obj_type, "computed_rust_copy_clone"):
-        return
-    obj_type.computed_rust_copy_clone = True
+def get_derives(obj_type):
+    if hasattr(obj_type, "computed_derives"):
+        possible_derives = ["Debug", "Clone", "Copy", "PartialEq", "Eq"]
+        return [item for item in possible_derives if item not in obj_type.underivable]
+    obj_type.computed_derives = True
 
-    copy, clone, peq, eq = True, True, True, True
+    underivable = set()
     if obj_type.is_container:
         if obj_type.is_union:
             # These are represented as a type containing Vec
-            copy = False
+            underivable.add("Copy")
             # And comparing unions makes no sense (in the current implementation)
-            peq, eq = False, False
+            underivable.update(["PartialEq", "Eq"])
 
         for field in obj_type.fields:
-            compute_copy_clone(field.type)
-            copy &= field.type.is_rust_copy
-            clone &= field.type.is_rust_clone
-            peq &= field.type.is_rust_partial_eq
-            eq &= field.type.is_rust_eq
+            get_derives(field.type)
+            underivable.update(field.type.underivable)
 
             # Sigh, FDs are weird and need special care
             if hasattr(field, "isfd") and field.isfd:
                 # RawFdContainer cannot be cloned
-                copy, clone = False, False
+                underivable.update(["Copy", "Clone"])
     elif obj_type.is_list:
-        compute_copy_clone(obj_type.member)
-        copy &= obj_type.member.is_rust_copy
-        clone &= obj_type.member.is_rust_clone
-        peq &= obj_type.member.is_rust_partial_eq
-        eq &= obj_type.member.is_rust_eq
+        get_derives(obj_type.member)
+        underivable.update(obj_type.member.underivable)
 
         if obj_type.nmemb is None:
             # Variable length list, represented as Vec
-            copy = False
+            underivable.add("Copy")
     elif obj_type.is_simple:
         if obj_type.name == ('float',) or obj_type.name == ('double',):
             # f32/f64 do not implement Eq
-            eq = False
+            underivable.add("Eq")
     else:
         assert obj_type.is_pad, obj_type
 
-    obj_type.is_rust_copy = copy
-    obj_type.is_rust_clone = clone
-    obj_type.is_rust_partial_eq = peq
-    obj_type.is_rust_eq = eq
-
-
-def is_copy(obj):
-    compute_copy_clone(obj)
-    return obj.is_rust_copy
-
-
-def is_clone(obj):
-    compute_copy_clone(obj)
-    return obj.is_rust_clone
-
-
-def is_partial_eq(obj):
-    compute_copy_clone(obj)
-    return obj.is_rust_partial_eq
-
-
-def is_eq(obj):
-    compute_copy_clone(obj)
-    return obj.is_rust_eq
+    obj_type.underivable = underivable
+    return get_derives(obj_type)
 
 
 def _emit_doc(out, doc):
@@ -1110,16 +1083,7 @@ class Module(object):
 
         has_fds = any(field.isfd for field in complex.fields)
         assert not (impl_try_parse and has_fds)
-        derives = ["Debug"]
-        if is_clone(complex):
-            derives.extend(["Clone"])
-            if is_copy(complex):
-                derives.extend(["Copy"])
-        if is_partial_eq(complex):
-            derives.extend(["PartialEq"])
-            if is_eq(complex):
-                derives.extend(["Eq"])
-        self.out("#[derive(%s)]", ", ".join(derives))
+        self.out("#[derive(%s)]", ", ".join(get_derives(complex)))
 
         self.out("pub struct %s%s {", name_transform(self._name(name)), extra_name)
         with Indent(self.out):
