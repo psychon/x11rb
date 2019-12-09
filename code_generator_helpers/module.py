@@ -62,30 +62,46 @@ def compute_copy_clone(obj_type):
         return
     obj_type.computed_rust_copy_clone = True
 
-    copy, clone = True, True
+    copy, clone, peq, eq = True, True, True, True
     if obj_type.is_container:
         if obj_type.is_union:
             # These are represented as a type containing Vec
             copy = False
+            # And comparing unions makes no sense (in the current implementation)
+            peq, eq = False, False
 
         for field in obj_type.fields:
             compute_copy_clone(field.type)
             copy &= field.type.is_rust_copy
             clone &= field.type.is_rust_clone
+            peq &= field.type.is_rust_partial_eq
+            eq &= field.type.is_rust_eq
 
             # Sigh, FDs are weird and need special care
             if hasattr(field, "isfd") and field.isfd:
                 # RawFdContainer cannot be cloned
                 copy, clone = False, False
     elif obj_type.is_list:
+        compute_copy_clone(obj_type.member)
+        copy &= obj_type.member.is_rust_copy
+        clone &= obj_type.member.is_rust_clone
+        peq &= obj_type.member.is_rust_partial_eq
+        eq &= obj_type.member.is_rust_eq
+
         if obj_type.nmemb is None:
             # Variable length list, represented as Vec
             copy = False
+    elif obj_type.is_simple:
+        if obj_type.name == ('float',) or obj_type.name == ('double',):
+            # f32/f64 do not implement Eq
+            eq = False
     else:
-        assert obj_type.is_simple or obj_type.is_pad, obj_type
+        assert obj_type.is_pad, obj_type
 
     obj_type.is_rust_copy = copy
     obj_type.is_rust_clone = clone
+    obj_type.is_rust_partial_eq = peq
+    obj_type.is_rust_eq = eq
 
 
 def is_copy(obj):
@@ -96,6 +112,16 @@ def is_copy(obj):
 def is_clone(obj):
     compute_copy_clone(obj)
     return obj.is_rust_clone
+
+
+def is_partial_eq(obj):
+    compute_copy_clone(obj)
+    return obj.is_rust_partial_eq
+
+
+def is_eq(obj):
+    compute_copy_clone(obj)
+    return obj.is_rust_eq
 
 
 def _emit_doc(out, doc):
@@ -202,7 +228,7 @@ class Module(object):
     def enum(self, enum, name):
         rust_name = self._name(name)
         _emit_doc(self.out, enum.doc)
-        self.out("#[derive(Debug, Clone, Copy)]")
+        self.out("#[derive(Debug, Clone, Copy, PartialEq, Eq)]")
         # Is any of the variants all upper-case?
         if any(ename.isupper() and len(ename) > 1 for (ename, value) in enum.values):
             self.out("#[allow(non_camel_case_types)]")
@@ -1084,13 +1110,16 @@ class Module(object):
 
         has_fds = any(field.isfd for field in complex.fields)
         assert not (impl_try_parse and has_fds)
+        derives = ["Debug"]
         if is_clone(complex):
+            derives.extend(["Clone"])
             if is_copy(complex):
-                self.out("#[derive(Debug, Clone, Copy)]")
-            else:
-                self.out("#[derive(Debug, Clone)]")
-        else:
-            self.out("#[derive(Debug)]")
+                derives.extend(["Copy"])
+        if is_partial_eq(complex):
+            derives.extend(["PartialEq"])
+            if is_eq(complex):
+                derives.extend(["Eq"])
+        self.out("#[derive(%s)]", ", ".join(derives))
 
         self.out("pub struct %s%s {", name_transform(self._name(name)), extra_name)
         with Indent(self.out):
@@ -1224,7 +1253,7 @@ class Module(object):
         assert all(field.type.size % min_field_size == 0 for field in switch.type.fields)
 
         self.out("/// Auxiliary and optional information for the %s function.", request_function_name)
-        self.out("#[derive(Debug, Clone, Copy, Default)]")
+        self.out("#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]")
         self.out("pub struct %s {", name)
         for field in switch.type.fields:
             self.out.indent("%s: RustOption<%s>,", self._aux_field_name(field), self._to_rust_type(field.type.name))
