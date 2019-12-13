@@ -188,6 +188,16 @@ class Module(object):
             self.out("")
             self.out("/// The X11 name of the extension for QueryExtension")
             self.out("pub const X11_EXTENSION_NAME: &str = \"%s\";", self.namespace.ext_xname)
+
+            self.out("")
+            self.out("/// The version number of this extension that this client library supports.")
+            self.out("///")
+            self.out("/// This constant contains the version number of this extension that is supported")
+            self.out("/// by this build of x11rb. For most things, it does not make sense to use this")
+            self.out("/// information. If you need to send a `QueryVersion`, it is recommended to instead")
+            self.out("/// send the maximum version of the extension that you need.")
+            self.out("pub const X11_XML_VERSION: (u32, u32) = (%s, %s);",
+                     self.namespace.major_version, self.namespace.minor_version)
         self.out("")
 
     def close(self, outer_module):
