@@ -122,9 +122,9 @@ Licensed under either of
 
 at your option.
 
-The subdirectory xcb-proto-1.13 contains a vendored copy of the package of the
-same name. It is covered by the MIT license. See
-[xcb-proto-1.13/COPYING](xcb-proto-1.13/COPYING) for details.
+The subdirectory xcbproto-1.13-6-ge79f6b0 contains a vendored copy of the
+package of the same name. It is covered by the MIT license. See
+[xcbproto-1.13-6-ge79f6b0/COPYING](xcb-proto-1.13/COPYING) for details.
 
 ## Contribution
 

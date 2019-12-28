@@ -25,7 +25,7 @@ fn get_paths() -> (String, String) {
 
 #[cfg(feature = "vendor-xcb-proto")]
 fn get_paths() -> (String, String) {
-    let dir = "xcb-proto-1.13/".to_string();
+    let dir = "xcbproto-1.13-6-ge79f6b0/".to_string();
     let pythondir = dir.clone();
     let includedir = dir + "src";
     (pythondir, includedir)

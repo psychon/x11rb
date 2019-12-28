@@ -1,4 +1,4 @@
-PROTO=xcb-proto-1.13
+PROTO=xcbproto-1.13-6-ge79f6b0
 REF_OUT=target/code-gen-ref
 CMP_OUT=target/code-gen-cmp
 
