@@ -13,9 +13,19 @@ rust_type_mapping = {
         'int32_t':  'i32',
         'int16_t':  'i16',
         'int8_t':   'i8',
+        'CARD64':   'u64',
+        'CARD32':   'u32',
+        'CARD16':   'u16',
+        'CARD8':    'u8',
+        'INT64':    'i64',
+        'INT32':    'i32',
+        'INT16':    'i16',
+        'INT8':     'i8',
         'char':     'u8',
+        'BYTE':     'u8',
         'float':    'f32',
         'double':   'f64',
+        'BOOL':     'bool',
 }
 
 
@@ -381,6 +391,8 @@ class Module(object):
                         else:
                             # Get the value of this field from "self".
                             source = "self.%s" % field_name
+                            if hasattr(field.type, 'xml_type') and field.type.xml_type == 'BOOL':
+                                source = "(%s as u8)" % source
                         # First serialise the value itself...
                         self.out("let %s = %s.to_ne_bytes();", field_name_bytes, source)
                         # ...then copy to the output.
@@ -547,7 +559,7 @@ class Module(object):
                     rust_type = letter
                 rust_type = self._to_rust_identifier(rust_type)
 
-                if name == ('xcb', 'InternAtom') and field.field_name == 'only_if_exists':
+                if name == ('xcb', 'InternAtom') and field.field_name == 'only_if_exists' and not hasattr(field, 'xml_type'):
                     rust_type = 'bool'
                 args.append("%s: %s" % (self._to_rust_variable(field.field_name), rust_type))
                 arg_names.append(self._to_rust_variable(field.field_name))
@@ -827,7 +839,8 @@ class Module(object):
                         # FIXME: Switch to a trait that we can implement on f32
                         self.out("let %s = %s.to_bits().to_ne_bytes();", field_bytes, rust_variable)
                     elif field.type.size is not None:  # Size None was already handled above
-                        if (name == ('xcb', 'InternAtom') and field_name == 'only_if_exists'):
+                        if (name == ('xcb', 'InternAtom') and field_name == 'only_if_exists') \
+                                and not hasattr(field.type, 'xml_type'):
                             # We faked a bool argument, convert to u8
                             self.out("let %s = %s as %s;", field_name, field_name, self._to_rust_type(field.type))
                         if field_name == "length":
@@ -837,7 +850,10 @@ class Module(object):
                             source = "TryInto::<%s>::try_into(length).unwrap_or(0)" % self._to_rust_type(field.type)
                         else:
                             source = rust_variable
-                        self.out("let %s = %s.to_ne_bytes();", field_bytes, source)
+                        if hasattr(field.type, 'xml_type') and field.type.xml_type == 'BOOL':
+                            self.out("let %s = (%s as u8).to_ne_bytes();", field_bytes, source)
+                        else:
+                            self.out("let %s = %s.to_ne_bytes();", field_bytes, source)
                     if field.type.is_switch or field.type.size is None:
                         # We have a byte array that we can directly send
                         _emit_request()
@@ -977,7 +993,10 @@ class Module(object):
                                     for n in range(field.type.size):
                                         parts.append("%s_%d[%d]" % (field_name, i, n))
                         elif field.type.size == 1:
-                            parts.append("self.%s" % field_name)
+                            if hasattr(field.type, 'xml_type') and field.type.xml_type == 'BOOL':
+                                parts.append("(self.%s as u8)" % field_name)
+                            else:
+                                parts.append("self.%s" % field_name)
                         else:
                             self.out("let %s = self.%s.to_ne_bytes();", field_name, field_name)
                             for i in range(field.type.size):
@@ -1314,6 +1333,10 @@ class Module(object):
 
     def _to_rust_type(self, field_type):
         """Convert an xcbgen name tuple to a rust type."""
+
+        if hasattr(field_type, 'xml_type'):
+            assert field_type.xml_type in rust_type_mapping
+            return rust_type_mapping[field_type.xml_type]
 
         name = field_type.name
 

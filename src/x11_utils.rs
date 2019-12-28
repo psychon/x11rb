@@ -202,6 +202,13 @@ impl TryParse for f64 {
     }
 }
 
+impl TryParse for bool {
+    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (data, remaining) = u8::try_parse(value)?;
+        Ok((data != 0, remaining))
+    }
+}
+
 // This macro is used by the generated code to implement `std::ops::BitOr` and
 // `std::ops::BitOrAssign`.
 macro_rules! bitmask_binop {
