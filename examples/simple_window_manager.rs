@@ -106,7 +106,7 @@ impl<'a, C: Connection> WMState<'a, C> {
                 continue;
             }
             let (attr, geom) = (attr.unwrap(), geom.unwrap());
-            if attr.override_redirect == 0 && attr.map_state != MapState::Unmapped.into() {
+            if !attr.override_redirect && attr.map_state != MapState::Unmapped.into() {
                 self.manage_window(win, &geom)?;
             }
         }
@@ -146,7 +146,7 @@ impl<'a, C: Connection> WMState<'a, C> {
                             Point { x: close_x, y: TITLEBAR_HEIGHT as _ },
                             Point { x: state.width as _, y: 0 },
         ])?;
-        let reply = self.conn.get_property(0, state.window, Atom::WM_NAME.into(), Atom::STRING.into(), 0, std::u32::MAX)?
+        let reply = self.conn.get_property(false, state.window, Atom::WM_NAME.into(), Atom::STRING.into(), 0, std::u32::MAX)?
             .reply()?;
         self.conn.image_text8(state.frame_window, self.black_gc, 1, 10, &reply.value)?;
         Ok(())
@@ -255,7 +255,7 @@ impl<'a, C: Connection> WMState<'a, C> {
                 type_: self.wm_protocols,
                 data: data.into(),
             };
-            self.conn.send_event(0, state.window, EventMask::NoEvent.into(), &event)?;
+            self.conn.send_event(false, state.window, EventMask::NoEvent.into(), &event)?;
         }
         Ok(())
     }

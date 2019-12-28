@@ -177,14 +177,14 @@ fn test_send_event() -> Result<(), ConnectionError> {
 
     // "Send" it
     let conn = FakeConnection::default();
-    let propagate = 42;
+    let propagate = true;
     let destination = 0x1337;
     let event_mask = 7;
     conn.send_event(propagate, destination, event_mask, event)?;
 
     let mut expected = Vec::new();
     expected.push(x11rb::generated::xproto::SEND_EVENT_REQUEST);
-    expected.push(propagate);
+    expected.push(propagate as _);
     expected.extend(&((12u16 + 32u16) / 4).to_ne_bytes());
     expected.extend(&destination.to_ne_bytes());
     expected.extend(&event_mask.to_ne_bytes());

@@ -77,7 +77,7 @@ fn make_file() -> IOResult<File>
 
 fn send_fd<C: Connection>(conn: &C, screen_num: usize, file: File) -> Result<(), ConnectionErrorOrX11Error> {
     let shmseg = conn.generate_id();
-    shm::attach_fd(conn, shmseg, file, 0)?;
+    shm::attach_fd(conn, shmseg, file, false)?;
 
     use_shared_mem(conn, screen_num, shmseg)?;
 
@@ -89,7 +89,7 @@ fn send_fd<C: Connection>(conn: &C, screen_num: usize, file: File) -> Result<(),
 fn receive_fd<C: Connection>(conn: &C, screen_num: usize) -> Result<(), ConnectionErrorOrX11Error> {
     let shmseg = conn.generate_id();
     let segment_size = TEMP_FILE_CONTENT.len() as _;
-    let reply = shm::create_segment(conn, shmseg, segment_size, 0)?.reply()?;
+    let reply = shm::create_segment(conn, shmseg, segment_size, false)?.reply()?;
     let shm::CreateSegmentReply { shm_fd, .. } = reply;
 
     let addr = unsafe { mmap(null_mut(), segment_size as _, PROT_READ|PROT_WRITE, MAP_SHARED, shm_fd.as_raw_fd(), 0) };

@@ -40,7 +40,7 @@ fn main() {
     conn.change_property8(PropMode::Replace, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), title.as_bytes()).unwrap();
     conn.change_property32(PropMode::Replace, win_id, wm_protocols.atom().unwrap(), Atom::ATOM.into(), &[wm_delete_window.atom().unwrap()]).unwrap();
 
-    let reply = conn.get_property(0, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), 0, 1024).unwrap();
+    let reply = conn.get_property(false, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), 0, 1024).unwrap();
     let reply = reply.reply().unwrap();
     assert_eq!(reply.value, title.as_bytes());
 

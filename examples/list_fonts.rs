@@ -27,7 +27,7 @@ fn main() {
             (u16::from(reply.min_byte1), u16::from(reply.max_byte1), '*')
         };
 
-        let all = if reply.all_chars_exist != 0 { "all" } else { "some" };
+        let all = if reply.all_chars_exist { "all" } else { "some" };
 
         let name = String::from_utf8_lossy(&reply.name);
 
