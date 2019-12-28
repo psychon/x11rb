@@ -40,10 +40,10 @@ mod util {
                 data
             };
 
-            if let Err(err) = conn.send_event(0, window, EventMask::NoEvent.into(), &event) {
+            if let Err(err) = conn.send_event(false, window, EventMask::NoEvent.into(), &event) {
                 eprintln!("Error while sending event: {:?}", err);
             }
-            if let Err(err) = conn.send_event(0, window, EventMask::SubstructureRedirect.into(), &event) {
+            if let Err(err) = conn.send_event(false, window, EventMask::SubstructureRedirect.into(), &event) {
                 eprintln!("Error while sending event: {:?}", err);
             }
             conn.flush();
