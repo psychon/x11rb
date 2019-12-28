@@ -100,12 +100,12 @@ class Module(object):
         self.add_type('INT16', '', ('int16_t',), tint16)
         self.add_type('INT32', '', ('int32_t',), tint32)
         self.add_type('INT64', '', ('int64_t',), tint64)
-        self.add_type('BYTE', '', ('uint8_t',), tcard8)
-        self.add_type('BOOL', '', ('uint8_t',), tcard8)
+        self.add_type('BYTE', '', ('uint8_t',), tbyte)
+        self.add_type('BOOL', '', ('uint8_t',), tbool)
         self.add_type('char', '', ('char',), tchar)
         self.add_type('float', '', ('float',), tfloat)
         self.add_type('double', '', ('double',), tdouble)
-        self.add_type('void', '', ('void',), tcard8)
+        self.add_type('void', '', ('void',), tvoid)
 
     # This goes out and parses the rest of the XML
     def register(self):

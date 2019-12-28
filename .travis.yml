@@ -39,7 +39,7 @@ script:
   - cargo build --verbose --all-targets
   - cargo test --verbose
 
-  - pycodestyle --show-pep8 --show-source $(git ls-files '*.py' | grep -v xcb-proto-1.13) --max-line-length=130
+  - pycodestyle --show-pep8 --show-source $(git ls-files '*.py' | grep -v xcbproto-1.13) --max-line-length=130
 
   # Run the examples as 'integration tests'. For this, there is a special
   # timeout mode where the examples close automatically after some time.
