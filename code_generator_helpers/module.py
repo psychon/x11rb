@@ -558,7 +558,6 @@ class Module(object):
                     generics.append(letter)
                     where.append("%s: Into<%s>" % (letter, rust_type))
                     rust_type = letter
-                rust_type = self._to_rust_identifier(rust_type)
 
                 if name == ('xcb', 'InternAtom') and field.field_name == 'only_if_exists' and not hasattr(field, 'xml_type'):
                     rust_type = 'bool'
@@ -1306,12 +1305,21 @@ class Module(object):
 
         self.out("}")
 
+    def _find_type_for_name(self, name_to_find):
+        for (name, type) in self.outer_module.types.values():
+            if name == name_to_find:
+                return type
+
     def _name(self, name):
         """Get the name as a string. xcbgen represents names as tuples like
         ('xcb', 'RandR', 'MonitorInfo'). This function produces MonitorInfo."""
         orig_name = name
+
         if name[0] == 'xcb':
             name = name[1:]
+        else:
+            assert len(name) == 1
+            name = (rust_type_mapping.get(name[0], name[0]),)
         if self.namespace.is_ext and name[0] == self.namespace.ext_name:
             name = name[1:]
         if len(name) == 2:
@@ -1319,7 +1327,17 @@ class Module(object):
             ext = self.outer_module.get_namespace(name[0]).header
             name = (ext + "::" + name[1],)
         assert len(name) == 1, orig_name
-        return name[0]
+        name = name[0]
+
+        type_for_name = self._find_type_for_name(orig_name)
+        if type_for_name:
+            if type_for_name.is_simple:
+                if '_' in name:
+                    name = self._to_rust_identifier(name)
+            if type_for_name.is_container:
+                name = self._to_rust_identifier(name)
+
+        return name
 
     def _lower_snake_name(self, name):
         """Convert a name tuple to a lowercase snake name. MonitorInfo is turned
