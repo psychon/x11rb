@@ -308,7 +308,7 @@ class Module(object):
         assert not hasattr(struct, "doc")
 
         # Emit the struct definition itself
-        self.complex_type(struct, name, '', True, lambda name: self._to_rust_identifier(name))
+        self.complex_type(struct, self._to_rust_identifier(self._name(name)), True)
 
         # And now emit some functions for the struct.
 
@@ -907,7 +907,7 @@ class Module(object):
 
         if obj.reply:
             _emit_doc(self.out, obj.reply.doc)
-            self.complex_type(obj.reply, name, 'Reply', False)
+            self.complex_type(obj.reply, self._name(name) + 'Reply', False)
 
         self.out("")
 
@@ -918,7 +918,7 @@ class Module(object):
     def event(self, event, name):
         self.emit_opcode(name, 'Event', event.opcodes[name])
         _emit_doc(self.out, event.doc)
-        self.complex_type(event, name, 'Event', False)
+        self.complex_type(event, self._name(name) + 'Event', False)
         if not event.is_ge_event:
             self._emit_from_generic(name, 'X11GenericEvent', 'Event')
             self._emit_serialise(event, name, 'Event')
@@ -929,7 +929,7 @@ class Module(object):
     def error(self, error, name):
         assert not hasattr(error, "doc")
         self.emit_opcode(name, 'Error', error.opcodes[name])
-        self.complex_type(error, name, 'Error', False)
+        self.complex_type(error, self._name(name) + 'Error', False)
         self._emit_from_generic(name, 'X11GenericError', 'Error')
         self._emit_serialise(error, name, 'Error')
         self.out("")
@@ -1103,7 +1103,7 @@ class Module(object):
 
         return parts
 
-    def complex_type(self, complex, name, extra_name, impl_try_parse, name_transform=lambda x: x):
+    def complex_type(self, complex, name, impl_try_parse):
         """Emit a complex type as a struct. This also adds some parsing code and
         a to_ne_bytes() implementation."""
 
@@ -1113,7 +1113,7 @@ class Module(object):
         assert not (impl_try_parse and has_fds)
         self.out("#[derive(%s)]", ", ".join(get_derives(complex)))
 
-        self.out("pub struct %s%s {", name_transform(self._name(name)), extra_name)
+        self.out("pub struct %s {", name)
         with Indent(self.out):
             for field in complex.fields:
                 if field.visible or (not field.type.is_pad and not hasattr(field, "is_length_field_for")):
@@ -1144,7 +1144,7 @@ class Module(object):
 
         if impl_try_parse and not unresolved:
             method = "fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError>"
-            self.out("impl TryParse for %s%s {", name_transform(self._name(name)), extra_name)
+            self.out("impl TryParse for %s {", name)
         else:
             if has_fds:
                 method = "fn try_parse_fd<'a>(value: &'a [u8], fds: &mut Vec<RawFdContainer>)"
@@ -1164,13 +1164,13 @@ class Module(object):
                 complex.extra_try_parse_args = extra_args
             else:
                 method = "pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError>"
-            self.out("impl %s%s {", name_transform(self._name(name)), extra_name)
+            self.out("impl %s {", name)
         with Indent(self.out):
             self.out("%s {", method)
             with Indent(self.out):
                 self.out("let mut remaining = value;")
                 parts = self._emit_parsing_code(complex.fields)
-                self.out("let result = %s%s { %s };", name_transform(self._name(name)), extra_name, ", ".join(parts))
+                self.out("let result = %s { %s };", name, ", ".join(parts))
                 self.out("Ok((result, remaining))")
             self.out("}")
         self.out("}")
@@ -1184,7 +1184,7 @@ class Module(object):
             value = "(Buffer, Vec<RawFdContainer>)"
         else:
             value = "&Buffer"
-        self.out("impl TryFrom<%s> for %s%s {", value, name_transform(self._name(name)), extra_name)
+        self.out("impl TryFrom<%s> for %s {", value, name)
         with Indent(self.out):
             self.out("type Error = ParseError;")
             self.out("fn try_from(value: %s) -> Result<Self, Self::Error> {", value)
@@ -1196,7 +1196,7 @@ class Module(object):
         self.out("}")
 
         if not has_fds:
-            self.out("impl TryFrom<Buffer> for %s%s {", name_transform(self._name(name)), extra_name)
+            self.out("impl TryFrom<Buffer> for %s {", name)
             with Indent(self.out):
                 self.out("type Error = ParseError;")
                 self.out("fn try_from(value: Buffer) -> Result<Self, Self::Error> {")
@@ -1208,7 +1208,7 @@ class Module(object):
             value = "(&[u8], Vec<RawFdContainer>)"
         else:
             value = "&[u8]"
-        self.out("impl TryFrom<%s> for %s%s {", value, name_transform(self._name(name)), extra_name)
+        self.out("impl TryFrom<%s> for %s {", value, name)
         with Indent(self.out):
             self.out("type Error = ParseError;")
             self.out("fn try_from(value: %s) -> Result<Self, Self::Error> {", value)
