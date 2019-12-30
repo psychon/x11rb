@@ -1313,6 +1313,10 @@ class Module(object):
             name = name[1:]
         if self.namespace.is_ext and name[0] == self.namespace.ext_name:
             name = name[1:]
+        if len(name) == 2:
+            # Must be a type from another module which we imported
+            ext = name[0].lower()  # FIXME: How to get the name of the ext?
+            name = (ext + "::" + name[1],)
         assert len(name) == 1, orig_name
         return name[0]
 
@@ -1339,21 +1343,8 @@ class Module(object):
             return rust_type_mapping[field_type.xml_type]
 
         name = field_type.name
-
-        orig_name = name
         if type(name) == tuple:
-            if name[0] == 'xcb':
-                name = name[1:]
-            if self.namespace.is_ext and name[0] == self.namespace.ext_name:
-                name = name[1:]
-            if len(name) == 2:
-                # If this is still a tuple, it should be a type from another module
-                # and we should have imported that module.
-                ext = name[0].lower()  # FIXME: How to get the name of the ext?
-                name = ext + "::" + name[1],
-            assert len(name) == 1, orig_name
-            name = name[0]
-
+            name = self._name(name)
         if name in rust_type_mapping:
             return rust_type_mapping[name]
         elif name.isupper():
