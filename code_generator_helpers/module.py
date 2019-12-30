@@ -162,6 +162,7 @@ class Module(object):
         self.out = Output()
         self.trait_out = Output()
         self.namespace = outer_module.namespace
+        self.outer_module = outer_module
 
         self.out("#![allow(clippy::unreadable_literal)]")
         self.out("#![allow(clippy::too_many_arguments)]")
@@ -1315,7 +1316,7 @@ class Module(object):
             name = name[1:]
         if len(name) == 2:
             # Must be a type from another module which we imported
-            ext = name[0].lower()  # FIXME: How to get the name of the ext?
+            ext = self.outer_module.get_namespace(name[0]).header
             name = (ext + "::" + name[1],)
         assert len(name) == 1, orig_name
         return name[0]
