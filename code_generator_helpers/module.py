@@ -23,6 +23,7 @@ rust_type_mapping = {
         'INT8':     'i8',
         'char':     'u8',
         'BYTE':     'u8',
+        'void':     'u8',
         'float':    'f32',
         'double':   'f64',
         'BOOL':     'bool',
@@ -1224,7 +1225,9 @@ class Module(object):
         if field.type.is_switch:
             return modifier + aux_name
         if not field.isfd:
-            result = self._to_rust_type(field.type)
+            result = self._name(field.field_type)
+            if hasattr(field.type, 'xml_type') and field.type.xml_type == 'BOOL':
+                result = 'bool'
             if field.type.is_list:
                 if field.type.nmemb is None:
                     result = "%s[%s]" % (modifier, result)
