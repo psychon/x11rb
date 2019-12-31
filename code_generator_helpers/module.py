@@ -1322,7 +1322,7 @@ class Module(object):
         if name[0] == 'xcb':
             name = name[1:]
         else:
-            assert len(name) == 1
+            assert len(name) == 1, name
             name = (rust_type_mapping.get(name[0], name[0]),)
         if self.namespace.is_ext and name[0] == self.namespace.ext_name:
             name = name[1:]
