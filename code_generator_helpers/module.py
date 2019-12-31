@@ -301,7 +301,7 @@ class Module(object):
         # right thing here, but then we get both 'pub type Window = u32;' and 'enum
         # Window', which the compiler does not like.
         name = self._name(name)
-        self.out("pub type %s = %s;", name, self._to_rust_type(simple))
+        self.out("pub type %s = %s;", name, self._name(simple.name))
         self.out("")
 
     def struct(self, struct, name):
@@ -1359,21 +1359,6 @@ class Module(object):
 
     def _aux_field_name(self, field):
         return self._lower_snake_name((field.field_name,))
-
-    def _to_rust_type(self, field_type):
-        """Convert an xcbgen name tuple to a rust type."""
-
-        if hasattr(field_type, 'xml_type'):
-            assert field_type.xml_type in rust_type_mapping
-            return rust_type_mapping[field_type.xml_type]
-
-        name = field_type.name
-        if type(name) == tuple:
-            name = self._name(name)
-        if name in rust_type_mapping:
-            return rust_type_mapping[name]
-        else:
-            return name
 
     def _to_rust_identifier(self, name):
         if name in rust_type_mapping.values():
