@@ -158,6 +158,10 @@ def ename_to_rust(ename):
     return ename[0].upper() + ename[1:]
 
 
+def is_bool(type):
+    return hasattr(type, 'xml_type') and type.xml_type == 'BOOL'
+
+
 class Module(object):
     def __init__(self, outer_module):
         self.out = Output()
@@ -391,7 +395,7 @@ class Module(object):
                         else:
                             # Get the value of this field from "self".
                             source = "self.%s" % field_name
-                            if hasattr(field.type, 'xml_type') and field.type.xml_type == 'BOOL':
+                            if is_bool(field.type):
                                 source = "(%s as u8)" % source
                         # First serialise the value itself...
                         self.out("let %s = %s.to_ne_bytes();", field_name_bytes, source)
@@ -558,7 +562,7 @@ class Module(object):
                     where.append("%s: Into<%s>" % (letter, rust_type))
                     rust_type = letter
 
-                if name == ('xcb', 'InternAtom') and field.field_name == 'only_if_exists' and not hasattr(field, 'xml_type'):
+                if name == ('xcb', 'InternAtom') and field.field_name == 'only_if_exists':
                     rust_type = 'bool'
                 args.append("%s: %s" % (self._to_rust_variable(field.field_name), rust_type))
                 arg_names.append(self._to_rust_variable(field.field_name))
@@ -838,10 +842,6 @@ class Module(object):
                         # FIXME: Switch to a trait that we can implement on f32
                         self.out("let %s = %s.to_bits().to_ne_bytes();", field_bytes, rust_variable)
                     elif field.type.size is not None:  # Size None was already handled above
-                        if (name == ('xcb', 'InternAtom') and field_name == 'only_if_exists') \
-                                and not hasattr(field.type, 'xml_type'):
-                            # We faked a bool argument, convert to u8
-                            self.out("let %s = %s as %s;", field_name, field_name, self._name(field.type.name))
                         if field_name == "length":
                             # This is the request length which we explicitly
                             # calculated above. If it does not fit into u16,
@@ -849,7 +849,7 @@ class Module(object):
                             source = "TryInto::<%s>::try_into(length).unwrap_or(0)" % self._name(field.type.name)
                         else:
                             source = rust_variable
-                        if hasattr(field.type, 'xml_type') and field.type.xml_type == 'BOOL':
+                        if is_bool(field.type) or (name == ('xcb', 'InternAtom') and field_name == 'only_if_exists'):
                             self.out("let %s = (%s as u8).to_ne_bytes();", field_bytes, source)
                         else:
                             self.out("let %s = %s.to_ne_bytes();", field_bytes, source)
@@ -992,7 +992,7 @@ class Module(object):
                                     for n in range(field.type.size):
                                         parts.append("%s_%d[%d]" % (field_name, i, n))
                         elif field.type.size == 1:
-                            if hasattr(field.type, 'xml_type') and field.type.xml_type == 'BOOL':
+                            if is_bool(field.type):
                                 parts.append("(self.%s as u8)" % field_name)
                             else:
                                 parts.append("self.%s" % field_name)
@@ -1038,10 +1038,7 @@ class Module(object):
         for field in fields:
             field_name = self._to_rust_variable(field.field_name)
             if not field.isfd:
-                if hasattr(field.type, 'xml_type') and field.type.xml_type == 'BOOL':
-                    rust_type = 'bool'
-                else:
-                    rust_type = self._name(field.field_type)
+                rust_type = self._field_type(field)
             if not field.wire:
                 if not field.isfd:
                     continue
@@ -1122,10 +1119,8 @@ class Module(object):
                     field_name = self._to_rust_variable(field.field_name)
                     if field.isfd:
                         rust_type = "RawFdContainer"
-                    elif hasattr(field.type, 'xml_type') and field.type.xml_type == 'BOOL':
-                        rust_type = 'bool'
                     else:
-                        rust_type = self._name(field.field_type)
+                        rust_type = self._field_type(field)
                     if field.type.is_list:
                         if field.type.nmemb is None:
                             self.out("pub %s: Vec<%s>,", field_name, rust_type)
@@ -1228,9 +1223,7 @@ class Module(object):
         if field.type.is_switch:
             return modifier + aux_name
         if not field.isfd:
-            result = self._name(field.field_type)
-            if hasattr(field.type, 'xml_type') and field.type.xml_type == 'BOOL':
-                result = 'bool'
+            result = self._field_type(field)
             if field.type.is_list:
                 if field.type.nmemb is None:
                     result = "%s[%s]" % (modifier, result)
@@ -1315,6 +1308,11 @@ class Module(object):
         for (name, type) in self.outer_module.types.values():
             if name == name_to_find:
                 return type
+
+    def _field_type(self, field):
+        if is_bool(field.type):
+            return 'bool'
+        return self._name(field.field_type)
 
     def _name(self, name):
         """Get the name as a string. xcbgen represents names as tuples like
