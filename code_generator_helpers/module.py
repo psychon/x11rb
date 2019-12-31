@@ -1128,7 +1128,7 @@ class Module(object):
                         else:
                             self.out("pub %s: [%s; %s],", field_name, rust_type, field.type.nmemb)
                     else:
-                        self.out("pub %s: %s,", field_name, self._to_rust_identifier(rust_type))
+                        self.out("pub %s: %s,", field_name, rust_type)
         self.out("}")
 
         # Collect all the fields that appear on the wire in the parent object
