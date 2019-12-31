@@ -1037,7 +1037,11 @@ class Module(object):
         parts = []
         for field in fields:
             field_name = self._to_rust_variable(field.field_name)
-            rust_type = self._to_rust_type(field.type)
+            if not field.isfd:
+                if hasattr(field.type, 'xml_type') and field.type.xml_type == 'BOOL':
+                    rust_type = 'bool'
+                else:
+                    rust_type = self._name(field.field_type)
             if not field.wire:
                 if not field.isfd:
                     continue
