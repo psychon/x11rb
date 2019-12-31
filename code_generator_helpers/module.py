@@ -1120,8 +1120,10 @@ class Module(object):
                     field_name = self._to_rust_variable(field.field_name)
                     if field.isfd:
                         rust_type = "RawFdContainer"
+                    elif hasattr(field.type, 'xml_type') and field.type.xml_type == 'BOOL':
+                        rust_type = 'bool'
                     else:
-                        rust_type = self._to_rust_type(field.type)
+                        rust_type = self._name(field.field_type)
                     if field.type.is_list:
                         if field.type.nmemb is None:
                             self.out("pub %s: Vec<%s>,", field_name, rust_type)
