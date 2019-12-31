@@ -1076,9 +1076,8 @@ class Module(object):
                 parts.append(field.field_name)
             elif field.type.is_list:
                 try_parse_args = ["remaining"]
-                if hasattr(field.type, "member"):
-                    if hasattr(field.type.member, "extra_try_parse_args"):
-                        try_parse_args += field.type.member.extra_try_parse_args
+                if hasattr(field.type.member, "extra_try_parse_args"):
+                    try_parse_args += field.type.member.extra_try_parse_args
 
                 if field.type.expr.op != 'calculate_len':
                     self.out("let list_length = %s;", self.expr_to_str(field.type.expr, 'usize'))
