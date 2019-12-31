@@ -301,8 +301,6 @@ class Module(object):
         # right thing here, but then we get both 'pub type Window = u32;' and 'enum
         # Window', which the compiler does not like.
         name = self._name(name)
-        if '_' in name:
-            name = self._to_rust_identifier(name)
         self.out("pub type %s = %s;", name, self._to_rust_type(simple))
         self.out("")
 
@@ -310,7 +308,7 @@ class Module(object):
         assert not hasattr(struct, "doc")
 
         # Emit the struct definition itself
-        self.complex_type(struct, self._to_rust_identifier(self._name(name)), True)
+        self.complex_type(struct, self._name(name), True)
 
         # And now emit some functions for the struct.
 
@@ -325,7 +323,7 @@ class Module(object):
             length = sum((field.type.get_total_size() for field in struct.fields))
             wire_type = "[u8; %s]" % length
 
-        self.out("impl %s {", self._to_rust_identifier(self._name(name)))
+        self.out("impl %s {", self._name(name))
         with Indent(self.out):
             self.out("pub fn to_ne_bytes(&self) -> %s {", wire_type)
 
@@ -1096,7 +1094,7 @@ class Module(object):
                 parts.append(field_name)
             else:
                 self.out("let (%s, new_remaining) = %s::try_parse(remaining)?;",
-                         field_name, self._to_rust_identifier(rust_type))
+                         field_name, rust_type)
                 self.out("remaining = new_remaining;")
                 if not hasattr(field, 'is_length_field_for'):
                     parts.append(self._to_rust_variable(field.field_name))
@@ -1370,8 +1368,6 @@ class Module(object):
             name = self._name(name)
         if name in rust_type_mapping:
             return rust_type_mapping[name]
-        elif name.isupper():
-            return self._to_rust_identifier(name)
         else:
             return name
 
