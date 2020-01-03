@@ -185,10 +185,11 @@ class Module(object):
         self.out("#[allow(unused_imports)]")
         self.out("use crate::x11_utils::{GenericEvent as X11GenericEvent, GenericError as X11GenericError, Event as _};")
         self.out("use crate::x11_utils::TryParse;")
+        self.out("use crate::connection::RequestConnection;")
         self.out("#[allow(unused_imports)]")
-        self.out("use crate::connection::{Cookie, CookieWithFds, VoidCookie, RequestConnection};")
+        self.out("use crate::cookie::{Cookie, CookieWithFds, VoidCookie};")
         if not self.namespace.is_ext:
-            self.out("use crate::connection::ListFontsWithInfoCookie;")
+            self.out("use crate::cookie::ListFontsWithInfoCookie;")
         self.out("use crate::errors::{ParseError, ConnectionError};")
 
         for (name, header) in outer_module.imports:
