@@ -17,7 +17,7 @@ mod inner;
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
 pub struct RustConnection {
-    inner: RefCell<inner::ConnectionInner>,
+    inner: RefCell<inner::ConnectionInner<TcpStream>>,
     setup: Setup,
     extension_information: ExtensionInformation,
 }
