@@ -3,7 +3,8 @@ use std::convert::TryFrom;
 use std::ops::Deref;
 use std::cell::RefCell;
 
-use x11rb::connection::{RequestConnection, Cookie, CookieWithFds, VoidCookie, SequenceNumber, RequestKind, DiscardMode};
+use x11rb::connection::{RequestConnection, SequenceNumber, RequestKind, DiscardMode};
+use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
 use x11rb::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 use x11rb::generated::xproto::{QueryExtensionReply, ConnectionExt, Segment, KeymapNotifyEvent, ClientMessageData};
 use x11rb::utils::{Buffer, RawFdContainer};

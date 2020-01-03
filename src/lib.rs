@@ -84,6 +84,8 @@ pub mod x11_utils;
 pub mod errors;
 pub mod connection;
 pub mod rust_connection;
+pub mod cookie;
+pub mod extension_information;
 
 pub mod generated {
     include!(concat!(env!("OUT_DIR"), "/generated/mod.rs"));

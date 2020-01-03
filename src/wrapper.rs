@@ -3,7 +3,8 @@
 use std::convert::TryInto;
 
 use super::generated::xproto::{ConnectionExt as XProtoConnectionExt, InternAtomReply, ATOM};
-use super::connection::{VoidCookie, Connection, Cookie};
+use super::connection::Connection;
+use super::cookie::{VoidCookie, Cookie};
 use super::errors::{ConnectionError, ConnectionErrorOrX11Error};
 
 /// Extension trait that simplifies API use

@@ -13,7 +13,9 @@ use libc::c_void;
 use crate::utils::{CSlice, Buffer, RawFdContainer};
 use crate::x11_utils::{GenericError, GenericEvent};
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
-use crate::connection::{RequestConnection, Connection, VoidCookie, Cookie, CookieWithFds, SequenceNumber, ExtensionInformation, RequestKind, DiscardMode};
+use crate::connection::{RequestConnection, Connection, SequenceNumber, RequestKind, DiscardMode};
+use crate::cookie::{VoidCookie, Cookie, CookieWithFds};
+use crate::extension_information::ExtensionInformation;
 use super::generated::xproto::{Setup, QueryExtensionReply};
 
 mod pending_errors;

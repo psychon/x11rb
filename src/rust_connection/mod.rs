@@ -7,7 +7,9 @@ use std::convert::TryFrom;
 use std::cell::RefCell;
 
 use crate::utils::{Buffer, RawFdContainer};
-use crate::connection::{RequestConnection, Connection, Cookie, CookieWithFds, VoidCookie, SequenceNumber, ExtensionInformation, RequestKind, DiscardMode};
+use crate::connection::{RequestConnection, Connection, SequenceNumber, RequestKind, DiscardMode};
+use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
+use crate::extension_information::ExtensionInformation;
 use crate::generated::xproto::{Setup, QueryExtensionReply};
 use crate::x11_utils::{GenericEvent, GenericError};
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
