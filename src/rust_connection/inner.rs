@@ -3,19 +3,17 @@
 use std::net::TcpStream;
 use std::io::{IoSlice, Write, Read};
 use std::error::Error;
-use std::convert::{TryFrom, TryInto};
+use std::convert::TryInto;
 use std::iter::repeat;
-use std::cell::RefCell;
 use std::collections::VecDeque;
 
 use crate::utils::{Buffer, RawFdContainer};
-use crate::connection::{RequestConnection, Connection, Cookie, CookieWithFds, VoidCookie, SequenceNumber, ExtensionInformation, RequestKind, DiscardMode};
-use crate::generated::xproto::{Setup, SetupRequest, QueryExtensionReply};
-use crate::x11_utils::{GenericEvent, GenericError};
-use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
+use crate::connection::SequenceNumber;
+use crate::generated::xproto::{Setup, SetupRequest};
+use crate::x11_utils::GenericEvent;
 
 #[derive(Debug)]
-struct ConnectionInner {
+pub(crate) struct ConnectionInner {
     stream: TcpStream,
 
     next_id: u32,
@@ -30,7 +28,7 @@ struct ConnectionInner {
 }
 
 impl ConnectionInner {
-    fn connect(mut stream: TcpStream) -> Result<(ConnectionInner, Setup), Box<dyn Error>> {
+    pub(crate) fn connect(mut stream: TcpStream) -> Result<(ConnectionInner, Setup), Box<dyn Error>> {
         Self::write_setup(&mut stream)?;
         let setup = Self::read_setup(&mut stream)?;
         let (base, mask) = (setup.resource_id_base, setup.resource_id_mask);
@@ -94,7 +92,7 @@ impl ConnectionInner {
         Ok(Buffer::from_vec(buffer))
     }
 
-    fn send_request(&mut self, bufs: &[IoSlice], fds: Vec<RawFdContainer>, has_reply: bool) -> Result<SequenceNumber, Box<dyn Error>> {
+    pub(crate) fn send_request(&mut self, bufs: &[IoSlice], fds: Vec<RawFdContainer>, has_reply: bool) -> Result<SequenceNumber, Box<dyn Error>> {
         assert_eq!(fds.len(), 0);
 
         self.last_sequence_written += 1;
@@ -164,7 +162,7 @@ impl ConnectionInner {
         Ok(())
     }
 
-    fn wait_for_reply(&mut self, sequence: SequenceNumber) -> Result<Buffer, Box<dyn Error>> {
+    pub(crate) fn wait_for_reply(&mut self, sequence: SequenceNumber) -> Result<Buffer, Box<dyn Error>> {
         // FIXME: Idea: Have this always return a Buffer and have the caller (Cookie and the multi
         // reply cookie) tell apart reply and error.
         loop {
@@ -177,7 +175,7 @@ impl ConnectionInner {
         }
     }
 
-    fn wait_for_event(&mut self) -> Result<GenericEvent, Box<dyn Error>> {
+    pub(crate) fn wait_for_event(&mut self) -> Result<GenericEvent, Box<dyn Error>> {
         loop {
             let event = self.pending_events.pop_front();
             if let Some(event) = event {
@@ -187,7 +185,7 @@ impl ConnectionInner {
         }
     }
 
-    fn poll_for_event(&mut self) -> Result<Option<GenericEvent>, Box<dyn Error>> {
+    pub(crate) fn poll_for_event(&mut self) -> Result<Option<GenericEvent>, Box<dyn Error>> {
         // FIXME: Check if something can be read from the wire
         self.pending_events.pop_front()
             .map(TryInto::try_into)
@@ -195,115 +193,11 @@ impl ConnectionInner {
             .map_err(Into::into)
     }
 
-    fn generate_id(&mut self) -> u32 {
+    pub(crate) fn generate_id(&mut self) -> u32 {
         // FIXME: use the XC_MISC extension to get a new range when the old one is used up
         assert!(self.next_id < self.max_id);
         let id = self.next_id;
         self.next_id += 1;
         id
-    }
-}
-
-/// A connection to an X11 server implemented in pure rust
-#[derive(Debug)]
-pub struct RustConnection {
-    inner: RefCell<ConnectionInner>,
-    setup: Setup,
-    extension_information: ExtensionInformation,
-}
-
-impl RustConnection {
-    /// Establish a new connection.
-    ///
-    /// FIXME: This currently hardcodes the display `127.0.0.1:1`.
-    pub fn connect() -> Result<(RustConnection, usize), Box<dyn Error>> {
-        let screen = 0;
-        let stream = TcpStream::connect("127.0.0.1:6001")?;
-        let (inner, setup) = ConnectionInner::connect(stream)?;
-        let conn = RustConnection {
-            inner: RefCell::new(inner),
-            setup,
-            extension_information: Default::default()
-        };
-        Ok((conn, screen))
-    }
-
-    fn send_request(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>, has_reply: bool) -> Result<SequenceNumber, ConnectionError> {
-        self.inner.borrow_mut().send_request(bufs, fds, has_reply).or(Err(ConnectionError::UnknownError))
-    }
-}
-
-impl RequestConnection for RustConnection {
-    fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<Cookie<Self, R>, ConnectionError>
-        where R: TryFrom<Buffer, Error=ParseError>
-    {
-        let mut storage = Default::default();
-        let bufs = self.compute_length_field(bufs, &mut storage)?;
-
-        Ok(Cookie::new(self, self.send_request(bufs, fds, true)?))
-    }
-
-    fn send_request_with_reply_with_fds<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<CookieWithFds<Self, R>, ConnectionError>
-        where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>
-    {
-        let _ = (bufs, fds);
-        unimplemented!()
-    }
-
-    fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<VoidCookie<Self>, ConnectionError> {
-        // FIXME: Shouldn't this call compute_length_field? (Or rather: the implementation from
-        // send_request_with_reply() should be moved to send_request())
-        Ok(VoidCookie::new(self, self.send_request(bufs, fds, false)?))
-    }
-
-    fn discard_reply(&self, sequence: SequenceNumber, kind: RequestKind, mode: DiscardMode) {
-        let _ = (sequence, kind, mode);
-        unimplemented!();
-    }
-
-    fn extension_information(&self, extension_name: &'static str) -> Option<QueryExtensionReply> {
-        self.extension_information.extension_information(self, extension_name)
-    }
-
-    fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
-        Ok(self.inner.borrow_mut().wait_for_reply(sequence).map_err(|_| ConnectionError::UnknownError)?)
-    }
-
-    fn wait_for_reply(&self, _sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError> {
-        unimplemented!();
-    }
-
-    fn check_for_error(&self, _sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError> {
-        unimplemented!();
-    }
-
-    fn wait_for_reply_with_fds(&self, _sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
-        unimplemented!();
-    }
-
-    fn maximum_request_bytes(&self) -> usize {
-        unimplemented!()
-    }
-}
-
-impl Connection for RustConnection {
-    fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
-        Ok(self.inner.borrow_mut().wait_for_event().map_err(|_| ConnectionError::UnknownError)?)
-    }
-
-    fn poll_for_event(&self) -> Result<Option<GenericEvent>, ConnectionError> {
-        Ok(self.inner.borrow_mut().poll_for_event().map_err(|_| ConnectionError::UnknownError)?)
-    }
-
-    fn flush(&self) {
-        // Nothing to do since we do not do any buffering
-    }
-
-    fn setup(&self) -> &Setup {
-        &self.setup
-    }
-
-    fn generate_id(&self) -> u32 {
-        self.inner.borrow_mut().generate_id()
     }
 }
