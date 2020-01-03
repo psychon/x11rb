@@ -1,6 +1,5 @@
 //! A pure-rust implementation of a connection to an X11 server.
 
-use std::net::TcpStream;
 use std::io::{IoSlice, Write, Read};
 use std::error::Error;
 use std::convert::TryInto;
@@ -13,8 +12,10 @@ use crate::generated::xproto::{Setup, SetupRequest};
 use crate::x11_utils::GenericEvent;
 
 #[derive(Debug)]
-pub(crate) struct ConnectionInner {
-    stream: TcpStream,
+pub(crate) struct ConnectionInner<Stream>
+where Stream: Read + Write
+{
+    stream: Stream,
 
     next_id: u32,
     max_id: u32,
@@ -27,8 +28,10 @@ pub(crate) struct ConnectionInner {
     pending_replies: VecDeque<(SequenceNumber, Buffer)>,
 }
 
-impl ConnectionInner {
-    pub(crate) fn connect(mut stream: TcpStream) -> Result<(ConnectionInner, Setup), Box<dyn Error>> {
+impl<Stream> ConnectionInner<Stream>
+where Stream: Read + Write
+{
+    pub(crate) fn connect(mut stream: Stream) -> Result<(Self, Setup), Box<dyn Error>> {
         Self::write_setup(&mut stream)?;
         let setup = Self::read_setup(&mut stream)?;
         let (base, mask) = (setup.resource_id_base, setup.resource_id_mask);
@@ -55,7 +58,7 @@ impl ConnectionInner {
         0x42
     }
 
-    fn write_setup(stream: &mut TcpStream) -> Result<(), Box<dyn Error>> {
+    fn write_setup(stream: &mut Stream) -> Result<(), Box<dyn Error>> {
         let request = SetupRequest {
             byte_order: Self::byte_order(),
             protocol_major_version: 11,
@@ -67,7 +70,7 @@ impl ConnectionInner {
         Ok(())
     }
 
-    fn read_setup(stream: &mut TcpStream) -> Result<Setup, Box<dyn Error>> {
+    fn read_setup(stream: &mut Stream) -> Result<Setup, Box<dyn Error>> {
         let mut setup: Vec<_> = repeat(0).take(8).collect();
         stream.read_exact(&mut setup)?;
         let length = u16::from_ne_bytes([setup[6], setup[7]]);
