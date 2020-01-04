@@ -10,6 +10,11 @@ followed by the Rust code that is generated for it.
 
 The following code is generated at the beginning of a module:
 ```rust
+#![allow(clippy::unreadable_literal)]
+#![allow(clippy::too_many_arguments)]
+#![allow(clippy::identity_op)]
+#![allow(clippy::trivially_copy_pass_by_ref)]
+#![allow(clippy::eq_op)]
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -21,9 +26,10 @@ use crate::utils::{Buffer, RawFdContainer};
 #[allow(unused_imports)]
 use crate::x11_utils::{GenericEvent as X11GenericEvent, GenericError as X11GenericError, Event as _};
 use crate::x11_utils::TryParse;
+use crate::connection::RequestConnection;
 #[allow(unused_imports)]
-use crate::connection::{Cookie, CookieWithFds, VoidCookie, Connection as X11Connection};
-use crate::connection::ListFontsWithInfoCookie;
+use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
+use crate::cookie::ListFontsWithInfoCookie;
 use crate::errors::{ParseError, ConnectionError};
 ```
 
@@ -61,7 +67,7 @@ implemented for some inputs.
 We must also be able to send structs to the server. This is handled by the
 `to_ne_bytes()` method. 'ne' stands for 'native endian'.
 ```rust
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Point {
     pub x: i16,
     pub y: i16,
@@ -125,7 +131,7 @@ contain lists of other structs. This example demonstrates this.
 </struct>
 ```
 ```rust
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Depth {
     pub depth: u8,
     pub visuals: Vec<Visualtype>,
@@ -206,7 +212,7 @@ impl Depth {
 Depending on the largest value, appropriate `Into` implementations are
 generated.
 ```rust
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BackingStore {
     NotUseful,
     WhenMapped,
@@ -228,7 +234,7 @@ impl Into<RustOption<u8>> for BackingStore {
 }
 impl Into<u16> for BackingStore {
     fn into(self) -> u16 {
-        Into::<u8>::into(self) as _
+        Into::<u8>::into(self).into()
     }
 }
 impl Into<RustOption<u16>> for BackingStore {
@@ -238,7 +244,7 @@ impl Into<RustOption<u16>> for BackingStore {
 }
 impl Into<u32> for BackingStore {
     fn into(self) -> u32 {
-        Into::<u8>::into(self) as _
+        Into::<u8>::into(self).into()
     }
 }
 impl Into<RustOption<u32>> for BackingStore {
@@ -264,7 +270,7 @@ implementations of `BitOr` and `BitOrAssign`.
 </enum>
 ```
 ```rust
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ConfigWindow {
     X,
     Y,
@@ -294,7 +300,7 @@ impl Into<RustOption<u8>> for ConfigWindow {
 }
 impl Into<u16> for ConfigWindow {
     fn into(self) -> u16 {
-        Into::<u8>::into(self) as _
+        Into::<u8>::into(self).into()
     }
 }
 impl Into<RustOption<u16>> for ConfigWindow {
@@ -304,7 +310,7 @@ impl Into<RustOption<u16>> for ConfigWindow {
 }
 impl Into<u32> for ConfigWindow {
     fn into(self) -> u32 {
-        Into::<u8>::into(self) as _
+        Into::<u8>::into(self).into()
     }
 }
 impl Into<RustOption<u32>> for ConfigWindow {
@@ -481,6 +487,80 @@ impl TryParse for ClientMessageData {
         Ok((result, &value[20..]))
     }
 }
+impl From<[u8; 20]> for ClientMessageData {
+    fn from(value: [u8; 20]) -> Self {
+        Self(value.to_vec())
+    }
+}
+impl From<[u16; 10]> for ClientMessageData {
+    fn from(value: [u16; 10]) -> Self {
+        let value0 = value[0].to_ne_bytes();
+        let value1 = value[1].to_ne_bytes();
+        let value2 = value[2].to_ne_bytes();
+        let value3 = value[3].to_ne_bytes();
+        let value4 = value[4].to_ne_bytes();
+        let value5 = value[5].to_ne_bytes();
+        let value6 = value[6].to_ne_bytes();
+        let value7 = value[7].to_ne_bytes();
+        let value8 = value[8].to_ne_bytes();
+        let value9 = value[9].to_ne_bytes();
+        let value = [
+            value0[0],
+            value0[1],
+            value1[0],
+            value1[1],
+            value2[0],
+            value2[1],
+            value3[0],
+            value3[1],
+            value4[0],
+            value4[1],
+            value5[0],
+            value5[1],
+            value6[0],
+            value6[1],
+            value7[0],
+            value7[1],
+            value8[0],
+            value8[1],
+            value9[0],
+            value9[1],
+        ];
+        Self(value.to_vec())
+    }
+}
+impl From<[u32; 5]> for ClientMessageData {
+    fn from(value: [u32; 5]) -> Self {
+        let value0 = value[0].to_ne_bytes();
+        let value1 = value[1].to_ne_bytes();
+        let value2 = value[2].to_ne_bytes();
+        let value3 = value[3].to_ne_bytes();
+        let value4 = value[4].to_ne_bytes();
+        let value = [
+            value0[0],
+            value0[1],
+            value0[2],
+            value0[3],
+            value1[0],
+            value1[1],
+            value1[2],
+            value1[3],
+            value2[0],
+            value2[1],
+            value2[2],
+            value2[3],
+            value3[0],
+            value3[1],
+            value3[2],
+            value3[3],
+            value4[0],
+            value4[1],
+            value4[2],
+            value4[3],
+        ];
+        Self(value.to_vec())
+    }
+}
 ```
 
 ## Events
@@ -506,38 +586,38 @@ impl TryParse for ClientMessageData {
 /// Opcode for the KeyPress event
 pub const KEY_PRESS_EVENT: u8 = 2;
 /// [SNIP]
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct KeyPressEvent {
     pub response_type: u8,
-    pub detail: u8,
+    pub detail: KEYCODE,
     pub sequence: u16,
-    pub time: u32,
-    pub root: u32,
-    pub event: u32,
-    pub child: u32,
+    pub time: TIMESTAMP,
+    pub root: WINDOW,
+    pub event: WINDOW,
+    pub child: WINDOW,
     pub root_x: i16,
     pub root_y: i16,
     pub event_x: i16,
     pub event_y: i16,
     pub state: u16,
-    pub same_screen: u8,
+    pub same_screen: bool,
 }
 impl KeyPressEvent {
     pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let mut remaining = value;
         let (response_type, new_remaining) = u8::try_parse(remaining)?;
         remaining = new_remaining;
-        let (detail, new_remaining) = u8::try_parse(remaining)?;
+        let (detail, new_remaining) = KEYCODE::try_parse(remaining)?;
         remaining = new_remaining;
         let (sequence, new_remaining) = u16::try_parse(remaining)?;
         remaining = new_remaining;
-        let (time, new_remaining) = u32::try_parse(remaining)?;
+        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
         remaining = new_remaining;
-        let (root, new_remaining) = u32::try_parse(remaining)?;
+        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
         remaining = new_remaining;
-        let (event, new_remaining) = u32::try_parse(remaining)?;
+        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
         remaining = new_remaining;
-        let (child, new_remaining) = u32::try_parse(remaining)?;
+        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
         remaining = new_remaining;
         let (root_x, new_remaining) = i16::try_parse(remaining)?;
         remaining = new_remaining;
@@ -549,7 +629,7 @@ impl KeyPressEvent {
         remaining = new_remaining;
         let (state, new_remaining) = u16::try_parse(remaining)?;
         remaining = new_remaining;
-        let (same_screen, new_remaining) = u8::try_parse(remaining)?;
+        let (same_screen, new_remaining) = bool::try_parse(remaining)?;
         remaining = new_remaining;
         remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
         let result = KeyPressEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen };
@@ -600,7 +680,7 @@ impl Into<[u8; 32]> for &KeyPressEvent {
             self.response_type, self.detail, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
             root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
             child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], self.same_screen, 0
+            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], (self.same_screen as u8), 0
         ]
     }
 }
@@ -622,9 +702,9 @@ impl Into<[u8; 32]> for KeyPressEvent {
 </error>
 ```
 ```rust
-/// Opcode for the KeyPress event
+/// Opcode for the Request error
 pub const REQUEST_ERROR: u8 = 1;
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct RequestError {
     pub response_type: u8,
     pub error_code: u8,
@@ -703,14 +783,14 @@ impl Into<[u8; 32]> for RequestError {
 
 ## Requests
 
-For requests, we generate an extension trait. The generic structure looks like
-this:
+For requests, we generate an extension trait. Individual requests are available
+on this trait and as global functions. The generic structure looks like this:
 ```rust
 /// Extension trait defining the requests of this extension.
-pub trait ConnectionExt: X11Connection {
+pub trait ConnectionExt: RequestConnection {
     // Following code examples are in here
 }
-impl<C: X11Connection + ?Sized> ConnectionExt for C {}
+impl<C: RequestConnection + ?Sized> ConnectionExt for C {}
 ```
 
 ### Request without a reply
@@ -722,10 +802,8 @@ This code is generated in the module:
 ```rust
 /// Opcode for the NoOperation request
 pub const NO_OPERATION_REQUEST: u8 = 127;
-```
-And this code is in the extension trait:
-```rust
-fn no_operation(&self) -> Result<VoidCookie<Self>, ConnectionError>
+pub fn no_operation<Conn>(conn: &Conn) -> Result<VoidCookie<Conn>, ConnectionError>
+where Conn: RequestConnection + ?Sized
 {
     let length: usize = (4) / 4;
     let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).to_ne_bytes();
@@ -737,7 +815,14 @@ fn no_operation(&self) -> Result<VoidCookie<Self>, ConnectionError>
     ];
     let length_so_far = (&request0).len();
     assert_eq!(length_so_far, length * 4);
-    Ok(self.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+}
+```
+And this code is in the extension trait:
+```rust
+fn no_operation(&self) -> Result<VoidCookie<Self>, ConnectionError>
+{
+    no_operation(self)
 }
 ```
 
@@ -755,13 +840,28 @@ This code is generated in the module:
 ```rust
 /// Opcode for the GetInputFocus request
 pub const GET_INPUT_FOCUS_REQUEST: u8 = 43;
-#[derive(Debug, Clone, Copy)]
+pub fn get_input_focus<Conn>(conn: &Conn) -> Result<Cookie<Conn, GetInputFocusReply>, ConnectionError>
+where Conn: RequestConnection + ?Sized
+{
+    let length: usize = (4) / 4;
+    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).to_ne_bytes();
+    let request0 = [
+        GET_INPUT_FOCUS_REQUEST,
+        0,
+        length_bytes[0],
+        length_bytes[1],
+    ];
+    let length_so_far = (&request0).len();
+    assert_eq!(length_so_far, length * 4);
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetInputFocusReply {
     pub response_type: u8,
     pub revert_to: u8,
     pub sequence: u16,
     pub length: u32,
-    pub focus: u32,
+    pub focus: WINDOW,
 }
 impl GetInputFocusReply {
     pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -774,7 +874,7 @@ impl GetInputFocusReply {
         remaining = new_remaining;
         let (length, new_remaining) = u32::try_parse(remaining)?;
         remaining = new_remaining;
-        let (focus, new_remaining) = u32::try_parse(remaining)?;
+        let (focus, new_remaining) = WINDOW::try_parse(remaining)?;
         remaining = new_remaining;
         let result = GetInputFocusReply { response_type, revert_to, sequence, length, focus };
         Ok((result, remaining))
@@ -803,17 +903,7 @@ And this code is in the extension trait:
 ```rust
 fn get_input_focus(&self) -> Result<Cookie<Self, GetInputFocusReply>, ConnectionError>
 {
-    let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).to_ne_bytes();
-    let request0 = [
-        GET_INPUT_FOCUS_REQUEST,
-        0,
-        length_bytes[0],
-        length_bytes[1],
-    ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(self.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    get_input_focus(self)
 }
 ```
 
@@ -867,7 +957,7 @@ This code is generated in the module:
 /// Opcode for the ConfigureWindow request
 pub const CONFIGURE_WINDOW_REQUEST: u8 = 12;
 /// Auxiliary and optional information for the configure_window function.
-#[derive(Debug, Clone, Copy, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ConfigureWindowAux {
     x: RustOption<i32>,
     y: RustOption<i32>,
@@ -993,11 +1083,9 @@ impl ConfigureWindowAux {
         self
     }
 }
-```
-And this code is in the extension trait:
-```rust
 /// [SNIP]
-fn configure_window(&self, window: u32, value_list: &ConfigureWindowAux) -> Result<VoidCookie<Self>, ConnectionError>
+pub fn configure_window<'c, Conn>(conn: &'c Conn, window: WINDOW, value_list: &ConfigureWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+where Conn: RequestConnection + ?Sized
 {
     let value_mask = value_list.value_mask();
     let length: usize = (12 + value_list.wire_length() + 3) / 4;
@@ -1024,6 +1112,14 @@ fn configure_window(&self, window: u32, value_list: &ConfigureWindowAux) -> Resu
     let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + (&padding1).len();
     assert_eq!(length_so_far, length * 4);
-    Ok(self.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding1)], Vec::new())?)
+}
+```
+And this code is in the extension trait:
+```rust
+/// [SNIP]
+fn configure_window<'c>(&'c self, window: WINDOW, value_list: &ConfigureWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+{
+    configure_window(self, window, value_list)
 }
 ```
