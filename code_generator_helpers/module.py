@@ -162,6 +162,11 @@ def is_bool(type):
     return hasattr(type, 'xml_type') and type.xml_type == 'BOOL'
 
 
+def find_field(fields, name):
+    result, = list(filter(lambda f: f.field_name == name, fields))
+    return result
+
+
 class Module(object):
     def __init__(self, outer_module):
         self.out = Output()
@@ -1040,6 +1045,11 @@ class Module(object):
             field_name = self._to_rust_variable(field.field_name)
             if not field.isfd:
                 rust_type = self._field_type(field)
+            try_parse_args = ["remaining"]
+            if hasattr(field.type, "extra_try_parse_args"):
+                try_parse_args += field.type.extra_try_parse_args
+            if field.type.is_list and hasattr(field.type.member, "extra_try_parse_args"):
+                try_parse_args += field.type.member.extra_try_parse_args
             if not field.wire:
                 if not field.isfd:
                     continue
@@ -1066,8 +1076,9 @@ class Module(object):
                 self.out("remaining = &remaining.get(%s..).ok_or(ParseError::ParseError)?;", length)
             elif field.type.is_list and field.type.nmemb is not None:
                 for i in range(field.type.nmemb):
-                    self.out("let (%s_%s, new_remaining) = %s::try_parse(remaining)?;",
-                             field.field_name, i, self._name(field.type.name))
+                    self.out("let (%s_%s, new_remaining) = %s::try_parse(%s)?;",
+                             field.field_name, i, self._name(field.type.name),
+                             ", ".join(try_parse_args))
                     self.out("remaining = new_remaining;")
                 self.out("let %s = [", field.field_name)
                 for i in range(field.type.nmemb):
@@ -1075,10 +1086,6 @@ class Module(object):
                 self.out("];")
                 parts.append(field.field_name)
             elif field.type.is_list:
-                try_parse_args = ["remaining"]
-                if hasattr(field.type.member, "extra_try_parse_args"):
-                    try_parse_args += field.type.member.extra_try_parse_args
-
                 if field.type.expr.op != 'calculate_len':
                     self.out("let list_length = %s;", self.expr_to_str(field.type.expr, 'usize'))
                     self.out("let mut %s = Vec::with_capacity(list_length);", field_name)
@@ -1095,8 +1102,8 @@ class Module(object):
                 self.out("}")
                 parts.append(field_name)
             else:
-                self.out("let (%s, new_remaining) = %s::try_parse(remaining)?;",
-                         field_name, rust_type)
+                self.out("let (%s, new_remaining) = %s::try_parse(%s)?;",
+                         field_name, rust_type, ", ".join(try_parse_args))
                 self.out("remaining = new_remaining;")
                 if not hasattr(field, 'is_length_field_for'):
                     parts.append(self._to_rust_variable(field.field_name))
@@ -1108,6 +1115,10 @@ class Module(object):
         a to_ne_bytes() implementation."""
 
         mark_length_fields(complex)
+
+        for field in complex.fields:
+            if field.type.is_switch:
+                self._emit_switch(field.type, self._name(field.field_type))
 
         has_fds = any(field.isfd for field in complex.fields)
         assert not (impl_try_parse and has_fds)
@@ -1237,6 +1248,68 @@ class Module(object):
                 result = "Vec<RawFdContainer>"
         return result
 
+    def _emit_switch(self, switch_type, name):
+        self.out("#[derive(%s)]", ", ".join(get_derives(switch_type) + ["Default"]))
+        self.out("pub struct %s {", name)
+        switch_field_type = find_field(switch_type.parents[-1].fields,
+                                       switch_type.expr.lenfield_name)
+        switch_field_type_string = self._to_complex_rust_type(switch_field_type, None, '')
+        for field in switch_type.fields:
+            type_name = self._field_type(field)
+            if field.type.is_list:
+                if field.type.nmemb is None:
+                    type_name = "Vec<%s>" % (type_name,)
+                else:
+                    type_name = "[%s; %s]" % (type_name, field.type.nmemb)
+            self.out.indent("%s: RustOption<%s>,", self._aux_field_name(field), type_name)
+        self.out("}")
+
+        # Collect missing values that are needed for parsing
+        unresolved_with_type, unresolved_without_type = [], []
+        unresolved_without_type.append(switch_field_type.field_name)
+        unresolved_with_type.append("%s: %s" % (switch_field_type.field_name,
+                                                switch_field_type_string))
+        for field in switch_type.fields:
+            expr = field.type.expr
+            assert expr.op is None, expr.op
+            field_name = self._to_rust_variable(expr.lenfield_name)
+            referenced_field = find_field(switch_type.parents[-1].fields,
+                                          expr.lenfield_name)
+            field_type = self._to_complex_rust_type(referenced_field, None, '')
+
+            unresolved_without_type.append(field_name)
+            unresolved_with_type.append("%s: %s" % (field_name, field_type))
+
+        switch_type.extra_try_parse_args = unresolved_without_type
+        self.out("impl %s {", name)
+        with Indent(self.out):
+            args = ["value: &[u8]"] + unresolved_with_type
+            self.out("fn try_parse(%s) -> Result<(Self, &[u8]), ParseError> {",
+                     ", ".join(args))
+            with Indent(self.out):
+                self.out("let mut remaining = value;")
+                parts = []
+                for field in switch_type.fields:
+                    expr, = field.parent.expr
+                    assert expr.op == 'enumref'
+                    field_name = self._to_rust_variable(field.field_name)
+                    self.out("let %s = if %s & Into::<%s>::into(%s::%s) != 0 {",
+                             field_name, switch_field_type.field_name,
+                             self._name(switch_field_type.field_type),
+                             self._name(expr.lenfield_type.name),
+                             ename_to_rust(expr.lenfield_name))
+                    with Indent(self.out):
+                        parts.extend(self._emit_parsing_code([field]))
+                        assert parts[-1] == field_name, (parts[-1], field_name)
+                        self.out("Some(%s)", field_name)
+                    self.out("} else {")
+                    self.out.indent("None")
+                    self.out("};")
+                self.out("let result = %s { %s };", name, ", ".join(parts))
+                self.out("Ok((result, remaining))")
+            self.out("}")
+        self.out("}")
+
     def _generate_aux(self, name, request, switch, mask_field, request_function_name):
         # This used to assert that all fields have the same size, but sync's
         # CreateAlarm has both 32 bit and 64 bit numbers. Now we assert that all
@@ -1328,9 +1401,17 @@ class Module(object):
         if self.namespace.is_ext and name[0] == self.namespace.ext_name:
             name = name[1:]
         if len(name) == 2:
-            # Must be a type from another module which we imported
-            ext = self.outer_module.get_namespace(name[0]).header
-            name = (ext + "::" + name[1],)
+            # Could be a type from another module which we imported
+            try:
+                ext = self.outer_module.get_namespace(name[0]).header
+            except KeyError:
+                ext = None
+
+            if ext:
+                # Yup, it's a type from another module.
+                name = (ext + "::" + name[1],)
+            else:
+                name = (name[0] + self._to_rust_identifier(name[1]),)
         assert len(name) == 1, orig_name
         name = name[0]
 
