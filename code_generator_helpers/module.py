@@ -34,7 +34,7 @@ def get_references(expr):
     if expr.op is not None:
         if expr.op in ['calculate_len', 'sumof']:
             return []
-        if expr.op == '~':
+        if expr.op in ['~', 'popcount']:
             return get_references(expr.rhs)
         return get_references(expr.lhs) + get_references(expr.rhs)
     elif expr.nmemb is None:
@@ -1476,11 +1476,15 @@ class Module(object):
         if e.op is not None:
             if e.op == 'calculate_len':
                 return e.op
-            if e.op == 'sumof':
+            if e.op in ['sumof', 'popcount']:
                 assert e.rhs.op is None
                 assert e.rhs.nmemb is None
                 field_name = e.rhs.lenfield_name
-                return "%s.iter().map(|x| x.%s as usize).sum()" % (e.lenfield_name, field_name)
+                if e.op == 'sumof':
+                    return "%s.iter().map(|x| x.%s as usize).sum()" % (e.lenfield_name, field_name)
+                else:
+                    assert e.op == 'popcount'
+                    return "%s.count_ones()" % (self._lower_snake_name((field_name,)),)
             if e.op == '~':
                 return "!(%s)" % self.expr_to_str(e.rhs, type)
             return "(%s) %s (%s)" % (self.expr_to_str(e.lhs, type), e.op, self.expr_to_str(e.rhs, type))
