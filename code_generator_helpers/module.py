@@ -1486,7 +1486,7 @@ class Module(object):
                     return "%s.iter().map(|x| x.%s as usize).sum()" % (e.lenfield_name, field_name)
                 else:
                     assert e.op == 'popcount'
-                    return "%s.count_ones()" % (self._lower_snake_name((field_name,)),)
+                    return "TryInto::<%s>::try_into(%s.count_ones()).unwrap()" % (type, self._lower_snake_name((field_name,)),)
             if e.op == '~':
                 return "!(%s)" % self.expr_to_str(e.rhs, type)
             return "(%s) %s (%s)" % (self.expr_to_str(e.lhs, type), e.op, self.expr_to_str(e.rhs, type))
