@@ -1256,6 +1256,8 @@ class Module(object):
                                        switch_type.expr.lenfield_name)
         switch_field_type_string = self._to_complex_rust_type(switch_field_type, None, '')
         for field in switch_type.fields:
+            if not field.visible:
+                continue
             type_name = self._field_type(field)
             if field.type.is_list:
                 if field.type.nmemb is None:
@@ -1273,7 +1275,7 @@ class Module(object):
         for case in switch_type.bitcases:
             for field in case.type.fields:
                 if hasattr(field.type, "expr"):
-                    assert field.type.expr.op is None, field.type.expr.op
+                    assert field.type.expr.op in [None, "popcount"], field.type.expr.op
                     lenfield_name = field.type.expr.lenfield_name
                     field_name = self._to_rust_variable(lenfield_name)
                     referenced_field = find_field(switch_type.parents[-1].fields,
@@ -1290,24 +1292,39 @@ class Module(object):
                      ", ".join(args))
             with Indent(self.out):
                 self.out("let mut remaining = value;")
-                parts = []
-                for field in switch_type.fields:
-                    expr, = field.parent.expr
+                all_parts = []
+                for case in switch_type.bitcases:
+                    expr, = case.type.expr
                     assert expr.op == 'enumref'
-                    field_name = self._to_rust_variable(field.field_name)
+                    field_names = [self._to_rust_variable(field.field_name)
+                                   for field in case.type.fields
+                                   if field.visible]
+                    if len(field_names) == 1:
+                        field_names_str = field_names[0]
+                    else:
+                        field_names_str = "(%s)" % (", ".join(field_names),)
                     self.out("let %s = if %s & Into::<%s>::into(%s::%s) != 0 {",
-                             field_name, switch_field_type.field_name,
+                             field_names_str, switch_field_type.field_name,
                              self._name(switch_field_type.field_type),
                              self._name(expr.lenfield_type.name),
                              ename_to_rust(expr.lenfield_name))
+                    this_parts = []
                     with Indent(self.out):
-                        parts.extend(self._emit_parsing_code([field]))
-                        assert parts[-1] == field_name, (parts[-1], field_name)
-                        self.out("Some(%s)", field_name)
+                        for field in case.type.fields:
+                            this_parts.extend(self._emit_parsing_code([field]))
+                        if len(this_parts) == 1:
+                            self.out("Some(%s)", this_parts[0])
+                        else:
+                            self.out("(%s)", ", ".join(["Some(%s)" % (part,)
+                                                        for part in this_parts]))
                     self.out("} else {")
-                    self.out.indent("None")
+                    if len(field_names) == 1:
+                        self.out.indent("None")
+                    else:
+                        self.out.indent("(%s)", ", ".join(["None"] * len(field_names)))
                     self.out("};")
-                self.out("let result = %s { %s };", name, ", ".join(parts))
+                    all_parts.extend(this_parts)
+                self.out("let result = %s { %s };", name, ", ".join(all_parts))
                 self.out("Ok((result, remaining))")
             self.out("}")
         self.out("}")
