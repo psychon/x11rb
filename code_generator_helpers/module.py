@@ -465,11 +465,12 @@ class Module(object):
             self.out("}")
         self.out("}")
 
-        # Check that all fields have different types
-        field_types = [field.type for field in union.fields]
-        assert len(field_types) == len(set(field_types))
+        # Get unique field types
+        seen = set()
+        field_types = [field for field in union.fields
+                       if not (field.type in seen or seen.add(field.type))]
 
-        for field in union.fields:
+        for field in field_types:
             assert not field.isfd
             rust_type = self._to_complex_rust_type(field, None, '')
             self.out("impl From<%s> for %s {", rust_type, rust_name)
