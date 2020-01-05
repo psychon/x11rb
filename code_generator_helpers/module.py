@@ -1270,16 +1270,17 @@ class Module(object):
         unresolved_without_type.append(switch_field_type.field_name)
         unresolved_with_type.append("%s: %s" % (switch_field_type.field_name,
                                                 switch_field_type_string))
-        for field in switch_type.fields:
-            expr = field.type.expr
-            assert expr.op is None, expr.op
-            field_name = self._to_rust_variable(expr.lenfield_name)
-            referenced_field = find_field(switch_type.parents[-1].fields,
-                                          expr.lenfield_name)
-            field_type = self._to_complex_rust_type(referenced_field, None, '')
-
-            unresolved_without_type.append(field_name)
-            unresolved_with_type.append("%s: %s" % (field_name, field_type))
+        for case in switch_type.bitcases:
+            for field in case.type.fields:
+                if hasattr(field.type, "expr"):
+                    assert field.type.expr.op is None, field.type.expr.op
+                    lenfield_name = field.type.expr.lenfield_name
+                    field_name = self._to_rust_variable(lenfield_name)
+                    referenced_field = find_field(switch_type.parents[-1].fields,
+                                                  lenfield_name)
+                    field_type = self._to_complex_rust_type(referenced_field, None, '')
+                    unresolved_without_type.append(field_name)
+                    unresolved_with_type.append("%s: %s" % (field_name, field_type))
 
         switch_type.extra_try_parse_args = unresolved_without_type
         self.out("impl %s {", name)
