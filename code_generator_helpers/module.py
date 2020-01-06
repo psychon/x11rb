@@ -1493,6 +1493,8 @@ class Module(object):
     def _to_rust_variable(self, name):
         if name == "type":
             name = "type_"
+        if name == "match":
+            name = "match_"
 
         # Check for camel case names and deal with them
         if any(c.isupper() for c in name):
