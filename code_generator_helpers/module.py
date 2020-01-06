@@ -1278,6 +1278,8 @@ class Module(object):
                     assert field.type.expr.op in [None, "popcount"], field.type.expr.op
                     lenfield_name = field.type.expr.lenfield_name
                     field_name = self._to_rust_variable(lenfield_name)
+                    if field_name in unresolved_without_type:
+                        continue
                     referenced_field = find_field(switch_type.parents[-1].fields,
                                                   lenfield_name)
                     field_type = self._to_complex_rust_type(referenced_field, None, '')
