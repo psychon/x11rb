@@ -1343,7 +1343,7 @@ class Module(object):
         assert all(field.type.size % min_field_size == 0 for field in switch.type.fields)
 
         self.out("/// Auxiliary and optional information for the %s function.", request_function_name)
-        self.out("#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]")
+        self.out("#[derive(%s)]", ", ".join(get_derives(switch.type) + ["Default"]))
         self.out("pub struct %s {", name)
         for field in switch.type.fields:
             self.out.indent("%s: RustOption<%s>,", self._aux_field_name(field), self._name(field.type.name))
