@@ -1278,6 +1278,11 @@ class Module(object):
                     lenfield_name = field.type.expr.lenfield_name
                     field_name = self._to_rust_variable(lenfield_name)
                     if field_name in unresolved_without_type:
+                        # We already generated this argument in a previous iteration
+                        continue
+                    if any(field.field_name == lenfield_name for field in case.type.fields):
+                        # This references a field that is part of the same bitcase,
+                        # so this does not have to become a function argument.
                         continue
                     referenced_field = find_field(switch_type.parents[-1].fields,
                                                   lenfield_name)
