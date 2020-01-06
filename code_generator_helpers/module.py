@@ -1339,8 +1339,12 @@ class Module(object):
         # This used to assert that all fields have the same size, but sync's
         # CreateAlarm has both 32 bit and 64 bit numbers. Now we assert that all
         # sizes are a multiple of the smallest size.
-        min_field_size = min(field.type.size for field in switch.type.fields)
-        assert all(field.type.size % min_field_size == 0 for field in switch.type.fields)
+        # Thanks to XKB having variable sized lists in SetMap, this assert is
+        # restricted to fixed size fields.
+        fixed_size_fields = list(filter(lambda field: field.type.fixed_size(), switch.type.fields))
+        if fixed_size_fields:
+            min_field_size = min(field.type.size for field in fixed_size_fields)
+            assert all(field.type.size % min_field_size == 0 for field in fixed_size_fields)
 
         self.out("/// Auxiliary and optional information for the %s function.", request_function_name)
         self.out("#[derive(%s)]", ", ".join(get_derives(switch.type) + ["Default"]))
