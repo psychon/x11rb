@@ -1275,7 +1275,6 @@ class Module(object):
         for case in switch_type.bitcases:
             for field in case.type.fields:
                 if hasattr(field.type, "expr"):
-                    assert field.type.expr.op in [None, "popcount"], field.type.expr.op
                     lenfield_name = field.type.expr.lenfield_name
                     field_name = self._to_rust_variable(lenfield_name)
                     if field_name in unresolved_without_type:
@@ -1497,15 +1496,14 @@ class Module(object):
         if e.op is not None:
             if e.op == 'calculate_len':
                 return e.op
-            if e.op in ['sumof', 'popcount']:
+            if e.op == 'sumof':
+                field_name = e.lenfield_name
+                return "%s.iter().map(|x| Into::<%s>::into(*x)).sum()" % (self._lower_snake_name((e.lenfield_name,)), type)
+            if e.op == 'popcount':
                 assert e.rhs.op is None
                 assert e.rhs.nmemb is None
                 field_name = e.rhs.lenfield_name
-                if e.op == 'sumof':
-                    return "%s.iter().map(|x| x.%s as usize).sum()" % (e.lenfield_name, field_name)
-                else:
-                    assert e.op == 'popcount'
-                    return "TryInto::<%s>::try_into(%s.count_ones()).unwrap()" % (type, self._lower_snake_name((field_name,)),)
+                return "TryInto::<%s>::try_into(%s.count_ones()).unwrap()" % (type, self._lower_snake_name((field_name,)),)
             if e.op == '~':
                 return "!(%s)" % self.expr_to_str(e.rhs, type)
             return "(%s) %s (%s)" % (self.expr_to_str(e.lhs, type), e.op, self.expr_to_str(e.rhs, type))
