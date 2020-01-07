@@ -1138,17 +1138,7 @@ class Module(object):
             for field in complex.fields:
                 if field.visible or (not field.type.is_pad and not hasattr(field, "is_length_field_for")):
                     field_name = self._to_rust_variable(field.field_name)
-                    if field.isfd:
-                        rust_type = "RawFdContainer"
-                    else:
-                        rust_type = self._field_type(field)
-                    if field.type.is_list:
-                        if field.type.nmemb is None:
-                            self.out("pub %s: Vec<%s>,", field_name, rust_type)
-                        else:
-                            self.out("pub %s: [%s; %s],", field_name, rust_type, field.type.nmemb)
-                    else:
-                        self.out("pub %s: %s,", field_name, rust_type)
+                    self.out("pub %s: %s,", field_name, self._to_complex_owned_rust_type(field))
         self.out("}")
 
         # Collect all the fields that appear on the wire in the parent object
@@ -1257,6 +1247,18 @@ class Module(object):
                 result = "Vec<RawFdContainer>"
         return result
 
+    def _to_complex_owned_rust_type(self, field):
+        if field.isfd:
+            result = "RawFdContainer"
+        else:
+            result = self._field_type(field)
+        if field.type.is_list:
+            if field.type.nmemb is None:
+                result = "Vec<%s>" % (result,)
+            else:
+                result = "[%s; %s]" % (result, field.type.nmemb)
+        return result
+
     def _emit_switch(self, switch_type, name):
         self.out("#[derive(%s)]", ", ".join(get_derives(switch_type) + ["Default"]))
         self.out("pub struct %s {", name)
@@ -1266,12 +1268,7 @@ class Module(object):
         for field in switch_type.fields:
             if not field.visible:
                 continue
-            type_name = self._field_type(field)
-            if field.type.is_list:
-                if field.type.nmemb is None:
-                    type_name = "Vec<%s>" % (type_name,)
-                else:
-                    type_name = "[%s; %s]" % (type_name, field.type.nmemb)
+            type_name = self._to_complex_owned_rust_type(field)
             self.out.indent("%s: RustOption<%s>,", self._aux_field_name(field), type_name)
         self.out("}")
 
@@ -1358,7 +1355,7 @@ class Module(object):
         self.out("#[derive(%s)]", ", ".join(get_derives(switch.type) + ["Default"]))
         self.out("pub struct %s {", name)
         for field in switch.type.fields:
-            field_type = self._field_type(field)
+            field_type = self._to_complex_owned_rust_type(field)
             self.out.indent("%s: RustOption<%s>,", self._aux_field_name(field), field_type)
         self.out("}")
 
