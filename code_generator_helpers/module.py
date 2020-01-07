@@ -1086,7 +1086,7 @@ class Module(object):
             elif field.type.is_list and field.type.nmemb is not None:
                 for i in range(field.type.nmemb):
                     self.out("let (%s_%s, new_remaining) = %s::try_parse(%s)?;",
-                             field_name, i, self._name(field.type.name),
+                             field_name, i, self._field_type(field),
                              ", ".join(try_parse_args))
                     self.out("remaining = new_remaining;")
                 self.out("let %s = [", field_name)
@@ -1358,7 +1358,8 @@ class Module(object):
         self.out("#[derive(%s)]", ", ".join(get_derives(switch.type) + ["Default"]))
         self.out("pub struct %s {", name)
         for field in switch.type.fields:
-            self.out.indent("%s: RustOption<%s>,", self._aux_field_name(field), self._name(field.type.name))
+            field_type = self._field_type(field)
+            self.out.indent("%s: RustOption<%s>,", self._aux_field_name(field), field_type)
         self.out("}")
 
         self.out("impl %s {", name)
@@ -1397,7 +1398,7 @@ class Module(object):
                 aux_name = self._aux_field_name(field)
                 self.out("/// Set the %s field of this structure.", field.field_name)
                 self.out("pub fn %s<I>(mut self, value: I) -> Self where I: Into<RustOption<%s>> {",
-                         aux_name, self._name(field.type.name))
+                         aux_name, self._field_type(field))
                 with Indent(self.out):
                     self.out("self.%s = value.into();", aux_name)
                     self.out("self")
