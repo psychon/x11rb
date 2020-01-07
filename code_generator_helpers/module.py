@@ -732,7 +732,12 @@ class Module(object):
             for field in obj.fields:
                 if not field.wire:
                     continue
-                if field.type.nmemb is None:
+                if field.type.is_switch:
+                    rust_variable = self._to_rust_variable(field.field_name)
+                    field_bytes = self._to_rust_variable(field.field_name + "_bytes")
+                    self.out("let %s = %s.to_ne_bytes();", field_bytes, rust_variable)
+                    request_length.append("%s.len()" % field_bytes)
+                elif field.type.nmemb is None:
                     size = field.type.size
                     if size is None:
                         # Variable length list with variable sized items:
@@ -751,7 +756,6 @@ class Module(object):
                 if hasattr(field, 'lenfield_for_switch'):
                     # This our special Aux-argument that represents a <switch>
                     self.out("let %s = %s.value_mask();", field.field_name, field.lenfield_for_switch.field_name)
-                    request_length.append("%s.wire_length()" % field.lenfield_for_switch.field_name)
             request_length = " + ".join(request_length)
 
             if has_variable_length:
@@ -845,7 +849,11 @@ class Module(object):
                         # This is a generic parameter, call Into::into
                         self.out("let %s = %s.into();", field_name, field_name)
                     field_bytes = self._to_rust_variable(field_name + "_bytes")
-                    if field.type.name == ('float',):
+                    if field.type.is_switch:
+                        # The previous loop for calculating the request length
+                        # already called to_ne_bytes() to get the bytes.
+                        pass
+                    elif field.type.name == ('float',):
                         # FIXME: Switch to a trait that we can implement on f32
                         self.out("let %s = %s.to_bits().to_ne_bytes();", field_bytes, rust_variable)
                     elif field.type.size is not None:  # Size None was already handled above
@@ -1359,16 +1367,6 @@ class Module(object):
             self.out("/// Create a new instance with all fields unset / not present.")
             self.out("pub fn new() -> Self {")
             self.out.indent("Default::default()")
-            self.out("}")
-
-            self.out("fn wire_length(&self) -> usize {")
-            with Indent(self.out):
-                self.out("let mut result = 0;")
-                for field in switch.type.fields:
-                    self.out("if self.%s.is_some() {", self._aux_field_name(field))
-                    self.out.indent("result += %s;", field.type.size)
-                    self.out("}")
-                self.out("result")
             self.out("}")
 
             self.out("fn to_ne_bytes(&self) -> Vec<u8> {")
