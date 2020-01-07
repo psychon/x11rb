@@ -684,14 +684,14 @@ class Module(object):
 
             # Emit the code for converting a list to bytes.
             def _emit_byte_conversion(field):
-                field_name = field.field_name
+                rust_variable = self._to_rust_variable(field.field_name)
                 if field.type.size is not None:
                     self.out("let mut %s_bytes = Vec::with_capacity(%s * %s.len());",
-                             field_name, field.type.size, field_name)
+                             rust_variable, field.type.size, rust_variable)
                 else:
-                    self.out("let mut %s_bytes = Vec::new();", field_name)
-                self.out("for value in %s {", field_name)
-                self.out.indent("%s_bytes.extend(value.to_ne_bytes().iter());", field_name)
+                    self.out("let mut %s_bytes = Vec::new();", rust_variable)
+                self.out("for value in %s {", rust_variable)
+                self.out.indent("%s_bytes.extend(value.to_ne_bytes().iter());", rust_variable)
                 self.out("}")
 
             pad_count = []
@@ -732,8 +732,8 @@ class Module(object):
             for field in obj.fields:
                 if not field.wire:
                     continue
+                rust_variable = self._to_rust_variable(field.field_name)
                 if field.type.is_switch:
-                    rust_variable = self._to_rust_variable(field.field_name)
                     field_bytes = self._to_rust_variable(field.field_name + "_bytes")
                     self.out("let %s = %s.to_ne_bytes();", field_bytes, rust_variable)
                     request_length.append("%s.len()" % field_bytes)
@@ -743,10 +743,10 @@ class Module(object):
                         # Variable length list with variable sized items:
                         # xproto::SetFontPath seems to be the only example
                         _emit_byte_conversion(field)
-                        request_length.append("%s_bytes.len()" % field.field_name)
+                        request_length.append("%s_bytes.len()" % rust_variable)
                     else:
                         # Variable length list with fixed sized items
-                        request_length.append("%s * %s.len()" % (size, self._to_rust_variable(field.field_name)))
+                        request_length.append("%s * %s.len()" % (size, rust_variable))
                 elif field.type.size is None:
                     # Variable sized element. Only example seems to be RandR's
                     # SetMonitor request. MonitorInfo contains a list.
@@ -755,7 +755,7 @@ class Module(object):
                     request_length.append("%s_bytes.len()" % field.field_name)
                 if hasattr(field, 'lenfield_for_switch'):
                     # This our special Aux-argument that represents a <switch>
-                    self.out("let %s = %s.value_mask();", field.field_name, field.lenfield_for_switch.field_name)
+                    self.out("let %s = %s.value_mask();", rust_variable, field.lenfield_for_switch.field_name)
             request_length = " + ".join(request_length)
 
             if has_variable_length:
@@ -837,7 +837,7 @@ class Module(object):
                         # else: Already called _emit_byte_conversion() above
 
                         _emit_request()
-                        _emit_add_to_requests("&%s_bytes" % field_name)
+                        _emit_add_to_requests("&%s_bytes" % rust_variable)
                 elif field.wire:
                     if hasattr(field, "is_length_field_for"):
                         # This is a length field for some list, get the length.
@@ -847,7 +847,7 @@ class Module(object):
                                  self._to_rust_variable(field.is_length_field_for.field_name))
                     if field.enum is not None:
                         # This is a generic parameter, call Into::into
-                        self.out("let %s = %s.into();", field_name, field_name)
+                        self.out("let %s = %s.into();", rust_variable, rust_variable)
                     field_bytes = self._to_rust_variable(field_name + "_bytes")
                     if field.type.is_switch:
                         # The previous loop for calculating the request length
@@ -1086,14 +1086,14 @@ class Module(object):
             elif field.type.is_list and field.type.nmemb is not None:
                 for i in range(field.type.nmemb):
                     self.out("let (%s_%s, new_remaining) = %s::try_parse(%s)?;",
-                             field.field_name, i, self._name(field.type.name),
+                             field_name, i, self._name(field.type.name),
                              ", ".join(try_parse_args))
                     self.out("remaining = new_remaining;")
-                self.out("let %s = [", field.field_name)
+                self.out("let %s = [", field_name)
                 for i in range(field.type.nmemb):
-                    self.out.indent("%s_%s,", field.field_name, i)
+                    self.out.indent("%s_%s,", field_name, i)
                 self.out("];")
-                parts.append(field.field_name)
+                parts.append(field_name)
             elif field.type.is_list:
                 if field.type.expr.op != 'calculate_len':
                     self.out("let list_length = %s;", self.expr_to_str(field.type.expr, 'usize'))
