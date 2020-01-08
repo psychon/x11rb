@@ -1365,12 +1365,33 @@ class Module(object):
             min_field_size = min(field.type.size for field in fixed_size_fields)
             assert all(field.type.size % min_field_size == 0 for field in fixed_size_fields)
 
+        for case in switch.type.bitcases:
+            # Is there more than one visible field?
+            visible_fields = list(filter(lambda x: x.visible, case.type.fields))
+            if len(visible_fields) > 1:
+                # Yes, then we need to generate a helper struct to ensure that
+                # these fields are only specified together.
+                case.rust_name = name + case.type.name[-1]
+                self.complex_type_struct(case.type, case.rust_name)
+
+                self.out("impl %s {", case.rust_name)
+                with Indent(self.out):
+                    self._generate_to_ne_bytes(case.type)
+                self.out("}")
+            else:
+                field, = visible_fields
+                case.only_field = field
+
         self.out("/// Auxiliary and optional information for the %s function.", request_function_name)
         self.out("#[derive(%s)]", ", ".join(get_derives(switch.type) + ["Default"]))
         self.out("pub struct %s {", name)
-        for field in switch.type.fields:
-            field_type = self._to_complex_owned_rust_type(field)
-            self.out.indent("%s: RustOption<%s>,", self._aux_field_name(field), field_type)
+        for case in switch.type.bitcases:
+            if hasattr(case, "rust_name"):
+                self.out.indent("%s: RustOption<%s>,", case.type.name[-1], case.rust_name)
+            else:
+                field = case.only_field
+                field_type = self._to_complex_owned_rust_type(field)
+                self.out.indent("%s: RustOption<%s>,", self._aux_field_name(field), field_type)
         self.out("}")
 
         self.out("impl %s {", name)
@@ -1384,37 +1405,56 @@ class Module(object):
             self.out("fn to_ne_bytes(&self) -> Vec<u8> {")
             with Indent(self.out):
                 self.out("let mut result = Vec::new();")
-                for field in switch.type.fields:
-                    self.out("if let Some(value) = &self.%s {", self._aux_field_name(field))
-                    with Indent(self.out):
-                        if field.type.is_list:
-                            self.out("for obj in value.iter() {")
-                            self.out.indent("result.extend(obj.to_ne_bytes().iter());")
-                            self.out("}")
-                        else:
+                for case in switch.type.bitcases:
+                    if hasattr(case, "rust_name"):
+                        self.out("if let Some(value) = &self.%s {", case.type.name[-1])
+                        with Indent(self.out):
                             self.out("result.extend(value.to_ne_bytes().iter());")
-                    self.out("}")
+                        self.out("}")
+                    else:
+                        field = case.only_field
+                        self.out("if let Some(value) = &self.%s {", self._aux_field_name(field))
+                        with Indent(self.out):
+                            if field.type.is_list:
+                                self.out("for obj in value.iter() {")
+                                self.out.indent("result.extend(obj.to_ne_bytes().iter());")
+                                self.out("}")
+                            else:
+                                self.out("result.extend(value.to_ne_bytes().iter());")
+                        self.out("}")
                 self.out("result")
             self.out("}")
 
             self.out("fn value_mask(&self) -> %s {", self._field_type(mask_field))
             with Indent(self.out):
                 self.out("let mut mask = 0;")
-                for field in switch.type.fields:
-                    expr, = field.parent.expr
+                for case in switch.type.bitcases:
+                    expr, = case.type.expr
                     assert expr.op == "enumref"
                     enum_name = self._name(expr.lenfield_type.name)
-                    self.out("if self.%s.is_some() {", self._aux_field_name(field))
+                    if hasattr(case, "rust_name"):
+                        field_name = case.type.name[-1]
+                    else:
+                        field = case.only_field
+                        field_name = self._aux_field_name(field)
+                    self.out("if self.%s.is_some() {", field_name)
                     self.out.indent("mask |= Into::<%s>::into(%s::%s);", self._field_type(mask_field),
                                     enum_name, ename_to_rust(expr.lenfield_name))
                     self.out("}")
                 self.out("mask")
             self.out("}")
 
-            for field in switch.type.fields:
-                aux_name = self._aux_field_name(field)
-                field_type = self._to_complex_owned_rust_type(field)
-                self.out("/// Set the %s field of this structure.", field.field_name)
+            for case in switch.type.bitcases:
+                if hasattr(case, "rust_name"):
+                    aux_name = case.type.name[-1]
+                    field_name = case.type.name[-1]
+                    field_type = case.rust_name
+                else:
+                    field = case.only_field
+                    aux_name = self._aux_field_name(field)
+                    field_name = field.field_name
+                    field_type = self._to_complex_owned_rust_type(field)
+                self.out("/// Set the %s field of this structure.", field_name)
                 self.out("pub fn %s<I>(mut self, value: I) -> Self where I: Into<RustOption<%s>> {",
                          aux_name, field_type)
                 with Indent(self.out):
