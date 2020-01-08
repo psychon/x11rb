@@ -506,7 +506,8 @@ class Module(object):
 
         if name in [('xcb', 'xkb', 'GetKbdByName')]:
             self.trait_out("fn %s(&self) { unimplemented!(\"Not yet supported by the code generator\") }", function_name)
-            self.out("pub fn %s<Conn>(_conn: &Conn) where Conn: RequestConnection + ?Sized { unimplemented!(\"Not yet supported by the code generator\") }", function_name)
+            self.out("pub fn %s<Conn>(_conn: &Conn) where Conn: RequestConnection + ?Sized {", function_name)
+            self.out("unimplemented!(\"Not yet supported by the code generator\") }")
             return
 
         is_list_fonts_with_info = name == ('xcb', 'ListFontsWithInfo')
