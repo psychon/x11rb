@@ -503,6 +503,11 @@ class Module(object):
         if function_name == "await":
             function_name = "await_"
 
+        if name in [('xcb', 'xkb', 'SetMap'), ('xcb', 'xkb', 'GetKbdByName'), ('xcb', 'xkb', 'SetNames')]:
+            self.trait_out("fn %s(&self) { unimplemented!(\"Not yet supported by the code generator\") }", function_name)
+            self.out("pub fn %s<Conn>(_conn: &Conn) where Conn: RequestConnection + ?Sized { unimplemented!(\"Not yet supported by the code generator\") }", function_name)
+            return
+
         is_list_fonts_with_info = name == ('xcb', 'ListFontsWithInfo')
 
         # Does this have a <switch>? If so, we generate an *Aux structure
