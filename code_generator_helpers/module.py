@@ -423,7 +423,6 @@ class Module(object):
                 self.out("result")
         self.out("}")
 
-
     def union(self, union, name):
         assert not hasattr(union, "doc")
 
