@@ -367,6 +367,7 @@ class Module(object):
             result_bytes = []
 
             for field in complex.fields:
+                field_name = self._to_rust_variable(field.field_name)
                 if field.type.is_pad:
                     if not complex.fixed_size() and field.type.align != 1:
                         # Align the output buffer to a multiple of field.type.align
@@ -384,18 +385,16 @@ class Module(object):
                     # This is a variable sized list, so emit bytes to 'result' and
                     # then add this list directly to 'result'
                     _emit()
-                    self.out("for obj in self.%s.iter() {", field.field_name)
+                    self.out("for obj in self.%s.iter() {", field_name)
                     self.out.indent("result.extend(obj.to_ne_bytes().iter());")
                     self.out("}")
                 elif field.type.is_list and field.type.nmemb is not None and field.type.size == 1:
                     # Fixed-sized list with byte-sized members
-                    field_name = self._to_rust_variable(field.field_name)
                     for i in range(field.type.nmemb):
                         result_bytes.append("self.%s[%d]" % (field_name, i))
                 else:
                     # Fixed-sized list with "large" members. We have first serialise
                     # the members individually and then assemble that into the output.
-                    field_name = self._to_rust_variable(field.field_name)
                     field_name_bytes = self._to_rust_variable(field.field_name + "_bytes")
                     if hasattr(field, "is_length_field_for"):
                         # This field is a length field for some list. We get the value
