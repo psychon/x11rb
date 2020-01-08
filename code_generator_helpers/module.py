@@ -322,8 +322,15 @@ class Module(object):
         self.complex_type(struct, self._name(name), True)
 
         # And now emit some functions for the struct.
+        self.out("impl %s {", self._name(name))
+        with Indent(self.out):
+            self._generate_to_ne_bytes(struct)
+        self.out("}")
 
-        has_variable_size_list = any(field.type.is_list and field.type.nmemb is None for field in struct.fields)
+        self.out("")
+
+    def _generate_to_ne_bytes(self, complex):
+        has_variable_size_list = any(field.type.is_list and field.type.nmemb is None for field in complex.fields)
         if has_variable_size_list:
             # For a variable size list, we do not know beforehand the size of the
             # serialised data. Thus, return a Vec.
@@ -331,97 +338,93 @@ class Module(object):
             wire_type = "Vec<u8>"
         else:
             # Everything is fixed-size so we can return an array.
-            length = sum((field.type.get_total_size() for field in struct.fields))
+            length = sum((field.type.get_total_size() for field in complex.fields))
             wire_type = "[u8; %s]" % length
 
-        self.out("impl %s {", self._name(name))
+        self.out("pub fn to_ne_bytes(&self) -> %s {", wire_type)
+
         with Indent(self.out):
-            self.out("pub fn to_ne_bytes(&self) -> %s {", wire_type)
+            if has_variable_size_list:
+                self.out("let mut result = Vec::new();")
 
-            with Indent(self.out):
-                if has_variable_size_list:
-                    self.out("let mut result = Vec::new();")
-
-                    def _emit():
-                        if not has_variable_size_list or not result_bytes:
-                            return
-                        self.out("result.extend([")
-                        for result_value in result_bytes:
-                            self.out.indent("%s,", result_value)
-                        self.out("].iter());")
-                        del result_bytes[:]
-                    _final_emit = _emit
-                else:
-                    def _emit():
-                        assert False, "We do not have a variable size list, but we do?"
-
-                    def _final_emit():
-                        pass
-
-                # This gathers the bytes of the result; its content is copied to
-                # result:Vec<u8> by _emit(). This happens in front of variable sized lists
-                result_bytes = []
-
-                for field in struct.fields:
-                    if field.type.is_pad:
-                        if has_variable_size_list and field.type.align != 1:
-                            # Align the output buffer to a multiple of field.type.align
-                            assert field.type.size == 1
-                            assert field.type.nmemb == 1
-                            self.out("while result.len() %% %s != 0 {", field.type.align)
-                            self.out.indent("result.push(0);")
-                            self.out("}")
-                        else:
-                            assert field.type.align == 1
-                            assert field.type.size == 1
-                            for i in range(field.type.nmemb):
-                                result_bytes.append("0")
-                    elif field.type.is_list and field.type.nmemb is None:
-                        # This is a variable sized list, so emit bytes to 'result' and
-                        # then add this list directly to 'result'
-                        _emit()
-                        self.out("for obj in self.%s.iter() {", field.field_name)
-                        self.out.indent("result.extend(obj.to_ne_bytes().iter());")
-                        self.out("}")
-                    elif field.type.is_list and field.type.nmemb is not None and field.type.size == 1:
-                        # Fixed-sized list with byte-sized members
-                        field_name = self._to_rust_variable(field.field_name)
-                        for i in range(field.type.nmemb):
-                            result_bytes.append("self.%s[%d]" % (field_name, i))
-                    else:
-                        # Fixed-sized list with "large" members. We have first serialise
-                        # the members individually and then assemble that into the output.
-                        field_name = self._to_rust_variable(field.field_name)
-                        field_name_bytes = self._to_rust_variable(field.field_name + "_bytes")
-                        if hasattr(field, "is_length_field_for"):
-                            # This field is a length field for some list. We get the value
-                            # for this field as the length of the list.
-                            self.out("let %s = self.%s.len() as %s;", field_name,
-                                     field.is_length_field_for.field_name, self._field_type(field))
-                            source = field_name
-                        else:
-                            # Get the value of this field from "self".
-                            source = "self.%s" % field_name
-                            if is_bool(field.type):
-                                source = "(%s as u8)" % source
-                        # First serialise the value itself...
-                        self.out("let %s = %s.to_ne_bytes();", field_name_bytes, source)
-                        # ...then copy to the output.
-                        for i in range(field.type.size):
-                            result_bytes.append("%s[%d]" % (field_name_bytes, i))
-                _final_emit()
-
-                if has_variable_size_list:
-                    self.out("result")
-                else:
-                    self.out("[")
+                def _emit():
+                    if not has_variable_size_list or not result_bytes:
+                        return
+                    self.out("result.extend([")
                     for result_value in result_bytes:
                         self.out.indent("%s,", result_value)
-                    self.out("]")
-            self.out("}")
+                    self.out("].iter());")
+                    del result_bytes[:]
+                _final_emit = _emit
+            else:
+                def _emit():
+                    assert False, "We do not have a variable size list, but we do?"
+
+                def _final_emit():
+                    pass
+
+            # This gathers the bytes of the result; its content is copied to
+            # result:Vec<u8> by _emit(). This happens in front of variable sized lists
+            result_bytes = []
+
+            for field in complex.fields:
+                if field.type.is_pad:
+                    if has_variable_size_list and field.type.align != 1:
+                        # Align the output buffer to a multiple of field.type.align
+                        assert field.type.size == 1
+                        assert field.type.nmemb == 1
+                        self.out("while result.len() %% %s != 0 {", field.type.align)
+                        self.out.indent("result.push(0);")
+                        self.out("}")
+                    else:
+                        assert field.type.align == 1
+                        assert field.type.size == 1
+                        for i in range(field.type.nmemb):
+                            result_bytes.append("0")
+                elif field.type.is_list and field.type.nmemb is None:
+                    # This is a variable sized list, so emit bytes to 'result' and
+                    # then add this list directly to 'result'
+                    _emit()
+                    self.out("for obj in self.%s.iter() {", field.field_name)
+                    self.out.indent("result.extend(obj.to_ne_bytes().iter());")
+                    self.out("}")
+                elif field.type.is_list and field.type.nmemb is not None and field.type.size == 1:
+                    # Fixed-sized list with byte-sized members
+                    field_name = self._to_rust_variable(field.field_name)
+                    for i in range(field.type.nmemb):
+                        result_bytes.append("self.%s[%d]" % (field_name, i))
+                else:
+                    # Fixed-sized list with "large" members. We have first serialise
+                    # the members individually and then assemble that into the output.
+                    field_name = self._to_rust_variable(field.field_name)
+                    field_name_bytes = self._to_rust_variable(field.field_name + "_bytes")
+                    if hasattr(field, "is_length_field_for"):
+                        # This field is a length field for some list. We get the value
+                        # for this field as the length of the list.
+                        self.out("let %s = self.%s.len() as %s;", field_name,
+                                 field.is_length_field_for.field_name, self._field_type(field))
+                        source = field_name
+                    else:
+                        # Get the value of this field from "self".
+                        source = "self.%s" % field_name
+                        if is_bool(field.type):
+                            source = "(%s as u8)" % source
+                    # First serialise the value itself...
+                    self.out("let %s = %s.to_ne_bytes();", field_name_bytes, source)
+                    # ...then copy to the output.
+                    for i in range(field.type.size):
+                        result_bytes.append("%s[%d]" % (field_name_bytes, i))
+            _final_emit()
+
+            if has_variable_size_list:
+                self.out("result")
+            else:
+                self.out("[")
+                for result_value in result_bytes:
+                    self.out.indent("%s,", result_value)
+                self.out("]")
         self.out("}")
 
-        self.out("")
 
     def union(self, union, name):
         assert not hasattr(union, "doc")
