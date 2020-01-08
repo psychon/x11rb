@@ -1404,9 +1404,10 @@ class Module(object):
 
             for field in switch.type.fields:
                 aux_name = self._aux_field_name(field)
+                field_type = self._to_complex_owned_rust_type(field)
                 self.out("/// Set the %s field of this structure.", field.field_name)
                 self.out("pub fn %s<I>(mut self, value: I) -> Self where I: Into<RustOption<%s>> {",
-                         aux_name, self._field_type(field))
+                         aux_name, field_type)
                 with Indent(self.out):
                     self.out("self.%s = value.into();", aux_name)
                     self.out("self")
