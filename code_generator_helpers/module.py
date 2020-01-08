@@ -1128,9 +1128,8 @@ class Module(object):
 
         return parts
 
-    def complex_type(self, complex, name, impl_try_parse):
-        """Emit a complex type as a struct. This also adds some parsing code and
-        a to_ne_bytes() implementation."""
+    def complex_type_struct(self, complex, name):
+        """Emit a complex type as a struct. """
 
         mark_length_fields(complex)
 
@@ -1138,8 +1137,6 @@ class Module(object):
             if field.type.is_switch:
                 self._emit_switch(field.type, self._name(field.field_type))
 
-        has_fds = any(field.isfd for field in complex.fields)
-        assert not (impl_try_parse and has_fds)
         self.out("#[derive(%s)]", ", ".join(get_derives(complex)))
 
         self.out("pub struct %s {", name)
@@ -1149,6 +1146,15 @@ class Module(object):
                     field_name = self._to_rust_variable(field.field_name)
                     self.out("pub %s: %s,", field_name, self._to_complex_owned_rust_type(field))
         self.out("}")
+
+    def complex_type(self, complex, name, impl_try_parse):
+        """Emit a complex type as a struct. This also adds some parsing code and
+        a to_ne_bytes() implementation."""
+
+        self.complex_type_struct(complex, name)
+
+        has_fds = any(field.isfd for field in complex.fields)
+        assert not (impl_try_parse and has_fds)
 
         # Collect all the fields that appear on the wire in the parent object
         wire_fields = [field.field_name for field in complex.fields if field.wire]
