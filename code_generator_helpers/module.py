@@ -1376,8 +1376,14 @@ class Module(object):
             with Indent(self.out):
                 self.out("let mut result = Vec::new();")
                 for field in switch.type.fields:
-                    self.out("if let Some(value) = self.%s {", self._aux_field_name(field))
-                    self.out.indent("result.extend(value.to_ne_bytes().iter());")
+                    self.out("if let Some(value) = &self.%s {", self._aux_field_name(field))
+                    with Indent(self.out):
+                        if field.type.is_list:
+                            self.out("for obj in value.iter() {")
+                            self.out.indent("result.extend(obj.to_ne_bytes().iter());")
+                            self.out("}")
+                        else:
+                            self.out("result.extend(value.to_ne_bytes().iter());")
                     self.out("}")
                 self.out("result")
             self.out("}")
