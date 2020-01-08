@@ -330,25 +330,30 @@ class Module(object):
         self.out("")
 
     def _generate_to_ne_bytes(self, complex):
-        has_variable_size_list = any(field.type.is_list and field.type.nmemb is None for field in complex.fields)
-        if has_variable_size_list:
+        if complex.fixed_size():
+            # Everything is fixed-size so we can return an array.
+            length = sum((field.type.get_total_size() for field in complex.fields))
+            wire_type = "[u8; %s]" % length
+        else:
             # For a variable size list, we do not know beforehand the size of the
             # serialised data. Thus, return a Vec.
             length = None
             wire_type = "Vec<u8>"
-        else:
-            # Everything is fixed-size so we can return an array.
-            length = sum((field.type.get_total_size() for field in complex.fields))
-            wire_type = "[u8; %s]" % length
 
         self.out("pub fn to_ne_bytes(&self) -> %s {", wire_type)
 
         with Indent(self.out):
-            if has_variable_size_list:
+            if complex.fixed_size():
+                def _emit():
+                    assert False, "We do not have a variable size list, but we do?"
+
+                def _final_emit():
+                    pass
+            else:
                 self.out("let mut result = Vec::new();")
 
                 def _emit():
-                    if not has_variable_size_list or not result_bytes:
+                    if complex.fixed_size() or not result_bytes:
                         return
                     self.out("result.extend([")
                     for result_value in result_bytes:
@@ -356,12 +361,6 @@ class Module(object):
                     self.out("].iter());")
                     del result_bytes[:]
                 _final_emit = _emit
-            else:
-                def _emit():
-                    assert False, "We do not have a variable size list, but we do?"
-
-                def _final_emit():
-                    pass
 
             # This gathers the bytes of the result; its content is copied to
             # result:Vec<u8> by _emit(). This happens in front of variable sized lists
@@ -369,7 +368,7 @@ class Module(object):
 
             for field in complex.fields:
                 if field.type.is_pad:
-                    if has_variable_size_list and field.type.align != 1:
+                    if not complex.fixed_size() and field.type.align != 1:
                         # Align the output buffer to a multiple of field.type.align
                         assert field.type.size == 1
                         assert field.type.nmemb == 1
@@ -416,13 +415,13 @@ class Module(object):
                         result_bytes.append("%s[%d]" % (field_name_bytes, i))
             _final_emit()
 
-            if has_variable_size_list:
-                self.out("result")
-            else:
+            if complex.fixed_size():
                 self.out("[")
                 for result_value in result_bytes:
                     self.out.indent("%s,", result_value)
                 self.out("]")
+            else:
+                self.out("result")
         self.out("}")
 
 
