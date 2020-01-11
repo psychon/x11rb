@@ -233,28 +233,20 @@ def request_implementation(module, obj, name, fds, fds_is_list):
             else:
                 request.append("%s_REQUEST" % module._upper_snake_name(name))
         elif field.type.is_expr:
-            # FIXME: Replace this with expr_to_str()
-            def expr_to_str_and_emit(e):
-                if e.op is not None:
-                    return "%s %s %s" % (expr_to_str_and_emit(e.lhs), e.op, expr_to_str_and_emit(e.rhs))
-                elif e.nmemb is not None:
-                    return e.nmemb
-                else:
-                    assert e.lenfield_name is not None
-                    other_field = [f for f in obj.fields if e.lenfield_name == f.field_name]
-                    assert len(other_field) == 1
-                    other_field = other_field[0]
-                    module.out("let %s: %s = %s.len().try_into()?;",
-                               other_field.field_name, module._field_type(other_field),
-                               other_field.is_length_field_for.field_name)
-                    return e.lenfield_name
+            assert name == ('xcb', 'QueryTextExtents')
+            # There is an expression referring to the string_len argument in the
+            # XML. However, this argument is just the length of the string
+            # argument and thus not actually visible in our code. Thus, get the
+            # variable that is needed for the expression.
+            module.out("let string_len: u32 = string.len().try_into()?;")
 
             # First compute the expression in its actual type, then
             # convert it to bytes, then append the bytes to request
+            module.out("// The following unwrap cannot fail since the value")
+            module.out("// is either 0 or 1. Both fit into an u8.")
             module.out("let %s: %s = (%s).try_into().unwrap();", field_name,
-                       module._field_type(field), expr_to_str_and_emit(field.type.expr))
-            module.out("let %s_bytes = %s.to_ne_bytes();", field_name,
-                       rust_variable)
+                       module._field_type(field), module.expr_to_str(field.type.expr, None))
+            module.out("let %s_bytes = %s.to_ne_bytes();", field_name, rust_variable)
             for i in range(field.type.size):
                 request.append("%s_bytes[%d]" % (field_name, i))
         elif field.type.is_pad:
