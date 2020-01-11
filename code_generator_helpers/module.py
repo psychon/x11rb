@@ -1,8 +1,8 @@
 import re
-import string
 
 from .output import Output, Indent
 import code_generator_helpers.special_cases as special_cases
+from .request import generate_request_code as generate_request_code
 
 
 rust_type_mapping = {
@@ -109,7 +109,7 @@ def get_derives(obj_type):
     return get_derives(obj_type)
 
 
-def _emit_doc(out, doc):
+def emit_doc(out, doc):
     if doc is None:
         return
     out("/// %s.", doc.brief)
@@ -233,7 +233,7 @@ class Module(object):
 
     def enum(self, enum, name):
         rust_name = self._name(name)
-        _emit_doc(self.out, enum.doc)
+        emit_doc(self.out, enum.doc)
         self.out("#[derive(Debug, Clone, Copy, PartialEq, Eq)]")
         # Is any of the variants all upper-case?
         if any(ename.isupper() and len(ename) > 1 for (ename, value) in enum.values):
@@ -499,6 +499,7 @@ class Module(object):
         self.out("")
 
     def request(self, obj, name):
+        mark_length_fields(obj)
         self.emit_opcode(name, 'REQUEST', obj.opcode)
 
         function_name = self._lower_snake_name(name)
@@ -507,426 +508,7 @@ class Module(object):
 
         if special_cases.skip_request(self.out, self.trait_out, obj, name, function_name):
             return
-
-        is_list_fonts_with_info = name == ('xcb', 'ListFontsWithInfo')
-
-        # Does this have a <switch>? If so, we generate an *Aux structure
-        switches = list(filter(lambda field: field.type.is_switch, obj.fields))
-        assert len(switches) <= 1
-        if switches:
-            aux_name = "%sAux" % self._name(name)
-            switch = switches[0]
-
-            # Find the mask field for the switch
-            lenfield_name = switch.type.expr.lenfield_name
-            mask_field = list(filter(lambda field: field.field_name == lenfield_name, obj.fields))
-            assert len(mask_field) == 1
-            mask_field = mask_field[0]
-
-            # Hide it from the API and "connect" it to the switch
-            mask_field.visible = False
-            mask_field.lenfield_for_switch = switch
-
-            self._generate_aux(aux_name, obj, switch, mask_field, function_name)
-        else:
-            aux_name = None
-
-        mark_length_fields(obj)
-
-        # Now start constructing the function prototype of the function for
-        # sending requests.
-
-        # Iterator of letters, used for naming generic parameters
-        letters = iter(string.ascii_uppercase)
-
-        # We need a lifetime if there are more than one references in the
-        # arguments. Right now that means: Any lists? An aux argument?
-        need_lifetime = switches or any(field.type.is_list for field in obj.fields)
-        if name == ('xcb', 'SendEvent'):
-            # We do "magic" below to replace the &[u8; 32] argument with Into<[u8;32]>
-            need_lifetime = False
-        generics = []
-        args = ["overwritten-later"]
-        arg_names = ["self"]
-        # list of "where" conditions to add to the prototype
-        where = []
-
-        # Now collect the arguments of the function. 'fds' will collect all file
-        # descriptors in the request. fds_is_list indicates a list of FDs.
-        fds, fds_is_list = [], False
-        for field in obj.fields:
-            if field.visible:
-                rust_type = self._to_complex_rust_type(field, aux_name, '&')
-
-                # Does this argument have a generic type? This is yes if
-                # - it comes from an enum, or
-                # - it is a FD (but not a list of FDs)
-                # - It is the "event" argument of SendEvent
-                if (field.enum is not None and not field.type.is_list) or \
-                        (field.isfd and not field.type.is_list) or \
-                        (name == ('xcb', 'SendEvent') and field.field_name == 'event'):
-                    if name == ('xcb', 'SendEvent') and field.field_name == 'event':
-                        # Turn &[u8; 32] into [u8; 32]
-                        assert rust_type[0] == '&'
-                        rust_type = rust_type[1:]
-                    letter = next(letters)
-                    generics.append(letter)
-                    where.append("%s: Into<%s>" % (letter, rust_type))
-                    rust_type = letter
-
-                args.append("%s: %s" % (self._to_rust_variable(field.field_name), rust_type))
-                arg_names.append(self._to_rust_variable(field.field_name))
-                if field.isfd:
-                    if field.type.is_list:
-                        fds_is_list = True
-                        fds.append(self._to_rust_variable(field.field_name))
-                    else:
-                        fds.append("%s.into()" % self._to_rust_variable(field.field_name))
-
-        # Figure out the return type of the request function
-        if is_list_fonts_with_info:
-            assert need_lifetime
-            result_type_trait = "ListFontsWithInfoCookie<'c, Self>"
-            result_type_func = "ListFontsWithInfoCookie<'c, Conn>"
-        elif obj.reply:
-            if any(field.isfd for field in obj.reply.fields):
-                cookie = "CookieWithFds"
-            else:
-                cookie = "Cookie"
-            if need_lifetime:
-                result_type_trait = "%s<'c, Self, %sReply>" % (cookie, self._name(name))
-                result_type_func = "%s<'c, Conn, %sReply>" % (cookie, self._name(name))
-            else:
-                result_type_trait = "%s<Self, %sReply>" % (cookie, self._name(name))
-                result_type_func = "%s<Conn, %sReply>" % (cookie, self._name(name))
-        else:
-            if need_lifetime:
-                result_type_trait = "VoidCookie<'c, Self>"
-                result_type_func = "VoidCookie<'c, Conn>"
-            else:
-                result_type_trait = "VoidCookie<Self>"
-                result_type_func = "VoidCookie<Conn>"
-
-        # Finally: Actually emit the function prototype.
-        if need_lifetime:
-            prefix_generics = ["'c"]
-        else:
-            prefix_generics = []
-
-        # First for the trait, this just calls the global function
-        if need_lifetime:
-            args[0] = "&'c self"
-        else:
-            args[0] = "&self"
-        if prefix_generics or generics:
-            generics_str = "<%s>" % ", ".join(prefix_generics + generics)
-        else:
-            generics_str = ""
-
-        _emit_doc(self.trait_out, obj.doc)
-        self.trait_out("fn %s%s(%s) -> Result<%s, ConnectionError>", function_name,
-                       generics_str, ", ".join(args), result_type_trait)
-        if where:
-            self.trait_out("where %s", ", ".join(where))
-        self.trait_out("{")
-        if function_name in arg_names:
-            self.trait_out.indent("self::%s(%s)", function_name, ", ".join(arg_names))
-        else:
-            self.trait_out.indent("%s(%s)", function_name, ", ".join(arg_names))
-        self.trait_out("}")
-        self.trait_out("")
-
-        # Then emit the global function that actually does all the work
-        if need_lifetime:
-            args[0] = "conn: &'c Conn"
-            prefix_generics = ["'c", "Conn"]
-        else:
-            args[0] = "conn: &Conn"
-            prefix_generics = ["Conn"]
-        generics_str = "<%s>" % ", ".join(prefix_generics + generics)
-        _emit_doc(self.out, obj.doc)
-        self.out("pub fn %s%s(%s) -> Result<%s, ConnectionError>", function_name, generics_str, ", ".join(args), result_type_func)
-        prefix_where = ['Conn: RequestConnection + ?Sized']
-        self.out("where %s", ", ".join(prefix_where + where))
-        self.out("{")
-        with Indent(self.out):
-            if self.namespace.is_ext:
-                self.out('let extension_information = conn.extension_information("%s")' % self.namespace.ext_xname)
-                self.out.indent(".ok_or(ConnectionError::UnsupportedExtension)?;")
-
-            # Now generate code for serialising the request. The request bytes
-            # will be collected in a number of arrays. Some of them are
-            # constructed in this function and others are passed in.
-
-            # List of arrays to send
-            requests = []
-            # The latest array of byte that is being constructed
-            request = []
-
-            # Add the given byte array to requests
-            def _emit_add_to_requests(part):
-                if requests:
-                    add = "length_so_far + "
-                else:
-                    add = ""
-                self.out("let length_so_far = %s(%s).len();",
-                         add, part)
-                requests.append(part)
-
-            # This function adds the current 'request' to the list of 'requests'
-            def _emit_request():
-                if not request:
-                    return
-
-                self.out("let request%d = [", len(requests))
-                for byte in request:
-                    self.out.indent("%s,", byte)
-                self.out("];")
-                _emit_add_to_requests("&request%d" % len(requests))
-                del request[:]
-
-            # Emit the code for converting a list to bytes.
-            def _emit_byte_conversion(field):
-                rust_variable = self._to_rust_variable(field.field_name)
-                if field.type.size is not None:
-                    self.out("let mut %s_bytes = Vec::with_capacity(%s * %s.len());",
-                             rust_variable, field.type.size, rust_variable)
-                else:
-                    self.out("let mut %s_bytes = Vec::new();", rust_variable)
-                self.out("for value in %s {", rust_variable)
-                self.out.indent("%s_bytes.extend(value.to_ne_bytes().iter());", rust_variable)
-                self.out("}")
-
-            pad_count = []
-
-            # Emit padding to align the request to the given alignment
-            def _emit_padding_for_alignment(align):
-                _emit_request()
-
-                pad_count.append('')
-                self.out("let padding%s = &[0; %d][..(%d - (length_so_far %% %d)) %% %d];",
-                         len(pad_count), align - 1, align, align, align)
-                _emit_add_to_requests("&padding%s" % len(pad_count))
-
-            # Get the length of all fixed-length parts of the request
-            fixed_request_length, has_variable_length = 0, False
-            for field in obj.fields:
-                if field.wire:
-                    if field.type.fixed_size():
-                        fixed_request_length += field.type.get_total_size()
-                    else:
-                        has_variable_length = True
-
-            # The XML does not describe trailing padding in requests. Everything
-            # is implicitly padded to a four byte boundary. Variably sized
-            # requests are handled below.
-            if has_variable_length:
-                trailing_padding = 0
-            else:
-                padded_length = (fixed_request_length + 3) // 4
-                trailing_padding = padded_length * 4 - fixed_request_length
-                fixed_request_length += trailing_padding
-
-            # This list collects expression that describe the wire length of the
-            # request when summed.
-            request_length = [str(fixed_request_length)]
-
-            # Collect the request length and emit some byte conversions
-            for field in obj.fields:
-                if not field.wire:
-                    continue
-                rust_variable = self._to_rust_variable(field.field_name)
-                if field.type.is_switch:
-                    field_bytes = self._to_rust_variable(field.field_name + "_bytes")
-                    self.out("let %s = %s.to_ne_bytes();", field_bytes, rust_variable)
-                    request_length.append("%s.len()" % field_bytes)
-                elif field.type.nmemb is None:
-                    size = field.type.size
-                    if size is None:
-                        # Variable length list with variable sized items:
-                        # xproto::SetFontPath seems to be the only example
-                        _emit_byte_conversion(field)
-                        request_length.append("%s_bytes.len()" % rust_variable)
-                    else:
-                        # Variable length list with fixed sized items
-                        request_length.append("%s * %s.len()" % (size, rust_variable))
-                elif field.type.size is None:
-                    # Variable sized element. Only example seems to be RandR's
-                    # SetMonitor request. MonitorInfo contains a list.
-                    assert field.type.nmemb is not None
-                    self.out("let %s_bytes = %s.to_ne_bytes();", field.field_name, field.field_name)
-                    request_length.append("%s_bytes.len()" % field.field_name)
-                if hasattr(field, 'lenfield_for_switch'):
-                    # This our special Aux-argument that represents a <switch>
-                    self.out("let %s = %s.value_mask();", rust_variable, field.lenfield_for_switch.field_name)
-            request_length = " + ".join(request_length)
-
-            if has_variable_length:
-                # This will cause the division by 4 to "round up". Code below
-                # will actually add padding bytes.
-                request_length += " + 3"
-
-            # The "length" variable contains the request length in four byte
-            # quantities. This rounds up to a multiple of four, because we
-            self.out("let length: usize = (%s) / 4;", request_length)
-
-            # Now construct the actual request bytes
-            for field in obj.fields:
-                if not field.wire:
-                    continue
-                field_name = field.field_name
-                rust_variable = self._to_rust_variable(field_name)
-                if field_name == "major_opcode" or field_name == "minor_opcode":
-                    # This is a special case for "magic" fields that we compute
-                    if self.namespace.is_ext and field_name == "major_opcode":
-                        request.append('extension_information.major_opcode')
-                    else:
-                        request.append("%s_REQUEST" % self._upper_snake_name(name))
-                elif field.type.is_expr:
-                    # FIXME: Replace this with expr_to_str()
-                    def expr_to_str_and_emit(e):
-                        if e.op is not None:
-                            return "%s %s %s" % (expr_to_str_and_emit(e.lhs), e.op, expr_to_str_and_emit(e.rhs))
-                        elif e.nmemb is not None:
-                            return e.nmemb
-                        else:
-                            assert e.lenfield_name is not None
-                            other_field = [f for f in obj.fields if e.lenfield_name == f.field_name]
-                            assert len(other_field) == 1
-                            other_field = other_field[0]
-                            self.out("let %s: %s = %s.len().try_into()?;",
-                                     other_field.field_name, self._field_type(other_field),
-                                     other_field.is_length_field_for.field_name)
-                            return e.lenfield_name
-
-                    # First compute the expression in its actual type, then
-                    # convert it to bytes, then append the bytes to request
-                    self.out("let %s: %s = (%s).try_into().unwrap();", field_name,
-                             self._field_type(field), expr_to_str_and_emit(field.type.expr))
-                    self.out("let %s_bytes = %s.to_ne_bytes();", field_name,
-                             rust_variable)
-                    for i in range(field.type.size):
-                        request.append("%s_bytes[%d]" % (field_name, i))
-                elif field.type.is_pad:
-                    if field.type.fixed_size():
-                        # Padding of a fixed size, we simply emit zero bytes
-                        assert field.type.size == 1
-                        for i in range(field.type.nmemb):
-                            request.append("0")
-                    else:
-                        # Padding of a variable length, we have to get the
-                        # length so far and add padding
-                        assert field.type.size == 1 and field.type.nmemb == 1
-                        _emit_padding_for_alignment(4)
-                elif field.type.is_list:
-                    # We faked the type of SendEvent's event argument before,
-                    # now we have to convert it for the following code
-                    if name == ('xcb', 'SendEvent') and field_name == 'event':
-                        self.out("let %s = %s.into();", field_name, field_name)
-                        self.out("let %s = &%s;", field_name, field_name)
-
-                    # Lists without a "simple" length field or with a fixed size
-                    # could be passed incorrectly be the caller; check this.
-                    if not (hasattr(field, "has_length_field") or field.type.fixed_size()):
-                        self.out("assert_eq!(%s.len(), %s, \"Argument %s has an incorrect length\");",
-                                 rust_variable, self.expr_to_str(field.type.expr, "usize"), field_name)
-                    if field.type.size == 1:
-                        # This list has u8 entries, we can avoid a copy
-                        _emit_request()
-                        _emit_add_to_requests(rust_variable)
-                    else:
-                        if field.type.size is not None:
-                            _emit_byte_conversion(field)
-                        # else: Already called _emit_byte_conversion() above
-
-                        _emit_request()
-                        _emit_add_to_requests("&%s_bytes" % rust_variable)
-                elif field.wire:
-                    if hasattr(field, "is_length_field_for"):
-                        # This is a length field for some list, get the length.
-                        # (Needed because this is not a function argument)
-                        self.out("let %s: %s = %s.len().try_into()?;", rust_variable,
-                                 self._field_type(field),
-                                 self._to_rust_variable(field.is_length_field_for.field_name))
-                    if field.enum is not None:
-                        # This is a generic parameter, call Into::into
-                        self.out("let %s = %s.into();", rust_variable, rust_variable)
-                    field_bytes = self._to_rust_variable(field_name + "_bytes")
-                    if field.type.is_switch:
-                        # The previous loop for calculating the request length
-                        # already called to_ne_bytes() to get the bytes.
-                        pass
-                    elif field.type.name == ('float',):
-                        # FIXME: Switch to a trait that we can implement on f32
-                        self.out("let %s = %s.to_bits().to_ne_bytes();", field_bytes, rust_variable)
-                    elif field.type.size is not None:  # Size None was already handled above
-                        if field_name == "length":
-                            # This is the request length which we explicitly
-                            # calculated above. If it does not fit into u16,
-                            # Connection::compute_length_field() fixes this.
-                            source = "TryInto::<%s>::try_into(length).unwrap_or(0)" % self._field_type(field)
-                        else:
-                            source = rust_variable
-                        if is_bool(field.type) or (name == ('xcb', 'InternAtom') and field_name == 'only_if_exists'):
-                            self.out("let %s = (%s as u8).to_ne_bytes();", field_bytes, source)
-                        else:
-                            self.out("let %s = %s.to_ne_bytes();", field_bytes, source)
-                    if field.type.is_switch or field.type.size is None:
-                        # We have a byte array that we can directly send
-                        _emit_request()
-                        _emit_add_to_requests("&" + field_bytes)
-                    else:
-                        # Copy the bytes to the request array
-                        for i in range(field.type.size):
-                            request.append("%s[%d]" % (field_bytes, i))
-
-            if trailing_padding:
-                request.append("0 /* trailing padding */")
-                request.extend(["0"] * (trailing_padding - 1))
-
-            # Emit everything that is still in 'request'
-            _emit_request()
-            assert not request
-
-            if has_variable_length:
-                # Add zero bytes so that the total length is a multiple of 4
-                _emit_padding_for_alignment(4)
-
-            # Emit an assert that checks that the sum of all the byte arrays in
-            # 'requests' is the same as our computed length field
-            self.out("assert_eq!(length_so_far, length * 4);")
-
-            # Now we actually send the request
-
-            slices = ", ".join(["IoSlice::new(%s)" % r for r in requests])
-
-            if fds:
-                if not fds_is_list:
-                    self.out("let fds = vec!(%s);", ", ".join(fds))
-                    fds = "fds"
-                else:
-                    # There may (currently) be only a single list of FDs
-                    fds, = fds
-            else:
-                fds = "Vec::new()"
-
-            if is_list_fonts_with_info:
-                assert obj.reply
-                self.out("Ok(ListFontsWithInfoCookie::new(conn.send_request_with_reply(&[%s], %s)?))", slices, fds)
-            elif obj.reply:
-                if any(field.isfd for field in obj.reply.fields):
-                    self.out("Ok(conn.send_request_with_reply_with_fds(&[%s], %s)?)", slices, fds)
-                else:
-                    self.out("Ok(conn.send_request_with_reply(&[%s], %s)?)", slices, fds)
-            else:
-                self.out("Ok(conn.send_request_without_reply(&[%s], %s)?)", slices, fds)
-        self.out("}")
-
-        if obj.reply:
-            _emit_doc(self.out, obj.reply.doc)
-            self.complex_type(obj.reply, self._name(name) + 'Reply', False)
-
-        self.out("")
+        generate_request_code(self, obj, name, function_name)
 
     def eventstruct(self, eventstruct, name):
         assert False
@@ -934,7 +516,7 @@ class Module(object):
 
     def event(self, event, name):
         self.emit_opcode(name, 'Event', event.opcodes[name])
-        _emit_doc(self.out, event.doc)
+        emit_doc(self.out, event.doc)
         self.complex_type(event, self._name(name) + 'Event', False)
         if not event.is_ge_event:
             self._emit_from_generic(name, 'X11GenericEvent', 'Event')
