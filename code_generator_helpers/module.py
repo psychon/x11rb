@@ -2,6 +2,7 @@ import re
 import string
 
 from .output import Output, Indent
+import code_generator_helpers.special_cases as special_cases
 
 
 rust_type_mapping = {
@@ -504,10 +505,7 @@ class Module(object):
         if function_name == "await":
             function_name = "await_"
 
-        if name in [('xcb', 'xkb', 'GetKbdByName')]:
-            self.trait_out("fn %s(&self) { unimplemented!(\"Not yet supported by the code generator\") }", function_name)
-            self.out("pub fn %s<Conn>(_conn: &Conn) where Conn: RequestConnection + ?Sized {", function_name)
-            self.out("unimplemented!(\"Not yet supported by the code generator\") }")
+        if special_cases.skip_request(self.out, self.trait_out, obj, name, function_name):
             return
 
         is_list_fonts_with_info = name == ('xcb', 'ListFontsWithInfo')
@@ -576,8 +574,6 @@ class Module(object):
                     where.append("%s: Into<%s>" % (letter, rust_type))
                     rust_type = letter
 
-                if name == ('xcb', 'InternAtom') and field.field_name == 'only_if_exists':
-                    rust_type = 'bool'
                 args.append("%s: %s" % (self._to_rust_variable(field.field_name), rust_type))
                 arg_names.append(self._to_rust_variable(field.field_name))
                 if field.isfd:
