@@ -1137,7 +1137,7 @@ class Module(object):
 
         return name
 
-    def expr_to_str(self, e, type):
+    def expr_to_str(self, e, type=None):
         if e.op is not None:
             if e.op == 'calculate_len':
                 return e.op
@@ -1156,4 +1156,7 @@ class Module(object):
             return e.nmemb
         else:
             assert e.lenfield_name is not None
-            return "%s as %s" % (self._to_rust_variable(e.lenfield_name), type)
+            if type is not None:
+                return "%s as %s" % (self._to_rust_variable(e.lenfield_name), type)
+            else:
+                return self._to_rust_variable(e.lenfield_name)
