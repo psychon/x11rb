@@ -135,18 +135,6 @@ def request_implementation(module, obj, name, fds, fds_is_list):
         _emit_add_to_requests("&request%d" % len(requests))
         del request[:]
 
-    # Emit the code for converting a list to bytes.
-    def _emit_byte_conversion(field):
-        rust_variable = module._to_rust_variable(field.field_name)
-        if field.type.size is not None:
-            module.out("let mut %s_bytes = Vec::with_capacity(%s * %s.len());",
-                       rust_variable, field.type.size, rust_variable)
-        else:
-            module.out("let mut %s_bytes = Vec::new();", rust_variable)
-        module.out("for value in %s {", rust_variable)
-        module.out.indent("%s_bytes.extend(value.serialize().iter());", rust_variable)
-        module.out("}")
-
     pad_count = []
 
     # Emit padding to align the request to the given alignment
@@ -195,7 +183,8 @@ def request_implementation(module, obj, name, fds, fds_is_list):
             if size is None:
                 # Variable length list with variable sized items:
                 # xproto::SetFontPath seems to be the only example
-                _emit_byte_conversion(field)
+                module.out("let %s_bytes = %s.serialize();",
+                           rust_variable, rust_variable)
                 request_length.append("%s_bytes.len()" % rust_variable)
             else:
                 # Variable length list with fixed sized items
@@ -278,8 +267,18 @@ def request_implementation(module, obj, name, fds, fds_is_list):
                 _emit_add_to_requests(rust_variable)
             else:
                 if field.type.size is not None:
-                    _emit_byte_conversion(field)
-                # else: Already called _emit_byte_conversion() above
+                    if field.type.size <= 32:
+                        module.out("let %s_bytes = %s.serialize();",
+                                   rust_variable, rust_variable)
+                    else:
+                        # I am not happy about the trait std::array::LengthAtMost32
+                        module.out("let mut %s_bytes = Vec::new();",
+                                   rust_variable)
+                        module.out("for value in %s {", rust_variable)
+                        module.out.indent("%s_bytes.extend(value.serialize().iter());",
+                                          rust_variable)
+                        module.out("}")
+                # else: Already called .serialize() on the list above
 
                 _emit_request()
                 _emit_add_to_requests("&%s_bytes" % rust_variable)
