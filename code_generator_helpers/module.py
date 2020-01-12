@@ -699,20 +699,27 @@ class Module(object):
                 self.out("];")
                 parts.append(field_name)
             elif field.type.is_list:
-                if field.type.expr.op != 'calculate_len':
-                    self.out("let list_length = %s;", self.expr_to_str(field.type.expr, 'usize'))
-                    self.out("let mut %s = Vec::with_capacity(list_length);", field_name)
-                    self.out("for _ in 0..list_length {")
-                else:
-                    self.out("// Length is 'everything left in the input'")
-                    self.out("let mut %s = Vec::new();", field_name)
-                    self.out("while !remaining.is_empty() {")
-
-                with Indent(self.out):
-                    self.out("let (v, new_remaining) = %s::try_parse(%s)?;", rust_type, ", ".join(try_parse_args))
-                    self.out("%s.push(v);", field_name)
+                if field.type.expr.op != 'calculate_len' and len(try_parse_args) == 1:
+                    assert try_parse_args == ["remaining"], try_parse_args
+                    self.out("let (%s, new_remaining) = crate::x11_utils::parse_list(remaining, %s)?;",
+                             field_name, self.expr_to_str(field.type.expr, 'usize'))
                     self.out("remaining = new_remaining;")
-                self.out("}")
+                else:
+                    if field.type.expr.op != 'calculate_len':
+                        self.out("let list_length = %s;", self.expr_to_str(field.type.expr, 'usize'))
+                        self.out("let mut %s = Vec::with_capacity(list_length);", field_name)
+                        self.out("for _ in 0..list_length {")
+                    else:
+                        self.out("// Length is 'everything left in the input'")
+                        self.out("let mut %s = Vec::new();", field_name)
+                        self.out("while !remaining.is_empty() {")
+
+                    with Indent(self.out):
+                        self.out("let (v, new_remaining) = %s::try_parse(%s)?;", rust_type, ", ".join(try_parse_args))
+                        self.out("%s.push(v);", field_name)
+                        self.out("remaining = new_remaining;")
+                    self.out("}")
+
                 parts.append(field_name)
             else:
                 self.out("let (%s, new_remaining) = %s::try_parse(%s)?;",
