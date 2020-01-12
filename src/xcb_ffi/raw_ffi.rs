@@ -87,6 +87,7 @@ mod mock {
     use std::ffi::CStr;
     use libc::{c_void, c_int, c_char, c_uint};
     use super::{xcb_connection_t, xcb_protocol_request_t, xcb_void_cookie_t};
+    use crate::x11_utils::Serialize;
     use crate::generated::xproto::Setup;
 
     #[repr(C)]
@@ -124,7 +125,7 @@ mod mock {
             pixmap_formats: Default::default(),
             roots: Default::default(),
         };
-        let setup = setup.to_ne_bytes();
+        let setup = setup.serialize();
         assert_eq!(setup.len(), 4 * length_field as usize);
 
         let mock = ConnectionMock {
