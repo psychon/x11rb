@@ -432,6 +432,6 @@ def generate_request_code(module, obj, name, function_name):
 
     if obj.reply:
         code_generator_helpers.module.emit_doc(module.out, obj.reply.doc)
-        module.complex_type(obj.reply, module._name(name) + 'Reply', False)
+        module.complex_type(obj.reply, module._name(name) + 'Reply', False, [])
 
     module.out("")
