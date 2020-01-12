@@ -923,7 +923,7 @@ class Module(object):
                                                 switch_field_type_string))
         for case in switch_type.bitcases:
             for field in case.type.fields:
-                if hasattr(field.type, "expr"):
+                if hasattr(field.type, "expr") and field.type.expr.nmemb is None:
                     lenfield_name = field.type.expr.lenfield_name
                     field_name = self._to_rust_variable(lenfield_name)
                     if field_name in unresolved_without_type:
