@@ -256,6 +256,23 @@ impl Serialize for bool {
     }
 }
 
+/// Parse a list of objects from the given data.
+///
+/// This function parses a list of objects where the length of the list was specified externally.
+/// The wire format for `list_length` instances of `T` will be read from the given data.
+pub fn parse_list<T>(data: &[u8], list_length: usize) -> Result<(Vec<T>, &[u8]), ParseError>
+where T: TryParse
+{
+    let mut remaining = data;
+    let mut result = Vec::with_capacity(list_length);
+    for _ in 0..list_length {
+        let (entry, new_remaining) = T::try_parse(remaining)?;
+        result.push(entry);
+        remaining = new_remaining;
+    }
+    Ok((result, remaining))
+}
+
 impl<T> Serialize for [T]
 where T: Serialize,
       <T as Serialize>::Bytes: AsRef<[u8]>
