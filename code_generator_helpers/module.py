@@ -730,14 +730,14 @@ class Module(object):
 
         return parts
 
-    def complex_type_struct(self, complex, name):
+    def complex_type_struct(self, complex, name, parent_fields):
         """Emit a complex type as a struct. """
 
         mark_length_fields(complex)
 
         for field in complex.fields:
             if field.type.is_switch:
-                self._emit_switch(field.type, self._name(field.field_type))
+                self._emit_switch(field.type, self._name(field.field_type), complex.fields)
 
         self.out("#[derive(%s)]", ", ".join(get_derives(complex)))
 
@@ -753,7 +753,7 @@ class Module(object):
         """Emit a complex type as a struct. This also adds some parsing code and
         a Serialize implementation."""
 
-        self.complex_type_struct(complex, name)
+        self.complex_type_struct(complex, name, parent_fields)
 
         has_fds = any(field.isfd for field in complex.fields)
         assert not (impl_try_parse and has_fds)
@@ -780,11 +780,12 @@ class Module(object):
                 # Turn missing values into extra arguments
                 assert unresolved
                 unresolved_args, extra_args = [], []
-                for field in complex.fields:
+                for field in parent_fields:
                     if field.field_name in unresolved:
+                        field_name = self._to_rust_variable(field.field_name)
                         field_type = self._to_complex_rust_type(field, None, '')
-                        unresolved_args.append("%s: %s" % (field.field_name, field_type))
-                        extra_args.append(field.field_name)
+                        unresolved_args.append("%s: %s" % (field_name, field_type))
+                        extra_args.append(field_name)
                 method = "pub fn try_parse(value: &[u8], %s) -> Result<(Self, &[u8]), ParseError>"
                 method = method % ", ".join(unresolved_args)
 
@@ -876,7 +877,7 @@ class Module(object):
                 result = "[%s; %s]" % (result, field.type.nmemb)
         return result
 
-    def _emit_switch_type(self, switch_type, name, generate_serialize, doc=None):
+    def _emit_switch_type(self, switch_type, name, parent_fields, generate_serialize, generate_try_parse, doc=None):
         for case in switch_type.bitcases:
             # Is there more than one visible field?
             visible_fields = list(filter(lambda x: x.visible, case.type.fields))
@@ -884,7 +885,11 @@ class Module(object):
                 # Yes, then we need to generate a helper struct to ensure that
                 # these fields are only specified together.
                 case.rust_name = name + case.type.name[-1]
-                self.complex_type_struct(case.type, case.rust_name)
+                if generate_try_parse:
+                    # This also generates a TryParse implementation
+                    self.complex_type(case.type, case.rust_name, True, parent_fields)
+                else:
+                    self.complex_type_struct(case.type, case.rust_name, parent_fields)
 
                 if generate_serialize:
                     self._generate_serialize(case.rust_name, case.type)
@@ -905,19 +910,11 @@ class Module(object):
                 self.out.indent("%s: %s<%s>,", self._aux_field_name(field), self.option_name, field_type)
         self.out("}")
 
-    def _emit_switch(self, switch_type, name):
-        self.out("#[derive(%s)]", ", ".join(get_derives(switch_type) + ["Default"]))
-        self.out("pub struct %s {", name)
+    def _emit_switch(self, switch_type, name, parent_fields):
+        self._emit_switch_type(switch_type, name, parent_fields, False, True)
         switch_field_type = find_field(switch_type.parents[-1].fields,
                                        switch_type.expr.lenfield_name)
         switch_field_type_string = self._to_complex_rust_type(switch_field_type, None, '')
-        for field in switch_type.fields:
-            if not field.visible:
-                continue
-            type_name = self._to_complex_owned_rust_type(field)
-            self.out.indent("%s: %s<%s>,", self._aux_field_name(field),
-                            self.option_name, type_name)
-        self.out("}")
 
         # Collect missing values that are needed for parsing
         unresolved_with_type, unresolved_without_type = [], []
@@ -954,34 +951,33 @@ class Module(object):
                 for case in switch_type.bitcases:
                     expr, = case.type.expr
                     assert expr.op == 'enumref'
-                    field_names = [self._to_rust_variable(field.field_name)
-                                   for field in case.type.fields
-                                   if field.visible]
-                    if len(field_names) == 1:
-                        field_names_str = field_names[0]
+                    if hasattr(case, "rust_name"):
+                        field_name = case.type.name[-1]
+                        field_type = case.rust_name
                     else:
-                        field_names_str = "(%s)" % (", ".join(field_names),)
+                        field_name = self._to_rust_variable(case.only_field.field_name)
+                        field_type = self._to_complex_owned_rust_type(case.only_field)
                     self.out("let %s = if %s & Into::<%s>::into(%s::%s) != 0 {",
-                             field_names_str, switch_field_type.field_name,
+                             field_name, switch_field_type.field_name,
                              self._name(switch_field_type.field_type),
                              self._name(expr.lenfield_type.name),
                              ename_to_rust(expr.lenfield_name))
                     this_parts = []
                     with Indent(self.out):
-                        for field in case.type.fields:
-                            this_parts.extend(self._emit_parsing_code([field]))
-                        if len(this_parts) == 1:
-                            self.out("Some(%s)", this_parts[0])
+                        if hasattr(case, "rust_name"):
+                            args = ["remaining"]
+                            if hasattr(case.type, "extra_try_parse_args"):
+                                args += case.type.extra_try_parse_args
+                            self.out("let (%s, new_remaining) = %s::try_parse(%s)?;",
+                                     field_name, field_type, ", ".join(args))
+                            self.out("remaining = new_remaining;")
                         else:
-                            self.out("(%s)", ", ".join(["Some(%s)" % (part,)
-                                                        for part in this_parts]))
+                            this_parts.extend(self._emit_parsing_code(case.type.fields))
+                        self.out("Some(%s)", field_name)
                     self.out("} else {")
-                    if len(field_names) == 1:
-                        self.out.indent("None")
-                    else:
-                        self.out.indent("(%s)", ", ".join(["None"] * len(field_names)))
+                    self.out.indent("None")
                     self.out("};")
-                    all_parts.extend(this_parts)
+                    all_parts.append(field_name)
                 self.out("let result = %s { %s };", name, ", ".join(all_parts))
                 self.out("Ok((result, remaining))")
             self.out("}")
@@ -998,7 +994,7 @@ class Module(object):
             min_field_size = min(field.type.size for field in fixed_size_fields)
             assert all(field.type.size % min_field_size == 0 for field in fixed_size_fields)
 
-        self._emit_switch_type(switch.type, name, True, "Auxiliary and optional information"
+        self._emit_switch_type(switch.type, name, request.fields, True, False, "Auxiliary and optional information"
                                + " for the %s function." % (request_function_name,))
 
         self.out("impl %s {", name)
