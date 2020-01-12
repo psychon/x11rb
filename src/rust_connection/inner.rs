@@ -9,7 +9,7 @@ use std::collections::VecDeque;
 use crate::utils::{Buffer, RawFdContainer};
 use crate::connection::SequenceNumber;
 use crate::generated::xproto::{Setup, SetupRequest};
-use crate::x11_utils::GenericEvent;
+use crate::x11_utils::{GenericEvent, Serialize};
 
 #[derive(Debug)]
 pub(crate) struct ConnectionInner<Stream>
@@ -66,7 +66,7 @@ where Stream: Read + Write
             authorization_protocol_name: Vec::new(),
             authorization_protocol_data: Vec::new(),
         };
-        stream.write_all(&request.to_ne_bytes())?;
+        stream.write_all(&request.serialize())?;
         Ok(())
     }
 

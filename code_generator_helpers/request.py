@@ -144,7 +144,7 @@ def request_implementation(module, obj, name, fds, fds_is_list):
         else:
             module.out("let mut %s_bytes = Vec::new();", rust_variable)
         module.out("for value in %s {", rust_variable)
-        module.out.indent("%s_bytes.extend(value.to_ne_bytes().iter());", rust_variable)
+        module.out.indent("%s_bytes.extend(value.serialize().iter());", rust_variable)
         module.out("}")
 
     pad_count = []
@@ -188,7 +188,7 @@ def request_implementation(module, obj, name, fds, fds_is_list):
         rust_variable = module._to_rust_variable(field.field_name)
         if field.type.is_switch:
             field_bytes = module._to_rust_variable(field.field_name + "_bytes")
-            module.out("let %s = %s.to_ne_bytes();", field_bytes, rust_variable)
+            module.out("let %s = %s.serialize();", field_bytes, rust_variable)
             request_length.append("%s.len()" % field_bytes)
         elif field.type.nmemb is None:
             size = field.type.size
@@ -204,7 +204,7 @@ def request_implementation(module, obj, name, fds, fds_is_list):
             # Variable sized element. Only example seems to be RandR's
             # SetMonitor request. MonitorInfo contains a list.
             assert field.type.nmemb is not None
-            module.out("let %s_bytes = %s.to_ne_bytes();", field.field_name, field.field_name)
+            module.out("let %s_bytes = %s.serialize();", field.field_name, field.field_name)
             request_length.append("%s_bytes.len()" % field.field_name)
         if hasattr(field, 'lenfield_for_switch'):
             # This our special Aux-argument that represents a <switch>
@@ -246,7 +246,7 @@ def request_implementation(module, obj, name, fds, fds_is_list):
             module.out("// is either 0 or 1. Both fit into an u8.")
             module.out("let %s: %s = (%s).try_into().unwrap();", field_name,
                        module._field_type(field), module.expr_to_str(field.type.expr, None))
-            module.out("let %s_bytes = %s.to_ne_bytes();", field_name, rust_variable)
+            module.out("let %s_bytes = %s.serialize();", field_name, rust_variable)
             for i in range(field.type.size):
                 request.append("%s_bytes[%d]" % (field_name, i))
         elif field.type.is_pad:
@@ -296,11 +296,8 @@ def request_implementation(module, obj, name, fds, fds_is_list):
             field_bytes = module._to_rust_variable(field_name + "_bytes")
             if field.type.is_switch:
                 # The previous loop for calculating the request length
-                # already called to_ne_bytes() to get the bytes.
+                # already called serialize() to get the bytes.
                 pass
-            elif field.type.name == ('float',):
-                # FIXME: Switch to a trait that we can implement on f32
-                module.out("let %s = %s.to_bits().to_ne_bytes();", field_bytes, rust_variable)
             elif field.type.size is not None:  # Size None was already handled above
                 if field_name == "length":
                     # This is the request length which we explicitly
@@ -311,9 +308,9 @@ def request_implementation(module, obj, name, fds, fds_is_list):
                     source = rust_variable
                 if code_generator_helpers.module.is_bool(field.type) or \
                         (name == ('xcb', 'InternAtom') and field_name == 'only_if_exists'):
-                    module.out("let %s = (%s as u8).to_ne_bytes();", field_bytes, source)
+                    module.out("let %s = (%s as u8).serialize();", field_bytes, source)
                 else:
-                    module.out("let %s = %s.to_ne_bytes();", field_bytes, source)
+                    module.out("let %s = %s.serialize();", field_bytes, source)
             if field.type.is_switch or field.type.size is None:
                 # We have a byte array that we can directly send
                 _emit_request()
