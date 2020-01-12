@@ -876,6 +876,35 @@ class Module(object):
                 result = "[%s; %s]" % (result, field.type.nmemb)
         return result
 
+    def _emit_switch_type(self, switch_type, name, generate_serialize, doc=None):
+        for case in switch_type.bitcases:
+            # Is there more than one visible field?
+            visible_fields = list(filter(lambda x: x.visible, case.type.fields))
+            if len(visible_fields) > 1:
+                # Yes, then we need to generate a helper struct to ensure that
+                # these fields are only specified together.
+                case.rust_name = name + case.type.name[-1]
+                self.complex_type_struct(case.type, case.rust_name)
+
+                if generate_serialize:
+                    self._generate_serialize(case.rust_name, case.type)
+            else:
+                field, = visible_fields
+                case.only_field = field
+
+        if doc:
+            self.out("/// %s", doc)
+        self.out("#[derive(%s)]", ", ".join(get_derives(switch_type) + ["Default"]))
+        self.out("pub struct %s {", name)
+        for case in switch_type.bitcases:
+            if hasattr(case, "rust_name"):
+                self.out.indent("%s: %s<%s>,", case.type.name[-1], self.option_name, case.rust_name)
+            else:
+                field = case.only_field
+                field_type = self._to_complex_owned_rust_type(field)
+                self.out.indent("%s: %s<%s>,", self._aux_field_name(field), self.option_name, field_type)
+        self.out("}")
+
     def _emit_switch(self, switch_type, name):
         self.out("#[derive(%s)]", ", ".join(get_derives(switch_type) + ["Default"]))
         self.out("pub struct %s {", name)
@@ -969,31 +998,8 @@ class Module(object):
             min_field_size = min(field.type.size for field in fixed_size_fields)
             assert all(field.type.size % min_field_size == 0 for field in fixed_size_fields)
 
-        for case in switch.type.bitcases:
-            # Is there more than one visible field?
-            visible_fields = list(filter(lambda x: x.visible, case.type.fields))
-            if len(visible_fields) > 1:
-                # Yes, then we need to generate a helper struct to ensure that
-                # these fields are only specified together.
-                case.rust_name = name + case.type.name[-1]
-                self.complex_type_struct(case.type, case.rust_name)
-
-                self._generate_serialize(case.rust_name, case.type)
-            else:
-                field, = visible_fields
-                case.only_field = field
-
-        self.out("/// Auxiliary and optional information for the %s function.", request_function_name)
-        self.out("#[derive(%s)]", ", ".join(get_derives(switch.type) + ["Default"]))
-        self.out("pub struct %s {", name)
-        for case in switch.type.bitcases:
-            if hasattr(case, "rust_name"):
-                self.out.indent("%s: %s<%s>,", case.type.name[-1], self.option_name, case.rust_name)
-            else:
-                field = case.only_field
-                field_type = self._to_complex_owned_rust_type(field)
-                self.out.indent("%s: %s<%s>,", self._aux_field_name(field), self.option_name, field_type)
-        self.out("}")
+        self._emit_switch_type(switch.type, name, True, "Auxiliary and optional information"
+                               + " for the %s function." % (request_function_name,))
 
         self.out("impl %s {", name)
         with Indent(self.out):
