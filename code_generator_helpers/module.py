@@ -180,7 +180,6 @@ class Module(object):
         self.out("#![allow(clippy::identity_op)]")
         self.out("#![allow(clippy::trivially_copy_pass_by_ref)]")
         self.out("#![allow(clippy::eq_op)]")
-        self.out("#![allow(clippy::cognitive_complexity)]")
         self.out("use std::convert::TryFrom;")
         self.out("#[allow(unused_imports)]")
         self.out("use std::convert::TryInto;")
