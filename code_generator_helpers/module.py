@@ -185,11 +185,9 @@ class Module(object):
         self.out("use std::convert::TryInto;")
         self.out("use std::io::IoSlice;")
         self.out("#[allow(unused_imports)]")
-        self.out("use std::option::Option as RustOption;")
-        self.out("#[allow(unused_imports)]")
         self.out("use crate::utils::{Buffer, RawFdContainer};")
         self.out("#[allow(unused_imports)]")
-        self.out("use crate::x11_utils::{GenericEvent as X11GenericEvent, GenericError as X11GenericError, Event as _};")
+        self.out("use crate::x11_utils::Event as _;")
         self.out("use crate::x11_utils::{TryParse, Serialize};")
         self.out("use crate::connection::RequestConnection;")
         self.out("#[allow(unused_imports)]")
@@ -197,6 +195,22 @@ class Module(object):
         if not self.namespace.is_ext:
             self.out("use crate::cookie::ListFontsWithInfoCookie;")
         self.out("use crate::errors::{ParseError, ConnectionError};")
+
+        self.generic_event_name = "GenericEvent"
+        self.option_name = "Option"
+        if self.namespace.is_ext and self.namespace.header == "present":
+            self.generic_event_name = "crate::x11_utils::GenericEvent"
+            self.option_name = "std::option::Option"
+        else:
+            self.out("#[allow(unused_imports)]")
+            self.out("use crate::x11_utils::GenericEvent;")
+
+        self.generic_error_name = "GenericError"
+        if self.namespace.is_ext and self.namespace.header == "glx":
+            self.generic_error_name = "crate::x11_utils::GenericError"
+        else:
+            self.out("#[allow(unused_imports)]")
+            self.out("use crate::x11_utils::GenericError;")
 
         for (name, header) in outer_module.imports:
             assert name == header, (name, header)  # I don't know what is going on here...
@@ -272,9 +286,9 @@ class Module(object):
             self.out("}")
         self.out("}")
 
-        self.out("impl Into<RustOption<%s>> for %s {", to_type, rust_name)
+        self.out("impl Into<%s<%s>> for %s {", self.option_name, to_type, rust_name)
         with Indent(self.out):
-            self.out("fn into(self) -> RustOption<%s> {", to_type)
+            self.out("fn into(self) -> %s<%s> {", self.option_name, to_type)
             self.out.indent("Some(self.into())")
             self.out("}")
         self.out("}")
@@ -288,9 +302,9 @@ class Module(object):
                 self.out("}")
             self.out("}")
 
-            self.out("impl Into<RustOption<%s>> for %s {", larger_type, rust_name)
+            self.out("impl Into<%s<%s>> for %s {", self.option_name, larger_type, rust_name)
             with Indent(self.out):
-                self.out("fn into(self) -> RustOption<%s> {", larger_type)
+                self.out("fn into(self) -> %s<%s> {", self.option_name, larger_type)
                 self.out.indent("Some(self.into())")
                 self.out("}")
             self.out("}")
@@ -522,18 +536,19 @@ class Module(object):
         self.emit_opcode(name, 'Event', event.opcodes[name])
         emit_doc(self.out, event.doc)
         self.complex_type(event, self._name(name) + 'Event', False)
+
         if not event.is_ge_event:
-            self._emit_from_generic(name, 'X11GenericEvent', 'Event')
+            self._emit_from_generic(name, self.generic_event_name, 'Event')
             self._emit_serialize(event, name, 'Event')
         else:
-            self._emit_tryfrom_generic(name, 'X11GenericEvent', 'Event')
+            self._emit_tryfrom_generic(name, self.generic_event_name, 'Event')
         self.out("")
 
     def error(self, error, name):
         assert not hasattr(error, "doc")
         self.emit_opcode(name, 'Error', error.opcodes[name])
         self.complex_type(error, self._name(name) + 'Error', False)
-        self._emit_from_generic(name, 'X11GenericError', 'Error')
+        self._emit_from_generic(name, self.generic_error_name, 'Error')
         self._emit_serialize(error, name, 'Error')
         self.out("")
 
@@ -864,7 +879,8 @@ class Module(object):
             if not field.visible:
                 continue
             type_name = self._to_complex_owned_rust_type(field)
-            self.out.indent("%s: RustOption<%s>,", self._aux_field_name(field), type_name)
+            self.out.indent("%s: %s<%s>,", self._aux_field_name(field),
+                            self.option_name, type_name)
         self.out("}")
 
         # Collect missing values that are needed for parsing
@@ -965,11 +981,11 @@ class Module(object):
         self.out("pub struct %s {", name)
         for case in switch.type.bitcases:
             if hasattr(case, "rust_name"):
-                self.out.indent("%s: RustOption<%s>,", case.type.name[-1], case.rust_name)
+                self.out.indent("%s: %s<%s>,", case.type.name[-1], self.option_name, case.rust_name)
             else:
                 field = case.only_field
                 field_type = self._to_complex_owned_rust_type(field)
-                self.out.indent("%s: RustOption<%s>,", self._aux_field_name(field), field_type)
+                self.out.indent("%s: %s<%s>,", self._aux_field_name(field), self.option_name, field_type)
         self.out("}")
 
         self.out("impl %s {", name)
@@ -1010,7 +1026,7 @@ class Module(object):
                     field_name = field.field_name
                     field_type = self._to_complex_owned_rust_type(field)
                 self.out("/// Set the %s field of this structure.", field_name)
-                self.out("pub fn %s<I>(mut self, value: I) -> Self where I: Into<RustOption<%s>> {",
+                self.out("pub fn %s<I>(mut self, value: I) -> Self where I: Into<Option<%s>> {",
                          aux_name, field_type)
                 with Indent(self.out):
                     self.out("self.%s = value.into();", aux_name)
