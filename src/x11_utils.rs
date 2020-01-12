@@ -162,7 +162,21 @@ pub trait TryParse: Sized {
     fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError>;
 }
 
-// Now implement TryParse for some primitive data types that we need.
+/// A type implementing this trait can be serialized into X11 raw bytes.
+pub trait Serialize {
+    /// The value returned by `serialize`.
+    ///
+    /// This should be `Vec<u8>` in most cases. However, arrays like `[u8; 4]` should also be
+    /// allowed and thus this is an associated type.
+    ///
+    /// If generic associated types were available, implementing `AsRef<[u8]>` would be required.
+    type Bytes;
+
+    /// Serialize this value into X11 raw bytes.
+    fn serialize(&self) -> Self::Bytes;
+}
+
+// Now implement TryParse and Serialize for some primitive data types that we need.
 
 macro_rules! implement_try_parse {
     ($t:ty: [$($indicies: expr),*]) => {
@@ -179,6 +193,34 @@ macro_rules! implement_try_parse {
     }
 }
 
+macro_rules! implement_serialize {
+    ($t:ty: $size:expr) => {
+        impl Serialize for $t {
+            type Bytes = [u8; $size];
+            fn serialize(&self) -> Self::Bytes {
+                self.to_ne_bytes()
+            }
+        }
+    }
+}
+
+macro_rules! forward_float {
+    ($from:ty: $to:ty) => {
+        impl TryParse for $from {
+            fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+                let (data, remaining) = <$to>::try_parse(value)?;
+                Ok((<$from>::from_bits(data), remaining))
+            }
+        }
+        impl Serialize for $from {
+            type Bytes = <$to as Serialize>::Bytes;
+            fn serialize(&self) -> Self::Bytes {
+                self.to_bits().serialize()
+            }
+        }
+    }
+}
+
 implement_try_parse!(u8: [0]);
 implement_try_parse!(i8: [0]);
 implement_try_parse!(u16: [0, 1]);
@@ -188,24 +230,29 @@ implement_try_parse!(i32: [0, 1, 2, 3]);
 implement_try_parse!(u64: [0, 1, 2, 3, 4, 5, 6, 7]);
 implement_try_parse!(i64: [0, 1, 2, 3, 4, 5, 6, 7]);
 
-impl TryParse for f32 {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (data, remaining) = u32::try_parse(value)?;
-        Ok((f32::from_bits(data), remaining))
-    }
-}
+implement_serialize!(u8: 1);
+implement_serialize!(i8: 1);
+implement_serialize!(u16: 2);
+implement_serialize!(i16: 2);
+implement_serialize!(u32: 4);
+implement_serialize!(i32: 4);
+implement_serialize!(u64: 8);
+implement_serialize!(i64: 8);
 
-impl TryParse for f64 {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (data, remaining) = u64::try_parse(value)?;
-        Ok((f64::from_bits(data), remaining))
-    }
-}
+forward_float!(f32: u32);
+forward_float!(f64: u64);
 
 impl TryParse for bool {
     fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (data, remaining) = u8::try_parse(value)?;
         Ok((data != 0, remaining))
+    }
+}
+
+impl Serialize for bool {
+    type Bytes = [u8; 1];
+    fn serialize(&self) -> Self::Bytes {
+        [*self as u8]
     }
 }
 
