@@ -1035,12 +1035,7 @@ class Module(object):
                         field = case.only_field
                         self.out("if let Some(value) = &self.%s {", self._aux_field_name(field))
                         with Indent(self.out):
-                            if field.type.is_list:
-                                self.out("for obj in value.iter() {")
-                                self.out.indent("result.extend(obj.serialize().iter());")
-                                self.out("}")
-                            else:
-                                self.out("result.extend(value.serialize().iter());")
+                            self.out("result.extend(value.serialize().iter());")
                         self.out("}")
                 self.out("result")
             self.out("}")

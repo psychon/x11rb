@@ -256,6 +256,20 @@ impl Serialize for bool {
     }
 }
 
+impl<T> Serialize for [T]
+where T: Serialize,
+      <T as Serialize>::Bytes: AsRef<[u8]>
+{
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Self::Bytes {
+        let mut result = Vec::new();
+        for item in self {
+            result.extend(item.serialize().as_ref());
+        }
+        result
+    }
+}
+
 // This macro is used by the generated code to implement `std::ops::BitOr` and
 // `std::ops::BitOrAssign`.
 macro_rules! bitmask_binop {
