@@ -884,7 +884,7 @@ class Module(object):
             if len(visible_fields) > 1:
                 # Yes, then we need to generate a helper struct to ensure that
                 # these fields are only specified together.
-                case.rust_name = name + case.type.name[-1]
+                case.rust_name = name + self._to_rust_identifier(case.type.name[-1])
                 if generate_try_parse:
                     # This also generates a TryParse implementation
                     self.complex_type(case.type, case.rust_name, True, parent_fields)
