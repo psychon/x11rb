@@ -915,11 +915,12 @@ class Module(object):
         switch_field_type = find_field(switch_type.parents[-1].fields,
                                        switch_type.expr.lenfield_name)
         switch_field_type_string = self._to_complex_rust_type(switch_field_type, None, '')
+        switch_field_name = self._to_rust_variable(switch_field_type.field_name)
 
         # Collect missing values that are needed for parsing
         unresolved_with_type, unresolved_without_type = [], []
-        unresolved_without_type.append(switch_field_type.field_name)
-        unresolved_with_type.append("%s: %s" % (switch_field_type.field_name,
+        unresolved_without_type.append(switch_field_name)
+        unresolved_with_type.append("%s: %s" % (switch_field_name,
                                                 switch_field_type_string))
         for case in switch_type.bitcases:
             for field in case.type.fields:
@@ -958,7 +959,7 @@ class Module(object):
                         field_name = self._to_rust_variable(case.only_field.field_name)
                         field_type = self._to_complex_owned_rust_type(case.only_field)
                     self.out("let %s = if %s & Into::<%s>::into(%s::%s) != 0 {",
-                             field_name, switch_field_type.field_name,
+                             field_name, switch_field_name,
                              self._name(switch_field_type.field_type),
                              self._name(expr.lenfield_type.name),
                              ename_to_rust(expr.lenfield_name))
