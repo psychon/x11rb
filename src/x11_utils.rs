@@ -299,3 +299,96 @@ macro_rules! bitmask_binop {
         }
     }
 }
+
+/// A helper macro for managing atoms
+///
+/// If we need to use multiple atoms, one would normally write code such as
+/// ```
+/// # use x11rb::generated::xproto::{ATOM, ConnectionExt, InternAtomReply};
+/// # use x11rb::errors::{ConnectionError, ConnectionErrorOrX11Error};
+/// # use x11rb::cookie::Cookie;
+/// #[allow(non_snake_case)]
+/// pub struct AtomCollection {
+///     pub _NET_WM_NAME: ATOM,
+///     pub _NET_WM_ICON: ATOM,
+///     pub WHATEVER: ATOM,
+/// }
+///
+/// #[allow(non_snake_case)]
+/// struct AtomCollectionCookie<'c, C: ConnectionExt>
+/// {
+///     _NET_WM_NAME: Cookie<'c, C, InternAtomReply>,
+///     _NET_WM_ICON: Cookie<'c, C, InternAtomReply>,
+///     WHATEVER: Cookie<'c, C, InternAtomReply>,
+/// }
+///
+/// impl AtomCollection {
+///     pub fn new<C: ConnectionExt>(conn: &C) -> Result<AtomCollectionCookie<'_, C>, ConnectionError>
+///     {
+///         Ok(AtomCollectionCookie {
+///             _NET_WM_NAME: conn.intern_atom(false, b"_NET_WM_NAME")?,
+///             _NET_WM_ICON: conn.intern_atom(false, b"_NET_WM_ICON")?,
+///             WHATEVER: conn.intern_atom(false, b"WHATEVER")?,
+///         })
+///     }
+/// }
+///
+/// impl<'c, Conn> AtomCollectionCookie<'c, Conn>
+/// where Conn: ConnectionExt
+/// {
+///     pub fn reply(self) -> Result<AtomCollection, ConnectionErrorOrX11Error> {
+///         Ok(AtomCollection {
+///             _NET_WM_NAME: self._NET_WM_NAME.reply()?.atom,
+///             _NET_WM_ICON: self._NET_WM_ICON.reply()?.atom,
+///             WHATEVER: self.WHATEVER.reply()?.atom,
+///         })
+///     }
+/// }
+/// ```
+/// This macro automatically produces this code with
+/// ```
+/// # use x11rb::atom_manager;
+/// atom_manager!(AtomCollection, AtomCollectionCookie, _NET_WM_NAME, _NET_WM_ICON, WHATEVER);
+/// ```
+#[macro_export]
+macro_rules! atom_manager {
+    ($A:ident, $B:ident, $( $x:ident ), *) => {
+        // Cookie version
+        #[allow(non_snake_case)]
+        #[derive(Debug)]
+        pub struct $B<'a, C: ::x11rb::generated::xproto::ConnectionExt> {
+            $(
+                $x: ::x11rb::cookie::Cookie<'a, C, ::x11rb::generated::xproto::InternAtomReply>,
+            )*
+        }
+
+        // Replies
+        #[allow(non_snake_case)]
+        #[derive(Debug, Clone, Copy)]
+        pub struct $A {
+            $(
+                pub $x: ::x11rb::generated::xproto::ATOM,
+            )*
+        }
+
+        impl $A {
+            pub fn new<C: ::x11rb::generated::xproto::ConnectionExt>(conn: &C) -> ::std::result::Result<$B<'_, C>, ::x11rb::errors::ConnectionError> {
+                Ok($B {
+                    $(
+                        $x: conn.intern_atom(false, stringify!($x).as_bytes())?,
+                    )*
+                })
+            }
+        }
+
+        impl<'a, C: ::x11rb::generated::xproto::ConnectionExt> $B<'a, C> {
+            pub fn reply(self) -> ::std::result::Result<$A, ::x11rb::errors::ConnectionErrorOrX11Error> {
+                Ok($A {
+                    $(
+                        $x: self.$x.reply()?.atom,
+                    )*
+                })
+            }
+        }
+    }
+}
