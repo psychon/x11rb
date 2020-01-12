@@ -333,7 +333,7 @@ class Module(object):
         assert not hasattr(struct, "doc")
 
         # Emit the struct definition itself
-        self.complex_type(struct, self._name(name), True)
+        self.complex_type(struct, self._name(name), True, [])
 
         # And now emit some functions for the struct.
         self._generate_serialize(self._name(name), struct)
@@ -535,7 +535,7 @@ class Module(object):
     def event(self, event, name):
         self.emit_opcode(name, 'Event', event.opcodes[name])
         emit_doc(self.out, event.doc)
-        self.complex_type(event, self._name(name) + 'Event', False)
+        self.complex_type(event, self._name(name) + 'Event', False, [])
 
         if not event.is_ge_event:
             self._emit_from_generic(name, self.generic_event_name, 'Event')
@@ -547,7 +547,7 @@ class Module(object):
     def error(self, error, name):
         assert not hasattr(error, "doc")
         self.emit_opcode(name, 'Error', error.opcodes[name])
-        self.complex_type(error, self._name(name) + 'Error', False)
+        self.complex_type(error, self._name(name) + 'Error', False, [])
         self._emit_from_generic(name, self.generic_error_name, 'Error')
         self._emit_serialize(error, name, 'Error')
         self.out("")
@@ -749,7 +749,7 @@ class Module(object):
                     self.out("pub %s: %s,", field_name, self._to_complex_owned_rust_type(field))
         self.out("}")
 
-    def complex_type(self, complex, name, impl_try_parse):
+    def complex_type(self, complex, name, impl_try_parse, parent_fields):
         """Emit a complex type as a struct. This also adds some parsing code and
         a Serialize implementation."""
 
