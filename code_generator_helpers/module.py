@@ -1039,6 +1039,27 @@ class Module(object):
             self.out("}")
         self.out("}")
 
+        if switch_type.bitcases[0].type.is_bitcase:
+            return
+
+        self.out("impl Serialize for %s {", name)
+        with Indent(self.out):
+            self.out("type Bytes = Vec<u8>;")
+            self.out("fn serialize(&self) -> Vec<u8> {")
+            with Indent(self.out):
+                self.out("match self {")
+                with Indent(self.out):
+                    for case in switch_type.bitcases:
+                        if hasattr(case, "rust_name"):
+                            variant = self._to_rust_identifier(case.type.name[-1])
+                        else:
+                            variant = self._to_rust_identifier(case.only_field.field_name)
+                        suffix = ".to_vec()" if case.type.fixed_size() else ""
+                        self.out("%s::%s(value) => value.serialize()%s,", name, variant, suffix)
+                self.out("}")
+            self.out("}")
+        self.out("}")
+
     def _generate_aux(self, name, request, switch, mask_field, request_function_name):
         # This used to assert that all fields have the same size, but sync's
         # CreateAlarm has both 32 bit and 64 bit numbers. Now we assert that all
