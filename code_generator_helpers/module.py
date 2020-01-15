@@ -877,7 +877,7 @@ class Module(object):
                 result = "[%s; %s]" % (result, field.type.nmemb)
         return result
 
-    def _emit_switch_type(self, switch_type, name, parent_fields, generate_serialize, generate_try_parse, doc=None):
+    def _emit_switch_type(self, switch_type, name, parent_fields, generate_try_parse, doc=None):
         for case in switch_type.bitcases:
             # Is there more than one visible field?
             visible_fields = list(filter(lambda x: x.visible, case.type.fields))
@@ -891,8 +891,7 @@ class Module(object):
                 else:
                     self.complex_type_struct(case.type, case.rust_name, parent_fields)
 
-                if generate_serialize:
-                    self._generate_serialize(case.rust_name, case.type)
+                self._generate_serialize(case.rust_name, case.type)
             else:
                 field, = visible_fields
                 case.only_field = field
@@ -932,7 +931,7 @@ class Module(object):
         assert all(case.type.is_case == switch_type.bitcases[0].type.is_case for case in switch_type.bitcases)
         assert all(case.type.is_bitcase == switch_type.bitcases[0].type.is_bitcase for case in switch_type.bitcases)
 
-        self._emit_switch_type(switch_type, name, parent_fields, False, True)
+        self._emit_switch_type(switch_type, name, parent_fields, True)
         switch_field_type = find_field(switch_type.parents[-1].fields,
                                        switch_type.expr.lenfield_name)
         switch_field_type_string = self._to_complex_rust_type(switch_field_type, None, '')
@@ -1051,7 +1050,7 @@ class Module(object):
             min_field_size = min(field.type.size for field in fixed_size_fields)
             assert all(field.type.size % min_field_size == 0 for field in fixed_size_fields)
 
-        self._emit_switch_type(switch.type, name, request.fields, True, False, "Auxiliary and optional information"
+        self._emit_switch_type(switch.type, name, request.fields, False, "Auxiliary and optional information"
                                + " for the %s function." % (request_function_name,))
 
         self.out("impl %s {", name)
