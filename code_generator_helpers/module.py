@@ -897,20 +897,41 @@ class Module(object):
                 field, = visible_fields
                 case.only_field = field
 
+        # Either everything should be a case or a bitcase
+        assert all(case.type.is_case == switch_type.bitcases[0].type.is_case for case in switch_type.bitcases)
+        assert all(case.type.is_bitcase == switch_type.bitcases[0].type.is_bitcase for case in switch_type.bitcases)
+
         if doc:
             self.out("/// %s", doc)
-        self.out("#[derive(%s)]", ", ".join(get_derives(switch_type) + ["Default"]))
-        self.out("pub struct %s {", name)
-        for case in switch_type.bitcases:
-            if hasattr(case, "rust_name"):
-                self.out.indent("%s: %s<%s>,", case.type.name[-1], self.option_name, case.rust_name)
-            else:
-                field = case.only_field
-                field_type = self._to_complex_owned_rust_type(field)
-                self.out.indent("%s: %s<%s>,", self._aux_field_name(field), self.option_name, field_type)
+        derives = get_derives(switch_type)
+        if switch_type.bitcases[0].type.is_bitcase:
+            derives += ["Default"]
+        self.out("#[derive(%s)]", ", ".join(derives))
+        if switch_type.bitcases[0].type.is_bitcase:
+            self.out("pub struct %s {", name)
+            for case in switch_type.bitcases:
+                if hasattr(case, "rust_name"):
+                    self.out.indent("%s: %s<%s>,", case.type.name[-1], self.option_name, case.rust_name)
+                else:
+                    field = case.only_field
+                    field_type = self._to_complex_owned_rust_type(field)
+                    self.out.indent("%s: %s<%s>,", self._aux_field_name(field), self.option_name, field_type)
+        else:
+            self.out("pub enum %s {", name)
+            for case in switch_type.bitcases:
+                if hasattr(case, "rust_name"):
+                    self.out.indent("%s(%s),", self._to_rust_identifier(case.type.name[-1]), case.rust_name)
+                else:
+                    field = case.only_field
+                    field_type = self._to_complex_owned_rust_type(field)
+                    self.out.indent("%s(%s),", self._to_rust_identifier(field.field_name), field_type)
         self.out("}")
 
     def _emit_switch(self, switch_type, name, parent_fields):
+        # Either everything should be a case or a bitcase
+        assert all(case.type.is_case == switch_type.bitcases[0].type.is_case for case in switch_type.bitcases)
+        assert all(case.type.is_bitcase == switch_type.bitcases[0].type.is_bitcase for case in switch_type.bitcases)
+
         self._emit_switch_type(switch_type, name, parent_fields, False, True)
         switch_field_type = find_field(switch_type.parents[-1].fields,
                                        switch_type.expr.lenfield_name)
@@ -948,39 +969,74 @@ class Module(object):
                      ", ".join(args))
             with Indent(self.out):
                 self.out("let mut remaining = value;")
-                all_parts = []
-                for case in switch_type.bitcases:
-                    expr, = case.type.expr
-                    assert expr.op == 'enumref'
-                    if hasattr(case, "rust_name"):
-                        field_name = case.type.name[-1]
-                        field_type = case.rust_name
-                    else:
-                        field_name = self._to_rust_variable(case.only_field.field_name)
-                        field_type = self._to_complex_owned_rust_type(case.only_field)
-                    self.out("let %s = if %s & Into::<%s>::into(%s::%s) != 0 {",
-                             field_name, switch_field_name,
-                             self._name(switch_field_type.field_type),
-                             self._name(expr.lenfield_type.name),
-                             ename_to_rust(expr.lenfield_name))
-                    this_parts = []
-                    with Indent(self.out):
+                if switch_type.bitcases[0].type.is_bitcase:
+                    all_parts = []
+                    for case in switch_type.bitcases:
+                        expr, = case.type.expr
+                        assert expr.op == 'enumref'
                         if hasattr(case, "rust_name"):
-                            args = ["remaining"]
-                            if hasattr(case.type, "extra_try_parse_args"):
-                                args += case.type.extra_try_parse_args
-                            self.out("let (%s, new_remaining) = %s::try_parse(%s)?;",
-                                     field_name, field_type, ", ".join(args))
-                            self.out("remaining = new_remaining;")
+                            field_name = case.type.name[-1]
+                            field_type = case.rust_name
                         else:
-                            this_parts.extend(self._emit_parsing_code(case.type.fields))
-                        self.out("Some(%s)", field_name)
-                    self.out("} else {")
-                    self.out.indent("None")
-                    self.out("};")
-                    all_parts.append(field_name)
-                self.out("let result = %s { %s };", name, ", ".join(all_parts))
-                self.out("Ok((result, remaining))")
+                            field_name = self._to_rust_variable(case.only_field.field_name)
+                            field_type = self._to_complex_owned_rust_type(case.only_field)
+                        self.out("let %s = if %s & Into::<%s>::into(%s::%s) != 0 {",
+                                 field_name, switch_field_name,
+                                 self._name(switch_field_type.field_type),
+                                 self._name(expr.lenfield_type.name),
+                                 ename_to_rust(expr.lenfield_name))
+                        with Indent(self.out):
+                            if hasattr(case, "rust_name"):
+                                args = ["remaining"]
+                                if hasattr(case.type, "extra_try_parse_args"):
+                                    args += case.type.extra_try_parse_args
+                                self.out("let (%s, new_remaining) = %s::try_parse(%s)?;",
+                                         field_name, field_type, ", ".join(args))
+                                self.out("remaining = new_remaining;")
+                            else:
+                                self._emit_parsing_code(case.type.fields)
+                            self.out("Some(%s)", field_name)
+                        self.out("} else {")
+                        self.out.indent("None")
+                        self.out("};")
+                        all_parts.append(field_name)
+                    self.out("let result = %s { %s };", name, ", ".join(all_parts))
+                    self.out("Ok((result, remaining))")
+                else:
+                    self.out("let mut parse_result = None;")
+                    for case in switch_type.bitcases:
+                        expr, = case.type.expr
+                        assert expr.op == 'enumref'
+                        if hasattr(case, "rust_name"):
+                            field_name = case.type.name[-1]
+                            field_type = case.rust_name
+                        else:
+                            field_name = self._to_rust_variable(case.only_field.field_name)
+                            field_type = self._to_complex_owned_rust_type(case.only_field)
+                        self.out("if %s == Into::<%s>::into(%s::%s) {", switch_field_name,
+                                 self._name(switch_field_type.field_type),
+                                 self._name(expr.lenfield_type.name),
+                                 ename_to_rust(expr.lenfield_name))
+                        with Indent(self.out):
+                            if hasattr(case, "rust_name"):
+                                args = ["remaining"]
+                                if hasattr(case.type, "extra_try_parse_args"):
+                                    args += case.type.extra_try_parse_args
+                                self.out("let (%s, new_remaining) = %s::try_parse(%s)?;",
+                                         field_name, field_type, ", ".join(args))
+                                self.out("remaining = new_remaining;")
+                                variant_name = self._to_rust_identifier(case.type.name[-1])
+                            else:
+                                self._emit_parsing_code(case.type.fields)
+                                variant_name = self._to_rust_identifier(case.only_field.field_name)
+                            msg = "The XML should prevent more than one 'if' from matching"
+                            self.out("assert!(parse_result.is_none(), \"%s\");", msg)
+                            self.out("parse_result = Some(%s::%s(%s));", name, variant_name, field_name)
+                        self.out("}")
+                    self.out("match parse_result {")
+                    self.out.indent("None => Err(ParseError::ParseError),")
+                    self.out.indent("Some(result) => Ok((result, remaining))")
+                    self.out("}")
             self.out("}")
         self.out("}")
 
