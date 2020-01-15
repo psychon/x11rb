@@ -395,6 +395,9 @@ class Module(object):
                             assert field.type.size == 1
                             for i in range(field.type.nmemb):
                                 result_bytes.append("0")
+                    elif field.type.is_switch:
+                        _emit()
+                        self.out("result.extend(self.%s.serialize());", self._to_rust_variable(field.field_name))
                     elif field.type.is_list and field.type.nmemb is None:
                         # This is a variable sized list, so emit bytes to 'result' and
                         # then add this list directly to 'result'
@@ -407,6 +410,7 @@ class Module(object):
                         for i in range(field.type.nmemb):
                             result_bytes.append("self.%s[%d]" % (field_name, i))
                     else:
+                        assert field.type.fixed_size()
                         # Fixed-sized list with "large" members. We have first serialize
                         # the members individually and then assemble that into the output.
                         field_name_bytes = self._to_rust_variable(field.field_name + "_bytes")
