@@ -102,11 +102,6 @@ output = {'open':        rs_open,
 from xcbgen.state import Module  # noqa
 
 names = glob.glob(input_dir + "/*.xml")
-unsupported = [
-        "xinput.xml",    # InputInfo has a <switch name="info"> that causes problems
-        ]
-names = [name for name in names if os.path.basename(name) not in unsupported]
-
 for name in names:
     module = Module(name, None)
     module.register()
