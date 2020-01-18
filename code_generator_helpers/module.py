@@ -1066,6 +1066,9 @@ class Module(object):
         if switch_type.bitcases[0].type.is_bitcase:
             return
 
+        self._emit_switch_serialize(name, switch_type)
+
+    def _emit_switch_serialize(self, name, switch_type):
         self.out("impl Serialize for %s {", name)
         with Indent(self.out):
             self.out("type Bytes = Vec<u8>;")
@@ -1086,7 +1089,8 @@ class Module(object):
 
     def _generate_aux(self, name, request, switch, mask_field, request_function_name):
         if switch.type.bitcases[0].type.is_case:
-            self._emit_switch(switch.type, name, [])
+            self._emit_switch_type(switch.type, name, [], False)
+            self._emit_switch_serialize(name, switch.type)
             self.out("impl %s {", name)
             with Indent(self.out):
                 self.out("fn %s(&self) -> %s {",
