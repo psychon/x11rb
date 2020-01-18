@@ -1101,7 +1101,7 @@ class Module(object):
                                 variant = self._to_rust_identifier(case.type.name[-1])
                             else:
                                 variant = self._to_rust_identifier(case.only_field.field_name)
-                            self.out("%s::%s(value) => %s::%s.into(),", name, variant,
+                            self.out("%s::%s(_) => %s::%s.into(),", name, variant,
                                      self._name(expr.lenfield_type.name),
                                      ename_to_rust(expr.lenfield_name))
                     self.out("}")
