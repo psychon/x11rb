@@ -792,12 +792,21 @@ class Module(object):
                 # Turn missing values into extra arguments
                 assert unresolved
                 unresolved_args, extra_args = [], []
-                for field in parent_fields:
-                    if field.field_name in unresolved:
-                        field_name = self._to_rust_variable(field.field_name)
+                for unresolved_field in unresolved:
+                    # Try to find the field in parent_fields
+                    matcher = lambda f: f.field_name == unresolved_field
+                    field = next(iter(filter(matcher, parent_fields)), None)
+                    if field:
                         field_type = self._to_complex_rust_type(field, None, '')
-                        unresolved_args.append("%s: %s" % (field_name, field_type))
-                        extra_args.append(field_name)
+                    else:
+                        # We did not find it... well, no idea how this is supposed to be handled
+                        assert name == "DeviceTimeCoord", name
+                        assert unresolved_field == "num_axes"
+                        field_type = "u8"
+                    field_name = self._to_rust_variable(unresolved_field)
+                    unresolved_args.append("%s: %s" % (field_name, field_type))
+                    extra_args.append(field_name)
+
                 method = "pub fn try_parse(value: &[u8], %s) -> Result<(Self, &[u8]), ParseError>"
                 method = method % ", ".join(unresolved_args)
 
