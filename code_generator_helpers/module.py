@@ -460,12 +460,12 @@ class Module(object):
                 with Indent(self.out):
                     self.out("fn do_the_parse(value: &[u8]) -> Result<%s, ParseError> {", result_type)
                     with Indent(self.out):
-                        self.out("let mut remaining = value;")
                         if union.is_eventstruct:
                             parts = ["event"]
-                            self.out("let (event, remaining) = %s::try_parse(remaining)?;",
+                            self.out("let (event, remaining) = %s::try_parse(value)?;",
                                      result_type)
                         else:
+                            self.out("let mut remaining = value;")
                             parts = self._emit_parsing_code([field])
                         self.out("let _ = remaining;")
                         assert len(parts) == 1
