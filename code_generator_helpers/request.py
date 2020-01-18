@@ -7,6 +7,26 @@ import code_generator_helpers.module
 from .output import Indent
 
 
+def solve_expression_for(e, name, res):
+    # The given expression is interpreted as "res = e" (where e contains name). This function shall
+    # return an expression that describes how to compute the value of "name" based on "res".
+    if e.op == '*':
+        assert e.nmemb is None
+        assert e.lhs.op is None
+        assert e.lhs.nmemb is None
+        assert e.lhs.lenfield_name == name
+        assert e.rhs.op is None
+        assert e.rhs.nmemb is not None
+        return ("%s / %d" % (res, e.rhs.nmemb), e.rhs.nmemb)
+
+    if e.op is not None:
+        assert e.nmemb is None
+        print("Unsupported operation: " + str(e.op))
+        assert False, e.op
+    else:
+        assert False, "We should not end up here with simple references"
+
+
 def handle_switches(module, obj, name, function_name):
     """Handle <switch> tags by generating the *Aux structure"""
     switches = list(filter(lambda field: field.type.is_switch, obj.fields))
@@ -289,11 +309,21 @@ def request_implementation(module, obj, name, fds, fds_is_list):
                 _emit_add_to_requests("&%s_bytes" % rust_variable)
         elif field.wire:
             if hasattr(field, "is_length_field_for"):
-                # This is a length field for some list, get the length.
-                # (Needed because this is not a function argument)
-                module.out("let %s: %s = %s.len().try_into()?;", rust_variable,
-                           module._field_type(field),
-                           module._to_rust_variable(field.is_length_field_for.field_name))
+                list_var_name = module._to_rust_variable(field.is_length_field_for.field_name)
+                if hasattr(field, "expr_for_length_field"):
+                    expr = field.expr_for_length_field
+                    length = "%s.len()" % list_var_name
+                    (solved, multiple) = solve_expression_for(expr, field.field_name, length)
+                    module.out("assert_eq!(0, %s %% %s, \"Argument %s has an incorrect length,"
+                               + " must be a multiple of %s\");",
+                               length, multiple, field_name, multiple)
+                    module.out("let %s: %s = TryInto::try_into(%s).unwrap();",
+                               rust_variable, module._field_type(field), solved)
+                else:
+                    # This is a length field for some list, get the length.
+                    # (Needed because this is not a function argument)
+                    module.out("let %s: %s = %s.len().try_into()?;", rust_variable,
+                               module._field_type(field), list_var_name)
             if field.enum is not None and not hasattr(field, 'lenfield_for_switch'):
                 # This is a generic parameter, call Into::into
                 module.out("let %s = %s.into();", rust_variable, rust_variable)
