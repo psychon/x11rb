@@ -197,7 +197,12 @@ def request_implementation(module, obj, name, fds, fds_is_list):
             request_length.append("%s_bytes.len()" % field.field_name)
         if hasattr(field, 'lenfield_for_switch'):
             # This our special Aux-argument that represents a <switch>
-            module.out("let %s = %s.value_mask();", rust_variable, field.lenfield_for_switch.field_name)
+            if field.lenfield_for_switch.type.bitcases[0].type.is_bitcase:
+                module.out("let %s = %s.value_mask();", rust_variable,
+                           field.lenfield_for_switch.field_name)
+            else:
+                module.out("let %s = %s.%s();", rust_variable,
+                           field.lenfield_for_switch.field_name, field.field_name)
     request_length = " + ".join(request_length)
 
     if has_variable_length:
