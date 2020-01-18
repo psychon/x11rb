@@ -796,7 +796,8 @@ class Module(object):
                 unresolved_args, extra_args = [], []
                 for unresolved_field in unresolved:
                     # Try to find the field in parent_fields
-                    matcher = lambda f: f.field_name == unresolved_field
+                    def matcher(field):
+                        return field.field_name == unresolved_field
                     field = next(iter(filter(matcher, parent_fields)), None)
                     if field:
                         field_type = self._to_complex_rust_type(field, None, '')
