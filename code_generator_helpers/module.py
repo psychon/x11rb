@@ -715,8 +715,8 @@ class Module(object):
             elif field.type.is_list:
                 if field.type.expr.op != 'calculate_len' and len(try_parse_args) == 1:
                     assert try_parse_args == ["remaining"], try_parse_args
-                    self.out("let (%s, new_remaining) = crate::x11_utils::parse_list(remaining, %s)?;",
-                             field_name, self.expr_to_str(field.type.expr, 'usize'))
+                    self.out("let (%s, new_remaining) = crate::x11_utils::parse_list::<%s>(remaining, %s)?;",
+                             field_name, rust_type, self.expr_to_str(field.type.expr, 'usize'))
                     self.out("remaining = new_remaining;")
                 else:
                     if field.type.expr.op != 'calculate_len':
