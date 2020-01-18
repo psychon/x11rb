@@ -1084,6 +1084,30 @@ class Module(object):
         self.out("}")
 
     def _generate_aux(self, name, request, switch, mask_field, request_function_name):
+        if switch.type.bitcases[0].type.is_case:
+            self._emit_switch(switch.type, name, [])
+            self.out("impl %s {", name)
+            with Indent(self.out):
+                self.out("fn %s(&self) -> %s {",
+                         mask_field.field_name, self._field_type(mask_field))
+                with Indent(self.out):
+                    self.out("match self {")
+                    with Indent(self.out):
+                        for case in switch.type.bitcases:
+                            expr, = case.type.expr
+                            assert expr.op == 'enumref'
+                            if hasattr(case, "rust_name"):
+                                variant = self._to_rust_identifier(case.type.name[-1])
+                            else:
+                                variant = self._to_rust_identifier(case.only_field.field_name)
+                            self.out("%s::%s(value) => %s::%s.into(),", name, variant,
+                                     self._name(expr.lenfield_type.name),
+                                     ename_to_rust(expr.lenfield_name))
+                    self.out("}")
+                self.out("}")
+            self.out("}")
+            return
+
         # This used to assert that all fields have the same size, but sync's
         # CreateAlarm has both 32 bit and 64 bit numbers. Now we assert that all
         # sizes are a multiple of the smallest size.
