@@ -50,7 +50,7 @@ def mark_length_fields(self):
     simple_lists = []
 
     for field in lists:
-        if len(get_references(field.type.expr)) <= 1:
+        if len(get_references(field.type.expr)) <= 1 and field.type.expr.op != 'popcount':
             simple_lists.append(field)
 
     # Mark length fields for simple list as not visible and map them to their list
