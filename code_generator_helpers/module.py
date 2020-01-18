@@ -1288,23 +1288,43 @@ class Module(object):
 
     def expr_to_str(self, e, type=None):
         if e.op is not None:
+            assert e.nmemb is None
             if e.op == 'calculate_len':
-                return e.op
+                assert False
             if e.op == 'sumof':
-                field_name = e.lenfield_name
-                return "%s.iter().map(|x| TryInto::<%s>::try_into(*x).unwrap()).sum()" % \
-                       (self._lower_snake_name((e.lenfield_name,)), type)
+                assert e.lhs is None
+                field_name = self._lower_snake_name((e.lenfield_name,))
+                if e.rhs is None:
+                    inner = "*x"
+                else:
+                    e = e.rhs
+                    assert e.lhs is None
+                    assert e.nmemb is None
+                    if e.op is not None:
+                        assert e.op == "popcount"
+                        inner = "x.count_ones()"
+                    else:
+                        assert e.rhs is None
+                        inner = "x.%s" % e.lenfield_name
+                return "%s.iter().map(|x| TryInto::<%s>::try_into(%s).unwrap()).sum()" % \
+                       (field_name, type, inner)
             if e.op == 'popcount':
+                assert e.lhs is None
                 assert e.rhs.op is None
                 assert e.rhs.nmemb is None
                 field_name = e.rhs.lenfield_name
                 return "TryInto::<%s>::try_into(%s.count_ones()).unwrap()" % (type, self._lower_snake_name((field_name,)),)
             if e.op == '~':
+                assert e.lhs is None
                 return "!(%s)" % self.expr_to_str(e.rhs, type)
             return "(%s) %s (%s)" % (self.expr_to_str(e.lhs, type), e.op, self.expr_to_str(e.rhs, type))
         elif e.nmemb is not None:
+            assert e.lhs is None
+            assert e.rhs is None
             return e.nmemb
         else:
+            assert e.lhs is None
+            assert e.rhs is None
             assert e.lenfield_name is not None
             if type is not None:
                 return "%s as %s" % (self._to_rust_variable(e.lenfield_name), type)
