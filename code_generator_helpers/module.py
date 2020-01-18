@@ -454,12 +454,19 @@ class Module(object):
             for field in union.fields:
                 assert not field.isfd
                 result_type = self._to_complex_rust_type(field, None, '')
+                if union.is_eventstruct:
+                    result_type += "Event"
                 self.out("pub fn as_%s(&self) -> %s {", self._lower_snake_name(('xcb', field.field_name)), result_type)
                 with Indent(self.out):
                     self.out("fn do_the_parse(value: &[u8]) -> Result<%s, ParseError> {", result_type)
                     with Indent(self.out):
                         self.out("let mut remaining = value;")
-                        parts = self._emit_parsing_code([field])
+                        if union.is_eventstruct:
+                            parts = ["event"]
+                            self.out("let (event, remaining) = %sEvent::try_parse(remaining)?;",
+                                     self._name(field.type.name))
+                        else:
+                            parts = self._emit_parsing_code([field])
                         self.out("let _ = remaining;")
                         assert len(parts) == 1
                         self.out("Ok(%s)", parts[0])
@@ -497,6 +504,8 @@ class Module(object):
         for field in field_types:
             assert not field.isfd
             rust_type = self._to_complex_rust_type(field, None, '')
+            if union.is_eventstruct:
+                rust_type += "Event"
             self.out("impl From<%s> for %s {", rust_type, rust_name)
             with Indent(self.out):
                 self.out("fn from(value: %s) -> Self {", rust_type)
@@ -533,8 +542,7 @@ class Module(object):
         generate_request_code(self, obj, name, function_name)
 
     def eventstruct(self, eventstruct, name):
-        assert False
-        self.out("")
+        self.union(eventstruct, name)
 
     def event(self, event, name):
         self.emit_opcode(name, 'Event', event.opcodes[name])
