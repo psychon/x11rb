@@ -522,6 +522,8 @@ class Module(object):
                                     self.out.indent("value%d[%d],", i, n)
                             self.out("];")
                     self.out.indent("Self(value.to_vec())")
+                elif union.is_eventstruct:
+                    self.out.indent("Self(Into::<[u8; 32]>::into(value).to_vec())")
                 else:
                     self.out.indent("Self(value.serialize().to_vec())")
                 self.out("}")
