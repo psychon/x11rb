@@ -1292,7 +1292,8 @@ class Module(object):
                 return e.op
             if e.op == 'sumof':
                 field_name = e.lenfield_name
-                return "%s.iter().map(|x| Into::<%s>::into(*x)).sum()" % (self._lower_snake_name((e.lenfield_name,)), type)
+                return "%s.iter().map(|x| TryInto::<%s>::try_into(*x).unwrap()).sum()" % \
+                       (self._lower_snake_name((e.lenfield_name,)), type)
             if e.op == 'popcount':
                 assert e.rhs.op is None
                 assert e.rhs.nmemb is None
