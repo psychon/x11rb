@@ -75,8 +75,6 @@ def rs_request(self, name):
 
 
 def rs_eventstruct(self, name):
-    print("eventstruct", self, name)
-    assert False
     current_module.eventstruct(self, name)
 
 
