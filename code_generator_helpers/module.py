@@ -68,6 +68,10 @@ def mark_length_fields(self):
             related_list.has_length_field = field
             field.visible = False
 
+            expr = related_list.type.expr
+            if expr is not None and expr.op is not None and expr.op != "calculate_len":
+                field.expr_for_length_field = expr
+
 
 def get_derives(obj_type):
     if hasattr(obj_type, "computed_derives"):

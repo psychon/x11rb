@@ -222,3 +222,22 @@ fn test_client_message_data_parse() {
     assert!(err.is_err());
     assert_eq!(err.unwrap_err(), ParseError::ParseError);
 }
+
+#[test]
+fn test_set_modifier_mapping() -> Result<(), ConnectionError> {
+    let conn = FakeConnection::default();
+    let cookie = conn.set_modifier_mapping(&(1..17).collect::<Vec<_>>())?;
+
+    // Prevent call to discard_reply(), we only check request sending
+    std::mem::forget(cookie);
+
+    let mut expected = Vec::new();
+    let length: u16 = 5;
+    expected.push(118); // request major code
+    expected.push(2); // keycodes per modifier
+    expected.extend(&length.to_ne_bytes()); // length, not in the xml
+    expected.extend(1u8..17u8);
+
+    conn.check_requests(&[(false, expected)]);
+    Ok(())
+}
