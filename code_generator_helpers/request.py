@@ -294,7 +294,7 @@ def request_implementation(module, obj, name, fds, fds_is_list):
                 module.out("let %s: %s = %s.len().try_into()?;", rust_variable,
                            module._field_type(field),
                            module._to_rust_variable(field.is_length_field_for.field_name))
-            if field.enum is not None:
+            if field.enum is not None and not hasattr(field, 'lenfield_for_switch'):
                 # This is a generic parameter, call Into::into
                 module.out("let %s = %s.into();", rust_variable, rust_variable)
             field_bytes = module._to_rust_variable(field_name + "_bytes")
