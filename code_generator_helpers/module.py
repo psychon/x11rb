@@ -463,8 +463,8 @@ class Module(object):
                         self.out("let mut remaining = value;")
                         if union.is_eventstruct:
                             parts = ["event"]
-                            self.out("let (event, remaining) = %sEvent::try_parse(remaining)?;",
-                                     self._name(field.type.name))
+                            self.out("let (event, remaining) = %s::try_parse(remaining)?;",
+                                     result_type)
                         else:
                             parts = self._emit_parsing_code([field])
                         self.out("let _ = remaining;")
