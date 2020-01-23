@@ -30,7 +30,8 @@ pub struct XCBConnection {
     conn: raw_ffi::XCBConnectionWrapper,
     setup: Setup,
     ext_info: ExtensionInformation,
-    errors: pending_errors::PendingErrors
+    errors: pending_errors::PendingErrors,
+    should_drop: bool
 }
 
 impl XCBConnection {
@@ -75,11 +76,27 @@ impl XCBConnection {
                     conn: raw_ffi::XCBConnectionWrapper(connection),
                     setup: Self::parse_setup(setup)?,
                     ext_info: Default::default(),
-                    errors: Default::default()
+                    errors: Default::default(),
+                    should_drop: true
                 };
                 Ok((conn, screen as usize))
             }
         }
+    }
+
+    /// Create a connection wrapper for a raw libxcb `xcb_connection_t`.
+    ///
+    /// It is the caller's responsibility to ensure the connection is valid and lives longer
+    /// than the returned. `xcb_disconnect` is not called on drop.
+    pub unsafe fn from_raw_xcb_connection(ptr: *mut c_void) -> Result<XCBConnection, ConnectionError> {
+        let setup = raw_ffi::xcb_get_setup(ptr as *mut raw_ffi::xcb_connection_t);
+        Ok(XCBConnection {
+            conn: raw_ffi::XCBConnectionWrapper(ptr as *mut raw_ffi::xcb_connection_t),
+            setup: Self::parse_setup(setup)?,
+            ext_info: Default::default(),
+            errors: Default::default(),
+            should_drop: false
+        })
     }
 
     unsafe fn parse_setup(setup: *const u8) -> Result<Setup, ParseError> {
@@ -379,8 +396,10 @@ impl Connection for XCBConnection {
 
 impl Drop for XCBConnection {
     fn drop(&mut self) {
-        unsafe {
-            raw_ffi::xcb_disconnect((self.conn).0 as *mut raw_ffi::xcb_connection_t);
+        if self.should_drop {
+            unsafe {
+                raw_ffi::xcb_disconnect((self.conn).0 as *mut raw_ffi::xcb_connection_t);
+            }
         }
     }
 }
