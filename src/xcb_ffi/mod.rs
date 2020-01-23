@@ -86,8 +86,12 @@ impl XCBConnection {
 
     /// Create a connection wrapper for a raw libxcb `xcb_connection_t`.
     ///
+    /// `xcb_disconnect` is not called on drop.
+    ///
+    /// # Safety
+    ///
     /// It is the caller's responsibility to ensure the connection is valid and lives longer
-    /// than the returned. `xcb_disconnect` is not called on drop.
+    /// than the returned XCBConnection.
     pub unsafe fn from_raw_xcb_connection(ptr: *mut c_void) -> Result<XCBConnection, ConnectionError> {
         let setup = raw_ffi::xcb_get_setup(ptr as *mut raw_ffi::xcb_connection_t);
         Ok(XCBConnection {
