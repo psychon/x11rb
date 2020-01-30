@@ -274,11 +274,11 @@ class Module(object):
             to_type = "u32"
             larger_types = []
 
-        self.out("impl Into<%s> for %s {", to_type, rust_name)
+        self.out("impl From<%s> for %s {", rust_name, to_type)
         with Indent(self.out):
-            self.out("fn into(self) -> %s {", to_type)
+            self.out("fn from(input: %s) -> Self {", rust_name)
             with Indent(self.out):
-                self.out("match self {")
+                self.out("match input {")
                 with Indent(self.out):
                     bits = [ename for (ename, bit) in enum.bits]
                     for (ename, value) in enum.values:
@@ -290,26 +290,26 @@ class Module(object):
             self.out("}")
         self.out("}")
 
-        self.out("impl Into<%s<%s>> for %s {", self.option_name, to_type, rust_name)
+        self.out("impl From<%s> for %s<%s> {", rust_name, self.option_name, to_type)
         with Indent(self.out):
-            self.out("fn into(self) -> %s<%s> {", self.option_name, to_type)
-            self.out.indent("Some(self.into())")
+            self.out("fn from(input: %s) -> Self {", rust_name)
+            self.out.indent("Some(%s::from(input))", to_type)
             self.out("}")
         self.out("}")
 
         for larger_type in larger_types:
-            self.out("impl Into<%s> for %s {", larger_type, rust_name)
+            self.out("impl From<%s> for %s {", rust_name, larger_type)
             with Indent(self.out):
-                self.out("fn into(self) -> %s {", larger_type)
+                self.out("fn from(input: %s) -> Self {", rust_name)
                 with Indent(self.out):
-                    self.out("Into::<%s>::into(self).into()", to_type)
+                    self.out("Self::from(%s::from(input))", to_type)
                 self.out("}")
             self.out("}")
 
-            self.out("impl Into<%s<%s>> for %s {", self.option_name, larger_type, rust_name)
+            self.out("impl From<%s> for %s<%s> {", rust_name, self.option_name, larger_type)
             with Indent(self.out):
-                self.out("fn into(self) -> %s<%s> {", self.option_name, larger_type)
-                self.out.indent("Some(self.into())")
+                self.out("fn from(input: %s) -> Self {", rust_name)
+                self.out.indent("Some(%s::from(input))", larger_type)
                 self.out("}")
             self.out("}")
 
@@ -604,9 +604,9 @@ class Module(object):
 
     def _emit_serialize(self, obj, name, extra_name):
         # Emit code for serialising an event or an error into an [u8; 32]
-        self.out("impl Into<[u8; 32]> for &%s%s {", self._name(name), extra_name)
+        self.out("impl From<&%s%s> for [u8; 32]{", self._name(name), extra_name)
         with Indent(self.out):
-            self.out("fn into(self) -> [u8; 32] {")
+            self.out("fn from(input: &%s%s) -> Self {", self._name(name), extra_name)
             with Indent(self.out):
                 parts = []
                 for field in obj.fields:
@@ -622,19 +622,19 @@ class Module(object):
                             assert field.type.size is not None
                             for i in range(field.type.nmemb):
                                 if field.type.size == 1:
-                                    parts.append("self.%s[%d]" % (field_name, i))
+                                    parts.append("input.%s[%d]" % (field_name, i))
                                 else:
-                                    self.out("let %s_%d = self.%s[%d].serialize();",
+                                    self.out("let %s_%d = input.%s[%d].serialize();",
                                              field_name, i, field_name, i)
                                     for n in range(field.type.size):
                                         parts.append("%s_%d[%d]" % (field_name, i, n))
                         elif field.type.size == 1:
                             if is_bool(field.type):
-                                parts.append("(self.%s as u8)" % field_name)
+                                parts.append("(input.%s as u8)" % field_name)
                             else:
-                                parts.append("self.%s" % field_name)
+                                parts.append("input.%s" % field_name)
                         else:
-                            self.out("let %s = self.%s.serialize();", field_name, field_name)
+                            self.out("let %s = input.%s.serialize();", field_name, field_name)
                             for i in range(field.type.size):
                                 parts.append("%s[%d]" % (field_name, i))
 
@@ -654,10 +654,10 @@ class Module(object):
             self.out("}")
         self.out("}")
 
-        self.out("impl Into<[u8; 32]> for %s%s {", self._name(name), extra_name)
+        self.out("impl From<%s%s> for [u8; 32] {", self._name(name), extra_name)
         with Indent(self.out):
-            self.out("fn into(self) -> [u8; 32] {")
-            self.out.indent("(&self).into()")
+            self.out("fn from(input: %s%s) -> Self {", self._name(name), extra_name)
+            self.out.indent("Self::from(&input)")
             self.out("}")
         self.out("}")
 
