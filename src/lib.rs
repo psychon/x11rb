@@ -87,12 +87,10 @@ pub mod rust_connection;
 pub mod cookie;
 pub mod extension_information;
 
-pub mod generated {
-    include!(concat!(env!("OUT_DIR"), "/generated/mod.rs"));
-}
+pub mod generated;
 pub mod wrapper;
 
-use generated::xproto::{KEYSYM, TIMESTAMP};
+use generated::*;
 
 /// The universal null resource or null atom parameter value for many core X requests
 pub const NONE: u32 = 0;
@@ -109,7 +107,7 @@ pub const COPY_DEPTH_FROM_PARENT: u8 = 0;
 pub const COPY_CLASS_FROM_PARENT: u16 = 0;
 
 /// This constant can be used in most request that take a timestamp argument
-pub const CURRENT_TIME: TIMESTAMP = 0;
+pub const CURRENT_TIME: xproto::TIMESTAMP = 0;
 
 /// This constant can be used to fill unused entries in `KEYSYM` tables
-pub const NO_SYMBOL: KEYSYM = 0;
+pub const NO_SYMBOL: xproto::KEYSYM = 0;

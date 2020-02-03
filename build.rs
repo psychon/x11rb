@@ -4,7 +4,6 @@ use std::process::Command;
 use std::path::PathBuf;
 use std::fs::create_dir;
 use std::io::Result;
-use std::env;
 
 fn create_dir_if_not_exist(dir: &PathBuf) -> Result<()> {
     let result = create_dir(dir);
@@ -32,7 +31,7 @@ fn get_paths() -> (String, String) {
 }
 
 fn main() {
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
+    let out_path = PathBuf::from("src");
     let out_path = out_path.join("generated");
     create_dir_if_not_exist(&out_path).unwrap();
     let out_path = out_path.to_str().unwrap();
