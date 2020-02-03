@@ -3,3 +3,4 @@
 Cargo.lock
 *.pyc
 **/__pycache__
+src/generated
