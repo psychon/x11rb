@@ -8,8 +8,9 @@ use std::collections::VecDeque;
 
 use crate::utils::{Buffer, RawFdContainer};
 use crate::connection::SequenceNumber;
-use crate::generated::xproto::{Setup, SetupRequest};
+use crate::generated::xproto::{Setup, SetupRequest, SetupFailed, SetupAuthenticate};
 use crate::x11_utils::{GenericEvent, Serialize};
+use crate::errors::ParseError;
 
 #[derive(Debug)]
 pub(crate) struct ConnectionInner<Stream>
@@ -72,7 +73,16 @@ where Stream: Read + Write
         let length = u16::from_ne_bytes([setup[6], setup[7]]);
         setup.extend(repeat(0).take(length as usize * 4));
         stream.read_exact(&mut setup[8..])?;
-        Ok((&setup[..]).try_into()?)
+        match setup[0] {
+            // 0 is SetupFailed
+            0 => Err(Box::new(SetupError::SetupFailed((&setup[..]).try_into()?))),
+            // Success
+            1 => Ok((&setup[..]).try_into()?),
+            // 2 is SetupAuthenticate
+            2 => Err(Box::new(SetupError::SetupAuthenticate((&setup[..]).try_into()?))),
+            // Uhm... no other cases are defined
+            _ => Err(Box::new(ParseError::ParseError))
+        }
     }
 
     fn read_packet(&mut self) -> Result<Buffer, Box<dyn Error>> {
@@ -190,5 +200,30 @@ where Stream: Read + Write
             .map(TryInto::try_into)
             .transpose()
             .map_err(Into::into)
+    }
+}
+
+// FIXME: Clean up this error stuff... somehow
+#[derive(Debug, Clone, PartialEq, Eq)]
+enum SetupError {
+    SetupFailed(SetupFailed),
+    SetupAuthenticate(SetupAuthenticate),
+}
+
+impl Error for SetupError {}
+
+impl std::fmt::Display for SetupError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        fn display(f: &mut std::fmt::Formatter, prefix: &str, value: &[u8]) -> std::fmt::Result {
+            match std::str::from_utf8(value).ok() {
+                Some(value) => write!(f, "{}: '{}'", prefix, value),
+                None => write!(f, "{}: {:?} [message is not utf8]", prefix, value),
+            }
+        }
+
+        match self {
+            SetupError::SetupFailed(err) => display(f, "X11 setup failed", &err.reason),
+            SetupError::SetupAuthenticate(err) => display(f, "X11 authentication failed", &err.reason),
+        }
     }
 }
