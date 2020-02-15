@@ -18,7 +18,26 @@ mod inner;
 mod id_allocator;
 mod parse_display;
 
-const TCP_PORT_BASE: u16 = 6000;
+fn connect_stream(host: &str, protocol: Option<&str>, display: u16) -> Result<TcpStream, Box<dyn Error>> {
+    const TCP_PORT_BASE: u16 = 6000;
+
+    if (protocol.is_none() || protocol != Some("unix")) && !host.is_empty() && host != "unix" {
+        Ok(TcpStream::connect((host, TCP_PORT_BASE + display))?)
+    } else {
+        if protocol.is_none() || protocol != Some("unix") {
+            let _file_name = format!("/tmp/.X11-unix/X{}", display);
+
+            // FIXME: Try abstract socket (unix socket with prepended '\0')
+            // FIXME: Try normal unix socket
+        }
+
+        if protocol.is_none() && host.is_empty() {
+            Ok(TcpStream::connect(("localhost", TCP_PORT_BASE + display))?)
+        } else {
+            Err(Box::new(ConnectionError::ConnectionError))
+        }
+    }
+}
 
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
@@ -36,13 +55,9 @@ impl RustConnection {
     pub fn connect(dpy_name: Option<&str>) -> Result<(RustConnection, usize), Box<dyn Error>> {
         // Parse display information
         let parsed_display = parse_display::parse_display(dpy_name).ok_or(ConnectionError::DisplayParsingError)?;
-        if parsed_display.protocol.is_some() {
-            return Err(Box::new(ConnectionError::DisplayParsingError)); // FIXME: Handle this
-        }
 
         // Establish connection
-        // FIXME: Support other protocols than TCP
-        let stream = TcpStream::connect((&*parsed_display.host, TCP_PORT_BASE + parsed_display.display))?;
+        let stream = connect_stream(&*parsed_display.host, parsed_display.protocol.as_ref().map(|s| &**s), parsed_display.display)?;
 
         // Handle X11 connection
         let (inner, setup) = inner::ConnectionInner::connect(stream)?;
