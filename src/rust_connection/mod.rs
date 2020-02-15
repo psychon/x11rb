@@ -60,7 +60,7 @@ impl RustConnection {
         let stream = connect_stream(&*parsed_display.host, parsed_display.protocol.as_ref().map(|s| &**s), parsed_display.display)?;
 
         // Handle X11 connection
-        let (inner, setup) = inner::ConnectionInner::connect(stream)?;
+        let (inner, setup) = inner::ConnectionInner::connect(stream, Vec::new(), Vec::new())?;
 
         // Check that we got a valid screen number
         let screen = parsed_display.screen.into();
