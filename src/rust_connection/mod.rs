@@ -16,6 +16,9 @@ use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 
 mod inner;
 mod id_allocator;
+mod parse_display;
+
+const TCP_PORT_BASE: u16 = 6000;
 
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
@@ -29,11 +32,28 @@ pub struct RustConnection {
 impl RustConnection {
     /// Establish a new connection.
     ///
-    /// FIXME: This currently hardcodes the display `127.0.0.1:1`.
-    pub fn connect() -> Result<(RustConnection, usize), Box<dyn Error>> {
-        let screen = 0;
-        let stream = TcpStream::connect("127.0.0.1:6001")?;
+    /// If no `dpy_name` is provided, the value from `$DISPLAY` is used.
+    pub fn connect(dpy_name: Option<&str>) -> Result<(RustConnection, usize), Box<dyn Error>> {
+        // Parse display information
+        let parsed_display = parse_display::parse_display(dpy_name).ok_or(ConnectionError::DisplayParsingError)?;
+        if parsed_display.protocol.is_some() {
+            return Err(Box::new(ConnectionError::DisplayParsingError)); // FIXME: Handle this
+        }
+
+        // Establish connection
+        // FIXME: Support other protocols than TCP
+        let stream = TcpStream::connect((&*parsed_display.host, TCP_PORT_BASE + parsed_display.display))?;
+
+        // Handle X11 connection
         let (inner, setup) = inner::ConnectionInner::connect(stream)?;
+
+        // Check that we got a valid screen number
+        let screen = parsed_display.screen.into();
+        if screen >= setup.roots.len() {
+            return Err(Box::new(ConnectionError::InvalidScreen));
+        }
+
+        // Success! Set up our state
         let allocator = id_allocator::IDAllocator::new(setup.resource_id_base, setup.resource_id_mask);
         let conn = RustConnection {
             inner: RefCell::new(inner),
