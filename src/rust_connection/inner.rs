@@ -28,8 +28,9 @@ where Stream: Read + Write
 impl<Stream> ConnectionInner<Stream>
 where Stream: Read + Write
 {
-    pub(crate) fn connect(mut stream: Stream) -> Result<(Self, Setup), Box<dyn Error>> {
-        Self::write_setup(&mut stream)?;
+    pub(crate) fn connect(mut stream: Stream, auth_name: Vec<u8>, auth_data: Vec<u8>)
+    -> Result<(Self, Setup), Box<dyn Error>> {
+        Self::write_setup(&mut stream, auth_name, auth_data)?;
         let setup = Self::read_setup(&mut stream)?;
         let result = ConnectionInner {
             stream,
@@ -52,13 +53,14 @@ where Stream: Read + Write
         0x42
     }
 
-    fn write_setup(stream: &mut Stream) -> Result<(), Box<dyn Error>> {
+    fn write_setup(stream: &mut Stream, auth_name: Vec<u8>, auth_data: Vec<u8>)
+    -> Result<(), Box<dyn Error>> {
         let request = SetupRequest {
             byte_order: Self::byte_order(),
             protocol_major_version: 11,
             protocol_minor_version: 0,
-            authorization_protocol_name: Vec::new(),
-            authorization_protocol_data: Vec::new(),
+            authorization_protocol_name: auth_name,
+            authorization_protocol_data: auth_data,
         };
         stream.write_all(&request.serialize())?;
         Ok(())
