@@ -82,13 +82,17 @@ impl RequestConnection for RustConnection {
     fn send_request_with_reply_with_fds<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<CookieWithFds<Self, R>, ConnectionError>
         where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>
     {
+        let mut storage = Default::default();
+        let bufs = self.compute_length_field(bufs, &mut storage)?;
+
         let _ = (bufs, fds);
         unimplemented!()
     }
 
     fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<VoidCookie<Self>, ConnectionError> {
-        // FIXME: Shouldn't this call compute_length_field? (Or rather: the implementation from
-        // send_request_with_reply() should be moved to send_request())
+        let mut storage = Default::default();
+        let bufs = self.compute_length_field(bufs, &mut storage)?;
+
         Ok(VoidCookie::new(self, self.send_request(bufs, fds, false)?))
     }
 
