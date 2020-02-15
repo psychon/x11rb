@@ -120,6 +120,6 @@ impl Connection for RustConnection {
     }
 
     fn generate_id(&self) -> u32 {
-        self.id_allocator.borrow_mut().generate_id().expect("Available XIDs exhausted")
+        self.id_allocator.borrow_mut().generate_id(self).expect("Available XIDs exhausted")
     }
 }

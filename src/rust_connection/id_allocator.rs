@@ -1,3 +1,6 @@
+use crate::connection::RequestConnection;
+use crate::generated::xc_misc::ConnectionExt as _;
+
 /// An allocator for X11 IDs.
 ///
 /// This struct handles the client-side generation of X11 IDs. The ID allocation is based on a
@@ -32,38 +35,143 @@ impl IDAllocator {
     }
 
     /// Generate the next ID.
-    pub(crate) fn generate_id(&mut self) -> Option<u32> {
-        // FIXME: use the XC_MISC extension to get a new range when the old one is used up
-        if self.next_id <= self.max_id {
-            let id = self.next_id;
-            self.next_id += self.increment;
-            Some(id)
-        } else {
-            None
+    pub(crate) fn generate_id(&mut self, conn: &impl RequestConnection) -> Option<u32> {
+        if self.next_id > self.max_id {
+            // Send an XC-MISC GetXIDRange request. Any failure is turned into None via .ok().
+            let xidrange = conn.get_xidrange().ok()
+                .and_then(|cookie| cookie.reply().ok());
+            match xidrange {
+                Some(reply) => {
+                    let (start, count) = (reply.start_id, reply.count);
+                    // Apparently (0, 1) is how the server signals "I am out of IDs".
+                    // The second case avoids an underflow below and should never happen.
+                    if (start, count) == (0, 1) || count == 0 {
+                        return None;
+                    }
+                    self.next_id = start;
+                    self.max_id = start + (count - 1) * self.increment;
+                },
+                None => return None,
+            }
         }
+        assert!(self.next_id <= self.max_id);
+        let id = self.next_id;
+        self.next_id += self.increment;
+        Some(id)
     }
 }
 
 #[cfg(test)]
 mod test {
+    use std::io::IoSlice;
+    use std::convert::TryFrom;
+
+    use crate::connection::{RequestConnection, SequenceNumber, RequestKind, DiscardMode};
+    use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
+    use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
+    use crate::generated::xproto::QueryExtensionReply;
+    use crate::utils::{Buffer, RawFdContainer};
+    use crate::x11_utils::GenericError;
+
     use super::IDAllocator;
 
     #[test]
     fn exhaustive() {
+        let conn = DummyConnection(None);
         let mut allocator = IDAllocator::new(0x2800, 0x1ff);
         for expected in 0x2800..=0x29ff {
-            assert_eq!(Some(expected), allocator.generate_id());
+            assert_eq!(Some(expected), allocator.generate_id(&conn));
         }
-        assert_eq!(None, allocator.generate_id());
+        assert_eq!(None, allocator.generate_id(&conn));
     }
 
     #[test]
     fn increment() {
+        let conn = DummyConnection(None);
         let mut allocator = IDAllocator::new(0, 0b1100);
-        assert_eq!(Some(0b0000), allocator.generate_id());
-        assert_eq!(Some(0b0100), allocator.generate_id());
-        assert_eq!(Some(0b1000), allocator.generate_id());
-        assert_eq!(Some(0b1100), allocator.generate_id());
-        assert_eq!(None, allocator.generate_id());
+        assert_eq!(Some(0b0000), allocator.generate_id(&conn));
+        assert_eq!(Some(0b0100), allocator.generate_id(&conn));
+        assert_eq!(Some(0b1000), allocator.generate_id(&conn));
+        assert_eq!(Some(0b1100), allocator.generate_id(&conn));
+        assert_eq!(None, allocator.generate_id(&conn));
+    }
+
+    #[test]
+    fn new_range() {
+        let conn = DummyConnection(Some(generate_get_xid_range_reply(0x13370, 3)));
+        let mut allocator = IDAllocator::new(0x420, 2);
+        assert_eq!(Some(0x420), allocator.generate_id(&conn));
+        assert_eq!(Some(0x420 + 2), allocator.generate_id(&conn));
+        // At this point the range is exhausted and a GetXIDRange request is sent
+        assert_eq!(Some(0x13370), allocator.generate_id(&conn));
+        assert_eq!(Some(0x13370 + 2), allocator.generate_id(&conn));
+        assert_eq!(Some(0x13370 + 4), allocator.generate_id(&conn));
+        // At this point the range is exhausted and a GetXIDRange request is sent
+        assert_eq!(Some(0x13370), allocator.generate_id(&conn));
+    }
+
+    fn generate_get_xid_range_reply(start_id: u32, count: u32) -> Vec<u8> {
+        let mut reply = [0; 8].to_vec();
+        reply.extend(&start_id.to_ne_bytes());
+        reply.extend(&count.to_ne_bytes());
+        reply
+    }
+
+    // If the Option is None, the GetXIDRange request fails (unsupported extension). Otherwise,
+    // this is the raw reply that is received for that request.
+    struct DummyConnection(Option<Vec<u8>>);
+
+    impl RequestConnection for DummyConnection {
+        fn send_request_with_reply<R>(&self, _bufs: &[IoSlice], _fds: Vec<RawFdContainer>) -> Result<Cookie<Self, R>, ConnectionError>
+        where R: TryFrom<Buffer, Error=ParseError>
+        {
+            Ok(Cookie::new(self, 0))
+        }
+
+        fn send_request_with_reply_with_fds<R>(&self, _bufs: &[IoSlice], _fds: Vec<RawFdContainer>) -> Result<CookieWithFds<Self, R>, ConnectionError>
+        where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>
+        {
+            unimplemented!()
+        }
+
+        fn send_request_without_reply(&self, _bufs: &[IoSlice], _fds: Vec<RawFdContainer>) -> Result<VoidCookie<Self>, ConnectionError> {
+            unimplemented!()
+        }
+
+        fn discard_reply(&self, _sequence: SequenceNumber, _kind: RequestKind, _mode: DiscardMode) {
+            unimplemented!()
+        }
+
+        fn extension_information(&self, _extension_name: &'static str) -> Option<QueryExtensionReply> {
+            self.0.as_ref().map(|_| QueryExtensionReply {
+                response_type: 1,
+                sequence: 0,
+                length: 0,
+                present: true,
+                major_opcode: 127,
+                first_event: 0,
+                first_error: 0,
+            })
+        }
+
+        fn wait_for_reply_or_error(&self, _sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
+            Ok(Buffer::from_vec(self.0.as_ref().unwrap().clone()))
+        }
+
+        fn wait_for_reply(&self, _sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError> {
+            unimplemented!()
+        }
+
+        fn wait_for_reply_with_fds(&self, _sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
+            unimplemented!()
+        }
+
+        fn check_for_error(&self, _sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError> {
+            unimplemented!()
+        }
+
+        fn maximum_request_bytes(&self) -> usize {
+            unimplemented!()
+        }
     }
 }
