@@ -15,11 +15,13 @@ use crate::x11_utils::{GenericEvent, GenericError};
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 
 mod inner;
+mod id_allocator;
 
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
 pub struct RustConnection {
     inner: RefCell<inner::ConnectionInner<TcpStream>>,
+    id_allocator: RefCell<id_allocator::IDAllocator>,
     setup: Setup,
     extension_information: ExtensionInformation,
 }
@@ -32,8 +34,10 @@ impl RustConnection {
         let screen = 0;
         let stream = TcpStream::connect("127.0.0.1:6001")?;
         let (inner, setup) = inner::ConnectionInner::connect(stream)?;
+        let allocator = id_allocator::IDAllocator::new(setup.resource_id_base, setup.resource_id_mask);
         let conn = RustConnection {
             inner: RefCell::new(inner),
+            id_allocator: RefCell::new(allocator),
             setup,
             extension_information: Default::default()
         };
@@ -116,6 +120,6 @@ impl Connection for RustConnection {
     }
 
     fn generate_id(&self) -> u32 {
-        self.inner.borrow_mut().generate_id()
+        self.id_allocator.borrow_mut().generate_id()
     }
 }

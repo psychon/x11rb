@@ -17,9 +17,6 @@ where Stream: Read + Write
 {
     stream: Stream,
 
-    next_id: u32,
-    max_id: u32,
-
     last_sequence_written: SequenceNumber,
     checked_requests: VecDeque<SequenceNumber>,
 
@@ -34,11 +31,8 @@ where Stream: Read + Write
     pub(crate) fn connect(mut stream: Stream) -> Result<(Self, Setup), Box<dyn Error>> {
         Self::write_setup(&mut stream)?;
         let setup = Self::read_setup(&mut stream)?;
-        let (base, mask) = (setup.resource_id_base, setup.resource_id_mask);
         let result = ConnectionInner {
             stream,
-            next_id: base,
-            max_id: base | mask,
             last_sequence_written: 0,
             last_sequence_read: 0,
             checked_requests: VecDeque::new(),
@@ -194,13 +188,5 @@ where Stream: Read + Write
             .map(TryInto::try_into)
             .transpose()
             .map_err(Into::into)
-    }
-
-    pub(crate) fn generate_id(&mut self) -> u32 {
-        // FIXME: use the XC_MISC extension to get a new range when the old one is used up
-        assert!(self.next_id < self.max_id);
-        let id = self.next_id;
-        self.next_id += 1;
-        id
     }
 }
