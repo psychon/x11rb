@@ -95,9 +95,8 @@ impl RequestConnection for RustConnection {
         Ok(VoidCookie::new(self, self.send_request(bufs, fds, RequestKind::IsVoid)?))
     }
 
-    fn discard_reply(&self, sequence: SequenceNumber, kind: RequestKind, mode: DiscardMode) {
-        let _ = (sequence, kind, mode);
-        unimplemented!();
+    fn discard_reply(&self, sequence: SequenceNumber, _kind: RequestKind, mode: DiscardMode) {
+        self.inner.borrow_mut().discard_reply(sequence, mode);
     }
 
     fn extension_information(&self, extension_name: &'static str) -> Option<QueryExtensionReply> {
