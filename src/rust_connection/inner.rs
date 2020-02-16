@@ -219,7 +219,7 @@ where Stream: Read + Write
         Ok(())
     }
 
-    pub(crate) fn wait_for_reply(&mut self, sequence: SequenceNumber) -> Result<Buffer, Box<dyn Error>> {
+    pub(crate) fn wait_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Result<Buffer, Box<dyn Error>> {
         loop {
             for (index, (seqno, _packet)) in self.pending_replies.iter().enumerate() {
                 if *seqno == sequence {
@@ -227,6 +227,16 @@ where Stream: Read + Write
                 }
             }
             self.read_packet_and_enqueue()?;
+        }
+    }
+
+    pub(crate) fn wait_for_reply(&mut self, sequence: SequenceNumber) -> Result<Option<Buffer>, Box<dyn Error>> {
+        let reply = self.wait_for_reply_or_error(sequence)?;
+        if reply[0] == 0 {
+            self.pending_events.push_back(reply);
+            Ok(None)
+        } else {
+            Ok(Some(reply))
         }
     }
 
