@@ -4,7 +4,6 @@ use std::io::IoSlice;
 use std::error::Error;
 use std::convert::{TryFrom, TryInto};
 use std::sync::Mutex;
-use std::cell::Cell;
 
 use crate::utils::{Buffer, RawFdContainer};
 use crate::connection::{RequestConnection, Connection, SequenceNumber, RequestKind, DiscardMode};
@@ -27,7 +26,7 @@ pub struct RustConnection {
     id_allocator: Mutex<id_allocator::IDAllocator>,
     setup: Setup,
     extension_information: ExtensionInformation,
-    maximum_request_bytes: Cell<Option<usize>>,
+    maximum_request_bytes: Mutex<Option<usize>>,
 }
 
 impl RustConnection {
@@ -58,7 +57,7 @@ impl RustConnection {
             id_allocator: Mutex::new(allocator),
             setup,
             extension_information: Default::default(),
-            maximum_request_bytes: Cell::new(None),
+            maximum_request_bytes: Mutex::new(None),
         };
         Ok((conn, screen))
     }
@@ -130,7 +129,8 @@ impl RequestConnection for RustConnection {
     }
 
     fn maximum_request_bytes(&self) -> usize {
-        match self.maximum_request_bytes.get() {
+        let mut max_bytes = self.maximum_request_bytes.lock().unwrap();
+        match *max_bytes {
             None => {
                 // TODO: Make it possible to prefetch extensions?
                 // TODO: Make it possible to prefetch the maximum request length?
@@ -141,7 +141,7 @@ impl RequestConnection for RustConnection {
                 };
                 let length = length.try_into().unwrap_or(usize::max_value());
                 let length = length * 4;
-                self.maximum_request_bytes.set(Some(length));
+                *max_bytes = Some(length);
                 length
             },
             Some(length) => length,
