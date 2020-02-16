@@ -2,7 +2,7 @@
 
 use std::io::IoSlice;
 use std::error::Error;
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 use std::cell::RefCell;
 
 use crate::utils::{Buffer, RawFdContainer};
@@ -104,15 +104,26 @@ impl RequestConnection for RustConnection {
     }
 
     fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
+        let reply = self.inner.borrow_mut().wait_for_reply_or_error(sequence).map_err(|_| ConnectionError::UnknownError)?;
+        if reply[0] == 0 {
+            let error: GenericError = reply.try_into()?;
+            Err(error.into())
+        } else {
+            Ok(reply)
+        }
+    }
+
+    fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError> {
         Ok(self.inner.borrow_mut().wait_for_reply(sequence).map_err(|_| ConnectionError::UnknownError)?)
     }
 
-    fn wait_for_reply(&self, _sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError> {
-        unimplemented!();
-    }
-
-    fn check_for_error(&self, _sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError> {
-        unimplemented!();
+    fn check_for_error(&self, sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError> {
+        let reply = self.inner.borrow_mut().wait_for_reply_or_error(sequence).map_err(|_| ConnectionError::UnknownError)?;
+        if reply[0] == 0 {
+            Ok(Some(reply.try_into()?))
+        } else {
+            Ok(None)
+        }
     }
 
     fn wait_for_reply_with_fds(&self, _sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
