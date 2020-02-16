@@ -120,12 +120,8 @@ impl RequestConnection for RustConnection {
     }
 
     fn check_for_error(&self, sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError> {
-        let reply = self.inner.borrow_mut().wait_for_reply_or_error(sequence).map_err(|_| ConnectionError::UnknownError)?;
-        if reply[0] == 0 {
-            Ok(Some(reply.try_into()?))
-        } else {
-            Ok(None)
-        }
+        let reply = self.inner.borrow_mut().check_for_reply_or_error(sequence).map_err(|_| ConnectionError::UnknownError)?;
+        Ok(reply.and_then(|r| r.try_into().ok()))
     }
 
     fn wait_for_reply_with_fds(&self, _sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
