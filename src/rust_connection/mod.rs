@@ -22,7 +22,7 @@ mod stream;
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
 pub struct RustConnection {
-    inner: Mutex<inner::ConnectionInner<stream::Stream>>,
+    inner: Mutex<inner::ConnectionInner>,
     id_allocator: Mutex<id_allocator::IDAllocator>,
     setup: Setup,
     extension_information: ExtensionInformation,

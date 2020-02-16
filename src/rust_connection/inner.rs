@@ -1,16 +1,18 @@
 //! A pure-rust implementation of a connection to an X11 server.
 
-use std::io::{IoSlice, Write, Read};
+use std::io::{IoSlice, Write, Read, Error as IOError};
 use std::error::Error;
 use std::convert::TryInto;
 use std::iter::repeat;
 use std::collections::VecDeque;
+use std::sync::mpsc::{channel, Receiver, Sender};
 
 use crate::utils::Buffer;
 use crate::connection::{SequenceNumber, RequestKind, DiscardMode};
 use crate::generated::xproto::{Setup, SetupRequest, SetupFailed, SetupAuthenticate, GET_INPUT_FOCUS_REQUEST};
 use crate::x11_utils::{GenericEvent, Serialize};
-use crate::errors::ParseError;
+use crate::errors::{ConnectionError, ParseError};
+use super::stream::Stream;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 struct SentRequest {
@@ -20,8 +22,7 @@ struct SentRequest {
 }
 
 #[derive(Debug)]
-pub(crate) struct ConnectionInner<Stream>
-where Stream: Read + Write
+pub(crate) struct ConnectionInner
 {
     // The underlying byte stream that connects us to the X11 server
     stream: Stream,
@@ -40,15 +41,18 @@ where Stream: Read + Write
     pending_events: VecDeque<Buffer>,
     // Replies that were read, but not yet returned to the API user
     pending_replies: VecDeque<(SequenceNumber, Buffer)>,
+
+    // Receiver that connects us to the thread that reads from the server
+    packet_receiver: Receiver<Buffer>,
 }
 
-impl<Stream> ConnectionInner<Stream>
-where Stream: Read + Write
+impl ConnectionInner
 {
     pub(crate) fn connect(mut stream: Stream, auth_name: Vec<u8>, auth_data: Vec<u8>)
     -> Result<(Self, Setup), Box<dyn Error>> {
         Self::write_setup(&mut stream, auth_name, auth_data)?;
         let setup = Self::read_setup(&mut stream)?;
+        let (send, recv) = channel();
         let result = ConnectionInner {
             stream,
             last_sequence_written: 0,
@@ -57,8 +61,24 @@ where Stream: Read + Write
             sent_requests: VecDeque::new(),
             pending_events: VecDeque::new(),
             pending_replies: VecDeque::new(),
+            packet_receiver: recv,
         };
+        result.spawn_worker_thread(send)?;
         Ok((result, setup))
+    }
+
+    fn spawn_worker_thread(&self, sender: Sender<Buffer>) -> Result<(), Box<dyn Error>> {
+        let mut reading_stream = self.stream.try_clone()?;
+        let _ = std::thread::spawn(move || {
+            loop {
+                match read_x11_packet(&mut reading_stream) {
+                    Ok(Some(buffer)) => sender.send(buffer).unwrap(),
+                    Ok(None) => return,
+                    Err(error) => panic!("FIXME: Do something about this {:?}", error),
+                }
+            }
+        });
+        Ok(())
     }
 
     #[cfg(target_endian = "little")]
@@ -102,22 +122,6 @@ where Stream: Read + Write
         }
     }
 
-    fn read_packet(&mut self) -> Result<Buffer, Box<dyn Error>> {
-        let mut buffer: Vec<_> = repeat(0).take(32).collect();
-        self.stream.read_exact(&mut buffer)?;
-        let extra_length = match buffer[0] {
-            1 => { // reply
-                4 * u32::from_ne_bytes([buffer[4], buffer[5], buffer[6], buffer[7]])
-            },
-            35 | 163 => panic!("XGE events not yet supported"),
-            _ => 0
-        };
-        buffer.extend(repeat(0).take(extra_length as usize));
-        self.stream.read_exact(&mut buffer[32..])?;
-
-        Ok(Buffer::from_vec(buffer))
-    }
-
     fn send_sync(&mut self) -> Result<(), Box<dyn Error>> {
         let length = 1u16.to_ne_bytes();
         let written = self.stream.write(&[GET_INPUT_FOCUS_REQUEST, 0 /* pad */, length[0], length[1]])?;
@@ -151,7 +155,6 @@ where Stream: Read + Write
         };
         self.sent_requests.push_back(sent_request);
 
-        // FIXME: We must always be able to read when we write
         let written = self.stream.write_vectored(bufs)?;
         assert_eq!(written, bufs.iter().map(|s| s.len()).sum(), "FIXME: Implement partial write handling");
         Ok(seqno)
@@ -207,7 +210,8 @@ where Stream: Read + Write
     }
 
     fn read_packet_and_enqueue(&mut self) -> Result<(), Box<dyn Error>> {
-        let packet = self.read_packet()?;
+        // recv() only fails if the other end of the channel was dropped -> ConnectionError.
+        let packet = self.packet_receiver.recv().or(Err(ConnectionError::ConnectionError))?;
         let kind = packet[0];
 
         // extract_sequence_number() updates our state and is thus important to call even when we
@@ -307,6 +311,31 @@ where Stream: Read + Write
             .transpose()
             .map_err(Into::into)
     }
+}
+
+fn read_x11_packet(read: &mut impl Read) -> Result<Option<Buffer>, IOError> {
+    let mut buffer: Vec<_> = repeat(0).take(32).collect();
+
+    let bytes_read = read.read(&mut buffer)?;
+    if bytes_read == 0 {
+        // End of file
+        return Ok(None);
+    }
+    if bytes_read < 32 {
+        // Read remaining data
+        read.read_exact(&mut buffer[bytes_read..])?;
+    }
+    let extra_length = match buffer[0] {
+        1 => { // reply
+            4 * u32::from_ne_bytes([buffer[4], buffer[5], buffer[6], buffer[7]])
+        },
+        35 | 163 => panic!("XGE events not yet supported"),
+        _ => 0
+    };
+    buffer.extend(repeat(0).take(extra_length as usize));
+    read.read_exact(&mut buffer[32..])?;
+
+    Ok(Some(Buffer::from_vec(buffer)))
 }
 
 // FIXME: Clean up this error stuff... somehow

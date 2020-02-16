@@ -40,6 +40,16 @@ impl Stream {
             }
         }
     }
+
+    /// Creates a new independently owned handle to the underlying socket.
+    ///
+    /// This function calls `try_clone()` on the inner stream.
+    pub(crate) fn try_clone(&self) -> Result<Stream> {
+        match self {
+            Stream::TcpStream(stream) => Ok(Stream::TcpStream(stream.try_clone()?)),
+            Stream::UnixStream(stream) => Ok(Stream::UnixStream(stream.try_clone()?)),
+        }
+    }
 }
 
 impl Read for Stream {
