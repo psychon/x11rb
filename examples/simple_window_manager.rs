@@ -6,7 +6,6 @@ extern crate x11rb;
 use std::process::exit;
 use std::collections::HashSet;
 
-use x11rb::xcb_ffi::XCBConnection;
 use x11rb::connection::Connection;
 use x11rb::generated::xproto::*;
 use x11rb::errors::ConnectionErrorOrX11Error;
@@ -278,7 +277,7 @@ fn become_wm<C: Connection>(conn: &C, screen: &Screen) -> Result<(), ConnectionE
 }
 
 fn main() {
-    let (conn, screen_num) = XCBConnection::connect(None).unwrap();
+    let (conn, screen_num) = x11rb::connect(None).unwrap();
 
     // The following is only needed for start_timeout_thread(), which is used for 'tests'
     let conn1 = std::sync::Arc::new(conn);

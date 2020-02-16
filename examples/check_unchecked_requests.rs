@@ -7,7 +7,6 @@
 
 extern crate x11rb;
 
-use x11rb::xcb_ffi::XCBConnection;
 use x11rb::connection::Connection;
 use x11rb::generated::xproto::ConnectionExt;
 use x11rb::errors::ConnectionErrorOrX11Error;
@@ -17,7 +16,7 @@ use x11rb::wrapper::ConnectionExt as _;
 const INVALID_WINDOW: u32 = 0;
 
 fn main() -> Result<(), ConnectionErrorOrX11Error> {
-    let (conn, _) = XCBConnection::connect(None).unwrap();
+    let (conn, _) = x11rb::connect(None).unwrap();
 
     // For requests with responses, there are four possibilities:
 

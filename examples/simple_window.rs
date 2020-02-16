@@ -2,14 +2,13 @@ extern crate x11rb;
 
 use std::convert::TryFrom;
 
-use x11rb::xcb_ffi::XCBConnection;
 use x11rb::x11_utils::{Event, GenericError};
 use x11rb::generated::xproto::*;
 use x11rb::connection::Connection;
 use x11rb::wrapper::{ConnectionExt as _, LazyAtom};
 
 fn main() {
-    let (conn, screen_num) = XCBConnection::connect(None).unwrap();
+    let (conn, screen_num) = x11rb::connect(None).unwrap();
 
     // The following is only needed for start_timeout_thread(), which is used for 'tests'
     let conn1 = std::sync::Arc::new(conn);

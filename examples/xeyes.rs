@@ -2,7 +2,6 @@
 
 extern crate x11rb;
 
-use x11rb::xcb_ffi::XCBConnection;
 use x11rb::connection::{RequestConnection as _, Connection};
 use x11rb::x11_utils::Event;
 use x11rb::generated::xproto::*;
@@ -231,7 +230,7 @@ fn create_gc_with_foreground<C: Connection>(conn: &C, win_id: WINDOW, foreground
 }
 
 fn main() {
-    let (conn, screen_num) = XCBConnection::connect(None).expect("Failed to connect to the X11 server");
+    let (conn, screen_num) = x11rb::connect(None).expect("Failed to connect to the X11 server");
 
     // The following is only needed for start_timeout_thread(), which is used for 'tests'
     let conn1 = std::sync::Arc::new(conn);

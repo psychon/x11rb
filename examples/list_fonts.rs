@@ -2,11 +2,10 @@
 
 extern crate x11rb;
 
-use x11rb::xcb_ffi::XCBConnection;
 use x11rb::generated::xproto::{ConnectionExt, FontDraw};
 
 fn main() {
-    let (conn, _) = XCBConnection::connect(None).unwrap();
+    let (conn, _) = x11rb::connect(None).unwrap();
     let (ltr, rtl): (u8, u8) = (FontDraw::LeftToRight.into(), FontDraw::RightToLeft.into());
 
     println!("DIR  MIN  MAX EXIST DFLT PROP ASC DESC NAME");

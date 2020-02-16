@@ -8,7 +8,6 @@ use std::thread;
 use std::time::Duration;
 use std::sync::{Arc, Mutex};
 use std::f64::consts::PI;
-use x11rb::xcb_ffi::XCBConnection;
 use x11rb::connection::Connection;
 use x11rb::errors::ConnectionErrorOrX11Error;
 use x11rb::x11_utils::Event;
@@ -33,7 +32,7 @@ struct Window {
 
 fn main()
 {
-    let (conn, screen_num) = XCBConnection::connect(None).unwrap();
+    let (conn, screen_num) = x11rb::connect(None).unwrap();
     let conn = Arc::new(conn);
     let screen = &conn.setup().roots[screen_num];
 
