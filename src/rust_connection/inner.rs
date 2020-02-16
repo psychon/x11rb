@@ -131,6 +131,27 @@ where Stream: Read + Write
         Ok(seqno)
     }
 
+    pub(crate) fn discard_reply(&mut self, seqno: SequenceNumber, mode: DiscardMode) {
+        if let Some(entry) = self.sent_requests.iter_mut().filter(|r| r.seqno == seqno).next() {
+            entry.discard_mode = Some(mode);
+        }
+        match mode {
+            DiscardMode::DiscardReplyAndError => self.pending_replies.retain(|r| r.0 != seqno),
+            DiscardMode::DiscardReply => {
+                if let Some(index) = self.pending_replies.iter().position(|r| r.0 == seqno) {
+                    while self.pending_replies.get(index).filter(|r| r.0 == seqno).is_some() {
+                        if let Some((_, packet)) = self.pending_replies.remove(index) {
+                            if packet[0] == 0 {
+                                // This is an error
+                                self.pending_events.push_back(packet);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     // Extract the sequence number from a packet read from the X11 server. Thus, the packet must be
     // a reply, an event, or an error. All of these have a u16 sequence number in bytes 2 and 3...
     // except for KeymapNotify events.
@@ -199,8 +220,6 @@ where Stream: Read + Write
     }
 
     pub(crate) fn wait_for_reply(&mut self, sequence: SequenceNumber) -> Result<Buffer, Box<dyn Error>> {
-        // FIXME: Idea: Have this always return a Buffer and have the caller (Cookie and the multi
-        // reply cookie) tell apart reply and error.
         loop {
             for (index, (seqno, _packet)) in self.pending_replies.iter().enumerate() {
                 if *seqno == sequence {
