@@ -52,4 +52,4 @@ script:
         fi
     done
 
-  - cargo build --verbose --all-targets --no-default-features
+  - cargo build --verbose --all-targets --no-default-features --features vendor-xcb-proto
