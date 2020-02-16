@@ -3,7 +3,7 @@
 use std::io::IoSlice;
 use std::error::Error;
 use std::convert::{TryFrom, TryInto};
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex, Condvar};
 
 use crate::utils::{Buffer, RawFdContainer};
 use crate::connection::{RequestConnection, Connection, SequenceNumber, RequestKind, DiscardMode};
@@ -19,10 +19,12 @@ mod id_allocator;
 mod parse_display;
 mod stream;
 
+use inner::ConnectionInner;
+
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
 pub struct RustConnection {
-    inner: Mutex<inner::ConnectionInner>,
+    inner: Arc<(Mutex<ConnectionInner>, Condvar)>,
     id_allocator: Mutex<id_allocator::IDAllocator>,
     setup: Setup,
     extension_information: ExtensionInformation,
@@ -42,7 +44,7 @@ impl RustConnection {
         let stream = stream::Stream::connect(&*parsed_display.host, protocol, parsed_display.display)?;
 
         // Handle X11 connection
-        let (inner, setup) = inner::ConnectionInner::connect(stream, Vec::new(), Vec::new())?;
+        let (inner, setup) = ConnectionInner::connect(stream, Vec::new(), Vec::new())?;
 
         // Check that we got a valid screen number
         let screen = parsed_display.screen.into();
@@ -53,7 +55,7 @@ impl RustConnection {
         // Success! Set up our state
         let allocator = id_allocator::IDAllocator::new(setup.resource_id_base, setup.resource_id_mask);
         let conn = RustConnection {
-            inner: Mutex::new(inner),
+            inner,
             id_allocator: Mutex::new(allocator),
             setup,
             extension_information: Default::default(),
@@ -66,7 +68,7 @@ impl RustConnection {
         if !fds.is_empty() {
             return Err(ConnectionError::FDPassingFailed);
         }
-        self.inner.lock().unwrap().send_request(bufs, kind).or(Err(ConnectionError::UnknownError))
+        self.inner.0.lock().unwrap().send_request(bufs, kind).or(Err(ConnectionError::UnknownError))
     }
 }
 
@@ -98,7 +100,7 @@ impl RequestConnection for RustConnection {
     }
 
     fn discard_reply(&self, sequence: SequenceNumber, _kind: RequestKind, mode: DiscardMode) {
-        self.inner.lock().unwrap().discard_reply(sequence, mode);
+        self.inner.0.lock().unwrap().discard_reply(sequence, mode);
     }
 
     fn extension_information(&self, extension_name: &'static str) -> Option<QueryExtensionReply> {
@@ -106,7 +108,8 @@ impl RequestConnection for RustConnection {
     }
 
     fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
-        let reply = self.inner.lock().unwrap().wait_for_reply_or_error(sequence).map_err(|_| ConnectionError::UnknownError)?;
+        let reply = ConnectionInner::wait_for_reply_or_error(&self.inner, sequence);
+        let reply = reply.map_err(|_| ConnectionError::UnknownError)?;
         if reply[0] == 0 {
             let error: GenericError = reply.try_into()?;
             Err(error.into())
@@ -116,11 +119,13 @@ impl RequestConnection for RustConnection {
     }
 
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError> {
-        Ok(self.inner.lock().unwrap().wait_for_reply(sequence).map_err(|_| ConnectionError::UnknownError)?)
+        let reply = ConnectionInner::wait_for_reply(&self.inner, sequence);
+        Ok(reply.map_err(|_| ConnectionError::UnknownError)?)
     }
 
     fn check_for_error(&self, sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError> {
-        let reply = self.inner.lock().unwrap().check_for_reply_or_error(sequence).map_err(|_| ConnectionError::UnknownError)?;
+        let reply = ConnectionInner::check_for_reply_or_error(&self.inner, sequence);
+        let reply = reply.map_err(|_| ConnectionError::UnknownError)?;
         Ok(reply.and_then(|r| r.try_into().ok()))
     }
 
@@ -151,11 +156,12 @@ impl RequestConnection for RustConnection {
 
 impl Connection for RustConnection {
     fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
-        Ok(self.inner.lock().unwrap().wait_for_event().map_err(|_| ConnectionError::UnknownError)?)
+        let event = ConnectionInner::wait_for_event(&self.inner);
+        Ok(event.map_err(|_| ConnectionError::UnknownError)?)
     }
 
     fn poll_for_event(&self) -> Result<Option<GenericEvent>, ConnectionError> {
-        Ok(self.inner.lock().unwrap().poll_for_event().map_err(|_| ConnectionError::UnknownError)?)
+        Ok(self.inner.0.lock().unwrap().poll_for_event().map_err(|_| ConnectionError::UnknownError)?)
     }
 
     fn flush(&self) {

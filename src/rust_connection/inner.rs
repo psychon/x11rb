@@ -5,13 +5,13 @@ use std::error::Error;
 use std::convert::TryInto;
 use std::iter::repeat;
 use std::collections::VecDeque;
-use std::sync::mpsc::{channel, Receiver, Sender};
+use std::sync::{Arc, Mutex, Condvar};
 
 use crate::utils::Buffer;
 use crate::connection::{SequenceNumber, RequestKind, DiscardMode};
 use crate::generated::xproto::{Setup, SetupRequest, SetupFailed, SetupAuthenticate, GET_INPUT_FOCUS_REQUEST};
 use crate::x11_utils::{GenericEvent, Serialize};
-use crate::errors::{ConnectionError, ParseError};
+use crate::errors::ParseError;
 use super::stream::Stream;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -41,18 +41,14 @@ pub(crate) struct ConnectionInner
     pending_events: VecDeque<Buffer>,
     // Replies that were read, but not yet returned to the API user
     pending_replies: VecDeque<(SequenceNumber, Buffer)>,
-
-    // Receiver that connects us to the thread that reads from the server
-    packet_receiver: Receiver<Buffer>,
 }
 
 impl ConnectionInner
 {
     pub(crate) fn connect(mut stream: Stream, auth_name: Vec<u8>, auth_data: Vec<u8>)
-    -> Result<(Self, Setup), Box<dyn Error>> {
+    -> Result<(Arc<(Mutex<Self>, Condvar)>, Setup), Box<dyn Error>> {
         Self::write_setup(&mut stream, auth_name, auth_data)?;
         let setup = Self::read_setup(&mut stream)?;
-        let (send, recv) = channel();
         let result = ConnectionInner {
             stream,
             last_sequence_written: 0,
@@ -61,21 +57,24 @@ impl ConnectionInner
             sent_requests: VecDeque::new(),
             pending_events: VecDeque::new(),
             pending_replies: VecDeque::new(),
-            packet_receiver: recv,
         };
-        result.spawn_worker_thread(send)?;
+        let result = Arc::new((Mutex::new(result), Condvar::new()));
+        Self::spawn_worker_thread(result.clone())?;
         Ok((result, setup))
     }
 
-    fn spawn_worker_thread(&self, sender: Sender<Buffer>) -> Result<(), Box<dyn Error>> {
-        let mut reading_stream = self.stream.try_clone()?;
+    fn spawn_worker_thread(arc: Arc<(Mutex<Self>, Condvar)>) -> Result<(), Box<dyn Error>> {
+        let mut reading_stream = arc.0.lock().unwrap().stream.try_clone()?;
         let _ = std::thread::spawn(move || {
+            let (self_, packet_condition) = &*arc;
             loop {
-                match read_x11_packet(&mut reading_stream) {
-                    Ok(Some(buffer)) => sender.send(buffer).unwrap(),
-                    Ok(None) => return,
-                    Err(error) => panic!("FIXME: Do something about this {:?}", error),
-                }
+                let buffer = match read_x11_packet(&mut reading_stream).expect("FIXME: Do something about errors here") {
+                    Some(buffer) => buffer,
+                    None => return,
+                };
+                let mut guard = self_.lock().unwrap();
+                guard.enqueue(buffer);
+                packet_condition.notify_all();
             }
         });
         Ok(())
@@ -209,9 +208,7 @@ impl ConnectionInner
         Some(full_number)
     }
 
-    fn read_packet_and_enqueue(&mut self) -> Result<(), Box<dyn Error>> {
-        // recv() only fails if the other end of the channel was dropped -> ConnectionError.
-        let packet = self.packet_receiver.recv().or(Err(ConnectionError::ConnectionError))?;
+    fn enqueue(&mut self, packet: Buffer) {
         let kind = packet[0];
 
         // extract_sequence_number() updates our state and is thus important to call even when we
@@ -251,61 +248,63 @@ impl ConnectionInner
             // It is an event
             self.pending_events.push_back(packet);
         }
-
-        Ok(())
     }
 
-    pub(crate) fn wait_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Result<Buffer, Box<dyn Error>> {
+    pub(crate) fn wait_for_reply_or_error((self_, packet_condition): &(Mutex<Self>, Condvar), sequence: SequenceNumber) -> Result<Buffer, Box<dyn Error>> {
+        let mut guard = self_.lock().unwrap();
         loop {
-            for (index, (seqno, _packet)) in self.pending_replies.iter().enumerate() {
+            for (index, (seqno, _packet)) in guard.pending_replies.iter().enumerate() {
                 if *seqno == sequence {
-                    return Ok(self.pending_replies.remove(index).unwrap().1)
+                    return Ok(guard.pending_replies.remove(index).unwrap().1)
                 }
             }
-            self.read_packet_and_enqueue()?;
+            guard = packet_condition.wait(guard).unwrap();
         }
     }
 
-    pub(crate) fn check_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Result<Option<Buffer>, Box<dyn Error>> {
-        if self.next_reply_expected < sequence {
-            self.send_sync()?;
+    pub(crate) fn check_for_reply_or_error((self_, packet_condition): &(Mutex<Self>, Condvar), sequence: SequenceNumber) -> Result<Option<Buffer>, Box<dyn Error>> {
+        let mut guard = self_.lock().unwrap();
+
+        if guard.next_reply_expected < sequence {
+            guard.send_sync()?;
         }
 
         loop {
-            for (index, (seqno, _packet)) in self.pending_replies.iter().enumerate() {
+            for (index, (seqno, _packet)) in guard.pending_replies.iter().enumerate() {
                 if *seqno == sequence {
-                    return Ok(Some(self.pending_replies.remove(index).unwrap().1))
+                    return Ok(Some(guard.pending_replies.remove(index).unwrap().1))
                 }
             }
-            if self.last_sequence_read > sequence {
+            if guard.last_sequence_read > sequence {
                 return Ok(None);
             }
-            self.read_packet_and_enqueue()?;
+            guard = packet_condition.wait(guard).unwrap();
         }
     }
 
-    pub(crate) fn wait_for_reply(&mut self, sequence: SequenceNumber) -> Result<Option<Buffer>, Box<dyn Error>> {
-        let reply = self.wait_for_reply_or_error(sequence)?;
+    pub(crate) fn wait_for_reply(arg: &(Mutex<Self>, Condvar), sequence: SequenceNumber) -> Result<Option<Buffer>, Box<dyn Error>> {
+        let reply = Self::wait_for_reply_or_error(arg, sequence)?;
         if reply[0] == 0 {
-            self.pending_events.push_back(reply);
+            arg.0.lock().unwrap().pending_events.push_back(reply);
             Ok(None)
         } else {
             Ok(Some(reply))
         }
     }
 
-    pub(crate) fn wait_for_event(&mut self) -> Result<GenericEvent, Box<dyn Error>> {
+    pub(crate) fn wait_for_event((self_, packet_condition): &(Mutex<Self>, Condvar)) -> Result<GenericEvent, Box<dyn Error>> {
+        let mut guard = self_.lock().unwrap();
+
         loop {
-            let event = self.pending_events.pop_front();
+            let event = guard.pending_events.pop_front();
             if let Some(event) = event {
                 return Ok(event.try_into()?);
             }
-            self.read_packet_and_enqueue()?;
+            guard = packet_condition.wait(guard).unwrap();
         }
     }
 
     pub(crate) fn poll_for_event(&mut self) -> Result<Option<GenericEvent>, Box<dyn Error>> {
-        // FIXME: Check if something can be read from the wire
         self.pending_events.pop_front()
             .map(TryInto::try_into)
             .transpose()
