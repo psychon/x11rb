@@ -4,14 +4,14 @@ use std::io::{Read, Write, Result, IoSlice, IoSliceMut};
 
 /// A wrapper around a `TcpStream` or `UnixStream`.
 #[derive(Debug)]
-pub(crate) enum Stream {
+pub enum Stream {
     TcpStream(TcpStream),
     UnixStream(UnixStream),
 }
 
 impl Stream {
     /// Try to connect to the X11 server described by the given arguments.
-    pub(crate) fn connect(host: &str, protocol: Option<&str>, display: u16) -> Result<Self> {
+    pub fn connect(host: &str, protocol: Option<&str>, display: u16) -> Result<Self> {
         const TCP_PORT_BASE: u16 = 6000;
 
         if (protocol.is_none() || protocol != Some("unix")) && !host.is_empty() && host != "unix" {
