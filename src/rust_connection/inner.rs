@@ -6,7 +6,7 @@ use std::convert::TryInto;
 use std::iter::repeat;
 use std::collections::VecDeque;
 
-use crate::utils::{Buffer, RawFdContainer};
+use crate::utils::Buffer;
 use crate::connection::SequenceNumber;
 use crate::generated::xproto::{Setup, SetupRequest, SetupFailed, SetupAuthenticate};
 use crate::x11_utils::{GenericEvent, Serialize};
@@ -101,9 +101,7 @@ where Stream: Read + Write
         Ok(Buffer::from_vec(buffer))
     }
 
-    pub(crate) fn send_request(&mut self, bufs: &[IoSlice], fds: Vec<RawFdContainer>, has_reply: bool) -> Result<SequenceNumber, Box<dyn Error>> {
-        assert_eq!(fds.len(), 0);
-
+    pub(crate) fn send_request(&mut self, bufs: &[IoSlice], has_reply: bool) -> Result<SequenceNumber, Box<dyn Error>> {
         self.last_sequence_written += 1;
         let seqno = self.last_sequence_written;
 
