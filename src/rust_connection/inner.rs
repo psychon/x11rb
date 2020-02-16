@@ -226,11 +226,12 @@ where Stream: Read + Write
 
         if kind == 0 {
             // It is an error. Let's see where we have to send it to.
-            if request.filter(|r| r.discard_mode == Some(DiscardMode::DiscardReplyAndError)).is_some() {
-                // This error should be discarded
-            } else if request.filter(|r| r.kind == RequestKind::HasResponse).is_some() {
-                // Error is the reply to some request
-                self.pending_replies.push_back((seqno, packet));
+            if let Some(request) = request {
+                match request.discard_mode {
+                    Some(DiscardMode::DiscardReplyAndError) => { /* This error should be ignored */ },
+                    Some(DiscardMode::DiscardReply) => self.pending_events.push_back(packet),
+                    None => self.pending_replies.push_back((seqno, packet)),
+                }
             } else {
                 // Unexpected error, send to main loop
                 self.pending_events.push_back(packet);
@@ -256,6 +257,24 @@ where Stream: Read + Write
                 if *seqno == sequence {
                     return Ok(self.pending_replies.remove(index).unwrap().1)
                 }
+            }
+            self.read_packet_and_enqueue()?;
+        }
+    }
+
+    pub(crate) fn check_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Result<Option<Buffer>, Box<dyn Error>> {
+        if self.next_reply_expected < sequence {
+            self.send_sync()?;
+        }
+
+        loop {
+            for (index, (seqno, _packet)) in self.pending_replies.iter().enumerate() {
+                if *seqno == sequence {
+                    return Ok(Some(self.pending_replies.remove(index).unwrap().1))
+                }
+            }
+            if self.last_sequence_read > sequence {
+                return Ok(None);
             }
             self.read_packet_and_enqueue()?;
         }
