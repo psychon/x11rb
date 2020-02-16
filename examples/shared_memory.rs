@@ -8,7 +8,6 @@ use std::os::unix::io::AsRawFd;
 
 use libc::{mmap, PROT_READ, PROT_WRITE, MAP_SHARED, MAP_FAILED};
 
-use x11rb::xcb_ffi::XCBConnection;
 use x11rb::connection::Connection;
 use x11rb::generated::xproto::{self, ImageFormat, ConnectionExt as _};
 use x11rb::generated::shm;
@@ -113,8 +112,7 @@ fn receive_fd<C: Connection>(conn: &C, screen_num: usize) -> Result<(), Connecti
 
 fn main() {
     let file = make_file().expect("Failed to create temporary file for FD passing");
-    // FIXME: Use x11rb::connect() once RustConnection supports FD passing
-    match XCBConnection::connect(None) {
+    match x11rb::connect(None) {
         Err(err) => eprintln!("Failed to connect to the X11 server: {}", err),
         Ok((conn, screen_num)) => {
             // Check for SHM 1.2 support (needed for fd passing)
@@ -129,10 +127,14 @@ fn main() {
                 return;
             }
 
-            println!("Trying to send an FD");
-            send_fd(&conn, screen_num, file).unwrap();
-            println!("Trying to receive an FD");
-            receive_fd(&conn, screen_num).unwrap();
+            if cfg!(feature = "allow-unsafe-code") {
+                println!("Trying to send an FD");
+                send_fd(&conn, screen_num, file).unwrap();
+                println!("Trying to receive an FD");
+                receive_fd(&conn, screen_num).unwrap();
+            } else {
+                eprintln!("Skipping FD passing since not supported RustConnection"); // FIXME
+            }
         }
     }
 }
