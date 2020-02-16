@@ -104,7 +104,7 @@ use connection::Connection;
 /// example `127.0.0.1:1`. If no value is provided, the `$DISPLAY` environment variable is
 /// used.
 pub fn connect(dpy_name: Option<&str>) -> Result<(impl Connection + Send + Sync, usize), Box<dyn Error>> {
-    let dpy_name = dpy_name.map(|d| CString::new(d)).transpose()?;
+    let dpy_name = dpy_name.map(CString::new).transpose()?;
     let dpy_name = dpy_name.as_ref().map(|d| &**d);
     Ok(xcb_ffi::XCBConnection::connect(dpy_name)?)
 }
