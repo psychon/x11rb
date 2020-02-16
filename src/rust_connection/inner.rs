@@ -8,7 +8,7 @@ use std::collections::VecDeque;
 
 use crate::utils::Buffer;
 use crate::connection::{SequenceNumber, RequestKind, DiscardMode};
-use crate::generated::xproto::{Setup, SetupRequest, SetupFailed, SetupAuthenticate};
+use crate::generated::xproto::{Setup, SetupRequest, SetupFailed, SetupAuthenticate, GET_INPUT_FOCUS_REQUEST};
 use crate::x11_utils::{GenericEvent, Serialize};
 use crate::errors::ParseError;
 
@@ -31,6 +31,9 @@ where Stream: Read + Write
     // Sorted(!) list with information on requests that were written, but no answer received yet.
     sent_requests: VecDeque<SentRequest>,
 
+    // The sequence number of the next reply that is expected to come in
+    next_reply_expected: SequenceNumber,
+
     // The sequence number of the last reply/error/event that was read
     last_sequence_read: SequenceNumber,
     // Events that were read, but not yet returned to the API user
@@ -49,6 +52,7 @@ where Stream: Read + Write
         let result = ConnectionInner {
             stream,
             last_sequence_written: 0,
+            next_reply_expected: 0,
             last_sequence_read: 0,
             sent_requests: VecDeque::new(),
             pending_events: VecDeque::new(),
@@ -115,6 +119,22 @@ where Stream: Read + Write
     }
 
     pub(crate) fn send_request(&mut self, bufs: &[IoSlice], kind: RequestKind) -> Result<SequenceNumber, Box<dyn Error>> {
+        if self.next_reply_expected + SequenceNumber::from(u16::max_value()) >= self.last_sequence_written {
+            // Send a GetInputFocus request so that we can reliably reconstruct sequence numbers in
+            // received packets.
+            let length = 1u16.to_ne_bytes();
+            let written = self.stream.write(&[GET_INPUT_FOCUS_REQUEST, 0 /* pad */, length[0], length[1]])?;
+            assert_eq!(written, 4);
+
+            self.last_sequence_written += 1;
+            self.next_reply_expected = self.last_sequence_written;
+            self.sent_requests.push_back(SentRequest {
+                seqno: self.last_sequence_written,
+                kind: RequestKind::HasResponse,
+                discard_mode: Some(DiscardMode::DiscardReplyAndError),
+            });
+        }
+
         self.last_sequence_written += 1;
         let seqno = self.last_sequence_written;
 
@@ -172,6 +192,11 @@ where Stream: Read + Write
 
         // Update our state
         self.last_sequence_read = full_number;
+        if self.next_reply_expected < full_number {
+            // This is most likely an event/error that allows us to update our sequence number
+            // implicitly. Normally, only requests with a reply update this (in send_request()).
+            self.next_reply_expected = full_number;
+        }
         Some(full_number)
     }
 
