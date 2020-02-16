@@ -1,6 +1,5 @@
 //! A pure-rust implementation of a connection to an X11 server.
 
-use std::net::TcpStream;
 use std::io::IoSlice;
 use std::error::Error;
 use std::convert::TryFrom;
@@ -17,32 +16,13 @@ use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 mod inner;
 mod id_allocator;
 mod parse_display;
+mod stream;
 
-fn connect_stream(host: &str, protocol: Option<&str>, display: u16) -> Result<TcpStream, Box<dyn Error>> {
-    const TCP_PORT_BASE: u16 = 6000;
-
-    if (protocol.is_none() || protocol != Some("unix")) && !host.is_empty() && host != "unix" {
-        Ok(TcpStream::connect((host, TCP_PORT_BASE + display))?)
-    } else {
-        if protocol.is_none() || protocol != Some("unix") {
-            let _file_name = format!("/tmp/.X11-unix/X{}", display);
-
-            // FIXME: Try abstract socket (unix socket with prepended '\0')
-            // FIXME: Try normal unix socket
-        }
-
-        if protocol.is_none() && host.is_empty() {
-            Ok(TcpStream::connect(("localhost", TCP_PORT_BASE + display))?)
-        } else {
-            Err(Box::new(ConnectionError::ConnectionError))
-        }
-    }
-}
 
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
 pub struct RustConnection {
-    inner: RefCell<inner::ConnectionInner<TcpStream>>,
+    inner: RefCell<inner::ConnectionInner<stream::Stream>>,
     id_allocator: RefCell<id_allocator::IDAllocator>,
     setup: Setup,
     extension_information: ExtensionInformation,
@@ -57,7 +37,8 @@ impl RustConnection {
         let parsed_display = parse_display::parse_display(dpy_name).ok_or(ConnectionError::DisplayParsingError)?;
 
         // Establish connection
-        let stream = connect_stream(&*parsed_display.host, parsed_display.protocol.as_ref().map(|s| &**s), parsed_display.display)?;
+        let protocol = parsed_display.protocol.as_ref().map(|s| &**s);
+        let stream = stream::Stream::connect(&*parsed_display.host, protocol, parsed_display.display)?;
 
         // Handle X11 connection
         let (inner, setup) = inner::ConnectionInner::connect(stream, Vec::new(), Vec::new())?;
