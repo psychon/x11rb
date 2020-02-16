@@ -27,7 +27,9 @@ impl ExtensionInformation {
                     let info = info.and_then(|c| c.reply().ok());
                     if let Some(info) = info {
                         // If the extension is not present, we return None, else we box it
-                        if info.present as u8 == 0 {
+                        #[allow(trivial_numeric_casts)]
+                        let present = info.present as u8;
+                        if present == 0 {
                             None
                         } else {
                             Some(info)
