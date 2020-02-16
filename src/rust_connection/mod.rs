@@ -3,13 +3,14 @@
 use std::io::IoSlice;
 use std::error::Error;
 use std::convert::{TryFrom, TryInto};
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 
 use crate::utils::{Buffer, RawFdContainer};
 use crate::connection::{RequestConnection, Connection, SequenceNumber, RequestKind, DiscardMode};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::extension_information::ExtensionInformation;
 use crate::generated::xproto::{Setup, QueryExtensionReply};
+use crate::generated::bigreq;
 use crate::x11_utils::{GenericEvent, GenericError};
 use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
 
@@ -18,7 +19,6 @@ mod id_allocator;
 mod parse_display;
 mod stream;
 
-
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
 pub struct RustConnection {
@@ -26,6 +26,7 @@ pub struct RustConnection {
     id_allocator: RefCell<id_allocator::IDAllocator>,
     setup: Setup,
     extension_information: ExtensionInformation,
+    maximum_request_bytes: Cell<Option<usize>>,
 }
 
 impl RustConnection {
@@ -55,7 +56,8 @@ impl RustConnection {
             inner: RefCell::new(inner),
             id_allocator: RefCell::new(allocator),
             setup,
-            extension_information: Default::default()
+            extension_information: Default::default(),
+            maximum_request_bytes: Cell::new(None),
         };
         Ok((conn, screen))
     }
@@ -131,7 +133,22 @@ impl RequestConnection for RustConnection {
     }
 
     fn maximum_request_bytes(&self) -> usize {
-        unimplemented!()
+        match self.maximum_request_bytes.get() {
+            None => {
+                // TODO: Make it possible to prefetch extensions?
+                // TODO: Make it possible to prefetch the maximum request length?
+                let length = match bigreq::enable(self).ok()
+                        .and_then(|cookie| cookie.reply().ok()) {
+                    Some(reply) => reply.maximum_request_length,
+                    None => self.setup.maximum_request_length.into(),
+                };
+                let length = length.try_into().unwrap_or(usize::max_value());
+                let length = length * 4;
+                self.maximum_request_bytes.set(Some(length));
+                length
+            },
+            Some(length) => length,
+        }
     }
 }
 
