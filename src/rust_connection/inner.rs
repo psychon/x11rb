@@ -152,7 +152,7 @@ where Stream: Read + Write
     }
 
     pub(crate) fn discard_reply(&mut self, seqno: SequenceNumber, mode: DiscardMode) {
-        if let Some(entry) = self.sent_requests.iter_mut().filter(|r| r.seqno == seqno).next() {
+        if let Some(entry) = self.sent_requests.iter_mut().find(|r| r.seqno == seqno) {
             entry.discard_mode = Some(mode);
         }
         match mode {
