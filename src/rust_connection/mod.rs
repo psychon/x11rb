@@ -61,7 +61,10 @@ impl RustConnection {
     }
 
     fn send_request(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>, has_reply: bool) -> Result<SequenceNumber, ConnectionError> {
-        self.inner.borrow_mut().send_request(bufs, fds, has_reply).or(Err(ConnectionError::UnknownError))
+        if !fds.is_empty() {
+            return Err(ConnectionError::FDPassingFailed);
+        }
+        self.inner.borrow_mut().send_request(bufs, has_reply).or(Err(ConnectionError::UnknownError))
     }
 }
 
@@ -82,7 +85,7 @@ impl RequestConnection for RustConnection {
         let bufs = self.compute_length_field(bufs, &mut storage)?;
 
         let _ = (bufs, fds);
-        unimplemented!()
+        Err(ConnectionError::FDPassingFailed)
     }
 
     fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<VoidCookie<Self>, ConnectionError> {
