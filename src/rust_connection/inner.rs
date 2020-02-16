@@ -7,22 +7,35 @@ use std::iter::repeat;
 use std::collections::VecDeque;
 
 use crate::utils::Buffer;
-use crate::connection::SequenceNumber;
+use crate::connection::{SequenceNumber, RequestKind, DiscardMode};
 use crate::generated::xproto::{Setup, SetupRequest, SetupFailed, SetupAuthenticate};
 use crate::x11_utils::{GenericEvent, Serialize};
 use crate::errors::ParseError;
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+struct SentRequest {
+    seqno: SequenceNumber,
+    kind: RequestKind,
+    discard_mode: Option<DiscardMode>,
+}
 
 #[derive(Debug)]
 pub(crate) struct ConnectionInner<Stream>
 where Stream: Read + Write
 {
+    // The underlying byte stream that connects us to the X11 server
     stream: Stream,
 
+    // The sequence number of the last request that was written
     last_sequence_written: SequenceNumber,
-    checked_requests: VecDeque<SequenceNumber>,
+    // Sorted(!) list with information on requests that were written, but no answer received yet.
+    sent_requests: VecDeque<SentRequest>,
 
+    // The sequence number of the last reply/error/event that was read
     last_sequence_read: SequenceNumber,
+    // Events that were read, but not yet returned to the API user
     pending_events: VecDeque<Buffer>,
+    // Replies that were read, but not yet returned to the API user
     pending_replies: VecDeque<(SequenceNumber, Buffer)>,
 }
 
@@ -37,7 +50,7 @@ where Stream: Read + Write
             stream,
             last_sequence_written: 0,
             last_sequence_read: 0,
-            checked_requests: VecDeque::new(),
+            sent_requests: VecDeque::new(),
             pending_events: VecDeque::new(),
             pending_replies: VecDeque::new(),
         };
@@ -101,13 +114,16 @@ where Stream: Read + Write
         Ok(Buffer::from_vec(buffer))
     }
 
-    pub(crate) fn send_request(&mut self, bufs: &[IoSlice], has_reply: bool) -> Result<SequenceNumber, Box<dyn Error>> {
+    pub(crate) fn send_request(&mut self, bufs: &[IoSlice], kind: RequestKind) -> Result<SequenceNumber, Box<dyn Error>> {
         self.last_sequence_written += 1;
         let seqno = self.last_sequence_written;
 
-        if has_reply {
-            self.checked_requests.push_back(seqno);
-        }
+        let sent_request = SentRequest {
+            seqno,
+            kind,
+            discard_mode: None,
+        };
+        self.sent_requests.push_back(sent_request);
 
         // FIXME: We must always be able to read when we write
         let written = self.stream.write_vectored(bufs)?;
@@ -146,21 +162,34 @@ where Stream: Read + Write
         // do not need the sequence number
         let seqno = self.extract_sequence_number(&packet).unwrap_or(self.last_sequence_read);
 
+        // Remove all entries for older requests
+        while let Some(request) = self.sent_requests.front() {
+            if request.seqno >= seqno {
+                break;
+            }
+            let _ = self.sent_requests.pop_front();
+        }
+        let request = self.sent_requests.front()
+            .filter(|r| r.seqno == seqno);
+
         if kind == 0 {
             // It is an error. Let's see where we have to send it to.
-            let is_checked = if let Some(&sequence) = self.checked_requests.front() {
-                seqno == sequence
-            } else {
-                false
-            };
-            if is_checked {
+            if request.filter(|r| r.discard_mode == Some(DiscardMode::DiscardReplyAndError)).is_some() {
+                // This error should be discarded
+            } else if request.filter(|r| r.kind == RequestKind::HasResponse).is_some() {
+                // Error is the reply to some request
                 self.pending_replies.push_back((seqno, packet));
             } else {
+                // Unexpected error, send to main loop
                 self.pending_events.push_back(packet);
             }
         } else if kind == 1 {
             // It is a reply
-            self.pending_replies.push_back((seqno, packet));
+            if request.filter(|r| r.discard_mode.is_some()).is_some() {
+                // This reply should be discarded
+            } else {
+                self.pending_replies.push_back((seqno, packet));
+            }
         } else {
             // It is an event
             self.pending_events.push_back(packet);

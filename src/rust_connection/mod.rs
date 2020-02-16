@@ -60,11 +60,11 @@ impl RustConnection {
         Ok((conn, screen))
     }
 
-    fn send_request(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>, has_reply: bool) -> Result<SequenceNumber, ConnectionError> {
+    fn send_request(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>, kind: RequestKind) -> Result<SequenceNumber, ConnectionError> {
         if !fds.is_empty() {
             return Err(ConnectionError::FDPassingFailed);
         }
-        self.inner.borrow_mut().send_request(bufs, has_reply).or(Err(ConnectionError::UnknownError))
+        self.inner.borrow_mut().send_request(bufs, kind).or(Err(ConnectionError::UnknownError))
     }
 }
 
@@ -75,7 +75,7 @@ impl RequestConnection for RustConnection {
         let mut storage = Default::default();
         let bufs = self.compute_length_field(bufs, &mut storage)?;
 
-        Ok(Cookie::new(self, self.send_request(bufs, fds, true)?))
+        Ok(Cookie::new(self, self.send_request(bufs, fds, RequestKind::HasResponse)?))
     }
 
     fn send_request_with_reply_with_fds<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<CookieWithFds<Self, R>, ConnectionError>
@@ -92,7 +92,7 @@ impl RequestConnection for RustConnection {
         let mut storage = Default::default();
         let bufs = self.compute_length_field(bufs, &mut storage)?;
 
-        Ok(VoidCookie::new(self, self.send_request(bufs, fds, false)?))
+        Ok(VoidCookie::new(self, self.send_request(bufs, fds, RequestKind::IsVoid)?))
     }
 
     fn discard_reply(&self, sequence: SequenceNumber, kind: RequestKind, mode: DiscardMode) {
