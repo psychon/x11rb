@@ -96,7 +96,6 @@ pub mod generated {
 pub mod wrapper;
 
 use std::error::Error;
-use std::ffi::CString;
 
 use generated::xproto::{KEYSYM, TIMESTAMP};
 use connection::Connection;
@@ -107,9 +106,16 @@ use connection::Connection;
 /// example `127.0.0.1:1`. If no value is provided, the `$DISPLAY` environment variable is
 /// used.
 pub fn connect(dpy_name: Option<&str>) -> Result<(impl Connection + Send + Sync, usize), Box<dyn Error>> {
-    let dpy_name = dpy_name.map(CString::new).transpose()?;
-    let dpy_name = dpy_name.as_ref().map(|d| &**d);
-    Ok(xcb_ffi::XCBConnection::connect(dpy_name)?)
+    #[cfg(feature = "allow-unsafe-code")]
+    {
+        let dpy_name = dpy_name.map(std::ffi::CString::new).transpose()?;
+        let dpy_name = dpy_name.as_ref().map(|d| &**d);
+        Ok(xcb_ffi::XCBConnection::connect(dpy_name)?)
+    }
+    #[cfg(not(feature = "allow-unsafe-code"))]
+    {
+        rust_connection::RustConnection::connect(dpy_name)
+    }
 }
 
 /// The universal null resource or null atom parameter value for many core X requests
