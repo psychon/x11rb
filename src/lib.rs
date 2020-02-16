@@ -92,7 +92,22 @@ pub mod generated {
 }
 pub mod wrapper;
 
+use std::error::Error;
+use std::ffi::CString;
+
 use generated::xproto::{KEYSYM, TIMESTAMP};
+use connection::Connection;
+
+/// Establish a new connection to an X11 server.
+///
+/// If a `dpy_name` is provided, it describes the display that should be connected to, for
+/// example `127.0.0.1:1`. If no value is provided, the `$DISPLAY` environment variable is
+/// used.
+pub fn connect(dpy_name: Option<&str>) -> Result<(impl Connection + Send + Sync, usize), Box<dyn Error>> {
+    let dpy_name = dpy_name.map(|d| CString::new(d)).transpose()?;
+    let dpy_name = dpy_name.as_ref().map(|d| &**d);
+    Ok(xcb_ffi::XCBConnection::connect(dpy_name)?)
+}
 
 /// The universal null resource or null atom parameter value for many core X requests
 pub const NONE: u32 = 0;
