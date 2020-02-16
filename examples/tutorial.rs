@@ -19,7 +19,8 @@
 
 extern crate x11rb;
 
-use x11rb::xcb_ffi::XCBConnection;
+use std::error::Error;
+
 use x11rb::connection::{Connection, SequenceNumber};
 use x11rb::x11_utils::Event;
 use x11rb::errors::{ConnectionError, ConnectionErrorOrX11Error};
@@ -198,10 +199,10 @@ use x11rb::COPY_DEPTH_FROM_PARENT;
 // Here is a program that computes the time to create 500 atoms with Xlib and XCB. It shows the Xlib way, the bad XCB way (which is similar to Xlib) and the good XCB way. On my computer, XCB is 25 times faster than Xlib.
 //
 
-fn example1() -> Result<(), ConnectionErrorOrX11Error> {
+fn example1() -> Result<(), Box<dyn Error>> {
     use std::time::Instant;
 
-    let (conn, _) = XCBConnection::connect(None)?;
+    let (conn, _) = x11rb::connect(None)?;
     const COUNT: usize = 500;
     let mut atoms = [Into::<u32>::into(Atom::None); COUNT];
 
@@ -292,15 +293,13 @@ fn example1() -> Result<(), ConnectionErrorOrX11Error> {
 // a connection. It requires the display name, or None. In the latter case, the display name will
 // be the one in the environment variable DISPLAY.
 //
-// trait Connection {
-//   fn connect(dpy_name: Option<&CStr>) -> Result<(XCBConnection, usize), ConnectionError>;
-// }
+// pub fn connect(dpy_name: Option<&str>) -> Result<([...], usize), [...]>;
 //
 // The second tuple value provides the screen number used for the connection. The returned
-// structure describes an XCB connection and is opaque. Here is how the connection can be opened:
+// structure describes an X11 connection and is opaque. Here is how the connection can be opened:
 
-fn example2() -> Result<(), ConnectionErrorOrX11Error> {
-    let (conn, _screen) = XCBConnection::connect(None)?;
+fn example2() -> Result<(), Box<dyn Error>> {
+    let (conn, _screen) = x11rb::connect(None)?;
 
 // To close a connection, it suffices to drop the connection object
 
@@ -341,9 +340,9 @@ pub struct RenamedScreen {
 
 // Here is a small program that shows how to use get this struct:
 
-fn example3() -> Result<(), ConnectionErrorOrX11Error> {
+fn example3() -> Result<(), Box<dyn Error>> {
     // Open the connection to the X server. Use the DISPLAY environment variable.
-    let (conn, screen_num) = XCBConnection::connect(None)?;
+    let (conn, screen_num) = x11rb::connect(None)?;
 
     // Get the screen #screen_num
     let screen = &conn.setup().roots[screen_num];
@@ -403,9 +402,9 @@ where B: Into<u16> {
 //
 // Finally, here is a small program to create a window of size 150x150 pixels, positioned at the top-left corner of the screen:
 
-fn example4() -> Result<(), ConnectionErrorOrX11Error> {
+fn example4() -> Result<(), Box<dyn Error>> {
     // Open the connection to the X server. Use the DISPLAY environment variable.
-    let (conn, screen_num) = XCBConnection::connect(None)?;
+    let (conn, screen_num) = x11rb::connect(None)?;
 
     // Get the screen #screen_num
     let screen = &conn.setup().roots[screen_num];
@@ -530,9 +529,9 @@ pub struct RenamedCreateGCAux {
 // We give now an example on how to allocate a graphic context that specifies that each drawing
 // function that uses it will draw in foreground with a black color.
 
-fn example5() -> Result<(), ConnectionErrorOrX11Error> {
+fn example5() -> Result<(), Box<dyn Error>> {
     // Open the connection to the X server. Use the DISPLAY environment variable.
-    let (conn, screen_num) = XCBConnection::connect(None)?;
+    let (conn, screen_num) = x11rb::connect(None)?;
 
     // Get the screen #screen_num
     let screen = &conn.setup().roots[screen_num];
@@ -688,7 +687,7 @@ fn example5() -> Result<(), ConnectionErrorOrX11Error> {
 // segments, two rectangles and two arcs. Remark that we use events for the first time, as an
 // introduction to the next section.
 
-fn example6() -> Result<(), ConnectionErrorOrX11Error> {
+fn example6() -> Result<(), Box<dyn Error>> {
     // geometric objects
     let points = [
         Point { x: 10, y: 10 },
@@ -716,7 +715,7 @@ fn example6() -> Result<(), ConnectionErrorOrX11Error> {
     ];
 
     // Open the connection to the X server. Use the DISPLAY environment variable.
-    let (conn, screen_num) = XCBConnection::connect(None)?;
+    let (conn, screen_num) = x11rb::connect(None)?;
 
     // Get the screen #screen_num
     let screen = &conn.setup().roots[screen_num];
@@ -804,7 +803,7 @@ fn example6() -> Result<(), ConnectionErrorOrX11Error> {
 //
 
 #[allow(unused)]
-fn example_expose<C: Connection>(conn: &C, depth: u8, screen: &Screen) -> Result<(), ConnectionErrorOrX11Error> {
+fn example_expose<C: Connection>(conn: &C, depth: u8, screen: &Screen) -> Result<(), Box<dyn Error>> {
     let values = CreateWindowAux::default()
         .event_mask(EventMask::Exposure);
     let win = conn.generate_id();
@@ -821,7 +820,7 @@ fn example_expose<C: Connection>(conn: &C, depth: u8, screen: &Screen) -> Result
 // If we wanted to register for several event types, we can logically "or" them, as follows:
 
 #[allow(unused)]
-fn example_or<C: Connection>(conn: &C, depth: u8, screen: &Screen) -> Result<(), ConnectionErrorOrX11Error> {
+fn example_or<C: Connection>(conn: &C, depth: u8, screen: &Screen) -> Result<(), Box<dyn Error>> {
     let values = CreateWindowAux::default()
         .event_mask(EventMask::Exposure | EventMask::ButtonPress);
     let win = conn.generate_id();
@@ -869,7 +868,7 @@ fn example_or<C: Connection>(conn: &C, depth: u8, screen: &Screen) -> Result<(),
 // `Expose` and `ButtonPress` events:
 
 #[allow(unused)]
-fn example_change_event_mask<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ConnectionErrorOrX11Error> {
+fn example_change_event_mask<C: Connection>(conn: &C, win: WINDOW) -> Result<(), Box<dyn Error>> {
     let values = ChangeWindowAttributesAux::default()
         .event_mask(EventMask::Exposure | EventMask::ButtonPress);
     conn.change_window_attributes(win, &values)?;
@@ -905,7 +904,7 @@ fn example_change_event_mask<C: Connection>(conn: &C, win: WINDOW) -> Result<(),
 // Xlib loop using only `XNextEvent`:
 
 #[allow(unused)]
-fn example_wait_for_event<C: Connection>(conn: &C) -> Result<(), ConnectionErrorOrX11Error> {
+fn example_wait_for_event<C: Connection>(conn: &C) -> Result<(), Box<dyn Error>> {
     loop {
         let event = conn.wait_for_event()?;
         match event.response_type() {
@@ -1191,9 +1190,9 @@ fn print_modifiers(mask: u16) {
     println!("Modifier mask: {:?}", active);
 }
 
-fn example7() -> Result<(), ConnectionErrorOrX11Error> {
+fn example7() -> Result<(), Box<dyn Error>> {
     // Open the connection to the X server. Use the DISPLAY environment variable.
-    let (conn, screen_num) = XCBConnection::connect(None)?;
+    let (conn, screen_num) = x11rb::connect(None)?;
 
     // Get the screen #screen_num
     let screen = &conn.setup().roots[screen_num];
@@ -1328,7 +1327,7 @@ fn example7() -> Result<(), ConnectionErrorOrX11Error> {
 
 #[allow(unused)]
 fn example_assign_font<C: Connection>(conn: &C, screen: &Screen, window: WINDOW, font: FONT)
--> Result<(), ConnectionErrorOrX11Error>
+-> Result<(), Box<dyn Error>>
 {
     let gc = conn.generate_id();
     let values = CreateGCAux::default()
@@ -1366,7 +1365,7 @@ fn example_assign_font<C: Connection>(conn: &C, screen: &Screen, window: WINDOW,
 // to me, so I changed it.)
 
 fn text_draw<C: Connection>(conn: &C, screen: &Screen, window: WINDOW, x1: i16, y1: i16, label: &str)
--> Result<(), ConnectionErrorOrX11Error>
+-> Result<(), Box<dyn Error>>
 {
     let gc = gc_font_get(conn, screen, window, "7x13")?;
 
@@ -1395,9 +1394,9 @@ fn gc_font_get<C: Connection>(conn: &C, screen: &Screen, window: WINDOW, font_na
     Ok(gc)
 }
 
-fn example8() -> Result<(), ConnectionErrorOrX11Error> {
+fn example8() -> Result<(), Box<dyn Error>> {
     // Open the connection to the X server. Use the DISPLAY environment variable.
-    let (conn, screen_num) = XCBConnection::connect(None)?;
+    let (conn, screen_num) = x11rb::connect(None)?;
 
     // Get the screen #screen_num
     let screen = &conn.setup().roots[screen_num];
@@ -1502,9 +1501,9 @@ fn example8() -> Result<(), ConnectionErrorOrX11Error> {
 // a window is `WM_NAME` (and `WM_ICON_NAME` for the iconified window) and its type is `STRING`.
 // Here is an example of utilization:
 
-fn example9() -> Result<(), ConnectionErrorOrX11Error> {
+fn example9() -> Result<(), Box<dyn Error>> {
     // Open the connection to the X server. Use the DISPLAY environment variable.
-    let (conn, screen_num) = XCBConnection::connect(None)?;
+    let (conn, screen_num) = x11rb::connect(None)?;
 
     // Get the screen #screen_num
     let screen = &conn.setup().roots[screen_num];
@@ -2203,12 +2202,12 @@ fn cursor_set<C: Connection>(conn: &C, screen: &Screen, window: WINDOW, cursor_i
     Ok(())
 }
 
-fn example10() -> Result<(), ConnectionErrorOrX11Error> {
+fn example10() -> Result<(), Box<dyn Error>> {
     const WIDTH: i16 = 300;
     const HEIGHT: i16 = 300;
 
     // Open the connection to the X server. Use the DISPLAY environment variable.
-    let (conn, screen_num) = XCBConnection::connect(None)?;
+    let (conn, screen_num) = x11rb::connect(None)?;
 
     // Get the screen #screen_num
     let screen = &conn.setup().roots[screen_num];
@@ -2310,7 +2309,7 @@ fn example10() -> Result<(), ConnectionErrorOrX11Error> {
 
 #[allow(unused)]
 fn example_get_screen_number() {
-    let (conn, screen_num) = XCBConnection::connect(None).unwrap();
+    let (conn, screen_num) = x11rb::connect(None).unwrap();
 
     // screen_num now contains the number of the default screen
 }
@@ -2333,7 +2332,7 @@ fn example_get_screen_number() {
 
 #[allow(unused)]
 fn example_get_screen_count() {
-    let (conn, screen_num) = XCBConnection::connect(None).unwrap();
+    let (conn, screen_num) = x11rb::connect(None).unwrap();
 
     let _screen_count = conn.setup().roots.len();
 
@@ -2393,8 +2392,8 @@ fn example_get_screen_count() {
 // You get the image byte order in the `xcb_setup_t` structure, with the function `xcb_get_setup`.
 // See the next example.
 
-fn example11() -> Result<(), ConnectionErrorOrX11Error> {
-    let (conn, _) = XCBConnection::connect(None)?;
+fn example11() -> Result<(), Box<dyn Error>> {
+    let (conn, _) = x11rb::connect(None)?;
     let setup = conn.setup();
 
     println!("Name of server vendor is {}", String::from_utf8_lossy(&setup.vendor));
@@ -2452,7 +2451,7 @@ fn example_get_screen<C: Connection>(conn: &C, index: usize) -> &Screen {
 #[allow(unused)]
 fn example_get_screen2<C: Connection>(conn: &C, index: usize) {
     // Open the connection to the X server. Use the DISPLAY environment variable.
-    let (conn, screen_num) = XCBConnection::connect(None).unwrap();
+    let (conn, screen_num) = x11rb::connect(None).unwrap();
     let _default_screen = &conn.setup().roots[screen_num];
 }
 
@@ -2464,7 +2463,7 @@ fn example_get_screen2<C: Connection>(conn: &C, index: usize) {
 #[allow(unused)]
 fn example_get_root<C: Connection>(conn: &C, index: usize) -> WINDOW{
     // Open the connection to the X server. Use the DISPLAY environment variable.
-    let (conn, screen_num) = XCBConnection::connect(None).unwrap();
+    let (conn, screen_num) = x11rb::connect(None).unwrap();
     let default_screen = &conn.setup().roots[screen_num];
     default_screen.root
 }
@@ -2485,7 +2484,7 @@ fn example_get_root<C: Connection>(conn: &C, index: usize) -> WINDOW{
 #[allow(unused)]
 fn example_get_visual() {
     // Open the connection to the X server. Use the DISPLAY environment variable.
-    let (conn, screen_num) = XCBConnection::connect(None).unwrap();
+    let (conn, screen_num) = x11rb::connect(None).unwrap();
     let screen = &conn.setup().roots[screen_num];
     let _root_visual = screen.root_visual;
 }
@@ -2498,7 +2497,7 @@ fn example_get_visual() {
 #[allow(unused)]
 fn example_get_visual2<C: Connection>(conn: &C, screen_num: usize) {
     // Open the connection to the X server. Use the DISPLAY environment variable.
-    let (conn, screen_num) = XCBConnection::connect(None).unwrap();
+    let (conn, screen_num) = x11rb::connect(None).unwrap();
     let screen = &conn.setup().roots[screen_num];
 
     for depth in &screen.allowed_depths {

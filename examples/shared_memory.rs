@@ -113,6 +113,7 @@ fn receive_fd<C: Connection>(conn: &C, screen_num: usize) -> Result<(), Connecti
 
 fn main() {
     let file = make_file().expect("Failed to create temporary file for FD passing");
+    // FIXME: Use x11rb::connect() once RustConnection supports FD passing
     match XCBConnection::connect(None) {
         Err(err) => eprintln!("Failed to connect to the X11 server: {}", err),
         Ok((conn, screen_num)) => {
