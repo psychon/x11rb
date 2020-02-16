@@ -143,11 +143,13 @@ mod test {
         }
 
         fn extension_information(&self, _extension_name: &'static str) -> Option<QueryExtensionReply> {
+            #[allow(trivial_casts, clippy::unnecessary_cast)]
+            let present = true as _;
             self.0.as_ref().map(|_| QueryExtensionReply {
                 response_type: 1,
                 sequence: 0,
                 length: 0,
-                present: true,
+                present,
                 major_opcode: 127,
                 first_event: 0,
                 first_error: 0,
