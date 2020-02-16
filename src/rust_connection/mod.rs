@@ -1,6 +1,6 @@
 //! A pure-rust implementation of a connection to an X11 server.
 
-use std::io::IoSlice;
+use std::io::{Read, Write, IoSlice};
 use std::error::Error;
 use std::convert::{TryFrom, TryInto};
 use std::sync::Mutex;
@@ -21,15 +21,15 @@ mod stream;
 
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
-pub struct RustConnection {
-    inner: Mutex<inner::ConnectionInner<stream::Stream>>,
+pub struct RustConnection<Stream: Read + Write = stream::Stream> {
+    inner: Mutex<inner::ConnectionInner<Stream>>,
     id_allocator: Mutex<id_allocator::IDAllocator>,
     setup: Setup,
     extension_information: ExtensionInformation,
     maximum_request_bytes: Mutex<Option<usize>>,
 }
 
-impl RustConnection {
+impl RustConnection<stream::Stream> {
     /// Establish a new connection.
     ///
     /// If no `dpy_name` is provided, the value from `$DISPLAY` is used.
@@ -61,7 +61,9 @@ impl RustConnection {
         };
         Ok((conn, screen))
     }
+}
 
+impl<Stream: Read + Write> RustConnection<Stream> {
     fn send_request(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>, kind: RequestKind) -> Result<SequenceNumber, ConnectionError> {
         if !fds.is_empty() {
             return Err(ConnectionError::FDPassingFailed);
@@ -70,7 +72,7 @@ impl RustConnection {
     }
 }
 
-impl RequestConnection for RustConnection {
+impl<S: Read + Write> RequestConnection for RustConnection<S> {
     fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<Cookie<Self, R>, ConnectionError>
         where R: TryFrom<Buffer, Error=ParseError>
     {
@@ -149,7 +151,7 @@ impl RequestConnection for RustConnection {
     }
 }
 
-impl Connection for RustConnection {
+impl<Stream: Read + Write> Connection for RustConnection<Stream> {
     fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
         Ok(self.inner.lock().unwrap().wait_for_event().map_err(|_| ConnectionError::UnknownError)?)
     }
