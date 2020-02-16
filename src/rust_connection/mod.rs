@@ -3,7 +3,8 @@
 use std::io::IoSlice;
 use std::error::Error;
 use std::convert::{TryFrom, TryInto};
-use std::cell::{Cell, RefCell};
+use std::sync::Mutex;
+use std::cell::Cell;
 
 use crate::utils::{Buffer, RawFdContainer};
 use crate::connection::{RequestConnection, Connection, SequenceNumber, RequestKind, DiscardMode};
@@ -22,8 +23,8 @@ mod stream;
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
 pub struct RustConnection {
-    inner: RefCell<inner::ConnectionInner<stream::Stream>>,
-    id_allocator: RefCell<id_allocator::IDAllocator>,
+    inner: Mutex<inner::ConnectionInner<stream::Stream>>,
+    id_allocator: Mutex<id_allocator::IDAllocator>,
     setup: Setup,
     extension_information: ExtensionInformation,
     maximum_request_bytes: Cell<Option<usize>>,
@@ -53,8 +54,8 @@ impl RustConnection {
         // Success! Set up our state
         let allocator = id_allocator::IDAllocator::new(setup.resource_id_base, setup.resource_id_mask);
         let conn = RustConnection {
-            inner: RefCell::new(inner),
-            id_allocator: RefCell::new(allocator),
+            inner: Mutex::new(inner),
+            id_allocator: Mutex::new(allocator),
             setup,
             extension_information: Default::default(),
             maximum_request_bytes: Cell::new(None),
@@ -66,7 +67,7 @@ impl RustConnection {
         if !fds.is_empty() {
             return Err(ConnectionError::FDPassingFailed);
         }
-        self.inner.borrow_mut().send_request(bufs, kind).or(Err(ConnectionError::UnknownError))
+        self.inner.lock().unwrap().send_request(bufs, kind).or(Err(ConnectionError::UnknownError))
     }
 }
 
@@ -98,7 +99,7 @@ impl RequestConnection for RustConnection {
     }
 
     fn discard_reply(&self, sequence: SequenceNumber, _kind: RequestKind, mode: DiscardMode) {
-        self.inner.borrow_mut().discard_reply(sequence, mode);
+        self.inner.lock().unwrap().discard_reply(sequence, mode);
     }
 
     fn extension_information(&self, extension_name: &'static str) -> Option<QueryExtensionReply> {
@@ -106,7 +107,7 @@ impl RequestConnection for RustConnection {
     }
 
     fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
-        let reply = self.inner.borrow_mut().wait_for_reply_or_error(sequence).map_err(|_| ConnectionError::UnknownError)?;
+        let reply = self.inner.lock().unwrap().wait_for_reply_or_error(sequence).map_err(|_| ConnectionError::UnknownError)?;
         if reply[0] == 0 {
             let error: GenericError = reply.try_into()?;
             Err(error.into())
@@ -116,11 +117,11 @@ impl RequestConnection for RustConnection {
     }
 
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError> {
-        Ok(self.inner.borrow_mut().wait_for_reply(sequence).map_err(|_| ConnectionError::UnknownError)?)
+        Ok(self.inner.lock().unwrap().wait_for_reply(sequence).map_err(|_| ConnectionError::UnknownError)?)
     }
 
     fn check_for_error(&self, sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError> {
-        let reply = self.inner.borrow_mut().check_for_reply_or_error(sequence).map_err(|_| ConnectionError::UnknownError)?;
+        let reply = self.inner.lock().unwrap().check_for_reply_or_error(sequence).map_err(|_| ConnectionError::UnknownError)?;
         Ok(reply.and_then(|r| r.try_into().ok()))
     }
 
@@ -150,11 +151,11 @@ impl RequestConnection for RustConnection {
 
 impl Connection for RustConnection {
     fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
-        Ok(self.inner.borrow_mut().wait_for_event().map_err(|_| ConnectionError::UnknownError)?)
+        Ok(self.inner.lock().unwrap().wait_for_event().map_err(|_| ConnectionError::UnknownError)?)
     }
 
     fn poll_for_event(&self) -> Result<Option<GenericEvent>, ConnectionError> {
-        Ok(self.inner.borrow_mut().poll_for_event().map_err(|_| ConnectionError::UnknownError)?)
+        Ok(self.inner.lock().unwrap().poll_for_event().map_err(|_| ConnectionError::UnknownError)?)
     }
 
     fn flush(&self) {
@@ -166,6 +167,6 @@ impl Connection for RustConnection {
     }
 
     fn generate_id(&self) -> u32 {
-        self.id_allocator.borrow_mut().generate_id(self).expect("Available XIDs exhausted")
+        self.id_allocator.lock().unwrap().generate_id(self).expect("Available XIDs exhausted")
     }
 }
