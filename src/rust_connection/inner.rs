@@ -118,21 +118,27 @@ where Stream: Read + Write
         Ok(Buffer::from_vec(buffer))
     }
 
+    fn send_sync(&mut self) -> Result<(), Box<dyn Error>> {
+        let length = 1u16.to_ne_bytes();
+        let written = self.stream.write(&[GET_INPUT_FOCUS_REQUEST, 0 /* pad */, length[0], length[1]])?;
+        assert_eq!(written, 4);
+
+        self.last_sequence_written += 1;
+        self.next_reply_expected = self.last_sequence_written;
+        self.sent_requests.push_back(SentRequest {
+            seqno: self.last_sequence_written,
+            kind: RequestKind::HasResponse,
+            discard_mode: Some(DiscardMode::DiscardReplyAndError),
+        });
+
+        Ok(())
+    }
+
     pub(crate) fn send_request(&mut self, bufs: &[IoSlice], kind: RequestKind) -> Result<SequenceNumber, Box<dyn Error>> {
-        if self.next_reply_expected + SequenceNumber::from(u16::max_value()) >= self.last_sequence_written {
+        if self.next_reply_expected + SequenceNumber::from(u16::max_value()) <= self.last_sequence_written {
             // Send a GetInputFocus request so that we can reliably reconstruct sequence numbers in
             // received packets.
-            let length = 1u16.to_ne_bytes();
-            let written = self.stream.write(&[GET_INPUT_FOCUS_REQUEST, 0 /* pad */, length[0], length[1]])?;
-            assert_eq!(written, 4);
-
-            self.last_sequence_written += 1;
-            self.next_reply_expected = self.last_sequence_written;
-            self.sent_requests.push_back(SentRequest {
-                seqno: self.last_sequence_written,
-                kind: RequestKind::HasResponse,
-                discard_mode: Some(DiscardMode::DiscardReplyAndError),
-            });
+            self.send_sync()?;
         }
 
         self.last_sequence_written += 1;
