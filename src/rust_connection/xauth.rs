@@ -3,8 +3,30 @@
 use std::io::{Read, Error, ErrorKind};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub(crate) enum Family {
+    Local,
+    // Wild, <- this seems to be encoded as 0x10000, which does not fit a u16
+    Netname,
+    Krb5Principal,
+    LocalHost,
+    Unknown(u16),
+}
+
+impl From<u16> for Family {
+    fn from(value: u16) -> Self {
+        match value {
+            256 => Family::Local,
+            254 => Family::Netname,
+            253 => Family::Krb5Principal,
+            252 => Family::LocalHost,
+            value => Family::Unknown(value),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) struct AuthEntry {
-    family: u16,
+    family: Family,
     address: Vec<u8>,
     number: Vec<u8>,
     name: Vec<u8>,
@@ -29,7 +51,7 @@ pub(crate) fn read_entry<R: Read>(read: &mut R) -> Result<Option<AuthEntry>, Err
         Ok(family) => family,
         Err(e) if e.kind() == ErrorKind::UnexpectedEof => return Ok(None),
         Err(e) => return Err(e),
-    };
+    }.into();
     let address = read_string(read)?;
     let number = read_string(read)?;
     let name = read_string(read)?;
@@ -40,7 +62,7 @@ pub(crate) fn read_entry<R: Read>(read: &mut R) -> Result<Option<AuthEntry>, Err
 #[cfg(test)]
 mod test {
     use std::io::Cursor;
-    use super::{AuthEntry, read_entry};
+    use super::{AuthEntry, read_entry, Family};
 
     #[test]
     fn test_read() {
@@ -53,7 +75,7 @@ mod test {
         let mut cursor = Cursor::new(&data[..]);
         let entry = read_entry(&mut cursor).unwrap();
         assert_eq!(entry, Some(AuthEntry {
-            family: 0x100,
+            family: Family::Local,
             address: "ZweiLED".as_bytes().to_vec(),
             number: "1".as_bytes().to_vec(),
             name: "bar".as_bytes().to_vec(),
@@ -76,14 +98,14 @@ mod test {
         let mut cursor = Cursor::new(&data[..]);
         for expected in &[
            AuthEntry {
-               family: 0x100,
+               family: Family::Local,
                address: "ZweiLED".as_bytes().to_vec(),
                number: "1".as_bytes().to_vec(),
                name: "bar".as_bytes().to_vec(),
                data: u32::to_be_bytes(0xdeadbeef).to_vec(),
            },
            AuthEntry {
-               family: 0,
+               family: Family::Unknown(0), // No idea why this is Unknown
                address: vec![1, 2, 3, 4],
                number: "2".as_bytes().to_vec(),
                name: "baz".as_bytes().to_vec(),
