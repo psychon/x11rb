@@ -41,12 +41,24 @@ impl RustConnection<stream::Stream> {
         // Establish connection
         let protocol = parsed_display.protocol.as_ref().map(|s| &**s);
         let stream = stream::Stream::connect(&*parsed_display.host, protocol, parsed_display.display)?;
+        let screen = parsed_display.screen.into();
 
-        // Handle X11 connection
-        let (inner, setup) = inner::ConnectionInner::connect(stream, Vec::new(), Vec::new())?;
+        Ok((Self::connect_to_stream(stream, screen)?, screen))
+    }
+}
+
+impl<Stream: Read + Write> RustConnection<Stream> {
+    /// Establish a new connection to the given stream.
+    pub fn connect_to_stream(stream: stream::Stream, screen: usize) -> Result<RustConnection, Box<dyn Error>> {
+        Self::connect_to_stream_with_auth_info(stream, screen, Vec::new(), Vec::new())
+    }
+
+    /// Establish a new connection to the given stream.
+    pub fn connect_to_stream_with_auth_info(stream: stream::Stream, screen: usize, auth_name: Vec<u8>, auth_data: Vec<u8>)
+    -> Result<RustConnection, Box<dyn Error>> {
+        let (inner, setup) = inner::ConnectionInner::connect(stream, auth_name, auth_data)?;
 
         // Check that we got a valid screen number
-        let screen = parsed_display.screen.into();
         if screen >= setup.roots.len() {
             return Err(Box::new(ConnectionError::InvalidScreen));
         }
@@ -60,11 +72,9 @@ impl RustConnection<stream::Stream> {
             extension_information: Default::default(),
             maximum_request_bytes: Mutex::new(None),
         };
-        Ok((conn, screen))
+        Ok(conn)
     }
-}
 
-impl<Stream: Read + Write> RustConnection<Stream> {
     fn send_request(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>, kind: RequestKind) -> Result<SequenceNumber, ConnectionError> {
         if !fds.is_empty() {
             return Err(ConnectionError::FDPassingFailed);
