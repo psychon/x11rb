@@ -18,6 +18,7 @@ mod inner;
 mod id_allocator;
 mod parse_display;
 mod stream;
+mod xauth;
 
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
