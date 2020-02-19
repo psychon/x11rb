@@ -1,6 +1,8 @@
 //! Helpers for working with `~/.Xauthority`.
 
 use std::io::{Read, Error, ErrorKind};
+use std::path::PathBuf;
+use std::env::var_os;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) enum Family {
@@ -57,6 +59,18 @@ pub(crate) fn read_entry<R: Read>(read: &mut R) -> Result<Option<AuthEntry>, Err
     let name = read_string(read)?;
     let data = read_string(read)?;
     Ok(Some(AuthEntry { family, address, number, name, data }))
+}
+
+pub(crate) fn get_xauthority_file_name() -> Option<PathBuf> {
+    if let Some(name) = var_os("XAUTHORITY") {
+        return Some(name.into());
+    }
+    var_os("HOME").map(|prefix| {
+        let mut result = PathBuf::new();
+        result.push(prefix);
+        result.push(".Xauthority");
+        result
+    })
 }
 
 #[cfg(test)]
