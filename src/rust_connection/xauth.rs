@@ -114,9 +114,9 @@ mod test {
         let entry = read_entry(&mut cursor).unwrap();
         assert_eq!(entry, Some(AuthEntry {
             family: Family::Local,
-            address: "ZweiLED".as_bytes().to_vec(),
-            number: "1".as_bytes().to_vec(),
-            name: "bar".as_bytes().to_vec(),
+            address: b"ZweiLED".to_vec(),
+            number: b"1".to_vec(),
+            name: b"bar".to_vec(),
             data: u32::to_be_bytes(0xdead_beef).to_vec(),
         }));
     }
@@ -137,16 +137,16 @@ mod test {
         for expected in &[
            AuthEntry {
                family: Family::Local,
-               address: "ZweiLED".as_bytes().to_vec(),
-               number: "1".as_bytes().to_vec(),
-               name: "bar".as_bytes().to_vec(),
+               address: b"ZweiLED".to_vec(),
+               number: b"1".to_vec(),
+               name: b"bar".to_vec(),
                data: u32::to_be_bytes(0xdead_beef).to_vec(),
            },
            AuthEntry {
                family: Family::Unknown(0), // No idea why this is Unknown
                address: vec![1, 2, 3, 4],
-               number: "2".as_bytes().to_vec(),
-               name: "baz".as_bytes().to_vec(),
+               number: b"2".to_vec(),
+               name: b"baz".to_vec(),
                data: u32::to_be_bytes(0xaabb_ccdd).to_vec(),
            },
         ] {
