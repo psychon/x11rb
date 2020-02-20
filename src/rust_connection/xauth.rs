@@ -77,7 +77,9 @@ fn get_xauthority_file_name() -> Option<PathBuf> {
     })
 }
 
-pub(crate) fn get_auth(display: u16) -> Result<Option<(Vec<u8>, Vec<u8>)>, Error> {
+pub(crate) type AuthInfo = (Vec<u8>, Vec<u8>);
+
+pub(crate) fn get_auth(display: u16) -> Result<Option<AuthInfo>, Error> {
     let file = match get_xauthority_file_name() {
         None => return Ok(None),
         Some(file) => file
@@ -115,7 +117,7 @@ mod test {
             address: "ZweiLED".as_bytes().to_vec(),
             number: "1".as_bytes().to_vec(),
             name: "bar".as_bytes().to_vec(),
-            data: u32::to_be_bytes(0xdeadbeef).to_vec(),
+            data: u32::to_be_bytes(0xdead_beef).to_vec(),
         }));
     }
 
@@ -138,14 +140,14 @@ mod test {
                address: "ZweiLED".as_bytes().to_vec(),
                number: "1".as_bytes().to_vec(),
                name: "bar".as_bytes().to_vec(),
-               data: u32::to_be_bytes(0xdeadbeef).to_vec(),
+               data: u32::to_be_bytes(0xdead_beef).to_vec(),
            },
            AuthEntry {
                family: Family::Unknown(0), // No idea why this is Unknown
                address: vec![1, 2, 3, 4],
                number: "2".as_bytes().to_vec(),
                name: "baz".as_bytes().to_vec(),
-               data: u32::to_be_bytes(0xaabbccdd).to_vec(),
+               data: u32::to_be_bytes(0xaabb_ccdd).to_vec(),
            },
         ] {
             let entry = read_entry(&mut cursor).unwrap();
