@@ -55,7 +55,7 @@ fn read_string<R: Read>(read: &mut R) -> Result<Vec<u8>, Error> {
 fn read_entry<R: Read>(read: &mut R) -> Result<Option<AuthEntry>, Error> {
     let family = match read_u16(read) {
         Ok(family) => family,
-        Err(e) if e.kind() == ErrorKind::UnexpectedEof => return Ok(None),
+        Err(ref e) if e.kind() == ErrorKind::UnexpectedEof => return Ok(None),
         Err(e) => return Err(e),
     }.into();
     let address = read_string(read)?;
