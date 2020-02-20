@@ -1,13 +1,16 @@
 //! Helpers for working with `~/.Xauthority`.
 
-use std::io::{Read, Error, ErrorKind};
+use std::io::{Read, Error, ErrorKind, BufReader};
 use std::path::PathBuf;
 use std::env::var_os;
+use std::fs::File;
+
+const MIT_MAGIC_COOKIE_1: &[u8] = b"MIT-MAGIC-COOKIE-1";
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub(crate) enum Family {
+    Wild,
     Local,
-    // Wild, <- this seems to be encoded as 0x10000, which does not fit a u16
     Netname,
     Krb5Principal,
     LocalHost,
@@ -17,6 +20,7 @@ pub(crate) enum Family {
 impl From<u16> for Family {
     fn from(value: u16) -> Self {
         match value {
+            65535 => Family::Wild,
             256 => Family::Local,
             254 => Family::Netname,
             253 => Family::Krb5Principal,
@@ -48,7 +52,7 @@ fn read_string<R: Read>(read: &mut R) -> Result<Vec<u8>, Error> {
     Ok(result)
 }
 
-pub(crate) fn read_entry<R: Read>(read: &mut R) -> Result<Option<AuthEntry>, Error> {
+fn read_entry<R: Read>(read: &mut R) -> Result<Option<AuthEntry>, Error> {
     let family = match read_u16(read) {
         Ok(family) => family,
         Err(e) if e.kind() == ErrorKind::UnexpectedEof => return Ok(None),
@@ -61,7 +65,7 @@ pub(crate) fn read_entry<R: Read>(read: &mut R) -> Result<Option<AuthEntry>, Err
     Ok(Some(AuthEntry { family, address, number, name, data }))
 }
 
-pub(crate) fn get_xauthority_file_name() -> Option<PathBuf> {
+fn get_xauthority_file_name() -> Option<PathBuf> {
     if let Some(name) = var_os("XAUTHORITY") {
         return Some(name.into());
     }
@@ -71,6 +75,24 @@ pub(crate) fn get_xauthority_file_name() -> Option<PathBuf> {
         result.push(".Xauthority");
         result
     })
+}
+
+pub(crate) fn get_auth(display: u16) -> Result<Option<(Vec<u8>, Vec<u8>)>, Error> {
+    let file = match get_xauthority_file_name() {
+        None => return Ok(None),
+        Some(file) => file
+    };
+    let mut file = BufReader::new(File::open(file)?);
+
+    let display = display.to_string();
+    let display = display.as_bytes();
+    while let Some(entry) = read_entry(&mut file)? {
+        // FIXME: Implement proper matching
+        if entry.number == &display[..] && entry.name == MIT_MAGIC_COOKIE_1 {
+            return Ok(Some((entry.name, entry.data)));
+        }
+    }
+    Ok(None)
 }
 
 #[cfg(test)]
