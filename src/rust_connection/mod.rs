@@ -43,7 +43,10 @@ impl RustConnection<stream::Stream> {
         let stream = stream::Stream::connect(&*parsed_display.host, protocol, parsed_display.display)?;
         let screen = parsed_display.screen.into();
 
-        Ok((Self::connect_to_stream(stream, screen)?, screen))
+        let (auth_name, auth_data) = xauth::get_auth(parsed_display.display)?
+            .unwrap_or_else(|| (Vec::new(), Vec::new()));
+
+        Ok((Self::connect_to_stream_with_auth_info(stream, screen, auth_name, auth_data)?, screen))
     }
 }
 
