@@ -3,7 +3,6 @@
 use std::io::{IoSlice, Write, Read};
 use std::error::Error;
 use std::convert::TryInto;
-use std::iter::repeat;
 use std::collections::VecDeque;
 
 use crate::utils::Buffer;
@@ -85,10 +84,13 @@ where Stream: Read + Write
     }
 
     fn read_setup(stream: &mut Stream) -> Result<Setup, Box<dyn Error>> {
-        let mut setup: Vec<_> = repeat(0).take(8).collect();
+        let mut setup = vec![0; 8];
         stream.read_exact(&mut setup)?;
-        let length = u16::from_ne_bytes([setup[6], setup[7]]);
-        setup.extend(repeat(0).take(length as usize * 4));
+        let extra_length = usize::from(u16::from_ne_bytes([setup[6], setup[7]])) * 4;
+        // Use `Vec::reserve_exact` because this will be the final
+        // length of the vector.
+        setup.reserve_exact(extra_length);
+        setup.resize(8 + extra_length, 0);
         stream.read_exact(&mut setup[8..])?;
         match setup[0] {
             // 0 is SetupFailed
@@ -103,7 +105,7 @@ where Stream: Read + Write
     }
 
     fn read_packet(&mut self) -> Result<Buffer, Box<dyn Error>> {
-        let mut buffer: Vec<_> = repeat(0).take(32).collect();
+        let mut buffer = vec![0; 32];
         self.stream.read_exact(&mut buffer)?;
         let extra_length = match buffer[0] {
             1 => { // reply
@@ -111,8 +113,11 @@ where Stream: Read + Write
             },
             35 | 163 => panic!("XGE events not yet supported"),
             _ => 0
-        };
-        buffer.extend(repeat(0).take(extra_length as usize));
+        } as usize;
+        // Use `Vec::reserve_exact` because this will be the final
+        // length of the vector.
+        buffer.reserve_exact(extra_length);
+        buffer.resize(32 + extra_length, 0);
         self.stream.read_exact(&mut buffer[32..])?;
 
         Ok(Buffer::from_vec(buffer))
