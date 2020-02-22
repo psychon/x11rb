@@ -42,13 +42,12 @@
 //! For example, here is how to create a new window with x11rb:
 //! ```no_run
 //! use x11rb::connection::Connection;
-//! use x11rb::xcb_ffi::XCBConnection;
 //! use x11rb::generated::xproto::*;
 //! use x11rb::errors::ConnectionErrorOrX11Error;
 //! use x11rb::COPY_DEPTH_FROM_PARENT;
 //!
-//! fn main() -> Result<(), ConnectionErrorOrX11Error> {
-//!     let (conn, screen_num) = XCBConnection::connect(None)?;
+//! fn main() -> Result<(), Box<dyn std::error::Error>> {
+//!     let (conn, screen_num) = x11rb::connect(None)?;
 //!     let screen = &conn.setup().roots[screen_num];
 //!     let win_id = conn.generate_id();
 //!     conn.create_window(COPY_DEPTH_FROM_PARENT, win_id, screen.root, 0, 0, 100, 100, 0, WindowClass::InputOutput,
