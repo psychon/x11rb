@@ -43,7 +43,8 @@ impl RustConnection<stream::Stream> {
         let stream = stream::Stream::connect(&*parsed_display.host, protocol, parsed_display.display)?;
         let screen = parsed_display.screen.into();
 
-        let (auth_name, auth_data) = xauth::get_auth(parsed_display.display)
+        // FIXME proper arguments
+        let (auth_name, auth_data) = xauth::get_auth(&xauth::Family::Wild, &[], parsed_display.display)
             // Ignore all errors while determining auth; instead we just try without auth info.
             .unwrap_or(None)
             .unwrap_or_else(|| (Vec::new(), Vec::new()));

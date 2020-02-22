@@ -217,25 +217,133 @@ pub(crate) type AuthInfo = (Vec<u8>, Vec<u8>);
 
 /// Get the authentication information necessary for connecting to the given display.
 ///
+/// - `family` is the protocol family that is used for connecting; this describes how to interpret
+///   the `address`.
+/// - `address` is the raw bytes describing the address that is being connected to.
 /// - `display` is the display number.
-/// - TODO: A proper implementation needs more arguments.
 ///
 /// If successful, this function returns that can be written to the X11 server as authorization
 /// protocol name and data, respectively.
-pub(crate) fn get_auth(display: u16) -> Result<Option<AuthInfo>, Error> {
+pub(crate) fn get_auth(family: &Family, address: &[u8], display: u16) -> Result<Option<AuthInfo>, Error> {
+    match file::XAuthorityEntries::new()? {
+        None => Ok(None),
+        Some(entries) => get_auth_impl(entries, family, address, display),
+    }
+}
+
+pub(crate) fn get_auth_impl(entries: impl Iterator<Item=Result<AuthEntry, Error>>, family: &Family, address: &[u8], display: u16) -> Result<Option<AuthInfo>, Error> {
+    fn address_matches((family1, address1): (&Family, &[u8]), (family2, address2): (&Family, &[u8])) -> bool {
+        if *family1 == Family::Wild || *family2 == Family::Wild {
+            true
+        } else if family1 != family2 {
+            false
+        } else {
+            address1 == address2
+        }
+    }
+
+    fn display_number_matches(entry_number: &[u8], display_number: &[u8]) -> bool {
+        debug_assert!(!display_number.is_empty()); // This case is not handled here and would be a match
+        entry_number.is_empty() || entry_number == display_number
+    }
+
     let display = display.to_string();
     let display = display.as_bytes();
 
-    let entries = match file::XAuthorityEntries::new()? {
-        None => return Ok(None),
-        Some(entries) => entries,
-    };
     for entry in entries {
         let entry = entry?;
-        // FIXME: Implement proper matching
-        if entry.number == &display[..] && entry.name == MIT_MAGIC_COOKIE_1 {
+
+        if address_matches((family, address), (&entry.family, &entry.address)) &&
+                display_number_matches(&entry.number, &display[..]) &&
+                entry.name == MIT_MAGIC_COOKIE_1 {
             return Ok(Some((entry.name, entry.data)));
         }
     }
     Ok(None)
+}
+
+#[cfg(test)]
+mod test {
+    use super::{AuthEntry, Family, get_auth_impl, MIT_MAGIC_COOKIE_1};
+
+    // Call the given function on a matching auth entry. The function can change the entry.
+    // Afterwards, it should still be a match.
+    fn expect_match<F>(f: F) where F: FnOnce(&mut AuthEntry) {
+        let mut entry = AuthEntry {
+            family: Family::Local,
+            address: b"whatever".to_vec(),
+            number: b"42".to_vec(),
+            name: MIT_MAGIC_COOKIE_1.to_vec(),
+            data: b"1234".to_vec(),
+        };
+        f(&mut entry);
+        let entries = vec![Ok(entry)];
+        assert_eq!(get_auth_impl(entries.into_iter(), &Family::Local, b"whatever", 42).unwrap().unwrap(),
+                   (MIT_MAGIC_COOKIE_1.to_vec(), b"1234".to_vec()));
+    }
+
+    // Call the given function on a matching auth entry. The function can change the entry.
+    // Afterwards, it should no longer match.
+    fn expect_mismatch<F>(f: F) where F: FnOnce(&mut AuthEntry) {
+        let mut entry = AuthEntry {
+            family: Family::Local,
+            address: b"whatever".to_vec(),
+            number: b"42".to_vec(),
+            name: MIT_MAGIC_COOKIE_1.to_vec(),
+            data: b"1234".to_vec(),
+        };
+        f(&mut entry);
+        let entries = vec![Ok(entry)];
+        assert_eq!(get_auth_impl(entries.into_iter(), &Family::Local, b"whatever", 42).unwrap(), None);
+    }
+
+    #[test]
+    fn direct_match() {
+        // This checks that an auth entry where all members match, really matches
+        expect_match(|_| { });
+    }
+
+    #[test]
+    fn display_wildcard() {
+        expect_match(|entry| entry.number = vec![]);
+    }
+
+    #[test]
+    fn address_wildcard_match1() {
+        expect_match(|entry| entry.family = Family::Wild);
+    }
+
+    #[test]
+    fn address_wildcard_match2() {
+        let entry = AuthEntry {
+            family: Family::Local,
+            address: b"whatever".to_vec(),
+            number: b"42".to_vec(),
+            name: MIT_MAGIC_COOKIE_1.to_vec(),
+            data: b"1234".to_vec(),
+        };
+        let entries = vec![Ok(entry)];
+        assert_eq!(get_auth_impl(entries.into_iter(), &Family::Wild, &[], 42).unwrap().unwrap(),
+                   (MIT_MAGIC_COOKIE_1.to_vec(), b"1234".to_vec()));
+    }
+
+    #[test]
+    fn family_mismatch() {
+        expect_mismatch(|entry| entry.family = Family::Krb5Principal);
+    }
+
+    #[test]
+    fn address_mismatch() {
+        expect_mismatch(|entry| entry.address = b"something else".to_vec());
+    }
+
+    #[test]
+    fn number_mismatch() {
+        expect_mismatch(|entry| entry.number = b"1337".to_vec());
+    }
+
+    #[test]
+    fn protocol_mismatch() {
+        expect_mismatch(|entry| entry.name = b"XDM-AUTHORIZATION-1".to_vec());
+    }
 }
