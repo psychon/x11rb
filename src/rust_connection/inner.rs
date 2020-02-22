@@ -268,21 +268,22 @@ where Stream: Read + Write
         Ok(None)
     }
 
-    pub(crate) fn check_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Result<Option<Buffer>, Box<dyn Error>> {
+    pub(crate) fn poll_check_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Result<Option<Option<Buffer>>, Box<dyn Error>> {
         if self.next_reply_expected < sequence {
             self.send_sync()?;
         }
 
-        loop {
-            for (index, (seqno, _packet)) in self.pending_replies.iter().enumerate() {
-                if *seqno == sequence {
-                    return Ok(Some(self.pending_replies.remove(index).unwrap().1))
-                }
+        for (index, (seqno, _packet)) in self.pending_replies.iter().enumerate() {
+            if *seqno == sequence {
+                return Ok(Some(Some(self.pending_replies.remove(index).unwrap().1)))
             }
-            if self.last_sequence_read > sequence {
-                return Ok(None);
-            }
-            self.read_packet_and_enqueue()?;
+        }
+        if self.last_sequence_read > sequence {
+            // We can be sure that there will be no reply/error
+            Ok(Some(None))
+        } else {
+            // Hm, we cannot be sure yet. Perhaps there will still be a reply/error
+            Ok(None)
         }
     }
 

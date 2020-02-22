@@ -150,8 +150,13 @@ impl<S: Read + Write> RequestConnection for RustConnection<S> {
     }
 
     fn check_for_error(&self, sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError> {
-        let reply = self.inner.lock().unwrap().check_for_reply_or_error(sequence).map_err(|_| ConnectionError::UnknownError)?;
-        Ok(reply.and_then(|r| r.try_into().ok()))
+        let mut inner = self.inner.lock().unwrap();
+        loop {
+            if let Some(reply) = inner.poll_check_for_reply_or_error(sequence).map_err(|_| ConnectionError::UnknownError)? {
+                return Ok(reply.and_then(|r| r.try_into().ok()));
+            }
+            inner.read_packet_and_enqueue().map_err(|_| ConnectionError::UnknownError)?;
+        }
     }
 
     fn wait_for_reply_with_fds(&self, _sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
