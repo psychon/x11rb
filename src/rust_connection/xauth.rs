@@ -5,10 +5,15 @@ use std::path::PathBuf;
 use std::env::var_os;
 use std::fs::File;
 
+use crate::generated::xproto::Family as X11Family;
+
 const MIT_MAGIC_COOKIE_1: &[u8] = b"MIT-MAGIC-COOKIE-1";
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum Family {
+    // Per a comment in xcb-proto/src/xproto.xml on the "Family" enum:
+    //    also used and extended for Xau authentication
+    X11Family(X11Family),
     Wild,
     Local,
     Netname,
@@ -19,6 +24,20 @@ pub(crate) enum Family {
 
 impl From<u16> for Family {
     fn from(value: u16) -> Self {
+        let x11family = {
+            match value {
+                0 => Some(X11Family::Internet),
+                1 => Some(X11Family::DECnet),
+                2 => Some(X11Family::Chaos),
+                5 => Some(X11Family::ServerInterpreted),
+                6 => Some(X11Family::Internet6),
+                _ => None,
+            }
+        };
+        if let Some(x11family) = x11family {
+            assert_eq!(value, x11family.into());
+            return Family::X11Family(x11family);
+        }
         match value {
             65535 => Family::Wild,
             256 => Family::Local,
@@ -30,7 +49,7 @@ impl From<u16> for Family {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct AuthEntry {
     family: Family,
     address: Vec<u8>,
@@ -100,7 +119,7 @@ pub(crate) fn get_auth(display: u16) -> Result<Option<AuthInfo>, Error> {
 #[cfg(test)]
 mod test {
     use std::io::Cursor;
-    use super::{AuthEntry, read_entry, Family};
+    use super::{AuthEntry, read_entry, Family, X11Family};
 
     #[test]
     fn test_read() {
@@ -143,7 +162,7 @@ mod test {
                data: u32::to_be_bytes(0xdead_beef).to_vec(),
            },
            AuthEntry {
-               family: Family::Unknown(0), // No idea why this is Unknown
+               family: Family::X11Family(X11Family::Internet),
                address: vec![1, 2, 3, 4],
                number: b"2".to_vec(),
                name: b"baz".to_vec(),
