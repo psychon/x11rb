@@ -14,13 +14,20 @@ mod unsafe_code {
     use std::ops::{Deref, Index};
     use std::slice::{from_raw_parts, SliceIndex};
     use std::mem::forget;
+    use std::ptr::NonNull;
     use libc::free;
 
     /// Wrapper around a slice that was allocated in C code.
     #[derive(Debug)]
     pub struct CSlice {
-        slice: &'static [u8]
+        ptr: NonNull<[u8]>,
     }
+
+    // `CSlice` is `Send` and `Sync` because, once created, it is
+    // completely immutable (it does not have interior mutability),
+    // so it can be safely accessed from different threads simultaneously.
+    unsafe impl Send for CSlice {}
+    unsafe impl Sync for CSlice {}
 
     impl CSlice {
         /// Constructs a new `CSlice` from the given parts. `libc::free` will be called on the given
@@ -31,8 +38,7 @@ mod unsafe_code {
         /// The same rules as for `std::slice::from_raw_parts` apply. Additionally, the given pointer
         /// must be safe to free with `libc::free`.
         pub unsafe fn new(ptr: *const u8, len: usize) -> CSlice {
-            let slice = from_raw_parts(ptr, len);
-            CSlice{ slice }
+            CSlice { ptr: NonNull::from(from_raw_parts(ptr, len)) }
         }
 
         /// Convert `self` into a raw part.
@@ -40,7 +46,7 @@ mod unsafe_code {
         /// Ownership of the returned pointer is given to the caller. Specifically, `libc::free` will
         /// not be called on it by `CSlice`.
         pub fn into_ptr(self) -> *const u8 {
-            let ptr = self.slice.as_ptr();
+            let ptr = self.ptr.as_ptr() as *const u8;
             forget(self);
             ptr
         }
@@ -48,7 +54,7 @@ mod unsafe_code {
 
     impl Drop for CSlice {
         fn drop(&mut self) {
-            unsafe { free(self.slice.as_ptr() as _) }
+            unsafe { free(self.ptr.as_ptr() as _) }
         }
     }
 
@@ -56,7 +62,7 @@ mod unsafe_code {
         type Target = [u8];
 
         fn deref(&self) -> &[u8] {
-            self.slice
+            unsafe { self.ptr.as_ref() }
         }
     }
 
@@ -66,7 +72,7 @@ mod unsafe_code {
         type Output = I::Output;
 
         fn index(&self, index: I) -> &I::Output {
-            self.slice.index(index)
+            (**self).index(index)
         }
     }
 }
