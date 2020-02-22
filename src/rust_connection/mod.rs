@@ -20,6 +20,8 @@ mod parse_display;
 mod stream;
 mod xauth;
 
+use inner::PollReply;
+
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
 pub struct RustConnection<Stream: Read + Write = stream::Stream> {
@@ -143,8 +145,10 @@ impl<S: Read + Write> RequestConnection for RustConnection<S> {
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
         loop {
-            if let Some(result) = inner.poll_for_reply(sequence) {
-                return Ok(result)
+            match inner.poll_for_reply(sequence) {
+                PollReply::TryAgain => {},
+                PollReply::NoReply => return Ok(None),
+                PollReply::Reply(buffer) => return Ok(Some(buffer)),
             }
             let packet = inner.read_packet().map_err(|_| ConnectionError::UnknownError)?;
             inner.enqueue_packet(packet);
@@ -155,8 +159,10 @@ impl<S: Read + Write> RequestConnection for RustConnection<S> {
         let mut inner = self.inner.lock().unwrap();
         inner.prepare_check_for_reply_or_error(sequence).map_err(|_| ConnectionError::UnknownError)?;
         loop {
-            if let Some(reply) = inner.poll_check_for_reply_or_error(sequence) {
-                return Ok(reply.and_then(|r| r.try_into().ok()));
+            match inner.poll_check_for_reply_or_error(sequence) {
+                PollReply::TryAgain => {},
+                PollReply::NoReply => return Ok(None),
+                PollReply::Reply(buffer) => return Ok(buffer.try_into().ok()),
             }
             let packet = inner.read_packet().map_err(|_| ConnectionError::UnknownError)?;
             inner.enqueue_packet(packet);

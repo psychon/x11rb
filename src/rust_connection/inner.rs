@@ -11,6 +11,16 @@ use crate::generated::xproto::{Setup, SetupRequest, SetupFailed, SetupAuthentica
 use crate::x11_utils::{GenericEvent, Serialize};
 use crate::errors::ParseError;
 
+#[derive(Debug, Clone)]
+pub(crate) enum PollReply {
+    /// It is not clear yet what the result will be; try again.
+    TryAgain,
+    /// There will be no reply; polling is done.
+    NoReply,
+    /// Here is the result of the polling; polling is done.
+    Reply(Buffer),
+}
+
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 struct SentRequest {
     seqno: SequenceNumber,
@@ -273,30 +283,30 @@ where Stream: Read + Write
         Ok(())
     }
 
-    pub(crate) fn poll_check_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Option<Option<Buffer>> {
+    pub(crate) fn poll_check_for_reply_or_error(&mut self, sequence: SequenceNumber) -> PollReply {
         if let Some(result) = self.poll_for_reply_or_error(sequence) {
-            return Some(Some(result))
+            return PollReply::Reply(result);
         }
 
         if self.last_sequence_read > sequence {
             // We can be sure that there will be no reply/error
-            Some(None)
+            PollReply::NoReply
         } else {
             // Hm, we cannot be sure yet. Perhaps there will still be a reply/error
-            None
+            PollReply::TryAgain
         }
     }
 
-    pub(crate) fn poll_for_reply(&mut self, sequence: SequenceNumber) -> Option<Option<Buffer>> {
+    pub(crate) fn poll_for_reply(&mut self, sequence: SequenceNumber) -> PollReply {
         if let Some(reply) = self.poll_for_reply_or_error(sequence) {
             if reply[0] == 0 {
                 self.pending_events.push_back(reply);
-                Some(None)
+                PollReply::NoReply
             } else {
-                Some(Some(reply))
+                PollReply::Reply(reply)
             }
         } else {
-            None
+            PollReply::TryAgain
         }
     }
 
