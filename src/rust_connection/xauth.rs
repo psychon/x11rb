@@ -9,15 +9,29 @@ const MIT_MAGIC_COOKIE_1: &[u8] = b"MIT-MAGIC-COOKIE-1";
 /// A family describes how to interpret some bytes as an address in an `AuthEntry`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum Family {
-    // Per a comment in xcb-proto/src/xproto.xml on the "Family" enum:
-    //    also used and extended for Xau authentication
-    X11Family(X11Family),
+    Internet,
+    DECnet,
+    Chaos,
+    ServerInterpreted,
+    Internet6,
     Wild,
     Local,
     Netname,
     Krb5Principal,
     LocalHost,
     Unknown(u16),
+}
+
+impl From<X11Family> for Family {
+    fn from(value: X11Family) -> Self {
+        match value {
+            X11Family::Internet => Family::Internet,
+            X11Family::DECnet => Family::DECnet,
+            X11Family::Chaos => Family::Chaos,
+            X11Family::ServerInterpreted => Family::ServerInterpreted,
+            X11Family::Internet6 => Family::Internet6,
+        }
+    }
 }
 
 impl From<u16> for Family {
@@ -34,7 +48,7 @@ impl From<u16> for Family {
         };
         if let Some(x11family) = x11family {
             assert_eq!(value, x11family.into());
-            return Family::X11Family(x11family);
+            return x11family.into();
         }
         match value {
             65535 => Family::Wild,
@@ -153,7 +167,7 @@ mod file {
     #[cfg(test)]
     mod test {
         use std::io::Cursor;
-        use super::super::{AuthEntry, Family, X11Family};
+        use super::super::{AuthEntry, Family};
         use super::read_entry;
 
         #[test]
@@ -197,7 +211,7 @@ mod file {
                    data: u32::to_be_bytes(0xdead_beef).to_vec(),
                },
                AuthEntry {
-                   family: Family::X11Family(X11Family::Internet),
+                   family: Family::Internet,
                    address: vec![1, 2, 3, 4],
                    number: b"2".to_vec(),
                    name: b"baz".to_vec(),
