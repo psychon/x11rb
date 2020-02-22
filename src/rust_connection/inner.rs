@@ -11,6 +11,16 @@ use crate::generated::xproto::{Setup, SetupRequest, SetupFailed, SetupAuthentica
 use crate::x11_utils::{GenericEvent, Serialize};
 use crate::errors::ParseError;
 
+#[derive(Debug, Clone)]
+pub(crate) enum PollReply {
+    /// It is not clear yet what the result will be; try again.
+    TryAgain,
+    /// There will be no reply; polling is done.
+    NoReply,
+    /// Here is the result of the polling; polling is done.
+    Reply(Buffer),
+}
+
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 struct SentRequest {
     seqno: SequenceNumber,
@@ -104,7 +114,7 @@ where Stream: Read + Write
         }
     }
 
-    fn read_packet(&mut self) -> Result<Buffer, Box<dyn Error>> {
+    pub(crate) fn read_packet(&mut self) -> Result<Buffer, Box<dyn Error>> {
         let mut buffer = vec![0; 32];
         self.stream.read_exact(&mut buffer)?;
 
@@ -214,8 +224,7 @@ where Stream: Read + Write
         Some(full_number)
     }
 
-    fn read_packet_and_enqueue(&mut self) -> Result<(), Box<dyn Error>> {
-        let packet = self.read_packet()?;
+    pub(crate) fn enqueue_packet(&mut self, packet: Buffer) {
         let kind = packet[0];
 
         // extract_sequence_number() updates our state and is thus important to call even when we
@@ -255,65 +264,55 @@ where Stream: Read + Write
             // It is an event
             self.pending_events.push_back(packet);
         }
-
-        Ok(())
     }
 
-    pub(crate) fn wait_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Result<Buffer, Box<dyn Error>> {
-        loop {
-            for (index, (seqno, _packet)) in self.pending_replies.iter().enumerate() {
-                if *seqno == sequence {
-                    return Ok(self.pending_replies.remove(index).unwrap().1)
-                }
+    pub(crate) fn poll_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Option<Buffer> {
+        for (index, (seqno, _packet)) in self.pending_replies.iter().enumerate() {
+            if *seqno == sequence {
+                return Some(self.pending_replies.remove(index).unwrap().1)
             }
-            self.read_packet_and_enqueue()?;
         }
+        None
     }
 
-    pub(crate) fn check_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Result<Option<Buffer>, Box<dyn Error>> {
+    pub(crate) fn prepare_check_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Result<(), Box<dyn Error>> {
         if self.next_reply_expected < sequence {
             self.send_sync()?;
         }
-
-        loop {
-            for (index, (seqno, _packet)) in self.pending_replies.iter().enumerate() {
-                if *seqno == sequence {
-                    return Ok(Some(self.pending_replies.remove(index).unwrap().1))
-                }
-            }
-            if self.last_sequence_read > sequence {
-                return Ok(None);
-            }
-            self.read_packet_and_enqueue()?;
-        }
+        assert!(self.next_reply_expected >= sequence);
+        Ok(())
     }
 
-    pub(crate) fn wait_for_reply(&mut self, sequence: SequenceNumber) -> Result<Option<Buffer>, Box<dyn Error>> {
-        let reply = self.wait_for_reply_or_error(sequence)?;
-        if reply[0] == 0 {
-            self.pending_events.push_back(reply);
-            Ok(None)
+    pub(crate) fn poll_check_for_reply_or_error(&mut self, sequence: SequenceNumber) -> PollReply {
+        if let Some(result) = self.poll_for_reply_or_error(sequence) {
+            return PollReply::Reply(result);
+        }
+
+        if self.last_sequence_read > sequence {
+            // We can be sure that there will be no reply/error
+            PollReply::NoReply
         } else {
-            Ok(Some(reply))
+            // Hm, we cannot be sure yet. Perhaps there will still be a reply/error
+            PollReply::TryAgain
         }
     }
 
-    pub(crate) fn wait_for_event(&mut self) -> Result<GenericEvent, Box<dyn Error>> {
-        loop {
-            let event = self.pending_events.pop_front();
-            if let Some(event) = event {
-                return Ok(event.try_into()?);
+    pub(crate) fn poll_for_reply(&mut self, sequence: SequenceNumber) -> PollReply {
+        if let Some(reply) = self.poll_for_reply_or_error(sequence) {
+            if reply[0] == 0 {
+                self.pending_events.push_back(reply);
+                PollReply::NoReply
+            } else {
+                PollReply::Reply(reply)
             }
-            self.read_packet_and_enqueue()?;
+        } else {
+            PollReply::TryAgain
         }
     }
 
-    pub(crate) fn poll_for_event(&mut self) -> Result<Option<GenericEvent>, Box<dyn Error>> {
-        // FIXME: Check if something can be read from the wire
+    pub(crate) fn poll_for_event(&mut self) -> Option<GenericEvent> {
         self.pending_events.pop_front()
-            .map(TryInto::try_into)
-            .transpose()
-            .map_err(Into::into)
+            .map(|event| event.try_into().unwrap())
     }
 }
 
