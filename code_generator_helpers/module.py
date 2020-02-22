@@ -82,9 +82,7 @@ def get_derives(obj_type):
     underivable = set()
     if obj_type.is_container:
         if obj_type.is_union:
-            # These are represented as a type containing Vec
-            underivable.add("Copy")
-            # And comparing unions makes no sense (in the current implementation)
+            # Comparing unions makes no sense (in the current implementation)
             underivable.update(["PartialEq", "Eq"])
 
         for field in obj_type.fields:
@@ -450,8 +448,9 @@ class Module(object):
         assert not hasattr(union, "doc")
 
         rust_name = self._name(name)
-        self.out("#[derive(Debug, Clone)]")
-        self.out("pub struct %s(Vec<u8>);", rust_name)
+        union_size = union.get_total_size()
+        self.out("#[derive(Debug, Copy, Clone)]")
+        self.out("pub struct %s([u8; %s]);", rust_name, union_size)
 
         self.out("impl %s {", rust_name)
         with Indent(self.out):
@@ -475,15 +474,15 @@ class Module(object):
                         assert len(parts) == 1
                         self.out("Ok(%s)", parts[0])
                     self.out("}")
-                    self.out("do_the_parse(&self.0[..]).unwrap()")
+                    self.out("do_the_parse(&self.0).unwrap()")
                 self.out("}")
         self.out("}")
 
         self.out("impl Serialize for %s {", rust_name)
         with Indent(self.out):
-            self.out("type Bytes = Vec<u8>;")
+            self.out("type Bytes = [u8; %s];", union_size)
             self.out("fn serialize(&self) -> Self::Bytes {")
-            self.out.indent("self.0.clone()")
+            self.out.indent("self.0")
             self.out("}")
         self.out("}")
 
@@ -491,10 +490,10 @@ class Module(object):
         with Indent(self.out):
             self.out("fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {")
             with Indent(self.out):
-                union_size = union.get_total_size()
-                self.out("let inner = value.get(..%s)", union_size)
+                self.out("let inner: [u8; %s] = value.get(..%s)", union_size, union_size)
                 self.out.indent(".ok_or(ParseError::ParseError)?")
-                self.out.indent(".iter().copied().collect();")
+                self.out.indent(".try_into()")
+                self.out.indent(".unwrap();")
                 self.out("let result = %s(inner);", rust_name)
                 self.out("Ok((result, &value[%s..]))", union_size)
             self.out("}")
@@ -525,11 +524,25 @@ class Module(object):
                                 for n in range(field.type.size):
                                     self.out.indent("value%d[%d],", i, n)
                             self.out("];")
-                    self.out.indent("Self(value.to_vec())")
+                    self.out.indent("Self(value)")
                 elif union.is_eventstruct:
-                    self.out.indent("Self(Into::<[u8; 32]>::into(value).to_vec())")
+                    self.out.indent("Self(Into::<[u8; 32]>::into(value))")
                 else:
-                    self.out.indent("Self(value.serialize().to_vec())")
+                    field_size = field.type.get_total_size()
+                    assert field_size <= union_size
+                    if field_size != union_size:
+                        # This is needed to handle cases such as Behavior.type or
+                        # Action.type from the XKB extension.
+                        #
+                        # FIXME: For those cases it might be better to omit the
+                        # serialize implementation.
+                        self.out.indent("let field_bytes = value.serialize();")
+                        self.out.indent("// Pad with zeros")
+                        self.out.indent("let mut union_bytes = [0; %s];", union_size)
+                        self.out.indent("union_bytes[..field_bytes.len()].copy_from_slice(&field_bytes);")
+                        self.out.indent("Self(union_bytes)")
+                    else:
+                        self.out.indent("Self(value.serialize())")
                 self.out("}")
             self.out("}")
 
