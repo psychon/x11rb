@@ -259,15 +259,13 @@ where Stream: Read + Write
         Ok(())
     }
 
-    pub(crate) fn wait_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Result<Buffer, Box<dyn Error>> {
-        loop {
-            for (index, (seqno, _packet)) in self.pending_replies.iter().enumerate() {
-                if *seqno == sequence {
-                    return Ok(self.pending_replies.remove(index).unwrap().1)
-                }
+    pub(crate) fn poll_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Result<Option<Buffer>, Box<dyn Error>> {
+        for (index, (seqno, _packet)) in self.pending_replies.iter().enumerate() {
+            if *seqno == sequence {
+                return Ok(Some(self.pending_replies.remove(index).unwrap().1))
             }
-            self.read_packet_and_enqueue()?;
         }
+        Ok(None)
     }
 
     pub(crate) fn check_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Result<Option<Buffer>, Box<dyn Error>> {
@@ -288,13 +286,16 @@ where Stream: Read + Write
         }
     }
 
-    pub(crate) fn wait_for_reply(&mut self, sequence: SequenceNumber) -> Result<Option<Buffer>, Box<dyn Error>> {
-        let reply = self.wait_for_reply_or_error(sequence)?;
-        if reply[0] == 0 {
-            self.pending_events.push_back(reply);
-            Ok(None)
+    pub(crate) fn poll_for_reply(&mut self, sequence: SequenceNumber) -> Result<Option<Option<Buffer>>, Box<dyn Error>> {
+        if let Some(reply) = self.poll_for_reply_or_error(sequence)? {
+            if reply[0] == 0 {
+                self.pending_events.push_back(reply);
+                Ok(Some(None))
+            } else {
+                Ok(Some(Some(reply)))
+            }
         } else {
-            Ok(Some(reply))
+            Ok(None)
         }
     }
 

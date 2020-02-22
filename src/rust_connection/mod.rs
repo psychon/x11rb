@@ -125,17 +125,28 @@ impl<S: Read + Write> RequestConnection for RustConnection<S> {
     }
 
     fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
-        let reply = self.inner.lock().unwrap().wait_for_reply_or_error(sequence).map_err(|_| ConnectionError::UnknownError)?;
-        if reply[0] == 0 {
-            let error: GenericError = reply.try_into()?;
-            Err(error.into())
-        } else {
-            Ok(reply)
+        let mut inner = self.inner.lock().unwrap();
+        loop {
+            if let Some(reply) = inner.poll_for_reply_or_error(sequence).map_err(|_| ConnectionError::UnknownError)? {
+                if reply[0] == 0 {
+                    let error: GenericError = reply.try_into()?;
+                    return Err(error.into())
+                } else {
+                    return Ok(reply)
+                }
+            }
+            inner.read_packet_and_enqueue().map_err(|_| ConnectionError::UnknownError)?;
         }
     }
 
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError> {
-        Ok(self.inner.lock().unwrap().wait_for_reply(sequence).map_err(|_| ConnectionError::UnknownError)?)
+        let mut inner = self.inner.lock().unwrap();
+        loop {
+            if let Some(result) = inner.poll_for_reply(sequence).map_err(|_| ConnectionError::UnknownError)? {
+                return Ok(result)
+            }
+            inner.read_packet_and_enqueue().map_err(|_| ConnectionError::UnknownError)?;
+        }
     }
 
     fn check_for_error(&self, sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError> {
