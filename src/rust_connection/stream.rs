@@ -1,7 +1,10 @@
-use std::net::TcpStream;
+use std::net::{TcpStream, SocketAddr, Ipv4Addr};
 #[cfg(unix)]
 use std::os::unix::net::UnixStream;
 use std::io::{Read, Write, Result, IoSlice, IoSliceMut};
+
+use super::xauth::Family;
+use crate::generated::xproto::Family as X11Family;
 
 /// A wrapper around a `TcpStream` or `UnixStream`.
 #[derive(Debug)]
@@ -44,6 +47,57 @@ impl Stream {
                 Err(error.unwrap_or_else(|| Error::new(ErrorKind::Other, ConnectionError::ConnectionError)))
             }
         }
+    }
+}
+
+impl Stream {
+    /// Get the peer's address in a format suitable for xauth.
+    ///
+    /// The returned values can be directly given to `super::xauth::get_auth` as `family` and
+    /// `address`.
+    pub(crate) fn peer_addr(&self) -> Result<(Family, Vec<u8>)> {
+        match self {
+            Stream::TcpStream(stream) => {
+                // Get the v4 address of the other end (if there is one)
+                let ip = match stream.peer_addr()? {
+                    SocketAddr::V4(addr) => *addr.ip(),
+                    SocketAddr::V6(addr) => {
+                        let ip = addr.ip();
+                        if ip.is_loopback() {
+                            // This is a local connection.
+                            // Use LOCALHOST to cause a fall-through in the code below.
+                            Ipv4Addr::LOCALHOST
+                        } else if let Some(ip) = ip.to_ipv4() {
+                            // Let the ipv4 code below handle this
+                            ip
+                        } else {
+                            // Okay, this is really a v6 address
+                            let family = Family::X11Family(X11Family::Internet6);
+                            return Ok((family, ip.octets().to_vec()));
+                        }
+                    }
+                };
+
+                // Handle the v4 address
+                if !ip.is_loopback() {
+                    let family = Family::X11Family(X11Family::Internet);
+                    return Ok((family, ip.octets().to_vec()));
+                } else {
+                    // This is only reached for loopback addresses. The code below handles this.
+                }
+            },
+            #[cfg(unix)]
+            Stream::UnixStream(_) => {
+                // Fall through to the code below.
+            }
+        };
+
+        // If we get to here: This is a local connection. Use the host name as address.
+        let hostname = gethostname::gethostname()
+            .to_str()
+            .map(|name| name.as_bytes().to_vec())
+            .unwrap_or_else(Vec::new);
+        Ok((Family::Local, hostname))
     }
 }
 
