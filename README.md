@@ -1,6 +1,7 @@
 # X11 rust bindings
 
-[![Build Status](https://travis-ci.org/psychon/x11rb.svg?branch=master)](https://travis-ci.org/psychon/x11rb)
+[![TravisCI Build Status](https://travis-ci.org/psychon/x11rb.svg?branch=master)](https://travis-ci.org/psychon/x11rb)
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/950g0t6i8hfc9dup/branch/master?svg=true)](https://ci.appveyor.com/project/psychon/x11rb)
 [![Crate](https://img.shields.io/crates/v/x11rb.svg)](https://crates.io/crates/x11rb)
 [![API](https://docs.rs/x11rb/badge.svg)](https://docs.rs/x11rb)
 ![Minimum rustc version](https://img.shields.io/badge/rustc-1.37+-lightgray.svg)
