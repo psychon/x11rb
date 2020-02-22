@@ -44,7 +44,7 @@ impl RustConnection<stream::Stream> {
         let screen = parsed_display.screen.into();
 
         let (family, address) = stream.peer_addr()?;
-        let (auth_name, auth_data) = xauth::get_auth(&family, &address, parsed_display.display)
+        let (auth_name, auth_data) = xauth::get_auth(family, &address, parsed_display.display)
             // Ignore all errors while determining auth; instead we just try without auth info.
             .unwrap_or(None)
             .unwrap_or_else(|| (Vec::new(), Vec::new()));

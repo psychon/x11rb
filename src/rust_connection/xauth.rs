@@ -238,16 +238,16 @@ pub(crate) type AuthInfo = (Vec<u8>, Vec<u8>);
 ///
 /// If successful, this function returns that can be written to the X11 server as authorization
 /// protocol name and data, respectively.
-pub(crate) fn get_auth(family: &Family, address: &[u8], display: u16) -> Result<Option<AuthInfo>, Error> {
+pub(crate) fn get_auth(family: Family, address: &[u8], display: u16) -> Result<Option<AuthInfo>, Error> {
     match file::XAuthorityEntries::new()? {
         None => Ok(None),
         Some(entries) => get_auth_impl(entries, family, address, display),
     }
 }
 
-pub(crate) fn get_auth_impl(entries: impl Iterator<Item=Result<AuthEntry, Error>>, family: &Family, address: &[u8], display: u16) -> Result<Option<AuthInfo>, Error> {
-    fn address_matches((family1, address1): (&Family, &[u8]), (family2, address2): (&Family, &[u8])) -> bool {
-        if *family1 == Family::Wild || *family2 == Family::Wild {
+pub(crate) fn get_auth_impl(entries: impl Iterator<Item=Result<AuthEntry, Error>>, family: Family, address: &[u8], display: u16) -> Result<Option<AuthInfo>, Error> {
+    fn address_matches((family1, address1): (Family, &[u8]), (family2, address2): (Family, &[u8])) -> bool {
+        if family1 == Family::Wild || family2 == Family::Wild {
             true
         } else if family1 != family2 {
             false
@@ -267,7 +267,7 @@ pub(crate) fn get_auth_impl(entries: impl Iterator<Item=Result<AuthEntry, Error>
     for entry in entries {
         let entry = entry?;
 
-        if address_matches((family, address), (&entry.family, &entry.address)) &&
+        if address_matches((family, address), (entry.family, &entry.address)) &&
                 display_number_matches(&entry.number, &display[..]) &&
                 entry.name == MIT_MAGIC_COOKIE_1 {
             return Ok(Some((entry.name, entry.data)));
@@ -292,7 +292,7 @@ mod test {
         };
         f(&mut entry);
         let entries = vec![Ok(entry)];
-        assert_eq!(get_auth_impl(entries.into_iter(), &Family::Local, b"whatever", 42).unwrap().unwrap(),
+        assert_eq!(get_auth_impl(entries.into_iter(), Family::Local, b"whatever", 42).unwrap().unwrap(),
                    (MIT_MAGIC_COOKIE_1.to_vec(), b"1234".to_vec()));
     }
 
@@ -308,7 +308,7 @@ mod test {
         };
         f(&mut entry);
         let entries = vec![Ok(entry)];
-        assert_eq!(get_auth_impl(entries.into_iter(), &Family::Local, b"whatever", 42).unwrap(), None);
+        assert_eq!(get_auth_impl(entries.into_iter(), Family::Local, b"whatever", 42).unwrap(), None);
     }
 
     #[test]
@@ -337,7 +337,7 @@ mod test {
             data: b"1234".to_vec(),
         };
         let entries = vec![Ok(entry)];
-        assert_eq!(get_auth_impl(entries.into_iter(), &Family::Wild, &[], 42).unwrap().unwrap(),
+        assert_eq!(get_auth_impl(entries.into_iter(), Family::Wild, &[], 42).unwrap().unwrap(),
                    (MIT_MAGIC_COOKIE_1.to_vec(), b"1234".to_vec()));
     }
 
