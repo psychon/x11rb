@@ -4,7 +4,6 @@ use std::os::unix::net::UnixStream;
 use std::io::{Read, Write, Result, IoSlice, IoSliceMut};
 
 use super::xauth::Family;
-use crate::generated::xproto::Family as X11Family;
 
 /// A wrapper around a `TcpStream` or `UnixStream`.
 #[derive(Debug)]
@@ -72,16 +71,14 @@ impl Stream {
                             ip
                         } else {
                             // Okay, this is really a v6 address
-                            let family = Family::X11Family(X11Family::Internet6);
-                            return Ok((family, ip.octets().to_vec()));
+                            return Ok((Family::Internet6, ip.octets().to_vec()));
                         }
                     }
                 };
 
                 // Handle the v4 address
                 if !ip.is_loopback() {
-                    let family = Family::X11Family(X11Family::Internet);
-                    return Ok((family, ip.octets().to_vec()));
+                    return Ok((Family::Internet, ip.octets().to_vec()));
                 } else {
                     // This is only reached for loopback addresses. The code below handles this.
                 }
