@@ -67,12 +67,19 @@ mod file {
 
     use super::AuthEntry;
 
+    /// Read a single `u16` from an `~/.Xauthority` file.
+    ///
+    /// The file stores these entries in big endian.
     fn read_u16<R: Read>(read: &mut R) -> Result<u16, Error> {
         let mut buffer = [0; 2];
         read.read_exact(&mut buffer)?;
         Ok(u16::from_be_bytes(buffer))
     }
 
+    /// Read a single "byte array" from an `~/.Xauthority` file.
+    ///
+    /// The file stores these as a length field followed by a number of bytes that contain the
+    /// actual data.
     fn read_string<R: Read>(read: &mut R) -> Result<Vec<u8>, Error> {
         let length = read_u16(read)?;
         let mut result = vec![0; length.into()];
@@ -80,6 +87,11 @@ mod file {
         Ok(result)
     }
 
+    /// Read a single entry from an `~/.Xauthority` file.
+    ///
+    /// This function tries to return `Ok(None)` when the end of the file is reached. However, the
+    /// code also treats a single byte as 'end of file', because things were simpler to implement
+    /// like this.
     fn read_entry<R: Read>(read: &mut R) -> Result<Option<AuthEntry>, Error> {
         let family = match read_u16(read) {
             Ok(family) => family,
@@ -93,6 +105,10 @@ mod file {
         Ok(Some(AuthEntry { family, address, number, name, data }))
     }
 
+    /// Get the file name for `~/.Xauthority` based on environment variables.
+    ///
+    /// The code in libXau contains a special case for Windows (looks like cygwin) that is not
+    /// handled here (yet?).
     fn get_xauthority_file_name() -> Option<PathBuf> {
         if let Some(name) = var_os("XAUTHORITY") {
             return Some(name.into());
@@ -110,6 +126,11 @@ mod file {
     pub(crate) struct XAuthorityEntries(BufReader<File>);
 
     impl XAuthorityEntries {
+        /// Open `~/.Xauthority` for reading.
+        ///
+        /// This function returns `Ok(None)` when the location of the `.Xauthority` file could not
+        /// be determined. If opening the file failed (for example, because it does not exist),
+        /// that error is returned.
         pub(crate) fn new() -> Result<Option<XAuthorityEntries>, Error> {
             get_xauthority_file_name()
                 .map(File::open)
@@ -194,6 +215,13 @@ mod file {
 
 pub(crate) type AuthInfo = (Vec<u8>, Vec<u8>);
 
+/// Get the authentication information necessary for connecting to the given display.
+///
+/// - `display` is the display number.
+/// - TODO: A proper implementation needs more arguments.
+///
+/// If successful, this function returns that can be written to the X11 server as authorization
+/// protocol name and data, respectively.
 pub(crate) fn get_auth(display: u16) -> Result<Option<AuthInfo>, Error> {
     let display = display.to_string();
     let display = display.as_bytes();
