@@ -1,4 +1,5 @@
 use std::net::TcpStream;
+#[cfg(unix)]
 use std::os::unix::net::UnixStream;
 use std::io::{Read, Write, Result, IoSlice, IoSliceMut};
 
@@ -6,6 +7,7 @@ use std::io::{Read, Write, Result, IoSlice, IoSliceMut};
 #[derive(Debug)]
 pub enum Stream {
     TcpStream(TcpStream),
+    #[cfg(unix)]
     UnixStream(UnixStream),
 }
 
@@ -19,15 +21,18 @@ impl Stream {
         } else {
             let mut error = None;
 
-            if protocol.is_none() || protocol == Some("unix") {
-                let file_name = format!("/tmp/.X11-unix/X{}", display);
+            #[cfg(unix)]
+            {
+                if protocol.is_none() || protocol == Some("unix") {
+                    let file_name = format!("/tmp/.X11-unix/X{}", display);
 
-                // TODO: Try abstract socket (file name with prepended '\0')
-                // Not supported on Rust right now: https://github.com/rust-lang/rust/issues/42048
+                    // TODO: Try abstract socket (file name with prepended '\0')
+                    // Not supported on Rust right now: https://github.com/rust-lang/rust/issues/42048
 
-                match UnixStream::connect(file_name) {
-                    Ok(stream) => return Ok(Stream::UnixStream(stream)),
-                    Err(err) => error = Some(err),
+                    match UnixStream::connect(file_name) {
+                        Ok(stream) => return Ok(Stream::UnixStream(stream)),
+                        Err(err) => error = Some(err),
+                    }
                 }
             }
 
@@ -48,6 +53,7 @@ impl Read for Stream {
     fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
         match self {
             Stream::TcpStream(stream) => stream.read(buf),
+            #[cfg(unix)]
             Stream::UnixStream(stream) => stream.read(buf),
         }
     }
@@ -55,6 +61,7 @@ impl Read for Stream {
     fn read_vectored(&mut self, bufs: &mut [IoSliceMut<'_>]) -> Result<usize> {
         match self {
             Stream::TcpStream(stream) => stream.read_vectored(bufs),
+            #[cfg(unix)]
             Stream::UnixStream(stream) => stream.read_vectored(bufs),
         }
     }
@@ -65,6 +72,7 @@ impl Read for Stream {
     unsafe fn initializer(&self) -> Initializer {
         match self {
             Stream::TcpStream(stream) => stream.initializer(),
+            #[cfg(unix)]
             Stream::UnixStream(stream) => stream.initializer(),
         }
     }
@@ -77,6 +85,7 @@ impl Write for Stream {
     fn write(&mut self, buf: &[u8]) -> Result<usize> {
         match self {
             Stream::TcpStream(stream) => stream.write(buf),
+            #[cfg(unix)]
             Stream::UnixStream(stream) => stream.write(buf),
         }
     }
@@ -84,6 +93,7 @@ impl Write for Stream {
     fn write_vectored(&mut self, bufs: &[IoSlice<'_>]) -> Result<usize> {
         match self {
             Stream::TcpStream(stream) => stream.write_vectored(bufs),
+            #[cfg(unix)]
             Stream::UnixStream(stream) => stream.write_vectored(bufs),
         }
     }
@@ -91,6 +101,7 @@ impl Write for Stream {
     fn flush(&mut self) -> Result<()> {
         match self {
             Stream::TcpStream(stream) => stream.flush(),
+            #[cfg(unix)]
             Stream::UnixStream(stream) => stream.flush(),
         }
     }
