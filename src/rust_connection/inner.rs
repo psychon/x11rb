@@ -269,6 +269,7 @@ where Stream: Read + Write
         if self.next_reply_expected < sequence {
             self.send_sync()?;
         }
+        assert!(self.next_reply_expected >= sequence);
         Ok(())
     }
 
