@@ -174,6 +174,10 @@ pub trait Serialize {
 
     /// Serialize this value into X11 raw bytes.
     fn serialize(&self) -> Self::Bytes;
+
+    /// Serialize this value into X11 raw bytes,
+    /// appending the result into `bytes`.
+    fn serialize_into(&self, bytes: &mut Vec<u8>);
 }
 
 // Now implement TryParse and Serialize for some primitive data types that we need.
@@ -200,6 +204,9 @@ macro_rules! implement_serialize {
             fn serialize(&self) -> Self::Bytes {
                 self.to_ne_bytes()
             }
+            fn serialize_into(&self, bytes: &mut Vec<u8>) {
+                bytes.extend_from_slice(&self.to_ne_bytes());
+            }
         }
     }
 }
@@ -216,6 +223,9 @@ macro_rules! forward_float {
             type Bytes = <$to as Serialize>::Bytes;
             fn serialize(&self) -> Self::Bytes {
                 self.to_bits().serialize()
+            }
+            fn serialize_into(&self, bytes: &mut Vec<u8>) {
+                self.to_bits().serialize_into(bytes);
             }
         }
     }
@@ -254,6 +264,9 @@ impl Serialize for bool {
     fn serialize(&self) -> Self::Bytes {
         [*self as u8]
     }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.push(*self as u8);
+    }
 }
 
 /// Parse a list of objects from the given data.
@@ -273,17 +286,17 @@ where T: TryParse
     Ok((result, remaining))
 }
 
-impl<T> Serialize for [T]
-where T: Serialize,
-      <T as Serialize>::Bytes: AsRef<[u8]>
-{
+impl<T: Serialize> Serialize for [T] {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Self::Bytes {
         let mut result = Vec::new();
-        for item in self {
-            result.extend(item.serialize().as_ref());
-        }
+        self.serialize_into(&mut result);
         result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        for item in self {
+            item.serialize_into(bytes);
+        }
     }
 }
 

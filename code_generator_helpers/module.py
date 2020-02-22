@@ -343,79 +343,111 @@ class Module(object):
         self.out("")
 
     def _generate_serialize(self, type_name, complex):
+        if complex.fixed_size():
+            self._generate_serialize_fixed_size(type_name, complex)
+        else:
+            self._generate_serialize_variable_size(type_name, complex)
+
+    def _generate_serialize_fixed_size(self, type_name, complex):
         self.out("impl Serialize for %s {", type_name)
         with Indent(self.out):
-            if complex.fixed_size():
-                # Everything is fixed-size so we can return an array.
-                length = sum((field.type.get_total_size() for field in complex.fields))
-                wire_type = "[u8; %s]" % length
-            else:
-                # For a variable size list, we do not know beforehand the size of the
-                # serialized data. Thus, return a Vec.
-                length = None
-                wire_type = "Vec<u8>"
+            # Everything is fixed-size so we can return an array.
+            length = sum((field.type.get_total_size() for field in complex.fields))
 
-            self.out("type Bytes = %s;", wire_type)
+            self.out("type Bytes = [u8; %s];", length)
             self.out("fn serialize(&self) -> Self::Bytes {")
 
             with Indent(self.out):
-                if complex.fixed_size():
-                    def _emit():
-                        assert False, "We do not have a variable size list, but we do?"
-
-                    def _final_emit():
-                        pass
-                else:
-                    self.out("let mut result = Vec::new();")
-
-                    def _emit():
-                        if complex.fixed_size() or not result_bytes:
-                            return
-                        self.out("result.extend([")
-                        for result_value in result_bytes:
-                            self.out.indent("%s,", result_value)
-                        self.out("].iter());")
-                        del result_bytes[:]
-                    _final_emit = _emit
-
-                # This gathers the bytes of the result; its content is copied to
-                # result:Vec<u8> by _emit(). This happens in front of variable sized lists
+                # This gathers the bytes of the result
                 result_bytes = []
 
                 for field in complex.fields:
+                    assert field.type.fixed_size()
                     field_name = self._to_rust_variable(field.field_name)
                     if field.type.is_pad:
-                        if not complex.fixed_size() and field.type.align != 1:
-                            # Align the output buffer to a multiple of field.type.align
-                            assert field.type.size == 1
-                            assert field.type.nmemb == 1
-                            self.out("while result.len() %% %s != 0 {", field.type.align)
-                            self.out.indent("result.push(0);")
-                            self.out("}")
-                        else:
-                            assert field.type.align == 1
-                            assert field.type.size == 1
-                            for i in range(field.type.nmemb):
-                                result_bytes.append("0")
-                    elif field.type.is_switch:
-                        _emit()
-                        self.out("result.extend(self.%s.serialize());", self._to_rust_variable(field.field_name))
-                    elif field.type.is_list and field.type.nmemb is None:
-                        # This is a variable sized list, so emit bytes to 'result' and
-                        # then add this list directly to 'result'
-                        _emit()
-                        self.out("for obj in self.%s.iter() {", field_name)
-                        self.out.indent("result.extend(obj.serialize().iter());")
-                        self.out("}")
+                        assert field.type.align == 1
+                        assert field.type.size == 1
+                        for i in range(field.type.nmemb):
+                            result_bytes.append("0")
                     elif field.type.is_list and field.type.nmemb is not None and field.type.size == 1:
                         # Fixed-sized list with byte-sized members
                         for i in range(field.type.nmemb):
                             result_bytes.append("self.%s[%d]" % (field_name, i))
                     else:
-                        assert field.type.fixed_size()
+                        assert not hasattr(field, "is_length_field_for")
                         # Fixed-sized list with "large" members. We have first serialize
                         # the members individually and then assemble that into the output.
                         field_name_bytes = self._to_rust_variable(field.field_name + "_bytes")
+                        # First serialize the value itself...
+                        self.out("let %s = self.%s.serialize();", field_name_bytes, field_name)
+                        # ...then copy to the output.
+                        for i in range(field.type.size):
+                            result_bytes.append("%s[%d]" % (field_name_bytes, i))
+
+                self.out("[")
+                for result_value in result_bytes:
+                    self.out.indent("%s,", result_value)
+                self.out("]")
+            self.out("}")
+
+            self.out("fn serialize_into(&self, bytes: &mut Vec<u8>) {")
+            with Indent(self.out):
+                self.out("bytes.reserve(%s);", length)
+                for field in complex.fields:
+                    assert field.type.fixed_size()
+                    if field.type.is_pad:
+                        self.out("bytes.extend_from_slice(&[0; %s]);", field.type.nmemb)
+                    else:
+                        field_name = self._to_rust_variable(field.field_name)
+                        self.out("self.%s.serialize_into(bytes);", field_name)
+            self.out("}")
+        self.out("}")
+
+    def _generate_serialize_variable_size(self, type_name, complex):
+        self.out("impl Serialize for %s {", type_name)
+        with Indent(self.out):
+            # For a variable size structure, we do not know beforehand the size of the
+            # serialized data. Thus, return a Vec.
+            self.out("type Bytes = Vec<u8>;")
+            self.out("fn serialize(&self) -> Self::Bytes {")
+            self.out.indent("let mut result = Vec::new();")
+            self.out.indent("self.serialize_into(&mut result);")
+            self.out.indent("result")
+            self.out("}")
+
+            self.out("fn serialize_into(&self, bytes: &mut Vec<u8>) {")
+
+            with Indent(self.out):
+                # Variable size structures usually have some fixed length
+                # fields at the beginning. Gather the total length of those
+                # fields...
+                fixed_part_length = 0
+                for field in complex.fields:
+                    if not field.type.fixed_size():
+                        break
+                    fixed_part_length += field.type.get_total_size()
+
+                # ...and reserve that length into the output vector to reduce
+                # the number of reallocations.
+                self.out("bytes.reserve(%s);", fixed_part_length)
+
+                # Now serialize each field
+                for field in complex.fields:
+                    if field.type.is_pad:
+                        if not complex.fixed_size() and field.type.align != 1:
+                            # Align the output buffer to a multiple of field.type.align
+                            assert field.type.size == 1
+                            assert field.type.nmemb == 1
+                            align = field.type.align
+                            # As done in request.py/_emit_padding_for_alignment
+                            self.out("bytes.extend_from_slice(&[0; %d][..(%d - (bytes.len() %% %d)) %% %d]);",
+                                     align - 1, align, align, align)
+                        else:
+                            assert field.type.align == 1
+                            assert field.type.size == 1
+                            self.out("bytes.extend_from_slice(&[0; %s]);", field.type.nmemb)
+                    else:
+                        field_name = self._to_rust_variable(field.field_name)
                         if hasattr(field, "is_length_field_for"):
                             # This field is a length field for some list. We get the value
                             # for this field as the length of the list.
@@ -425,22 +457,7 @@ class Module(object):
                         else:
                             # Get the value of this field from "self".
                             source = "self.%s" % field_name
-                            if is_bool(field.type):
-                                source = "(%s as u8)" % source
-                        # First serialize the value itself...
-                        self.out("let %s = %s.serialize();", field_name_bytes, source)
-                        # ...then copy to the output.
-                        for i in range(field.type.size):
-                            result_bytes.append("%s[%d]" % (field_name_bytes, i))
-                _final_emit()
-
-                if complex.fixed_size():
-                    self.out("[")
-                    for result_value in result_bytes:
-                        self.out.indent("%s,", result_value)
-                    self.out("]")
-                else:
-                    self.out("result")
+                        self.out("%s.serialize_into(bytes);", source)
             self.out("}")
         self.out("}")
 
@@ -483,6 +500,9 @@ class Module(object):
             self.out("type Bytes = [u8; %s];", union_size)
             self.out("fn serialize(&self) -> Self::Bytes {")
             self.out.indent("self.0")
+            self.out("}")
+            self.out("fn serialize_into(&self, bytes: &mut Vec<u8>) {")
+            self.out.indent("bytes.extend_from_slice(&self.0);")
             self.out("}")
         self.out("}")
 
@@ -1102,6 +1122,18 @@ class Module(object):
                         self.out("%s::%s(value) => value.serialize()%s,", name, variant, suffix)
                 self.out("}")
             self.out("}")
+            self.out("fn serialize_into(&self, bytes: &mut Vec<u8>) {")
+            with Indent(self.out):
+                self.out("match self {")
+                with Indent(self.out):
+                    for case in switch_type.bitcases:
+                        if hasattr(case, "rust_name"):
+                            variant = self._to_rust_identifier(case.type.name[-1])
+                        else:
+                            variant = self._to_rust_identifier(case.only_field.field_name)
+                        self.out("%s::%s(value) => value.serialize_into(bytes),", name, variant)
+                self.out("}")
+            self.out("}")
         self.out("}")
 
     def _generate_aux(self, name, request, switch, mask_field, request_function_name):
@@ -1195,19 +1227,23 @@ class Module(object):
             self.out("fn serialize(&self) -> Vec<u8> {")
             with Indent(self.out):
                 self.out("let mut result = Vec::new();")
+                self.out("self.serialize_into(&mut result);")
+                self.out("result")
+            self.out("}")
+            self.out("fn serialize_into(&self, bytes: &mut Vec<u8>) {")
+            with Indent(self.out):
                 for case in switch.type.bitcases:
                     if hasattr(case, "rust_name"):
-                        self.out("if let Some(value) = &self.%s {", case.type.name[-1])
+                        self.out("if let Some(ref value) = self.%s {", case.type.name[-1])
                         with Indent(self.out):
-                            self.out("result.extend(value.serialize().iter());")
+                            self.out("value.serialize_into(bytes);")
                         self.out("}")
                     else:
                         field = case.only_field
-                        self.out("if let Some(value) = &self.%s {", self._aux_field_name(field))
+                        self.out("if let Some(ref value) = self.%s {", self._aux_field_name(field))
                         with Indent(self.out):
-                            self.out("result.extend(value.serialize().iter());")
+                            self.out("value.serialize_into(bytes);")
                         self.out("}")
-                self.out("result")
             self.out("}")
         self.out("}")
 
