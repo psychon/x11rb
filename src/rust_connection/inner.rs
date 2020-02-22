@@ -107,11 +107,14 @@ where Stream: Read + Write
     fn read_packet(&mut self) -> Result<Buffer, Box<dyn Error>> {
         let mut buffer = vec![0; 32];
         self.stream.read_exact(&mut buffer)?;
+
+        use crate::generated::xproto::GE_GENERIC_EVENT;
+        const REPLY: u8 = 1;
+        const SENT_GE_GENERIC_EVENT: u8 = GE_GENERIC_EVENT | 0x80;
         let extra_length = match buffer[0] {
-            1 => { // reply
+            REPLY | GE_GENERIC_EVENT | SENT_GE_GENERIC_EVENT => {
                 4 * u32::from_ne_bytes([buffer[4], buffer[5], buffer[6], buffer[7]])
             },
-            35 | 163 => panic!("XGE events not yet supported"),
             _ => 0
         } as usize;
         // Use `Vec::reserve_exact` because this will be the final
