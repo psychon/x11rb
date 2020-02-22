@@ -214,7 +214,7 @@ where Stream: Read + Write
         Some(full_number)
     }
 
-    fn read_packet_and_enqueue(&mut self) -> Result<(), Box<dyn Error>> {
+    pub(crate) fn read_packet_and_enqueue(&mut self) -> Result<(), Box<dyn Error>> {
         let packet = self.read_packet()?;
         let kind = packet[0];
 
@@ -298,18 +298,7 @@ where Stream: Read + Write
         }
     }
 
-    pub(crate) fn wait_for_event(&mut self) -> Result<GenericEvent, Box<dyn Error>> {
-        loop {
-            let event = self.pending_events.pop_front();
-            if let Some(event) = event {
-                return Ok(event.try_into()?);
-            }
-            self.read_packet_and_enqueue()?;
-        }
-    }
-
     pub(crate) fn poll_for_event(&mut self) -> Result<Option<GenericEvent>, Box<dyn Error>> {
-        // FIXME: Check if something can be read from the wire
         self.pending_events.pop_front()
             .map(TryInto::try_into)
             .transpose()

@@ -170,7 +170,13 @@ impl<S: Read + Write> RequestConnection for RustConnection<S> {
 
 impl<Stream: Read + Write> Connection for RustConnection<Stream> {
     fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
-        Ok(self.inner.lock().unwrap().wait_for_event().map_err(|_| ConnectionError::UnknownError)?)
+        let mut inner = self.inner.lock().unwrap();
+        loop {
+            if let Some(event) = inner.poll_for_event().map_err(|_| ConnectionError::UnknownError)? {
+                return Ok(event);
+            }
+            inner.read_packet_and_enqueue().map_err(|_| ConnectionError::UnknownError)?;
+        }
     }
 
     fn poll_for_event(&self) -> Result<Option<GenericEvent>, ConnectionError> {
