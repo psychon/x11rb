@@ -111,7 +111,7 @@ mod test {
     }
 
     fn generate_get_xid_range_reply(start_id: u32, count: u32) -> Vec<u8> {
-        let mut reply = [0; 8].to_vec();
+        let mut reply = vec![0; 8];
         reply.extend(&start_id.to_ne_bytes());
         reply.extend(&count.to_ne_bytes());
         reply

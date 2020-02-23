@@ -101,16 +101,22 @@ impl TryFrom<&[u8]> for Point {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl Point {
-    pub fn to_ne_bytes(&self) -> [u8; 4] {
-        let x_bytes = self.x.to_ne_bytes();
-        let y_bytes = self.y.to_ne_bytes();
+impl Serialize for Point {
+    type Bytes = [u8; 4];
+    fn serialize(&self) -> Self::Bytes {
+        let x_bytes = self.x.serialize();
+        let y_bytes = self.y.serialize();
         [
             x_bytes[0],
             x_bytes[1],
             y_bytes[0],
             y_bytes[1],
         ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(4);
+        self.x.serialize_into(bytes);
+        self.y.serialize_into(bytes);
     }
 }
 ```
@@ -145,13 +151,8 @@ impl TryParse for Depth {
         let (visuals_len, new_remaining) = u16::try_parse(remaining)?;
         remaining = new_remaining;
         remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let list_length = visuals_len as usize;
-        let mut visuals = Vec::with_capacity(list_length);
-        for _ in 0..list_length {
-            let (v, new_remaining) = Visualtype::try_parse(remaining)?;
-            visuals.push(v);
-            remaining = new_remaining;
-        }
+        let (visuals, new_remaining) = crate::x11_utils::parse_list::<Visualtype>(remaining, visuals_len as usize)?;
+        remaining = new_remaining;
         let result = Depth { depth, visuals };
         Ok((result, remaining))
     }
@@ -174,26 +175,21 @@ impl TryFrom<&[u8]> for Depth {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl Depth {
-    pub fn to_ne_bytes(&self) -> Vec<u8> {
+impl Serialize for Depth {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Self::Bytes {
         let mut result = Vec::new();
-        let depth_bytes = self.depth.to_ne_bytes();
-        let visuals_len = self.visuals.len() as u16;
-        let visuals_len_bytes = visuals_len.to_ne_bytes();
-        result.extend([
-            depth_bytes[0],
-            0,
-            visuals_len_bytes[0],
-            visuals_len_bytes[1],
-            0,
-            0,
-            0,
-            0,
-        ].iter());
-        for obj in self.visuals.iter() {
-            result.extend(obj.to_ne_bytes().iter());
-        }
+        self.serialize_into(&mut result);
         result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(8);
+        self.depth.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 1]);
+        let visuals_len = self.visuals.len() as u16;
+        visuals_len.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 4]);
+        self.visuals.serialize_into(bytes);
     }
 }
 ```
@@ -209,7 +205,7 @@ impl Depth {
   <item name="Always">    <value>2</value></item>
 </enum>
 ```
-Depending on the largest value, appropriate `Into` implementations are
+Depending on the largest value, appropriate `From` implementations are
 generated.
 ```rust
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -218,38 +214,38 @@ pub enum BackingStore {
     WhenMapped,
     Always,
 }
-impl Into<u8> for BackingStore {
-    fn into(self) -> u8 {
-        match self {
+impl From<BackingStore> for u8 {
+    fn from(input: BackingStore) -> Self {
+        match input {
             BackingStore::NotUseful => 0,
             BackingStore::WhenMapped => 1,
             BackingStore::Always => 2,
         }
     }
 }
-impl Into<RustOption<u8>> for BackingStore {
-    fn into(self) -> RustOption<u8> {
-        Some(self.into())
+impl From<BackingStore> for Option<u8> {
+    fn from(input: BackingStore) -> Self {
+        Some(u8::from(input))
     }
 }
-impl Into<u16> for BackingStore {
-    fn into(self) -> u16 {
-        Into::<u8>::into(self).into()
+impl From<BackingStore> for u16 {
+    fn from(input: BackingStore) -> Self {
+        Self::from(u8::from(input))
     }
 }
-impl Into<RustOption<u16>> for BackingStore {
-    fn into(self) -> RustOption<u16> {
-        Some(self.into())
+impl From<BackingStore> for Option<u16> {
+    fn from(input: BackingStore) -> Self {
+        Some(u16::from(input))
     }
 }
-impl Into<u32> for BackingStore {
-    fn into(self) -> u32 {
-        Into::<u8>::into(self).into()
+impl From<BackingStore> for u32 {
+    fn from(input: BackingStore) -> Self {
+        Self::from(u8::from(input))
     }
 }
-impl Into<RustOption<u32>> for BackingStore {
-    fn into(self) -> RustOption<u32> {
-        Some(self.into())
+impl From<BackingStore> for Option<u32> {
+    fn from(input: BackingStore) -> Self {
+        Some(u32::from(input))
     }
 }
 ```
@@ -280,9 +276,9 @@ pub enum ConfigWindow {
     Sibling,
     StackMode,
 }
-impl Into<u8> for ConfigWindow {
-    fn into(self) -> u8 {
-        match self {
+impl From<ConfigWindow> for u8 {
+    fn from(input: ConfigWindow) -> Self {
+        match input {
             ConfigWindow::X => 1 << 0,
             ConfigWindow::Y => 1 << 1,
             ConfigWindow::Width => 1 << 2,
@@ -293,29 +289,29 @@ impl Into<u8> for ConfigWindow {
         }
     }
 }
-impl Into<RustOption<u8>> for ConfigWindow {
-    fn into(self) -> RustOption<u8> {
-        Some(self.into())
+impl From<ConfigWindow> for Option<u8> {
+    fn from(input: ConfigWindow) -> Self {
+        Some(u8::from(input))
     }
 }
-impl Into<u16> for ConfigWindow {
-    fn into(self) -> u16 {
-        Into::<u8>::into(self).into()
+impl From<ConfigWindow> for u16 {
+    fn from(input: ConfigWindow) -> Self {
+        Self::from(u8::from(input))
     }
 }
-impl Into<RustOption<u16>> for ConfigWindow {
-    fn into(self) -> RustOption<u16> {
-        Some(self.into())
+impl From<ConfigWindow> for Option<u16> {
+    fn from(input: ConfigWindow) -> Self {
+        Some(u16::from(input))
     }
 }
-impl Into<u32> for ConfigWindow {
-    fn into(self) -> u32 {
-        Into::<u8>::into(self).into()
+impl From<ConfigWindow> for u32 {
+    fn from(input: ConfigWindow) -> Self {
+        Self::from(u8::from(input))
     }
 }
-impl Into<RustOption<u32>> for ConfigWindow {
-    fn into(self) -> RustOption<u32> {
-        Some(self.into())
+impl From<ConfigWindow> for Option<u32> {
+    fn from(input: ConfigWindow) -> Self {
+        Some(u32::from(input))
     }
 }
 bitmask_binop!(ConfigWindow, u8);
@@ -336,8 +332,8 @@ ClientMessageData.
 </union>
 ```
 ```rust
-#[derive(Debug, Clone)]
-pub struct ClientMessageData(Vec<u8>);
+#[derive(Debug, Copy, Clone)]
+pub struct ClientMessageData([u8; 20]);
 impl ClientMessageData {
     pub fn as_data8(&self) -> [u8; 20] {
         fn do_the_parse(value: &[u8]) -> Result<[u8; 20], ParseError> {
@@ -407,7 +403,7 @@ impl ClientMessageData {
             let _ = remaining;
             Ok(data8)
         }
-        do_the_parse(&self.0[..]).unwrap()
+        do_the_parse(&self.0).unwrap()
     }
     pub fn as_data16(&self) -> [u16; 10] {
         fn do_the_parse(value: &[u8]) -> Result<[u16; 10], ParseError> {
@@ -447,7 +443,7 @@ impl ClientMessageData {
             let _ = remaining;
             Ok(data16)
         }
-        do_the_parse(&self.0[..]).unwrap()
+        do_the_parse(&self.0).unwrap()
     }
     pub fn as_data32(&self) -> [u32; 5] {
         fn do_the_parse(value: &[u8]) -> Result<[u32; 5], ParseError> {
@@ -472,38 +468,45 @@ impl ClientMessageData {
             let _ = remaining;
             Ok(data32)
         }
-        do_the_parse(&self.0[..]).unwrap()
+        do_the_parse(&self.0).unwrap()
     }
-    fn to_ne_bytes(&self) -> &[u8] {
-        &self.0
+}
+impl Serialize for ClientMessageData {
+    type Bytes = [u8; 20];
+    fn serialize(&self) -> Self::Bytes {
+        self.0
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.extend_from_slice(&self.0);
     }
 }
 impl TryParse for ClientMessageData {
     fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let inner = value.get(..20)
+        let inner: [u8; 20] = value.get(..20)
             .ok_or(ParseError::ParseError)?
-            .iter().copied().collect();
+            .try_into()
+            .unwrap();
         let result = ClientMessageData(inner);
         Ok((result, &value[20..]))
     }
 }
 impl From<[u8; 20]> for ClientMessageData {
     fn from(value: [u8; 20]) -> Self {
-        Self(value.to_vec())
+        Self(value)
     }
 }
 impl From<[u16; 10]> for ClientMessageData {
     fn from(value: [u16; 10]) -> Self {
-        let value0 = value[0].to_ne_bytes();
-        let value1 = value[1].to_ne_bytes();
-        let value2 = value[2].to_ne_bytes();
-        let value3 = value[3].to_ne_bytes();
-        let value4 = value[4].to_ne_bytes();
-        let value5 = value[5].to_ne_bytes();
-        let value6 = value[6].to_ne_bytes();
-        let value7 = value[7].to_ne_bytes();
-        let value8 = value[8].to_ne_bytes();
-        let value9 = value[9].to_ne_bytes();
+        let value0 = value[0].serialize();
+        let value1 = value[1].serialize();
+        let value2 = value[2].serialize();
+        let value3 = value[3].serialize();
+        let value4 = value[4].serialize();
+        let value5 = value[5].serialize();
+        let value6 = value[6].serialize();
+        let value7 = value[7].serialize();
+        let value8 = value[8].serialize();
+        let value9 = value[9].serialize();
         let value = [
             value0[0],
             value0[1],
@@ -526,16 +529,16 @@ impl From<[u16; 10]> for ClientMessageData {
             value9[0],
             value9[1],
         ];
-        Self(value.to_vec())
+        Self(value)
     }
 }
 impl From<[u32; 5]> for ClientMessageData {
     fn from(value: [u32; 5]) -> Self {
-        let value0 = value[0].to_ne_bytes();
-        let value1 = value[1].to_ne_bytes();
-        let value2 = value[2].to_ne_bytes();
-        let value3 = value[3].to_ne_bytes();
-        let value4 = value[4].to_ne_bytes();
+        let value0 = value[0].serialize();
+        let value1 = value[1].serialize();
+        let value2 = value[2].serialize();
+        let value3 = value[3].serialize();
+        let value4 = value[4].serialize();
         let value = [
             value0[0],
             value0[1],
@@ -558,7 +561,7 @@ impl From<[u32; 5]> for ClientMessageData {
             value4[2],
             value4[3],
         ];
-        Self(value.to_vec())
+        Self(value)
     }
 }
 ```
@@ -654,39 +657,39 @@ impl TryFrom<&[u8]> for KeyPressEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl From<X11GenericEvent> for KeyPressEvent {
-    fn from(value: X11GenericEvent) -> Self {
+impl From<GenericEvent> for KeyPressEvent {
+    fn from(value: GenericEvent) -> Self {
         Self::try_from(Into::<Buffer>::into(value)).expect("Buffer should be large enough so that parsing cannot fail")
     }
 }
-impl From<&X11GenericEvent> for KeyPressEvent {
-    fn from(value: &X11GenericEvent) -> Self {
+impl From<&GenericEvent> for KeyPressEvent {
+    fn from(value: &GenericEvent) -> Self {
         Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
     }
 }
-impl Into<[u8; 32]> for &KeyPressEvent {
-    fn into(self) -> [u8; 32] {
-        let sequence = self.sequence.to_ne_bytes();
-        let time = self.time.to_ne_bytes();
-        let root = self.root.to_ne_bytes();
-        let event = self.event.to_ne_bytes();
-        let child = self.child.to_ne_bytes();
-        let root_x = self.root_x.to_ne_bytes();
-        let root_y = self.root_y.to_ne_bytes();
-        let event_x = self.event_x.to_ne_bytes();
-        let event_y = self.event_y.to_ne_bytes();
-        let state = self.state.to_ne_bytes();
+impl From<&KeyPressEvent> for [u8; 32]{
+    fn from(input: &KeyPressEvent) -> Self {
+        let sequence = input.sequence.serialize();
+        let time = input.time.serialize();
+        let root = input.root.serialize();
+        let event = input.event.serialize();
+        let child = input.child.serialize();
+        let root_x = input.root_x.serialize();
+        let root_y = input.root_y.serialize();
+        let event_x = input.event_x.serialize();
+        let event_y = input.event_y.serialize();
+        let state = input.state.serialize();
         [
-            self.response_type, self.detail, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            input.response_type, input.detail, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
             root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
             child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], (self.same_screen as u8), 0
+            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], (input.same_screen as u8), 0
         ]
     }
 }
-impl Into<[u8; 32]> for KeyPressEvent {
-    fn into(self) -> [u8; 32] {
-        (&self).into()
+impl From<KeyPressEvent> for [u8; 32] {
+    fn from(input: KeyPressEvent) -> Self {
+        Self::from(&input)
     }
 }
 ```
@@ -751,32 +754,32 @@ impl TryFrom<&[u8]> for RequestError {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl From<X11GenericError> for RequestError {
-    fn from(value: X11GenericError) -> Self {
+impl From<GenericError> for RequestError {
+    fn from(value: GenericError) -> Self {
         Self::try_from(Into::<Buffer>::into(value)).expect("Buffer should be large enough so that parsing cannot fail")
     }
 }
-impl From<&X11GenericError> for RequestError {
-    fn from(value: &X11GenericError) -> Self {
+impl From<&GenericError> for RequestError {
+    fn from(value: &GenericError) -> Self {
         Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
     }
 }
-impl Into<[u8; 32]> for &RequestError {
-    fn into(self) -> [u8; 32] {
-        let sequence = self.sequence.to_ne_bytes();
-        let bad_value = self.bad_value.to_ne_bytes();
-        let minor_opcode = self.minor_opcode.to_ne_bytes();
+impl From<&RequestError> for [u8; 32]{
+    fn from(input: &RequestError) -> Self {
+        let sequence = input.sequence.serialize();
+        let bad_value = input.bad_value.serialize();
+        let minor_opcode = input.minor_opcode.serialize();
         [
-            self.response_type, self.error_code, sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], self.major_opcode, 0, /* trailing padding */ 0, 0, 0, 0,
+            input.response_type, input.error_code, sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
+            minor_opcode[0], minor_opcode[1], input.major_opcode, 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
     }
 }
-impl Into<[u8; 32]> for RequestError {
-    fn into(self) -> [u8; 32] {
-        (&self).into()
+impl From<RequestError> for [u8; 32] {
+    fn from(input: RequestError) -> Self {
+        Self::from(&input)
     }
 }
 ```
@@ -806,7 +809,7 @@ pub fn no_operation<Conn>(conn: &Conn) -> Result<VoidCookie<Conn>, ConnectionErr
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).to_ne_bytes();
+    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
     let request0 = [
         NO_OPERATION_REQUEST,
         0,
@@ -844,7 +847,7 @@ pub fn get_input_focus<Conn>(conn: &Conn) -> Result<Cookie<Conn, GetInputFocusRe
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).to_ne_bytes();
+    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
     let request0 = [
         GET_INPUT_FOCUS_REQUEST,
         0,
@@ -959,68 +962,18 @@ pub const CONFIGURE_WINDOW_REQUEST: u8 = 12;
 /// Auxiliary and optional information for the configure_window function.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ConfigureWindowAux {
-    x: RustOption<i32>,
-    y: RustOption<i32>,
-    width: RustOption<u32>,
-    height: RustOption<u32>,
-    border_width: RustOption<u32>,
-    sibling: RustOption<u32>,
-    stack_mode: RustOption<u32>,
+    x: Option<i32>,
+    y: Option<i32>,
+    width: Option<u32>,
+    height: Option<u32>,
+    border_width: Option<u32>,
+    sibling: Option<WINDOW>,
+    stack_mode: Option<u32>,
 }
 impl ConfigureWindowAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
         Default::default()
-    }
-    fn wire_length(&self) -> usize {
-        let mut result = 0;
-        if self.x.is_some() {
-            result += 4;
-        }
-        if self.y.is_some() {
-            result += 4;
-        }
-        if self.width.is_some() {
-            result += 4;
-        }
-        if self.height.is_some() {
-            result += 4;
-        }
-        if self.border_width.is_some() {
-            result += 4;
-        }
-        if self.sibling.is_some() {
-            result += 4;
-        }
-        if self.stack_mode.is_some() {
-            result += 4;
-        }
-        result
-    }
-    fn to_ne_bytes(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        if let Some(value) = self.x {
-            result.extend(value.to_ne_bytes().iter());
-        }
-        if let Some(value) = self.y {
-            result.extend(value.to_ne_bytes().iter());
-        }
-        if let Some(value) = self.width {
-            result.extend(value.to_ne_bytes().iter());
-        }
-        if let Some(value) = self.height {
-            result.extend(value.to_ne_bytes().iter());
-        }
-        if let Some(value) = self.border_width {
-            result.extend(value.to_ne_bytes().iter());
-        }
-        if let Some(value) = self.sibling {
-            result.extend(value.to_ne_bytes().iter());
-        }
-        if let Some(value) = self.stack_mode {
-            result.extend(value.to_ne_bytes().iter());
-        }
-        result
     }
     fn value_mask(&self) -> u16 {
         let mut mask = 0;
@@ -1048,51 +1001,83 @@ impl ConfigureWindowAux {
         mask
     }
     /// Set the x field of this structure.
-    pub fn x<I>(mut self, value: I) -> Self where I: Into<RustOption<i32>> {
+    pub fn x<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.x = value.into();
         self
     }
     /// Set the y field of this structure.
-    pub fn y<I>(mut self, value: I) -> Self where I: Into<RustOption<i32>> {
+    pub fn y<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.y = value.into();
         self
     }
     /// Set the width field of this structure.
-    pub fn width<I>(mut self, value: I) -> Self where I: Into<RustOption<u32>> {
+    pub fn width<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.width = value.into();
         self
     }
     /// Set the height field of this structure.
-    pub fn height<I>(mut self, value: I) -> Self where I: Into<RustOption<u32>> {
+    pub fn height<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.height = value.into();
         self
     }
     /// Set the border_width field of this structure.
-    pub fn border_width<I>(mut self, value: I) -> Self where I: Into<RustOption<u32>> {
+    pub fn border_width<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.border_width = value.into();
         self
     }
     /// Set the sibling field of this structure.
-    pub fn sibling<I>(mut self, value: I) -> Self where I: Into<RustOption<u32>> {
+    pub fn sibling<I>(mut self, value: I) -> Self where I: Into<Option<WINDOW>> {
         self.sibling = value.into();
         self
     }
     /// Set the stack_mode field of this structure.
-    pub fn stack_mode<I>(mut self, value: I) -> Self where I: Into<RustOption<u32>> {
+    pub fn stack_mode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.stack_mode = value.into();
         self
     }
 }
+impl Serialize for ConfigureWindowAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.x {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.y {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.width {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.height {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.border_width {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.sibling {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.stack_mode {
+            value.serialize_into(bytes);
+        }
+    }
+}
 /// [SNIP]
+/// ```
 pub fn configure_window<'c, Conn>(conn: &'c Conn, window: WINDOW, value_list: &ConfigureWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let value_mask = value_list.value_mask();
-    let length: usize = (12 + value_list.wire_length() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).to_ne_bytes();
-    let window_bytes = window.to_ne_bytes();
-    let value_mask_bytes = value_mask.to_ne_bytes();
-    let value_list_bytes = value_list.to_ne_bytes();
+    let value_list_bytes = value_list.serialize();
+    let length: usize = (12 + value_list_bytes.len() + 3) / 4;
+    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let window_bytes = window.serialize();
+    let value_mask_bytes = value_mask.serialize();
     let request0 = [
         CONFIGURE_WINDOW_REQUEST,
         0,

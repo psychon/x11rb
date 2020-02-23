@@ -292,17 +292,7 @@ def request_implementation(module, obj, name, fds, fds_is_list):
                 _emit_add_to_requests(rust_variable)
             else:
                 if field.type.size is not None:
-                    if field.type.size <= 32:
-                        module.out("let %s_bytes = %s.serialize();",
-                                   rust_variable, rust_variable)
-                    else:
-                        # I am not happy about the trait std::array::LengthAtMost32
-                        module.out("let mut %s_bytes = Vec::new();",
-                                   rust_variable)
-                        module.out("for value in %s {", rust_variable)
-                        module.out.indent("%s_bytes.extend(value.serialize().iter());",
-                                          rust_variable)
-                        module.out("}")
+                    module.out("let %s_bytes = %s.serialize();", rust_variable, rust_variable)
                 # else: Already called .serialize() on the list above
 
                 _emit_request()
