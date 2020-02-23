@@ -1,6 +1,6 @@
 //! A pure-rust implementation of a connection to an X11 server.
 
-use std::io::{IoSlice, Write, Read};
+use std::io::{IoSlice, Write, Read, ErrorKind};
 use std::error::Error;
 use std::convert::TryInto;
 use std::collections::VecDeque;
@@ -116,8 +116,7 @@ where W: Write
     /// to be ignored. This causes `self.next_reply_expected` to be increased.
     fn send_sync(&mut self) -> Result<(), Box<dyn Error>> {
         let length = 1u16.to_ne_bytes();
-        let written = self.write.write(&[GET_INPUT_FOCUS_REQUEST, 0 /* pad */, length[0], length[1]])?;
-        assert_eq!(written, 4);
+        self.write.write_all(&[GET_INPUT_FOCUS_REQUEST, 0 /* pad */, length[0], length[1]])?;
 
         self.last_sequence_written += 1;
         self.next_reply_expected = self.last_sequence_written;
@@ -152,9 +151,26 @@ where W: Write
         };
         self.sent_requests.push_back(sent_request);
 
+        // Now actually send the buffers
         // FIXME: We must always be able to read when we write
-        let written = self.write.write_vectored(bufs)?;
-        assert_eq!(written, bufs.iter().map(|s| s.len()).sum(), "FIXME: Implement partial write handling");
+        let mut bufs = bufs;
+        while !bufs.is_empty() {
+            let mut count = self.write.write_vectored(bufs)?;
+            if count == 0 {
+                return Err(std::io::Error::new(ErrorKind::WriteZero, "failed to write anything").into());
+            }
+            while count > 0 {
+                if count >= bufs[0].len() {
+                    count -= bufs[0].len();
+                } else {
+                    let remaining = &bufs[0][count..];
+                    self.write.write_all(remaining)?;
+                    count = 0;
+                }
+                bufs = &bufs[1..];
+            }
+        }
+
         Ok(seqno)
     }
 
@@ -518,5 +534,24 @@ mod test {
         let expected: Vec<_> = std::iter::repeat(&get_input_focus).take(0x10001).flatten().copied().collect();
         assert_eq!(&written[..], &expected[..]);
         Ok(())
+    }
+
+    fn partial_write_test(request: &[u8], expected_err: &str) {
+        let mut written = [0x21; 2];
+        let mut output = &mut written[..];
+        let mut connection = ConnectionInner::new(&mut output);
+        let request = [IoSlice::new(&request), IoSlice::new(&request)];
+        let error = connection.send_request(&request, RequestKind::IsVoid).unwrap_err();
+        assert_eq!(expected_err, error.to_string());
+    }
+
+    #[test]
+    fn partial_write_larger_slice() {
+        partial_write_test(&[0; 4], "failed to write whole buffer");
+    }
+
+    #[test]
+    fn partial_write_slice_border() {
+        partial_write_test(&[0; 2], "failed to write anything");
     }
 }
