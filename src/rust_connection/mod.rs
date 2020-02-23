@@ -22,12 +22,17 @@ mod xauth;
 
 use inner::PollReply;
 
-type MutexGuardInner<'a, R, W> = MutexGuard<'a, inner::ConnectionInner<R, W>>;
+type MutexGuardInner<'a, W> = MutexGuard<'a, inner::ConnectionInner<W>>;
+
+// A mutex that is only necessary to make something `Sync`, but the actual synchronisation happens
+// elsewhere. Basically, this mutex is never locked when `lock()` is called on it.
+type UselessMutex<T> = Mutex<T>;
 
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
 pub struct RustConnection<R: Read = stream::Stream, W: Write = stream::Stream> {
-    inner: Mutex<inner::ConnectionInner<R, W>>,
+    inner: Mutex<inner::ConnectionInner<W>>,
+    read: UselessMutex<R>,
     id_allocator: Mutex<id_allocator::IDAllocator>,
     setup: Setup,
     extension_information: ExtensionInformation,
@@ -77,9 +82,9 @@ impl<R: Read, W: Write> RustConnection<R, W> {
     /// The parameters `auth_name` and `auth_data` are used for the members
     /// `authorization_protocol_name` and `authorization_protocol_data` of the `SetupRequest` that
     /// is sent to the X11 server.
-    pub fn connect_to_stream_with_auth_info(read: R, write: W, screen: usize, auth_name: Vec<u8>, auth_data: Vec<u8>)
+    pub fn connect_to_stream_with_auth_info(mut read: R, write: W, screen: usize, auth_name: Vec<u8>, auth_data: Vec<u8>)
     -> Result<Self, Box<dyn Error>> {
-        let (inner, setup) = inner::ConnectionInner::connect(read, write, auth_name, auth_data)?;
+        let (inner, setup) = inner::ConnectionInner::connect(&mut read, write, auth_name, auth_data)?;
 
         // Check that we got a valid screen number
         if screen >= setup.roots.len() {
@@ -90,6 +95,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
         let allocator = id_allocator::IDAllocator::new(setup.resource_id_base, setup.resource_id_mask);
         let conn = RustConnection {
             inner: Mutex::new(inner),
+            read: UselessMutex::new(read),
             id_allocator: Mutex::new(allocator),
             setup,
             extension_information: Default::default(),
@@ -105,8 +111,8 @@ impl<R: Read, W: Write> RustConnection<R, W> {
         self.inner.lock().unwrap().send_request(bufs, kind).or(Err(ConnectionError::UnknownError))
     }
 
-    fn read_packet_and_enqueue(mut inner: MutexGuardInner<R, W>) -> Result<MutexGuardInner<R, W>, Box<dyn Error>> {
-        let packet = read_packet(&mut inner.read)?;
+    fn read_packet_and_enqueue<'a>(&'a self, mut inner: MutexGuardInner<'a, W>) -> Result<MutexGuardInner<'a, W>, Box<dyn Error>> {
+        let packet = read_packet(&mut *self.read.lock().unwrap())?;
         inner.enqueue_packet(packet);
         Ok(inner)
     }
@@ -158,7 +164,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
                     return Ok(reply)
                 }
             }
-            inner = Self::read_packet_and_enqueue(inner).map_err(|_| ConnectionError::UnknownError)?;
+            inner = self.read_packet_and_enqueue(inner).map_err(|_| ConnectionError::UnknownError)?;
         }
     }
 
@@ -170,7 +176,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
                 PollReply::NoReply => return Ok(None),
                 PollReply::Reply(buffer) => return Ok(Some(buffer)),
             }
-            inner = Self::read_packet_and_enqueue(inner).map_err(|_| ConnectionError::UnknownError)?;
+            inner = self.read_packet_and_enqueue(inner).map_err(|_| ConnectionError::UnknownError)?;
         }
     }
 
@@ -183,7 +189,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
                 PollReply::NoReply => return Ok(None),
                 PollReply::Reply(buffer) => return Ok(buffer.try_into().ok()),
             }
-            inner = Self::read_packet_and_enqueue(inner).map_err(|_| ConnectionError::UnknownError)?;
+            inner = self.read_packet_and_enqueue(inner).map_err(|_| ConnectionError::UnknownError)?;
         }
     }
 
@@ -219,7 +225,7 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
             if let Some(event) = inner.poll_for_event() {
                 return Ok(event);
             }
-            inner = Self::read_packet_and_enqueue(inner).map_err(|_| ConnectionError::UnknownError)?;
+            inner = self.read_packet_and_enqueue(inner).map_err(|_| ConnectionError::UnknownError)?;
         }
     }
 

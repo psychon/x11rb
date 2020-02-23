@@ -29,11 +29,11 @@ struct SentRequest {
 }
 
 #[derive(Debug)]
-pub(crate) struct ConnectionInner<R, W>
-where R: Read, W: Write
+pub(crate) struct ConnectionInner<W>
+where W: Write
 {
-    // The underlying byte stream that connects us to the X11 server
-    pub(crate) read: R,
+    // The underlying byte stream used for writing to the X11 server. Reading is done outside of
+    // this struct (for synchronisation reasons).
     write: W,
 
     // The sequence number of the last request that was written
@@ -52,15 +52,14 @@ where R: Read, W: Write
     pending_replies: VecDeque<(SequenceNumber, Buffer)>,
 }
 
-impl<R, W> ConnectionInner<R, W>
-where R: Read, W: Write
+impl<W> ConnectionInner<W>
+where W: Write
 {
-    pub(crate) fn connect(mut read: R, mut write: W, auth_name: Vec<u8>, auth_data: Vec<u8>)
+    pub(crate) fn connect(read: &mut impl Read, mut write: W, auth_name: Vec<u8>, auth_data: Vec<u8>)
     -> Result<(Self, Setup), Box<dyn Error>> {
         Self::write_setup(&mut write, auth_name, auth_data)?;
-        let setup = Self::read_setup(&mut read)?;
+        let setup = Self::read_setup(read)?;
         let result = ConnectionInner {
-            read,
             write,
             last_sequence_written: 0,
             next_reply_expected: 0,
@@ -95,7 +94,7 @@ where R: Read, W: Write
         Ok(())
     }
 
-    fn read_setup(read: &mut R) -> Result<Setup, Box<dyn Error>> {
+    fn read_setup(read: &mut impl Read) -> Result<Setup, Box<dyn Error>> {
         let mut setup = vec![0; 8];
         read.read_exact(&mut setup)?;
         let extra_length = usize::from(u16::from_ne_bytes([setup[6], setup[7]])) * 4;
