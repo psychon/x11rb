@@ -24,15 +24,11 @@ use inner::PollReply;
 
 type MutexGuardInner<'a, W> = MutexGuard<'a, inner::ConnectionInner<W>>;
 
-// A mutex that is only necessary to make something `Sync`, but the actual synchronisation happens
-// elsewhere. Basically, this mutex is never locked when `lock()` is called on it.
-type UselessMutex<T> = Mutex<T>;
-
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
 pub struct RustConnection<R: Read = BufReader<stream::Stream>, W: Write = BufWriter<stream::Stream>> {
     inner: Mutex<inner::ConnectionInner<W>>,
-    read: UselessMutex<R>,
+    read: Mutex<R>,
     reader_condition: Condvar,
     id_allocator: Mutex<id_allocator::IDAllocator>,
     setup: Setup,
@@ -97,7 +93,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
         let allocator = id_allocator::IDAllocator::new(setup.resource_id_base, setup.resource_id_mask);
         let conn = RustConnection {
             inner: Mutex::new(inner),
-            read: UselessMutex::new(read),
+            read: Mutex::new(read),
             reader_condition: Condvar::new(),
             id_allocator: Mutex::new(allocator),
             setup,
@@ -125,22 +121,22 @@ impl<R: Read, W: Write> RustConnection<R, W> {
     /// reason, you need to pass in a `MutexGuard` to be dropped. This function locks the mutex
     /// again and returns a new `MutexGuard`.
     fn read_packet_and_enqueue<'a>(&'a self, mut inner: MutexGuardInner<'a, W>) -> Result<MutexGuardInner<'a, W>, Box<dyn Error>> {
-        if inner.have_reader {
-            // Someone else is reading; wait for them
-            Ok(self.reader_condition.wait(inner).unwrap())
-        } else {
-            // We can read from the socket
-            inner.have_reader = true;
-            drop(inner);
+        match self.read.try_lock() {
+            Err(_) => {
+                // Someone else is reading; wait for them
+                Ok(self.reader_condition.wait(inner).unwrap())
+            }
+            Ok(mut lock) => {
+                drop(inner);
 
-            let packet = read_packet(&mut *self.read.try_lock().unwrap())?;
+                let packet = read_packet(&mut *lock)?;
+                drop(lock);
 
-            inner = self.inner.lock().unwrap();
-            debug_assert!(inner.have_reader);
-            inner.have_reader = false;
-            inner.enqueue_packet(packet);
-            self.reader_condition.notify_all();
-            Ok(inner)
+                inner = self.inner.lock().unwrap();
+                inner.enqueue_packet(packet);
+                self.reader_condition.notify_all();
+                Ok(inner)
+            }
         }
     }
 }
