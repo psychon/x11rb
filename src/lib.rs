@@ -75,19 +75,18 @@
         unused_qualifications,
         unused_results,
         )]
-#![cfg_attr(not(feature = "allow-unsafe-code"),
-            forbid(unsafe_code))]
+#![cfg_attr(not(feature = "allow-unsafe-code"), forbid(unsafe_code))]
 
+pub mod utils;
 #[cfg(feature = "allow-unsafe-code")]
 pub mod xcb_ffi;
-pub mod utils;
 #[macro_use]
 pub mod x11_utils;
-pub mod errors;
 pub mod connection;
-pub mod rust_connection;
 pub mod cookie;
+pub mod errors;
 pub mod extension_information;
+pub mod rust_connection;
 
 pub mod generated {
     include!(concat!(env!("OUT_DIR"), "/generated/mod.rs"));
@@ -96,15 +95,17 @@ pub mod wrapper;
 
 use std::error::Error;
 
-use generated::xproto::{KEYSYM, TIMESTAMP};
 use connection::Connection;
+use generated::xproto::{KEYSYM, TIMESTAMP};
 
 /// Establish a new connection to an X11 server.
 ///
 /// If a `dpy_name` is provided, it describes the display that should be connected to, for
 /// example `127.0.0.1:1`. If no value is provided, the `$DISPLAY` environment variable is
 /// used.
-pub fn connect(dpy_name: Option<&str>) -> Result<(impl Connection + Send + Sync, usize), Box<dyn Error>> {
+pub fn connect(
+    dpy_name: Option<&str>,
+) -> Result<(impl Connection + Send + Sync, usize), Box<dyn Error>> {
     #[cfg(feature = "allow-unsafe-code")]
     {
         let dpy_name = dpy_name.map(std::ffi::CString::new).transpose()?;

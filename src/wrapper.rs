@@ -3,10 +3,10 @@
 use std::convert::TryInto;
 use std::marker::PhantomData;
 
-use super::generated::xproto::{ConnectionExt as XProtoConnectionExt, InternAtomReply, ATOM};
 use super::connection::Connection;
-use super::cookie::{VoidCookie, Cookie};
+use super::cookie::{Cookie, VoidCookie};
 use super::errors::{ConnectionError, ConnectionErrorOrX11Error};
+use super::generated::xproto::{ConnectionExt as XProtoConnectionExt, InternAtomReply, ATOM};
 use super::x11_utils::TryParse;
 
 /// Iterator implementation used by `GetPropertyReply`.
@@ -23,7 +23,8 @@ impl<'a, T> PropertyIterator<'a, T> {
 }
 
 impl<T> Iterator for PropertyIterator<'_, T>
-where T: TryParse
+where
+    T: TryParse,
 {
     type Item = T;
 
@@ -32,11 +33,11 @@ where T: TryParse
             Ok((value, remaining)) => {
                 self.0 = remaining;
                 Some(value)
-            },
+            }
             Err(_) => {
                 self.0 = &[];
                 None
-            },
+            }
         }
     }
 
@@ -51,35 +52,80 @@ impl<T: TryParse> std::iter::FusedIterator for PropertyIterator<'_, T> {}
 /// Extension trait that simplifies API use
 pub trait ConnectionExt: XProtoConnectionExt {
     /// Change a property on a window with format 8.
-    fn change_property8<A>(&self, mode: A, window: u32, property: u32, type_: u32, data: &[u8])
-    -> Result<VoidCookie<Self>, ConnectionError>
-    where A: Into<u8>
+    fn change_property8<A>(
+        &self,
+        mode: A,
+        window: u32,
+        property: u32,
+        type_: u32,
+        data: &[u8],
+    ) -> Result<VoidCookie<Self>, ConnectionError>
+    where
+        A: Into<u8>,
     {
-        self.change_property(mode, window, property, type_, 8, data.len().try_into()?, data)
+        self.change_property(
+            mode,
+            window,
+            property,
+            type_,
+            8,
+            data.len().try_into()?,
+            data,
+        )
     }
 
     /// Change a property on a window with format 16.
-    fn change_property16<A>(&self, mode: A, window: u32, property: u32, type_: u32, data: &[u16])
-    -> Result<VoidCookie<Self>, ConnectionError>
-    where A: Into<u8>
+    fn change_property16<A>(
+        &self,
+        mode: A,
+        window: u32,
+        property: u32,
+        type_: u32,
+        data: &[u16],
+    ) -> Result<VoidCookie<Self>, ConnectionError>
+    where
+        A: Into<u8>,
     {
         let mut data_u8 = Vec::with_capacity(data.len() * 2);
         for item in data {
             data_u8.extend(&item.to_ne_bytes());
         }
-        self.change_property(mode, window, property, type_, 16, data.len().try_into()?, &data_u8)
+        self.change_property(
+            mode,
+            window,
+            property,
+            type_,
+            16,
+            data.len().try_into()?,
+            &data_u8,
+        )
     }
 
     /// Change a property on a window with format 32.
-    fn change_property32<A>(&self, mode: A, window: u32, property: u32, type_: u32, data: &[u32])
-    -> Result<VoidCookie<Self>, ConnectionError>
-    where A: Into<u8>
+    fn change_property32<A>(
+        &self,
+        mode: A,
+        window: u32,
+        property: u32,
+        type_: u32,
+        data: &[u32],
+    ) -> Result<VoidCookie<Self>, ConnectionError>
+    where
+        A: Into<u8>,
     {
         let mut data_u8 = Vec::with_capacity(data.len() * 4);
         for item in data {
             data_u8.extend(&item.to_ne_bytes());
         }
-        self.change_property(mode, window, property, type_, 32, data.len().try_into()?, &data_u8)
+        self.change_property(
+            mode,
+            window,
+            property,
+            type_,
+            32,
+            data.len().try_into()?,
+            &data_u8,
+        )
     }
 
     /// Synchronise with the X11 server.
@@ -117,7 +163,7 @@ impl<'c, C: Connection> LazyAtom<'c, C> {
     pub fn new(conn: &'c C, only_if_exists: bool, name: &[u8]) -> Self {
         match conn.intern_atom(only_if_exists, name) {
             Ok(cookie) => LazyAtom::Pending(cookie),
-            Err(err) => LazyAtom::Resolved(Err(err.into()))
+            Err(err) => LazyAtom::Resolved(Err(err.into())),
         }
     }
 
@@ -136,16 +182,17 @@ impl<'c, C: Connection> LazyAtom<'c, C> {
         match self {
             LazyAtom::Pending(_) => {
                 // We need to move the cookie out of self to call reply()
-                if let LazyAtom::Pending(cookie) = std::mem::replace(self, LazyAtom::Resolved(Ok(0))) {
+                if let LazyAtom::Pending(cookie) =
+                    std::mem::replace(self, LazyAtom::Resolved(Ok(0)))
+                {
                     // Now get the reply and replace self again with the correct value
-                    let reply = cookie.reply()
-                        .map(|reply| reply.atom);
+                    let reply = cookie.reply().map(|reply| reply.atom);
                     *self = LazyAtom::Resolved(reply.clone());
                     reply
                 } else {
                     unreachable!()
                 }
-            },
+            }
             LazyAtom::Resolved(result) => result.clone(),
         }
     }

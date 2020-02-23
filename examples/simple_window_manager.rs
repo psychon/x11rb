@@ -3,15 +3,15 @@
 
 extern crate x11rb;
 
-use std::process::exit;
 use std::collections::HashSet;
+use std::process::exit;
 
 use x11rb::connection::Connection;
-use x11rb::generated::xproto::*;
 use x11rb::errors::ConnectionErrorOrX11Error;
-use x11rb::x11_utils::{GenericEvent, Event};
-use x11rb::COPY_DEPTH_FROM_PARENT;
+use x11rb::generated::xproto::*;
 use x11rb::wrapper::LazyAtom;
+use x11rb::x11_utils::{Event, GenericEvent};
+use x11rb::COPY_DEPTH_FROM_PARENT;
 
 const TITLEBAR_HEIGHT: u16 = 20;
 
@@ -23,7 +23,7 @@ struct WindowState {
     x: i16,
     y: i16,
     width: u16,
-    height: u16
+    height: u16,
 }
 
 impl WindowState {
@@ -114,19 +114,37 @@ impl<'a, C: Connection> WMState<'a, C> {
     }
 
     /// Add a new window that should be managed by the WM
-    fn manage_window(&mut self, win: WINDOW, geom: &GetGeometryReply) -> Result<(), ConnectionErrorOrX11Error> {
+    fn manage_window(
+        &mut self,
+        win: WINDOW,
+        geom: &GetGeometryReply,
+    ) -> Result<(), ConnectionErrorOrX11Error> {
         println!("Managing window {:?}", win);
         let screen = &self.conn.setup().roots[self.screen_num];
         assert!(self.find_window_by_id(win).is_none());
 
         let frame_win = self.conn.generate_id();
         let win_aux = CreateWindowAux::new()
-            .event_mask(EventMask::Exposure | EventMask::SubstructureNotify | EventMask::ButtonRelease)
+            .event_mask(
+                EventMask::Exposure | EventMask::SubstructureNotify | EventMask::ButtonRelease,
+            )
             .background_pixel(screen.white_pixel);
-        self.conn.create_window(COPY_DEPTH_FROM_PARENT, frame_win, screen.root, geom.x, geom.y, geom.width,
-                                geom.height + TITLEBAR_HEIGHT, 1, WindowClass::InputOutput, 0, &win_aux)?;
+        self.conn.create_window(
+            COPY_DEPTH_FROM_PARENT,
+            frame_win,
+            screen.root,
+            geom.x,
+            geom.y,
+            geom.width,
+            geom.height + TITLEBAR_HEIGHT,
+            1,
+            WindowClass::InputOutput,
+            0,
+            &win_aux,
+        )?;
 
-        self.conn.reparent_window(win, frame_win, 0, TITLEBAR_HEIGHT as _)?;
+        self.conn
+            .reparent_window(win, frame_win, 0, TITLEBAR_HEIGHT as _)?;
         self.conn.map_window(win)?;
         self.conn.map_window(frame_win)?;
 
@@ -137,17 +155,46 @@ impl<'a, C: Connection> WMState<'a, C> {
     /// Draw the titlebar of a window
     fn redraw_titlebar(&self, state: &WindowState) -> Result<(), ConnectionErrorOrX11Error> {
         let close_x = state.close_x_position();
-        self.conn.poly_line(CoordMode::Origin, state.frame_window, self.black_gc, &[
-                            Point { x: close_x, y: 0 },
-                            Point { x: state.width as _, y: TITLEBAR_HEIGHT as _ },
-        ])?;
-        self.conn.poly_line(CoordMode::Origin, state.frame_window, self.black_gc, &[
-                            Point { x: close_x, y: TITLEBAR_HEIGHT as _ },
-                            Point { x: state.width as _, y: 0 },
-        ])?;
-        let reply = self.conn.get_property(false, state.window, Atom::WM_NAME.into(), Atom::STRING.into(), 0, std::u32::MAX)?
+        self.conn.poly_line(
+            CoordMode::Origin,
+            state.frame_window,
+            self.black_gc,
+            &[
+                Point { x: close_x, y: 0 },
+                Point {
+                    x: state.width as _,
+                    y: TITLEBAR_HEIGHT as _,
+                },
+            ],
+        )?;
+        self.conn.poly_line(
+            CoordMode::Origin,
+            state.frame_window,
+            self.black_gc,
+            &[
+                Point {
+                    x: close_x,
+                    y: TITLEBAR_HEIGHT as _,
+                },
+                Point {
+                    x: state.width as _,
+                    y: 0,
+                },
+            ],
+        )?;
+        let reply = self
+            .conn
+            .get_property(
+                false,
+                state.window,
+                Atom::WM_NAME.into(),
+                Atom::STRING.into(),
+                0,
+                std::u32::MAX,
+            )?
             .reply()?;
-        self.conn.image_text8(state.frame_window, self.black_gc, 1, 10, &reply.value)?;
+        self.conn
+            .image_text8(state.frame_window, self.black_gc, 1, 10, &reply.value)?;
         Ok(())
     }
 
@@ -157,7 +204,10 @@ impl<'a, C: Connection> WMState<'a, C> {
             self.pending_expose.remove(&win);
             if let Some(state) = self.find_window_by_id(win) {
                 if let Err(err) = self.redraw_titlebar(state) {
-                    eprintln!("Error while redrawing window {:x?}: {:?}", state.window, err);
+                    eprintln!(
+                        "Error while redrawing window {:x?}: {:?}",
+                        state.window, err
+                    );
                 }
             }
         }
@@ -165,12 +215,14 @@ impl<'a, C: Connection> WMState<'a, C> {
     }
 
     fn find_window_by_id(&self, win: WINDOW) -> Option<&WindowState> {
-        self.windows.iter()
+        self.windows
+            .iter()
             .find(|state| state.window == win || state.frame_window == win)
     }
 
     fn find_window_by_id_mut(&mut self, win: WINDOW) -> Option<&mut WindowState> {
-        self.windows.iter_mut()
+        self.windows
+            .iter_mut()
             .find(|state| state.window == win || state.frame_window == win)
     }
 
@@ -184,24 +236,29 @@ impl<'a, C: Connection> WMState<'a, C> {
             EXPOSE_EVENT => self.handle_expose(event.into()),
             ENTER_NOTIFY_EVENT => self.handle_enter(event.into()),
             BUTTON_RELEASE_EVENT => self.handle_button_release(event.into()),
-            _ => Ok(())
+            _ => Ok(()),
         }
     }
 
-    fn handle_unmap_notify(&mut self, event: UnmapNotifyEvent) -> Result<(), ConnectionErrorOrX11Error> {
+    fn handle_unmap_notify(
+        &mut self,
+        event: UnmapNotifyEvent,
+    ) -> Result<(), ConnectionErrorOrX11Error> {
         let conn = self.conn;
-        self.windows
-            .retain(|state| {
-                if state.window != event.window {
-                    return true;
-                }
-                conn.destroy_window(state.frame_window).unwrap();
-                false
-            });
+        self.windows.retain(|state| {
+            if state.window != event.window {
+                return true;
+            }
+            conn.destroy_window(state.frame_window).unwrap();
+            false
+        });
         Ok(())
     }
 
-    fn handle_configure_request(&mut self, event: ConfigureRequestEvent) -> Result<(), ConnectionErrorOrX11Error> {
+    fn handle_configure_request(
+        &mut self,
+        event: ConfigureRequestEvent,
+    ) -> Result<(), ConnectionErrorOrX11Error> {
         if let Some(state) = self.find_window_by_id_mut(event.window) {
             let _ = state;
             unimplemented!();
@@ -224,8 +281,14 @@ impl<'a, C: Connection> WMState<'a, C> {
         Ok(())
     }
 
-    fn handle_map_request(&mut self, event: MapRequestEvent) -> Result<(), ConnectionErrorOrX11Error> {
-        self.manage_window(event.window, &self.conn.get_geometry(event.window)?.reply()?)
+    fn handle_map_request(
+        &mut self,
+        event: MapRequestEvent,
+    ) -> Result<(), ConnectionErrorOrX11Error> {
+        self.manage_window(
+            event.window,
+            &self.conn.get_geometry(event.window)?.reply()?,
+        )
     }
 
     fn handle_expose(&mut self, event: ExposeEvent) -> Result<(), ConnectionErrorOrX11Error> {
@@ -243,7 +306,10 @@ impl<'a, C: Connection> WMState<'a, C> {
         Ok(())
     }
 
-    fn handle_button_release(&mut self, event: ButtonReleaseEvent) -> Result<(), ConnectionErrorOrX11Error> {
+    fn handle_button_release(
+        &mut self,
+        event: ButtonReleaseEvent,
+    ) -> Result<(), ConnectionErrorOrX11Error> {
         if let Some(state) = self.find_window_by_id(event.event) {
             let data = [self.wm_delete_window, 0, 0, 0, 0];
             let event = ClientMessageEvent {
@@ -254,18 +320,21 @@ impl<'a, C: Connection> WMState<'a, C> {
                 type_: self.wm_protocols,
                 data: data.into(),
             };
-            self.conn.send_event(false, state.window, EventMask::NoEvent.into(), &event)?;
+            self.conn
+                .send_event(false, state.window, EventMask::NoEvent.into(), &event)?;
         }
         Ok(())
     }
 }
 
-fn become_wm<C: Connection>(conn: &C, screen: &Screen) -> Result<(), ConnectionErrorOrX11Error>
-{
+fn become_wm<C: Connection>(conn: &C, screen: &Screen) -> Result<(), ConnectionErrorOrX11Error> {
     // Try to become the window manager. This causes an error if there is already another WM.
-    let change = ChangeWindowAttributesAux::default()
-        .event_mask(EventMask::SubstructureRedirect | EventMask::SubstructureNotify | EventMask::EnterWindow);
-    let error = conn.change_window_attributes(screen.root, &change)?.check()?;
+    let change = ChangeWindowAttributesAux::default().event_mask(
+        EventMask::SubstructureRedirect | EventMask::SubstructureNotify | EventMask::EnterWindow,
+    );
+    let error = conn
+        .change_window_attributes(screen.root, &change)?
+        .check()?;
     if let Some(error) = error {
         if error.error_code() == ACCESS_ERROR {
             eprintln!("Another WM is already running.");
@@ -301,7 +370,7 @@ fn main() {
         while let Some(event) = event_option {
             if event.response_type() == CLIENT_MESSAGE_EVENT {
                 // This is start_timeout_thread() signaling us to close (most likely).
-                return
+                return;
             }
 
             wm_state.handle_event(event).unwrap();

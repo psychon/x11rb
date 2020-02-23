@@ -4,21 +4,21 @@
 
 #![allow(clippy::cast_ptr_alignment)] // FIXME: Remove this
 
-use std::ptr::{null, null_mut};
+use super::generated::xproto::{QueryExtensionReply, Setup};
+use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
+use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
+use crate::errors::{ConnectionError, ConnectionErrorOrX11Error, ParseError};
+use crate::extension_information::ExtensionInformation;
+use crate::utils::{Buffer, CSlice, RawFdContainer};
+use crate::x11_utils::{GenericError, GenericEvent};
+use libc::c_void;
 use std::convert::{TryFrom, TryInto};
 use std::ffi::CStr;
 use std::io::IoSlice;
 use std::ops::Deref;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, RawFd};
-use libc::c_void;
-use crate::utils::{CSlice, Buffer, RawFdContainer};
-use crate::x11_utils::{GenericError, GenericEvent};
-use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
-use crate::connection::{RequestConnection, Connection, SequenceNumber, RequestKind, DiscardMode};
-use crate::cookie::{VoidCookie, Cookie, CookieWithFds};
-use crate::extension_information::ExtensionInformation;
-use super::generated::xproto::{Setup, QueryExtensionReply};
+use std::ptr::{null, null_mut};
 
 mod pending_errors;
 mod raw_ffi;
@@ -33,11 +33,13 @@ pub struct XCBConnection {
     setup: Setup,
     ext_info: ExtensionInformation,
     errors: pending_errors::PendingErrors,
-    should_drop: bool
+    should_drop: bool,
 }
 
 impl XCBConnection {
-    unsafe fn connection_error_from_connection(c: *const raw_ffi::xcb_connection_t) -> ConnectionError {
+    unsafe fn connection_error_from_connection(
+        c: *const raw_ffi::xcb_connection_t,
+    ) -> ConnectionError {
         Self::connection_error_from_c_error(raw_ffi::xcb_connection_has_error(c))
     }
 
@@ -53,7 +55,7 @@ impl XCBConnection {
             PARSE_ERR => ConnectionError::DisplayParsingError,
             INVALID_SCREEN => ConnectionError::InvalidScreen,
             FDPASSING_FAILED => ConnectionError::FDPassingFailed,
-            _ => ConnectionError::UnknownError
+            _ => ConnectionError::UnknownError,
         }
     }
 
@@ -62,7 +64,7 @@ impl XCBConnection {
     /// If a `dpy_name` is provided, it describes the display that should be connected to, for
     /// example `127.0.0.1:1`. If no value is provided, the `$DISPLAY` environment variable is
     /// used.
-    pub fn connect(dpy_name: Option<&CStr>) -> Result<(XCBConnection, usize), ConnectionError>  {
+    pub fn connect(dpy_name: Option<&CStr>) -> Result<(XCBConnection, usize), ConnectionError> {
         use libc::c_int;
         unsafe {
             let mut screen: c_int = 0;
@@ -71,7 +73,9 @@ impl XCBConnection {
             let error = raw_ffi::xcb_connection_has_error(connection);
             if error != 0 {
                 raw_ffi::xcb_disconnect(connection);
-                Err(Self::connection_error_from_c_error(error.try_into().or(Err(ConnectionError::UnknownError))?))
+                Err(Self::connection_error_from_c_error(
+                    error.try_into().or(Err(ConnectionError::UnknownError))?,
+                ))
             } else {
                 let setup = raw_ffi::xcb_get_setup(connection);
                 let conn = XCBConnection {
@@ -79,7 +83,7 @@ impl XCBConnection {
                     setup: Self::parse_setup(setup)?,
                     ext_info: Default::default(),
                     errors: Default::default(),
-                    should_drop: true
+                    should_drop: true,
                 };
                 Ok((conn, screen as usize))
             }
@@ -94,14 +98,16 @@ impl XCBConnection {
     ///
     /// It is the caller's responsibility to ensure the connection is valid and lives longer
     /// than the returned XCBConnection.
-    pub unsafe fn from_raw_xcb_connection(ptr: *mut c_void) -> Result<XCBConnection, ConnectionError> {
+    pub unsafe fn from_raw_xcb_connection(
+        ptr: *mut c_void,
+    ) -> Result<XCBConnection, ConnectionError> {
         let setup = raw_ffi::xcb_get_setup(ptr as *mut raw_ffi::xcb_connection_t);
         Ok(XCBConnection {
             conn: raw_ffi::XCBConnectionWrapper(ptr as *mut raw_ffi::xcb_connection_t),
             setup: Self::parse_setup(setup)?,
             ext_info: Default::default(),
             errors: Default::default(),
-            should_drop: false
+            should_drop: false,
         })
     }
 
@@ -124,7 +130,13 @@ impl XCBConnection {
         Ok(result)
     }
 
-    fn send_request(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>, has_reply: bool, reply_has_fds: bool) -> Result<SequenceNumber, ConnectionError> {
+    fn send_request(
+        &self,
+        bufs: &[IoSlice],
+        fds: Vec<RawFdContainer>,
+        has_reply: bool,
+        reply_has_fds: bool,
+    ) -> Result<SequenceNumber, ConnectionError> {
         // For this, we derefence the IoSlices, add two new entries, and create new IoSlices.
         let mut new_bufs = Vec::with_capacity(2 + bufs.len());
 
@@ -134,7 +146,11 @@ impl XCBConnection {
 
         // Add the actual request buffers
         let mut storage = Default::default();
-        new_bufs.extend(self.compute_length_field(bufs, &mut storage)?.iter().map(Deref::deref));
+        new_bufs.extend(
+            self.compute_length_field(bufs, &mut storage)?
+                .iter()
+                .map(Deref::deref),
+        );
 
         // Now wrap the buffers with IoSlice
         let mut new_bufs = new_bufs.into_iter().map(IoSlice::new).collect::<Vec<_>>();
@@ -144,7 +160,7 @@ impl XCBConnection {
             count: bufs.len(),
             ext: null_mut(), // Not needed since we always use raw
             opcode: 0,
-            isvoid: if has_reply { 0 } else { 1 }
+            isvoid: if has_reply { 0 } else { 1 },
         };
         let mut flags = raw_ffi::send_request_flags::RAW;
         assert!(has_reply || !reply_has_fds);
@@ -157,14 +173,34 @@ impl XCBConnection {
         let fds: Vec<_> = fds.into_iter().map(RawFdContainer::into_raw_fd).collect();
 
         let seqno = if fds.is_empty() {
-            unsafe { raw_ffi::xcb_send_request64((self.conn).0, flags, &mut new_bufs[2], &protocol_request) }
+            unsafe {
+                raw_ffi::xcb_send_request64(
+                    (self.conn).0,
+                    flags,
+                    &mut new_bufs[2],
+                    &protocol_request,
+                )
+            }
         } else {
             let num_fds = fds.len().try_into().unwrap();
             let fds_ptr = fds.as_ptr();
-            unsafe { raw_ffi::xcb_send_request_with_fds64((self.conn).0, flags, &mut new_bufs[2], &protocol_request, num_fds, fds_ptr) }
+            unsafe {
+                raw_ffi::xcb_send_request_with_fds64(
+                    (self.conn).0,
+                    flags,
+                    &mut new_bufs[2],
+                    &protocol_request,
+                    num_fds,
+                    fds_ptr,
+                )
+            }
         };
         if seqno == 0 {
-            unsafe { Err(XCBConnection::connection_error_from_connection((self.conn).0)) }
+            unsafe {
+                Err(XCBConnection::connection_error_from_connection(
+                    (self.conn).0,
+                ))
+            }
         } else {
             Ok(seqno)
         }
@@ -199,7 +235,8 @@ impl XCBConnection {
         unsafe {
             let mut reply = null_mut();
             let mut error = null_mut();
-            let found = raw_ffi::xcb_poll_for_reply((self.conn).0, sequence as _, &mut reply, &mut error);
+            let found =
+                raw_ffi::xcb_poll_for_reply((self.conn).0, sequence as _, &mut reply, &mut error);
             if found == 0 {
                 return Err(());
             }
@@ -208,7 +245,7 @@ impl XCBConnection {
                 (true, true) => Ok(None),
                 (true, false) => Ok(Some(XCBConnection::wrap_error(error as _))),
                 (false, true) => Ok(Some(XCBConnection::wrap_reply(reply as _))),
-                (false, false) => unreachable!()
+                (false, false) => unreachable!(),
             }
         }
     }
@@ -217,7 +254,8 @@ impl XCBConnection {
         let header = CSlice::new(reply, 32);
 
         let length_field = u32::from_ne_bytes(header[4..8].try_into().unwrap());
-        let length_field: usize = length_field.try_into()
+        let length_field: usize = length_field
+            .try_into()
             .expect("usize should have at least 32 bits");
 
         let length = 32 + length_field * 4;
@@ -225,7 +263,7 @@ impl XCBConnection {
     }
 
     unsafe fn wrap_error(error: *const u8) -> Buffer {
-         Buffer::from_raw_parts(error, 32)
+        Buffer::from_raw_parts(error, 32)
     }
 
     unsafe fn wrap_event(event: *mut u8) -> Result<GenericEvent, ParseError> {
@@ -246,20 +284,43 @@ impl XCBConnection {
 }
 
 impl RequestConnection for XCBConnection {
-    fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<Cookie<Self, R>, ConnectionError>
-        where R: TryFrom<Buffer, Error=ParseError>
+    fn send_request_with_reply<R>(
+        &self,
+        bufs: &[IoSlice],
+        fds: Vec<RawFdContainer>,
+    ) -> Result<Cookie<Self, R>, ConnectionError>
+    where
+        R: TryFrom<Buffer, Error = ParseError>,
     {
-        Ok(Cookie::new(self, self.send_request(bufs, fds, true, false)?))
+        Ok(Cookie::new(
+            self,
+            self.send_request(bufs, fds, true, false)?,
+        ))
     }
 
-    fn send_request_with_reply_with_fds<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<CookieWithFds<Self, R>, ConnectionError>
-        where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>
+    fn send_request_with_reply_with_fds<R>(
+        &self,
+        bufs: &[IoSlice],
+        fds: Vec<RawFdContainer>,
+    ) -> Result<CookieWithFds<Self, R>, ConnectionError>
+    where
+        R: TryFrom<(Buffer, Vec<RawFdContainer>), Error = ParseError>,
     {
-        Ok(CookieWithFds::new(self, self.send_request(bufs, fds, true, true)?))
+        Ok(CookieWithFds::new(
+            self,
+            self.send_request(bufs, fds, true, true)?,
+        ))
     }
 
-    fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<VoidCookie<Self>, ConnectionError> {
-        Ok(VoidCookie::new(self, self.send_request(bufs, fds, false, false)?))
+    fn send_request_without_reply(
+        &self,
+        bufs: &[IoSlice],
+        fds: Vec<RawFdContainer>,
+    ) -> Result<VoidCookie<Self>, ConnectionError> {
+        Ok(VoidCookie::new(
+            self,
+            self.send_request(bufs, fds, false, false)?,
+        ))
     }
 
     fn discard_reply(&self, sequence: SequenceNumber, _kind: RequestKind, mode: DiscardMode) {
@@ -269,7 +330,7 @@ impl RequestConnection for XCBConnection {
                 raw_ffi::xcb_discard_reply64((self.conn).0, sequence);
             },
             // We have to check for errors ourselves
-            DiscardMode::DiscardReply => self.errors.discard_reply(sequence)
+            DiscardMode::DiscardReply => self.errors.discard_reply(sequence),
         }
     }
 
@@ -277,7 +338,10 @@ impl RequestConnection for XCBConnection {
         self.ext_info.extension_information(self, extension_name)
     }
 
-    fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
+    fn wait_for_reply_or_error(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<Buffer, ConnectionErrorOrX11Error> {
         unsafe {
             let mut error = null_mut();
             let reply = raw_ffi::xcb_wait_for_reply64((self.conn).0, sequence, &mut error);
@@ -309,12 +373,17 @@ impl RequestConnection for XCBConnection {
                     self.errors.append_error(err);
                     Ok(None)
                 }
-            }
+            },
         }
     }
 
-    fn check_for_error(&self, sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError> {
-        let cookie = raw_ffi::xcb_void_cookie_t { sequence: sequence as _ };
+    fn check_for_error(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<Option<GenericError>, ConnectionError> {
+        let cookie = raw_ffi::xcb_void_cookie_t {
+            sequence: sequence as _,
+        };
         let error = unsafe { raw_ffi::xcb_request_check((self.conn).0, cookie) };
         if error.is_null() {
             Ok(None)
@@ -324,7 +393,10 @@ impl RequestConnection for XCBConnection {
     }
 
     #[cfg(unix)]
-    fn wait_for_reply_with_fds(&self, sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
+    fn wait_for_reply_with_fds(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
         let buffer = self.wait_for_reply_or_error(sequence)?;
 
         // Get a pointer to the array of integers where libxcb saved the FD numbers
@@ -346,7 +418,10 @@ impl RequestConnection for XCBConnection {
     }
 
     #[cfg(not(unix))]
-    fn wait_for_reply_with_fds(&self, _sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
+    fn wait_for_reply_with_fds(
+        &self,
+        _sequence: SequenceNumber,
+    ) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
         unimplemented!("FD passing is currently only implemented on Unix-like systems")
     }
 
@@ -416,16 +491,14 @@ impl Drop for XCBConnection {
 #[cfg(unix)]
 impl AsRawFd for XCBConnection {
     fn as_raw_fd(&self) -> RawFd {
-        unsafe {
-            raw_ffi::xcb_get_file_descriptor((self.conn).0)
-        }
+        unsafe { raw_ffi::xcb_get_file_descriptor((self.conn).0) }
     }
 }
 
 #[cfg(test)]
 mod test {
+    use super::{ConnectionError, XCBConnection};
     use std::ffi::CString;
-    use super::{XCBConnection, ConnectionError};
 
     #[test]
     fn xcb_connect_smoke_test() -> Result<(), ConnectionError> {

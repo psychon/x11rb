@@ -30,8 +30,19 @@ fn main() {
 
         let name = String::from_utf8_lossy(&reply.name);
 
-        println!("{} {}{:3} {}{:3} {:>5} {:4} {:4} {:3} {:4} {}", dir, indicator, min, indicator,
-                 max, all, reply.default_char, reply.properties.len(), reply.font_ascent,
-                 reply.font_descent, name);
+        println!(
+            "{} {}{:3} {}{:3} {:>5} {:4} {:4} {:3} {:4} {}",
+            dir,
+            indicator,
+            min,
+            indicator,
+            max,
+            all,
+            reply.default_char,
+            reply.properties.len(),
+            reply.font_ascent,
+            reply.font_descent,
+            name
+        );
     }
 }

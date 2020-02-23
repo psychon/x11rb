@@ -74,10 +74,10 @@ pub(crate) struct AuthEntry {
 mod file {
     //! Code for actually reading `~/.Xauthority`.
 
-    use std::io::{Read, Error, ErrorKind, BufReader};
-    use std::path::PathBuf;
     use std::env::var_os;
     use std::fs::File;
+    use std::io::{BufReader, Error, ErrorKind, Read};
+    use std::path::PathBuf;
 
     use super::AuthEntry;
 
@@ -111,12 +111,19 @@ mod file {
             Ok(family) => family,
             Err(ref e) if e.kind() == ErrorKind::UnexpectedEof => return Ok(None),
             Err(e) => return Err(e),
-        }.into();
+        }
+        .into();
         let address = read_string(read)?;
         let number = read_string(read)?;
         let name = read_string(read)?;
         let data = read_string(read)?;
-        Ok(Some(AuthEntry { family, address, number, name, data }))
+        Ok(Some(AuthEntry {
+            family,
+            address,
+            number,
+            name,
+            data,
+        }))
     }
 
     /// Get the file name for `~/.Xauthority` based on environment variables.
@@ -166,27 +173,29 @@ mod file {
 
     #[cfg(test)]
     mod test {
-        use std::io::Cursor;
         use super::super::{AuthEntry, Family};
         use super::read_entry;
+        use std::io::Cursor;
 
         #[test]
         fn test_read() {
             // Data generated via xauth -f /tmp/file add :1 bar deadbeef
             let data = [
-                0x01, 0x00, 0x00, 0x07, 0x5a, 0x77, 0x65, 0x69, 0x4c, 0x45,
-                0x44, 0x00, 0x01, 0x31, 0x00, 0x03, 0x62, 0x61, 0x72, 0x00,
-                0x04, 0xde, 0xad, 0xbe, 0xef,
+                0x01, 0x00, 0x00, 0x07, 0x5a, 0x77, 0x65, 0x69, 0x4c, 0x45, 0x44, 0x00, 0x01, 0x31,
+                0x00, 0x03, 0x62, 0x61, 0x72, 0x00, 0x04, 0xde, 0xad, 0xbe, 0xef,
             ];
             let mut cursor = Cursor::new(&data[..]);
             let entry = read_entry(&mut cursor).unwrap();
-            assert_eq!(entry, Some(AuthEntry {
-                family: Family::Local,
-                address: b"ZweiLED".to_vec(),
-                number: b"1".to_vec(),
-                name: b"bar".to_vec(),
-                data: u32::to_be_bytes(0xdead_beef).to_vec(),
-            }));
+            assert_eq!(
+                entry,
+                Some(AuthEntry {
+                    family: Family::Local,
+                    address: b"ZweiLED".to_vec(),
+                    number: b"1".to_vec(),
+                    name: b"bar".to_vec(),
+                    data: u32::to_be_bytes(0xdead_beef).to_vec(),
+                })
+            );
         }
 
         #[test]
@@ -195,28 +204,27 @@ mod file {
             //   xauth -f /tmp/file add :1 bar deadbeef
             //   xauth -f /tmp/file add 1.2.3.4:2 baz aabbccdd
             let data = [
-                0x01, 0x00, 0x00, 0x07, 0x5a, 0x77, 0x65, 0x69, 0x4c, 0x45,
-                0x44, 0x00, 0x01, 0x31, 0x00, 0x03, 0x62, 0x61, 0x72, 0x00,
-                0x04, 0xde, 0xad, 0xbe, 0xef, 0x00, 0x00, 0x00, 0x04, 0x01,
-                0x02, 0x03, 0x04, 0x00, 0x01, 0x32, 0x00, 0x03, 0x62, 0x61,
-                0x7a, 0x00, 0x04, 0xaa, 0xbb, 0xcc, 0xdd
+                0x01, 0x00, 0x00, 0x07, 0x5a, 0x77, 0x65, 0x69, 0x4c, 0x45, 0x44, 0x00, 0x01, 0x31,
+                0x00, 0x03, 0x62, 0x61, 0x72, 0x00, 0x04, 0xde, 0xad, 0xbe, 0xef, 0x00, 0x00, 0x00,
+                0x04, 0x01, 0x02, 0x03, 0x04, 0x00, 0x01, 0x32, 0x00, 0x03, 0x62, 0x61, 0x7a, 0x00,
+                0x04, 0xaa, 0xbb, 0xcc, 0xdd,
             ];
             let mut cursor = Cursor::new(&data[..]);
             for expected in &[
-               AuthEntry {
-                   family: Family::Local,
-                   address: b"ZweiLED".to_vec(),
-                   number: b"1".to_vec(),
-                   name: b"bar".to_vec(),
-                   data: u32::to_be_bytes(0xdead_beef).to_vec(),
-               },
-               AuthEntry {
-                   family: Family::Internet,
-                   address: vec![1, 2, 3, 4],
-                   number: b"2".to_vec(),
-                   name: b"baz".to_vec(),
-                   data: u32::to_be_bytes(0xaabb_ccdd).to_vec(),
-               },
+                AuthEntry {
+                    family: Family::Local,
+                    address: b"ZweiLED".to_vec(),
+                    number: b"1".to_vec(),
+                    name: b"bar".to_vec(),
+                    data: u32::to_be_bytes(0xdead_beef).to_vec(),
+                },
+                AuthEntry {
+                    family: Family::Internet,
+                    address: vec![1, 2, 3, 4],
+                    number: b"2".to_vec(),
+                    name: b"baz".to_vec(),
+                    data: u32::to_be_bytes(0xaabb_ccdd).to_vec(),
+                },
             ] {
                 let entry = read_entry(&mut cursor).unwrap();
                 assert_eq!(entry.as_ref(), Some(expected));
@@ -238,15 +246,27 @@ pub(crate) type AuthInfo = (Vec<u8>, Vec<u8>);
 ///
 /// If successful, this function returns that can be written to the X11 server as authorization
 /// protocol name and data, respectively.
-pub(crate) fn get_auth(family: Family, address: &[u8], display: u16) -> Result<Option<AuthInfo>, Error> {
+pub(crate) fn get_auth(
+    family: Family,
+    address: &[u8],
+    display: u16,
+) -> Result<Option<AuthInfo>, Error> {
     match file::XAuthorityEntries::new()? {
         None => Ok(None),
         Some(entries) => get_auth_impl(entries, family, address, display),
     }
 }
 
-pub(crate) fn get_auth_impl(entries: impl Iterator<Item=Result<AuthEntry, Error>>, family: Family, address: &[u8], display: u16) -> Result<Option<AuthInfo>, Error> {
-    fn address_matches((family1, address1): (Family, &[u8]), (family2, address2): (Family, &[u8])) -> bool {
+pub(crate) fn get_auth_impl(
+    entries: impl Iterator<Item = Result<AuthEntry, Error>>,
+    family: Family,
+    address: &[u8],
+    display: u16,
+) -> Result<Option<AuthInfo>, Error> {
+    fn address_matches(
+        (family1, address1): (Family, &[u8]),
+        (family2, address2): (Family, &[u8]),
+    ) -> bool {
         if family1 == Family::Wild || family2 == Family::Wild {
             true
         } else if family1 != family2 {
@@ -267,9 +287,10 @@ pub(crate) fn get_auth_impl(entries: impl Iterator<Item=Result<AuthEntry, Error>
     for entry in entries {
         let entry = entry?;
 
-        if address_matches((family, address), (entry.family, &entry.address)) &&
-                display_number_matches(&entry.number, &display[..]) &&
-                entry.name == MIT_MAGIC_COOKIE_1 {
+        if address_matches((family, address), (entry.family, &entry.address))
+            && display_number_matches(&entry.number, &display[..])
+            && entry.name == MIT_MAGIC_COOKIE_1
+        {
             return Ok(Some((entry.name, entry.data)));
         }
     }
@@ -278,11 +299,14 @@ pub(crate) fn get_auth_impl(entries: impl Iterator<Item=Result<AuthEntry, Error>
 
 #[cfg(test)]
 mod test {
-    use super::{AuthEntry, Family, get_auth_impl, MIT_MAGIC_COOKIE_1};
+    use super::{get_auth_impl, AuthEntry, Family, MIT_MAGIC_COOKIE_1};
 
     // Call the given function on a matching auth entry. The function can change the entry.
     // Afterwards, it should still be a match.
-    fn expect_match<F>(f: F) where F: FnOnce(&mut AuthEntry) {
+    fn expect_match<F>(f: F)
+    where
+        F: FnOnce(&mut AuthEntry),
+    {
         let mut entry = AuthEntry {
             family: Family::Local,
             address: b"whatever".to_vec(),
@@ -292,13 +316,20 @@ mod test {
         };
         f(&mut entry);
         let entries = vec![Ok(entry)];
-        assert_eq!(get_auth_impl(entries.into_iter(), Family::Local, b"whatever", 42).unwrap().unwrap(),
-                   (MIT_MAGIC_COOKIE_1.to_vec(), b"1234".to_vec()));
+        assert_eq!(
+            get_auth_impl(entries.into_iter(), Family::Local, b"whatever", 42)
+                .unwrap()
+                .unwrap(),
+            (MIT_MAGIC_COOKIE_1.to_vec(), b"1234".to_vec())
+        );
     }
 
     // Call the given function on a matching auth entry. The function can change the entry.
     // Afterwards, it should no longer match.
-    fn expect_mismatch<F>(f: F) where F: FnOnce(&mut AuthEntry) {
+    fn expect_mismatch<F>(f: F)
+    where
+        F: FnOnce(&mut AuthEntry),
+    {
         let mut entry = AuthEntry {
             family: Family::Local,
             address: b"whatever".to_vec(),
@@ -308,13 +339,16 @@ mod test {
         };
         f(&mut entry);
         let entries = vec![Ok(entry)];
-        assert_eq!(get_auth_impl(entries.into_iter(), Family::Local, b"whatever", 42).unwrap(), None);
+        assert_eq!(
+            get_auth_impl(entries.into_iter(), Family::Local, b"whatever", 42).unwrap(),
+            None
+        );
     }
 
     #[test]
     fn direct_match() {
         // This checks that an auth entry where all members match, really matches
-        expect_match(|_| { });
+        expect_match(|_| {});
     }
 
     #[test]
@@ -337,8 +371,12 @@ mod test {
             data: b"1234".to_vec(),
         };
         let entries = vec![Ok(entry)];
-        assert_eq!(get_auth_impl(entries.into_iter(), Family::Wild, &[], 42).unwrap().unwrap(),
-                   (MIT_MAGIC_COOKIE_1.to_vec(), b"1234".to_vec()));
+        assert_eq!(
+            get_auth_impl(entries.into_iter(), Family::Wild, &[], 42)
+                .unwrap()
+                .unwrap(),
+            (MIT_MAGIC_COOKIE_1.to_vec(), b"1234".to_vec())
+        );
     }
 
     #[test]

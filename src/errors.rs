@@ -6,11 +6,10 @@ use crate::x11_utils::GenericError;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ParseError {
-    ParseError
+    ParseError,
 }
 
-impl Error for ParseError {
-}
+impl Error for ParseError {}
 
 impl std::fmt::Display for ParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -43,8 +42,7 @@ pub enum ConnectionError {
     ParseError,
 }
 
-impl Error for ConnectionError {
-}
+impl Error for ConnectionError {}
 
 impl std::fmt::Display for ConnectionError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -53,7 +51,9 @@ impl std::fmt::Display for ConnectionError {
             ConnectionError::ConnectionError => write!(f, "Error with the underlying connection"),
             ConnectionError::UnsupportedExtension => write!(f, "Unsupported extension"),
             ConnectionError::InsufficientMemory => write!(f, "Insufficient memory"),
-            ConnectionError::MaximumRequestLengthExceeded => write!(f, "Maximum request length exceeded"),
+            ConnectionError::MaximumRequestLengthExceeded => {
+                write!(f, "Maximum request length exceeded")
+            }
             ConnectionError::DisplayParsingError => write!(f, "Display parsing error"),
             ConnectionError::InvalidScreen => write!(f, "Invalid screen"),
             ConnectionError::FDPassingFailed => write!(f, "FD passing failed"),
@@ -65,7 +65,7 @@ impl std::fmt::Display for ConnectionError {
 impl From<ParseError> for ConnectionError {
     fn from(err: ParseError) -> Self {
         match err {
-            ParseError::ParseError => ConnectionError::ParseError
+            ParseError::ParseError => ConnectionError::ParseError,
         }
     }
 }
@@ -79,11 +79,10 @@ impl From<std::num::TryFromIntError> for ConnectionError {
 #[derive(Debug, Clone)]
 pub enum ConnectionErrorOrX11Error {
     ConnectionError(ConnectionError),
-    X11Error(GenericError)
+    X11Error(GenericError),
 }
 
-impl Error for ConnectionErrorOrX11Error {
-}
+impl Error for ConnectionErrorOrX11Error {}
 
 impl std::fmt::Display for ConnectionErrorOrX11Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {

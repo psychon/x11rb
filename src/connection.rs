@@ -40,13 +40,13 @@
 //! | Get    | `Cookie::reply`                    | `Cookie::reply_unchecked` |
 //! | Ignore | `Cookie::discard_reply_and_errors` | Just drop the cookie      |
 
-use std::io::IoSlice;
-use std::convert::{TryFrom, TryInto};
-use crate::utils::{Buffer, RawFdContainer};
-use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
-use crate::x11_utils::{GenericEvent, GenericError};
-use crate::generated::xproto::{Setup, QueryExtensionReply};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
+use crate::errors::{ConnectionError, ConnectionErrorOrX11Error, ParseError};
+use crate::generated::xproto::{QueryExtensionReply, Setup};
+use crate::utils::{Buffer, RawFdContainer};
+use crate::x11_utils::{GenericError, GenericEvent};
+use std::convert::{TryFrom, TryInto};
+use std::io::IoSlice;
 
 /// Number type used for referring to things that were sent to the server in responses from the
 /// server.
@@ -82,9 +82,13 @@ pub trait RequestConnection {
     /// automatically uses the BIG-REQUESTS extension for such large requests.
     ///
     /// In any case, the request may not be larger than the server's maximum request length.
-    fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
-        -> Result<Cookie<Self, R>, ConnectionError>
-        where R: TryFrom<Buffer, Error=ParseError>;
+    fn send_request_with_reply<R>(
+        &self,
+        bufs: &[IoSlice],
+        fds: Vec<RawFdContainer>,
+    ) -> Result<Cookie<Self, R>, ConnectionError>
+    where
+        R: TryFrom<Buffer, Error = ParseError>;
 
     /// Send a request with a reply containing file descriptors to the server.
     ///
@@ -105,9 +109,13 @@ pub trait RequestConnection {
     /// automatically uses the BIG-REQUESTS extension for such large requests.
     ///
     /// In any case, the request may not be larger than the server's maximum request length.
-    fn send_request_with_reply_with_fds<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
-        -> Result<CookieWithFds<Self, R>, ConnectionError>
-        where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>;
+    fn send_request_with_reply_with_fds<R>(
+        &self,
+        bufs: &[IoSlice],
+        fds: Vec<RawFdContainer>,
+    ) -> Result<CookieWithFds<Self, R>, ConnectionError>
+    where
+        R: TryFrom<(Buffer, Vec<RawFdContainer>), Error = ParseError>;
 
     /// Send a request without a reply to the server.
     ///
@@ -128,8 +136,11 @@ pub trait RequestConnection {
     /// automatically uses the BIG-REQUESTS extension for such large requests.
     ///
     /// In any case, the request may not be larger than the server's maximum request length.
-    fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
-        -> Result<VoidCookie<Self>, ConnectionError>;
+    fn send_request_without_reply(
+        &self,
+        bufs: &[IoSlice],
+        fds: Vec<RawFdContainer>,
+    ) -> Result<VoidCookie<Self>, ConnectionError>;
 
     /// A reply to an error should be discarded.
     ///
@@ -154,7 +165,10 @@ pub trait RequestConnection {
     /// server answered the request with an error, that error is returned as an `Err`.
     ///
     /// Users of this library will most likely not want to use this function directly.
-    fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error>;
+    fn wait_for_reply_or_error(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<Buffer, ConnectionErrorOrX11Error>;
 
     /// Wait for the reply to a request.
     ///
@@ -170,14 +184,20 @@ pub trait RequestConnection {
     /// The given sequence number identifies the request for which replies are expected.
     ///
     /// Users of this library will most likely not want to use this function directly.
-    fn wait_for_reply_with_fds(&self, sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error>;
+    fn wait_for_reply_with_fds(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error>;
 
     /// Check whether a request that does not have a reply caused an X11 error.
     ///
     /// The given sequence number identifies the request for which the check should be performed.
     ///
     /// Users of this library will most likely not want to use this function directly.
-    fn check_for_error(&self, sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError>;
+    fn check_for_error(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<Option<GenericError>, ConnectionError>;
 
     /// The maximum number of bytes that the X11 server accepts in a request.
     fn maximum_request_bytes(&self) -> usize;
@@ -267,13 +287,19 @@ pub trait RequestConnection {
     ///     }
     /// }
     /// ```
-    fn compute_length_field<'b>(&self, request_buffers: &'b [IoSlice<'b>], storage: &'b mut (Vec<IoSlice<'b>>, [u8; 8])) -> Result<&'b [IoSlice<'b>], ConnectionError>
-    {
+    fn compute_length_field<'b>(
+        &self,
+        request_buffers: &'b [IoSlice<'b>],
+        storage: &'b mut (Vec<IoSlice<'b>>, [u8; 8]),
+    ) -> Result<&'b [IoSlice<'b>], ConnectionError> {
         // Compute the total length of the request
-        let length: usize = request_buffers.iter()
-            .map(|buf| buf.len())
-            .sum();
-        assert_eq!(length % 4, 0, "The length of X11 requests must be a multiple of 4, got {}", length);
+        let length: usize = request_buffers.iter().map(|buf| buf.len()).sum();
+        assert_eq!(
+            length % 4,
+            0,
+            "The length of X11 requests must be a multiple of 4, got {}",
+            length
+        );
         let wire_length = length / 4;
 
         let first_buf = &request_buffers[0];
@@ -282,8 +308,11 @@ pub trait RequestConnection {
         if let Ok(wire_length) = TryInto::<u16>::try_into(wire_length) {
             // Check that the request contains the correct length field
             let length_field = u16::from_ne_bytes([first_buf[2], first_buf[3]]);
-            assert_eq!(wire_length, length_field, "Length field contains incorrect value");
-            return Ok(request_buffers)
+            assert_eq!(
+                wire_length, length_field,
+                "Length field contains incorrect value"
+            );
+            return Ok(request_buffers);
         }
 
         // Check that the total length is not too large
@@ -292,7 +321,9 @@ pub trait RequestConnection {
         }
 
         // Okay, we need to use big requests.
-        let wire_length: u32 = wire_length.try_into().expect("X11 request larger than 2^34 bytes?!?");
+        let wire_length: u32 = wire_length
+            .try_into()
+            .expect("X11 request larger than 2^34 bytes?!?");
         let wire_length = wire_length.to_ne_bytes();
 
         // Now construct the new IoSlices
@@ -300,11 +331,16 @@ pub trait RequestConnection {
         // Replacement for the first four bytes of the request
         storage.1.copy_from_slice(&[
             // First part of the request
-            first_buf[0], first_buf[1],
+            first_buf[0],
+            first_buf[1],
             // length field zero indicates big requests
-            0, 0,
+            0,
+            0,
             // New bytes: extended length
-            wire_length[0], wire_length[1], wire_length[2], wire_length[3]
+            wire_length[0],
+            wire_length[1],
+            wire_length[2],
+            wire_length[3],
         ]);
         storage.0.push(IoSlice::new(&storage.1));
 
@@ -312,7 +348,12 @@ pub trait RequestConnection {
         storage.0.push(IoSlice::new(&first_buf[4..]));
 
         // and the rest of the request
-        storage.0.extend(request_buffers[1..].iter().map(std::ops::Deref::deref).map(IoSlice::new));
+        storage.0.extend(
+            request_buffers[1..]
+                .iter()
+                .map(std::ops::Deref::deref)
+                .map(IoSlice::new),
+        );
 
         Ok(&storage.0[..])
     }
@@ -354,7 +395,7 @@ pub enum RequestKind {
     /// The request has no response, i.e. its type is "void".
     IsVoid,
     /// The request has a response.
-    HasResponse
+    HasResponse,
 }
 
 /// Variants describing which responses to a request should be discarded.

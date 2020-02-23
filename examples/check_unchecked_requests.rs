@@ -8,10 +8,10 @@
 extern crate x11rb;
 
 use x11rb::connection::Connection;
-use x11rb::generated::xproto::ConnectionExt;
 use x11rb::errors::ConnectionErrorOrX11Error;
-use x11rb::x11_utils::Event;
+use x11rb::generated::xproto::ConnectionExt;
 use x11rb::wrapper::ConnectionExt as _;
+use x11rb::x11_utils::Event;
 
 const INVALID_WINDOW: u32 = 0;
 
@@ -26,7 +26,8 @@ fn main() -> Result<(), ConnectionErrorOrX11Error> {
 
     // We can decide that we do not care about the response and also do not care about errors via
     // discard_reply_and_errors()
-    conn.get_geometry(INVALID_WINDOW)?.discard_reply_and_errors();
+    conn.get_geometry(INVALID_WINDOW)?
+        .discard_reply_and_errors();
 
     // Errors can show up as 'events' in wait_for_event() via reply_unchecked()
     let cookie = conn.get_geometry(INVALID_WINDOW)?;

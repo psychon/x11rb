@@ -4,14 +4,14 @@
 
 extern crate x11rb;
 
+use std::f64::consts::PI;
+use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
-use std::sync::{Arc, Mutex};
-use std::f64::consts::PI;
 use x11rb::connection::Connection;
 use x11rb::errors::ConnectionErrorOrX11Error;
-use x11rb::x11_utils::Event;
 use x11rb::generated::xproto::*;
+use x11rb::x11_utils::Event;
 use x11rb::COPY_DEPTH_FROM_PARENT;
 
 /// Lag angle for the follow line
@@ -27,11 +27,10 @@ const WINS: usize = 3;
 struct Window {
     window: WINDOW,
     pixmap: PIXMAP,
-    angle_velocity: f64
+    angle_velocity: f64,
 }
 
-fn main()
-{
+fn main() {
     let (conn, screen_num) = x11rb::connect(None).unwrap();
     let conn = Arc::new(conn);
     let screen = &conn.setup().roots[screen_num];
@@ -39,12 +38,22 @@ fn main()
     let white = conn.generate_id();
     let black = conn.generate_id();
 
-    conn.create_gc(white, screen.root, &CreateGCAux::new()
-                   .graphics_exposures(0)
-                   .foreground(screen.white_pixel)).unwrap();
-    conn.create_gc(black, screen.root, &CreateGCAux::new()
-                   .graphics_exposures(0)
-                   .foreground(screen.black_pixel)).unwrap();
+    conn.create_gc(
+        white,
+        screen.root,
+        &CreateGCAux::new()
+            .graphics_exposures(0)
+            .foreground(screen.white_pixel),
+    )
+    .unwrap();
+    conn.create_gc(
+        black,
+        screen.root,
+        &CreateGCAux::new()
+            .graphics_exposures(0)
+            .foreground(screen.black_pixel),
+    )
+    .unwrap();
 
     let windows: Vec<_> = (0..WINS)
         .map(|_| Arc::new(Mutex::new(Window::default())))
@@ -59,10 +68,13 @@ fn main()
     event_thread(conn, windows, white).unwrap();
 }
 
-fn run<C: Connection>(conn: Arc<C>, window_state: Arc<Mutex<Window>>,
-                      screen_num: usize, white: GCONTEXT, black: GCONTEXT)
--> Result<(), ConnectionErrorOrX11Error>
-{
+fn run<C: Connection>(
+    conn: Arc<C>,
+    window_state: Arc<Mutex<Window>>,
+    screen_num: usize,
+    white: GCONTEXT,
+    black: GCONTEXT,
+) -> Result<(), ConnectionErrorOrX11Error> {
     let screen = &conn.setup().roots[screen_num];
     let default_size = 300;
     let pixmap = conn.generate_id();
@@ -75,21 +87,37 @@ fn run<C: Connection>(conn: Arc<C>, window_state: Arc<Mutex<Window>>,
         guard.angle_velocity = 0.05;
     }
 
-    conn.create_window(COPY_DEPTH_FROM_PARENT, window, screen.root,
-                       0, 0, /* x and y */
-                       default_size, default_size, /* width and height */
-                       0, WindowClass::InputOutput,
-                       screen.root_visual,
-                       &CreateWindowAux::new()
-                           .background_pixel(screen.white_pixel)
-                           .event_mask(EventMask::ButtonRelease |
-                                       EventMask::Exposure |
-                                       EventMask::StructureNotify)
-                           .do_not_propogate_mask(EventMask::ButtonPress))?;
+    conn.create_window(
+        COPY_DEPTH_FROM_PARENT,
+        window,
+        screen.root,
+        0,            // x
+        0,            // y
+        default_size, // width
+        default_size, // height
+        0,
+        WindowClass::InputOutput,
+        screen.root_visual,
+        &CreateWindowAux::new()
+            .background_pixel(screen.white_pixel)
+            .event_mask(EventMask::ButtonRelease | EventMask::Exposure | EventMask::StructureNotify)
+            .do_not_propogate_mask(EventMask::ButtonPress),
+    )?;
     conn.map_window(window)?;
 
-    conn.create_pixmap(screen.root_depth, pixmap, window, default_size, default_size)?;
-    let rect = Rectangle { x: 0, y: 0, width: default_size, height: default_size };
+    conn.create_pixmap(
+        screen.root_depth,
+        pixmap,
+        window,
+        default_size,
+        default_size,
+    )?;
+    let rect = Rectangle {
+        x: 0,
+        y: 0,
+        width: default_size,
+        height: default_size,
+    };
     conn.poly_fill_rectangle(pixmap, white, &[rect])?;
 
     let mut theta: f64 = 0.0;
@@ -102,20 +130,36 @@ fn run<C: Connection>(conn: Arc<C>, window_state: Arc<Mutex<Window>>,
         let (sin, cos) = theta.sin_cos();
         let (x, y) = ((radius * cos) as i16, (radius * sin) as i16);
         let lines = [
-            Point { x: center_x, y: center_y },
-            Point { x, y }
+            Point {
+                x: center_x,
+                y: center_y,
+            },
+            Point { x, y },
         ];
         conn.poly_line(CoordMode::Previous, pixmap, black, &lines)?;
 
         let (sin, cos) = (theta + LAG).sin_cos();
         let (x, y) = ((radius * cos) as i16, (radius * sin) as i16);
         let lines = [
-            Point { x: center_x, y: center_y },
-            Point { x, y }
+            Point {
+                x: center_x,
+                y: center_y,
+            },
+            Point { x, y },
         ];
         conn.poly_line(CoordMode::Previous, pixmap, white, &lines)?;
 
-        conn.copy_area(pixmap, window, white, 0, 0, 0, 0, default_size, default_size)?;
+        conn.copy_area(
+            pixmap,
+            window,
+            white,
+            0,
+            0,
+            0,
+            0,
+            default_size,
+            default_size,
+        )?;
         conn.flush();
 
         theta += guard.angle_velocity;
@@ -132,9 +176,13 @@ fn run<C: Connection>(conn: Arc<C>, window_state: Arc<Mutex<Window>>,
     }
 }
 
-fn event_thread<C>(conn_arc: Arc<C>, windows: Vec<Arc<Mutex<Window>>>, white: GCONTEXT)
--> Result<(), ConnectionErrorOrX11Error>
-where C: Connection + Send + Sync + 'static
+fn event_thread<C>(
+    conn_arc: Arc<C>,
+    windows: Vec<Arc<Mutex<Window>>>,
+    white: GCONTEXT,
+) -> Result<(), ConnectionErrorOrX11Error>
+where
+    C: Connection + Send + Sync + 'static,
 {
     let mut first_window_mapped = false;
 
@@ -148,15 +196,24 @@ where C: Connection + Send + Sync + 'static
                 let event = ExposeEvent::from(event);
                 if let Some(state) = find_window_by_id(&windows, event.window) {
                     let state = state.lock().unwrap();
-                    conn.copy_area(state.pixmap, state.window, white, event.x as _, event.y as _,
-                                   event.x as _, event.y as _, event.width, event.height)?;
+                    conn.copy_area(
+                        state.pixmap,
+                        state.window,
+                        white,
+                        event.x as _,
+                        event.y as _,
+                        event.x as _,
+                        event.y as _,
+                        event.width,
+                        event.height,
+                    )?;
                     if event.count == 0 {
                         conn.flush();
                     }
                 } else {
                     eprintln!("Expose on unknown window!");
                 }
-            },
+            }
             BUTTON_RELEASE_EVENT => {
                 let event = ButtonReleaseEvent::from(event);
                 if let Some(state) = find_window_by_id(&windows, event.event) {
@@ -172,7 +229,7 @@ where C: Connection + Send + Sync + 'static
                 } else {
                     eprintln!("ButtonRelease on unknown window!");
                 }
-            },
+            }
             MAP_NOTIFY_EVENT => {
                 if !first_window_mapped {
                     first_window_mapped = true;
@@ -180,23 +237,27 @@ where C: Connection + Send + Sync + 'static
                     let event = MapNotifyEvent::from(event);
                     util::start_timeout_thread(conn_arc.clone(), event.window);
                 }
-            },
+            }
             CLIENT_MESSAGE_EVENT => {
                 // We simply assume that this is a message to close. Since we are the main thread,
                 // everything closes when we exit.
                 return Ok(());
-            },
+            }
             _ => {}
         }
     }
 }
 
-fn find_window_by_id(windows: &[Arc<Mutex<Window>>], window: WINDOW) -> Option<&Arc<Mutex<Window>>>
-{
-    windows.iter()
-        .find(|state| state.lock()
-                .map(|state| state.window == window)
-                .unwrap_or(false))
+fn find_window_by_id(
+    windows: &[Arc<Mutex<Window>>],
+    window: WINDOW,
+) -> Option<&Arc<Mutex<Window>>> {
+    windows.iter().find(|state| {
+        state
+            .lock()
+            .map(|state| state.window == window)
+            .unwrap_or(false)
+    })
 }
 
 include!("integration_test_util/util.rs");

@@ -2,10 +2,10 @@ extern crate x11rb;
 
 use std::convert::TryFrom;
 
-use x11rb::x11_utils::{Event, GenericError};
-use x11rb::generated::xproto::*;
 use x11rb::connection::Connection;
+use x11rb::generated::xproto::*;
 use x11rb::wrapper::{ConnectionExt as _, LazyAtom};
+use x11rb::x11_utils::{Event, GenericError};
 
 fn main() {
     let (conn, screen_num) = x11rb::connect(None).unwrap();
@@ -26,20 +26,55 @@ fn main() {
         .background_pixel(screen.white_pixel)
         .win_gravity(Gravity::NorthWest);
 
-    let gc_aux = CreateGCAux::new()
-        .foreground(screen.black_pixel);
+    let gc_aux = CreateGCAux::new().foreground(screen.black_pixel);
 
     let (mut width, mut height) = (100, 100);
 
-    conn.create_window(screen.root_depth, win_id, screen.root, 0, 0, width, height, 0, WindowClass::InputOutput, 0, &win_aux).unwrap();
+    conn.create_window(
+        screen.root_depth,
+        win_id,
+        screen.root,
+        0,
+        0,
+        width,
+        height,
+        0,
+        WindowClass::InputOutput,
+        0,
+        &win_aux,
+    )
+    .unwrap();
 
     util::start_timeout_thread(conn1.clone(), win_id);
 
     let title = "Simple Window";
-    conn.change_property8(PropMode::Replace, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), title.as_bytes()).unwrap();
-    conn.change_property32(PropMode::Replace, win_id, wm_protocols.atom().unwrap(), Atom::ATOM.into(), &[wm_delete_window.atom().unwrap()]).unwrap();
+    conn.change_property8(
+        PropMode::Replace,
+        win_id,
+        Atom::WM_NAME.into(),
+        Atom::STRING.into(),
+        title.as_bytes(),
+    )
+    .unwrap();
+    conn.change_property32(
+        PropMode::Replace,
+        win_id,
+        wm_protocols.atom().unwrap(),
+        Atom::ATOM.into(),
+        &[wm_delete_window.atom().unwrap()],
+    )
+    .unwrap();
 
-    let reply = conn.get_property(false, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), 0, 1024).unwrap();
+    let reply = conn
+        .get_property(
+            false,
+            win_id,
+            Atom::WM_NAME.into(),
+            Atom::STRING.into(),
+            0,
+            1024,
+        )
+        .unwrap();
     let reply = reply.reply().unwrap();
     assert_eq!(reply.value, title.as_bytes());
 
@@ -60,31 +95,48 @@ fn main() {
                     // whatever
                     let (width, height): (i16, i16) = (width as _, height as _);
                     let points = [
-                        Point { x: width, y: height },
+                        Point {
+                            x: width,
+                            y: height,
+                        },
                         Point { x: -10, y: -10 },
-                        Point { x: -10, y: height + 10 },
-                        Point { x: width + 10, y: -10 },
+                        Point {
+                            x: -10,
+                            y: height + 10,
+                        },
+                        Point {
+                            x: width + 10,
+                            y: -10,
+                        },
                     ];
-                    conn.poly_line(CoordMode::Origin, win_id, gc_id, &points).unwrap();
+                    conn.poly_line(CoordMode::Origin, win_id, gc_id, &points)
+                        .unwrap();
                     conn.flush();
                 }
-            },
+            }
             CONFIGURE_NOTIFY_EVENT => {
                 let event = ConfigureNotifyEvent::from(event);
                 width = event.width;
                 height = event.height;
-            },
+            }
             CLIENT_MESSAGE_EVENT => {
                 let event = ClientMessageEvent::from(event);
                 println!("{:?})", event);
                 let data = event.data.as_data32();
-                if event.format == 32 && event.window == win_id && data[0] == wm_delete_window.atom().unwrap() {
+                if event.format == 32
+                    && event.window == win_id
+                    && data[0] == wm_delete_window.atom().unwrap()
+                {
                     println!("Window was asked to close");
                     return;
                 }
             }
-            0 => { println!("Unknown error {:?}", GenericError::try_from(event)); },
-            _ => { println!("Unknown event {:?}", event); }
+            0 => {
+                println!("Unknown error {:?}", GenericError::try_from(event));
+            }
+            _ => {
+                println!("Unknown event {:?}", event);
+            }
         }
     }
 }
