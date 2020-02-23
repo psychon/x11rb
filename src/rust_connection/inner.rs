@@ -168,6 +168,11 @@ where W: Write
                     count = 0;
                 }
                 bufs = &bufs[1..];
+
+                // Skip empty slices
+                while bufs.first().map(|s| s.len()) == Some(0) {
+                    bufs = &bufs[1..];
+                }
             }
         }
 
@@ -553,5 +558,15 @@ mod test {
     #[test]
     fn partial_write_slice_border() {
         partial_write_test(&[0; 2], "failed to write anything");
+    }
+
+    #[test]
+    fn full_write_trailing_empty() {
+        let mut written = [0; 4];
+        let mut output = &mut written[..];
+        let mut connection = ConnectionInner::new(&mut output);
+        let (request1, request2) = ([0; 4], [0; 0]);
+        let request = [IoSlice::new(&request1), IoSlice::new(&request2)];
+        let _ = connection.send_request(&request, RequestKind::IsVoid).unwrap();
     }
 }
