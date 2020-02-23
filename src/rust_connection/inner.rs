@@ -70,7 +70,11 @@ where W: Write
     -> Result<(Self, Setup), Box<dyn Error>> {
         Self::write_setup(&mut write, auth_name, auth_data)?;
         let setup = read_setup(read)?;
-        let result = ConnectionInner {
+        Ok((Self::new(write), setup))
+    }
+
+    fn new(write: W) -> Self {
+        ConnectionInner {
             write,
             last_sequence_written: 0,
             next_reply_expected: 0,
@@ -78,8 +82,7 @@ where W: Write
             sent_requests: VecDeque::new(),
             pending_events: VecDeque::new(),
             pending_replies: VecDeque::new(),
-        };
-        Ok((result, setup))
+        }
     }
 
     #[cfg(target_endian = "little")]
@@ -137,6 +140,10 @@ where W: Write
 
         self.last_sequence_written += 1;
         let seqno = self.last_sequence_written;
+
+        if kind == RequestKind::HasResponse {
+            self.next_reply_expected = self.last_sequence_written;
+        }
 
         let sent_request = SentRequest {
             seqno,
@@ -391,9 +398,13 @@ impl std::fmt::Display for SetupError {
 
 #[cfg(test)]
 mod test {
+    use std::io::IoSlice;
+    use std::error::Error;
+
     use crate::generated::xproto::{Setup, SetupFailed, SetupAuthenticate};
     use crate::x11_utils::Serialize;
-    use super::{read_setup, SetupError};
+    use crate::connection::RequestKind;
+    use super::{read_setup, SetupError, ConnectionInner};
 
     #[test]
     fn read_setup_success() {
@@ -454,5 +465,58 @@ mod test {
             Err(SetupError::SetupAuthenticate(read)) => assert_eq!(setup, read),
             value => panic!("Unexpected value {:?}", value),
         }
+    }
+
+    #[test]
+    fn insert_sync_no_reply() -> Result<(), Box<dyn Error>> {
+        // The connection must send a sync (GetInputFocus) request every 2^16 requests (that do not
+        // have a reply). Thus, this test sends more than that and tests for the sync to appear.
+
+        let length = 1u16.to_ne_bytes();
+        let no_operation = [127, 0, length[0], length[1]];
+        let get_input_focus = [43, 0, length[0], length[1]];
+
+        // Set up a connection that writes to this array
+        let mut written = [0; 0x10000 * 4 + 4];
+        let mut output = &mut written[..];
+        let mut connection = ConnectionInner::new(&mut output);
+
+        for num in 1..0x10000 {
+            let seqno = connection.send_request(&[IoSlice::new(&no_operation)], RequestKind::IsVoid)?;
+            assert_eq!(num, seqno);
+        }
+        // request 0x10000 should be a sync, hence the next one is 0x10001
+        let seqno = connection.send_request(&[IoSlice::new(&no_operation)], RequestKind::IsVoid)?;
+        assert_eq!(0x10001, seqno);
+
+        let mut expected: Vec<_> = std::iter::repeat(&no_operation).take(0xffff).flatten().copied().collect();
+        expected.extend_from_slice(&get_input_focus);
+        expected.extend_from_slice(&no_operation);
+
+        assert_eq!(&written[..], &expected[..]);
+        Ok(())
+    }
+
+    #[test]
+    fn insert_no_sync_with_reply() -> Result<(), Box<dyn Error>> {
+        // Compared to the previous test, this uses RequestKind::HasResponse, so no sync needs to
+        // be inserted.
+
+        let length = 1u16.to_ne_bytes();
+        let get_input_focus = [43, 0, length[0], length[1]];
+
+        // Set up a connection that writes to this array
+        let mut written = [0; 0x10001 * 4];
+        let mut output = &mut written[..];
+        let mut connection = ConnectionInner::new(&mut output);
+
+        for num in 1..=0x10001 {
+            let seqno = connection.send_request(&[IoSlice::new(&get_input_focus)], RequestKind::HasResponse)?;
+            assert_eq!(num, seqno);
+        }
+
+        let expected: Vec<_> = std::iter::repeat(&get_input_focus).take(0x10001).flatten().copied().collect();
+        assert_eq!(&written[..], &expected[..]);
+        Ok(())
     }
 }
