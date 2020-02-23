@@ -36,6 +36,9 @@ where W: Write
     // this struct (for synchronisation reasons).
     write: W,
 
+    // Member that is used by `RustConnection` for synchronisation purpose
+    pub(crate) have_reader: bool,
+
     // The sequence number of the last request that was written
     last_sequence_written: SequenceNumber,
     // Sorted(!) list with information on requests that were written, but no answer received yet.
@@ -61,6 +64,7 @@ where W: Write
         let setup = Self::read_setup(read)?;
         let result = ConnectionInner {
             write,
+            have_reader: false,
             last_sequence_written: 0,
             next_reply_expected: 0,
             last_sequence_read: 0,
