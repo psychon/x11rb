@@ -4,6 +4,7 @@ install:
   - set PATH=%PATH%;C:\Users\appveyor\.cargo\bin
   - rustc -V
   - cargo -V
+  - C:\cygwin\setup-x86.exe --quiet-mode --no-shortcuts --no-startmenu --no-desktop --upgrade-also --root c:\cygwin --packages xorg-server-extra
   # This uses libc::mmap and thus is Unix-only
   - del examples\shared_memory.rs
 
@@ -12,3 +13,21 @@ test_script:
   # We do not have libxcb and thus cannot build XCBConnection
   - cargo build --verbose --all-targets --no-default-features --features vendor-xcb-proto
   - cargo test --verbose --no-default-features --features vendor-xcb-proto
+
+  # Start an X11 server in the background
+  - ps: $Server = Start-Process -PassThru -FilePath C:\cygwin\bin\Xvfb.exe -ArgumentList "-listen tcp :0"
+  - set "DISPLAY=127.0.0.1:0"
+  - set "X11RB_EXAMPLE_TIMEOUT=1"
+
+  # FIXME: Can this list be automated? somehow?
+  - cargo run --verbose --no-default-features --features vendor-xcb-proto --example check_unchecked_requests
+  - cargo run --verbose --no-default-features --features vendor-xcb-proto --example generic_events
+  - cargo run --verbose --no-default-features --features vendor-xcb-proto --example hypnomoire
+  - cargo run --verbose --no-default-features --features vendor-xcb-proto --example list_fonts
+  - cargo run --verbose --no-default-features --features vendor-xcb-proto --example simple_window
+  - cargo run --verbose --no-default-features --features vendor-xcb-proto --example simple_window_manager
+  #- cargo run --verbose --no-default-features --features vendor-xcb-proto --example tutorial
+  - cargo run --verbose --no-default-features --features vendor-xcb-proto --example xeyes
+
+on_finish:
+  - ps: Stop-Process -Id $Server.Id
