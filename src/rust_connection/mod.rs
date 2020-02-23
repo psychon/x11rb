@@ -3,7 +3,7 @@
 use std::io::{Read, Write, IoSlice};
 use std::error::Error;
 use std::convert::{TryFrom, TryInto};
-use std::sync::{Mutex, MutexGuard};
+use std::sync::{Mutex, MutexGuard, Condvar};
 
 use crate::utils::{Buffer, RawFdContainer};
 use crate::connection::{RequestConnection, Connection, SequenceNumber, RequestKind, DiscardMode};
@@ -33,6 +33,7 @@ type UselessMutex<T> = Mutex<T>;
 pub struct RustConnection<R: Read = stream::Stream, W: Write = stream::Stream> {
     inner: Mutex<inner::ConnectionInner<W>>,
     read: UselessMutex<R>,
+    reader_condition: Condvar,
     id_allocator: Mutex<id_allocator::IDAllocator>,
     setup: Setup,
     extension_information: ExtensionInformation,
@@ -96,6 +97,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
         let conn = RustConnection {
             inner: Mutex::new(inner),
             read: UselessMutex::new(read),
+            reader_condition: Condvar::new(),
             id_allocator: Mutex::new(allocator),
             setup,
             extension_information: Default::default(),
@@ -112,9 +114,23 @@ impl<R: Read, W: Write> RustConnection<R, W> {
     }
 
     fn read_packet_and_enqueue<'a>(&'a self, mut inner: MutexGuardInner<'a, W>) -> Result<MutexGuardInner<'a, W>, Box<dyn Error>> {
-        let packet = read_packet(&mut *self.read.lock().unwrap())?;
-        inner.enqueue_packet(packet);
-        Ok(inner)
+        if inner.have_reader {
+            // Someone else is reading; wait for them
+            Ok(self.reader_condition.wait(inner).unwrap())
+        } else {
+            // We can read from the socket
+            inner.have_reader = true;
+            drop(inner);
+
+            let packet = read_packet(&mut *self.read.try_lock().unwrap())?;
+
+            inner = self.inner.lock().unwrap();
+            debug_assert!(inner.have_reader);
+            inner.have_reader = false;
+            inner.enqueue_packet(packet);
+            self.reader_condition.notify_all();
+            Ok(inner)
+        }
     }
 }
 
