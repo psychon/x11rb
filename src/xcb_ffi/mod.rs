@@ -226,7 +226,7 @@ impl XCBConnection {
          Buffer::from_raw_parts(error, 32)
     }
 
-    unsafe fn wrap_event(event: *const u8) -> Result<GenericEvent, ParseError> {
+    unsafe fn wrap_event(event: *mut u8) -> Result<GenericEvent, ParseError> {
         let mut length = 32;
         // The first byte contains the event type, check for XGE events
         if (*event & 0x7f) == super::generated::xproto::GE_GENERIC_EVENT {
@@ -235,6 +235,9 @@ impl XCBConnection {
             let length_field = u32::from_ne_bytes([slice[4], slice[5], slice[6], slice[7]]);
             let length_field: usize = length_field.try_into()?;
             length += length_field * 4;
+            // Discard the `full_sequence` field inserted by xcb at
+            // the 32-byte boundary.
+            std::ptr::copy(event.add(36), event.add(32), length_field * 4);
         }
         Ok(Buffer::from_raw_parts(event, length).try_into()?)
     }
