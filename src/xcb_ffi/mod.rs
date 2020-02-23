@@ -1,4 +1,6 @@
 //! A FFI-based connection to an X11 server, using libxcb.
+//!
+//! This module is only available when the `allow-unsafe-code` feature is enabled.
 
 #![allow(clippy::cast_ptr_alignment)] // FIXME: Remove this
 
