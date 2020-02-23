@@ -33,7 +33,7 @@ pub(crate) struct ConnectionInner<R, W>
 where R: Read, W: Write
 {
     // The underlying byte stream that connects us to the X11 server
-    read: R,
+    pub(crate) read: R,
     write: W,
 
     // The sequence number of the last request that was written
@@ -114,28 +114,6 @@ where R: Read, W: Write
             // Uhm... no other cases are defined
             _ => Err(Box::new(ParseError::ParseError))
         }
-    }
-
-    pub(crate) fn read_packet(&mut self) -> Result<Buffer, Box<dyn Error>> {
-        let mut buffer = vec![0; 32];
-        self.read.read_exact(&mut buffer)?;
-
-        use crate::generated::xproto::GE_GENERIC_EVENT;
-        const REPLY: u8 = 1;
-        const SENT_GE_GENERIC_EVENT: u8 = GE_GENERIC_EVENT | 0x80;
-        let extra_length = match buffer[0] {
-            REPLY | GE_GENERIC_EVENT | SENT_GE_GENERIC_EVENT => {
-                4 * u32::from_ne_bytes([buffer[4], buffer[5], buffer[6], buffer[7]])
-            },
-            _ => 0
-        } as usize;
-        // Use `Vec::reserve_exact` because this will be the final
-        // length of the vector.
-        buffer.reserve_exact(extra_length);
-        buffer.resize(32 + extra_length, 0);
-        self.read.read_exact(&mut buffer[32..])?;
-
-        Ok(Buffer::from_vec(buffer))
     }
 
     fn send_sync(&mut self) -> Result<(), Box<dyn Error>> {

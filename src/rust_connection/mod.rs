@@ -3,7 +3,7 @@
 use std::io::{Read, Write, IoSlice};
 use std::error::Error;
 use std::convert::{TryFrom, TryInto};
-use std::sync::Mutex;
+use std::sync::{Mutex, MutexGuard};
 
 use crate::utils::{Buffer, RawFdContainer};
 use crate::connection::{RequestConnection, Connection, SequenceNumber, RequestKind, DiscardMode};
@@ -21,6 +21,8 @@ mod stream;
 mod xauth;
 
 use inner::PollReply;
+
+type MutexGuardInner<'a, R, W> = MutexGuard<'a, inner::ConnectionInner<R, W>>;
 
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
@@ -102,6 +104,12 @@ impl<R: Read, W: Write> RustConnection<R, W> {
         }
         self.inner.lock().unwrap().send_request(bufs, kind).or(Err(ConnectionError::UnknownError))
     }
+
+    fn read_packet_and_enqueue(mut inner: MutexGuardInner<R, W>) -> Result<MutexGuardInner<R, W>, Box<dyn Error>> {
+        let packet = read_packet(&mut inner.read)?;
+        inner.enqueue_packet(packet);
+        Ok(inner)
+    }
 }
 
 impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
@@ -150,8 +158,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
                     return Ok(reply)
                 }
             }
-            let packet = inner.read_packet().map_err(|_| ConnectionError::UnknownError)?;
-            inner.enqueue_packet(packet);
+            inner = Self::read_packet_and_enqueue(inner).map_err(|_| ConnectionError::UnknownError)?;
         }
     }
 
@@ -163,8 +170,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
                 PollReply::NoReply => return Ok(None),
                 PollReply::Reply(buffer) => return Ok(Some(buffer)),
             }
-            let packet = inner.read_packet().map_err(|_| ConnectionError::UnknownError)?;
-            inner.enqueue_packet(packet);
+            inner = Self::read_packet_and_enqueue(inner).map_err(|_| ConnectionError::UnknownError)?;
         }
     }
 
@@ -177,8 +183,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
                 PollReply::NoReply => return Ok(None),
                 PollReply::Reply(buffer) => return Ok(buffer.try_into().ok()),
             }
-            let packet = inner.read_packet().map_err(|_| ConnectionError::UnknownError)?;
-            inner.enqueue_packet(packet);
+            inner = Self::read_packet_and_enqueue(inner).map_err(|_| ConnectionError::UnknownError)?;
         }
     }
 
@@ -214,8 +219,7 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
             if let Some(event) = inner.poll_for_event() {
                 return Ok(event);
             }
-            let packet = inner.read_packet().map_err(|_| ConnectionError::UnknownError)?;
-            inner.enqueue_packet(packet);
+            inner = Self::read_packet_and_enqueue(inner).map_err(|_| ConnectionError::UnknownError)?;
         }
     }
 
@@ -234,4 +238,26 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
     fn generate_id(&self) -> u32 {
         self.id_allocator.lock().unwrap().generate_id(self).expect("Available XIDs exhausted")
     }
+}
+
+fn read_packet(read: &mut impl Read) -> Result<Buffer, Box<dyn Error>> {
+    let mut buffer = vec![0; 32];
+    read.read_exact(&mut buffer)?;
+
+    use crate::generated::xproto::GE_GENERIC_EVENT;
+    const REPLY: u8 = 1;
+    const SENT_GE_GENERIC_EVENT: u8 = GE_GENERIC_EVENT | 0x80;
+    let extra_length = match buffer[0] {
+        REPLY | GE_GENERIC_EVENT | SENT_GE_GENERIC_EVENT => {
+            4 * u32::from_ne_bytes([buffer[4], buffer[5], buffer[6], buffer[7]])
+        },
+        _ => 0
+    } as usize;
+    // Use `Vec::reserve_exact` because this will be the final
+    // length of the vector.
+    buffer.reserve_exact(extra_length);
+    buffer.resize(32 + extra_length, 0);
+    read.read_exact(&mut buffer[32..])?;
+
+    Ok(Buffer::from_vec(buffer))
 }
