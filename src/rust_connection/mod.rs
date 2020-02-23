@@ -3,7 +3,7 @@
 use std::io::{Read, Write, BufReader, BufWriter, IoSlice};
 use std::error::Error;
 use std::convert::{TryFrom, TryInto};
-use std::sync::{Mutex, MutexGuard, Condvar};
+use std::sync::{Mutex, MutexGuard, Condvar, TryLockError};
 
 use crate::utils::{Buffer, RawFdContainer};
 use crate::connection::{RequestConnection, Connection, SequenceNumber, RequestKind, DiscardMode};
@@ -122,10 +122,11 @@ impl<R: Read, W: Write> RustConnection<R, W> {
     /// again and returns a new `MutexGuard`.
     fn read_packet_and_enqueue<'a>(&'a self, mut inner: MutexGuardInner<'a, W>) -> Result<MutexGuardInner<'a, W>, Box<dyn Error>> {
         match self.read.try_lock() {
-            Err(_) => {
+            Err(TryLockError::WouldBlock) => {
                 // Someone else is reading; wait for them
                 Ok(self.reader_condition.wait(inner).unwrap())
             }
+            Err(TryLockError::Poisoned(_)) => panic!(),
             Ok(mut lock) => {
                 drop(inner);
 
