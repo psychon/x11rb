@@ -1,6 +1,6 @@
 //! A pure-rust implementation of a connection to an X11 server.
 
-use std::io::{Read, Write, IoSlice};
+use std::io::{Read, Write, BufReader, BufWriter, IoSlice};
 use std::error::Error;
 use std::convert::{TryFrom, TryInto};
 use std::sync::{Mutex, MutexGuard, Condvar};
@@ -30,7 +30,7 @@ type UselessMutex<T> = Mutex<T>;
 
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
-pub struct RustConnection<R: Read = stream::Stream, W: Write = stream::Stream> {
+pub struct RustConnection<R: Read = BufReader<stream::Stream>, W: Write = BufWriter<stream::Stream>> {
     inner: Mutex<inner::ConnectionInner<W>>,
     read: UselessMutex<R>,
     reader_condition: Condvar,
@@ -40,7 +40,7 @@ pub struct RustConnection<R: Read = stream::Stream, W: Write = stream::Stream> {
     maximum_request_bytes: Mutex<Option<usize>>,
 }
 
-impl RustConnection<stream::Stream, stream::Stream> {
+impl RustConnection<BufReader<stream::Stream>, BufWriter<stream::Stream>> {
     /// Establish a new connection.
     ///
     /// If no `dpy_name` is provided, the value from `$DISPLAY` is used.
@@ -59,8 +59,9 @@ impl RustConnection<stream::Stream, stream::Stream> {
             .unwrap_or(None)
             .unwrap_or_else(|| (Vec::new(), Vec::new()));
 
-        let write = stream.try_clone()?;
-        Ok((Self::connect_to_stream_with_auth_info(stream, write, screen, auth_name, auth_data)?, screen))
+        let write = BufWriter::new(stream.try_clone()?);
+        let read = BufReader::new(stream);
+        Ok((Self::connect_to_stream_with_auth_info(read, write, screen, auth_name, auth_data)?, screen))
     }
 }
 
@@ -250,7 +251,8 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
     }
 
     fn flush(&self) {
-        // Nothing to do since we do not do any buffering
+        // FIXME: Allow an error to be returned
+        let _ = self.inner.lock().unwrap().flush();
     }
 
     fn setup(&self) -> &Setup {

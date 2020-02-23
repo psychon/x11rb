@@ -297,6 +297,10 @@ where W: Write
         self.pending_events.pop_front()
             .map(|event| event.try_into().unwrap())
     }
+
+    pub(crate) fn flush(&mut self) -> Result<(), std::io::Error> {
+        self.write.flush()
+    }
 }
 
 // FIXME: Clean up this error stuff... somehow
