@@ -1,21 +1,21 @@
-use std::ops::{Deref, Index};
-use std::slice::SliceIndex;
-use std::mem::forget;
-#[cfg(unix)]
-use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
 #[cfg(not(unix))]
 use libc::c_int;
+use std::mem::forget;
+use std::ops::{Deref, Index};
+#[cfg(unix)]
+use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
+use std::slice::SliceIndex;
 
 #[cfg(not(unix))]
 type RawFd = c_int;
 
 #[cfg(feature = "allow-unsafe-code")]
 mod unsafe_code {
-    use std::ops::{Deref, Index};
-    use std::slice::{from_raw_parts, SliceIndex};
-    use std::mem::forget;
-    use std::ptr::NonNull;
     use libc::free;
+    use std::mem::forget;
+    use std::ops::{Deref, Index};
+    use std::ptr::NonNull;
+    use std::slice::{from_raw_parts, SliceIndex};
 
     /// Wrapper around a slice that was allocated in C code.
     ///
@@ -40,7 +40,9 @@ mod unsafe_code {
         /// The same rules as for `std::slice::from_raw_parts` apply. Additionally, the given pointer
         /// must be safe to free with `libc::free`.
         pub unsafe fn new(ptr: *const u8, len: usize) -> CSlice {
-            CSlice { ptr: NonNull::from(from_raw_parts(ptr, len)) }
+            CSlice {
+                ptr: NonNull::from(from_raw_parts(ptr, len)),
+            }
         }
 
         /// Convert `self` into a raw part.
@@ -69,7 +71,8 @@ mod unsafe_code {
     }
 
     impl<I> Index<I> for CSlice
-    where I: SliceIndex<[u8]>
+    where
+        I: SliceIndex<[u8]>,
     {
         type Output = I::Output;
 
@@ -91,7 +94,7 @@ pub use unsafe_code::CSlice;
 pub enum Buffer {
     #[cfg(feature = "allow-unsafe-code")]
     CSlice(CSlice),
-    Vec(Vec<u8>)
+    Vec(Vec<u8>),
 }
 
 impl Buffer {
@@ -122,13 +125,14 @@ impl Deref for Buffer {
         match self {
             #[cfg(feature = "allow-unsafe-code")]
             Self::CSlice(ref slice) => slice.deref(),
-            Self::Vec(ref vec) => vec.deref()
+            Self::Vec(ref vec) => vec.deref(),
         }
     }
 }
 
 impl<I> Index<I> for Buffer
-where I: SliceIndex<[u8]>
+where
+    I: SliceIndex<[u8]>,
 {
     type Output = I::Output;
 

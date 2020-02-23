@@ -11,8 +11,7 @@ use crate::generated::xc_misc::ConnectionExt as _;
 /// > allocates resource IDs [..] by choosing a value with only some subset of these bits set and
 /// > ORing it with resource-id-base.
 #[derive(Debug)]
-pub(crate) struct IDAllocator
-{
+pub(crate) struct IDAllocator {
     next_id: u32,
     max_id: u32,
     increment: u32,
@@ -38,7 +37,9 @@ impl IDAllocator {
     pub(crate) fn generate_id(&mut self, conn: &impl RequestConnection) -> Option<u32> {
         if self.next_id > self.max_id {
             // Send an XC-MISC GetXIDRange request. Any failure is turned into None via .ok().
-            let xidrange = conn.get_xidrange().ok()
+            let xidrange = conn
+                .get_xidrange()
+                .ok()
                 .and_then(|cookie| cookie.reply().ok());
             match xidrange {
                 Some(reply) => {
@@ -50,7 +51,7 @@ impl IDAllocator {
                     }
                     self.next_id = start;
                     self.max_id = start + (count - 1) * self.increment;
-                },
+                }
                 None => return None,
             }
         }
@@ -63,12 +64,12 @@ impl IDAllocator {
 
 #[cfg(test)]
 mod test {
-    use std::io::IoSlice;
     use std::convert::TryFrom;
+    use std::io::IoSlice;
 
-    use crate::connection::{RequestConnection, SequenceNumber, RequestKind, DiscardMode};
+    use crate::connection::{DiscardMode, RequestConnection, RequestKind, SequenceNumber};
     use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-    use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
+    use crate::errors::{ConnectionError, ConnectionErrorOrX11Error, ParseError};
     use crate::generated::xproto::QueryExtensionReply;
     use crate::utils::{Buffer, RawFdContainer};
     use crate::x11_utils::GenericError;
@@ -122,19 +123,33 @@ mod test {
     struct DummyConnection(Option<Vec<u8>>);
 
     impl RequestConnection for DummyConnection {
-        fn send_request_with_reply<R>(&self, _bufs: &[IoSlice], _fds: Vec<RawFdContainer>) -> Result<Cookie<Self, R>, ConnectionError>
-        where R: TryFrom<Buffer, Error=ParseError>
+        fn send_request_with_reply<R>(
+            &self,
+            _bufs: &[IoSlice],
+            _fds: Vec<RawFdContainer>,
+        ) -> Result<Cookie<Self, R>, ConnectionError>
+        where
+            R: TryFrom<Buffer, Error = ParseError>,
         {
             Ok(Cookie::new(self, 0))
         }
 
-        fn send_request_with_reply_with_fds<R>(&self, _bufs: &[IoSlice], _fds: Vec<RawFdContainer>) -> Result<CookieWithFds<Self, R>, ConnectionError>
-        where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>
+        fn send_request_with_reply_with_fds<R>(
+            &self,
+            _bufs: &[IoSlice],
+            _fds: Vec<RawFdContainer>,
+        ) -> Result<CookieWithFds<Self, R>, ConnectionError>
+        where
+            R: TryFrom<(Buffer, Vec<RawFdContainer>), Error = ParseError>,
         {
             unimplemented!()
         }
 
-        fn send_request_without_reply(&self, _bufs: &[IoSlice], _fds: Vec<RawFdContainer>) -> Result<VoidCookie<Self>, ConnectionError> {
+        fn send_request_without_reply(
+            &self,
+            _bufs: &[IoSlice],
+            _fds: Vec<RawFdContainer>,
+        ) -> Result<VoidCookie<Self>, ConnectionError> {
             unimplemented!()
         }
 
@@ -142,7 +157,10 @@ mod test {
             unimplemented!()
         }
 
-        fn extension_information(&self, _extension_name: &'static str) -> Option<QueryExtensionReply> {
+        fn extension_information(
+            &self,
+            _extension_name: &'static str,
+        ) -> Option<QueryExtensionReply> {
             #[allow(trivial_casts, clippy::unnecessary_cast)]
             let present = true as _;
             self.0.as_ref().map(|_| QueryExtensionReply {
@@ -156,19 +174,31 @@ mod test {
             })
         }
 
-        fn wait_for_reply_or_error(&self, _sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
+        fn wait_for_reply_or_error(
+            &self,
+            _sequence: SequenceNumber,
+        ) -> Result<Buffer, ConnectionErrorOrX11Error> {
             Ok(Buffer::from_vec(self.0.as_ref().unwrap().clone()))
         }
 
-        fn wait_for_reply(&self, _sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError> {
+        fn wait_for_reply(
+            &self,
+            _sequence: SequenceNumber,
+        ) -> Result<Option<Buffer>, ConnectionError> {
             unimplemented!()
         }
 
-        fn wait_for_reply_with_fds(&self, _sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
+        fn wait_for_reply_with_fds(
+            &self,
+            _sequence: SequenceNumber,
+        ) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
             unimplemented!()
         }
 
-        fn check_for_error(&self, _sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError> {
+        fn check_for_error(
+            &self,
+            _sequence: SequenceNumber,
+        ) -> Result<Option<GenericError>, ConnectionError> {
             unimplemented!()
         }
 

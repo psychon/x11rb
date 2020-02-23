@@ -1,12 +1,12 @@
 //! Cookies are handles to future replies or errors from the X11 server.
 
+use crate::connection::{DiscardMode, RequestConnection, RequestKind, SequenceNumber};
+use crate::errors::{ConnectionError, ConnectionErrorOrX11Error, ParseError};
+use crate::generated::xproto::ListFontsWithInfoReply;
+use crate::utils::{Buffer, RawFdContainer};
+use crate::x11_utils::GenericError;
 use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
-use crate::utils::{Buffer, RawFdContainer};
-use crate::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
-use crate::x11_utils::GenericError;
-use crate::generated::xproto::ListFontsWithInfoReply;
-use crate::connection::{RequestKind, DiscardMode, RequestConnection, SequenceNumber};
 
 /// A handle to a possible error from the X11 server.
 ///
@@ -14,21 +14,26 @@ use crate::connection::{RequestKind, DiscardMode, RequestConnection, SequenceNum
 /// This `VoidCookie` can then later be used to check if the X11 server sent an error.
 #[derive(Debug)]
 pub struct VoidCookie<'a, C>
-where C: RequestConnection + ?Sized
+where
+    C: RequestConnection + ?Sized,
 {
     connection: &'a C,
     sequence_number: SequenceNumber,
 }
 
 impl<'a, C> VoidCookie<'a, C>
-where C: RequestConnection + ?Sized
+where
+    C: RequestConnection + ?Sized,
 {
     /// Construct a new cookie.
     ///
     /// This function should only be used by implementations of
     /// `Connection::send_request_without_reply`.
     pub fn new(connection: &C, sequence_number: SequenceNumber) -> VoidCookie<C> {
-        VoidCookie { connection, sequence_number }
+        VoidCookie {
+            connection,
+            sequence_number,
+        }
     }
 
     /// Get the sequence number of the request that generated this cookie.
@@ -54,29 +59,40 @@ where C: RequestConnection + ?Sized
     /// this cookie was dropped. This function causes errors to be ignored instead.
     pub fn ignore_error(self) {
         let (connection, sequence) = self.consume();
-        connection.discard_reply(sequence, RequestKind::IsVoid, DiscardMode::DiscardReplyAndError)
+        connection.discard_reply(
+            sequence,
+            RequestKind::IsVoid,
+            DiscardMode::DiscardReplyAndError,
+        )
     }
 }
 
 impl<C> Drop for VoidCookie<'_, C>
-where C: RequestConnection + ?Sized
+where
+    C: RequestConnection + ?Sized,
 {
     fn drop(&mut self) {
-        self.connection.discard_reply(self.sequence_number, RequestKind::IsVoid, DiscardMode::DiscardReply)
+        self.connection.discard_reply(
+            self.sequence_number,
+            RequestKind::IsVoid,
+            DiscardMode::DiscardReply,
+        )
     }
 }
 
 /// Internal helper for a cookie with an response
 #[derive(Debug)]
 struct RawCookie<'a, C>
-where C: RequestConnection + ?Sized
+where
+    C: RequestConnection + ?Sized,
 {
     connection: &'a C,
     sequence_number: SequenceNumber,
 }
 
 impl<C> RawCookie<'_, C>
-where C: RequestConnection + ?Sized
+where
+    C: RequestConnection + ?Sized,
 {
     /// Construct a new raw cookie.
     ///
@@ -99,10 +115,15 @@ where C: RequestConnection + ?Sized
 }
 
 impl<C> Drop for RawCookie<'_, C>
-where C: RequestConnection + ?Sized
+where
+    C: RequestConnection + ?Sized,
 {
     fn drop(&mut self) {
-        self.connection.discard_reply(self.sequence_number, RequestKind::HasResponse, DiscardMode::DiscardReply);
+        self.connection.discard_reply(
+            self.sequence_number,
+            RequestKind::HasResponse,
+            DiscardMode::DiscardReply,
+        );
     }
 }
 
@@ -112,15 +133,17 @@ where C: RequestConnection + ?Sized
 /// then later be used to get the response that the server sent.
 #[derive(Debug)]
 pub struct Cookie<'a, C, R>
-where C: RequestConnection + ?Sized
+where
+    C: RequestConnection + ?Sized,
 {
     raw_cookie: RawCookie<'a, C>,
-    phantom: PhantomData<R>
+    phantom: PhantomData<R>,
 }
 
 impl<C, R> Cookie<'_, C, R>
-where R: TryFrom<Buffer, Error=ParseError>,
-      C: RequestConnection + ?Sized
+where
+    R: TryFrom<Buffer, Error = ParseError>,
+    C: RequestConnection + ?Sized,
 {
     /// Construct a new cookie.
     ///
@@ -129,7 +152,7 @@ where R: TryFrom<Buffer, Error=ParseError>,
     pub fn new(connection: &C, sequence_number: SequenceNumber) -> Cookie<C, R> {
         Cookie {
             raw_cookie: RawCookie::new(connection, sequence_number),
-            phantom: PhantomData
+            phantom: PhantomData,
         }
     }
 
@@ -168,7 +191,11 @@ where R: TryFrom<Buffer, Error=ParseError>,
     /// Without this function, errors are treated as events after the cookie is dropped.
     pub fn discard_reply_and_errors(self) {
         let conn = self.raw_cookie.connection;
-        conn.discard_reply(self.raw_cookie.into_sequence_number(), RequestKind::HasResponse, DiscardMode::DiscardReplyAndError)
+        conn.discard_reply(
+            self.raw_cookie.into_sequence_number(),
+            RequestKind::HasResponse,
+            DiscardMode::DiscardReplyAndError,
+        )
     }
 }
 
@@ -180,15 +207,17 @@ where R: TryFrom<Buffer, Error=ParseError>,
 /// This variant of `Cookie` represents a response that can contain `RawFd`s.
 #[derive(Debug)]
 pub struct CookieWithFds<'a, C, R>
-where C: RequestConnection + ?Sized
+where
+    C: RequestConnection + ?Sized,
 {
     raw_cookie: RawCookie<'a, C>,
-    phantom: PhantomData<R>
+    phantom: PhantomData<R>,
 }
 
 impl<C, R> CookieWithFds<'_, C, R>
-where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>,
-      C: RequestConnection + ?Sized
+where
+    R: TryFrom<(Buffer, Vec<RawFdContainer>), Error = ParseError>,
+    C: RequestConnection + ?Sized,
 {
     /// Construct a new cookie.
     ///
@@ -197,7 +226,7 @@ where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>,
     pub fn new(connection: &C, sequence_number: SequenceNumber) -> CookieWithFds<C, R> {
         CookieWithFds {
             raw_cookie: RawCookie::new(connection, sequence_number),
-            phantom: PhantomData
+            phantom: PhantomData,
         }
     }
 
@@ -226,7 +255,8 @@ where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>,
 pub struct ListFontsWithInfoCookie<'a, C: RequestConnection + ?Sized>(Option<RawCookie<'a, C>>);
 
 impl<C> ListFontsWithInfoCookie<'_, C>
-where C: RequestConnection + ?Sized
+where
+    C: RequestConnection + ?Sized,
 {
     pub(crate) fn new(cookie: Cookie<C, ListFontsWithInfoReply>) -> ListFontsWithInfoCookie<C> {
         ListFontsWithInfoCookie(Some(cookie.raw_cookie))
@@ -239,19 +269,22 @@ where C: RequestConnection + ?Sized
 }
 
 impl<C> Iterator for ListFontsWithInfoCookie<'_, C>
-where C: RequestConnection + ?Sized
+where
+    C: RequestConnection + ?Sized,
 {
     type Item = Result<ListFontsWithInfoReply, ConnectionErrorOrX11Error>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let cookie = match self.0.take() {
             None => return None,
-            Some(cookie) => cookie
+            Some(cookie) => cookie,
         };
-        let reply = cookie.connection.wait_for_reply_or_error(cookie.sequence_number);
+        let reply = cookie
+            .connection
+            .wait_for_reply_or_error(cookie.sequence_number);
         let reply = match reply {
             Err(e) => return Some(Err(e)),
-            Ok(v) => v
+            Ok(v) => v,
         };
         let reply: Result<ListFontsWithInfoReply, ParseError> = reply.try_into();
         let reply = reply.map_err(ConnectionErrorOrX11Error::from);
@@ -260,7 +293,7 @@ where C: RequestConnection + ?Sized
             if !reply.as_ref().unwrap().name.is_empty() {
                 self.0 = Some(cookie);
             } else {
-                return None
+                return None;
             }
         }
         Some(reply)

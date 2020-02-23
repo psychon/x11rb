@@ -1,9 +1,8 @@
-/// Helper for implementing `RequestConnection::extension_information()`.
-
-use std::sync::Mutex;
-use std::collections::HashMap;
 use crate::connection::RequestConnection;
 use crate::generated::xproto::{ConnectionExt, QueryExtensionReply};
+use std::collections::HashMap;
+/// Helper for implementing `RequestConnection::extension_information()`.
+use std::sync::Mutex;
 
 /// Helper for implementing `RequestConnection::extension_information()`.
 ///
@@ -16,11 +15,14 @@ impl ExtensionInformation {
     /// An implementation of `RequestConnection::extension_information()`.
     ///
     /// The given connection is used for sending a `QueryExtension` request if needed.
-    pub fn extension_information<C: RequestConnection>(&self, conn: &C, extension_name: &'static str)
-            -> Option<QueryExtensionReply> {
+    pub fn extension_information<C: RequestConnection>(
+        &self,
+        conn: &C,
+        extension_name: &'static str,
+    ) -> Option<QueryExtensionReply> {
         // If locking the mutex fails, just return None
-        self.0.lock().ok()
-            .and_then(|mut map| *map.entry(extension_name)
+        self.0.lock().ok().and_then(|mut map| {
+            *map.entry(extension_name)
                 // Insert the entry if it does not yet exist and get a copy
                 .or_insert_with(|| {
                     let info = conn.query_extension(extension_name.as_bytes()).ok();
@@ -38,6 +40,7 @@ impl ExtensionInformation {
                         // There was an error. Pretend the extension is not present.
                         None
                     }
-                }))
+                })
+        })
     }
 }

@@ -3,23 +3,29 @@
 // include!()d in the examples
 
 mod util {
-    use std::thread;
     use std::env;
     use std::sync::Arc;
+    use std::thread;
     use std::time::Duration;
 
     use x11rb::connection::Connection;
-    use x11rb::x11_utils::TryParse;
-    use x11rb::generated::xproto::{WINDOW, ConnectionExt as _, EventMask, ClientMessageData, ClientMessageEvent, CLIENT_MESSAGE_EVENT};
+    use x11rb::generated::xproto::{
+        ClientMessageData, ClientMessageEvent, ConnectionExt as _, EventMask, CLIENT_MESSAGE_EVENT,
+        WINDOW,
+    };
     use x11rb::wrapper::LazyAtom;
+    use x11rb::x11_utils::TryParse;
 
     pub fn start_timeout_thread<C>(conn: Arc<C>, window: WINDOW)
-    where C: Connection + Send + Sync + 'static
+    where
+        C: Connection + Send + Sync + 'static,
     {
-        let timeout = match env::var("X11RB_EXAMPLE_TIMEOUT").ok()
-                .and_then(|str| str.parse().ok()) {
+        let timeout = match env::var("X11RB_EXAMPLE_TIMEOUT")
+            .ok()
+            .and_then(|str| str.parse().ok())
+        {
             None => return,
-            Some(timeout) => timeout
+            Some(timeout) => timeout,
         };
 
         thread::spawn(move || {
@@ -37,13 +43,18 @@ mod util {
                 sequence: 0,
                 window: window,
                 type_: wm_protocols.atom().unwrap(),
-                data
+                data,
             };
 
             if let Err(err) = conn.send_event(false, window, EventMask::NoEvent.into(), &event) {
                 eprintln!("Error while sending event: {:?}", err);
             }
-            if let Err(err) = conn.send_event(false, window, EventMask::SubstructureRedirect.into(), &event) {
+            if let Err(err) = conn.send_event(
+                false,
+                window,
+                EventMask::SubstructureRedirect.into(),
+                &event,
+            ) {
                 eprintln!("Error while sending event: {:?}", err);
             }
             conn.flush();

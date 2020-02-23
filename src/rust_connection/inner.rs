@@ -1,15 +1,17 @@
 //! A pure-rust implementation of a connection to an X11 server.
 
-use std::io::{IoSlice, Write, Read, ErrorKind};
-use std::error::Error;
-use std::convert::TryInto;
 use std::collections::VecDeque;
+use std::convert::TryInto;
+use std::error::Error;
+use std::io::{ErrorKind, IoSlice, Read, Write};
 
-use crate::utils::Buffer;
-use crate::connection::{SequenceNumber, RequestKind, DiscardMode};
-use crate::generated::xproto::{Setup, SetupRequest, SetupFailed, SetupAuthenticate, GET_INPUT_FOCUS_REQUEST};
-use crate::x11_utils::{GenericEvent, Serialize};
+use crate::connection::{DiscardMode, RequestKind, SequenceNumber};
 use crate::errors::ParseError;
+use crate::generated::xproto::{
+    Setup, SetupAuthenticate, SetupFailed, SetupRequest, GET_INPUT_FOCUS_REQUEST,
+};
+use crate::utils::Buffer;
+use crate::x11_utils::{GenericEvent, Serialize};
 
 #[derive(Debug, Clone)]
 pub(crate) enum PollReply {
@@ -30,7 +32,8 @@ struct SentRequest {
 
 #[derive(Debug)]
 pub(crate) struct ConnectionInner<W>
-where W: Write
+where
+    W: Write,
 {
     // The underlying byte stream used for writing to the X11 server. Reading is done outside of
     // this struct (for synchronisation reasons).
@@ -53,7 +56,8 @@ where W: Write
 }
 
 impl<W> ConnectionInner<W>
-where W: Write
+where
+    W: Write,
 {
     /// Create a `ConnectionInner` for the given connection.
     ///
@@ -66,8 +70,12 @@ where W: Write
     ///
     /// `auth_name` and `auth_data` describe the authentication data that will be sent to the X11
     /// server in the `SetupRequest`.
-    pub(crate) fn connect(read: &mut impl Read, mut write: W, auth_name: Vec<u8>, auth_data: Vec<u8>)
-    -> Result<(Self, Setup), Box<dyn Error>> {
+    pub(crate) fn connect(
+        read: &mut impl Read,
+        mut write: W,
+        auth_name: Vec<u8>,
+        auth_data: Vec<u8>,
+    ) -> Result<(Self, Setup), Box<dyn Error>> {
         Self::write_setup(&mut write, auth_name, auth_data)?;
         let setup = read_setup(read)?;
         Ok((Self::new(write), setup))
@@ -96,8 +104,11 @@ where W: Write
     }
 
     /// Send a `SetupRequest` to the X11 server.
-    fn write_setup(write: &mut W, auth_name: Vec<u8>, auth_data: Vec<u8>)
-    -> Result<(), Box<dyn Error>> {
+    fn write_setup(
+        write: &mut W,
+        auth_name: Vec<u8>,
+        auth_data: Vec<u8>,
+    ) -> Result<(), Box<dyn Error>> {
         let request = SetupRequest {
             byte_order: Self::byte_order(),
             protocol_major_version: 11,
@@ -116,7 +127,12 @@ where W: Write
     /// to be ignored. This causes `self.next_reply_expected` to be increased.
     fn send_sync(&mut self) -> Result<(), Box<dyn Error>> {
         let length = 1u16.to_ne_bytes();
-        self.write.write_all(&[GET_INPUT_FOCUS_REQUEST, 0 /* pad */, length[0], length[1]])?;
+        self.write.write_all(&[
+            GET_INPUT_FOCUS_REQUEST,
+            0, /* pad */
+            length[0],
+            length[1],
+        ])?;
 
         self.last_sequence_written += 1;
         self.next_reply_expected = self.last_sequence_written;
@@ -130,8 +146,14 @@ where W: Write
     }
 
     /// Send a request to the X11 server.
-    pub(crate) fn send_request(&mut self, bufs: &[IoSlice], kind: RequestKind) -> Result<SequenceNumber, Box<dyn Error>> {
-        if self.next_reply_expected + SequenceNumber::from(u16::max_value()) <= self.last_sequence_written {
+    pub(crate) fn send_request(
+        &mut self,
+        bufs: &[IoSlice],
+        kind: RequestKind,
+    ) -> Result<SequenceNumber, Box<dyn Error>> {
+        if self.next_reply_expected + SequenceNumber::from(u16::max_value())
+            <= self.last_sequence_written
+        {
             // Send a GetInputFocus request so that we can reliably reconstruct sequence numbers in
             // received packets.
             self.send_sync()?;
@@ -157,7 +179,9 @@ where W: Write
         while !bufs.is_empty() {
             let mut count = self.write.write_vectored(bufs)?;
             if count == 0 {
-                return Err(std::io::Error::new(ErrorKind::WriteZero, "failed to write anything").into());
+                return Err(
+                    std::io::Error::new(ErrorKind::WriteZero, "failed to write anything").into(),
+                );
             }
             while count > 0 {
                 if count >= bufs[0].len() {
@@ -188,7 +212,12 @@ where W: Write
             DiscardMode::DiscardReplyAndError => self.pending_replies.retain(|r| r.0 != seqno),
             DiscardMode::DiscardReply => {
                 if let Some(index) = self.pending_replies.iter().position(|r| r.0 == seqno) {
-                    while self.pending_replies.get(index).filter(|r| r.0 == seqno).is_some() {
+                    while self
+                        .pending_replies
+                        .get(index)
+                        .filter(|r| r.0 == seqno)
+                        .is_some()
+                    {
                         if let Some((_, packet)) = self.pending_replies.remove(index) {
                             if packet[0] == 0 {
                                 // This is an error
@@ -235,7 +264,9 @@ where W: Write
 
         // extract_sequence_number() updates our state and is thus important to call even when we
         // do not need the sequence number
-        let seqno = self.extract_sequence_number(&packet).unwrap_or(self.last_sequence_read);
+        let seqno = self
+            .extract_sequence_number(&packet)
+            .unwrap_or(self.last_sequence_read);
 
         // Remove all entries for older requests
         while let Some(request) = self.sent_requests.front() {
@@ -244,14 +275,14 @@ where W: Write
             }
             let _ = self.sent_requests.pop_front();
         }
-        let request = self.sent_requests.front()
-            .filter(|r| r.seqno == seqno);
+        let request = self.sent_requests.front().filter(|r| r.seqno == seqno);
 
         if kind == 0 {
             // It is an error. Let's see where we have to send it to.
             if let Some(request) = request {
                 match request.discard_mode {
-                    Some(DiscardMode::DiscardReplyAndError) => { /* This error should be ignored */ },
+                    Some(DiscardMode::DiscardReplyAndError) => { /* This error should be ignored */
+                    }
                     Some(DiscardMode::DiscardReply) => self.pending_events.push_back(packet),
                     None => self.pending_replies.push_back((seqno, packet)),
                 }
@@ -279,7 +310,7 @@ where W: Write
     pub(crate) fn poll_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Option<Buffer> {
         for (index, (seqno, _packet)) in self.pending_replies.iter().enumerate() {
             if *seqno == sequence {
-                return Some(self.pending_replies.remove(index).unwrap().1)
+                return Some(self.pending_replies.remove(index).unwrap().1);
             }
         }
         None
@@ -294,7 +325,10 @@ where W: Write
     /// Thus, this function ensures that a reply with a higher sequence number will be received.
     /// Since the X11 server handles requests in-order, if the reply to a later request is
     /// received, this means that the earlier request did not fail.
-    pub(crate) fn prepare_check_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Result<(), Box<dyn Error>> {
+    pub(crate) fn prepare_check_for_reply_or_error(
+        &mut self,
+        sequence: SequenceNumber,
+    ) -> Result<(), Box<dyn Error>> {
         if self.next_reply_expected < sequence {
             self.send_sync()?;
         }
@@ -341,7 +375,8 @@ where W: Write
 
     /// Get a pending event.
     pub(crate) fn poll_for_event(&mut self) -> Option<GenericEvent> {
-        self.pending_events.pop_front()
+        self.pending_events
+            .pop_front()
             .map(|event| event.try_into().unwrap())
     }
 
@@ -372,7 +407,7 @@ fn read_setup(read: &mut impl Read) -> Result<Setup, SetupError> {
         // 2 is SetupAuthenticate
         2 => Err(SetupError::SetupAuthenticate((&setup[..]).try_into()?)),
         // Uhm... no other cases are defined
-        _ => Err(ParseError::ParseError.into())
+        _ => Err(ParseError::ParseError.into()),
     }
 }
 
@@ -412,20 +447,22 @@ impl std::fmt::Display for SetupError {
             SetupError::ParseError(err) => err.fmt(f),
             SetupError::IoError(err) => err.fmt(f),
             SetupError::SetupFailed(err) => display(f, "X11 setup failed", &err.reason),
-            SetupError::SetupAuthenticate(err) => display(f, "X11 authentication failed", &err.reason),
+            SetupError::SetupAuthenticate(err) => {
+                display(f, "X11 authentication failed", &err.reason)
+            }
         }
     }
 }
 
 #[cfg(test)]
 mod test {
-    use std::io::IoSlice;
     use std::error::Error;
+    use std::io::IoSlice;
 
-    use crate::generated::xproto::{Setup, SetupFailed, SetupAuthenticate};
-    use crate::x11_utils::Serialize;
+    use super::{read_setup, ConnectionInner, SetupError};
     use crate::connection::RequestKind;
-    use super::{read_setup, SetupError, ConnectionInner};
+    use crate::generated::xproto::{Setup, SetupAuthenticate, SetupFailed};
+    use crate::x11_utils::Serialize;
 
     #[test]
     fn read_setup_success() {
@@ -503,14 +540,19 @@ mod test {
         let mut connection = ConnectionInner::new(&mut output);
 
         for num in 1..0x10000 {
-            let seqno = connection.send_request(&[IoSlice::new(&no_operation)], RequestKind::IsVoid)?;
+            let seqno =
+                connection.send_request(&[IoSlice::new(&no_operation)], RequestKind::IsVoid)?;
             assert_eq!(num, seqno);
         }
         // request 0x10000 should be a sync, hence the next one is 0x10001
         let seqno = connection.send_request(&[IoSlice::new(&no_operation)], RequestKind::IsVoid)?;
         assert_eq!(0x10001, seqno);
 
-        let mut expected: Vec<_> = std::iter::repeat(&no_operation).take(0xffff).flatten().copied().collect();
+        let mut expected: Vec<_> = std::iter::repeat(&no_operation)
+            .take(0xffff)
+            .flatten()
+            .copied()
+            .collect();
         expected.extend_from_slice(&get_input_focus);
         expected.extend_from_slice(&no_operation);
 
@@ -532,11 +574,16 @@ mod test {
         let mut connection = ConnectionInner::new(&mut output);
 
         for num in 1..=0x10001 {
-            let seqno = connection.send_request(&[IoSlice::new(&get_input_focus)], RequestKind::HasResponse)?;
+            let seqno = connection
+                .send_request(&[IoSlice::new(&get_input_focus)], RequestKind::HasResponse)?;
             assert_eq!(num, seqno);
         }
 
-        let expected: Vec<_> = std::iter::repeat(&get_input_focus).take(0x10001).flatten().copied().collect();
+        let expected: Vec<_> = std::iter::repeat(&get_input_focus)
+            .take(0x10001)
+            .flatten()
+            .copied()
+            .collect();
         assert_eq!(&written[..], &expected[..]);
         Ok(())
     }
@@ -546,7 +593,9 @@ mod test {
         let mut output = &mut written[..];
         let mut connection = ConnectionInner::new(&mut output);
         let request = [IoSlice::new(&request), IoSlice::new(&request)];
-        let error = connection.send_request(&request, RequestKind::IsVoid).unwrap_err();
+        let error = connection
+            .send_request(&request, RequestKind::IsVoid)
+            .unwrap_err();
         assert_eq!(expected_err, error.to_string());
     }
 
@@ -567,6 +616,8 @@ mod test {
         let mut connection = ConnectionInner::new(&mut output);
         let (request1, request2) = ([0; 4], [0; 0]);
         let request = [IoSlice::new(&request1), IoSlice::new(&request2)];
-        let _ = connection.send_request(&request, RequestKind::IsVoid).unwrap();
+        let _ = connection
+            .send_request(&request, RequestKind::IsVoid)
+            .unwrap();
     }
 }

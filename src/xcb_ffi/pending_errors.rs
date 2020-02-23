@@ -5,9 +5,9 @@
 //! received, but not yet given to the user of this library.
 
 use std::cmp::Reverse;
-use std::sync::Mutex;
-use std::convert::TryInto;
 use std::collections::{BinaryHeap, VecDeque};
+use std::convert::TryInto;
+use std::sync::Mutex;
 
 use super::XCBConnection;
 use crate::connection::SequenceNumber;
@@ -22,7 +22,7 @@ struct PendingErrorsInner {
 /// A management struct for pending X11 errors
 #[derive(Debug, Default)]
 pub(crate) struct PendingErrors {
-    inner: Mutex<PendingErrorsInner>
+    inner: Mutex<PendingErrorsInner>,
 }
 
 impl PendingErrors {
@@ -50,8 +50,8 @@ impl PendingErrors {
                     // This request was not answered/errored yet, so later request will not
                     // have answers as well.
                     return None;
-                },
-                Ok(reply) => reply
+                }
+                Ok(reply) => reply,
             };
 
             let seqno2 = inner.in_flight.pop();

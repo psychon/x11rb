@@ -1,24 +1,28 @@
-use std::io::IoSlice;
-use std::convert::TryFrom;
-use std::ops::Deref;
 use std::cell::RefCell;
+use std::convert::TryFrom;
+use std::io::IoSlice;
+use std::ops::Deref;
 
-use x11rb::connection::{RequestConnection, SequenceNumber, RequestKind, DiscardMode};
+use x11rb::connection::{DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
-use x11rb::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
-use x11rb::generated::xproto::{QueryExtensionReply, ConnectionExt, Segment, KeymapNotifyEvent, ClientMessageData, SetupAuthenticate};
+use x11rb::errors::{ConnectionError, ConnectionErrorOrX11Error, ParseError};
+use x11rb::generated::xproto::{
+    ClientMessageData, ConnectionExt, KeymapNotifyEvent, QueryExtensionReply, Segment,
+    SetupAuthenticate,
+};
 use x11rb::utils::{Buffer, RawFdContainer};
-use x11rb::x11_utils::{GenericError, TryParse, Serialize};
+use x11rb::x11_utils::{GenericError, Serialize, TryParse};
 
 #[derive(Debug)]
 struct SavedRequest {
     has_reply: bool,
-    data: Vec<u8>
+    data: Vec<u8>,
 }
 
 impl SavedRequest {
     fn new(has_reply: bool, data: &[IoSlice]) -> SavedRequest {
-        let data = data.iter()
+        let data = data
+            .iter()
             .flat_map(|slice| slice.deref())
             .copied()
             .collect::<Vec<_>>();
@@ -39,7 +43,11 @@ impl FakeConnection {
         assert_eq!(expected.len(), vec.len());
     }
 
-    fn internal_send_request(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<SequenceNumber, ConnectionError> {
+    fn internal_send_request(
+        &self,
+        bufs: &[IoSlice],
+        fds: Vec<RawFdContainer>,
+    ) -> Result<SequenceNumber, ConnectionError> {
         assert_eq!(fds.len(), 0);
 
         let mut storage = Default::default();
@@ -51,20 +59,37 @@ impl FakeConnection {
 }
 
 impl RequestConnection for FakeConnection {
-    fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<Cookie<Self, R>, ConnectionError>
-    where R: TryFrom<Buffer, Error=ParseError>
+    fn send_request_with_reply<R>(
+        &self,
+        bufs: &[IoSlice],
+        fds: Vec<RawFdContainer>,
+    ) -> Result<Cookie<Self, R>, ConnectionError>
+    where
+        R: TryFrom<Buffer, Error = ParseError>,
     {
         Ok(Cookie::new(self, self.internal_send_request(bufs, fds)?))
     }
 
-    fn send_request_with_reply_with_fds<R>(&self, _bufs: &[IoSlice], _fds: Vec<RawFdContainer>) -> Result<CookieWithFds<Self, R>, ConnectionError>
-    where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>
+    fn send_request_with_reply_with_fds<R>(
+        &self,
+        _bufs: &[IoSlice],
+        _fds: Vec<RawFdContainer>,
+    ) -> Result<CookieWithFds<Self, R>, ConnectionError>
+    where
+        R: TryFrom<(Buffer, Vec<RawFdContainer>), Error = ParseError>,
     {
         unimplemented!()
     }
 
-    fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<VoidCookie<Self>, ConnectionError> {
-        Ok(VoidCookie::new(self, self.internal_send_request(bufs, fds)?))
+    fn send_request_without_reply(
+        &self,
+        bufs: &[IoSlice],
+        fds: Vec<RawFdContainer>,
+    ) -> Result<VoidCookie<Self>, ConnectionError> {
+        Ok(VoidCookie::new(
+            self,
+            self.internal_send_request(bufs, fds)?,
+        ))
     }
 
     fn discard_reply(&self, _sequence: SequenceNumber, _kind: RequestKind, _mode: DiscardMode) {
@@ -75,7 +100,10 @@ impl RequestConnection for FakeConnection {
         unimplemented!()
     }
 
-    fn wait_for_reply_or_error(&self, _sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
+    fn wait_for_reply_or_error(
+        &self,
+        _sequence: SequenceNumber,
+    ) -> Result<Buffer, ConnectionErrorOrX11Error> {
         unimplemented!()
     }
 
@@ -83,11 +111,17 @@ impl RequestConnection for FakeConnection {
         unimplemented!()
     }
 
-    fn wait_for_reply_with_fds(&self, _sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
+    fn wait_for_reply_with_fds(
+        &self,
+        _sequence: SequenceNumber,
+    ) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
         unimplemented!()
     }
 
-    fn check_for_error(&self, _sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError> {
+    fn check_for_error(
+        &self,
+        _sequence: SequenceNumber,
+    ) -> Result<Option<GenericError>, ConnectionError> {
         unimplemented!()
     }
 
@@ -103,8 +137,18 @@ fn test_poly_segment() -> Result<(), ConnectionErrorOrX11Error> {
     let drawable = 42;
     let gc = 0x1337;
     let segments = [
-        Segment { x1: 1, y1: 2, x2: 3, y2: 4 },
-        Segment { x1: 5, y1: 6, x2: 7, y2: 8 },
+        Segment {
+            x1: 1,
+            y1: 2,
+            x2: 3,
+            y2: 4,
+        },
+        Segment {
+            x1: 5,
+            y1: 6,
+            x2: 7,
+            y2: 8,
+        },
     ];
     let length: u16 = (12 + segments.len() * 8) as u16 / 4;
     conn.poly_segment(drawable, gc, &segments)?;
@@ -138,7 +182,7 @@ fn test_big_requests() -> Result<(), ConnectionError> {
     let mut expected = Vec::new();
     expected.push(x11rb::generated::xproto::POLY_TEXT16_REQUEST);
     expected.push(0); // padding
-    // Length of zero: we use big requests
+                      // Length of zero: we use big requests
     expected.push(0);
     expected.push(0);
     // Actual length
@@ -164,16 +208,20 @@ fn test_too_large_request() -> Result<(), ConnectionError> {
     let x: i16 = 21;
     let y: i16 = 7;
     let res = conn.poly_text16(drawable, gc, x, y, &big_buffer);
-    assert_eq!(ConnectionError::MaximumRequestLengthExceeded, res.unwrap_err());
+    assert_eq!(
+        ConnectionError::MaximumRequestLengthExceeded,
+        res.unwrap_err()
+    );
     Ok(())
 }
 
 #[test]
 fn test_send_event() -> Result<(), ConnectionError> {
     // Prepare the event
-    let buffer: [u8; 32] = [11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
-                            14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
-                            26, 27, 28, 29, 30];
+    let buffer: [u8; 32] = [
+        11, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
+        24, 25, 26, 27, 28, 29, 30,
+    ];
     let event = KeymapNotifyEvent::try_from(&buffer[..])?;
 
     // "Send" it
@@ -250,6 +298,8 @@ fn test_serialize_setup_authenticate() {
     };
     // At the time of writing, the code generator does not produce the correct code...
     let length = 2u16.to_ne_bytes();
-    let setup_bytes = [2, 0, 0, 0, 0, 0, length[0], length[1], b'1', b'2', b'3', b'4', b'5', b'6', b'7', b'8'];
+    let setup_bytes = [
+        2, 0, 0, 0, 0, 0, length[0], length[1], b'1', b'2', b'3', b'4', b'5', b'6', b'7', b'8',
+    ];
     assert_eq!(&setup_bytes[..], &setup.serialize()[..]);
 }

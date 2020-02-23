@@ -2,22 +2,25 @@
 
 extern crate x11rb;
 
-use x11rb::connection::{RequestConnection as _, Connection};
-use x11rb::x11_utils::Event;
-use x11rb::generated::xproto::*;
-use x11rb::generated::shape::{self, ConnectionExt as _};
-use x11rb::wrapper::{ConnectionExt as _, LazyAtom};
+use x11rb::connection::{Connection, RequestConnection as _};
 use x11rb::errors::ConnectionError;
+use x11rb::generated::shape::{self, ConnectionExt as _};
+use x11rb::generated::xproto::*;
+use x11rb::wrapper::{ConnectionExt as _, LazyAtom};
+use x11rb::x11_utils::Event;
 use x11rb::COPY_DEPTH_FROM_PARENT;
 
 const PUPIL_SIZE: i16 = 50;
 const EYE_SIZE: i16 = 50;
 
 // Draw the big background of the eyes
-fn draw_eyes<C: Connection>(conn: &C, win_id: WINDOW, black: GCONTEXT, white: GCONTEXT,
-                            window_size: (u16, u16))
--> Result<(), ConnectionError>
-{
+fn draw_eyes<C: Connection>(
+    conn: &C,
+    win_id: WINDOW,
+    black: GCONTEXT,
+    white: GCONTEXT,
+    window_size: (u16, u16),
+) -> Result<(), ConnectionError> {
     // Draw the black outlines
     let mut arc1 = Arc {
         x: 0,
@@ -25,7 +28,7 @@ fn draw_eyes<C: Connection>(conn: &C, win_id: WINDOW, black: GCONTEXT, white: GC
         width: window_size.0 / 2,
         height: window_size.1,
         angle1: 0,
-        angle2: 360*64
+        angle2: 360 * 64,
     };
     let mut arc2 = arc1;
     arc2.x = arc2.width as _;
@@ -44,10 +47,12 @@ fn draw_eyes<C: Connection>(conn: &C, win_id: WINDOW, black: GCONTEXT, white: GC
 }
 
 // Draw the pupils inside the eye
-fn draw_pupils<C: Connection>(conn: &C, win_id: WINDOW, gc: GCONTEXT,
-                              ((x1, y1), (x2, y2)): ((i16, i16), (i16, i16)))
--> Result<(), ConnectionError>
-{
+fn draw_pupils<C: Connection>(
+    conn: &C,
+    win_id: WINDOW,
+    gc: GCONTEXT,
+    ((x1, y1), (x2, y2)): ((i16, i16), (i16, i16)),
+) -> Result<(), ConnectionError> {
     // Transform center to top left corner
     let (x1, y1) = (x1 - PUPIL_SIZE / 2, y1 - PUPIL_SIZE / 2);
     let (x2, y2) = (x2 - PUPIL_SIZE / 2, y2 - PUPIL_SIZE / 2);
@@ -58,7 +63,7 @@ fn draw_pupils<C: Connection>(conn: &C, win_id: WINDOW, gc: GCONTEXT,
         width: PUPIL_SIZE as _,
         height: PUPIL_SIZE as _,
         angle1: 90 * 64,
-        angle2: 360*64
+        angle2: 360 * 64,
     };
     let mut arc2 = arc1;
     arc2.x = x2;
@@ -77,8 +82,7 @@ fn distance_squared(p1: (f64, f64), p2: (f64, f64)) -> f64 {
 }
 
 // Compute the position of a pupil inside of the given area.
-fn compute_pupil(area: (i16, i16, i16, i16), mouse: (i16, i16)) -> (i16, i16)
-{
+fn compute_pupil(area: (i16, i16, i16, i16), mouse: (i16, i16)) -> (i16, i16) {
     // What is the center of the eye?
     let center_x = area.0 + area.2 / 2;
     let center_y = area.1 + area.3 / 2;
@@ -137,15 +141,16 @@ fn compute_pupil(area: (i16, i16, i16, i16), mouse: (i16, i16)) -> (i16, i16)
 }
 
 // Compute the position of both pupils.
-fn compute_pupils(window_size: (u16, u16), mouse_position: (i16, i16)) -> ((i16, i16), (i16, i16))
-{
+fn compute_pupils(window_size: (u16, u16), mouse_position: (i16, i16)) -> ((i16, i16), (i16, i16)) {
     let border = PUPIL_SIZE + EYE_SIZE;
     let half_width = window_size.0 as i16 / 2;
     let width = half_width - 2 * border;
     let height = window_size.1 as i16 - 2 * border;
 
-    (compute_pupil((border, border, width, height), mouse_position),
-     compute_pupil((border + half_width, border, width, height), mouse_position))
+    (
+        compute_pupil((border, border, width, height), mouse_position),
+        compute_pupil((border + half_width, border, width, height), mouse_position),
+    )
 }
 
 struct FreePixmap<'c, C: Connection>(&'c C, PIXMAP);
@@ -161,17 +166,22 @@ impl<C: Connection> Drop for FreeGC<'_, C> {
     }
 }
 
-fn create_pixmap_wrapper<C: Connection>(conn: &C, depth: u8, drawable: DRAWABLE, size: (u16, u16))
--> Result<FreePixmap<C>, ConnectionError>
-{
+fn create_pixmap_wrapper<C: Connection>(
+    conn: &C,
+    depth: u8,
+    drawable: DRAWABLE,
+    size: (u16, u16),
+) -> Result<FreePixmap<C>, ConnectionError> {
     let pixmap = conn.generate_id();
     conn.create_pixmap(depth, pixmap, drawable, size.0, size.1)?;
     Ok(FreePixmap(conn, pixmap))
 }
 
-fn shape_window<C: Connection>(conn: &C, win_id: WINDOW, window_size: (u16, u16))
--> Result<(), ConnectionError>
-{
+fn shape_window<C: Connection>(
+    conn: &C,
+    win_id: WINDOW,
+    window_size: (u16, u16),
+) -> Result<(), ConnectionError> {
     // Create a pixmap for the shape
     let pixmap = create_pixmap_wrapper(conn, 1, win_id, window_size)?;
 
@@ -183,7 +193,7 @@ fn shape_window<C: Connection>(conn: &C, win_id: WINDOW, window_size: (u16, u16)
         x: 0,
         y: 0,
         width: window_size.0,
-        height: window_size.1
+        height: window_size.1,
     };
     conn.poly_fill_rectangle(pixmap.1, gc, &[rect])?;
 
@@ -197,30 +207,60 @@ fn shape_window<C: Connection>(conn: &C, win_id: WINDOW, window_size: (u16, u16)
     Ok(())
 }
 
-fn setup_window<C: Connection>(conn: &C, screen: &Screen, window_size: (u16, u16),
-                               wm_protocols: ATOM, wm_delete_window: ATOM)
--> Result<WINDOW, ConnectionError>
-{
+fn setup_window<C: Connection>(
+    conn: &C,
+    screen: &Screen,
+    window_size: (u16, u16),
+    wm_protocols: ATOM,
+    wm_delete_window: ATOM,
+) -> Result<WINDOW, ConnectionError> {
     let win_id = conn.generate_id();
     let win_aux = CreateWindowAux::new()
         .event_mask(EventMask::Exposure | EventMask::StructureNotify | EventMask::PointerMotion)
         .background_pixel(screen.white_pixel);
 
-    conn.create_window(COPY_DEPTH_FROM_PARENT, win_id, screen.root, 0, 0, window_size.0, window_size.1,
-                       0, WindowClass::InputOutput, 0, &win_aux)?;
+    conn.create_window(
+        COPY_DEPTH_FROM_PARENT,
+        win_id,
+        screen.root,
+        0,
+        0,
+        window_size.0,
+        window_size.1,
+        0,
+        WindowClass::InputOutput,
+        0,
+        &win_aux,
+    )?;
 
     let title = "xeyes";
-    conn.change_property8(PropMode::Replace, win_id, Atom::WM_NAME.into(), Atom::STRING.into(), title.as_bytes()).unwrap();
-    conn.change_property32(PropMode::Replace, win_id, wm_protocols, Atom::ATOM.into(), &[wm_delete_window]).unwrap();
+    conn.change_property8(
+        PropMode::Replace,
+        win_id,
+        Atom::WM_NAME.into(),
+        Atom::STRING.into(),
+        title.as_bytes(),
+    )
+    .unwrap();
+    conn.change_property32(
+        PropMode::Replace,
+        win_id,
+        wm_protocols,
+        Atom::ATOM.into(),
+        &[wm_delete_window],
+    )
+    .unwrap();
 
     conn.map_window(win_id).unwrap();
 
     Ok(win_id)
 }
 
-fn create_gc_with_foreground<C: Connection>(conn: &C, win_id: WINDOW, foreground: u32)
--> Result<GCONTEXT, ConnectionError>
-{
+fn create_gc_with_foreground<C: Connection>(
+    conn: &C,
+    win_id: WINDOW,
+    foreground: u32,
+) -> Result<GCONTEXT, ConnectionError> {
     let gc = conn.generate_id();
     let gc_aux = CreateGCAux::new()
         .graphics_exposures(0)
@@ -242,8 +282,17 @@ fn main() {
     let mut wm_delete_window = LazyAtom::new(conn, false, b"WM_DELETE_WINDOW");
 
     let mut window_size = (700, 500);
-    let has_shape = conn.extension_information(shape::X11_EXTENSION_NAME).is_some();
-    let win_id = setup_window(conn, screen, window_size, wm_protocols.atom().unwrap(), wm_delete_window.atom().unwrap()).unwrap();
+    let has_shape = conn
+        .extension_information(shape::X11_EXTENSION_NAME)
+        .is_some();
+    let win_id = setup_window(
+        conn,
+        screen,
+        window_size,
+        wm_protocols.atom().unwrap(),
+        wm_delete_window.atom().unwrap(),
+    )
+    .unwrap();
     let mut pixmap = create_pixmap_wrapper(conn, screen.root_depth, win_id, window_size).unwrap();
 
     let black_gc = create_gc_with_foreground(conn, win_id, screen.black_pixel).unwrap();
@@ -271,8 +320,8 @@ fn main() {
                 CONFIGURE_NOTIFY_EVENT => {
                     let event = ConfigureNotifyEvent::from(event);
                     window_size = (event.width, event.height);
-                    pixmap = create_pixmap_wrapper(conn, screen.root_depth, win_id,
-                                                   window_size).unwrap();
+                    pixmap = create_pixmap_wrapper(conn, screen.root_depth, win_id, window_size)
+                        .unwrap();
                     need_reshape = true;
                 }
                 MOTION_NOTIFY_EVENT => {
@@ -286,13 +335,20 @@ fn main() {
                 CLIENT_MESSAGE_EVENT => {
                     let event = ClientMessageEvent::from(event);
                     let data = event.data.as_data32();
-                    if event.format == 32 && event.window == win_id && data[0] == wm_delete_window.atom().unwrap() {
+                    if event.format == 32
+                        && event.window == win_id
+                        && data[0] == wm_delete_window.atom().unwrap()
+                    {
                         println!("Window was asked to close");
                         return;
                     }
                 }
-                0 => { println!("Unknown error {:?}", event); },
-                _ => { println!("Unknown event {:?}", event); }
+                0 => {
+                    println!("Unknown error {:?}", event);
+                }
+                _ => {
+                    println!("Unknown event {:?}", event);
+                }
             }
 
             event_option = conn.poll_for_event().unwrap();
@@ -309,8 +365,18 @@ fn main() {
             draw_pupils(conn, pixmap.1, black_gc, pos).unwrap();
 
             // Copy drawing from pixmap to window
-            conn.copy_area(pixmap.1, win_id, white_gc, 0, 0, 0, 0,
-                      window_size.0, window_size.1).unwrap();
+            conn.copy_area(
+                pixmap.1,
+                win_id,
+                white_gc,
+                0,
+                0,
+                0,
+                0,
+                window_size.0,
+                window_size.1,
+            )
+            .unwrap();
 
             conn.flush();
             need_repaint = false;

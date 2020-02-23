@@ -22,10 +22,10 @@ extern crate x11rb;
 use std::error::Error;
 
 use x11rb::connection::{Connection, SequenceNumber};
-use x11rb::x11_utils::Event;
 use x11rb::errors::{ConnectionError, ConnectionErrorOrX11Error};
 use x11rb::generated::xproto::{self, *};
 use x11rb::wrapper::{ConnectionExt as _, LazyAtom};
+use x11rb::x11_utils::Event;
 use x11rb::COPY_DEPTH_FROM_PARENT;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -140,7 +140,7 @@ use x11rb::COPY_DEPTH_FROM_PARENT;
 //     2.  Handle the event, possibly sending various drawing requests to the X server.
 //     3.  If the event was a quit message, exit the loop.
 // 5.  Close down the connection to the X server.
-// 6.  Perform cleanup operations.  
+// 6.  Perform cleanup operations.
 //
 //
 //     Basic XCB notions
@@ -207,9 +207,7 @@ fn example1() -> Result<(), Box<dyn Error>> {
     let mut atoms = [Into::<u32>::into(Atom::None); COUNT];
 
     // Init names
-    let names = (0..COUNT)
-        .map(|i| format!("NAME{}", i))
-        .collect::<Vec<_>>();
+    let names = (0..COUNT).map(|i| format!("NAME{}", i)).collect::<Vec<_>>();
 
     // Bad use
     let start = Instant::now();
@@ -221,7 +219,8 @@ fn example1() -> Result<(), Box<dyn Error>> {
 
     // Good use
     let start = Instant::now();
-    let cookies = names.iter()
+    let cookies = names
+        .iter()
         .map(|name| conn.intern_atom(false, name.as_bytes()))
         .collect::<Vec<_>>();
     for (i, atom) in cookies.into_iter().enumerate() {
@@ -229,7 +228,10 @@ fn example1() -> Result<(), Box<dyn Error>> {
     }
     let diff2 = start.elapsed();
     println!("good use time: {:?}", diff2);
-    println!("ratio:         {:?}", diff.as_nanos() as f64 / diff2.as_nanos() as f64);
+    println!(
+        "ratio:         {:?}",
+        diff.as_nanos() as f64 / diff2.as_nanos() as f64
+    );
 
     // The original tutorial has an Xlib example. This was not ported to rust. Instead, there is an
     // x11rb-specific wrapper type that is presented here. This wrapper internally does the good
@@ -237,7 +239,8 @@ fn example1() -> Result<(), Box<dyn Error>> {
 
     println!();
     let start = Instant::now();
-    let cookies = names.iter()
+    let cookies = names
+        .iter()
         .map(|name| LazyAtom::new(&conn, false, name.as_bytes()))
         .collect::<Vec<_>>();
     for (i, mut atom) in cookies.into_iter().enumerate() {
@@ -245,8 +248,14 @@ fn example1() -> Result<(), Box<dyn Error>> {
     }
     let diff3 = start.elapsed();
     println!("LazyAtom time: {:?}", diff3);
-    println!("ratio to bad:  {:?}", diff.as_nanos() as f64 / diff3.as_nanos() as f64);
-    println!("ratio to good: {:?}", diff2.as_nanos() as f64 / diff3.as_nanos() as f64);
+    println!(
+        "ratio to bad:  {:?}",
+        diff.as_nanos() as f64 / diff3.as_nanos() as f64
+    );
+    println!(
+        "ratio to good: {:?}",
+        diff2.as_nanos() as f64 / diff3.as_nanos() as f64
+    );
 
     Ok(())
 }
@@ -301,13 +310,12 @@ fn example1() -> Result<(), Box<dyn Error>> {
 fn example2() -> Result<(), Box<dyn Error>> {
     let (conn, _screen) = x11rb::connect(None)?;
 
-// To close a connection, it suffices to drop the connection object
+    // To close a connection, it suffices to drop the connection object
 
     drop(conn);
 
     Ok(())
 }
-
 
 //     Checking basic information about a connection
 //     ---------------------------------------------
@@ -357,7 +365,6 @@ fn example3() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-
 //     Creating a basic window - the "hello world" program
 //     ===================================================
 //
@@ -377,20 +384,23 @@ pub type WINDOW = u32;
 // Then, XCB supplies the following function to create new windows:
 
 #[allow(unused, clippy::too_many_arguments)]
-fn own_create_window<A: Connection, B>(c: &A,               // The connection to use
-                                       depth: u8,           // Depth of the screen
-                                       wid: u32,            // Id of the window
-                                       parent: u32,         // Id of an existing window that should be the parent of the new window
-                                       x: i16,              // X position of the top-left corner of the window (in pixels)
-                                       y: i16,              // Y position of the top-left corner of the window (in pixels)
-                                       width: u16,          // Width of the window (in pixels)
-                                       height: u16,         // Height of the window (in pixels)
-                                       border_width: u16,   // Width of the window's border (in pixels)
-                                       class: B,
-                                       visual: u32,
-                                       value_list: &CreateWindowAux)
-                                              -> Result<SequenceNumber, ConnectionError>
-where B: Into<u16> {
+fn own_create_window<A: Connection, B>(
+    c: &A,             // The connection to use
+    depth: u8,         // Depth of the screen
+    wid: u32,          // Id of the window
+    parent: u32,       // Id of an existing window that should be the parent of the new window
+    x: i16,            // X position of the top-left corner of the window (in pixels)
+    y: i16,            // Y position of the top-left corner of the window (in pixels)
+    width: u16,        // Width of the window (in pixels)
+    height: u16,       // Height of the window (in pixels)
+    border_width: u16, // Width of the window's border (in pixels)
+    class: B,
+    visual: u32,
+    value_list: &CreateWindowAux,
+) -> Result<SequenceNumber, ConnectionError>
+where
+    B: Into<u16>,
+{
     unimplemented!();
 }
 
@@ -413,15 +423,19 @@ fn example4() -> Result<(), Box<dyn Error>> {
     let win = conn.generate_id();
 
     // Create the window
-    conn.create_window(COPY_DEPTH_FROM_PARENT,   // depth (same as root)
-                       win,                      // window Id
-                       screen.root,              // parent window
-                       0, 0,                     // x, y
-                       150, 150,                 // width, height
-                       10,                       // border width
-                       WindowClass::InputOutput, // class
-                       screen.root_visual,       // visual
-                       &Default::default())?;    // masks, not used yet
+    conn.create_window(
+        COPY_DEPTH_FROM_PARENT,   // depth (same as root)
+        win,                      // window Id
+        screen.root,              // parent window
+        0,                        // x
+        0,                        // y
+        150,                      // width
+        150,                      // height
+        10,                       // border width
+        WindowClass::InputOutput, // class
+        screen.root_visual,       // visual
+        &Default::default(),
+    )?; // masks, not used yet
 
     // Map the window on the screen
     conn.map_window(win)?;
@@ -489,9 +503,12 @@ fn example4() -> Result<(), Box<dyn Error>> {
 //
 
 #[allow(unused)]
-fn my_create_gc<A: Connection>(c: &A, cid: u32, drawable: u32, value_list: &CreateGCAux)
-    -> Result<SequenceNumber, ConnectionError>
-{
+fn my_create_gc<A: Connection>(
+    c: &A,
+    cid: u32,
+    drawable: u32,
+    value_list: &CreateGCAux,
+) -> Result<SequenceNumber, ConnectionError> {
     unimplemented!();
 }
 
@@ -697,21 +714,55 @@ fn example6() -> Result<(), Box<dyn Error>> {
     ];
     let polyline = [
         Point { x: 50, y: 10 },
-        Point { x:  5, y: 20 }, // Rest of points are relative
-        Point { x: 25, y:-20 },
+        Point { x: 5, y: 20 }, // Rest of points are relative
+        Point { x: 25, y: -20 },
         Point { x: 10, y: 10 },
     ];
     let segments = [
-        Segment { x1: 100, y1: 10, x2: 140, y2: 30 },
-        Segment { x1: 110, y1: 25, x2: 130, y2: 60 },
+        Segment {
+            x1: 100,
+            y1: 10,
+            x2: 140,
+            y2: 30,
+        },
+        Segment {
+            x1: 110,
+            y1: 25,
+            x2: 130,
+            y2: 60,
+        },
     ];
     let rectangles = [
-        Rectangle { x: 10, y: 50, width: 40, height: 20 },
-        Rectangle { x: 80, y: 50, width: 10, height: 40 },
+        Rectangle {
+            x: 10,
+            y: 50,
+            width: 40,
+            height: 20,
+        },
+        Rectangle {
+            x: 80,
+            y: 50,
+            width: 10,
+            height: 40,
+        },
     ];
     let arcs = [
-        Arc { x: 10, y: 100, width: 60, height: 40, angle1: 0, angle2: 90 << 6 },
-        Arc { x: 90, y: 100, width: 55, height: 40, angle1: 0, angle2: 270 << 6 },
+        Arc {
+            x: 10,
+            y: 100,
+            width: 60,
+            height: 40,
+            angle1: 0,
+            angle2: 90 << 6,
+        },
+        Arc {
+            x: 90,
+            y: 100,
+            width: 55,
+            height: 40,
+            angle1: 0,
+            angle2: 270 << 6,
+        },
     ];
 
     // Open the connection to the X server. Use the DISPLAY environment variable.
@@ -736,15 +787,19 @@ fn example6() -> Result<(), Box<dyn Error>> {
     let values = CreateWindowAux::default()
         .background_pixel(screen.white_pixel)
         .event_mask(EventMask::Exposure);
-    conn.create_window(COPY_DEPTH_FROM_PARENT,   // depth
-                       win,                      // window Id
-                       screen.root,              // parent window
-                       0, 0,                     // x, y
-                       150, 150,                 // width, height
-                       10,                       // border_width
-                       WindowClass::InputOutput, // class
-                       screen.root_visual,       // visual
-                       &values)?;
+    conn.create_window(
+        COPY_DEPTH_FROM_PARENT,   // depth
+        win,                      // window Id
+        screen.root,              // parent window
+        0,                        // x
+        0,                        // y
+        150,                      // width
+        150,                      // height
+        10,                       // border_width
+        WindowClass::InputOutput, // class
+        screen.root_visual,       // visual
+        &values,
+    )?;
 
     // Map the window on the screen
     conn.map_window(win)?;
@@ -754,7 +809,7 @@ fn example6() -> Result<(), Box<dyn Error>> {
 
     loop {
         let event = conn.wait_for_event()?;
-        if event.response_type()  == xproto::EXPOSE_EVENT {
+        if event.response_type() == xproto::EXPOSE_EVENT {
             // We draw the points
             conn.poly_point(CoordMode::Origin, win, foreground, &points)?;
 
@@ -777,7 +832,6 @@ fn example6() -> Result<(), Box<dyn Error>> {
         }
     }
 }
-
 
 //     X Events
 //     ========
@@ -803,14 +857,26 @@ fn example6() -> Result<(), Box<dyn Error>> {
 //
 
 #[allow(unused)]
-fn example_expose<C: Connection>(conn: &C, depth: u8, screen: &Screen) -> Result<(), Box<dyn Error>> {
-    let values = CreateWindowAux::default()
-        .event_mask(EventMask::Exposure);
+fn example_expose<C: Connection>(
+    conn: &C,
+    depth: u8,
+    screen: &Screen,
+) -> Result<(), Box<dyn Error>> {
+    let values = CreateWindowAux::default().event_mask(EventMask::Exposure);
     let win = conn.generate_id();
-    conn.create_window(depth, win, screen.root,
-                       0, 0, 150, 150, 10,
-                       WindowClass::InputOutput, screen.root_visual,
-                       &values)?;
+    conn.create_window(
+        depth,
+        win,
+        screen.root,
+        0,
+        0,
+        150,
+        150,
+        10,
+        WindowClass::InputOutput,
+        screen.root_visual,
+        &values,
+    )?;
     Ok(())
 }
 
@@ -821,13 +887,22 @@ fn example_expose<C: Connection>(conn: &C, depth: u8, screen: &Screen) -> Result
 
 #[allow(unused)]
 fn example_or<C: Connection>(conn: &C, depth: u8, screen: &Screen) -> Result<(), Box<dyn Error>> {
-    let values = CreateWindowAux::default()
-        .event_mask(EventMask::Exposure | EventMask::ButtonPress);
+    let values =
+        CreateWindowAux::default().event_mask(EventMask::Exposure | EventMask::ButtonPress);
     let win = conn.generate_id();
-    conn.create_window(depth, win, screen.root,
-                       0, 0, 150, 150, 10,
-                       WindowClass::InputOutput, screen.root_visual,
-                       &values)?;
+    conn.create_window(
+        depth,
+        win,
+        screen.root,
+        0,
+        0,
+        150,
+        150,
+        10,
+        WindowClass::InputOutput,
+        screen.root_visual,
+        &values,
+    )?;
     Ok(())
 }
 
@@ -892,7 +967,7 @@ fn example_change_event_mask<C: Connection>(conn: &C, win: WINDOW) -> Result<(),
 //  * `xcb_wait_for_event (xcb_connection_t *c)` is the blocking way. It waits (so blocks...)
 //    until an event is queued in the X server. Then it retrieves it into a newly allocated
 //    structure (it dequeues it from the queue) and returns it. This structure has to be freed. The
-//    function returns `NULL` if an error occurs.  
+//    function returns `NULL` if an error occurs.
 //
 //  * `xcb_poll_for_event (xcb_connection_t *c, int *error)` is the non-blocking way. It looks at
 //    the event queue and returns (and dequeues too) an existing event into a newly allocated
@@ -912,12 +987,12 @@ fn example_wait_for_event<C: Connection>(conn: &C) -> Result<(), Box<dyn Error>>
                 // Handle the expose event type
                 let ev = ExposeEvent::from(event);
                 // ....
-            },
+            }
             xproto::BUTTON_PRESS_EVENT => {
                 // Handle the button press event type
                 let ev = ButtonPressEvent::from(event);
                 // ....
-            },
+            }
             _ => {
                 // Unknown event type, ignore it
             }
@@ -974,15 +1049,19 @@ fn example_wait_for_event<C: Connection>(conn: &C) -> Result<(), Box<dyn Error>>
 
 #[allow(unused)]
 pub struct RenamedExposeEvent {
-    pub window: u32,  // The Id of the window that receives the event (in case our application
-                      // registered for events in several windows)
-    pub x: u16,       // The x coordinate of the top-left part of the window that needs to be redrawn
-    pub y: u16,       // The y coordinate of the top-left part of the window that needs to be redrawn
-    pub width: u16,   // The width of the part of the window that needs to be redrawn
-    pub height: u16,  // The height of the part of the window that needs to be redrawn
+    /// The Id of the window that receives the event (in case our application
+    /// registered for events in several windows)
+    pub window: u32,
+    /// The x coordinate of the top-left part of the window that needs to be redrawn
+    pub x: u16,
+    /// The y coordinate of the top-left part of the window that needs to be redrawn
+    pub y: u16,
+    /// The width of the part of the window that needs to be redrawn
+    pub width: u16,
+    /// The height of the part of the window that needs to be redrawn
+    pub height: u16,
     pub count: u16,
 }
-
 
 //     Getting user input
 //     ==================
@@ -1009,15 +1088,19 @@ pub struct RenamedExposeEvent {
 #[allow(unused)]
 pub struct RenamedButtonPressEvent {
     pub detail: u8,
-    pub time: u32,   // Time, in milliseconds the event took place in
+    /// Time, in milliseconds the event took place in
+    pub time: u32,
     pub root: u32,
     pub event: u32,
     pub child: u32,
     pub root_x: i16,
     pub root_y: i16,
-    pub event_x: i16, // The x coordinate where the mouse has been pressed in the window
-    pub event_y: i16, // The y coordinate where the mouse has been pressed in the window
-    pub state: u16,   // A mask of the buttons (or keys) during the event
+    /// The x coordinate where the mouse has been pressed in the window
+    pub event_x: i16,
+    /// The y coordinate where the mouse has been pressed in the window
+    pub event_y: i16,
+    /// A mask of the buttons (or keys) during the event
+    pub state: u16,
     pub same_screen: u8,
 }
 
@@ -1074,18 +1157,21 @@ pub struct RenamedButtonPressEvent {
 #[allow(unused)]
 pub struct RenamedMotionNotifyEvent {
     pub detail: u8,
-    pub time: u32,     // Time, in milliseconds the event took place in
+    /// Time, in milliseconds the event took place in
+    pub time: u32,
     pub root: u32,
     pub event: u32,
     pub child: u32,
     pub root_x: i16,
     pub root_y: i16,
-    pub event_x: i16, // The x coordinate where the mouse has been pressed in the window
-    pub event_y: i16, // The y coordinate where the mouse has been pressed in the window
-    pub state: u16,   // A mask of the buttons (or keys) during the event
+    /// The x coordinate where the mouse has been pressed in the window
+    pub event_x: i16,
+    /// The y coordinate where the mouse has been pressed in the window
+    pub event_y: i16,
+    /// A mask of the buttons (or keys) during the event
+    pub state: u16,
     pub same_screen: u8,
 }
-
 
 //     Mouse pointer enter and leave events
 //     ------------------------------------
@@ -1119,7 +1205,6 @@ pub struct RenamedEnterNotifyEvent {
     pub same_screen_focus: u8,
 }
 
-
 //     The keyboard focus
 //     ------------------
 //
@@ -1150,7 +1235,8 @@ pub struct RenamedEnterNotifyEvent {
 #[allow(unused)]
 pub struct RenamedKeyPressEvent {
     pub detail: u8,
-    pub time: u32,  // Time, in milliseconds the event took place in
+    /// Time, in milliseconds the event took place in
+    pub time: u32,
     pub root: u32,
     pub event: u32,
     pub child: u32,
@@ -1178,12 +1264,23 @@ pub struct RenamedKeyPressEvent {
 fn print_modifiers(mask: u16) {
     use KeyButMask::*;
     let mods = [
-        (Shift, "Shift"), (Lock, "Lock"), (Control, "Ctrl"), (Mod1, "Alt"), (Mod2, "Mod2"),
-        (Mod3, "Mod3"), (Mod4, "Mod4"), (Mod5, "Mod5"), (Button1, "Button1"), (Button2, "Button2"),
-        (Button3, "Button3"), (Button4, "Button4"), (Button5, "Button5")
+        (Shift, "Shift"),
+        (Lock, "Lock"),
+        (Control, "Ctrl"),
+        (Mod1, "Alt"),
+        (Mod2, "Mod2"),
+        (Mod3, "Mod3"),
+        (Mod4, "Mod4"),
+        (Mod5, "Mod5"),
+        (Button1, "Button1"),
+        (Button2, "Button2"),
+        (Button3, "Button3"),
+        (Button4, "Button4"),
+        (Button5, "Button5"),
     ];
 
-    let active = mods.iter()
+    let active = mods
+        .iter()
         .filter(|(m, _)| mask & Into::<u16>::into(*m) != 0) // FIXME: This should be made nicer
         .map(|(_, name)| name)
         .collect::<Vec<_>>();
@@ -1203,19 +1300,29 @@ fn example7() -> Result<(), Box<dyn Error>> {
     // Create the window
     let values = CreateWindowAux::default()
         .background_pixel(screen.white_pixel)
-        .event_mask(EventMask::Exposure      | EventMask::ButtonPress   |
-                    EventMask::ButtonRelease | EventMask::PointerMotion |
-                    EventMask::EnterWindow   | EventMask::LeaveWindow   |
-                    EventMask::KeyPress      | EventMask::KeyRelease);
-    conn.create_window(COPY_DEPTH_FROM_PARENT,   // depth
-                       win,                      // window Id
-                       screen.root,              // parent window
-                       0, 0,                     // x, y
-                       150, 150,                 // width, height
-                       10,                       // border_width
-                       WindowClass::InputOutput, // class
-                       screen.root_visual,       // visual
-                       &values)?;
+        .event_mask(
+            EventMask::Exposure
+                | EventMask::ButtonPress
+                | EventMask::ButtonRelease
+                | EventMask::PointerMotion
+                | EventMask::EnterWindow
+                | EventMask::LeaveWindow
+                | EventMask::KeyPress
+                | EventMask::KeyRelease,
+        );
+    conn.create_window(
+        COPY_DEPTH_FROM_PARENT,   // depth
+        win,                      // window Id
+        screen.root,              // parent window
+        0,                        // x
+        0,                        // y
+        150,                      // width
+        150,                      // height
+        10,                       // border_width
+        WindowClass::InputOutput, // class
+        screen.root_visual,       // visual
+        &values,
+    )?;
 
     // Map the window on the screen
     conn.map_window(win)?;
@@ -1226,52 +1333,69 @@ fn example7() -> Result<(), Box<dyn Error>> {
         match event.response_type() {
             xproto::EXPOSE_EVENT => {
                 let ev = ExposeEvent::from(event);
-                println!("Window {} exposed. Region to be redrawn at location ({},{}) \
-                         with dimensions ({},{})", ev.window, ev.x, ev.y, ev.width, ev.height);
-            },
+                println!(
+                    "Window {} exposed. Region to be redrawn at location ({},{}) \
+                         with dimensions ({},{})",
+                    ev.window, ev.x, ev.y, ev.width, ev.height
+                );
+            }
             xproto::BUTTON_PRESS_EVENT => {
                 let ev = ButtonPressEvent::from(event);
                 print_modifiers(ev.state);
                 match ev.detail {
-                    4 => println!("Wheel Button up in window {}, at coordinates ({},{})",
-                                  ev.event, ev.event_x, ev.event_y),
-                    5 => println!("Wheel Button down in window {}, at coordinates ({},{})",
-                                  ev.event, ev.event_x, ev.event_y),
-                    _ => println!("Button {} pressed in window {}, at coordinates ({},{})",
-                                  ev.detail, ev.event, ev.event_x, ev.event_y)
+                    4 => println!(
+                        "Wheel Button up in window {}, at coordinates ({},{})",
+                        ev.event, ev.event_x, ev.event_y
+                    ),
+                    5 => println!(
+                        "Wheel Button down in window {}, at coordinates ({},{})",
+                        ev.event, ev.event_x, ev.event_y
+                    ),
+                    _ => println!(
+                        "Button {} pressed in window {}, at coordinates ({},{})",
+                        ev.detail, ev.event, ev.event_x, ev.event_y
+                    ),
                 }
-            },
+            }
             xproto::BUTTON_RELEASE_EVENT => {
                 let ev = ButtonReleaseEvent::from(event);
                 print_modifiers(ev.state);
-                println!("Button {} released in window {}, at coordinates ({},{})",
-                         ev.detail, ev.event, ev.event_x, ev.event_y);
-            },
+                println!(
+                    "Button {} released in window {}, at coordinates ({},{})",
+                    ev.detail, ev.event, ev.event_x, ev.event_y
+                );
+            }
             xproto::MOTION_NOTIFY_EVENT => {
                 let ev = MotionNotifyEvent::from(event);
-                println!("Mouse moved in window {} at coordinates ({},{})",
-                         ev.event, ev.event_x, ev.event_y);
-            },
+                println!(
+                    "Mouse moved in window {} at coordinates ({},{})",
+                    ev.event, ev.event_x, ev.event_y
+                );
+            }
             xproto::ENTER_NOTIFY_EVENT => {
                 let ev = EnterNotifyEvent::from(event);
-                println!("Mouse entered window {} at coordinates ({},{})",
-                         ev.event, ev.event_x, ev.event_y);
-            },
+                println!(
+                    "Mouse entered window {} at coordinates ({},{})",
+                    ev.event, ev.event_x, ev.event_y
+                );
+            }
             xproto::LEAVE_NOTIFY_EVENT => {
                 let ev = LeaveNotifyEvent::from(event);
-                println!("Mouse left window {} at coordinates ({},{})",
-                         ev.event, ev.event_x, ev.event_y);
-            },
+                println!(
+                    "Mouse left window {} at coordinates ({},{})",
+                    ev.event, ev.event_x, ev.event_y
+                );
+            }
             xproto::KEY_PRESS_EVENT => {
                 let ev = KeyPressEvent::from(event);
                 print_modifiers(ev.state);
                 println!("Key pressed in window {}", ev.event);
-            },
+            }
             xproto::KEY_RELEASE_EVENT => {
                 let ev = KeyReleaseEvent::from(event);
                 print_modifiers(ev.state);
                 println!("Key released in window {}", ev.event);
-            },
+            }
             _ => {
                 // Unknown event type, ignore it
                 println!("Unknown event: {}", event.raw_response_type());
@@ -1326,9 +1450,12 @@ fn example7() -> Result<(), Box<dyn Error>> {
 // foreground and a white background:
 
 #[allow(unused)]
-fn example_assign_font<C: Connection>(conn: &C, screen: &Screen, window: WINDOW, font: FONT)
--> Result<(), Box<dyn Error>>
-{
+fn example_assign_font<C: Connection>(
+    conn: &C,
+    screen: &Screen,
+    window: WINDOW,
+    font: FONT,
+) -> Result<(), Box<dyn Error>> {
     let gc = conn.generate_id();
     let values = CreateGCAux::default()
         .foreground(screen.black_pixel)
@@ -1341,7 +1468,6 @@ fn example_assign_font<C: Connection>(conn: &C, screen: &Screen, window: WINDOW,
 
     Ok(())
 }
-
 
 //     Drawing text in a drawable
 //     --------------------------
@@ -1364,9 +1490,14 @@ fn example_assign_font<C: Connection>(conn: &C, screen: &Screen, window: WINDOW,
 // (This whole example uses checked requests in the original, but that does not really seem useful
 // to me, so I changed it.)
 
-fn text_draw<C: Connection>(conn: &C, screen: &Screen, window: WINDOW, x1: i16, y1: i16, label: &str)
--> Result<(), Box<dyn Error>>
-{
+fn text_draw<C: Connection>(
+    conn: &C,
+    screen: &Screen,
+    window: WINDOW,
+    x1: i16,
+    y1: i16,
+    label: &str,
+) -> Result<(), Box<dyn Error>> {
     let gc = gc_font_get(conn, screen, window, "7x13")?;
 
     conn.image_text8(window, gc, x1, y1, label.as_bytes())?;
@@ -1375,9 +1506,12 @@ fn text_draw<C: Connection>(conn: &C, screen: &Screen, window: WINDOW, x1: i16, 
     Ok(())
 }
 
-fn gc_font_get<C: Connection>(conn: &C, screen: &Screen, window: WINDOW, font_name: &str)
--> Result<GCONTEXT, ConnectionErrorOrX11Error>
-{
+fn gc_font_get<C: Connection>(
+    conn: &C,
+    screen: &Screen,
+    window: WINDOW,
+    font_name: &str,
+) -> Result<GCONTEXT, ConnectionErrorOrX11Error> {
     let font = conn.generate_id();
 
     conn.open_font(font, font_name.as_bytes())?;
@@ -1408,16 +1542,25 @@ fn example8() -> Result<(), Box<dyn Error>> {
     let window = conn.generate_id();
     let values = CreateWindowAux::default()
         .background_pixel(screen.white_pixel)
-        .event_mask(EventMask::KeyRelease |
-                    EventMask::ButtonPress |
-                    EventMask::Exposure |
-                    EventMask::PointerMotion);
-    conn.create_window(screen.root_depth,
-                       window, screen.root,
-                       20, 200, WIDTH, HEIGHT,
-                       0, WindowClass::InputOutput,
-                       screen.root_visual,
-                       &values)?;
+        .event_mask(
+            EventMask::KeyRelease
+                | EventMask::ButtonPress
+                | EventMask::Exposure
+                | EventMask::PointerMotion,
+        );
+    conn.create_window(
+        screen.root_depth,
+        window,
+        screen.root,
+        20,
+        200,
+        WIDTH,
+        HEIGHT,
+        0,
+        WindowClass::InputOutput,
+        screen.root_visual,
+        &values,
+    )?;
     conn.map_window(window)?;
 
     conn.flush();
@@ -1429,19 +1572,18 @@ fn example8() -> Result<(), Box<dyn Error>> {
                 let text = "Press ESC key to exit...";
                 text_draw(&conn, screen, window, 10, HEIGHT as i16 - 10, text)?;
                 conn.flush();
-            },
+            }
             xproto::KEY_RELEASE_EVENT => {
                 let ev = KeyReleaseEvent::from(event);
                 if ev.detail == 9 {
                     // ESC
-                    return Ok(())
+                    return Ok(());
                 }
-            },
+            }
             _ => {} // Unknown event type, ignore it
         }
     }
 }
-
 
 //     Interacting with the window manager
 //     ===================================
@@ -1512,19 +1654,39 @@ fn example9() -> Result<(), Box<dyn Error>> {
     let win = conn.generate_id();
 
     // Create the window
-    conn.create_window(0, win, screen.root, 0, 0, 250, 150,
-                       10, WindowClass::InputOutput, screen.root_visual,
-                       &Default::default())?;
+    conn.create_window(
+        0,
+        win,
+        screen.root,
+        0,
+        0,
+        250,
+        150,
+        10,
+        WindowClass::InputOutput,
+        screen.root_visual,
+        &Default::default(),
+    )?;
 
     // Set the title of the window
     let title = "Hello World !";
-    conn.change_property8(PropMode::Replace, win, Atom::WM_NAME.into(), Atom::STRING.into(), // FIXME: Get rid of these ugly into()
-                          title.as_bytes())?;
+    conn.change_property8(
+        PropMode::Replace,
+        win,
+        Atom::WM_NAME.into(),
+        Atom::STRING.into(), // FIXME: Get rid of these ugly into()
+        title.as_bytes(),
+    )?;
 
     // Set the title of the window icon
     let title_icon = "Hello World ! (iconified)";
-    conn.change_property8(PropMode::Replace, win, Atom::WM_ICON_NAME.into(), Atom::STRING.into(), // FIXME: Get rid of these ugly into()
-                          title_icon.as_bytes())?;
+    conn.change_property8(
+        PropMode::Replace,
+        win,
+        Atom::WM_ICON_NAME.into(),
+        Atom::STRING.into(), // FIXME: Get rid of these ugly into()
+        title_icon.as_bytes(),
+    )?;
 
     // Map the window on the screen
     conn.map_window(win)?;
@@ -1535,7 +1697,6 @@ fn example9() -> Result<(), Box<dyn Error>> {
         conn.wait_for_event()?;
     }
 }
-
 
 //     Simple window operations
 //     ========================
@@ -1604,12 +1765,9 @@ fn example9() -> Result<(), Box<dyn Error>> {
 // be done like this:
 
 #[allow(unused)]
-fn example_move<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ConnectionErrorOrX11Error>
-{
+fn example_move<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ConnectionErrorOrX11Error> {
     // Move the window to coordinates x = 10 and y = 20
-    let values = ConfigureWindowAux::default()
-        .x(10)
-        .y(20);
+    let values = ConfigureWindowAux::default().x(10).y(20);
     conn.configure_window(win, &values)?;
     Ok(())
 }
@@ -1625,12 +1783,9 @@ fn example_move<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ConnectionEr
 // following code:
 
 #[allow(unused)]
-fn example_resize<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ConnectionErrorOrX11Error>
-{
+fn example_resize<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ConnectionErrorOrX11Error> {
     // Move the window to coordinates width = 10 and height = 20
-    let values = ConfigureWindowAux::default()
-        .width(10)
-        .height(20);
+    let values = ConfigureWindowAux::default().width(10).height(20);
     conn.configure_window(win, &values)?;
     Ok(())
 }
@@ -1639,8 +1794,10 @@ fn example_resize<C: Connection>(conn: &C, win: WINDOW) -> Result<(), Connection
 // `xcb_configure_window_t`:
 
 #[allow(unused)]
-fn example_move_resize<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ConnectionErrorOrX11Error>
-{
+fn example_move_resize<C: Connection>(
+    conn: &C,
+    win: WINDOW,
+) -> Result<(), ConnectionErrorOrX11Error> {
     // Move the window to coordinates x = 10 and y = 20
     // and resize the window to width = 200 and height = 300
     let values = ConfigureWindowAux::default()
@@ -1652,7 +1809,6 @@ fn example_move_resize<C: Connection>(conn: &C, win: WINDOW) -> Result<(), Conne
     Ok(())
 }
 
-
 //     Changing windows stacking order: raise and lower
 //     ------------------------------------------------
 //
@@ -1663,25 +1819,26 @@ fn example_move_resize<C: Connection>(conn: &C, win: WINDOW) -> Result<(), Conne
 // manipulate our windows stack order:
 
 #[allow(unused)]
-fn example_stack_above<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ConnectionErrorOrX11Error>
-{
+fn example_stack_above<C: Connection>(
+    conn: &C,
+    win: WINDOW,
+) -> Result<(), ConnectionErrorOrX11Error> {
     // Move the window on the top of the stack
-    let values = ConfigureWindowAux::default()
-        .stack_mode(StackMode::Above);
+    let values = ConfigureWindowAux::default().stack_mode(StackMode::Above);
     conn.configure_window(win, &values)?;
     Ok(())
 }
 
 #[allow(unused)]
-fn example_stack_below<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ConnectionErrorOrX11Error>
-{
+fn example_stack_below<C: Connection>(
+    conn: &C,
+    win: WINDOW,
+) -> Result<(), ConnectionErrorOrX11Error> {
     // Move the window to the bottom of the stack
-    let values = ConfigureWindowAux::default()
-        .stack_mode(StackMode::Below);
+    let values = ConfigureWindowAux::default().stack_mode(StackMode::Below);
     conn.configure_window(win, &values)?;
     Ok(())
 }
-
 
 //     Getting information about a window
 //     ----------------------------------
@@ -1710,8 +1867,10 @@ pub struct RenamedGetGeometryReply {
 // You use them as follows:
 
 #[allow(unused)]
-fn example_get_geometry<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ConnectionErrorOrX11Error>
-{
+fn example_get_geometry<C: Connection>(
+    conn: &C,
+    win: WINDOW,
+) -> Result<(), ConnectionErrorOrX11Error> {
     let geom = conn.get_geometry(win)?.reply()?;
 
     // Do something with the fields of geom
@@ -1763,8 +1922,10 @@ fn example_get_geometry<C: Connection>(conn: &C, win: WINDOW) -> Result<(), Conn
 // We use them as follows:
 
 #[allow(unused)]
-fn example_get_and_query<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ConnectionErrorOrX11Error>
-{
+fn example_get_and_query<C: Connection>(
+    conn: &C,
+    win: WINDOW,
+) -> Result<(), ConnectionErrorOrX11Error> {
     let geom = conn.get_geometry(win)?;
     let tree = conn.query_tree(win)?;
     let geom = geom.reply()?;
@@ -1811,15 +1972,16 @@ fn example_get_and_query<C: Connection>(conn: &C, win: WINDOW) -> Result<(), Con
 // You use them as follows:
 
 #[allow(unused)]
-fn example_get_attributes<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ConnectionErrorOrX11Error>
-{
+fn example_get_attributes<C: Connection>(
+    conn: &C,
+    win: WINDOW,
+) -> Result<(), ConnectionErrorOrX11Error> {
     let geom = conn.get_window_attributes(win)?.reply()?;
 
     // Do something with the fields of attr
 
     Ok(())
 }
-
 
 //     Using colors to paint the rainbow
 //     =================================
@@ -1881,8 +2043,7 @@ fn example_get_attributes<C: Connection>(conn: &C, win: WINDOW) -> Result<(), Co
 // information about a connection](#screen)):
 
 #[allow(unused)]
-fn example_get_colormap<C: Connection>(conn: &C)
-{
+fn example_get_colormap<C: Connection>(conn: &C) {
     let screen = &conn.setup().roots[0];
     let _colormap = screen.default_colormap;
 }
@@ -1904,8 +2065,11 @@ fn example_get_colormap<C: Connection>(conn: &C)
 // Here is an example of creation of a new color map:
 
 #[allow(unused)]
-fn example_create_colormap<C: Connection>(conn: &C, win: WINDOW, screen: &Screen) -> Result<(), ConnectionErrorOrX11Error>
-{
+fn example_create_colormap<C: Connection>(
+    conn: &C,
+    win: WINDOW,
+    screen: &Screen,
+) -> Result<(), ConnectionErrorOrX11Error> {
     let cmap = conn.generate_id();
     conn.create_colormap(ColormapAlloc::None, cmap, win, screen.root_visual)?;
 
@@ -1943,8 +2107,11 @@ fn example_create_colormap<C: Connection>(conn: &C, win: WINDOW, screen: &Screen
 // Here is an example of using these functions:
 
 #[allow(unused)]
-fn example_fill_colormap<C: Connection>(conn: &C, win: WINDOW, screen: &Screen) -> Result<(), ConnectionErrorOrX11Error>
-{
+fn example_fill_colormap<C: Connection>(
+    conn: &C,
+    win: WINDOW,
+    screen: &Screen,
+) -> Result<(), ConnectionErrorOrX11Error> {
     let cmap = conn.generate_id();
     conn.create_colormap(ColormapAlloc::None, cmap, win, screen.root_visual)?;
     let _rep = conn.alloc_color(cmap, 65535, 0, 0)?.reply()?;
@@ -2093,16 +2260,16 @@ fn example_fill_colormap<C: Connection>(conn: &C, win: WINDOW, screen: &Screen) 
 // every X resource, we have to ask for an X id with `xcb_generate_id` first:
 
 #[allow(unused)]
-fn example_create_glyph_cursor<C: Connection>(conn: &C, win: WINDOW, screen: &Screen) -> Result<(), ConnectionErrorOrX11Error>
-{
+fn example_create_glyph_cursor<C: Connection>(
+    conn: &C,
+    win: WINDOW,
+    screen: &Screen,
+) -> Result<(), ConnectionErrorOrX11Error> {
     let font = conn.generate_id();
     conn.open_font(font, b"cursor")?;
 
     let cursor = conn.generate_id();
-    conn.create_glyph_cursor(cursor, font, font,
-                             58, 58 + 1,
-                             0, 0, 0,
-                             0, 0, 0);
+    conn.create_glyph_cursor(cursor, font, font, 58, 58 + 1, 0, 0, 0, 0, 0, 0);
 
     Ok(())
 }
@@ -2129,10 +2296,12 @@ fn example_create_glyph_cursor<C: Connection>(conn: &C, win: WINDOW, screen: &Sc
 // `xcb_change_window_attributes` and using the `XCB_CWCURSOR` attribute:
 
 #[allow(unused)]
-fn example_change_window_cursor<C: Connection>(conn: &C, win: WINDOW, cursor: CURSOR) -> Result<(), ConnectionErrorOrX11Error>
-{
-    let values = ChangeWindowAttributesAux::default()
-        .cursor(cursor);
+fn example_change_window_cursor<C: Connection>(
+    conn: &C,
+    win: WINDOW,
+    cursor: CURSOR,
+) -> Result<(), ConnectionErrorOrX11Error> {
+    let values = ChangeWindowAttributesAux::default().cursor(cursor);
     conn.change_window_attributes(win, &values)?;
 
     Ok(())
@@ -2149,9 +2318,14 @@ fn example_change_window_cursor<C: Connection>(conn: &C, win: WINDOW, cursor: CU
 // hand. When clicking again on the button, the cursor window gets back to the arrow. The Esc key
 // exits the application.
 
-fn button_draw<C: Connection>(conn: &C, screen: &Screen, window: WINDOW, x1: i16, y1: i16, label: &str)
--> Result<(), ConnectionErrorOrX11Error>
-{
+fn button_draw<C: Connection>(
+    conn: &C,
+    screen: &Screen,
+    window: WINDOW,
+    x1: i16,
+    y1: i16,
+    label: &str,
+) -> Result<(), ConnectionErrorOrX11Error> {
     let inset = 2;
     let gc = gc_font_get(conn, screen, window, "7x13")?;
     let width = 7 * label.len() + 2 * (inset + 1);
@@ -2161,9 +2335,18 @@ fn button_draw<C: Connection>(conn: &C, screen: &Screen, window: WINDOW, x1: i16
 
     let points = [
         Point { x: x1, y: y1 },
-        Point { x: x1 + width, y: y1 },
-        Point { x: x1 + width, y: y1 - height },
-        Point { x: x1, y: y1 - height },
+        Point {
+            x: x1 + width,
+            y: y1,
+        },
+        Point {
+            x: x1 + width,
+            y: y1 - height,
+        },
+        Point {
+            x: x1,
+            y: y1 - height,
+        },
         Point { x: x1, y: y1 },
     ];
     conn.poly_line(CoordMode::Origin, window, gc, &points)?;
@@ -2174,17 +2357,29 @@ fn button_draw<C: Connection>(conn: &C, screen: &Screen, window: WINDOW, x1: i16
 
 // text_draw and gc_font_get were already defined above
 
-fn cursor_set<C: Connection>(conn: &C, screen: &Screen, window: WINDOW, cursor_id: u16)
--> Result<(), ConnectionErrorOrX11Error>
-{
+fn cursor_set<C: Connection>(
+    conn: &C,
+    screen: &Screen,
+    window: WINDOW,
+    cursor_id: u16,
+) -> Result<(), ConnectionErrorOrX11Error> {
     let font = conn.generate_id();
     conn.open_font(font, b"cursor")?;
 
     let cursor = conn.generate_id();
-    conn.create_glyph_cursor(cursor, font, font,
-                             cursor_id, cursor_id + 1,
-                             0, 0, 0,
-                             0, 0, 0)?;
+    conn.create_glyph_cursor(
+        cursor,
+        font,
+        font,
+        cursor_id,
+        cursor_id + 1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+    )?;
 
     let gc = conn.generate_id();
     let values = CreateGCAux::default()
@@ -2193,8 +2388,7 @@ fn cursor_set<C: Connection>(conn: &C, screen: &Screen, window: WINDOW, cursor_i
         .font(font);
     conn.create_gc(gc, window, &values)?;
 
-    let values = ChangeWindowAttributesAux::default()
-        .cursor(cursor);
+    let values = ChangeWindowAttributesAux::default().cursor(cursor);
     conn.change_window_attributes(window, &values)?;
 
     conn.free_cursor(cursor)?;
@@ -2216,13 +2410,20 @@ fn example10() -> Result<(), Box<dyn Error>> {
     let window = conn.generate_id();
     let values = CreateWindowAux::default()
         .background_pixel(screen.white_pixel)
-        .event_mask(EventMask::KeyRelease |
-                    EventMask::ButtonPress |
-                    EventMask::Exposure);
-    conn.create_window(screen.root_depth, window, screen.root,
-                       20, 200, WIDTH as u16, HEIGHT as u16,
-                       0, WindowClass::InputOutput,
-                       screen.root_visual, &values)?;
+        .event_mask(EventMask::KeyRelease | EventMask::ButtonPress | EventMask::Exposure);
+    conn.create_window(
+        screen.root_depth,
+        window,
+        screen.root,
+        20,
+        200,
+        WIDTH as u16,
+        HEIGHT as u16,
+        0,
+        WindowClass::InputOutput,
+        screen.root_visual,
+        &values,
+    )?;
     conn.map_window(window)?;
 
     cursor_set(&conn, screen, window, 68)?;
@@ -2236,23 +2437,29 @@ fn example10() -> Result<(), Box<dyn Error>> {
         match event.response_type() {
             xproto::EXPOSE_EVENT => {
                 let text = "click here to change cursor";
-                button_draw(&conn, screen, window,
-                            (WIDTH - 7 * text.len() as i16) / 2,
-                            (HEIGHT - 16) / 2, text)?;
+                button_draw(
+                    &conn,
+                    screen,
+                    window,
+                    (WIDTH - 7 * text.len() as i16) / 2,
+                    (HEIGHT - 16) / 2,
+                    text,
+                )?;
 
                 let text = "Press ESC key to exit...";
                 text_draw(&conn, screen, window, 10, HEIGHT - 10, text)?;
                 conn.flush();
-            },
+            }
             xproto::BUTTON_PRESS_EVENT => {
                 let ev = ButtonPressEvent::from(event);
                 let length = "click here to change cursor".len() as i16;
 
-                if (ev.event_x >= (WIDTH - 7 * length) / 2) &&
-                   (ev.event_x <= ((WIDTH - 7 * length) / 2 + 7 * length + 6)) &&
-                   (ev.event_y >= (HEIGHT - 16) / 2 - 19) &&
-                   (ev.event_y <= ((HEIGHT - 16) / 2)) {
-                  is_hand = !is_hand;
+                if (ev.event_x >= (WIDTH - 7 * length) / 2)
+                    && (ev.event_x <= ((WIDTH - 7 * length) / 2 + 7 * length + 6))
+                    && (ev.event_y >= (HEIGHT - 16) / 2 - 19)
+                    && (ev.event_y <= ((HEIGHT - 16) / 2))
+                {
+                    is_hand = !is_hand;
                 }
 
                 if is_hand {
@@ -2261,19 +2468,18 @@ fn example10() -> Result<(), Box<dyn Error>> {
                     cursor_set(&conn, screen, window, 68)?;
                 }
                 conn.flush();
-            },
+            }
             xproto::KEY_RELEASE_EVENT => {
                 let ev = KeyReleaseEvent::from(event);
                 if ev.detail == 9 {
                     // ESC
                     return Ok(());
                 }
-            },
+            }
             _ => {} // Unknown event type, ignore it
         }
     }
 }
-
 
 //     Translation of basic Xlib functions and macros
 //
@@ -2314,7 +2520,6 @@ fn example_get_screen_number() {
     // screen_num now contains the number of the default screen
 }
 
-
 //     QLength
 //
 // Not documented yet.
@@ -2338,7 +2543,6 @@ fn example_get_screen_count() {
 
     // screen_num now contains the number of the default screen
 }
-
 
 //     ServerVendor
 //
@@ -2396,17 +2600,31 @@ fn example11() -> Result<(), Box<dyn Error>> {
     let (conn, _) = x11rb::connect(None)?;
     let setup = conn.setup();
 
-    println!("Name of server vendor is {}", String::from_utf8_lossy(&setup.vendor));
+    println!(
+        "Name of server vendor is {}",
+        String::from_utf8_lossy(&setup.vendor)
+    );
     println!("Release number is {}", setup.release_number);
-    println!("Protocol version is {}.{}", setup.protocol_major_version, setup.protocol_minor_version);
-    println!("Bitmap format scanline unit is {}", setup.bitmap_format_scanline_unit);
-    println!("Bitmap format bit order is {}", setup.bitmap_format_bit_order);
-    println!("Bitmap format scanline pad is {}", setup.bitmap_format_scanline_pad);
+    println!(
+        "Protocol version is {}.{}",
+        setup.protocol_major_version, setup.protocol_minor_version
+    );
+    println!(
+        "Bitmap format scanline unit is {}",
+        setup.bitmap_format_scanline_unit
+    );
+    println!(
+        "Bitmap format bit order is {}",
+        setup.bitmap_format_bit_order
+    );
+    println!(
+        "Bitmap format scanline pad is {}",
+        setup.bitmap_format_scanline_pad
+    );
     println!("Image byte order is {}", setup.image_byte_order);
 
     Ok(())
 }
-
 
 //     ScreenOfDisplay related functions
 //     ---------------------------------
@@ -2455,19 +2673,17 @@ fn example_get_screen2<C: Connection>(conn: &C, index: usize) {
     let _default_screen = &conn.setup().roots[screen_num];
 }
 
-
 //     RootWindow / RootWindowOfScreen
 //
 // Just use the .root member of `Screen`.
 
 #[allow(unused)]
-fn example_get_root<C: Connection>(conn: &C, index: usize) -> WINDOW{
+fn example_get_root<C: Connection>(conn: &C, index: usize) -> WINDOW {
     // Open the connection to the X server. Use the DISPLAY environment variable.
     let (conn, screen_num) = x11rb::connect(None).unwrap();
     let default_screen = &conn.setup().roots[screen_num];
     default_screen.root
 }
-
 
 //     DefaultRootWindow
 //
@@ -2509,14 +2725,16 @@ fn example_get_visual2<C: Connection>(conn: &C, screen_num: usize) {
     }
 }
 
-
 //     DefaultGC / DefaultGCOfScreen
 //
 // This default Graphic Context is just a newly created Graphic Context, associated to the root
 // window of a `xcb_screen_t`, using the black white pixels of that screen:
 
 #[allow(unused)]
-fn example_create_default_gc<C: Connection>(conn: &C, screen_num: usize) -> Result<GCONTEXT, ConnectionErrorOrX11Error> {
+fn example_create_default_gc<C: Connection>(
+    conn: &C,
+    screen_num: usize,
+) -> Result<GCONTEXT, ConnectionErrorOrX11Error> {
     let screen = &conn.setup().roots[screen_num];
     let values = CreateGCAux::default()
         .foreground(screen.black_pixel)
@@ -2525,7 +2743,6 @@ fn example_create_default_gc<C: Connection>(conn: &C, screen_num: usize) -> Resu
     conn.create_gc(gc, screen.root, &values)?;
     Ok(gc)
 }
-
 
 //     BlackPixel / BlackPixelOfScreen
 //
@@ -2536,7 +2753,6 @@ fn example_black_pixel<C: Connection>(conn: &C, screen_num: usize) {
     let _black_pixel = conn.setup().roots[screen_num].black_pixel;
 }
 
-
 //     WhitePixel / WhitePixelOfScreen
 //
 // It is the Id of the white pixel, which is in the structure of an `xcb_screen_t`.
@@ -2545,7 +2761,6 @@ fn example_black_pixel<C: Connection>(conn: &C, screen_num: usize) {
 fn example_white_pixel<C: Connection>(conn: &C, screen_num: usize) {
     let _white_pixel = conn.setup().roots[screen_num].white_pixel;
 }
-
 
 //     DisplayWidth / WidthOfScreen
 //
@@ -2557,7 +2772,6 @@ fn example_display_width<C: Connection>(conn: &C, screen_num: usize) {
     let _width = conn.setup().roots[screen_num].width_in_pixels;
 }
 
-
 //     DisplayHeight / HeightOfScreen
 //
 // It is the height in pixels of the screen that you want, and which is in the structure of the
@@ -2567,7 +2781,6 @@ fn example_display_width<C: Connection>(conn: &C, screen_num: usize) {
 fn example_display_height<C: Connection>(conn: &C, screen_num: usize) {
     let _height = conn.setup().roots[screen_num].height_in_pixels;
 }
-
 
 //     DisplayWidthMM / WidthMMOfScreen
 //
@@ -2580,7 +2793,6 @@ fn example_display_width_mm<C: Connection>(conn: &C, screen_num: usize) {
     let _width = screen.width_in_millimeters;
 }
 
-
 //     DisplayHeightMM / HeightMMOfScreen
 //
 // It is the height in millimeters of the screen that you want, and which is in the structure of
@@ -2591,7 +2803,6 @@ fn example_display_height_mm<C: Connection>(conn: &C, screen_num: usize) {
     let screen = &conn.setup().roots[screen_num];
     let _height = screen.height_in_millimeters;
 }
-
 
 //     DisplayPlanes / DefaultDepth / DefaultDepthOfScreen / PlanesOfScreen
 //
@@ -2604,7 +2815,6 @@ fn example_display_depth<C: Connection>(conn: &C, screen_num: usize) {
     let _depth = screen.root_depth;
 }
 
-
 //     DefaultColormap / DefaultColormapOfScreen
 //
 // This is the default colormap of the screen (and not the (default) colormap of the default screen
@@ -2616,7 +2826,6 @@ fn example_display_colormap<C: Connection>(conn: &C, screen_num: usize) {
     let _map = screen.default_colormap;
 }
 
-
 //     MinCmapsOfScreen
 //
 // You get the minimum installed colormaps in the `xcb_screen_t` structure:
@@ -2626,7 +2835,6 @@ fn example_display_min_installed_maps<C: Connection>(conn: &C, screen_num: usize
     let screen = &conn.setup().roots[screen_num];
     let _min_installed = screen.min_installed_maps;
 }
-
 
 //     MaxCmapsOfScreen
 //
@@ -2638,7 +2846,6 @@ fn example_display_max_installed_maps<C: Connection>(conn: &C, screen_num: usize
     let _max_installed = screen.max_installed_maps;
 }
 
-
 //     DoesSaveUnders
 //
 // You know if `save_unders` is set, by looking in the `xcb_screen_t` structure:
@@ -2648,7 +2855,6 @@ fn example_save_unders<C: Connection>(conn: &C, screen_num: usize) {
     let screen = &conn.setup().roots[screen_num];
     let _save_unders = screen.save_unders;
 }
-
 
 //     DoesBackingStore
 //
@@ -2660,7 +2866,6 @@ fn example_backing_store<C: Connection>(conn: &C, screen_num: usize) {
     let _backing_stores = screen.backing_stores;
 }
 
-
 //     EventMaskOfScreen
 //
 // To get the current input masks, you look in the `xcb_screen_t` structure:
@@ -2670,7 +2875,6 @@ fn example_input_masks<C: Connection>(conn: &C, screen_num: usize) {
     let screen = &conn.setup().roots[screen_num];
     let _input_masks = screen.current_input_masks;
 }
-
 
 //     Miscellaneous macros
 //     --------------------
@@ -2690,7 +2894,6 @@ fn example_input_masks<C: Connection>(conn: &C, screen_num: usize) {
 fn example_visual_colormap_entries<C: Connection>(visual: &Visualtype) -> u16 {
     visual.colormap_entries
 }
-
 
 fn main() {
     example1().unwrap();

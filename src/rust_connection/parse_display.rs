@@ -10,7 +10,7 @@ pub(crate) fn parse_display(dpy_name: Option<&str>) -> Option<ParsedDisplay> {
     // If no dpy name was provided, use the env var. If no env var exists, return None.
     match dpy_name {
         Some(dpy_name) => parse_display_impl(dpy_name),
-        None => parse_display_impl(&std::env::var("DISPLAY").ok()?)
+        None => parse_display_impl(&std::env::var("DISPLAY").ok()?),
     }
 }
 
@@ -29,7 +29,7 @@ fn parse_display_impl(dpy_name: &str) -> Option<ParsedDisplay> {
     // The remaining part is display.screen. The display is required and the screen optional.
     let (display, screen) = match remaining.find('.') {
         Some(pos) => (&remaining[..pos], &remaining[pos + 1..]),
-        None => (remaining, "0")
+        None => (remaining, "0"),
     };
 
     // Parse the display and screen number
@@ -37,12 +37,17 @@ fn parse_display_impl(dpy_name: &str) -> Option<ParsedDisplay> {
 
     let host = host.to_string();
     let protocol = protocol.map(|p| p.to_string());
-    Some(ParsedDisplay { host, protocol, display, screen })
+    Some(ParsedDisplay {
+        host,
+        protocol,
+        display,
+        screen,
+    })
 }
 
 #[cfg(test)]
 mod test {
-    use super::{ParsedDisplay, parse_display};
+    use super::{parse_display, ParsedDisplay};
 
     fn do_parse_display(input: &str) -> Option<ParsedDisplay> {
         std::env::set_var("DISPLAY", input);
@@ -74,11 +79,40 @@ mod test {
     fn own_good_cases() {
         // The XCB test suite does not test protocol parsing
         for (input, output) in &[
-            ("foo/bar:1", ParsedDisplay { host: "bar".to_string(), protocol: Some("foo".to_string()), display: 1, screen: 0 }),
-            ("foo/bar:1.2", ParsedDisplay { host: "bar".to_string(), protocol: Some("foo".to_string()), display: 1, screen: 2 }),
-            ("a:b/c/foo:bar:1.2", ParsedDisplay { host: "foo:bar".to_string(), protocol: Some("a:b/c".to_string()), display: 1, screen: 2 }),
+            (
+                "foo/bar:1",
+                ParsedDisplay {
+                    host: "bar".to_string(),
+                    protocol: Some("foo".to_string()),
+                    display: 1,
+                    screen: 0,
+                },
+            ),
+            (
+                "foo/bar:1.2",
+                ParsedDisplay {
+                    host: "bar".to_string(),
+                    protocol: Some("foo".to_string()),
+                    display: 1,
+                    screen: 2,
+                },
+            ),
+            (
+                "a:b/c/foo:bar:1.2",
+                ParsedDisplay {
+                    host: "foo:bar".to_string(),
+                    protocol: Some("a:b/c".to_string()),
+                    display: 1,
+                    screen: 2,
+                },
+            ),
         ] {
-            assert_eq!(do_parse_display(input).as_ref(), Some(output), "Failed parsing correctly: {}", input);
+            assert_eq!(
+                do_parse_display(input).as_ref(),
+                Some(output),
+                "Failed parsing correctly: {}",
+                input
+            );
         }
     }
 
@@ -86,39 +120,260 @@ mod test {
     fn xcb_good_cases() {
         for (input, output) in &[
             // unix
-            (":0", ParsedDisplay { host: "".to_string(), protocol: None, display: 0, screen: 0 }),
-            (":1", ParsedDisplay { host: "".to_string(), protocol: None, display: 1, screen: 0 }),
-            (":0.1", ParsedDisplay { host: "".to_string(), protocol: None, display: 0, screen: 1 }),
+            (
+                ":0",
+                ParsedDisplay {
+                    host: "".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 0,
+                },
+            ),
+            (
+                ":1",
+                ParsedDisplay {
+                    host: "".to_string(),
+                    protocol: None,
+                    display: 1,
+                    screen: 0,
+                },
+            ),
+            (
+                ":0.1",
+                ParsedDisplay {
+                    host: "".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 1,
+                },
+            ),
             // ip
-            ("x.org:0", ParsedDisplay { host: "x.org".to_string(), protocol: None, display: 0, screen: 0 }),
-            ("expo:0", ParsedDisplay { host: "expo".to_string(), protocol: None, display: 0, screen: 0 }),
-            ("bigmachine:1", ParsedDisplay { host: "bigmachine".to_string(), protocol: None, display: 1, screen: 0 }),
-            ("hydra:0.1", ParsedDisplay { host: "hydra".to_string(), protocol: None, display: 0, screen: 1 }),
+            (
+                "x.org:0",
+                ParsedDisplay {
+                    host: "x.org".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 0,
+                },
+            ),
+            (
+                "expo:0",
+                ParsedDisplay {
+                    host: "expo".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 0,
+                },
+            ),
+            (
+                "bigmachine:1",
+                ParsedDisplay {
+                    host: "bigmachine".to_string(),
+                    protocol: None,
+                    display: 1,
+                    screen: 0,
+                },
+            ),
+            (
+                "hydra:0.1",
+                ParsedDisplay {
+                    host: "hydra".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 1,
+                },
+            ),
             // ipv4
-            ("198.112.45.11:0", ParsedDisplay { host: "198.112.45.11".to_string(), protocol: None, display: 0, screen: 0 }),
-            ("198.112.45.11:0.1", ParsedDisplay { host: "198.112.45.11".to_string(), protocol: None, display: 0, screen: 1 }),
+            (
+                "198.112.45.11:0",
+                ParsedDisplay {
+                    host: "198.112.45.11".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 0,
+                },
+            ),
+            (
+                "198.112.45.11:0.1",
+                ParsedDisplay {
+                    host: "198.112.45.11".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 1,
+                },
+            ),
             // ipv6
-            (":::0", ParsedDisplay { host: "::".to_string(), protocol: None, display: 0, screen: 0 }),
-            ("1:::0", ParsedDisplay { host: "1::".to_string(), protocol: None, display: 0, screen: 0 }),
-            ("::1:0", ParsedDisplay { host: "::1".to_string(), protocol: None, display: 0, screen: 0 }),
-            ("::1:0.1", ParsedDisplay { host: "::1".to_string(), protocol: None, display: 0, screen: 1 }),
-            ("::127.0.0.1:0", ParsedDisplay { host: "::127.0.0.1".to_string(), protocol: None, display: 0, screen: 0 }),
-            ("::ffff:127.0.0.1:0", ParsedDisplay { host: "::ffff:127.0.0.1".to_string(), protocol: None, display: 0, screen: 0 }),
-            ("2002:83fc:3052::1:0", ParsedDisplay { host: "2002:83fc:3052::1".to_string(), protocol: None, display: 0, screen: 0 }),
-            ("2002:83fc:3052::1:0.1", ParsedDisplay { host: "2002:83fc:3052::1".to_string(), protocol: None, display: 0, screen: 1 }),
-            ("[::]:0", ParsedDisplay { host: "[::]".to_string(), protocol: None, display: 0, screen: 0 }),
-            ("[1::]:0", ParsedDisplay { host: "[1::]".to_string(), protocol: None, display: 0, screen: 0 }),
-            ("[::1]:0", ParsedDisplay { host: "[::1]".to_string(), protocol: None, display: 0, screen: 0 }),
-            ("[::1]:0.1", ParsedDisplay { host: "[::1]".to_string(), protocol: None, display: 0, screen: 1 }),
-            ("[::127.0.0.1]:0", ParsedDisplay { host: "[::127.0.0.1]".to_string(), protocol: None, display: 0, screen: 0 }),
-            ("[2002:83fc:d052::1]:0", ParsedDisplay { host: "[2002:83fc:d052::1]".to_string(), protocol: None, display: 0, screen: 0 }),
-            ("[2002:83fc:d052::1]:0.1", ParsedDisplay { host: "[2002:83fc:d052::1]".to_string(), protocol: None, display: 0, screen: 1 }),
+            (
+                ":::0",
+                ParsedDisplay {
+                    host: "::".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 0,
+                },
+            ),
+            (
+                "1:::0",
+                ParsedDisplay {
+                    host: "1::".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 0,
+                },
+            ),
+            (
+                "::1:0",
+                ParsedDisplay {
+                    host: "::1".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 0,
+                },
+            ),
+            (
+                "::1:0.1",
+                ParsedDisplay {
+                    host: "::1".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 1,
+                },
+            ),
+            (
+                "::127.0.0.1:0",
+                ParsedDisplay {
+                    host: "::127.0.0.1".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 0,
+                },
+            ),
+            (
+                "::ffff:127.0.0.1:0",
+                ParsedDisplay {
+                    host: "::ffff:127.0.0.1".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 0,
+                },
+            ),
+            (
+                "2002:83fc:3052::1:0",
+                ParsedDisplay {
+                    host: "2002:83fc:3052::1".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 0,
+                },
+            ),
+            (
+                "2002:83fc:3052::1:0.1",
+                ParsedDisplay {
+                    host: "2002:83fc:3052::1".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 1,
+                },
+            ),
+            (
+                "[::]:0",
+                ParsedDisplay {
+                    host: "[::]".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 0,
+                },
+            ),
+            (
+                "[1::]:0",
+                ParsedDisplay {
+                    host: "[1::]".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 0,
+                },
+            ),
+            (
+                "[::1]:0",
+                ParsedDisplay {
+                    host: "[::1]".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 0,
+                },
+            ),
+            (
+                "[::1]:0.1",
+                ParsedDisplay {
+                    host: "[::1]".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 1,
+                },
+            ),
+            (
+                "[::127.0.0.1]:0",
+                ParsedDisplay {
+                    host: "[::127.0.0.1]".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 0,
+                },
+            ),
+            (
+                "[2002:83fc:d052::1]:0",
+                ParsedDisplay {
+                    host: "[2002:83fc:d052::1]".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 0,
+                },
+            ),
+            (
+                "[2002:83fc:d052::1]:0.1",
+                ParsedDisplay {
+                    host: "[2002:83fc:d052::1]".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 1,
+                },
+            ),
             // decnet
-            ("myws::0", ParsedDisplay { host: "myws:".to_string(), protocol: None, display: 0, screen: 0 }),
-            ("big::0", ParsedDisplay { host: "big:".to_string(), protocol: None, display: 0, screen: 0 }),
-            ("hydra::0.1", ParsedDisplay { host: "hydra:".to_string(), protocol: None, display: 0, screen: 1 }),
+            (
+                "myws::0",
+                ParsedDisplay {
+                    host: "myws:".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 0,
+                },
+            ),
+            (
+                "big::0",
+                ParsedDisplay {
+                    host: "big:".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 0,
+                },
+            ),
+            (
+                "hydra::0.1",
+                ParsedDisplay {
+                    host: "hydra:".to_string(),
+                    protocol: None,
+                    display: 0,
+                    screen: 1,
+                },
+            ),
         ] {
-            assert_eq!(do_parse_display(input).as_ref(), Some(output), "Failed parsing correctly: {}", input);
+            assert_eq!(
+                do_parse_display(input).as_ref(),
+                Some(output),
+                "Failed parsing correctly: {}",
+                input
+            );
         }
     }
 
@@ -150,7 +405,12 @@ mod test {
             "localhost:",
             "localhost::",
         ] {
-            assert_eq!(do_parse_display(input), None, "Unexpectedly parsed: {}", input);
+            assert_eq!(
+                do_parse_display(input),
+                None,
+                "Unexpectedly parsed: {}",
+                input
+            );
         }
     }
 }

@@ -1,7 +1,7 @@
 use std::convert::{TryFrom, TryInto};
 
-use crate::utils::Buffer;
 use crate::errors::ParseError;
+use crate::utils::Buffer;
 
 /// Common information on events and errors.
 ///
@@ -88,7 +88,7 @@ impl TryFrom<Buffer> for GenericEvent {
         let event = GenericEvent(value);
         let expected_length = match event.response_type() {
             GE_GENERIC_EVENT | REPLY => 32 + 4 * length_field,
-            _ => 32
+            _ => 32,
         };
         if actual_length != expected_length {
             return Err(ParseError::ParseError);
@@ -138,7 +138,7 @@ impl TryFrom<GenericEvent> for GenericError {
 
     fn try_from(event: GenericEvent) -> Result<Self, Self::Error> {
         if event.response_type() != 0 {
-            return Err(ParseError::ParseError)
+            return Err(ParseError::ParseError);
         }
         Ok(GenericError(event.into()))
     }
@@ -208,7 +208,7 @@ macro_rules! implement_serialize {
                 bytes.extend_from_slice(&self.to_ne_bytes());
             }
         }
-    }
+    };
 }
 
 macro_rules! forward_float {
@@ -228,7 +228,7 @@ macro_rules! forward_float {
                 self.to_bits().serialize_into(bytes);
             }
         }
-    }
+    };
 }
 
 implement_try_parse!(u8: [0]);
@@ -274,7 +274,8 @@ impl Serialize for bool {
 /// This function parses a list of objects where the length of the list was specified externally.
 /// The wire format for `list_length` instances of `T` will be read from the given data.
 pub fn parse_list<T>(data: &[u8], list_length: usize) -> Result<(Vec<T>, &[u8]), ParseError>
-where T: TryParse
+where
+    T: TryParse,
 {
     let mut remaining = data;
     let mut result = Vec::with_capacity(list_length);
@@ -327,7 +328,7 @@ macro_rules! bitmask_binop {
                 *self |= Into::<Self>::into(other)
             }
         }
-    }
+    };
 }
 
 /// A helper macro for managing atoms

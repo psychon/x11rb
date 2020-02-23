@@ -1,7 +1,7 @@
-use std::net::{TcpStream, SocketAddr, Ipv4Addr};
+use std::io::{IoSlice, IoSliceMut, Read, Result, Write};
+use std::net::{Ipv4Addr, SocketAddr, TcpStream};
 #[cfg(unix)]
 use std::os::unix::net::UnixStream;
-use std::io::{Read, Write, Result, IoSlice, IoSliceMut};
 
 use super::xauth::Family;
 
@@ -19,7 +19,10 @@ impl Stream {
         const TCP_PORT_BASE: u16 = 6000;
 
         if (protocol.is_none() || protocol != Some("unix")) && !host.is_empty() && host != "unix" {
-            Ok(Stream::TcpStream(TcpStream::connect((host, TCP_PORT_BASE + display))?))
+            Ok(Stream::TcpStream(TcpStream::connect((
+                host,
+                TCP_PORT_BASE + display,
+            ))?))
         } else {
             let mut error = None;
 
@@ -39,11 +42,16 @@ impl Stream {
             }
 
             if protocol.is_none() && host.is_empty() {
-                Ok(Stream::TcpStream(TcpStream::connect(("localhost", TCP_PORT_BASE + display))?))
+                Ok(Stream::TcpStream(TcpStream::connect((
+                    "localhost",
+                    TCP_PORT_BASE + display,
+                ))?))
             } else {
-                use std::io::{Error, ErrorKind};
                 use crate::errors::ConnectionError;
-                Err(error.unwrap_or_else(|| Error::new(ErrorKind::Other, ConnectionError::ConnectionError)))
+                use std::io::{Error, ErrorKind};
+                Err(error.unwrap_or_else(|| {
+                    Error::new(ErrorKind::Other, ConnectionError::ConnectionError)
+                }))
             }
         }
     }
@@ -82,7 +90,7 @@ impl Stream {
                 } else {
                     // This is only reached for loopback addresses. The code below handles this.
                 }
-            },
+            }
             #[cfg(unix)]
             Stream::UnixStream(_) => {
                 // Fall through to the code below.

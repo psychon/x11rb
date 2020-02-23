@@ -1,13 +1,13 @@
 #[cfg(not(test))]
-use std::io::IoSlice;
-use libc::{c_int, c_char, c_uint};
-#[cfg(not(test))]
 use libc::c_void;
+use libc::{c_char, c_int, c_uint};
+#[cfg(not(test))]
+use std::io::IoSlice;
 
 #[allow(non_camel_case_types)]
 #[repr(C)]
 pub(crate) struct xcb_connection_t {
-    _unused: [u8; 0]
+    _unused: [u8; 0],
 }
 
 #[derive(Debug)]
@@ -22,13 +22,13 @@ unsafe impl Sync for XCBConnectionWrapper {}
 #[repr(C)]
 pub(crate) struct xcb_extension_t {
     pub(crate) name: *const c_char,
-    pub(crate) global_id: c_int
+    pub(crate) global_id: c_int,
 }
 
 #[allow(non_camel_case_types)]
 #[repr(C)]
 pub(crate) struct xcb_void_cookie_t {
-    pub(crate) sequence: c_uint
+    pub(crate) sequence: c_uint,
 }
 
 #[allow(non_camel_case_types)]
@@ -37,7 +37,7 @@ pub(crate) struct xcb_protocol_request_t {
     pub(crate) count: usize,
     pub(crate) ext: *mut xcb_extension_t,
     pub(crate) opcode: u8,
-    pub(crate) isvoid: u8
+    pub(crate) isvoid: u8,
 }
 
 pub(crate) mod connection_errors {
@@ -61,16 +61,43 @@ pub(crate) mod send_request_flags {
 
 #[cfg(not(test))]
 #[link(name = "xcb")]
-extern {
-    pub(crate) fn xcb_connect(displayname: *const c_char, screenp: *mut c_int ) -> *mut xcb_connection_t;
+extern "C" {
+    pub(crate) fn xcb_connect(
+        displayname: *const c_char,
+        screenp: *mut c_int,
+    ) -> *mut xcb_connection_t;
     pub(crate) fn xcb_disconnect(c: *mut xcb_connection_t);
     pub(crate) fn xcb_connection_has_error(c: *const xcb_connection_t) -> c_int;
-    pub(crate) fn xcb_send_request64(c: *const xcb_connection_t, flags: c_int, vector: *mut IoSlice, request: *const xcb_protocol_request_t) -> u64;
-    pub(crate) fn xcb_send_request_with_fds64(c: *const xcb_connection_t, flags: c_int, vector: *mut IoSlice, request: *const xcb_protocol_request_t, num_fds: c_uint, fds: *const c_int) -> u64;
+    pub(crate) fn xcb_send_request64(
+        c: *const xcb_connection_t,
+        flags: c_int,
+        vector: *mut IoSlice,
+        request: *const xcb_protocol_request_t,
+    ) -> u64;
+    pub(crate) fn xcb_send_request_with_fds64(
+        c: *const xcb_connection_t,
+        flags: c_int,
+        vector: *mut IoSlice,
+        request: *const xcb_protocol_request_t,
+        num_fds: c_uint,
+        fds: *const c_int,
+    ) -> u64;
     pub(crate) fn xcb_discard_reply64(c: *const xcb_connection_t, sequence: u64);
-    pub(crate) fn xcb_wait_for_reply64(c: *const xcb_connection_t, request: u64, e: *mut *mut c_void) -> *mut c_void;
-    pub(crate) fn xcb_poll_for_reply(c: *const xcb_connection_t, request: c_uint, reply: *mut *mut c_void, e: *mut *mut c_void) -> c_int;
-    pub(crate) fn xcb_request_check(c: *const xcb_connection_t, void_cookie: xcb_void_cookie_t) -> *mut c_void;
+    pub(crate) fn xcb_wait_for_reply64(
+        c: *const xcb_connection_t,
+        request: u64,
+        e: *mut *mut c_void,
+    ) -> *mut c_void;
+    pub(crate) fn xcb_poll_for_reply(
+        c: *const xcb_connection_t,
+        request: c_uint,
+        reply: *mut *mut c_void,
+        e: *mut *mut c_void,
+    ) -> c_int;
+    pub(crate) fn xcb_request_check(
+        c: *const xcb_connection_t,
+        void_cookie: xcb_void_cookie_t,
+    ) -> *mut c_void;
     pub(crate) fn xcb_wait_for_event(c: *const xcb_connection_t) -> *mut c_void;
     pub(crate) fn xcb_poll_for_event(c: *const xcb_connection_t) -> *mut c_void;
     pub(crate) fn xcb_flush(c: *const xcb_connection_t) -> c_int;
@@ -83,12 +110,12 @@ extern {
 
 #[cfg(test)]
 mod mock {
-    use std::io::IoSlice;
-    use std::ffi::CStr;
-    use libc::{c_void, c_int, c_char, c_uint};
     use super::{xcb_connection_t, xcb_protocol_request_t, xcb_void_cookie_t};
-    use crate::x11_utils::Serialize;
     use crate::generated::xproto::Setup;
+    use crate::x11_utils::Serialize;
+    use libc::{c_char, c_int, c_uint, c_void};
+    use std::ffi::CStr;
+    use std::io::IoSlice;
 
     #[repr(C)]
     struct ConnectionMock {
@@ -97,7 +124,10 @@ mod mock {
         setup: Vec<u8>,
     }
 
-    pub(crate) unsafe fn xcb_connect(displayname: *const c_char, screenp: *mut c_int ) -> *mut xcb_connection_t {
+    pub(crate) unsafe fn xcb_connect(
+        displayname: *const c_char,
+        screenp: *mut c_int,
+    ) -> *mut xcb_connection_t {
         // Test that the provided displayname is correct
         if CStr::from_ptr(displayname).to_str().unwrap() != "display name" {
             panic!("Did not get the expected displayname");
@@ -129,7 +159,9 @@ mod mock {
         assert_eq!(setup.len(), 4 * length_field as usize);
 
         let mock = ConnectionMock {
-            xcb_conn: xcb_connection_t { _unused: Default::default() },
+            xcb_conn: xcb_connection_t {
+                _unused: Default::default(),
+            },
             error: 0,
             setup,
         };
@@ -144,11 +176,23 @@ mod mock {
         (*(c as *const ConnectionMock)).error
     }
 
-    pub(crate) unsafe fn xcb_send_request64(_c: *const xcb_connection_t, _flags: c_int, _vector: *mut IoSlice, _request: *const xcb_protocol_request_t) -> u64 {
+    pub(crate) unsafe fn xcb_send_request64(
+        _c: *const xcb_connection_t,
+        _flags: c_int,
+        _vector: *mut IoSlice,
+        _request: *const xcb_protocol_request_t,
+    ) -> u64 {
         unimplemented!();
     }
 
-    pub(crate) unsafe fn xcb_send_request_with_fds64(_c: *const xcb_connection_t, _flags: c_int, _vector: *mut IoSlice, _request: *const xcb_protocol_request_t, _num_fds: c_uint, _fds: *const c_int) -> u64 {
+    pub(crate) unsafe fn xcb_send_request_with_fds64(
+        _c: *const xcb_connection_t,
+        _flags: c_int,
+        _vector: *mut IoSlice,
+        _request: *const xcb_protocol_request_t,
+        _num_fds: c_uint,
+        _fds: *const c_int,
+    ) -> u64 {
         unimplemented!();
     }
 
@@ -156,15 +200,27 @@ mod mock {
         unimplemented!();
     }
 
-    pub(crate) unsafe fn xcb_wait_for_reply64(_c: *const xcb_connection_t, _request: u64, _e: *mut *mut c_void) -> *mut c_void {
+    pub(crate) unsafe fn xcb_wait_for_reply64(
+        _c: *const xcb_connection_t,
+        _request: u64,
+        _e: *mut *mut c_void,
+    ) -> *mut c_void {
         unimplemented!();
     }
 
-    pub(crate) unsafe fn xcb_poll_for_reply(_c: *const xcb_connection_t, _request: c_uint, _reply: *mut *mut c_void, _e: *mut *mut c_void) -> c_int {
+    pub(crate) unsafe fn xcb_poll_for_reply(
+        _c: *const xcb_connection_t,
+        _request: c_uint,
+        _reply: *mut *mut c_void,
+        _e: *mut *mut c_void,
+    ) -> c_int {
         unimplemented!();
     }
 
-    pub(crate) unsafe fn xcb_request_check(_c: *const xcb_connection_t, _void_cookie: xcb_void_cookie_t) -> *mut c_void {
+    pub(crate) unsafe fn xcb_request_check(
+        _c: *const xcb_connection_t,
+        _void_cookie: xcb_void_cookie_t,
+    ) -> *mut c_void {
         unimplemented!();
     }
 

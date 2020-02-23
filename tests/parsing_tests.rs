@@ -1,6 +1,6 @@
+use x11rb::errors::ParseError;
 use x11rb::generated::xproto::Setup;
 use x11rb::x11_utils::TryParse;
-use x11rb::errors::ParseError;
 
 fn get_setup_data() -> Vec<u8> {
     let mut s = Vec::new();
@@ -9,7 +9,8 @@ fn get_setup_data() -> Vec<u8> {
     let num_pixmap_formats: u8 = 1;
     let roots_len: u8 = 18;
     let header: u16 = 10;
-    let length: u16 = header + vendor_len + 2 * u16::from(num_pixmap_formats) + u16::from(roots_len);
+    let length: u16 =
+        header + vendor_len + 2 * u16::from(num_pixmap_formats) + u16::from(roots_len);
 
     s.extend(&[1, 0]); // Status "success" and padding
     s.extend(&11u16.to_ne_bytes()); // major version
@@ -40,7 +41,10 @@ fn get_setup_data() -> Vec<u8> {
     s.push(42); // bits per pixel
     s.push(21); // scanline pad
     s.extend(&[0, 0, 0, 0, 0]); // padding
-    assert_eq!(s.len(), 4 * usize::from(header + vendor_len + 2 * u16::from(num_pixmap_formats)));
+    assert_eq!(
+        s.len(),
+        4 * usize::from(header + vendor_len + 2 * u16::from(num_pixmap_formats))
+    );
 
     // Screens, we said above there is one entry
     s.extend(&1u32.to_ne_bytes()); // root window
@@ -83,7 +87,14 @@ fn parse_setup() -> Result<(), ParseError> {
 
     assert_eq!(remaining.len(), 0);
 
-    assert_eq!((1, 11, 0), (setup.status, setup.protocol_major_version, setup.protocol_minor_version));
+    assert_eq!(
+        (1, 11, 0),
+        (
+            setup.status,
+            setup.protocol_major_version,
+            setup.protocol_minor_version
+        )
+    );
     assert_eq!(0x1234_5678, setup.release_number);
     assert_eq!((0, 0xff), (setup.min_keycode, setup.max_keycode));
     assert_eq!(b"Vendor", &setup.vendor[..]);
@@ -96,7 +107,15 @@ fn parse_setup() -> Result<(), ParseError> {
 
     assert_eq!(1, setup.roots.len());
     let root = &setup.roots[0];
-    assert_eq!((1, 2, 3, 4), (root.root, root.default_colormap, root.white_pixel, root.black_pixel));
+    assert_eq!(
+        (1, 2, 3, 4),
+        (
+            root.root,
+            root.default_colormap,
+            root.white_pixel,
+            root.black_pixel
+        )
+    );
 
     assert_eq!(1, root.allowed_depths.len());
     let depth = &root.allowed_depths[0];
