@@ -24,19 +24,19 @@ use inner::PollReply;
 
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
-pub struct RustConnection<Stream: Read + Write = stream::Stream> {
-    inner: Mutex<inner::ConnectionInner<Stream>>,
+pub struct RustConnection<R: Read = stream::Stream, W: Write = stream::Stream> {
+    inner: Mutex<inner::ConnectionInner<R, W>>,
     id_allocator: Mutex<id_allocator::IDAllocator>,
     setup: Setup,
     extension_information: ExtensionInformation,
     maximum_request_bytes: Mutex<Option<usize>>,
 }
 
-impl RustConnection<stream::Stream> {
+impl RustConnection<stream::Stream, stream::Stream> {
     /// Establish a new connection.
     ///
     /// If no `dpy_name` is provided, the value from `$DISPLAY` is used.
-    pub fn connect(dpy_name: Option<&str>) -> Result<(RustConnection, usize), Box<dyn Error>> {
+    pub fn connect(dpy_name: Option<&str>) -> Result<(Self, usize), Box<dyn Error>> {
         // Parse display information
         let parsed_display = parse_display::parse_display(dpy_name).ok_or(ConnectionError::DisplayParsingError)?;
 
@@ -51,20 +51,33 @@ impl RustConnection<stream::Stream> {
             .unwrap_or(None)
             .unwrap_or_else(|| (Vec::new(), Vec::new()));
 
-        Ok((Self::connect_to_stream_with_auth_info(stream, screen, auth_name, auth_data)?, screen))
+        let write = stream.try_clone()?;
+        Ok((Self::connect_to_stream_with_auth_info(stream, write, screen, auth_name, auth_data)?, screen))
     }
 }
 
-impl<Stream: Read + Write> RustConnection<Stream> {
-    /// Establish a new connection to the given stream.
-    pub fn connect_to_stream(stream: stream::Stream, screen: usize) -> Result<RustConnection, Box<dyn Error>> {
-        Self::connect_to_stream_with_auth_info(stream, screen, Vec::new(), Vec::new())
+impl<R: Read, W: Write> RustConnection<R, W> {
+    /// Establish a new connection to the given streams.
+    ///
+    /// `read` is used for reading data from the X11 server and `write` is used for writing.
+    /// `screen` is the number of the screen that should be used. This function checks that a
+    /// screen with that number exists.
+    pub fn connect_to_stream(read: R, write: W, screen: usize) -> Result<Self, Box<dyn Error>> {
+        Self::connect_to_stream_with_auth_info(read, write, screen, Vec::new(), Vec::new())
     }
 
-    /// Establish a new connection to the given stream.
-    pub fn connect_to_stream_with_auth_info(stream: stream::Stream, screen: usize, auth_name: Vec<u8>, auth_data: Vec<u8>)
-    -> Result<RustConnection, Box<dyn Error>> {
-        let (inner, setup) = inner::ConnectionInner::connect(stream, auth_name, auth_data)?;
+    /// Establish a new connection to the given streams.
+    ///
+    /// `read` is used for reading data from the X11 server and `write` is used for writing.
+    /// `screen` is the number of the screen that should be used. This function checks that a
+    /// screen with that number exists.
+    ///
+    /// The parameters `auth_name` and `auth_data` are used for the members
+    /// `authorization_protocol_name` and `authorization_protocol_data` of the `SetupRequest` that
+    /// is sent to the X11 server.
+    pub fn connect_to_stream_with_auth_info(read: R, write: W, screen: usize, auth_name: Vec<u8>, auth_data: Vec<u8>)
+    -> Result<Self, Box<dyn Error>> {
+        let (inner, setup) = inner::ConnectionInner::connect(read, write, auth_name, auth_data)?;
 
         // Check that we got a valid screen number
         if screen >= setup.roots.len() {
@@ -91,9 +104,9 @@ impl<Stream: Read + Write> RustConnection<Stream> {
     }
 }
 
-impl<S: Read + Write> RequestConnection for RustConnection<S> {
-    fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<Cookie<Self, R>, ConnectionError>
-        where R: TryFrom<Buffer, Error=ParseError>
+impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
+    fn send_request_with_reply<Reply>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<Cookie<Self, Reply>, ConnectionError>
+        where Reply: TryFrom<Buffer, Error=ParseError>
     {
         let mut storage = Default::default();
         let bufs = self.compute_length_field(bufs, &mut storage)?;
@@ -101,8 +114,8 @@ impl<S: Read + Write> RequestConnection for RustConnection<S> {
         Ok(Cookie::new(self, self.send_request(bufs, fds, RequestKind::HasResponse)?))
     }
 
-    fn send_request_with_reply_with_fds<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<CookieWithFds<Self, R>, ConnectionError>
-        where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>
+    fn send_request_with_reply_with_fds<Reply>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>) -> Result<CookieWithFds<Self, Reply>, ConnectionError>
+        where Reply: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError>
     {
         let mut storage = Default::default();
         let bufs = self.compute_length_field(bufs, &mut storage)?;
@@ -194,7 +207,7 @@ impl<S: Read + Write> RequestConnection for RustConnection<S> {
     }
 }
 
-impl<Stream: Read + Write> Connection for RustConnection<Stream> {
+impl<R: Read, W: Write> Connection for RustConnection<R, W> {
     fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
         loop {

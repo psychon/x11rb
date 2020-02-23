@@ -96,6 +96,19 @@ impl Stream {
             .unwrap_or_else(Vec::new);
         Ok((Family::Local, hostname))
     }
+
+    /// Creates a new independently owned handle to the underlying socket.
+    ///
+    /// The returned `Stream` is a reference to the same stream that this object references. Both
+    /// handles will read and write the same stream of data, and options set on one stream will be
+    /// propagated to the other stream.
+    pub fn try_clone(&self) -> Result<Stream> {
+        match self {
+            Stream::TcpStream(stream) => Ok(Stream::TcpStream(stream.try_clone()?)),
+            #[cfg(unix)]
+            Stream::UnixStream(stream) => Ok(Stream::UnixStream(stream.try_clone()?)),
+        }
+    }
 }
 
 impl Read for Stream {

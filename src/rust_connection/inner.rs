@@ -29,11 +29,12 @@ struct SentRequest {
 }
 
 #[derive(Debug)]
-pub(crate) struct ConnectionInner<Stream>
-where Stream: Read + Write
+pub(crate) struct ConnectionInner<R, W>
+where R: Read, W: Write
 {
     // The underlying byte stream that connects us to the X11 server
-    stream: Stream,
+    read: R,
+    write: W,
 
     // The sequence number of the last request that was written
     last_sequence_written: SequenceNumber,
@@ -51,15 +52,16 @@ where Stream: Read + Write
     pending_replies: VecDeque<(SequenceNumber, Buffer)>,
 }
 
-impl<Stream> ConnectionInner<Stream>
-where Stream: Read + Write
+impl<R, W> ConnectionInner<R, W>
+where R: Read, W: Write
 {
-    pub(crate) fn connect(mut stream: Stream, auth_name: Vec<u8>, auth_data: Vec<u8>)
+    pub(crate) fn connect(mut read: R, mut write: W, auth_name: Vec<u8>, auth_data: Vec<u8>)
     -> Result<(Self, Setup), Box<dyn Error>> {
-        Self::write_setup(&mut stream, auth_name, auth_data)?;
-        let setup = Self::read_setup(&mut stream)?;
+        Self::write_setup(&mut write, auth_name, auth_data)?;
+        let setup = Self::read_setup(&mut read)?;
         let result = ConnectionInner {
-            stream,
+            read,
+            write,
             last_sequence_written: 0,
             next_reply_expected: 0,
             last_sequence_read: 0,
@@ -80,7 +82,7 @@ where Stream: Read + Write
         0x42
     }
 
-    fn write_setup(stream: &mut Stream, auth_name: Vec<u8>, auth_data: Vec<u8>)
+    fn write_setup(write: &mut W, auth_name: Vec<u8>, auth_data: Vec<u8>)
     -> Result<(), Box<dyn Error>> {
         let request = SetupRequest {
             byte_order: Self::byte_order(),
@@ -89,19 +91,19 @@ where Stream: Read + Write
             authorization_protocol_name: auth_name,
             authorization_protocol_data: auth_data,
         };
-        stream.write_all(&request.serialize())?;
+        write.write_all(&request.serialize())?;
         Ok(())
     }
 
-    fn read_setup(stream: &mut Stream) -> Result<Setup, Box<dyn Error>> {
+    fn read_setup(read: &mut R) -> Result<Setup, Box<dyn Error>> {
         let mut setup = vec![0; 8];
-        stream.read_exact(&mut setup)?;
+        read.read_exact(&mut setup)?;
         let extra_length = usize::from(u16::from_ne_bytes([setup[6], setup[7]])) * 4;
         // Use `Vec::reserve_exact` because this will be the final
         // length of the vector.
         setup.reserve_exact(extra_length);
         setup.resize(8 + extra_length, 0);
-        stream.read_exact(&mut setup[8..])?;
+        read.read_exact(&mut setup[8..])?;
         match setup[0] {
             // 0 is SetupFailed
             0 => Err(Box::new(SetupError::SetupFailed((&setup[..]).try_into()?))),
@@ -116,7 +118,7 @@ where Stream: Read + Write
 
     pub(crate) fn read_packet(&mut self) -> Result<Buffer, Box<dyn Error>> {
         let mut buffer = vec![0; 32];
-        self.stream.read_exact(&mut buffer)?;
+        self.read.read_exact(&mut buffer)?;
 
         use crate::generated::xproto::GE_GENERIC_EVENT;
         const REPLY: u8 = 1;
@@ -131,14 +133,14 @@ where Stream: Read + Write
         // length of the vector.
         buffer.reserve_exact(extra_length);
         buffer.resize(32 + extra_length, 0);
-        self.stream.read_exact(&mut buffer[32..])?;
+        self.read.read_exact(&mut buffer[32..])?;
 
         Ok(Buffer::from_vec(buffer))
     }
 
     fn send_sync(&mut self) -> Result<(), Box<dyn Error>> {
         let length = 1u16.to_ne_bytes();
-        let written = self.stream.write(&[GET_INPUT_FOCUS_REQUEST, 0 /* pad */, length[0], length[1]])?;
+        let written = self.write.write(&[GET_INPUT_FOCUS_REQUEST, 0 /* pad */, length[0], length[1]])?;
         assert_eq!(written, 4);
 
         self.last_sequence_written += 1;
@@ -170,7 +172,7 @@ where Stream: Read + Write
         self.sent_requests.push_back(sent_request);
 
         // FIXME: We must always be able to read when we write
-        let written = self.stream.write_vectored(bufs)?;
+        let written = self.write.write_vectored(bufs)?;
         assert_eq!(written, bufs.iter().map(|s| s.len()).sum(), "FIXME: Implement partial write handling");
         Ok(seqno)
     }
