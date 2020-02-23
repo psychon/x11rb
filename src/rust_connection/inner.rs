@@ -107,6 +107,7 @@ where W: Write
             authorization_protocol_data: auth_data,
         };
         write.write_all(&request.serialize())?;
+        write.flush()?;
         Ok(())
     }
 
