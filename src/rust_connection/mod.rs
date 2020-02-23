@@ -182,6 +182,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
 
     fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Buffer, ConnectionErrorOrX11Error> {
         let mut inner = self.inner.lock().unwrap();
+        inner.flush().map_err(|_| ConnectionError::UnknownError)?; // Ensure the request is sent
         loop {
             if let Some(reply) = inner.poll_for_reply_or_error(sequence) {
                 if reply[0] == 0 {
@@ -197,6 +198,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
 
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
+        inner.flush().map_err(|_| ConnectionError::UnknownError)?; // Ensure the request is sent
         loop {
             match inner.poll_for_reply(sequence) {
                 PollReply::TryAgain => {},
@@ -210,6 +212,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
     fn check_for_error(&self, sequence: SequenceNumber) -> Result<Option<GenericError>, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
         inner.prepare_check_for_reply_or_error(sequence).map_err(|_| ConnectionError::UnknownError)?;
+        inner.flush().map_err(|_| ConnectionError::UnknownError)?; // Ensure the request is sent
         loop {
             match inner.poll_check_for_reply_or_error(sequence) {
                 PollReply::TryAgain => {},
