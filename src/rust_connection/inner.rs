@@ -69,7 +69,7 @@ where W: Write
     pub(crate) fn connect(read: &mut impl Read, mut write: W, auth_name: Vec<u8>, auth_data: Vec<u8>)
     -> Result<(Self, Setup), Box<dyn Error>> {
         Self::write_setup(&mut write, auth_name, auth_data)?;
-        let setup = Self::read_setup(read)?;
+        let setup = read_setup(read)?;
         let result = ConnectionInner {
             write,
             last_sequence_written: 0,
@@ -105,31 +105,6 @@ where W: Write
         write.write_all(&request.serialize())?;
         write.flush()?;
         Ok(())
-    }
-
-    /// Read a `Setup` from the X11 server.
-    ///
-    /// If the server sends a `SetupFailed` or `SetupAuthenticate` packet, these will be returned
-    /// as errors.
-    fn read_setup(read: &mut impl Read) -> Result<Setup, Box<dyn Error>> {
-        let mut setup = vec![0; 8];
-        read.read_exact(&mut setup)?;
-        let extra_length = usize::from(u16::from_ne_bytes([setup[6], setup[7]])) * 4;
-        // Use `Vec::reserve_exact` because this will be the final
-        // length of the vector.
-        setup.reserve_exact(extra_length);
-        setup.resize(8 + extra_length, 0);
-        read.read_exact(&mut setup[8..])?;
-        match setup[0] {
-            // 0 is SetupFailed
-            0 => Err(Box::new(SetupError::SetupFailed((&setup[..]).try_into()?))),
-            // Success
-            1 => Ok((&setup[..]).try_into()?),
-            // 2 is SetupAuthenticate
-            2 => Err(Box::new(SetupError::SetupAuthenticate((&setup[..]).try_into()?))),
-            // Uhm... no other cases are defined
-            _ => Err(Box::new(ParseError::ParseError))
-        }
     }
 
     /// Send a synchronisation packet to the X11 server.
@@ -348,11 +323,50 @@ where W: Write
     }
 }
 
+/// Read a `Setup` from the X11 server.
+///
+/// If the server sends a `SetupFailed` or `SetupAuthenticate` packet, these will be returned
+/// as errors.
+fn read_setup(read: &mut impl Read) -> Result<Setup, SetupError> {
+    let mut setup = vec![0; 8];
+    read.read_exact(&mut setup)?;
+    let extra_length = usize::from(u16::from_ne_bytes([setup[6], setup[7]])) * 4;
+    // Use `Vec::reserve_exact` because this will be the final
+    // length of the vector.
+    setup.reserve_exact(extra_length);
+    setup.resize(8 + extra_length, 0);
+    read.read_exact(&mut setup[8..])?;
+    match setup[0] {
+        // 0 is SetupFailed
+        0 => Err(SetupError::SetupFailed((&setup[..]).try_into()?)),
+        // Success
+        1 => Ok((&setup[..]).try_into()?),
+        // 2 is SetupAuthenticate
+        2 => Err(SetupError::SetupAuthenticate((&setup[..]).try_into()?)),
+        // Uhm... no other cases are defined
+        _ => Err(ParseError::ParseError.into())
+    }
+}
+
 // FIXME: Clean up this error stuff... somehow
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug)]
 enum SetupError {
+    ParseError(ParseError),
+    IoError(std::io::Error),
     SetupFailed(SetupFailed),
     SetupAuthenticate(SetupAuthenticate),
+}
+
+impl From<ParseError> for SetupError {
+    fn from(value: ParseError) -> Self {
+        SetupError::ParseError(value)
+    }
+}
+
+impl From<std::io::Error> for SetupError {
+    fn from(value: std::io::Error) -> Self {
+        SetupError::IoError(value)
+    }
 }
 
 impl Error for SetupError {}
@@ -367,8 +381,78 @@ impl std::fmt::Display for SetupError {
         }
 
         match self {
+            SetupError::ParseError(err) => err.fmt(f),
+            SetupError::IoError(err) => err.fmt(f),
             SetupError::SetupFailed(err) => display(f, "X11 setup failed", &err.reason),
             SetupError::SetupAuthenticate(err) => display(f, "X11 authentication failed", &err.reason),
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::generated::xproto::{Setup, SetupFailed, SetupAuthenticate};
+    use crate::x11_utils::Serialize;
+    use super::{read_setup, SetupError};
+
+    #[test]
+    fn read_setup_success() {
+        let mut setup = Setup {
+            status: 1,
+            protocol_major_version: 11,
+            protocol_minor_version: 0,
+            length: 0,
+            release_number: 0,
+            resource_id_base: 0,
+            resource_id_mask: 0,
+            motion_buffer_size: 0,
+            maximum_request_length: 0,
+            image_byte_order: 0,
+            bitmap_format_bit_order: 0,
+            bitmap_format_scanline_unit: 0,
+            bitmap_format_scanline_pad: 0,
+            min_keycode: 0,
+            max_keycode: 0,
+            vendor: vec![],
+            pixmap_formats: vec![],
+            roots: vec![],
+        };
+        setup.length = ((setup.serialize().len() - 8) / 4) as _;
+        let setup_bytes = setup.serialize();
+
+        let read = read_setup(&mut &setup_bytes[..]);
+        assert_eq!(setup, read.unwrap());
+    }
+
+    #[test]
+    fn read_setup_failed() {
+        let mut setup = SetupFailed {
+            status: 0,
+            protocol_major_version: 11,
+            protocol_minor_version: 0,
+            length: 0,
+            reason: b"whatever".to_vec(),
+        };
+        setup.length = ((setup.serialize().len() - 8) / 4) as _;
+        let setup_bytes = setup.serialize();
+
+        match read_setup(&mut &setup_bytes[..]) {
+            Err(SetupError::SetupFailed(read)) => assert_eq!(setup, read),
+            value => panic!("Unexpected value {:?}", value),
+        }
+    }
+
+    #[test]
+    fn read_setup_authenticate() {
+        let setup = SetupAuthenticate {
+            status: 2,
+            reason: b"12345678".to_vec(),
+        };
+        let setup_bytes = setup.serialize();
+
+        match read_setup(&mut &setup_bytes[..]) {
+            Err(SetupError::SetupAuthenticate(read)) => assert_eq!(setup, read),
+            value => panic!("Unexpected value {:?}", value),
         }
     }
 }
