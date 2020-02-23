@@ -18,6 +18,8 @@ mod unsafe_code {
     use libc::free;
 
     /// Wrapper around a slice that was allocated in C code.
+    ///
+    /// `CSlice` is only available when the `allow-unsafe-code` feature is enabled.
     #[derive(Debug)]
     pub struct CSlice {
         ptr: NonNull<[u8]>,
@@ -96,6 +98,8 @@ impl Buffer {
     /// Constructs a new buffer from the given parts. `libc::free` will be called on the given
     /// pointer. In other words, this creates a `CSlice` variant of this enumeration.
     ///
+    /// This function is only available with the `allow-unsafe-code` feature.
+    ///
     /// # Safety
     ///
     /// The same rules as for `CSlice::new` and `std::slice::from_raw_parts` apply. Additionally,
@@ -160,6 +164,9 @@ impl RawFdContainer {
     /// Create a new `RawFdContainer` for the given `RawFd`.
     ///
     /// The `RawFdContainer` takes ownership of the `RawFd` and closes it on drop.
+    ///
+    /// This function panics on non-unix systems and when the `allow-unsafe-code` feature is
+    /// disabled.
     pub fn new(fd: RawFd) -> RawFdContainer {
         if cfg!(unix) {
             if cfg!(feature = "allow-unsafe-code") {
