@@ -107,6 +107,10 @@ impl<R: Read, W: Write> RustConnection<R, W> {
         Ok(conn)
     }
 
+    /// Internal function for actually sending a request.
+    ///
+    /// This function "does the actual work" for `send_request_with_reply()` and
+    /// `send_request_without_reply()`.
     fn send_request(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>, kind: RequestKind) -> Result<SequenceNumber, ConnectionError> {
         if !fds.is_empty() {
             return Err(ConnectionError::FDPassingFailed);
@@ -114,6 +118,12 @@ impl<R: Read, W: Write> RustConnection<R, W> {
         self.inner.lock().unwrap().send_request(bufs, kind).or(Err(ConnectionError::UnknownError))
     }
 
+    /// Read a packet from the connection.
+    ///
+    /// This function waits for an X11 packet to be received. It drops the mutex protecting the
+    /// inner data while waiting for a packet so that other threads can make progress. For this
+    /// reason, you need to pass in a `MutexGuard` to be dropped. This function locks the mutex
+    /// again and returns a new `MutexGuard`.
     fn read_packet_and_enqueue<'a>(&'a self, mut inner: MutexGuardInner<'a, W>) -> Result<MutexGuardInner<'a, W>, Box<dyn Error>> {
         if inner.have_reader {
             // Someone else is reading; wait for them
@@ -211,7 +221,8 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
     }
 
     fn wait_for_reply_with_fds(&self, _sequence: SequenceNumber) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
-        unimplemented!();
+        unreachable!("To wait for a reply containing FDs, a successful call to \
+        send_request_with_reply_with_fds() is necessary. However, this function never succeeds.");
     }
 
     fn maximum_request_bytes(&self) -> usize {
@@ -264,6 +275,10 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
     }
 }
 
+// Read a single X11 packet from the connection.
+//
+// This function only supports errors, events, and replies. Namely, this cannot be used to receive
+// the initial setup reply from the X11 server.
 fn read_packet(read: &mut impl Read) -> Result<Buffer, Box<dyn Error>> {
     let mut buffer = vec![0; 32];
     read.read_exact(&mut buffer)?;

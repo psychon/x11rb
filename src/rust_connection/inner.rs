@@ -58,6 +58,17 @@ where W: Write
 impl<W> ConnectionInner<W>
 where W: Write
 {
+    /// Create a `ConnectionInner` for the given connection.
+    ///
+    /// This function sends a setup request to the X11 server and waits for the reply. The received
+    /// `Setup` is returned to the caller, together with an instance of `ConnectionInner`.
+    ///
+    /// The `read` and `write` arguments describe the connection to the X11 server. `read` is only
+    /// borrowed and will be managed by the caller after this function read. Ownership of `write`
+    /// is transferred to the new `ConnectionInner` instance.
+    ///
+    /// `auth_name` and `auth_data` describe the authentication data that will be sent to the X11
+    /// server in the `SetupRequest`.
     pub(crate) fn connect(read: &mut impl Read, mut write: W, auth_name: Vec<u8>, auth_data: Vec<u8>)
     -> Result<(Self, Setup), Box<dyn Error>> {
         Self::write_setup(&mut write, auth_name, auth_data)?;
@@ -85,6 +96,7 @@ where W: Write
         0x42
     }
 
+    /// Send a `SetupRequest` to the X11 server.
     fn write_setup(write: &mut W, auth_name: Vec<u8>, auth_data: Vec<u8>)
     -> Result<(), Box<dyn Error>> {
         let request = SetupRequest {
@@ -98,6 +110,10 @@ where W: Write
         Ok(())
     }
 
+    /// Read a `Setup` from the X11 server.
+    ///
+    /// If the server sends a `SetupFailed` or `SetupAuthenticate` packet, these will be returned
+    /// as errors.
     fn read_setup(read: &mut impl Read) -> Result<Setup, Box<dyn Error>> {
         let mut setup = vec![0; 8];
         read.read_exact(&mut setup)?;
@@ -119,6 +135,10 @@ where W: Write
         }
     }
 
+    /// Send a synchronisation packet to the X11 server.
+    ///
+    /// This function sends a `GetInputFocus` request to the X11 server and arranges for its reply
+    /// to be ignored. This causes `self.next_reply_expected` to be increased.
     fn send_sync(&mut self) -> Result<(), Box<dyn Error>> {
         let length = 1u16.to_ne_bytes();
         let written = self.write.write(&[GET_INPUT_FOCUS_REQUEST, 0 /* pad */, length[0], length[1]])?;
@@ -135,6 +155,7 @@ where W: Write
         Ok(())
     }
 
+    /// Send a request to the X11 server.
     pub(crate) fn send_request(&mut self, bufs: &[IoSlice], kind: RequestKind) -> Result<SequenceNumber, Box<dyn Error>> {
         if self.next_reply_expected + SequenceNumber::from(u16::max_value()) <= self.last_sequence_written {
             // Send a GetInputFocus request so that we can reliably reconstruct sequence numbers in
@@ -158,6 +179,7 @@ where W: Write
         Ok(seqno)
     }
 
+    /// Ignore the reply for a request that was previously sent.
     pub(crate) fn discard_reply(&mut self, seqno: SequenceNumber, mode: DiscardMode) {
         if let Some(entry) = self.sent_requests.iter_mut().find(|r| r.seqno == seqno) {
             entry.discard_mode = Some(mode);
@@ -179,8 +201,8 @@ where W: Write
         }
     }
 
-    // Extract the sequence number from a packet read from the X11 server. Thus, the packet must be
-    // a reply, an event, or an error. All of these have a u16 sequence number in bytes 2 and 3...
+    // Extract the sequence number from a packet read from the X11 server. The packet must be a
+    // reply, an event, or an error. All of these have a u16 sequence number in bytes 2 and 3...
     // except for KeymapNotify events.
     fn extract_sequence_number(&mut self, buffer: &Buffer) -> Option<SequenceNumber> {
         use crate::generated::xproto::KEYMAP_NOTIFY_EVENT;
@@ -207,6 +229,7 @@ where W: Write
         Some(full_number)
     }
 
+    /// An X11 packet was received from the connection and is now enqueued into our state.
     pub(crate) fn enqueue_packet(&mut self, packet: Buffer) {
         let kind = packet[0];
 
@@ -249,6 +272,10 @@ where W: Write
         }
     }
 
+    /// Check if the server already sent an answer to the request with the given sequence number.
+    ///
+    /// This function is meant to be used for requests that have a reply. Such requests always
+    /// cause a reply or an error to be sent.
     pub(crate) fn poll_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Option<Buffer> {
         for (index, (seqno, _packet)) in self.pending_replies.iter().enumerate() {
             if *seqno == sequence {
@@ -258,6 +285,15 @@ where W: Write
         None
     }
 
+    /// Prepare for calling `poll_check_for_reply_or_error()`.
+    ///
+    /// To check if a request with a reply caused an error, one simply has to wait for the error or
+    /// reply to be received. However, this approach does not work for requests without errors:
+    /// Success is indicated by the absence of an error.
+    ///
+    /// Thus, this function ensures that a reply with a higher sequence number will be received.
+    /// Since the X11 server handles requests in-order, if the reply to a later request is
+    /// received, this means that the earlier request did not fail.
     pub(crate) fn prepare_check_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Result<(), Box<dyn Error>> {
         if self.next_reply_expected < sequence {
             self.send_sync()?;
@@ -266,6 +302,12 @@ where W: Write
         Ok(())
     }
 
+    /// Check if the request with the given sequence number was already handled by the server.
+    ///
+    /// Before calling this function, you must call `prepare_check_for_reply_or_error()` with the
+    /// sequence number.
+    ///
+    /// This function can be used for requests with and without a reply.
     pub(crate) fn poll_check_for_reply_or_error(&mut self, sequence: SequenceNumber) -> PollReply {
         if let Some(result) = self.poll_for_reply_or_error(sequence) {
             return PollReply::Reply(result);
@@ -280,6 +322,10 @@ where W: Write
         }
     }
 
+    /// Find the reply for the request with the given sequence number.
+    ///
+    /// If the request caused an error, that error will be handled as an event. This means that a
+    /// latter call to `poll_for_event()` will return it.
     pub(crate) fn poll_for_reply(&mut self, sequence: SequenceNumber) -> PollReply {
         if let Some(reply) = self.poll_for_reply_or_error(sequence) {
             if reply[0] == 0 {
@@ -293,11 +339,13 @@ where W: Write
         }
     }
 
+    /// Get a pending event.
     pub(crate) fn poll_for_event(&mut self) -> Option<GenericEvent> {
         self.pending_events.pop_front()
             .map(|event| event.try_into().unwrap())
     }
 
+    /// Send all pending events by flushing the output buffer.
     pub(crate) fn flush(&mut self) -> Result<(), std::io::Error> {
         self.write.flush()
     }
