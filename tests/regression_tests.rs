@@ -6,9 +6,9 @@ use std::cell::RefCell;
 use x11rb::connection::{RequestConnection, SequenceNumber, RequestKind, DiscardMode};
 use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
 use x11rb::errors::{ParseError, ConnectionError, ConnectionErrorOrX11Error};
-use x11rb::generated::xproto::{QueryExtensionReply, ConnectionExt, Segment, KeymapNotifyEvent, ClientMessageData};
+use x11rb::generated::xproto::{QueryExtensionReply, ConnectionExt, Segment, KeymapNotifyEvent, ClientMessageData, SetupAuthenticate};
 use x11rb::utils::{Buffer, RawFdContainer};
-use x11rb::x11_utils::{GenericError, TryParse};
+use x11rb::x11_utils::{GenericError, TryParse, Serialize};
 
 #[derive(Debug)]
 struct SavedRequest {
@@ -240,4 +240,16 @@ fn test_set_modifier_mapping() -> Result<(), ConnectionError> {
 
     conn.check_requests(&[(false, expected)]);
     Ok(())
+}
+
+#[test]
+fn test_serialize_setup_authenticate() {
+    let setup = SetupAuthenticate {
+        status: 2,
+        reason: b"12345678".to_vec(),
+    };
+    // At the time of writing, the code generator does not produce the correct code...
+    let length = 2u16.to_ne_bytes();
+    let setup_bytes = [2, 0, 0, 0, 0, 0, length[0], length[1], b'1', b'2', b'3', b'4', b'5', b'6', b'7', b'8'];
+    assert_eq!(&setup_bytes[..], &setup.serialize()[..]);
 }

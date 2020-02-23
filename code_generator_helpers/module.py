@@ -453,6 +453,15 @@ class Module(object):
                             # for this field as the length of the list.
                             self.out("let %s = self.%s.len() as %s;", field_name,
                                      field.is_length_field_for.field_name, self._field_type(field))
+                            expr = field.is_length_field_for.type.expr
+                            if expr.op is not None:
+                                # Sigh. The length cannot be used as-is, but needs to be transformed
+                                assert expr.op in ['*', '/']
+                                op = '*' if expr.op == '/' else '/'
+                                assert expr.lhs.op is None
+                                assert expr.rhs.op is None
+                                assert expr.rhs.nmemb is not None
+                                self.out("let %s = %s %s %s;", field_name, field_name, op, expr.rhs.nmemb)
                             source = field_name
                         else:
                             # Get the value of this field from "self".
