@@ -183,18 +183,19 @@ pub trait Serialize {
 // Now implement TryParse and Serialize for some primitive data types that we need.
 
 macro_rules! implement_try_parse {
-    ($t:ty: [$($indicies: expr),*]) => {
+    ($t:ty) => {
         impl TryParse for $t {
             fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
                 let len = std::mem::size_of::<$t>();
-                if value.len() < len {
-                    Err(ParseError::ParseError)
-                } else {
-                    Ok((<$t>::from_ne_bytes([ $(value[$indicies],)* ]), &value[len..]))
-                }
+                let bytes = value
+                    .get(..len)
+                    .ok_or(ParseError::ParseError)?
+                    .try_into() // TryInto<[u8; len]>
+                    .unwrap();
+                Ok((<$t>::from_ne_bytes(bytes), &value[len..]))
             }
         }
-    }
+    };
 }
 
 macro_rules! implement_serialize {
@@ -231,14 +232,14 @@ macro_rules! forward_float {
     };
 }
 
-implement_try_parse!(u8: [0]);
-implement_try_parse!(i8: [0]);
-implement_try_parse!(u16: [0, 1]);
-implement_try_parse!(i16: [0, 1]);
-implement_try_parse!(u32: [0, 1, 2, 3]);
-implement_try_parse!(i32: [0, 1, 2, 3]);
-implement_try_parse!(u64: [0, 1, 2, 3, 4, 5, 6, 7]);
-implement_try_parse!(i64: [0, 1, 2, 3, 4, 5, 6, 7]);
+implement_try_parse!(u8);
+implement_try_parse!(i8);
+implement_try_parse!(u16);
+implement_try_parse!(i16);
+implement_try_parse!(u32);
+implement_try_parse!(i32);
+implement_try_parse!(u64);
+implement_try_parse!(i64);
 
 implement_serialize!(u8: 1);
 implement_serialize!(i8: 1);
