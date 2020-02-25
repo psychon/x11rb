@@ -50,6 +50,9 @@ script:
   - rustup component add clippy
   - cargo clippy --all-targets --all-features -- -D warnings
 
+  - rustup component add rustfmt
+  - cargo fmt --all -- --check
+
   - cargo build --verbose --all-targets
   - cargo test --verbose
 
