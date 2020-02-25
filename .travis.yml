@@ -50,6 +50,12 @@ script:
   - rustup component add clippy
   - cargo clippy --all-targets --all-features -- -D warnings
 
+  - |
+    if [ "x$TRAVIS_RUST_VERSION" != "x1.37.0" ]; then
+        rustup component add rustfmt
+        cargo fmt --all -- --check || exit 1
+    fi
+
   - cargo build --verbose --all-targets
   - cargo test --verbose
 
