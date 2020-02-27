@@ -1,6 +1,7 @@
 extern crate pkg_config;
 
 use std::env;
+use std::ffi::OsStr;
 use std::fs::{create_dir, read_dir};
 use std::io::Result;
 use std::path::{Path, PathBuf};
@@ -17,17 +18,17 @@ fn create_dir_if_not_exist(dir: &PathBuf) -> Result<()> {
 }
 
 #[cfg(not(feature = "vendor-xcb-proto"))]
-fn get_paths() -> (String, String) {
+fn get_paths() -> (PathBuf, PathBuf) {
     let pythondir = pkg_config::get_variable("xcb-proto", "pythondir").unwrap();
     let includedir = pkg_config::get_variable("xcb-proto", "xcbincludedir").unwrap();
-    (pythondir, includedir)
+    (pythondir.into(), includedir.into())
 }
 
 #[cfg(feature = "vendor-xcb-proto")]
-fn get_paths() -> (String, String) {
-    let dir = "xcbproto-1.13-6-ge79f6b0/".to_string();
-    let pythondir = dir.clone();
-    let includedir = dir + "src";
+fn get_paths() -> (PathBuf, PathBuf) {
+    let dir = Path::new("xcbproto-1.13-6-ge79f6b0");
+    let pythondir = dir.to_path_buf();
+    let includedir = dir.join("src");
     (pythondir, includedir)
 }
 
@@ -41,32 +42,33 @@ fn list_files_with_ending(dir: impl AsRef<Path>, end: &str) -> Vec<PathBuf> {
 }
 
 fn main() {
-    println!("cargo:rerun-if-changed=rs_code_generator.py");
-    for py_file in list_files_with_ending("code_generator_helpers", ".py") {
-        println!("cargo:rerun-if-changed={}", py_file.to_str().unwrap());
-    }
-    for py_file in list_files_with_ending("xcbproto-1.13-6-ge79f6b0/xcbgen", ".py") {
-        println!("cargo:rerun-if-changed={}", py_file.to_str().unwrap());
-    }
-    for xml_file in list_files_with_ending("xcbproto-1.13-6-ge79f6b0/src", ".xml") {
-        println!("cargo:rerun-if-changed={}", xml_file.to_str().unwrap());
-    }
-
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
     let out_path = out_path.join("generated");
     create_dir_if_not_exist(&out_path).unwrap();
     let out_path = out_path.to_str().unwrap();
     let (pythondir, includedir) = get_paths();
+
+    println!("cargo:rerun-if-changed=rs_code_generator.py");
+    for py_file in list_files_with_ending("code_generator_helpers", ".py") {
+        println!("cargo:rerun-if-changed={}", py_file.to_str().unwrap());
+    }
+    for py_file in list_files_with_ending(pythondir.join("xcbgen"), ".py") {
+        println!("cargo:rerun-if-changed={}", py_file.to_str().unwrap());
+    }
+    for xml_file in list_files_with_ending(&includedir, ".xml") {
+        println!("cargo:rerun-if-changed={}", xml_file.to_str().unwrap());
+    }
+
     let status = Command::new("python")
         .args(&[
-            "rs_code_generator.py",
-            "-p",
-            &pythondir,
-            "-i",
-            &includedir,
-            "-o",
-            out_path,
-            "mod",
+            OsStr::new("rs_code_generator.py"),
+            OsStr::new("-p"),
+            pythondir.as_ref(),
+            OsStr::new("-i"),
+            includedir.as_ref(),
+            OsStr::new("-o"),
+            out_path.as_ref(),
+            OsStr::new("mod"),
         ])
         .status()
         .unwrap();
