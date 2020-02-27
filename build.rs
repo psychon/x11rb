@@ -32,12 +32,12 @@ fn get_paths() -> (PathBuf, PathBuf) {
     (pythondir, includedir)
 }
 
-// Returns a list of files in `dir` whose name ends with `end`.
-fn list_files_with_ending(dir: impl AsRef<Path>, end: &str) -> Vec<PathBuf> {
+// Returns a list of files in `dir` whose extension is `ext`.
+fn list_files_with_extension(dir: impl AsRef<Path>, ext: impl AsRef<OsStr>) -> Vec<PathBuf> {
     read_dir(dir.as_ref())
         .unwrap()
         .map(|entry| entry.unwrap().path())
-        .filter(|path| path.to_string_lossy().ends_with(end))
+        .filter(|path| path.extension() == Some(ext.as_ref()))
         .collect()
 }
 
@@ -49,13 +49,13 @@ fn main() {
     let (pythondir, includedir) = get_paths();
 
     println!("cargo:rerun-if-changed=rs_code_generator.py");
-    for py_file in list_files_with_ending("code_generator_helpers", ".py") {
+    for py_file in list_files_with_extension("code_generator_helpers", "py") {
         println!("cargo:rerun-if-changed={}", py_file.to_str().unwrap());
     }
-    for py_file in list_files_with_ending(pythondir.join("xcbgen"), ".py") {
+    for py_file in list_files_with_extension(pythondir.join("xcbgen"), "py") {
         println!("cargo:rerun-if-changed={}", py_file.to_str().unwrap());
     }
-    for xml_file in list_files_with_ending(&includedir, ".xml") {
+    for xml_file in list_files_with_extension(&includedir, "xml") {
         println!("cargo:rerun-if-changed={}", xml_file.to_str().unwrap());
     }
 
