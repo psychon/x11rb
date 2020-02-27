@@ -42,10 +42,9 @@ fn list_files_with_extension(dir: impl AsRef<Path>, ext: impl AsRef<OsStr>) -> V
 }
 
 fn main() {
-    let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
-    let out_path = out_path.join("generated");
+    let mut out_path = PathBuf::from(env::var_os("OUT_DIR").unwrap());
+    out_path.push("generated");
     create_dir_if_not_exist(&out_path).unwrap();
-    let out_path = out_path.to_str().unwrap();
     let (pythondir, includedir) = get_paths();
 
     println!("cargo:rerun-if-changed=rs_code_generator.py");
@@ -60,16 +59,14 @@ fn main() {
     }
 
     let status = Command::new("python")
-        .args(&[
-            OsStr::new("rs_code_generator.py"),
-            OsStr::new("-p"),
-            pythondir.as_ref(),
-            OsStr::new("-i"),
-            includedir.as_ref(),
-            OsStr::new("-o"),
-            out_path.as_ref(),
-            OsStr::new("mod"),
-        ])
+        .arg("rs_code_generator.py")
+        .arg("-p")
+        .arg(&pythondir)
+        .arg("-i")
+        .arg(&includedir)
+        .arg("-o")
+        .arg(&out_path)
+        .arg("mod")
         .status()
         .unwrap();
     assert!(status.success());
