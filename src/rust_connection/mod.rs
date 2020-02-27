@@ -146,21 +146,48 @@ impl<R: Read, W: Write> RustConnection<R, W> {
         &'a self,
         mut inner: MutexGuardInner<'a, W>,
     ) -> Result<MutexGuardInner<'a, W>, Box<dyn Error>> {
+        // 0.1. Try to lock the `read` mutex.
         match self.read.try_lock() {
             Err(TryLockError::WouldBlock) => {
-                // Someone else is reading; wait for them
+                // 1.1. Someone else is reading (other thread is at 2.2);
+                // wait for it. `Condvar::wait` will unlock `inner`, so
+                // the other thread can relock `inner` at 2.3 (and to allow
+                // other threads to arrive 0.1).
+                //
+                // When `wait` finishes, other thread has enqueued a packet,
+                // so the purpose of this function has been fulfilled. `wait`
+                // will relock `inner` when it returns.
                 Ok(self.reader_condition.wait(inner).unwrap())
             }
-            Err(TryLockError::Poisoned(_)) => panic!(),
+            Err(TryLockError::Poisoned(e)) => panic!("{}", e),
             Ok(mut lock) => {
+                // 2.1. Drop inner so other threads can use it while
+                // `read_packet` is blocking.
                 drop(inner);
 
+                // 2.2. Block the thread until a packet is received.
                 let packet = read_packet(&mut *lock)?;
+
+                // 2.3. Relock `inner` to enqueue the packet.
+                inner = self.inner.lock().unwrap();
+
+                // 2.4. Once `inner` has been relocked, drop the
+                // lock on `read`. While inner is locked, other
+                // threads cannot arrive 0.1 anyways.
+                //
+                // `read` cannot unlocked before `inner` is relocked
+                // because it could let another thread wait on 2.2
+                // for a reply that has been read but not enqueued yet.
                 drop(lock);
 
-                inner = self.inner.lock().unwrap();
+                // 2.5. Actually enqueue the read packet.
                 inner.enqueue_packet(packet);
+
+                // 2.6. Notify threads that a packet has been enqueued,
+                // so other threads waiting on 1.1 can return.
                 self.reader_condition.notify_all();
+
+                // 2.7. Return the locked `inner` to the caller.
                 Ok(inner)
             }
         }

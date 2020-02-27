@@ -24,6 +24,7 @@ test_script:
   - cargo run --verbose --no-default-features --features vendor-xcb-proto --example generic_events
   - cargo run --verbose --no-default-features --features vendor-xcb-proto --example hypnomoire
   - cargo run --verbose --no-default-features --features vendor-xcb-proto --example list_fonts
+  - cargo run --verbose --no-default-features --features vendor-xcb-proto --example multithread_test
   - cargo run --verbose --no-default-features --features vendor-xcb-proto --example simple_window
   - cargo run --verbose --no-default-features --features vendor-xcb-proto --example simple_window_manager
   #- cargo run --verbose --no-default-features --features vendor-xcb-proto --example tutorial
