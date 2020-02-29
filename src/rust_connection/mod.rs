@@ -266,7 +266,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         sequence: SequenceNumber,
     ) -> Result<Buffer, ConnectionErrorOrX11Error> {
         let mut inner = self.inner.lock().unwrap();
-        inner.flush().map_err(|_| ConnectionError::UnknownError)?; // Ensure the request is sent
+        inner.flush()?; // Ensure the request is sent
         loop {
             if let Some(reply) = inner.poll_for_reply_or_error(sequence) {
                 if reply[0] == 0 {
@@ -276,24 +276,20 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
                     return Ok(reply);
                 }
             }
-            inner = self
-                .read_packet_and_enqueue(inner)
-                .map_err(|_| ConnectionError::UnknownError)?;
+            inner = self.read_packet_and_enqueue(inner)?;
         }
     }
 
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
-        inner.flush().map_err(|_| ConnectionError::UnknownError)?; // Ensure the request is sent
+        inner.flush()?; // Ensure the request is sent
         loop {
             match inner.poll_for_reply(sequence) {
                 PollReply::TryAgain => {}
                 PollReply::NoReply => return Ok(None),
                 PollReply::Reply(buffer) => return Ok(Some(buffer)),
             }
-            inner = self
-                .read_packet_and_enqueue(inner)
-                .map_err(|_| ConnectionError::UnknownError)?;
+            inner = self.read_packet_and_enqueue(inner)?;
         }
     }
 
@@ -302,19 +298,15 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         sequence: SequenceNumber,
     ) -> Result<Option<GenericError>, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
-        inner
-            .prepare_check_for_reply_or_error(sequence)
-            .map_err(|_| ConnectionError::UnknownError)?;
-        inner.flush().map_err(|_| ConnectionError::UnknownError)?; // Ensure the request is sent
+        inner.prepare_check_for_reply_or_error(sequence)?;
+        inner.flush()?; // Ensure the request is sent
         loop {
             match inner.poll_check_for_reply_or_error(sequence) {
                 PollReply::TryAgain => {}
                 PollReply::NoReply => return Ok(None),
                 PollReply::Reply(buffer) => return Ok(buffer.try_into().ok()),
             }
-            inner = self
-                .read_packet_and_enqueue(inner)
-                .map_err(|_| ConnectionError::UnknownError)?;
+            inner = self.read_packet_and_enqueue(inner)?;
         }
     }
 
@@ -358,9 +350,7 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
             if let Some(event) = inner.poll_for_event() {
                 return Ok(event);
             }
-            inner = self
-                .read_packet_and_enqueue(inner)
-                .map_err(|_| ConnectionError::UnknownError)?;
+            inner = self.read_packet_and_enqueue(inner)?;
         }
     }
 

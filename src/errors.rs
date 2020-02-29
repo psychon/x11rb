@@ -33,13 +33,15 @@ impl From<std::num::TryFromIntError> for ParseError {
 /// An error that occurred while connecting to an X11 server
 #[derive(Debug)]
 pub enum ConnectError {
-    // Errors from XCB
     UnknownError,
+    ParseError,
+
+    // Errors from XCB
     ConnectionError,
     InsufficientMemory,
     DisplayParsingError,
     InvalidScreen,
-    ParseError,
+
     // Errors from RustConnection
     IOError(std::io::Error),
     ZeroIDMask,
@@ -89,15 +91,20 @@ impl From<std::io::Error> for ConnectError {
 }
 
 /// An error that occurred on an already established X11 connection
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug)]
 pub enum ConnectionError {
     UnknownError,
     ConnectionError,
     UnsupportedExtension,
-    InsufficientMemory,
     MaximumRequestLengthExceeded,
     FDPassingFailed,
     ParseError,
+
+    // Errors from XCB
+    InsufficientMemory,
+
+    // Errors from RustConnection
+    IOError(std::io::Error),
 }
 
 impl Error for ConnectionError {}
@@ -114,6 +121,7 @@ impl std::fmt::Display for ConnectionError {
             }
             ConnectionError::FDPassingFailed => write!(f, "FD passing failed"),
             ConnectionError::ParseError => write!(f, "Parsing error"),
+            ConnectionError::IOError(err) => err.fmt(f),
         }
     }
 }
@@ -132,7 +140,13 @@ impl From<std::num::TryFromIntError> for ConnectionError {
     }
 }
 
-#[derive(Debug, Clone)]
+impl From<std::io::Error> for ConnectionError {
+    fn from(err: std::io::Error) -> Self {
+        ConnectionError::IOError(err)
+    }
+}
+
+#[derive(Debug)]
 pub enum ConnectionErrorOrX11Error {
     ConnectionError(ConnectionError),
     X11Error(GenericError),
@@ -158,6 +172,12 @@ impl From<ParseError> for ConnectionErrorOrX11Error {
 impl From<std::num::TryFromIntError> for ConnectionErrorOrX11Error {
     fn from(err: std::num::TryFromIntError) -> Self {
         Self::from(ParseError::from(err))
+    }
+}
+
+impl From<std::io::Error> for ConnectionErrorOrX11Error {
+    fn from(err: std::io::Error) -> Self {
+        ConnectionError::from(err).into()
     }
 }
 
