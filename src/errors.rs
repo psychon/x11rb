@@ -3,6 +3,7 @@
 use std::error::Error;
 
 use crate::x11_utils::GenericError;
+use crate::generated::xproto::{SetupAuthenticate, SetupFailed};
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ParseError {
@@ -30,20 +31,32 @@ impl From<std::num::TryFromIntError> for ParseError {
 }
 
 /// An error that occurred while connecting to an X11 server
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug)]
 pub enum ConnectError {
+    // Errors from XCB
     UnknownError,
     ConnectionError,
     InsufficientMemory,
     DisplayParsingError,
     InvalidScreen,
     ParseError,
+    // Errors from RustConnection
+    IOError(std::io::Error),
+    ZeroIDMask,
+    SetupAuthenticate(SetupAuthenticate),
+    SetupFailed(SetupFailed),
 }
 
 impl Error for ConnectError {}
 
 impl std::fmt::Display for ConnectError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        fn display(f: &mut std::fmt::Formatter, prefix: &str, value: &[u8]) -> std::fmt::Result {
+            match std::str::from_utf8(value).ok() {
+                Some(value) => write!(f, "{}: '{}'", prefix, value),
+                None => write!(f, "{}: {:?} [message is not utf8]", prefix, value),
+            }
+        }
         match self {
             ConnectError::UnknownError => write!(f, "Unknown connection error"),
             ConnectError::ConnectionError => write!(f, "Error with the underlying connection"),
@@ -51,6 +64,12 @@ impl std::fmt::Display for ConnectError {
             ConnectError::DisplayParsingError => write!(f, "Display parsing error"),
             ConnectError::InvalidScreen => write!(f, "Invalid screen"),
             ConnectError::ParseError => write!(f, "Parsing error"),
+            ConnectError::IOError(err) => err.fmt(f),
+            ConnectError::ZeroIDMask => write!(f, "XID mask was zero"),
+            ConnectError::SetupFailed(err) => display(f, "X11 setup failed", &err.reason),
+            ConnectError::SetupAuthenticate(err) => {
+                display(f, "X11 authentication failed", &err.reason)
+            }
         }
     }
 }
@@ -60,6 +79,12 @@ impl From<ParseError> for ConnectError {
         match err {
             ParseError::ParseError => ConnectError::ParseError,
         }
+    }
+}
+
+impl From<std::io::Error> for ConnectError {
+    fn from(err: std::io::Error) -> Self {
+        ConnectError::IOError(err)
     }
 }
 

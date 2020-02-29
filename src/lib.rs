@@ -113,7 +113,7 @@ pub fn connect(
     }
     #[cfg(not(feature = "allow-unsafe-code"))]
     {
-        rust_connection::RustConnection::connect(dpy_name).map_err(|_| ConnectError::UnknownError) // FIXME
+        rust_connection::RustConnection::connect(dpy_name)
     }
 }
 

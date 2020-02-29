@@ -1,7 +1,6 @@
 //! A pure-rust implementation of a connection to an X11 server.
 
 use std::convert::{TryFrom, TryInto};
-use std::error::Error;
 use std::io::{BufReader, BufWriter, IoSlice, Read, Write};
 use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 
@@ -41,7 +40,7 @@ impl RustConnection<BufReader<stream::Stream>, BufWriter<stream::Stream>> {
     /// Establish a new connection.
     ///
     /// If no `dpy_name` is provided, the value from `$DISPLAY` is used.
-    pub fn connect(dpy_name: Option<&str>) -> Result<(Self, usize), Box<dyn Error>> {
+    pub fn connect(dpy_name: Option<&str>) -> Result<(Self, usize), ConnectError> {
         // Parse display information
         let parsed_display =
             parse_display::parse_display(dpy_name).ok_or(ConnectError::DisplayParsingError)?;
@@ -73,7 +72,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
     /// `read` is used for reading data from the X11 server and `write` is used for writing.
     /// `screen` is the number of the screen that should be used. This function checks that a
     /// screen with that number exists.
-    pub fn connect_to_stream(read: R, write: W, screen: usize) -> Result<Self, Box<dyn Error>> {
+    pub fn connect_to_stream(read: R, write: W, screen: usize) -> Result<Self, ConnectError> {
         Self::connect_to_stream_with_auth_info(read, write, screen, Vec::new(), Vec::new())
     }
 
@@ -92,13 +91,13 @@ impl<R: Read, W: Write> RustConnection<R, W> {
         screen: usize,
         auth_name: Vec<u8>,
         auth_data: Vec<u8>,
-    ) -> Result<Self, Box<dyn Error>> {
+    ) -> Result<Self, ConnectError> {
         let (inner, setup) =
             inner::ConnectionInner::connect(&mut read, write, auth_name, auth_data)?;
 
         // Check that we got a valid screen number
         if screen >= setup.roots.len() {
-            return Err(Box::new(ConnectError::InvalidScreen));
+            return Err(ConnectError::InvalidScreen);
         }
 
         // Success! Set up our state
@@ -110,11 +109,11 @@ impl<R: Read, W: Write> RustConnection<R, W> {
     /// `read` is used for reading data from the X11 server and `write` is used for writing.
     /// It is assumed that `setup` was just received from the server. Thus, the first reply to a
     /// request that is sent will have sequence number one.
-    pub fn for_connected_stream(read: R, write: W, setup: Setup) -> Result<Self, Box<dyn Error>> {
+    pub fn for_connected_stream(read: R, write: W, setup: Setup) -> Result<Self, ConnectError> {
         Self::for_inner(read, inner::ConnectionInner::new(write), setup)
     }
 
-    fn for_inner(read: R, inner: inner::ConnectionInner<W>, setup: Setup) -> Result<Self, Box<dyn Error>> {
+    fn for_inner(read: R, inner: inner::ConnectionInner<W>, setup: Setup) -> Result<Self, ConnectError> {
         let allocator =
             id_allocator::IDAllocator::new(setup.resource_id_base, setup.resource_id_mask)?;
         Ok(RustConnection {

@@ -1,5 +1,6 @@
 use crate::connection::RequestConnection;
 use crate::generated::xc_misc::ConnectionExt as _;
+use crate::errors::ConnectError;
 
 /// An allocator for X11 IDs.
 ///
@@ -17,30 +18,14 @@ pub(crate) struct IDAllocator {
     increment: u32,
 }
 
-// FIXME: Clean up this error stuff... somehow
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
-pub(crate) enum MaskError {
-    ZeroMask
-}
-
-impl std::error::Error for MaskError {}
-
-impl std::fmt::Display for MaskError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            MaskError::ZeroMask => write!(f, "XID mask was zero"),
-        }
-    }
-}
-
 impl IDAllocator {
     /// Create a new instance of an ID allocator.
     ///
     /// The arguments should be the `resource_id_base` and `resource_id_mask` values that the X11
     /// server sent in a `Setup` response.
-    pub(crate) fn new(id_base: u32, id_mask: u32) -> Result<Self, MaskError> {
+    pub(crate) fn new(id_base: u32, id_mask: u32) -> Result<Self, ConnectError> {
         if id_mask == 0 {
-            return Err(MaskError::ZeroMask);
+            return Err(ConnectError::ZeroIDMask);
         }
         // Find the right-most set bit in id_mask, e.g. for 0b110, this results in 0b010.
         let increment = id_mask & (1 + !id_mask);
@@ -131,8 +116,11 @@ mod test {
 
     #[test]
     fn invalid_arg() {
-        let allocator = IDAllocator::new(1234, 0).unwrap_err();
-        assert_eq!(super::MaskError::ZeroMask, allocator);
+        let err = IDAllocator::new(1234, 0).unwrap_err();
+        if let super::ConnectError::ZeroIDMask = err {
+        } else {
+            panic!("Wrong error: {:?}", err);
+        }
     }
 
     fn generate_get_xid_range_reply(start_id: u32, count: u32) -> Vec<u8> {

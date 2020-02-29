@@ -2,14 +2,11 @@
 
 use std::collections::VecDeque;
 use std::convert::TryInto;
-use std::error::Error;
 use std::io::{ErrorKind, IoSlice, Read, Write};
 
 use crate::connection::{DiscardMode, RequestKind, SequenceNumber};
-use crate::errors::ParseError;
-use crate::generated::xproto::{
-    Setup, SetupAuthenticate, SetupFailed, SetupRequest, GET_INPUT_FOCUS_REQUEST,
-};
+use crate::errors::{ConnectError, ParseError};
+use crate::generated::xproto::{Setup, SetupRequest, GET_INPUT_FOCUS_REQUEST};
 use crate::utils::Buffer;
 use crate::x11_utils::{GenericEvent, Serialize};
 
@@ -75,7 +72,7 @@ where
         mut write: W,
         auth_name: Vec<u8>,
         auth_data: Vec<u8>,
-    ) -> Result<(Self, Setup), SetupError> {
+    ) -> Result<(Self, Setup), ConnectError> {
         Self::write_setup(&mut write, auth_name, auth_data)?;
         let setup = read_setup(read)?;
         Ok((Self::new(write), setup))
@@ -394,7 +391,7 @@ where
 ///
 /// If the server sends a `SetupFailed` or `SetupAuthenticate` packet, these will be returned
 /// as errors.
-fn read_setup(read: &mut impl Read) -> Result<Setup, SetupError> {
+fn read_setup(read: &mut impl Read) -> Result<Setup, ConnectError> {
     let mut setup = vec![0; 8];
     read.read_exact(&mut setup)?;
     let extra_length = usize::from(u16::from_ne_bytes([setup[6], setup[7]])) * 4;
@@ -405,56 +402,13 @@ fn read_setup(read: &mut impl Read) -> Result<Setup, SetupError> {
     read.read_exact(&mut setup[8..])?;
     match setup[0] {
         // 0 is SetupFailed
-        0 => Err(SetupError::SetupFailed((&setup[..]).try_into()?)),
+        0 => Err(ConnectError::SetupFailed((&setup[..]).try_into()?)),
         // Success
         1 => Ok((&setup[..]).try_into()?),
         // 2 is SetupAuthenticate
-        2 => Err(SetupError::SetupAuthenticate((&setup[..]).try_into()?)),
+        2 => Err(ConnectError::SetupAuthenticate((&setup[..]).try_into()?)),
         // Uhm... no other cases are defined
         _ => Err(ParseError::ParseError.into()),
-    }
-}
-
-// FIXME: Clean up this error stuff... somehow
-#[derive(Debug)]
-pub(crate) enum SetupError {
-    ParseError(ParseError),
-    IoError(std::io::Error),
-    SetupFailed(SetupFailed),
-    SetupAuthenticate(SetupAuthenticate),
-}
-
-impl From<ParseError> for SetupError {
-    fn from(value: ParseError) -> Self {
-        SetupError::ParseError(value)
-    }
-}
-
-impl From<std::io::Error> for SetupError {
-    fn from(value: std::io::Error) -> Self {
-        SetupError::IoError(value)
-    }
-}
-
-impl Error for SetupError {}
-
-impl std::fmt::Display for SetupError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        fn display(f: &mut std::fmt::Formatter, prefix: &str, value: &[u8]) -> std::fmt::Result {
-            match std::str::from_utf8(value).ok() {
-                Some(value) => write!(f, "{}: '{}'", prefix, value),
-                None => write!(f, "{}: {:?} [message is not utf8]", prefix, value),
-            }
-        }
-
-        match self {
-            SetupError::ParseError(err) => err.fmt(f),
-            SetupError::IoError(err) => err.fmt(f),
-            SetupError::SetupFailed(err) => display(f, "X11 setup failed", &err.reason),
-            SetupError::SetupAuthenticate(err) => {
-                display(f, "X11 authentication failed", &err.reason)
-            }
-        }
     }
 }
 
@@ -462,10 +416,11 @@ impl std::fmt::Display for SetupError {
 mod test {
     use std::io::IoSlice;
 
-    use super::{read_setup, ConnectionInner, SetupError};
+    use super::{read_setup, ConnectionInner};
     use crate::connection::RequestKind;
     use crate::generated::xproto::{Setup, SetupAuthenticate, SetupFailed};
     use crate::x11_utils::Serialize;
+    use crate::errors::ConnectError;
 
     #[test]
     fn read_setup_success() {
@@ -509,7 +464,7 @@ mod test {
         let setup_bytes = setup.serialize();
 
         match read_setup(&mut &setup_bytes[..]) {
-            Err(SetupError::SetupFailed(read)) => assert_eq!(setup, read),
+            Err(ConnectError::SetupFailed(read)) => assert_eq!(setup, read),
             value => panic!("Unexpected value {:?}", value),
         }
     }
@@ -523,7 +478,7 @@ mod test {
         let setup_bytes = setup.serialize();
 
         match read_setup(&mut &setup_bytes[..]) {
-            Err(SetupError::SetupAuthenticate(read)) => assert_eq!(setup, read),
+            Err(ConnectError::SetupAuthenticate(read)) => assert_eq!(setup, read),
             value => panic!("Unexpected value {:?}", value),
         }
     }
