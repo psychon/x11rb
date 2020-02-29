@@ -157,7 +157,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
     fn read_packet_and_enqueue<'a>(
         &'a self,
         mut inner: MutexGuardInner<'a, W>,
-    ) -> Result<MutexGuardInner<'a, W>, Box<dyn Error>> {
+    ) -> Result<MutexGuardInner<'a, W>, std::io::Error> {
         // 0.1. Try to lock the `read` mutex.
         match self.read.try_lock() {
             Err(TryLockError::WouldBlock) => {
@@ -391,7 +391,7 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
 //
 // This function only supports errors, events, and replies. Namely, this cannot be used to receive
 // the initial setup reply from the X11 server.
-fn read_packet(read: &mut impl Read) -> Result<Buffer, Box<dyn Error>> {
+fn read_packet(read: &mut impl Read) -> Result<Buffer, std::io::Error> {
     let mut buffer = vec![0; 32];
     read.read_exact(&mut buffer)?;
 
