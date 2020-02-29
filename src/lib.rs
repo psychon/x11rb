@@ -46,8 +46,8 @@
 //! use x11rb::errors::ConnectionErrorOrX11Error;
 //! use x11rb::COPY_DEPTH_FROM_PARENT;
 //!
-//! fn main() -> Result<(), Box<dyn std::error::Error>> {
-//!     let (conn, screen_num) = x11rb::connect(None)?;
+//! fn main() -> Result<(), ConnectionErrorOrX11Error> {
+//!     let (conn, screen_num) = x11rb::connect(None).unwrap();
 //!     let screen = &conn.setup().roots[screen_num];
 //!     let win_id = conn.generate_id();
 //!     conn.create_window(COPY_DEPTH_FROM_PARENT, win_id, screen.root, 0, 0, 100, 100, 0, WindowClass::InputOutput,
