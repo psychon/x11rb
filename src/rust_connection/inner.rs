@@ -75,7 +75,7 @@ where
         mut write: W,
         auth_name: Vec<u8>,
         auth_data: Vec<u8>,
-    ) -> Result<(Self, Setup), Box<dyn Error>> {
+    ) -> Result<(Self, Setup), SetupError> {
         Self::write_setup(&mut write, auth_name, auth_data)?;
         let setup = read_setup(read)?;
         Ok((Self::new(write), setup))
@@ -112,7 +112,7 @@ where
         write: &mut W,
         auth_name: Vec<u8>,
         auth_data: Vec<u8>,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<(), std::io::Error> {
         let request = SetupRequest {
             byte_order: Self::byte_order(),
             protocol_major_version: 11,
@@ -129,7 +129,7 @@ where
     ///
     /// This function sends a `GetInputFocus` request to the X11 server and arranges for its reply
     /// to be ignored. This causes `self.next_reply_expected` to be increased.
-    fn send_sync(&mut self) -> Result<(), Box<dyn Error>> {
+    fn send_sync(&mut self) -> Result<(), std::io::Error> {
         let length = 1u16.to_ne_bytes();
         self.write.write_all(&[
             GET_INPUT_FOCUS_REQUEST,
@@ -154,7 +154,7 @@ where
         &mut self,
         bufs: &[IoSlice],
         kind: RequestKind,
-    ) -> Result<SequenceNumber, Box<dyn Error>> {
+    ) -> Result<SequenceNumber, std::io::Error> {
         if self.next_reply_expected + SequenceNumber::from(u16::max_value())
             <= self.last_sequence_written
         {
@@ -332,7 +332,7 @@ where
     pub(crate) fn prepare_check_for_reply_or_error(
         &mut self,
         sequence: SequenceNumber,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<(), std::io::Error> {
         if self.next_reply_expected < sequence {
             self.send_sync()?;
         }
@@ -417,7 +417,7 @@ fn read_setup(read: &mut impl Read) -> Result<Setup, SetupError> {
 
 // FIXME: Clean up this error stuff... somehow
 #[derive(Debug)]
-enum SetupError {
+pub(crate) enum SetupError {
     ParseError(ParseError),
     IoError(std::io::Error),
     SetupFailed(SetupFailed),
@@ -460,7 +460,6 @@ impl std::fmt::Display for SetupError {
 
 #[cfg(test)]
 mod test {
-    use std::error::Error;
     use std::io::IoSlice;
 
     use super::{read_setup, ConnectionInner, SetupError};
@@ -530,7 +529,7 @@ mod test {
     }
 
     #[test]
-    fn insert_sync_no_reply() -> Result<(), Box<dyn Error>> {
+    fn insert_sync_no_reply() -> Result<(), std::io::Error> {
         // The connection must send a sync (GetInputFocus) request every 2^16 requests (that do not
         // have a reply). Thus, this test sends more than that and tests for the sync to appear.
 
@@ -565,7 +564,7 @@ mod test {
     }
 
     #[test]
-    fn insert_no_sync_with_reply() -> Result<(), Box<dyn Error>> {
+    fn insert_no_sync_with_reply() -> Result<(), std::io::Error> {
         // Compared to the previous test, this uses RequestKind::HasResponse, so no sync needs to
         // be inserted.
 
