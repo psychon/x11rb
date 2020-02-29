@@ -17,20 +17,38 @@ pub(crate) struct IDAllocator {
     increment: u32,
 }
 
+// FIXME: Clean up this error stuff... somehow
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub(crate) enum MaskError {
+    ZeroMask
+}
+
+impl std::error::Error for MaskError {}
+
+impl std::fmt::Display for MaskError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            MaskError::ZeroMask => write!(f, "XID mask was zero"),
+        }
+    }
+}
+
 impl IDAllocator {
     /// Create a new instance of an ID allocator.
     ///
     /// The arguments should be the `resource_id_base` and `resource_id_mask` values that the X11
     /// server sent in a `Setup` response.
-    pub(crate) fn new(id_base: u32, id_mask: u32) -> Self {
-        assert_ne!(0, id_mask);
+    pub(crate) fn new(id_base: u32, id_mask: u32) -> Result<Self, MaskError> {
+        if id_mask == 0 {
+            return Err(MaskError::ZeroMask);
+        }
         // Find the right-most set bit in id_mask, e.g. for 0b110, this results in 0b010.
         let increment = id_mask & (1 + !id_mask);
-        Self {
+        Ok(Self {
             next_id: id_base,
             max_id: id_base | id_mask,
             increment,
-        }
+        })
     }
 
     /// Generate the next ID.
@@ -79,7 +97,7 @@ mod test {
     #[test]
     fn exhaustive() {
         let conn = DummyConnection(None);
-        let mut allocator = IDAllocator::new(0x2800, 0x1ff);
+        let mut allocator = IDAllocator::new(0x2800, 0x1ff).unwrap();
         for expected in 0x2800..=0x29ff {
             assert_eq!(Some(expected), allocator.generate_id(&conn));
         }
@@ -89,7 +107,7 @@ mod test {
     #[test]
     fn increment() {
         let conn = DummyConnection(None);
-        let mut allocator = IDAllocator::new(0, 0b1100);
+        let mut allocator = IDAllocator::new(0, 0b1100).unwrap();
         assert_eq!(Some(0b0000), allocator.generate_id(&conn));
         assert_eq!(Some(0b0100), allocator.generate_id(&conn));
         assert_eq!(Some(0b1000), allocator.generate_id(&conn));
@@ -100,7 +118,7 @@ mod test {
     #[test]
     fn new_range() {
         let conn = DummyConnection(Some(generate_get_xid_range_reply(0x13370, 3)));
-        let mut allocator = IDAllocator::new(0x420, 2);
+        let mut allocator = IDAllocator::new(0x420, 2).unwrap();
         assert_eq!(Some(0x420), allocator.generate_id(&conn));
         assert_eq!(Some(0x420 + 2), allocator.generate_id(&conn));
         // At this point the range is exhausted and a GetXIDRange request is sent
@@ -109,6 +127,12 @@ mod test {
         assert_eq!(Some(0x13370 + 4), allocator.generate_id(&conn));
         // At this point the range is exhausted and a GetXIDRange request is sent
         assert_eq!(Some(0x13370), allocator.generate_id(&conn));
+    }
+
+    #[test]
+    fn invalid_arg() {
+        let allocator = IDAllocator::new(1234, 0).unwrap_err();
+        assert_eq!(super::MaskError::ZeroMask, allocator);
     }
 
     fn generate_get_xid_range_reply(start_id: u32, count: u32) -> Vec<u8> {

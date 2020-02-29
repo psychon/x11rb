@@ -102,7 +102,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
         }
 
         // Success! Set up our state
-        Ok(Self::for_inner(read, inner, setup))
+        Self::for_inner(read, inner, setup)
     }
 
     /// Establish a new connection for an already connected stream.
@@ -110,14 +110,14 @@ impl<R: Read, W: Write> RustConnection<R, W> {
     /// `read` is used for reading data from the X11 server and `write` is used for writing.
     /// It is assumed that `setup` was just received from the server. Thus, the first reply to a
     /// request that is sent will have sequence number one.
-    pub fn for_connected_stream(read: R, write: W, setup: Setup) -> Self {
+    pub fn for_connected_stream(read: R, write: W, setup: Setup) -> Result<Self, Box<dyn Error>> {
         Self::for_inner(read, inner::ConnectionInner::new(write), setup)
     }
 
-    fn for_inner(read: R, inner: inner::ConnectionInner<W>, setup: Setup) -> Self {
+    fn for_inner(read: R, inner: inner::ConnectionInner<W>, setup: Setup) -> Result<Self, Box<dyn Error>> {
         let allocator =
-            id_allocator::IDAllocator::new(setup.resource_id_base, setup.resource_id_mask);
-        RustConnection {
+            id_allocator::IDAllocator::new(setup.resource_id_base, setup.resource_id_mask)?;
+        Ok(RustConnection {
             inner: Mutex::new(inner),
             read: Mutex::new(read),
             reader_condition: Condvar::new(),
@@ -125,7 +125,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
             setup,
             extension_information: Default::default(),
             maximum_request_bytes: Mutex::new(None),
-        }
+        })
     }
 
     /// Internal function for actually sending a request.
