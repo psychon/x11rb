@@ -6,7 +6,7 @@ use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 
 use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ConnectionError, ConnectError, ConnectionErrorOrX11Error, ParseError};
+use crate::errors::{ConnectError, ConnectionError, ConnectionErrorOrX11Error, ParseError};
 use crate::extension_information::ExtensionInformation;
 use crate::generated::bigreq;
 use crate::generated::xproto::{QueryExtensionReply, Setup};
@@ -113,7 +113,11 @@ impl<R: Read, W: Write> RustConnection<R, W> {
         Self::for_inner(read, inner::ConnectionInner::new(write), setup)
     }
 
-    fn for_inner(read: R, inner: inner::ConnectionInner<W>, setup: Setup) -> Result<Self, ConnectError> {
+    fn for_inner(
+        read: R,
+        inner: inner::ConnectionInner<W>,
+        setup: Setup,
+    ) -> Result<Self, ConnectError> {
         let allocator =
             id_allocator::IDAllocator::new(setup.resource_id_base, setup.resource_id_mask)?;
         Ok(RustConnection {

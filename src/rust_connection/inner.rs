@@ -180,9 +180,10 @@ where
         while !bufs.is_empty() {
             let mut count = self.write.write_vectored(bufs)?;
             if count == 0 {
-                return Err(
-                    std::io::Error::new(ErrorKind::WriteZero, "failed to write anything"),
-                );
+                return Err(std::io::Error::new(
+                    ErrorKind::WriteZero,
+                    "failed to write anything",
+                ));
             }
             while count > 0 {
                 if count >= bufs[0].len() {
@@ -418,9 +419,9 @@ mod test {
 
     use super::{read_setup, ConnectionInner};
     use crate::connection::RequestKind;
+    use crate::errors::ConnectError;
     use crate::generated::xproto::{Setup, SetupAuthenticate, SetupFailed};
     use crate::x11_utils::Serialize;
-    use crate::errors::ConnectError;
 
     #[test]
     fn read_setup_success() {

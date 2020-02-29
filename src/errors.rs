@@ -2,8 +2,8 @@
 
 use std::error::Error;
 
-use crate::x11_utils::GenericError;
 use crate::generated::xproto::{SetupAuthenticate, SetupFailed};
+use crate::x11_utils::GenericError;
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ParseError {

@@ -183,9 +183,7 @@ impl<'c, C: Connection> LazyAtom<'c, C> {
         match self {
             LazyAtom::Pending(_) => {
                 // We need to move the cookie out of self to call reply()
-                if let LazyAtom::Pending(cookie) =
-                    std::mem::replace(self, LazyAtom::Resolved(0))
-                {
+                if let LazyAtom::Pending(cookie) = std::mem::replace(self, LazyAtom::Resolved(0)) {
                     // Now get the reply and replace self again with the correct value
                     let reply = cookie.reply().map(|reply| reply.atom);
                     *self = match reply {
@@ -198,7 +196,7 @@ impl<'c, C: Connection> LazyAtom<'c, C> {
                 }
             }
             LazyAtom::Resolved(result) => Ok(*result),
-            LazyAtom::Errored => Err(ConnectionError::UnknownError.into())
+            LazyAtom::Errored => Err(ConnectionError::UnknownError.into()),
         }
     }
 }

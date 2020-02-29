@@ -1,6 +1,6 @@
 use crate::connection::RequestConnection;
-use crate::generated::xc_misc::ConnectionExt as _;
 use crate::errors::ConnectError;
+use crate::generated::xc_misc::ConnectionExt as _;
 
 /// An allocator for X11 IDs.
 ///

@@ -94,8 +94,8 @@ pub mod generated {
 pub mod wrapper;
 
 use connection::Connection;
-use generated::xproto::{KEYSYM, TIMESTAMP};
 use errors::ConnectError;
+use generated::xproto::{KEYSYM, TIMESTAMP};
 
 /// Establish a new connection to an X11 server.
 ///
@@ -107,7 +107,10 @@ pub fn connect(
 ) -> Result<(impl Connection + Send + Sync, usize), ConnectError> {
     #[cfg(feature = "allow-unsafe-code")]
     {
-        let dpy_name = dpy_name.map(std::ffi::CString::new).transpose().map_err(|_| ConnectError::DisplayParsingError)?;
+        let dpy_name = dpy_name
+            .map(std::ffi::CString::new)
+            .transpose()
+            .map_err(|_| ConnectError::DisplayParsingError)?;
         let dpy_name = dpy_name.as_ref().map(|d| &**d);
         xcb_ffi::XCBConnection::connect(dpy_name)
     }

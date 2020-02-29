@@ -7,7 +7,7 @@
 use super::generated::xproto::{QueryExtensionReply, Setup};
 use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ConnectionError, ConnectError, ConnectionErrorOrX11Error, ParseError};
+use crate::errors::{ConnectError, ConnectionError, ConnectionErrorOrX11Error, ParseError};
 use crate::extension_information::ExtensionInformation;
 use crate::utils::{Buffer, CSlice, RawFdContainer};
 use crate::x11_utils::{GenericError, GenericEvent};
