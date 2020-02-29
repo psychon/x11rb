@@ -7,7 +7,7 @@ use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 
 use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ConnectionError, ConnectionErrorOrX11Error, ParseError};
+use crate::errors::{ConnectionError, ConnectError, ConnectionErrorOrX11Error, ParseError};
 use crate::extension_information::ExtensionInformation;
 use crate::generated::bigreq;
 use crate::generated::xproto::{QueryExtensionReply, Setup};
@@ -44,7 +44,7 @@ impl RustConnection<BufReader<stream::Stream>, BufWriter<stream::Stream>> {
     pub fn connect(dpy_name: Option<&str>) -> Result<(Self, usize), Box<dyn Error>> {
         // Parse display information
         let parsed_display =
-            parse_display::parse_display(dpy_name).ok_or(ConnectionError::DisplayParsingError)?;
+            parse_display::parse_display(dpy_name).ok_or(ConnectError::DisplayParsingError)?;
 
         // Establish connection
         let protocol = parsed_display.protocol.as_ref().map(|s| &**s);
@@ -98,7 +98,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
 
         // Check that we got a valid screen number
         if screen >= setup.roots.len() {
-            return Err(Box::new(ConnectionError::InvalidScreen));
+            return Err(Box::new(ConnectError::InvalidScreen));
         }
 
         // Success! Set up our state
