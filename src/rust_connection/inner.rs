@@ -81,7 +81,11 @@ where
         Ok((Self::new(write), setup))
     }
 
-    fn new(write: W) -> Self {
+    /// Crate a `ConnectionInner` wrapping the given write stream.
+    ///
+    /// It is assumed that the connection was just established. This means that the next request
+    /// that is sent will have sequence number one.
+    pub(crate) fn new(write: W) -> Self {
         ConnectionInner {
             write,
             last_sequence_written: 0,
