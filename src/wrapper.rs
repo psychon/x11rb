@@ -153,7 +153,8 @@ impl<C: XProtoConnectionExt + ?Sized> ConnectionExt for C {}
 #[derive(Debug)]
 pub enum LazyAtom<'c, C: Connection> {
     Pending(Cookie<'c, C, InternAtomReply>),
-    Resolved(Result<ATOM, ConnectionErrorOrX11Error>),
+    Resolved(ATOM),
+    Errored,
 }
 
 impl<'c, C: Connection> LazyAtom<'c, C> {
@@ -163,7 +164,7 @@ impl<'c, C: Connection> LazyAtom<'c, C> {
     pub fn new(conn: &'c C, only_if_exists: bool, name: &[u8]) -> Self {
         match conn.intern_atom(only_if_exists, name) {
             Ok(cookie) => LazyAtom::Pending(cookie),
-            Err(err) => LazyAtom::Resolved(Err(err.into())),
+            Err(_) => LazyAtom::Errored,
         }
     }
 
@@ -172,7 +173,7 @@ impl<'c, C: Connection> LazyAtom<'c, C> {
     /// This function just wraps an existing atom. The resulting LazyAtom will always return
     /// `Ok(atom)` from `atom()`.
     pub fn new_for_atom(atom: ATOM) -> Self {
-        LazyAtom::Resolved(Ok(atom))
+        LazyAtom::Resolved(atom)
     }
 
     /// Get the atom that is contained in this type.
@@ -183,17 +184,21 @@ impl<'c, C: Connection> LazyAtom<'c, C> {
             LazyAtom::Pending(_) => {
                 // We need to move the cookie out of self to call reply()
                 if let LazyAtom::Pending(cookie) =
-                    std::mem::replace(self, LazyAtom::Resolved(Ok(0)))
+                    std::mem::replace(self, LazyAtom::Resolved(0))
                 {
                     // Now get the reply and replace self again with the correct value
                     let reply = cookie.reply().map(|reply| reply.atom);
-                    *self = LazyAtom::Resolved(reply.clone());
+                    *self = match reply {
+                        Ok(atom) => LazyAtom::Resolved(atom),
+                        Err(_) => LazyAtom::Errored,
+                    };
                     reply
                 } else {
                     unreachable!()
                 }
             }
-            LazyAtom::Resolved(result) => result.clone(),
+            LazyAtom::Resolved(result) => Ok(*result),
+            LazyAtom::Errored => Err(ConnectionError::UnknownError.into())
         }
     }
 }
