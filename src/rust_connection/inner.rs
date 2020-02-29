@@ -2,14 +2,11 @@
 
 use std::collections::VecDeque;
 use std::convert::TryInto;
-use std::error::Error;
 use std::io::{ErrorKind, IoSlice, Read, Write};
 
 use crate::connection::{DiscardMode, RequestKind, SequenceNumber};
-use crate::errors::ParseError;
-use crate::generated::xproto::{
-    Setup, SetupAuthenticate, SetupFailed, SetupRequest, GET_INPUT_FOCUS_REQUEST,
-};
+use crate::errors::{ConnectError, ParseError};
+use crate::generated::xproto::{Setup, SetupRequest, GET_INPUT_FOCUS_REQUEST};
 use crate::utils::Buffer;
 use crate::x11_utils::{GenericEvent, Serialize};
 
@@ -75,13 +72,17 @@ where
         mut write: W,
         auth_name: Vec<u8>,
         auth_data: Vec<u8>,
-    ) -> Result<(Self, Setup), Box<dyn Error>> {
+    ) -> Result<(Self, Setup), ConnectError> {
         Self::write_setup(&mut write, auth_name, auth_data)?;
         let setup = read_setup(read)?;
         Ok((Self::new(write), setup))
     }
 
-    fn new(write: W) -> Self {
+    /// Crate a `ConnectionInner` wrapping the given write stream.
+    ///
+    /// It is assumed that the connection was just established. This means that the next request
+    /// that is sent will have sequence number one.
+    pub(crate) fn new(write: W) -> Self {
         ConnectionInner {
             write,
             last_sequence_written: 0,
@@ -108,7 +109,7 @@ where
         write: &mut W,
         auth_name: Vec<u8>,
         auth_data: Vec<u8>,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<(), std::io::Error> {
         let request = SetupRequest {
             byte_order: Self::byte_order(),
             protocol_major_version: 11,
@@ -125,7 +126,7 @@ where
     ///
     /// This function sends a `GetInputFocus` request to the X11 server and arranges for its reply
     /// to be ignored. This causes `self.next_reply_expected` to be increased.
-    fn send_sync(&mut self) -> Result<(), Box<dyn Error>> {
+    fn send_sync(&mut self) -> Result<(), std::io::Error> {
         let length = 1u16.to_ne_bytes();
         self.write.write_all(&[
             GET_INPUT_FOCUS_REQUEST,
@@ -150,7 +151,7 @@ where
         &mut self,
         bufs: &[IoSlice],
         kind: RequestKind,
-    ) -> Result<SequenceNumber, Box<dyn Error>> {
+    ) -> Result<SequenceNumber, std::io::Error> {
         if self.next_reply_expected + SequenceNumber::from(u16::max_value())
             <= self.last_sequence_written
         {
@@ -179,9 +180,10 @@ where
         while !bufs.is_empty() {
             let mut count = self.write.write_vectored(bufs)?;
             if count == 0 {
-                return Err(
-                    std::io::Error::new(ErrorKind::WriteZero, "failed to write anything").into(),
-                );
+                return Err(std::io::Error::new(
+                    ErrorKind::WriteZero,
+                    "failed to write anything",
+                ));
             }
             while count > 0 {
                 if count >= bufs[0].len() {
@@ -328,7 +330,7 @@ where
     pub(crate) fn prepare_check_for_reply_or_error(
         &mut self,
         sequence: SequenceNumber,
-    ) -> Result<(), Box<dyn Error>> {
+    ) -> Result<(), std::io::Error> {
         if self.next_reply_expected < sequence {
             self.send_sync()?;
         }
@@ -390,7 +392,7 @@ where
 ///
 /// If the server sends a `SetupFailed` or `SetupAuthenticate` packet, these will be returned
 /// as errors.
-fn read_setup(read: &mut impl Read) -> Result<Setup, SetupError> {
+fn read_setup(read: &mut impl Read) -> Result<Setup, ConnectError> {
     let mut setup = vec![0; 8];
     read.read_exact(&mut setup)?;
     let extra_length = usize::from(u16::from_ne_bytes([setup[6], setup[7]])) * 4;
@@ -401,66 +403,23 @@ fn read_setup(read: &mut impl Read) -> Result<Setup, SetupError> {
     read.read_exact(&mut setup[8..])?;
     match setup[0] {
         // 0 is SetupFailed
-        0 => Err(SetupError::SetupFailed((&setup[..]).try_into()?)),
+        0 => Err(ConnectError::SetupFailed((&setup[..]).try_into()?)),
         // Success
         1 => Ok((&setup[..]).try_into()?),
         // 2 is SetupAuthenticate
-        2 => Err(SetupError::SetupAuthenticate((&setup[..]).try_into()?)),
+        2 => Err(ConnectError::SetupAuthenticate((&setup[..]).try_into()?)),
         // Uhm... no other cases are defined
         _ => Err(ParseError::ParseError.into()),
     }
 }
 
-// FIXME: Clean up this error stuff... somehow
-#[derive(Debug)]
-enum SetupError {
-    ParseError(ParseError),
-    IoError(std::io::Error),
-    SetupFailed(SetupFailed),
-    SetupAuthenticate(SetupAuthenticate),
-}
-
-impl From<ParseError> for SetupError {
-    fn from(value: ParseError) -> Self {
-        SetupError::ParseError(value)
-    }
-}
-
-impl From<std::io::Error> for SetupError {
-    fn from(value: std::io::Error) -> Self {
-        SetupError::IoError(value)
-    }
-}
-
-impl Error for SetupError {}
-
-impl std::fmt::Display for SetupError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        fn display(f: &mut std::fmt::Formatter, prefix: &str, value: &[u8]) -> std::fmt::Result {
-            match std::str::from_utf8(value).ok() {
-                Some(value) => write!(f, "{}: '{}'", prefix, value),
-                None => write!(f, "{}: {:?} [message is not utf8]", prefix, value),
-            }
-        }
-
-        match self {
-            SetupError::ParseError(err) => err.fmt(f),
-            SetupError::IoError(err) => err.fmt(f),
-            SetupError::SetupFailed(err) => display(f, "X11 setup failed", &err.reason),
-            SetupError::SetupAuthenticate(err) => {
-                display(f, "X11 authentication failed", &err.reason)
-            }
-        }
-    }
-}
-
 #[cfg(test)]
 mod test {
-    use std::error::Error;
     use std::io::IoSlice;
 
-    use super::{read_setup, ConnectionInner, SetupError};
+    use super::{read_setup, ConnectionInner};
     use crate::connection::RequestKind;
+    use crate::errors::ConnectError;
     use crate::generated::xproto::{Setup, SetupAuthenticate, SetupFailed};
     use crate::x11_utils::Serialize;
 
@@ -506,7 +465,7 @@ mod test {
         let setup_bytes = setup.serialize();
 
         match read_setup(&mut &setup_bytes[..]) {
-            Err(SetupError::SetupFailed(read)) => assert_eq!(setup, read),
+            Err(ConnectError::SetupFailed(read)) => assert_eq!(setup, read),
             value => panic!("Unexpected value {:?}", value),
         }
     }
@@ -520,13 +479,13 @@ mod test {
         let setup_bytes = setup.serialize();
 
         match read_setup(&mut &setup_bytes[..]) {
-            Err(SetupError::SetupAuthenticate(read)) => assert_eq!(setup, read),
+            Err(ConnectError::SetupAuthenticate(read)) => assert_eq!(setup, read),
             value => panic!("Unexpected value {:?}", value),
         }
     }
 
     #[test]
-    fn insert_sync_no_reply() -> Result<(), Box<dyn Error>> {
+    fn insert_sync_no_reply() -> Result<(), std::io::Error> {
         // The connection must send a sync (GetInputFocus) request every 2^16 requests (that do not
         // have a reply). Thus, this test sends more than that and tests for the sync to appear.
 
@@ -561,7 +520,7 @@ mod test {
     }
 
     #[test]
-    fn insert_no_sync_with_reply() -> Result<(), Box<dyn Error>> {
+    fn insert_no_sync_with_reply() -> Result<(), std::io::Error> {
         // Compared to the previous test, this uses RequestKind::HasResponse, so no sync needs to
         // be inserted.
 

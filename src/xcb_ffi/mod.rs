@@ -7,7 +7,7 @@
 use super::generated::xproto::{QueryExtensionReply, Setup};
 use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ConnectionError, ConnectionErrorOrX11Error, ParseError};
+use crate::errors::{ConnectError, ConnectionError, ConnectionErrorOrX11Error, ParseError};
 use crate::extension_information::ExtensionInformation;
 use crate::utils::{Buffer, CSlice, RawFdContainer};
 use crate::x11_utils::{GenericError, GenericEvent};
@@ -52,10 +52,23 @@ impl XCBConnection {
             EXT_NOTSUPPORTED => ConnectionError::UnsupportedExtension,
             MEM_INSUFFICIENT => ConnectionError::InsufficientMemory,
             REQ_LEN_EXCEED => ConnectionError::MaximumRequestLengthExceeded,
-            PARSE_ERR => ConnectionError::DisplayParsingError,
-            INVALID_SCREEN => ConnectionError::InvalidScreen,
             FDPASSING_FAILED => ConnectionError::FDPassingFailed,
             _ => ConnectionError::UnknownError,
+            // Not possible here: PARSE_ERR, INVALID_SCREEN
+        }
+    }
+
+    fn connect_error_from_c_error(error: i32) -> ConnectError {
+        use crate::xcb_ffi::raw_ffi::connection_errors::*;
+
+        assert_ne!(error, 0);
+        match error {
+            ERROR => ConnectError::ConnectionError,
+            MEM_INSUFFICIENT => ConnectError::InsufficientMemory,
+            PARSE_ERR => ConnectError::DisplayParsingError,
+            INVALID_SCREEN => ConnectError::InvalidScreen,
+            _ => ConnectError::UnknownError,
+            // Not possible here: EXT_NOTSUPPORTED, REQ_LEN_EXCEED, FDPASSING_FAILED
         }
     }
 
@@ -64,7 +77,7 @@ impl XCBConnection {
     /// If a `dpy_name` is provided, it describes the display that should be connected to, for
     /// example `127.0.0.1:1`. If no value is provided, the `$DISPLAY` environment variable is
     /// used.
-    pub fn connect(dpy_name: Option<&CStr>) -> Result<(XCBConnection, usize), ConnectionError> {
+    pub fn connect(dpy_name: Option<&CStr>) -> Result<(XCBConnection, usize), ConnectError> {
         use libc::c_int;
         unsafe {
             let mut screen: c_int = 0;
@@ -73,8 +86,8 @@ impl XCBConnection {
             let error = raw_ffi::xcb_connection_has_error(connection);
             if error != 0 {
                 raw_ffi::xcb_disconnect(connection);
-                Err(Self::connection_error_from_c_error(
-                    error.try_into().or(Err(ConnectionError::UnknownError))?,
+                Err(Self::connect_error_from_c_error(
+                    error.try_into().or(Err(ConnectError::UnknownError))?,
                 ))
             } else {
                 let setup = raw_ffi::xcb_get_setup(connection);

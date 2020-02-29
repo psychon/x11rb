@@ -208,10 +208,10 @@ fn test_too_large_request() -> Result<(), ConnectionError> {
     let x: i16 = 21;
     let y: i16 = 7;
     let res = conn.poly_text16(drawable, gc, x, y, &big_buffer);
-    assert_eq!(
-        ConnectionError::MaximumRequestLengthExceeded,
-        res.unwrap_err()
-    );
+    match res.unwrap_err() {
+        ConnectionError::MaximumRequestLengthExceeded => {}
+        err => panic!("Wrong error: {:?}", err),
+    };
     Ok(())
 }
 

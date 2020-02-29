@@ -46,8 +46,8 @@
 //! use x11rb::errors::ConnectionErrorOrX11Error;
 //! use x11rb::COPY_DEPTH_FROM_PARENT;
 //!
-//! fn main() -> Result<(), Box<dyn std::error::Error>> {
-//!     let (conn, screen_num) = x11rb::connect(None)?;
+//! fn main() -> Result<(), ConnectionErrorOrX11Error> {
+//!     let (conn, screen_num) = x11rb::connect(None).unwrap();
 //!     let screen = &conn.setup().roots[screen_num];
 //!     let win_id = conn.generate_id();
 //!     conn.create_window(COPY_DEPTH_FROM_PARENT, win_id, screen.root, 0, 0, 100, 100, 0, WindowClass::InputOutput,
@@ -93,9 +93,8 @@ pub mod generated {
 }
 pub mod wrapper;
 
-use std::error::Error;
-
 use connection::Connection;
+use errors::ConnectError;
 use generated::xproto::{KEYSYM, TIMESTAMP};
 
 /// Establish a new connection to an X11 server.
@@ -105,12 +104,15 @@ use generated::xproto::{KEYSYM, TIMESTAMP};
 /// used.
 pub fn connect(
     dpy_name: Option<&str>,
-) -> Result<(impl Connection + Send + Sync, usize), Box<dyn Error>> {
+) -> Result<(impl Connection + Send + Sync, usize), ConnectError> {
     #[cfg(feature = "allow-unsafe-code")]
     {
-        let dpy_name = dpy_name.map(std::ffi::CString::new).transpose()?;
+        let dpy_name = dpy_name
+            .map(std::ffi::CString::new)
+            .transpose()
+            .map_err(|_| ConnectError::DisplayParsingError)?;
         let dpy_name = dpy_name.as_ref().map(|d| &**d);
-        Ok(xcb_ffi::XCBConnection::connect(dpy_name)?)
+        xcb_ffi::XCBConnection::connect(dpy_name)
     }
     #[cfg(not(feature = "allow-unsafe-code"))]
     {

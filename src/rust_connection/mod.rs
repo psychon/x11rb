@@ -1,13 +1,12 @@
 //! A pure-rust implementation of a connection to an X11 server.
 
 use std::convert::{TryFrom, TryInto};
-use std::error::Error;
 use std::io::{BufReader, BufWriter, IoSlice, Read, Write};
 use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 
 use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ConnectionError, ConnectionErrorOrX11Error, ParseError};
+use crate::errors::{ConnectError, ConnectionError, ConnectionErrorOrX11Error, ParseError};
 use crate::extension_information::ExtensionInformation;
 use crate::generated::bigreq;
 use crate::generated::xproto::{QueryExtensionReply, Setup};
@@ -41,10 +40,10 @@ impl RustConnection<BufReader<stream::Stream>, BufWriter<stream::Stream>> {
     /// Establish a new connection.
     ///
     /// If no `dpy_name` is provided, the value from `$DISPLAY` is used.
-    pub fn connect(dpy_name: Option<&str>) -> Result<(Self, usize), Box<dyn Error>> {
+    pub fn connect(dpy_name: Option<&str>) -> Result<(Self, usize), ConnectError> {
         // Parse display information
         let parsed_display =
-            parse_display::parse_display(dpy_name).ok_or(ConnectionError::DisplayParsingError)?;
+            parse_display::parse_display(dpy_name).ok_or(ConnectError::DisplayParsingError)?;
 
         // Establish connection
         let protocol = parsed_display.protocol.as_ref().map(|s| &**s);
@@ -73,7 +72,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
     /// `read` is used for reading data from the X11 server and `write` is used for writing.
     /// `screen` is the number of the screen that should be used. This function checks that a
     /// screen with that number exists.
-    pub fn connect_to_stream(read: R, write: W, screen: usize) -> Result<Self, Box<dyn Error>> {
+    pub fn connect_to_stream(read: R, write: W, screen: usize) -> Result<Self, ConnectError> {
         Self::connect_to_stream_with_auth_info(read, write, screen, Vec::new(), Vec::new())
     }
 
@@ -92,19 +91,36 @@ impl<R: Read, W: Write> RustConnection<R, W> {
         screen: usize,
         auth_name: Vec<u8>,
         auth_data: Vec<u8>,
-    ) -> Result<Self, Box<dyn Error>> {
+    ) -> Result<Self, ConnectError> {
         let (inner, setup) =
             inner::ConnectionInner::connect(&mut read, write, auth_name, auth_data)?;
 
         // Check that we got a valid screen number
         if screen >= setup.roots.len() {
-            return Err(Box::new(ConnectionError::InvalidScreen));
+            return Err(ConnectError::InvalidScreen);
         }
 
         // Success! Set up our state
+        Self::for_inner(read, inner, setup)
+    }
+
+    /// Establish a new connection for an already connected stream.
+    ///
+    /// `read` is used for reading data from the X11 server and `write` is used for writing.
+    /// It is assumed that `setup` was just received from the server. Thus, the first reply to a
+    /// request that is sent will have sequence number one.
+    pub fn for_connected_stream(read: R, write: W, setup: Setup) -> Result<Self, ConnectError> {
+        Self::for_inner(read, inner::ConnectionInner::new(write), setup)
+    }
+
+    fn for_inner(
+        read: R,
+        inner: inner::ConnectionInner<W>,
+        setup: Setup,
+    ) -> Result<Self, ConnectError> {
         let allocator =
-            id_allocator::IDAllocator::new(setup.resource_id_base, setup.resource_id_mask);
-        let conn = RustConnection {
+            id_allocator::IDAllocator::new(setup.resource_id_base, setup.resource_id_mask)?;
+        Ok(RustConnection {
             inner: Mutex::new(inner),
             read: Mutex::new(read),
             reader_condition: Condvar::new(),
@@ -112,8 +128,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
             setup,
             extension_information: Default::default(),
             maximum_request_bytes: Mutex::new(None),
-        };
-        Ok(conn)
+        })
     }
 
     /// Internal function for actually sending a request.
@@ -145,7 +160,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
     fn read_packet_and_enqueue<'a>(
         &'a self,
         mut inner: MutexGuardInner<'a, W>,
-    ) -> Result<MutexGuardInner<'a, W>, Box<dyn Error>> {
+    ) -> Result<MutexGuardInner<'a, W>, std::io::Error> {
         // 0.1. Try to lock the `read` mutex.
         match self.read.try_lock() {
             Err(TryLockError::WouldBlock) => {
@@ -255,7 +270,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         sequence: SequenceNumber,
     ) -> Result<Buffer, ConnectionErrorOrX11Error> {
         let mut inner = self.inner.lock().unwrap();
-        inner.flush().map_err(|_| ConnectionError::UnknownError)?; // Ensure the request is sent
+        inner.flush()?; // Ensure the request is sent
         loop {
             if let Some(reply) = inner.poll_for_reply_or_error(sequence) {
                 if reply[0] == 0 {
@@ -265,24 +280,20 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
                     return Ok(reply);
                 }
             }
-            inner = self
-                .read_packet_and_enqueue(inner)
-                .map_err(|_| ConnectionError::UnknownError)?;
+            inner = self.read_packet_and_enqueue(inner)?;
         }
     }
 
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
-        inner.flush().map_err(|_| ConnectionError::UnknownError)?; // Ensure the request is sent
+        inner.flush()?; // Ensure the request is sent
         loop {
             match inner.poll_for_reply(sequence) {
                 PollReply::TryAgain => {}
                 PollReply::NoReply => return Ok(None),
                 PollReply::Reply(buffer) => return Ok(Some(buffer)),
             }
-            inner = self
-                .read_packet_and_enqueue(inner)
-                .map_err(|_| ConnectionError::UnknownError)?;
+            inner = self.read_packet_and_enqueue(inner)?;
         }
     }
 
@@ -291,19 +302,15 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         sequence: SequenceNumber,
     ) -> Result<Option<GenericError>, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
-        inner
-            .prepare_check_for_reply_or_error(sequence)
-            .map_err(|_| ConnectionError::UnknownError)?;
-        inner.flush().map_err(|_| ConnectionError::UnknownError)?; // Ensure the request is sent
+        inner.prepare_check_for_reply_or_error(sequence)?;
+        inner.flush()?; // Ensure the request is sent
         loop {
             match inner.poll_check_for_reply_or_error(sequence) {
                 PollReply::TryAgain => {}
                 PollReply::NoReply => return Ok(None),
                 PollReply::Reply(buffer) => return Ok(buffer.try_into().ok()),
             }
-            inner = self
-                .read_packet_and_enqueue(inner)
-                .map_err(|_| ConnectionError::UnknownError)?;
+            inner = self.read_packet_and_enqueue(inner)?;
         }
     }
 
@@ -347,9 +354,7 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
             if let Some(event) = inner.poll_for_event() {
                 return Ok(event);
             }
-            inner = self
-                .read_packet_and_enqueue(inner)
-                .map_err(|_| ConnectionError::UnknownError)?;
+            inner = self.read_packet_and_enqueue(inner)?;
         }
     }
 
@@ -379,7 +384,7 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
 //
 // This function only supports errors, events, and replies. Namely, this cannot be used to receive
 // the initial setup reply from the X11 server.
-fn read_packet(read: &mut impl Read) -> Result<Buffer, Box<dyn Error>> {
+fn read_packet(read: &mut impl Read) -> Result<Buffer, std::io::Error> {
     let mut buffer = vec![0; 32];
     read.read_exact(&mut buffer)?;
 
