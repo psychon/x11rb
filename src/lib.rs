@@ -93,10 +93,9 @@ pub mod generated {
 }
 pub mod wrapper;
 
-use std::error::Error;
-
 use connection::Connection;
 use generated::xproto::{KEYSYM, TIMESTAMP};
+use errors::ConnectError;
 
 /// Establish a new connection to an X11 server.
 ///
@@ -105,16 +104,16 @@ use generated::xproto::{KEYSYM, TIMESTAMP};
 /// used.
 pub fn connect(
     dpy_name: Option<&str>,
-) -> Result<(impl Connection + Send + Sync, usize), Box<dyn Error>> {
+) -> Result<(impl Connection + Send + Sync, usize), ConnectError> {
     #[cfg(feature = "allow-unsafe-code")]
     {
-        let dpy_name = dpy_name.map(std::ffi::CString::new).transpose()?;
+        let dpy_name = dpy_name.map(std::ffi::CString::new).transpose().map_err(|_| ConnectError::DisplayParsingError)?;
         let dpy_name = dpy_name.as_ref().map(|d| &**d);
-        Ok(xcb_ffi::XCBConnection::connect(dpy_name)?)
+        xcb_ffi::XCBConnection::connect(dpy_name)
     }
     #[cfg(not(feature = "allow-unsafe-code"))]
     {
-        rust_connection::RustConnection::connect(dpy_name)
+        rust_connection::RustConnection::connect(dpy_name).map_err(|_| ConnectError::UnknownError) // FIXME
     }
 }
 
