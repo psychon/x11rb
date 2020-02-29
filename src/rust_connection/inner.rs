@@ -181,7 +181,7 @@ where
             let mut count = self.write.write_vectored(bufs)?;
             if count == 0 {
                 return Err(
-                    std::io::Error::new(ErrorKind::WriteZero, "failed to write anything").into(),
+                    std::io::Error::new(ErrorKind::WriteZero, "failed to write anything"),
                 );
             }
             while count > 0 {
