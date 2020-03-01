@@ -47,7 +47,7 @@ where
     // The sequence number of the last reply/error/event that was read
     last_sequence_read: SequenceNumber,
     // Events that were read, but not yet returned to the API user
-    pending_events: VecDeque<Buffer>,
+    pending_events: VecDeque<(SequenceNumber, Buffer)>,
     // Replies that were read, but not yet returned to the API user
     pending_replies: VecDeque<(SequenceNumber, Buffer)>,
 }
@@ -223,7 +223,7 @@ where
                         if let Some((_, packet)) = self.pending_replies.remove(index) {
                             if packet[0] == 0 {
                                 // This is an error
-                                self.pending_events.push_back(packet);
+                                self.pending_events.push_back((seqno, packet));
                             }
                         }
                     }
@@ -285,12 +285,14 @@ where
                 match request.discard_mode {
                     Some(DiscardMode::DiscardReplyAndError) => { /* This error should be ignored */
                     }
-                    Some(DiscardMode::DiscardReply) => self.pending_events.push_back(packet),
+                    Some(DiscardMode::DiscardReply) => {
+                        self.pending_events.push_back((seqno, packet))
+                    }
                     None => self.pending_replies.push_back((seqno, packet)),
                 }
             } else {
                 // Unexpected error, send to main loop
-                self.pending_events.push_back(packet);
+                self.pending_events.push_back((seqno, packet));
             }
         } else if kind == 1 {
             // It is a reply
@@ -301,7 +303,7 @@ where
             }
         } else {
             // It is an event
-            self.pending_events.push_back(packet);
+            self.pending_events.push_back((seqno, packet));
         }
     }
 
@@ -365,7 +367,7 @@ where
     pub(crate) fn poll_for_reply(&mut self, sequence: SequenceNumber) -> PollReply {
         if let Some(reply) = self.poll_for_reply_or_error(sequence) {
             if reply[0] == 0 {
-                self.pending_events.push_back(reply);
+                self.pending_events.push_back((sequence, reply));
                 PollReply::NoReply
             } else {
                 PollReply::Reply(reply)
@@ -376,10 +378,12 @@ where
     }
 
     /// Get a pending event.
-    pub(crate) fn poll_for_event(&mut self) -> Option<GenericEvent> {
+    pub(crate) fn poll_for_event_with_sequence(
+        &mut self,
+    ) -> Option<(SequenceNumber, GenericEvent)> {
         self.pending_events
             .pop_front()
-            .map(|event| event.try_into().unwrap())
+            .map(|(seqno, event)| (seqno, event.try_into().unwrap()))
     }
 
     /// Send all pending events by flushing the output buffer.
