@@ -8,7 +8,7 @@ use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind,
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError};
 use crate::extension_information::ExtensionInformation;
-use crate::generated::bigreq;
+use crate::generated::bigreq::ConnectionExt as _;
 use crate::generated::xproto::{QueryExtensionReply, Setup};
 use crate::utils::{Buffer, RawFdContainer};
 use crate::x11_utils::{GenericError, GenericEvent};
@@ -327,7 +327,8 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
             None => {
                 // TODO: Make it possible to prefetch extensions?
                 // TODO: Make it possible to prefetch the maximum request length?
-                let length = match bigreq::enable(self)
+                let length = match self
+                    .bigreq_enable()
                     .ok()
                     .and_then(|cookie| cookie.reply().ok())
                 {

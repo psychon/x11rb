@@ -426,9 +426,14 @@ def generate_request_code(module, obj, name, function_name):
     else:
         generics_str = ""
 
+    if module.namespace.is_ext:
+        function_name_prefix = module.namespace.header + "_"
+    else:
+        function_name_prefix = ""
+
     code_generator_helpers.module.emit_doc(module.trait_out, obj.doc)
-    module.trait_out("fn %s%s(%s) -> Result<%s, ConnectionError>", function_name,
-                     generics_str, ", ".join(args), result_type_trait)
+    module.trait_out("fn %s%s%s(%s) -> Result<%s, ConnectionError>", function_name_prefix,
+                     function_name, generics_str, ", ".join(args), result_type_trait)
     if where:
         module.trait_out("where %s", ", ".join(where))
     module.trait_out("{")

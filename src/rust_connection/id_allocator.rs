@@ -41,7 +41,7 @@ impl IDAllocator {
         if self.next_id > self.max_id {
             // Send an XC-MISC GetXIDRange request. Any failure is turned into None via .ok().
             let xidrange = conn
-                .get_xidrange()
+                .xc_misc_get_xidrange()
                 .ok()
                 .and_then(|cookie| cookie.reply().ok());
             match xidrange {
