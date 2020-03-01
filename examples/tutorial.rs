@@ -441,7 +441,7 @@ fn example4() -> Result<(), Box<dyn Error>> {
     conn.map_window(win)?;
 
     // Make sure commands are sent before the sleep, so window is shown
-    conn.flush();
+    conn.flush()?;
 
     std::thread::sleep(std::time::Duration::from_secs(10));
 
@@ -453,7 +453,7 @@ fn example4() -> Result<(), Box<dyn Error>> {
 // one is flush():
 //
 // trait Connection {
-//     fn flush(&self);
+//     fn flush(&self) -> Result<(), ConnectionError>;
 // }
 //
 // This function flushes all pending requests to the X server (much like the fflush() function is
@@ -805,7 +805,7 @@ fn example6() -> Result<(), Box<dyn Error>> {
     conn.map_window(win)?;
 
     // We flush the request
-    conn.flush();
+    conn.flush()?;
 
     loop {
         let event = conn.wait_for_event()?;
@@ -826,7 +826,7 @@ fn example6() -> Result<(), Box<dyn Error>> {
             conn.poly_arc(win, foreground, &arcs)?;
 
             // We flush the request
-            conn.flush();
+            conn.flush()?;
         } else {
             // Unknown event type, ignore it
         }
@@ -1326,7 +1326,7 @@ fn example7() -> Result<(), Box<dyn Error>> {
 
     // Map the window on the screen
     conn.map_window(win)?;
-    conn.flush();
+    conn.flush()?;
 
     loop {
         let event = conn.wait_for_event()?;
@@ -1563,7 +1563,7 @@ fn example8() -> Result<(), Box<dyn Error>> {
     )?;
     conn.map_window(window)?;
 
-    conn.flush();
+    conn.flush()?;
 
     loop {
         let event = conn.wait_for_event()?;
@@ -1571,7 +1571,7 @@ fn example8() -> Result<(), Box<dyn Error>> {
             xproto::EXPOSE_EVENT => {
                 let text = "Press ESC key to exit...";
                 text_draw(&conn, screen, window, 10, HEIGHT as i16 - 10, text)?;
-                conn.flush();
+                conn.flush()?;
             }
             xproto::KEY_RELEASE_EVENT => {
                 let ev = KeyReleaseEvent::from(event);
@@ -1691,7 +1691,7 @@ fn example9() -> Result<(), Box<dyn Error>> {
     // Map the window on the screen
     conn.map_window(win)?;
 
-    conn.flush();
+    conn.flush()?;
 
     loop {
         conn.wait_for_event()?;
@@ -2428,7 +2428,7 @@ fn example10() -> Result<(), Box<dyn Error>> {
 
     cursor_set(&conn, screen, window, 68)?;
 
-    conn.flush();
+    conn.flush()?;
 
     let mut is_hand = false;
 
@@ -2448,7 +2448,7 @@ fn example10() -> Result<(), Box<dyn Error>> {
 
                 let text = "Press ESC key to exit...";
                 text_draw(&conn, screen, window, 10, HEIGHT - 10, text)?;
-                conn.flush();
+                conn.flush()?;
             }
             xproto::BUTTON_PRESS_EVENT => {
                 let ev = ButtonPressEvent::from(event);
@@ -2467,7 +2467,7 @@ fn example10() -> Result<(), Box<dyn Error>> {
                 } else {
                     cursor_set(&conn, screen, window, 68)?;
                 }
-                conn.flush();
+                conn.flush()?;
             }
             xproto::KEY_RELEASE_EVENT => {
                 let ev = KeyReleaseEvent::from(event);

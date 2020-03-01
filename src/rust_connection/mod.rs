@@ -362,9 +362,9 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
         Ok(self.inner.lock().unwrap().poll_for_event())
     }
 
-    fn flush(&self) {
-        // FIXME: Allow an error to be returned
-        let _ = self.inner.lock().unwrap().flush();
+    fn flush(&self) -> Result<(), ConnectionError> {
+        self.inner.lock().unwrap().flush()?;
+        Ok(())
     }
 
     fn setup(&self) -> &Setup {

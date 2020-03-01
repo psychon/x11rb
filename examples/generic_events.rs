@@ -55,7 +55,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     conn.configure_window(win_id, &ConfigureWindowAux::new().width(20))?;
 
     // Wait for the event
-    conn.flush();
+    conn.flush()?;
     let event = conn.wait_for_event()?;
 
     // Now check that the event really is what we wanted to get

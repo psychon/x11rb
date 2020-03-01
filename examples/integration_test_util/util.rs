@@ -57,7 +57,7 @@ mod util {
             ) {
                 eprintln!("Error while sending event: {:?}", err);
             }
-            conn.flush();
+            conn.flush().unwrap();
         });
     }
 }
