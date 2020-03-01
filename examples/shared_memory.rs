@@ -9,7 +9,7 @@ use std::ptr::null_mut;
 use libc::{mmap, MAP_FAILED, MAP_SHARED, PROT_READ, PROT_WRITE};
 
 use x11rb::connection::Connection;
-use x11rb::errors::{ConnectionError, ConnectionErrorOrX11Error};
+use x11rb::errors::{ConnectionError, ReplyError};
 use x11rb::generated::shm;
 use x11rb::generated::xproto::{self, ConnectionExt as _, ImageFormat};
 
@@ -23,9 +23,7 @@ impl<C: Connection> Drop for FreePixmap<'_, C> {
 }
 
 /// Get the supported SHM version from the X11 server
-fn check_shm_version<C: Connection>(
-    conn: &C,
-) -> Result<Option<(u16, u16)>, ConnectionErrorOrX11Error> {
+fn check_shm_version<C: Connection>(conn: &C) -> Result<Option<(u16, u16)>, ReplyError> {
     if conn
         .extension_information(shm::X11_EXTENSION_NAME)
         .is_none()
@@ -44,7 +42,7 @@ fn get_shared_memory_content_at_offset<C: Connection>(
     screen: &xproto::Screen,
     shmseg: shm::SEG,
     offset: u32,
-) -> Result<Vec<u8>, ConnectionErrorOrX11Error> {
+) -> Result<Vec<u8>, ReplyError> {
     let width = match screen.root_depth {
         24 => 1,
         16 => 2,
@@ -73,7 +71,7 @@ fn use_shared_mem<C: Connection>(
     conn: &C,
     screen_num: usize,
     shmseg: shm::SEG,
-) -> Result<(), ConnectionErrorOrX11Error> {
+) -> Result<(), ReplyError> {
     let screen = &conn.setup().roots[screen_num];
 
     let content = get_shared_memory_content_at_offset(conn, screen, shmseg, 0)?;
@@ -99,11 +97,7 @@ fn make_file() -> IOResult<File> {
     Ok(file)
 }
 
-fn send_fd<C: Connection>(
-    conn: &C,
-    screen_num: usize,
-    file: File,
-) -> Result<(), ConnectionErrorOrX11Error> {
+fn send_fd<C: Connection>(conn: &C, screen_num: usize, file: File) -> Result<(), ReplyError> {
     let shmseg = conn.generate_id();
     shm::attach_fd(conn, shmseg, file, false)?;
 
@@ -114,7 +108,7 @@ fn send_fd<C: Connection>(
     Ok(())
 }
 
-fn receive_fd<C: Connection>(conn: &C, screen_num: usize) -> Result<(), ConnectionErrorOrX11Error> {
+fn receive_fd<C: Connection>(conn: &C, screen_num: usize) -> Result<(), ReplyError> {
     let shmseg = conn.generate_id();
     let segment_size = TEMP_FILE_CONTENT.len() as _;
     let reply = shm::create_segment(conn, shmseg, segment_size, false)?.reply()?;

@@ -43,10 +43,10 @@
 //! ```no_run
 //! use x11rb::connection::Connection;
 //! use x11rb::generated::xproto::*;
-//! use x11rb::errors::ConnectionErrorOrX11Error;
+//! use x11rb::errors::ReplyError;
 //! use x11rb::COPY_DEPTH_FROM_PARENT;
 //!
-//! fn main() -> Result<(), ConnectionErrorOrX11Error> {
+//! fn main() -> Result<(), ReplyError> {
 //!     let (conn, screen_num) = x11rb::connect(None).unwrap();
 //!     let screen = &conn.setup().roots[screen_num];
 //!     let win_id = conn.generate_id();

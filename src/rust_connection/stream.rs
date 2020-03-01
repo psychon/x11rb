@@ -47,10 +47,10 @@ impl Stream {
                     TCP_PORT_BASE + display,
                 ))?))
             } else {
-                use crate::errors::ConnectionError;
+                use crate::errors::ConnectError;
                 use std::io::{Error, ErrorKind};
                 Err(error.unwrap_or_else(|| {
-                    Error::new(ErrorKind::Other, ConnectionError::ConnectionError)
+                    Error::new(ErrorKind::Other, ConnectError::DisplayParsingError)
                 }))
             }
         }

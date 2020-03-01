@@ -7,14 +7,14 @@
 use super::generated::xproto::{QueryExtensionReply, Setup};
 use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ConnectError, ConnectionError, ConnectionErrorOrX11Error, ParseError};
+use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError};
 use crate::extension_information::ExtensionInformation;
 use crate::utils::{Buffer, CSlice, RawFdContainer};
 use crate::x11_utils::{GenericError, GenericEvent};
 use libc::c_void;
 use std::convert::{TryFrom, TryInto};
 use std::ffi::CStr;
-use std::io::IoSlice;
+use std::io::{Error, ErrorKind, IoSlice};
 use std::ops::Deref;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, RawFd};
@@ -48,7 +48,7 @@ impl XCBConnection {
 
         assert_ne!(error, 0);
         match error {
-            ERROR => ConnectionError::ConnectionError,
+            ERROR => Error::new(ErrorKind::Other, ConnectionError::UnknownError).into(),
             EXT_NOTSUPPORTED => ConnectionError::UnsupportedExtension,
             MEM_INSUFFICIENT => ConnectionError::InsufficientMemory,
             REQ_LEN_EXCEED => ConnectionError::MaximumRequestLengthExceeded,
@@ -63,7 +63,7 @@ impl XCBConnection {
 
         assert_ne!(error, 0);
         match error {
-            ERROR => ConnectError::ConnectionError,
+            ERROR => Error::new(ErrorKind::Other, ConnectionError::UnknownError).into(),
             MEM_INSUFFICIENT => ConnectError::InsufficientMemory,
             PARSE_ERR => ConnectError::DisplayParsingError,
             INVALID_SCREEN => ConnectError::InvalidScreen,
@@ -357,10 +357,7 @@ impl RequestConnection for XCBConnection {
         self.ext_info.extension_information(self, extension_name)
     }
 
-    fn wait_for_reply_or_error(
-        &self,
-        sequence: SequenceNumber,
-    ) -> Result<Buffer, ConnectionErrorOrX11Error> {
+    fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Buffer, ReplyError> {
         unsafe {
             let mut error = null_mut();
             let reply = raw_ffi::xcb_wait_for_reply64((self.conn).0, sequence, &mut error);
@@ -383,7 +380,7 @@ impl RequestConnection for XCBConnection {
     }
 
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError> {
-        use ConnectionErrorOrX11Error::*;
+        use ReplyError::*;
         match self.wait_for_reply_or_error(sequence) {
             Ok(buffer) => Ok(Some(buffer)),
             Err(err) => match err {
@@ -415,7 +412,7 @@ impl RequestConnection for XCBConnection {
     fn wait_for_reply_with_fds(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
+    ) -> Result<(Buffer, Vec<RawFdContainer>), ReplyError> {
         let buffer = self.wait_for_reply_or_error(sequence)?;
 
         // Get a pointer to the array of integers where libxcb saved the FD numbers
@@ -440,7 +437,7 @@ impl RequestConnection for XCBConnection {
     fn wait_for_reply_with_fds(
         &self,
         _sequence: SequenceNumber,
-    ) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
+    ) -> Result<(Buffer, Vec<RawFdContainer>), ReplyError> {
         unimplemented!("FD passing is currently only implemented on Unix-like systems")
     }
 

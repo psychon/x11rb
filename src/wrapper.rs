@@ -5,7 +5,7 @@ use std::marker::PhantomData;
 
 use super::connection::Connection;
 use super::cookie::{Cookie, VoidCookie};
-use super::errors::{ConnectionError, ConnectionErrorOrX11Error};
+use super::errors::{ConnectionError, ReplyError};
 use super::generated::xproto::{ConnectionExt as XProtoConnectionExt, InternAtomReply, ATOM};
 use super::x11_utils::TryParse;
 
@@ -133,7 +133,7 @@ pub trait ConnectionExt: XProtoConnectionExt {
     /// This function synchronises with the X11 server. This means that all requests that are still
     /// in the output buffer are sent to the server. Then, we wait until the X11 server processed
     /// all requests.
-    fn sync(&self) -> Result<(), ConnectionErrorOrX11Error> {
+    fn sync(&self) -> Result<(), ReplyError> {
         // When a new request is generated, it is appended to the output buffer. Thus, this causes
         // all previous requests to be sent.
         // The X11 server is single-threaded and processes requests in-order. Thus, it will only
@@ -179,7 +179,7 @@ impl<'c, C: Connection> LazyAtom<'c, C> {
     /// Get the atom that is contained in this type.
     ///
     /// This function gets the answer from the X11 server if it was not yet fetched. It returns the atom value.
-    pub fn atom(&mut self) -> Result<ATOM, ConnectionErrorOrX11Error> {
+    pub fn atom(&mut self) -> Result<ATOM, ReplyError> {
         match self {
             LazyAtom::Pending(_) => {
                 // We need to move the cookie out of self to call reply()

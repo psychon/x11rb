@@ -6,7 +6,7 @@ use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 
 use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ConnectError, ConnectionError, ConnectionErrorOrX11Error, ParseError};
+use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError};
 use crate::extension_information::ExtensionInformation;
 use crate::generated::bigreq;
 use crate::generated::xproto::{QueryExtensionReply, Setup};
@@ -265,10 +265,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
             .extension_information(self, extension_name)
     }
 
-    fn wait_for_reply_or_error(
-        &self,
-        sequence: SequenceNumber,
-    ) -> Result<Buffer, ConnectionErrorOrX11Error> {
+    fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Buffer, ReplyError> {
         let mut inner = self.inner.lock().unwrap();
         inner.flush()?; // Ensure the request is sent
         loop {
@@ -317,7 +314,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
     fn wait_for_reply_with_fds(
         &self,
         _sequence: SequenceNumber,
-    ) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
+    ) -> Result<(Buffer, Vec<RawFdContainer>), ReplyError> {
         unreachable!(
             "To wait for a reply containing FDs, a successful call to \
         send_request_with_reply_with_fds() is necessary. However, this function never succeeds."

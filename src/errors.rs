@@ -40,11 +40,6 @@ pub enum ConnectError {
     /// Error while parsing some data, see `ParseError`.
     ParseError,
 
-    /// A low-level socket error occurred.
-    ///
-    /// This is `XCB_CONN_ERROR`.
-    ConnectionError,
-
     /// Out of memory.
     ///
     /// This is `XCB_CONN_CLOSED_MEM_INSUFFICIENT`.
@@ -87,7 +82,6 @@ impl std::fmt::Display for ConnectError {
         }
         match self {
             ConnectError::UnknownError => write!(f, "Unknown connection error"),
-            ConnectError::ConnectionError => write!(f, "Error with the underlying connection"),
             ConnectError::InsufficientMemory => write!(f, "Insufficient memory"),
             ConnectError::DisplayParsingError => write!(f, "Display parsing error"),
             ConnectError::InvalidScreen => write!(f, "Invalid screen"),
@@ -120,11 +114,6 @@ impl From<std::io::Error> for ConnectError {
 #[derive(Debug)]
 pub enum ConnectionError {
     UnknownError,
-
-    /// A low-level socket error occurred.
-    ///
-    /// This corresponds to `XCB_CONN_ERROR`.
-    ConnectionError,
 
     /// An X11 extension was not supported by the server.
     ///
@@ -159,7 +148,6 @@ impl std::fmt::Display for ConnectionError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             ConnectionError::UnknownError => write!(f, "Unknown connection error"),
-            ConnectionError::ConnectionError => write!(f, "Error with the underlying connection"),
             ConnectionError::UnsupportedExtension => write!(f, "Unsupported extension"),
             ConnectionError::InsufficientMemory => write!(f, "Insufficient memory"),
             ConnectionError::MaximumRequestLengthExceeded => {
@@ -194,49 +182,49 @@ impl From<std::io::Error> for ConnectionError {
 
 /// An error that occurred with some request.
 #[derive(Debug)]
-pub enum ConnectionErrorOrX11Error {
+pub enum ReplyError {
     /// Some error occurred on the X11 connection.
     ConnectionError(ConnectionError),
     /// The X11 server sent an error in response to the request.
     X11Error(GenericError),
 }
 
-impl Error for ConnectionErrorOrX11Error {}
+impl Error for ReplyError {}
 
-impl std::fmt::Display for ConnectionErrorOrX11Error {
+impl std::fmt::Display for ReplyError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
-            ConnectionErrorOrX11Error::ConnectionError(e) => write!(f, "{}", e),
-            ConnectionErrorOrX11Error::X11Error(e) => write!(f, "X11 error {:?}", e),
+            ReplyError::ConnectionError(e) => write!(f, "{}", e),
+            ReplyError::X11Error(e) => write!(f, "X11 error {:?}", e),
         }
     }
 }
 
-impl From<ParseError> for ConnectionErrorOrX11Error {
+impl From<ParseError> for ReplyError {
     fn from(err: ParseError) -> Self {
         Self::from(ConnectionError::from(err))
     }
 }
 
-impl From<std::num::TryFromIntError> for ConnectionErrorOrX11Error {
+impl From<std::num::TryFromIntError> for ReplyError {
     fn from(err: std::num::TryFromIntError) -> Self {
         Self::from(ParseError::from(err))
     }
 }
 
-impl From<std::io::Error> for ConnectionErrorOrX11Error {
+impl From<std::io::Error> for ReplyError {
     fn from(err: std::io::Error) -> Self {
         ConnectionError::from(err).into()
     }
 }
 
-impl From<ConnectionError> for ConnectionErrorOrX11Error {
+impl From<ConnectionError> for ReplyError {
     fn from(err: ConnectionError) -> Self {
         Self::ConnectionError(err)
     }
 }
 
-impl From<GenericError> for ConnectionErrorOrX11Error {
+impl From<GenericError> for ReplyError {
     fn from(err: GenericError) -> Self {
         Self::X11Error(err)
     }
