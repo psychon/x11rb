@@ -40,8 +40,6 @@ pub enum ConnectError {
     /// Error while parsing some data, see `ParseError`.
     ParseError,
 
-    // Errors from XCB
-
     /// A low-level socket error occurred.
     ///
     /// This is `XCB_CONN_ERROR`.
@@ -61,8 +59,6 @@ pub enum ConnectError {
     ///
     /// This is `XCB_CONN_CLOSED_INVALID_SCREEN`.
     InvalidScreen,
-
-    // Errors from RustConnection
 
     /// An I/O error occurred on the connection.
     IOError(std::io::Error),
@@ -148,14 +144,10 @@ pub enum ConnectionError {
     /// Error while parsing some data, see `ParseError`.
     ParseError,
 
-    // Errors from XCB
-
     /// Out of memory.
     ///
     /// This is `XCB_CONN_CLOSED_MEM_INSUFFICIENT`.
     InsufficientMemory,
-
-    // Errors from RustConnection
 
     /// An I/O error occurred on the connection.
     IOError(std::io::Error),
