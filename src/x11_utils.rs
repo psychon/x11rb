@@ -343,6 +343,7 @@ macro_rules! bitmask_binop {
 /// pub struct AtomCollection {
 ///     pub _NET_WM_NAME: ATOM,
 ///     pub _NET_WM_ICON: ATOM,
+///     pub ATOM_WITH_SPACES: ATOM,
 ///     pub WHATEVER: ATOM,
 /// }
 ///
@@ -351,6 +352,7 @@ macro_rules! bitmask_binop {
 /// {
 ///     _NET_WM_NAME: Cookie<'c, C, InternAtomReply>,
 ///     _NET_WM_ICON: Cookie<'c, C, InternAtomReply>,
+///     ATOM_WITH_SPACES: Cookie<'c, C, InternAtomReply>,
 ///     WHATEVER: Cookie<'c, C, InternAtomReply>,
 /// }
 ///
@@ -360,6 +362,7 @@ macro_rules! bitmask_binop {
 ///         Ok(AtomCollectionCookie {
 ///             _NET_WM_NAME: conn.intern_atom(false, b"_NET_WM_NAME")?,
 ///             _NET_WM_ICON: conn.intern_atom(false, b"_NET_WM_ICON")?,
+///             ATOM_WITH_SPACES: conn.intern_atom(false, b"ATOM WITH SPACES")?,
 ///             WHATEVER: conn.intern_atom(false, b"WHATEVER")?,
 ///         })
 ///     }
@@ -372,6 +375,7 @@ macro_rules! bitmask_binop {
 ///         Ok(AtomCollection {
 ///             _NET_WM_NAME: self._NET_WM_NAME.reply()?.atom,
 ///             _NET_WM_ICON: self._NET_WM_ICON.reply()?.atom,
+///             ATOM_WITH_SPACES: self.ATOM_WITH_SPACES.reply()?.atom,
 ///             WHATEVER: self.WHATEVER.reply()?.atom,
 ///         })
 ///     }
@@ -380,47 +384,74 @@ macro_rules! bitmask_binop {
 /// This macro automatically produces this code with
 /// ```
 /// # use x11rb::atom_manager;
-/// atom_manager!(AtomCollection, AtomCollectionCookie, _NET_WM_NAME, _NET_WM_ICON, WHATEVER);
+/// atom_manager! {
+///     pub AtomCollection: AtomCollectionCookie {
+///         _NET_WM_NAME,
+///         _NET_WM_ICON,
+///         ATOM_WITH_SPACES: b"ATOM WITH SPACES",
+///         WHATEVER,
+///     }
+/// }
 /// ```
 #[macro_export]
 macro_rules! atom_manager {
-    ($A:ident, $B:ident, $( $x:ident ), *) => {
+    {
+        $vis:vis $struct_name:ident: $cookie_name:ident {
+            $($field_name:ident$(: $atom_value:expr)?,)*
+        }
+    } => {
         // Cookie version
         #[allow(non_snake_case)]
         #[derive(Debug)]
-        pub struct $B<'a, C: ::x11rb::generated::xproto::ConnectionExt> {
+        $vis struct $cookie_name<'a, C: $crate::generated::xproto::ConnectionExt> {
             $(
-                $x: ::x11rb::cookie::Cookie<'a, C, ::x11rb::generated::xproto::InternAtomReply>,
+                $field_name: $crate::cookie::Cookie<'a, C, $crate::generated::xproto::InternAtomReply>,
             )*
         }
 
         // Replies
         #[allow(non_snake_case)]
         #[derive(Debug, Clone, Copy)]
-        pub struct $A {
+        $vis struct $struct_name {
             $(
-                pub $x: ::x11rb::generated::xproto::ATOM,
+                $vis $field_name: $crate::generated::xproto::ATOM,
             )*
         }
 
-        impl $A {
-            pub fn new<C: ::x11rb::generated::xproto::ConnectionExt>(conn: &C) -> ::std::result::Result<$B<'_, C>, ::x11rb::errors::ConnectionError> {
-                Ok($B {
+        impl $struct_name {
+            $vis fn new<C: $crate::generated::xproto::ConnectionExt>(
+                conn: &C,
+            ) -> ::std::result::Result<$cookie_name<'_, C>, $crate::errors::ConnectionError> {
+                Ok($cookie_name {
                     $(
-                        $x: conn.intern_atom(false, stringify!($x).as_bytes())?,
+                        $field_name: conn.intern_atom(
+                            false,
+                            $crate::__atom_manager_atom_value!($field_name$(: $atom_value)?),
+                        )?,
                     )*
                 })
             }
         }
 
-        impl<'a, C: ::x11rb::generated::xproto::ConnectionExt> $B<'a, C> {
-            pub fn reply(self) -> ::std::result::Result<$A, ::x11rb::errors::ReplyError> {
-                Ok($A {
+        impl<'a, C: $crate::generated::xproto::ConnectionExt> $cookie_name<'a, C> {
+            $vis fn reply(self) -> ::std::result::Result<$struct_name, $crate::errors::ReplyError> {
+                Ok($struct_name {
                     $(
-                        $x: self.$x.reply()?.atom,
+                        $field_name: self.$field_name.reply()?.atom,
                     )*
                 })
             }
         }
     }
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __atom_manager_atom_value {
+    ($field_name:ident) => {
+        stringify!($field_name).as_bytes()
+    };
+    ($field_name:ident: $atom_value:expr) => {
+        $atom_value
+    };
 }
