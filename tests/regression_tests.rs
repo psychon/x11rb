@@ -5,7 +5,7 @@ use std::ops::Deref;
 
 use x11rb::connection::{DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
-use x11rb::errors::{ConnectionError, ReplyError, ParseError};
+use x11rb::errors::{ConnectionError, ParseError, ReplyError};
 use x11rb::generated::xproto::{
     ClientMessageData, ConnectionExt, KeymapNotifyEvent, QueryExtensionReply, Segment,
     SetupAuthenticate,
@@ -100,10 +100,7 @@ impl RequestConnection for FakeConnection {
         unimplemented!()
     }
 
-    fn wait_for_reply_or_error(
-        &self,
-        _sequence: SequenceNumber,
-    ) -> Result<Buffer, ReplyError> {
+    fn wait_for_reply_or_error(&self, _sequence: SequenceNumber) -> Result<Buffer, ReplyError> {
         unimplemented!()
     }
 

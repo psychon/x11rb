@@ -72,7 +72,7 @@ mod test {
 
     use crate::connection::{DiscardMode, RequestConnection, RequestKind, SequenceNumber};
     use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-    use crate::errors::{ConnectionError, ReplyError, ParseError};
+    use crate::errors::{ConnectionError, ParseError, ReplyError};
     use crate::generated::xproto::QueryExtensionReply;
     use crate::utils::{Buffer, RawFdContainer};
     use crate::x11_utils::GenericError;
@@ -186,10 +186,7 @@ mod test {
             })
         }
 
-        fn wait_for_reply_or_error(
-            &self,
-            _sequence: SequenceNumber,
-        ) -> Result<Buffer, ReplyError> {
+        fn wait_for_reply_or_error(&self, _sequence: SequenceNumber) -> Result<Buffer, ReplyError> {
             Ok(Buffer::from_vec(self.0.as_ref().unwrap().clone()))
         }
 

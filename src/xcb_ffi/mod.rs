@@ -7,7 +7,7 @@
 use super::generated::xproto::{QueryExtensionReply, Setup};
 use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ConnectError, ConnectionError, ReplyError, ParseError};
+use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError};
 use crate::extension_information::ExtensionInformation;
 use crate::utils::{Buffer, CSlice, RawFdContainer};
 use crate::x11_utils::{GenericError, GenericEvent};
@@ -357,10 +357,7 @@ impl RequestConnection for XCBConnection {
         self.ext_info.extension_information(self, extension_name)
     }
 
-    fn wait_for_reply_or_error(
-        &self,
-        sequence: SequenceNumber,
-    ) -> Result<Buffer, ReplyError> {
+    fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Buffer, ReplyError> {
         unsafe {
             let mut error = null_mut();
             let reply = raw_ffi::xcb_wait_for_reply64((self.conn).0, sequence, &mut error);

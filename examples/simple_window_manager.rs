@@ -114,11 +114,7 @@ impl<'a, C: Connection> WMState<'a, C> {
     }
 
     /// Add a new window that should be managed by the WM
-    fn manage_window(
-        &mut self,
-        win: WINDOW,
-        geom: &GetGeometryReply,
-    ) -> Result<(), ReplyError> {
+    fn manage_window(&mut self, win: WINDOW, geom: &GetGeometryReply) -> Result<(), ReplyError> {
         println!("Managing window {:?}", win);
         let screen = &self.conn.setup().roots[self.screen_num];
         assert!(self.find_window_by_id(win).is_none());
@@ -240,10 +236,7 @@ impl<'a, C: Connection> WMState<'a, C> {
         }
     }
 
-    fn handle_unmap_notify(
-        &mut self,
-        event: UnmapNotifyEvent,
-    ) -> Result<(), ReplyError> {
+    fn handle_unmap_notify(&mut self, event: UnmapNotifyEvent) -> Result<(), ReplyError> {
         let conn = self.conn;
         self.windows.retain(|state| {
             if state.window != event.window {
@@ -255,10 +248,7 @@ impl<'a, C: Connection> WMState<'a, C> {
         Ok(())
     }
 
-    fn handle_configure_request(
-        &mut self,
-        event: ConfigureRequestEvent,
-    ) -> Result<(), ReplyError> {
+    fn handle_configure_request(&mut self, event: ConfigureRequestEvent) -> Result<(), ReplyError> {
         if let Some(state) = self.find_window_by_id_mut(event.window) {
             let _ = state;
             unimplemented!();
@@ -281,10 +271,7 @@ impl<'a, C: Connection> WMState<'a, C> {
         Ok(())
     }
 
-    fn handle_map_request(
-        &mut self,
-        event: MapRequestEvent,
-    ) -> Result<(), ReplyError> {
+    fn handle_map_request(&mut self, event: MapRequestEvent) -> Result<(), ReplyError> {
         self.manage_window(
             event.window,
             &self.conn.get_geometry(event.window)?.reply()?,
@@ -306,10 +293,7 @@ impl<'a, C: Connection> WMState<'a, C> {
         Ok(())
     }
 
-    fn handle_button_release(
-        &mut self,
-        event: ButtonReleaseEvent,
-    ) -> Result<(), ReplyError> {
+    fn handle_button_release(&mut self, event: ButtonReleaseEvent) -> Result<(), ReplyError> {
         if let Some(state) = self.find_window_by_id(event.event) {
             let data = [self.wm_delete_window, 0, 0, 0, 0];
             let event = ClientMessageEvent {

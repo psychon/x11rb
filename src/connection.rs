@@ -41,7 +41,7 @@
 //! | Ignore | `Cookie::discard_reply_and_errors` | Just drop the cookie      |
 
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ConnectionError, ReplyError, ParseError};
+use crate::errors::{ConnectionError, ParseError, ReplyError};
 use crate::generated::xproto::{QueryExtensionReply, Setup};
 use crate::utils::{Buffer, RawFdContainer};
 use crate::x11_utils::{GenericError, GenericEvent};
@@ -165,10 +165,7 @@ pub trait RequestConnection {
     /// server answered the request with an error, that error is returned as an `Err`.
     ///
     /// Users of this library will most likely not want to use this function directly.
-    fn wait_for_reply_or_error(
-        &self,
-        sequence: SequenceNumber,
-    ) -> Result<Buffer, ReplyError>;
+    fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Buffer, ReplyError>;
 
     /// Wait for the reply to a request.
     ///

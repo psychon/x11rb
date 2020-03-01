@@ -6,7 +6,7 @@ use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 
 use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ConnectError, ConnectionError, ReplyError, ParseError};
+use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError};
 use crate::extension_information::ExtensionInformation;
 use crate::generated::bigreq;
 use crate::generated::xproto::{QueryExtensionReply, Setup};
@@ -265,10 +265,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
             .extension_information(self, extension_name)
     }
 
-    fn wait_for_reply_or_error(
-        &self,
-        sequence: SequenceNumber,
-    ) -> Result<Buffer, ReplyError> {
+    fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Buffer, ReplyError> {
         let mut inner = self.inner.lock().unwrap();
         inner.flush()?; // Ensure the request is sent
         loop {

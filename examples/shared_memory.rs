@@ -23,9 +23,7 @@ impl<C: Connection> Drop for FreePixmap<'_, C> {
 }
 
 /// Get the supported SHM version from the X11 server
-fn check_shm_version<C: Connection>(
-    conn: &C,
-) -> Result<Option<(u16, u16)>, ReplyError> {
+fn check_shm_version<C: Connection>(conn: &C) -> Result<Option<(u16, u16)>, ReplyError> {
     if conn
         .extension_information(shm::X11_EXTENSION_NAME)
         .is_none()
@@ -99,11 +97,7 @@ fn make_file() -> IOResult<File> {
     Ok(file)
 }
 
-fn send_fd<C: Connection>(
-    conn: &C,
-    screen_num: usize,
-    file: File,
-) -> Result<(), ReplyError> {
+fn send_fd<C: Connection>(conn: &C, screen_num: usize, file: File) -> Result<(), ReplyError> {
     let shmseg = conn.generate_id();
     shm::attach_fd(conn, shmseg, file, false)?;
 

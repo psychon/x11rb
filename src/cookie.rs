@@ -1,7 +1,7 @@
 //! Cookies are handles to future replies or errors from the X11 server.
 
 use crate::connection::{DiscardMode, RequestConnection, RequestKind, SequenceNumber};
-use crate::errors::{ConnectionError, ReplyError, ParseError};
+use crate::errors::{ConnectionError, ParseError, ReplyError};
 use crate::generated::xproto::ListFontsWithInfoReply;
 use crate::utils::{Buffer, RawFdContainer};
 use crate::x11_utils::GenericError;

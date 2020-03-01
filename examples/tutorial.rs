@@ -1794,10 +1794,7 @@ fn example_resize<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ReplyError
 // `xcb_configure_window_t`:
 
 #[allow(unused)]
-fn example_move_resize<C: Connection>(
-    conn: &C,
-    win: WINDOW,
-) -> Result<(), ReplyError> {
+fn example_move_resize<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ReplyError> {
     // Move the window to coordinates x = 10 and y = 20
     // and resize the window to width = 200 and height = 300
     let values = ConfigureWindowAux::default()
@@ -1819,10 +1816,7 @@ fn example_move_resize<C: Connection>(
 // manipulate our windows stack order:
 
 #[allow(unused)]
-fn example_stack_above<C: Connection>(
-    conn: &C,
-    win: WINDOW,
-) -> Result<(), ReplyError> {
+fn example_stack_above<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ReplyError> {
     // Move the window on the top of the stack
     let values = ConfigureWindowAux::default().stack_mode(StackMode::Above);
     conn.configure_window(win, &values)?;
@@ -1830,10 +1824,7 @@ fn example_stack_above<C: Connection>(
 }
 
 #[allow(unused)]
-fn example_stack_below<C: Connection>(
-    conn: &C,
-    win: WINDOW,
-) -> Result<(), ReplyError> {
+fn example_stack_below<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ReplyError> {
     // Move the window to the bottom of the stack
     let values = ConfigureWindowAux::default().stack_mode(StackMode::Below);
     conn.configure_window(win, &values)?;
@@ -1867,10 +1858,7 @@ pub struct RenamedGetGeometryReply {
 // You use them as follows:
 
 #[allow(unused)]
-fn example_get_geometry<C: Connection>(
-    conn: &C,
-    win: WINDOW,
-) -> Result<(), ReplyError> {
+fn example_get_geometry<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ReplyError> {
     let geom = conn.get_geometry(win)?.reply()?;
 
     // Do something with the fields of geom
@@ -1922,10 +1910,7 @@ fn example_get_geometry<C: Connection>(
 // We use them as follows:
 
 #[allow(unused)]
-fn example_get_and_query<C: Connection>(
-    conn: &C,
-    win: WINDOW,
-) -> Result<(), ReplyError> {
+fn example_get_and_query<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ReplyError> {
     let geom = conn.get_geometry(win)?;
     let tree = conn.query_tree(win)?;
     let geom = geom.reply()?;
@@ -1972,10 +1957,7 @@ fn example_get_and_query<C: Connection>(
 // You use them as follows:
 
 #[allow(unused)]
-fn example_get_attributes<C: Connection>(
-    conn: &C,
-    win: WINDOW,
-) -> Result<(), ReplyError> {
+fn example_get_attributes<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ReplyError> {
     let geom = conn.get_window_attributes(win)?.reply()?;
 
     // Do something with the fields of attr
