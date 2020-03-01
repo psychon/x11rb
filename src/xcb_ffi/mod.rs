@@ -14,7 +14,7 @@ use crate::x11_utils::{GenericError, GenericEvent};
 use libc::c_void;
 use std::convert::{TryFrom, TryInto};
 use std::ffi::CStr;
-use std::io::IoSlice;
+use std::io::{Error, ErrorKind, IoSlice};
 use std::ops::Deref;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, RawFd};
@@ -48,7 +48,7 @@ impl XCBConnection {
 
         assert_ne!(error, 0);
         match error {
-            ERROR => ConnectionError::ConnectionError,
+            ERROR => Error::new(ErrorKind::Other, ConnectionError::UnknownError).into(),
             EXT_NOTSUPPORTED => ConnectionError::UnsupportedExtension,
             MEM_INSUFFICIENT => ConnectionError::InsufficientMemory,
             REQ_LEN_EXCEED => ConnectionError::MaximumRequestLengthExceeded,
@@ -63,7 +63,7 @@ impl XCBConnection {
 
         assert_ne!(error, 0);
         match error {
-            ERROR => ConnectError::ConnectionError,
+            ERROR => Error::new(ErrorKind::Other, ConnectionError::UnknownError).into(),
             MEM_INSUFFICIENT => ConnectError::InsufficientMemory,
             PARSE_ERR => ConnectError::DisplayParsingError,
             INVALID_SCREEN => ConnectError::InvalidScreen,

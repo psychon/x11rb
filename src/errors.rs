@@ -40,11 +40,6 @@ pub enum ConnectError {
     /// Error while parsing some data, see `ParseError`.
     ParseError,
 
-    /// A low-level socket error occurred.
-    ///
-    /// This is `XCB_CONN_ERROR`.
-    ConnectionError,
-
     /// Out of memory.
     ///
     /// This is `XCB_CONN_CLOSED_MEM_INSUFFICIENT`.
@@ -87,7 +82,6 @@ impl std::fmt::Display for ConnectError {
         }
         match self {
             ConnectError::UnknownError => write!(f, "Unknown connection error"),
-            ConnectError::ConnectionError => write!(f, "Error with the underlying connection"),
             ConnectError::InsufficientMemory => write!(f, "Insufficient memory"),
             ConnectError::DisplayParsingError => write!(f, "Display parsing error"),
             ConnectError::InvalidScreen => write!(f, "Invalid screen"),
@@ -120,11 +114,6 @@ impl From<std::io::Error> for ConnectError {
 #[derive(Debug)]
 pub enum ConnectionError {
     UnknownError,
-
-    /// A low-level socket error occurred.
-    ///
-    /// This corresponds to `XCB_CONN_ERROR`.
-    ConnectionError,
 
     /// An X11 extension was not supported by the server.
     ///
@@ -159,7 +148,6 @@ impl std::fmt::Display for ConnectionError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match self {
             ConnectionError::UnknownError => write!(f, "Unknown connection error"),
-            ConnectionError::ConnectionError => write!(f, "Error with the underlying connection"),
             ConnectionError::UnsupportedExtension => write!(f, "Unsupported extension"),
             ConnectionError::InsufficientMemory => write!(f, "Insufficient memory"),
             ConnectionError::MaximumRequestLengthExceeded => {
