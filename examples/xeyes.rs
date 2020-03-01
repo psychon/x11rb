@@ -203,7 +203,7 @@ fn shape_window<C: Connection>(
     draw_eyes(conn, pixmap.1, gc, gc, window_size)?;
 
     // Set the shape of the window
-    conn.mask(shape::SO::Set, shape::SK::Bounding, win_id, 0, 0, pixmap.1)?;
+    conn.shape_mask(shape::SO::Set, shape::SK::Bounding, win_id, 0, 0, pixmap.1)?;
     Ok(())
 }
 

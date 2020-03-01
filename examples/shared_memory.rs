@@ -10,7 +10,7 @@ use libc::{mmap, MAP_FAILED, MAP_SHARED, PROT_READ, PROT_WRITE};
 
 use x11rb::connection::Connection;
 use x11rb::errors::{ConnectionError, ReplyError};
-use x11rb::generated::shm;
+use x11rb::generated::shm::{self, ConnectionExt as _};
 use x11rb::generated::xproto::{self, ConnectionExt as _, ImageFormat};
 
 const TEMP_FILE_CONTENT: [u8; 8] = [0x00, 0x01, 0x02, 0x03, 0xff, 0xfe, 0xfd, 0xfc];
@@ -31,7 +31,7 @@ fn check_shm_version<C: Connection>(conn: &C) -> Result<Option<(u16, u16)>, Repl
         return Ok(None);
     }
 
-    let shm_version = shm::query_version(conn)?.reply()?;
+    let shm_version = conn.shm_query_version()?.reply()?;
     Ok(Some((shm_version.major_version, shm_version.minor_version)))
 }
 
@@ -50,8 +50,7 @@ fn get_shared_memory_content_at_offset<C: Connection>(
         _ => panic!("I do not know how to handle depth {}", screen.root_depth),
     };
     let pixmap = conn.generate_id();
-    shm::create_pixmap(
-        conn,
+    conn.shm_create_pixmap(
         pixmap,
         screen.root,
         width,
@@ -99,11 +98,11 @@ fn make_file() -> IOResult<File> {
 
 fn send_fd<C: Connection>(conn: &C, screen_num: usize, file: File) -> Result<(), ReplyError> {
     let shmseg = conn.generate_id();
-    shm::attach_fd(conn, shmseg, file, false)?;
+    conn.shm_attach_fd(shmseg, file, false)?;
 
     use_shared_mem(conn, screen_num, shmseg)?;
 
-    shm::detach(conn, shmseg)?;
+    conn.shm_detach(shmseg)?;
 
     Ok(())
 }
@@ -111,7 +110,9 @@ fn send_fd<C: Connection>(conn: &C, screen_num: usize, file: File) -> Result<(),
 fn receive_fd<C: Connection>(conn: &C, screen_num: usize) -> Result<(), ReplyError> {
     let shmseg = conn.generate_id();
     let segment_size = TEMP_FILE_CONTENT.len() as _;
-    let reply = shm::create_segment(conn, shmseg, segment_size, false)?.reply()?;
+    let reply = conn
+        .shm_create_segment(shmseg, segment_size, false)?
+        .reply()?;
     let shm::CreateSegmentReply { shm_fd, .. } = reply;
 
     let addr = unsafe {
@@ -125,7 +126,7 @@ fn receive_fd<C: Connection>(conn: &C, screen_num: usize) -> Result<(), ReplyErr
         )
     };
     if addr == MAP_FAILED {
-        shm::detach(conn, shmseg)?;
+        conn.shm_detach(shmseg)?;
         return Err(ConnectionError::InsufficientMemory.into());
     }
 
@@ -136,7 +137,7 @@ fn receive_fd<C: Connection>(conn: &C, screen_num: usize) -> Result<(), ReplyErr
 
     use_shared_mem(conn, screen_num, shmseg)?;
 
-    shm::detach(conn, shmseg)?;
+    conn.shm_detach(shmseg)?;
     // Let's ignore the munmap() that we should do here
 
     Ok(())
