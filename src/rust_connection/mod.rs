@@ -348,23 +348,27 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
 }
 
 impl<R: Read, W: Write> Connection for RustConnection<R, W> {
-    fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
+    fn wait_for_event_with_sequence(
+        &self,
+    ) -> Result<(SequenceNumber, GenericEvent), ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
         loop {
-            if let Some(event) = inner.poll_for_event() {
+            if let Some(event) = inner.poll_for_event_with_sequence() {
                 return Ok(event);
             }
             inner = self.read_packet_and_enqueue(inner)?;
         }
     }
 
-    fn poll_for_event(&self) -> Result<Option<GenericEvent>, ConnectionError> {
-        Ok(self.inner.lock().unwrap().poll_for_event())
+    fn poll_for_event_with_sequence(
+        &self,
+    ) -> Result<Option<(SequenceNumber, GenericEvent)>, ConnectionError> {
+        Ok(self.inner.lock().unwrap().poll_for_event_with_sequence())
     }
 
-    fn flush(&self) {
-        // FIXME: Allow an error to be returned
-        let _ = self.inner.lock().unwrap().flush();
+    fn flush(&self) -> Result<(), ConnectionError> {
+        self.inner.lock().unwrap().flush()?;
+        Ok(())
     }
 
     fn setup(&self) -> &Setup {

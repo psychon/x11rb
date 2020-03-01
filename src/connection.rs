@@ -362,10 +362,24 @@ pub trait RequestConnection {
 /// A connection to an X11 server.
 pub trait Connection: RequestConnection {
     /// Wait for a new event from the X11 server.
-    fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError>;
+    fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
+        Ok(self.wait_for_event_with_sequence()?.1)
+    }
+
+    /// Wait for a new event from the X11 server.
+    fn wait_for_event_with_sequence(
+        &self,
+    ) -> Result<(SequenceNumber, GenericEvent), ConnectionError>;
 
     /// Poll for a new event from the X11 server.
-    fn poll_for_event(&self) -> Result<Option<GenericEvent>, ConnectionError>;
+    fn poll_for_event(&self) -> Result<Option<GenericEvent>, ConnectionError> {
+        Ok(self.poll_for_event_with_sequence()?.map(|r| r.1))
+    }
+
+    /// Poll for a new event from the X11 server.
+    fn poll_for_event_with_sequence(
+        &self,
+    ) -> Result<Option<(SequenceNumber, GenericEvent)>, ConnectionError>;
 
     /// Send all pending requests to the server.
     ///
@@ -374,7 +388,7 @@ pub trait Connection: RequestConnection {
     ///
     /// You do not have to call this method before `wait_for_reply()`. If the request you want to
     /// wait for was not yet sent, it will be sent by `wait_for_reply()`.
-    fn flush(&self);
+    fn flush(&self) -> Result<(), ConnectionError>;
 
     /// Get the setup information sent by the X11 server.
     ///

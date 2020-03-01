@@ -30,7 +30,7 @@ fn main() {
         &CreateWindowAux::new().event_mask(EventMask::NoEvent),
     )
     .unwrap();
-    conn.flush();
+    conn.flush().unwrap();
 
     // Auxiliary thread: send requests and wait for replies
     let conn1 = conn.clone();
@@ -69,7 +69,7 @@ fn main() {
                 &event,
             )
             .unwrap();
-        conn1.flush();
+        conn1.flush().unwrap();
     });
 
     // Main thread: wait for events until finished

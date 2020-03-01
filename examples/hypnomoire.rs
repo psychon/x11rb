@@ -160,7 +160,7 @@ fn run<C: Connection>(
             default_size,
             default_size,
         )?;
-        conn.flush();
+        conn.flush()?;
 
         theta += guard.angle_velocity;
         while theta > 2.0 * PI {
@@ -208,7 +208,7 @@ where
                         event.height,
                     )?;
                     if event.count == 0 {
-                        conn.flush();
+                        conn.flush()?;
                     }
                 } else {
                     eprintln!("Expose on unknown window!");

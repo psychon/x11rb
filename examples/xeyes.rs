@@ -298,7 +298,7 @@ fn main() {
     let black_gc = create_gc_with_foreground(conn, win_id, screen.black_pixel).unwrap();
     let white_gc = create_gc_with_foreground(conn, win_id, screen.white_pixel).unwrap();
 
-    conn.flush();
+    conn.flush().unwrap();
 
     let mut need_repaint = false;
     let mut need_reshape = false;
@@ -378,7 +378,7 @@ fn main() {
             )
             .unwrap();
 
-            conn.flush();
+            conn.flush().unwrap();
             need_repaint = false;
         }
     }

@@ -363,7 +363,7 @@ fn main() {
 
     loop {
         wm_state.refresh().unwrap();
-        conn.flush();
+        conn.flush().unwrap();
 
         let event = conn.wait_for_event().unwrap();
         let mut event_option = Some(event);

@@ -82,7 +82,7 @@ fn main() {
 
     conn.map_window(win_id).unwrap();
 
-    conn.flush();
+    conn.flush().unwrap();
 
     loop {
         let event = conn.wait_for_event().unwrap();
@@ -111,7 +111,7 @@ fn main() {
                     ];
                     conn.poly_line(CoordMode::Origin, win_id, gc_id, &points)
                         .unwrap();
-                    conn.flush();
+                    conn.flush().unwrap();
                 }
             }
             CONFIGURE_NOTIFY_EVENT => {

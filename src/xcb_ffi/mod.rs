@@ -279,8 +279,14 @@ impl XCBConnection {
         Buffer::from_raw_parts(error, 32)
     }
 
-    unsafe fn wrap_event(event: *mut u8) -> Result<GenericEvent, ParseError> {
+    unsafe fn wrap_event(event: *mut u8) -> Result<(SequenceNumber, GenericEvent), ParseError> {
         let mut length = 32;
+        // XCB inserts a uint32_t with the sequence number after the first 32 bytes.
+        let mut seqno = [0; 4];
+        seqno.as_mut_ptr().copy_from(event.add(32), 4);
+        let seqno = u32::from_ne_bytes(seqno);
+        let seqno = SequenceNumber::from(seqno); // FIXME: Figure out a way to get the high bytes
+
         // The first byte contains the event type, check for XGE events
         if (*event & 0x7f) == super::generated::xproto::GE_GENERIC_EVENT {
             // Read the length field of the event to get its length
@@ -292,7 +298,7 @@ impl XCBConnection {
             // the 32-byte boundary.
             std::ptr::copy(event.add(36), event.add(32), length_field * 4);
         }
-        Ok(Buffer::from_raw_parts(event, length).try_into()?)
+        Ok((seqno, Buffer::from_raw_parts(event, length).try_into()?))
     }
 }
 
@@ -383,7 +389,7 @@ impl RequestConnection for XCBConnection {
             Err(err) => match err {
                 ConnectionError(err) => Err(err),
                 X11Error(err) => {
-                    self.errors.append_error(err);
+                    self.errors.append_error((sequence, err));
                     Ok(None)
                 }
             },
@@ -444,9 +450,11 @@ impl RequestConnection for XCBConnection {
 }
 
 impl Connection for XCBConnection {
-    fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
+    fn wait_for_event_with_sequence(
+        &self,
+    ) -> Result<(SequenceNumber, GenericEvent), ConnectionError> {
         if let Some(error) = self.errors.get(self) {
-            return Ok(error.into());
+            return Ok((error.0, error.1.into()));
         }
         unsafe {
             let event = raw_ffi::xcb_wait_for_event((self.conn).0);
@@ -457,9 +465,11 @@ impl Connection for XCBConnection {
         }
     }
 
-    fn poll_for_event(&self) -> Result<Option<GenericEvent>, ConnectionError> {
+    fn poll_for_event_with_sequence(
+        &self,
+    ) -> Result<Option<(SequenceNumber, GenericEvent)>, ConnectionError> {
         if let Some(error) = self.errors.get(self) {
-            return Ok(Some(error.into()));
+            return Ok(Some((error.0, error.1.into())));
         }
         unsafe {
             let event = raw_ffi::xcb_poll_for_event((self.conn).0);
@@ -475,11 +485,14 @@ impl Connection for XCBConnection {
         }
     }
 
-    fn flush(&self) {
+    fn flush(&self) -> Result<(), ConnectionError> {
         // xcb_flush() returns 0 if the connection is in (or just entered) an error state, else 1.
-        // Adding a Result<(), ConnectionError> as a return value here would be too noisy, I think,
-        // so just ignore this return value.
-        let _ = unsafe { raw_ffi::xcb_flush((self.conn).0) };
+        let res = unsafe { raw_ffi::xcb_flush((self.conn).0) };
+        if res != 0 {
+            Ok(())
+        } else {
+            unsafe { Err(Self::connection_error_from_connection((self.conn).0)) }
+        }
     }
 
     fn generate_id(&self) -> u32 {

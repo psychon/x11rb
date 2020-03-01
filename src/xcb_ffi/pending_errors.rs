@@ -16,7 +16,7 @@ use crate::x11_utils::GenericError;
 #[derive(Debug, Default)]
 struct PendingErrorsInner {
     in_flight: BinaryHeap<Reverse<SequenceNumber>>,
-    pending: VecDeque<GenericError>,
+    pending: VecDeque<(SequenceNumber, GenericError)>,
 }
 
 /// A management struct for pending X11 errors
@@ -26,7 +26,7 @@ pub(crate) struct PendingErrors {
 }
 
 impl PendingErrors {
-    pub(crate) fn append_error(&self, error: GenericError) {
+    pub(crate) fn append_error(&self, error: (SequenceNumber, GenericError)) {
         self.inner.lock().unwrap().pending.push_back(error)
     }
 
@@ -34,7 +34,7 @@ impl PendingErrors {
         self.inner.lock().unwrap().in_flight.push(Reverse(sequence));
     }
 
-    pub(crate) fn get(&self, conn: &XCBConnection) -> Option<GenericError> {
+    pub(crate) fn get(&self, conn: &XCBConnection) -> Option<(SequenceNumber, GenericError)> {
         let mut inner = self.inner.lock().unwrap();
 
         // Check if we already have an element at hand
@@ -60,7 +60,7 @@ impl PendingErrors {
             if let Some(result) = result {
                 // Is this an error?
                 if let Ok(error) = result.try_into() {
-                    return Some(error);
+                    return Some((seqno, error));
                 } else {
                     // It's a reply, just ignore it
                 }
