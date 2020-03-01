@@ -5,8 +5,10 @@ use std::error::Error;
 use crate::generated::xproto::{SetupAuthenticate, SetupFailed};
 use crate::x11_utils::GenericError;
 
+/// An error occurred while parsing some data
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ParseError {
+    /// Error while parsing some data
     ParseError,
 }
 
@@ -34,18 +36,46 @@ impl From<std::num::TryFromIntError> for ParseError {
 #[derive(Debug)]
 pub enum ConnectError {
     UnknownError,
+
+    /// Error while parsing some data, see `ParseError`.
     ParseError,
 
     // Errors from XCB
+
+    /// A low-level socket error occurred.
+    ///
+    /// This is `XCB_CONN_ERROR`.
     ConnectionError,
+
+    /// Out of memory.
+    ///
+    /// This is `XCB_CONN_CLOSED_MEM_INSUFFICIENT`.
     InsufficientMemory,
+
+    /// Error during parsing of display string.
+    ///
+    /// This is `XCB_CONN_CLOSSED_PARSE_ERR`.
     DisplayParsingError,
+
+    /// Server does not have a screen matcing the display.
+    ///
+    /// This is `XCB_CONN_CLOSED_INVALID_SCREEN`.
     InvalidScreen,
 
     // Errors from RustConnection
+
+    /// An I/O error occurred on the connection.
     IOError(std::io::Error),
+
+    /// Invalid ID mask provided by the server.
+    ///
+    /// The value of `resource_id_mask` in the `Setup` provided by the server was zero.
     ZeroIDMask,
+
+    /// The server rejected the connection with a `SetupAuthenticate` message.
     SetupAuthenticate(SetupAuthenticate),
+    ///
+    /// The server rejected the connection with a `SetupFailed` message.
     SetupFailed(SetupFailed),
 }
 
@@ -94,16 +124,40 @@ impl From<std::io::Error> for ConnectError {
 #[derive(Debug)]
 pub enum ConnectionError {
     UnknownError,
+
+    /// A low-level socket error occurred.
+    ///
+    /// This corresponds to `XCB_CONN_ERROR`.
     ConnectionError,
+
+    /// An X11 extension was not supported by the server.
+    ///
+    /// This corresponds to `XCB_CONN_CLOSED_EXT_NOTSUPPORTED`.
     UnsupportedExtension,
+
+    /// A request larger than the maximum request length was sent.
+    ///
+    /// This corresponds to `XCB_CONN_CLOSED_REQ_LEN_EXCEED`.
     MaximumRequestLengthExceeded,
+
+    /// File descriptor passing failed.
+    ///
+    /// This corresponds to `XCB_CONN_CLOSED_FDPASSING_FAILED`.
     FDPassingFailed,
+
+    /// Error while parsing some data, see `ParseError`.
     ParseError,
 
     // Errors from XCB
+
+    /// Out of memory.
+    ///
+    /// This is `XCB_CONN_CLOSED_MEM_INSUFFICIENT`.
     InsufficientMemory,
 
     // Errors from RustConnection
+
+    /// An I/O error occurred on the connection.
     IOError(std::io::Error),
 }
 
@@ -146,9 +200,12 @@ impl From<std::io::Error> for ConnectionError {
     }
 }
 
+/// An error that occurred with some request.
 #[derive(Debug)]
 pub enum ConnectionErrorOrX11Error {
+    /// Some error occurred on the X11 connection.
     ConnectionError(ConnectionError),
+    /// The X11 server sent an error in response to the request.
     X11Error(GenericError),
 }
 
