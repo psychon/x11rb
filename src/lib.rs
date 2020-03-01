@@ -43,13 +43,13 @@
 //! ```no_run
 //! use x11rb::connection::Connection;
 //! use x11rb::generated::xproto::*;
-//! use x11rb::errors::ReplyError;
+//! use x11rb::errors::ReplyOrIdError;
 //! use x11rb::COPY_DEPTH_FROM_PARENT;
 //!
-//! fn main() -> Result<(), ReplyError> {
+//! fn main() -> Result<(), ReplyOrIdError> {
 //!     let (conn, screen_num) = x11rb::connect(None).unwrap();
 //!     let screen = &conn.setup().roots[screen_num];
-//!     let win_id = conn.generate_id();
+//!     let win_id = conn.generate_id()?;
 //!     conn.create_window(COPY_DEPTH_FROM_PARENT, win_id, screen.root, 0, 0, 100, 100, 0, WindowClass::InputOutput,
 //!                        0, &CreateWindowAux::new().background_pixel(screen.white_pixel))?;
 //!     conn.map_window(win_id)?;

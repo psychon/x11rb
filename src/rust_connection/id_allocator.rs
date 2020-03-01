@@ -1,5 +1,5 @@
 use crate::connection::RequestConnection;
-use crate::errors::ConnectError;
+use crate::errors::{ConnectError, ReplyOrIdError};
 use crate::generated::xc_misc::ConnectionExt as _;
 
 /// An allocator for X11 IDs.
@@ -37,31 +37,28 @@ impl IDAllocator {
     }
 
     /// Generate the next ID.
-    pub(crate) fn generate_id(&mut self, conn: &impl RequestConnection) -> Option<u32> {
+    pub(crate) fn generate_id(
+        &mut self,
+        conn: &impl RequestConnection,
+    ) -> Result<u32, ReplyOrIdError> {
         if self.next_id > self.max_id {
-            // Send an XC-MISC GetXIDRange request. Any failure is turned into None via .ok().
-            let xidrange = conn
-                .xc_misc_get_xidrange()
-                .ok()
-                .and_then(|cookie| cookie.reply().ok());
-            match xidrange {
-                Some(reply) => {
-                    let (start, count) = (reply.start_id, reply.count);
-                    // Apparently (0, 1) is how the server signals "I am out of IDs".
-                    // The second case avoids an underflow below and should never happen.
-                    if (start, count) == (0, 1) || count == 0 {
-                        return None;
-                    }
-                    self.next_id = start;
-                    self.max_id = start + (count - 1) * self.increment;
-                }
-                None => return None,
+            // TODO: Check if XC-MISC is available.
+
+            // Send an XC-MISC GetXIDRange request.
+            let xidrange = conn.xc_misc_get_xidrange()?.reply()?;
+            let (start, count) = (xidrange.start_id, xidrange.count);
+            // Apparently (0, 1) is how the server signals "I am out of IDs".
+            // The second case avoids an underflow below and should never happen.
+            if (start, count) == (0, 1) || count == 0 {
+                return Err(ReplyOrIdError::IdsExhausted);
             }
+            self.next_id = start;
+            self.max_id = start + (count - 1) * self.increment;
         }
         assert!(self.next_id <= self.max_id);
         let id = self.next_id;
         self.next_id += self.increment;
-        Some(id)
+        Ok(id)
     }
 }
 
@@ -84,34 +81,34 @@ mod test {
         let conn = DummyConnection(None);
         let mut allocator = IDAllocator::new(0x2800, 0x1ff).unwrap();
         for expected in 0x2800..=0x29ff {
-            assert_eq!(Some(expected), allocator.generate_id(&conn));
+            assert_eq!(expected, allocator.generate_id(&conn).unwrap());
         }
-        assert_eq!(None, allocator.generate_id(&conn));
+        assert!(allocator.generate_id(&conn).is_err());
     }
 
     #[test]
     fn increment() {
         let conn = DummyConnection(None);
         let mut allocator = IDAllocator::new(0, 0b1100).unwrap();
-        assert_eq!(Some(0b0000), allocator.generate_id(&conn));
-        assert_eq!(Some(0b0100), allocator.generate_id(&conn));
-        assert_eq!(Some(0b1000), allocator.generate_id(&conn));
-        assert_eq!(Some(0b1100), allocator.generate_id(&conn));
-        assert_eq!(None, allocator.generate_id(&conn));
+        assert_eq!(0b0000, allocator.generate_id(&conn).unwrap());
+        assert_eq!(0b0100, allocator.generate_id(&conn).unwrap());
+        assert_eq!(0b1000, allocator.generate_id(&conn).unwrap());
+        assert_eq!(0b1100, allocator.generate_id(&conn).unwrap());
+        assert!(allocator.generate_id(&conn).is_err());
     }
 
     #[test]
     fn new_range() {
         let conn = DummyConnection(Some(generate_get_xid_range_reply(0x13370, 3)));
         let mut allocator = IDAllocator::new(0x420, 2).unwrap();
-        assert_eq!(Some(0x420), allocator.generate_id(&conn));
-        assert_eq!(Some(0x420 + 2), allocator.generate_id(&conn));
+        assert_eq!(0x420, allocator.generate_id(&conn).unwrap());
+        assert_eq!(0x420 + 2, allocator.generate_id(&conn).unwrap());
         // At this point the range is exhausted and a GetXIDRange request is sent
-        assert_eq!(Some(0x13370), allocator.generate_id(&conn));
-        assert_eq!(Some(0x13370 + 2), allocator.generate_id(&conn));
-        assert_eq!(Some(0x13370 + 4), allocator.generate_id(&conn));
+        assert_eq!(0x13370, allocator.generate_id(&conn).unwrap());
+        assert_eq!(0x13370 + 2, allocator.generate_id(&conn).unwrap());
+        assert_eq!(0x13370 + 4, allocator.generate_id(&conn).unwrap());
         // At this point the range is exhausted and a GetXIDRange request is sent
-        assert_eq!(Some(0x13370), allocator.generate_id(&conn));
+        assert_eq!(0x13370, allocator.generate_id(&conn).unwrap());
     }
 
     #[test]

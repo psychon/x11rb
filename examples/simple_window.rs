@@ -15,8 +15,8 @@ fn main() {
     let conn = &*conn1;
 
     let screen = &conn.setup().roots[screen_num];
-    let win_id = conn.generate_id();
-    let gc_id = conn.generate_id();
+    let win_id = conn.generate_id().unwrap();
+    let gc_id = conn.generate_id().unwrap();
 
     let mut wm_protocols = LazyAtom::new(conn, false, b"WM_PROTOCOLS");
     let mut wm_delete_window = LazyAtom::new(conn, false, b"WM_DELETE_WINDOW");

@@ -15,7 +15,7 @@ fn main() {
     let conn = Arc::new(conn);
 
     let screen = &conn.setup().roots[screen_num];
-    let window = conn.generate_id();
+    let window = conn.generate_id().unwrap();
     conn.create_window(
         COPY_DEPTH_FROM_PARENT,
         window,

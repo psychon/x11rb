@@ -6,7 +6,7 @@ use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 
 use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError};
+use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::extension_information::ExtensionInformation;
 use crate::generated::bigreq::ConnectionExt as _;
 use crate::generated::xproto::{QueryExtensionReply, Setup};
@@ -373,12 +373,8 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
         &self.setup
     }
 
-    fn generate_id(&self) -> u32 {
-        self.id_allocator
-            .lock()
-            .unwrap()
-            .generate_id(self)
-            .expect("Available XIDs exhausted")
+    fn generate_id(&self) -> Result<u32, ReplyOrIdError> {
+        self.id_allocator.lock().unwrap().generate_id(self)
     }
 }
 

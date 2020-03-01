@@ -7,7 +7,7 @@
 use super::generated::xproto::{QueryExtensionReply, Setup};
 use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError};
+use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::extension_information::ExtensionInformation;
 use crate::utils::{Buffer, CSlice, RawFdContainer};
 use crate::x11_utils::{GenericError, GenericEvent};
@@ -492,8 +492,18 @@ impl Connection for XCBConnection {
         }
     }
 
-    fn generate_id(&self) -> u32 {
-        unsafe { raw_ffi::xcb_generate_id((self.conn).0) }
+    fn generate_id(&self) -> Result<u32, ReplyOrIdError> {
+        unsafe {
+            let id = raw_ffi::xcb_generate_id((self.conn).0);
+            // XCB does not document the behaviour of `xcb_generate_id` when
+            // there is an error. Looking at its source code it seems that it
+            // returns `-1` (presumably `u32::max_value()`).
+            if id == u32::max_value() {
+                Err(Self::connection_error_from_connection((self.conn).0).into())
+            } else {
+                Ok(id)
+            }
+        }
     }
 
     fn setup(&self) -> &Setup {

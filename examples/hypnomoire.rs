@@ -9,7 +9,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 use x11rb::connection::Connection;
-use x11rb::errors::ReplyError;
+use x11rb::errors::{ReplyError, ReplyOrIdError};
 use x11rb::generated::xproto::*;
 use x11rb::x11_utils::Event;
 use x11rb::COPY_DEPTH_FROM_PARENT;
@@ -35,8 +35,8 @@ fn main() {
     let conn = Arc::new(conn);
     let screen = &conn.setup().roots[screen_num];
 
-    let white = conn.generate_id();
-    let black = conn.generate_id();
+    let white = conn.generate_id().unwrap();
+    let black = conn.generate_id().unwrap();
 
     conn.create_gc(
         white,
@@ -74,11 +74,11 @@ fn run<C: Connection>(
     screen_num: usize,
     white: GCONTEXT,
     black: GCONTEXT,
-) -> Result<(), ReplyError> {
+) -> Result<(), ReplyOrIdError> {
     let screen = &conn.setup().roots[screen_num];
     let default_size = 300;
-    let pixmap = conn.generate_id();
-    let window = conn.generate_id();
+    let pixmap = conn.generate_id()?;
+    let window = conn.generate_id()?;
 
     {
         let mut guard = window_state.lock().unwrap();

@@ -7,7 +7,7 @@ use std::collections::HashSet;
 use std::process::exit;
 
 use x11rb::connection::Connection;
-use x11rb::errors::ReplyError;
+use x11rb::errors::{ReplyError, ReplyOrIdError};
 use x11rb::generated::xproto::*;
 use x11rb::wrapper::LazyAtom;
 use x11rb::x11_utils::{Event, GenericEvent};
@@ -56,10 +56,10 @@ struct WMState<'a, C: Connection> {
 }
 
 impl<'a, C: Connection> WMState<'a, C> {
-    fn new(conn: &'a C, screen_num: usize) -> Result<WMState<'a, C>, ReplyError> {
+    fn new(conn: &'a C, screen_num: usize) -> Result<WMState<'a, C>, ReplyOrIdError> {
         let screen = &conn.setup().roots[screen_num];
-        let black_gc = conn.generate_id();
-        let font = conn.generate_id();
+        let black_gc = conn.generate_id()?;
+        let font = conn.generate_id()?;
         conn.open_font(font, b"9x15")?;
 
         let gc_aux = CreateGCAux::new()
@@ -85,7 +85,7 @@ impl<'a, C: Connection> WMState<'a, C> {
     }
 
     /// Scan for already existing windows and manage them
-    fn scan_windows(&mut self) -> Result<(), ReplyError> {
+    fn scan_windows(&mut self) -> Result<(), ReplyOrIdError> {
         // Get the already existing top-level windows.
         let screen = &self.conn.setup().roots[self.screen_num];
         let tree_reply = self.conn.query_tree(screen.root)?.reply()?;
@@ -114,12 +114,16 @@ impl<'a, C: Connection> WMState<'a, C> {
     }
 
     /// Add a new window that should be managed by the WM
-    fn manage_window(&mut self, win: WINDOW, geom: &GetGeometryReply) -> Result<(), ReplyError> {
+    fn manage_window(
+        &mut self,
+        win: WINDOW,
+        geom: &GetGeometryReply,
+    ) -> Result<(), ReplyOrIdError> {
         println!("Managing window {:?}", win);
         let screen = &self.conn.setup().roots[self.screen_num];
         assert!(self.find_window_by_id(win).is_none());
 
-        let frame_win = self.conn.generate_id();
+        let frame_win = self.conn.generate_id()?;
         let win_aux = CreateWindowAux::new()
             .event_mask(
                 EventMask::Exposure | EventMask::SubstructureNotify | EventMask::ButtonRelease,
@@ -223,17 +227,18 @@ impl<'a, C: Connection> WMState<'a, C> {
     }
 
     /// Handle the given event
-    fn handle_event(&mut self, event: GenericEvent) -> Result<(), ReplyError> {
+    fn handle_event(&mut self, event: GenericEvent) -> Result<(), ReplyOrIdError> {
         println!("Got event {:?}", event);
         match event.response_type() {
-            UNMAP_NOTIFY_EVENT => self.handle_unmap_notify(event.into()),
-            CONFIGURE_REQUEST_EVENT => self.handle_configure_request(event.into()),
-            MAP_REQUEST_EVENT => self.handle_map_request(event.into()),
-            EXPOSE_EVENT => self.handle_expose(event.into()),
-            ENTER_NOTIFY_EVENT => self.handle_enter(event.into()),
-            BUTTON_RELEASE_EVENT => self.handle_button_release(event.into()),
-            _ => Ok(()),
+            UNMAP_NOTIFY_EVENT => self.handle_unmap_notify(event.into())?,
+            CONFIGURE_REQUEST_EVENT => self.handle_configure_request(event.into())?,
+            MAP_REQUEST_EVENT => self.handle_map_request(event.into())?,
+            EXPOSE_EVENT => self.handle_expose(event.into())?,
+            ENTER_NOTIFY_EVENT => self.handle_enter(event.into())?,
+            BUTTON_RELEASE_EVENT => self.handle_button_release(event.into())?,
+            _ => {}
         }
+        Ok(())
     }
 
     fn handle_unmap_notify(&mut self, event: UnmapNotifyEvent) -> Result<(), ReplyError> {
@@ -271,7 +276,7 @@ impl<'a, C: Connection> WMState<'a, C> {
         Ok(())
     }
 
-    fn handle_map_request(&mut self, event: MapRequestEvent) -> Result<(), ReplyError> {
+    fn handle_map_request(&mut self, event: MapRequestEvent) -> Result<(), ReplyOrIdError> {
         self.manage_window(
             event.window,
             &self.conn.get_geometry(event.window)?.reply()?,
