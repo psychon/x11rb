@@ -382,6 +382,27 @@ macro_rules! bitmask_binop {
 /// # use x11rb::atom_manager;
 /// atom_manager!(AtomCollection, AtomCollectionCookie, _NET_WM_NAME, _NET_WM_ICON, WHATEVER);
 /// ```
+///
+/// It is also possible to have the struct field name distinct from the atom name. This is
+/// especially useful when the atom name contains whitespaces (e.g. most atoms used by xinput). The
+/// corresponding notation is
+/// ```
+/// # use x11rb::atom_manager;
+/// atom_manager!(AtomCollection, AtomCollectionCookie,
+///   wm_name => b"_NET_WM_NAME",
+///   wm_icon => b"_NET_WM_ICON"
+/// );
+/// ```
+/// Note that for technical reasons, you must use the same notation for all fields, i.e. you cannot
+/// do
+/// ```compile_fail
+/// # use x11rb::atom_manager;
+/// atom_manager!(AtomCollection, AtomCollectionCookie,
+///   _NET_WM_NAME,
+///   wm_icon => b"_NET_WM_ICON"
+/// );
+/// ```
+
 #[macro_export]
 macro_rules! atom_manager {
     ($A:ident, $B:ident, $( $x:ident ), *) => {
@@ -408,6 +429,45 @@ macro_rules! atom_manager {
                 Ok($B {
                     $(
                         $x: conn.intern_atom(false, stringify!($x).as_bytes())?,
+                    )*
+                })
+            }
+        }
+
+        impl<'a, C: ::x11rb::generated::xproto::ConnectionExt> $B<'a, C> {
+            pub fn reply(self) -> ::std::result::Result<$A, ::x11rb::errors::ReplyError> {
+                Ok($A {
+                    $(
+                        $x: self.$x.reply()?.atom,
+                    )*
+                })
+            }
+        }
+    };
+    ($A:ident, $B:ident, $( $x:ident => $y:expr ), *) => {
+        // Cookie version
+        #[allow(non_snake_case)]
+        #[derive(Debug)]
+        pub struct $B<'a, C: ::x11rb::generated::xproto::ConnectionExt> {
+            $(
+                $x: ::x11rb::cookie::Cookie<'a, C, ::x11rb::generated::xproto::InternAtomReply>,
+            )*
+        }
+
+        // Replies
+        #[allow(non_snake_case)]
+        #[derive(Debug, Clone, Copy)]
+        pub struct $A {
+            $(
+                pub $x: ::x11rb::generated::xproto::ATOM,
+            )*
+        }
+
+        impl $A {
+            pub fn new<C: ::x11rb::generated::xproto::ConnectionExt>(conn: &C) -> ::std::result::Result<$B<'_, C>, ::x11rb::errors::ConnectionError> {
+                Ok($B {
+                    $(
+                        $x: conn.intern_atom(false, $y)?,
                     )*
                 })
             }
