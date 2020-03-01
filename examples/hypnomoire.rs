@@ -9,7 +9,7 @@ use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
 use x11rb::connection::Connection;
-use x11rb::errors::ConnectionErrorOrX11Error;
+use x11rb::errors::ReplyError;
 use x11rb::generated::xproto::*;
 use x11rb::x11_utils::Event;
 use x11rb::COPY_DEPTH_FROM_PARENT;
@@ -74,7 +74,7 @@ fn run<C: Connection>(
     screen_num: usize,
     white: GCONTEXT,
     black: GCONTEXT,
-) -> Result<(), ConnectionErrorOrX11Error> {
+) -> Result<(), ReplyError> {
     let screen = &conn.setup().roots[screen_num];
     let default_size = 300;
     let pixmap = conn.generate_id();
@@ -180,7 +180,7 @@ fn event_thread<C>(
     conn_arc: Arc<C>,
     windows: Vec<Arc<Mutex<Window>>>,
     white: GCONTEXT,
-) -> Result<(), ConnectionErrorOrX11Error>
+) -> Result<(), ReplyError>
 where
     C: Connection + Send + Sync + 'static,
 {

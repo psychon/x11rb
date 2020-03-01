@@ -1,7 +1,7 @@
 //! Cookies are handles to future replies or errors from the X11 server.
 
 use crate::connection::{DiscardMode, RequestConnection, RequestKind, SequenceNumber};
-use crate::errors::{ConnectionError, ConnectionErrorOrX11Error, ParseError};
+use crate::errors::{ConnectionError, ReplyError, ParseError};
 use crate::generated::xproto::ListFontsWithInfoReply;
 use crate::utils::{Buffer, RawFdContainer};
 use crate::x11_utils::GenericError;
@@ -162,7 +162,7 @@ where
     }
 
     /// Get the raw reply that the server sent.
-    pub fn raw_reply(self) -> Result<Buffer, ConnectionErrorOrX11Error> {
+    pub fn raw_reply(self) -> Result<Buffer, ReplyError> {
         let conn = self.raw_cookie.connection;
         Ok(conn.wait_for_reply_or_error(self.raw_cookie.into_sequence_number())?)
     }
@@ -174,7 +174,7 @@ where
     }
 
     /// Get the reply that the server sent.
-    pub fn reply(self) -> Result<R, ConnectionErrorOrX11Error> {
+    pub fn reply(self) -> Result<R, ReplyError> {
         Ok(self.raw_reply()?.try_into()?)
     }
 
@@ -236,13 +236,13 @@ where
     }
 
     /// Get the raw reply that the server sent.
-    pub fn raw_reply(self) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
+    pub fn raw_reply(self) -> Result<(Buffer, Vec<RawFdContainer>), ReplyError> {
         let conn = self.raw_cookie.connection;
         Ok(conn.wait_for_reply_with_fds(self.raw_cookie.into_sequence_number())?)
     }
 
     /// Get the reply that the server sent.
-    pub fn reply(self) -> Result<R, ConnectionErrorOrX11Error> {
+    pub fn reply(self) -> Result<R, ReplyError> {
         Ok(self.raw_reply()?.try_into()?)
     }
 }
@@ -272,7 +272,7 @@ impl<C> Iterator for ListFontsWithInfoCookie<'_, C>
 where
     C: RequestConnection + ?Sized,
 {
-    type Item = Result<ListFontsWithInfoReply, ConnectionErrorOrX11Error>;
+    type Item = Result<ListFontsWithInfoReply, ReplyError>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let cookie = match self.0.take() {
@@ -287,7 +287,7 @@ where
             Ok(v) => v,
         };
         let reply: Result<ListFontsWithInfoReply, ParseError> = reply.try_into();
-        let reply = reply.map_err(ConnectionErrorOrX11Error::from);
+        let reply = reply.map_err(ReplyError::from);
         if reply.is_ok() {
             // Is this an indicator that no more replies follow?
             if !reply.as_ref().unwrap().name.is_empty() {

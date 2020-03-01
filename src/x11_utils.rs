@@ -337,7 +337,7 @@ macro_rules! bitmask_binop {
 /// If we need to use multiple atoms, one would normally write code such as
 /// ```
 /// # use x11rb::generated::xproto::{ATOM, ConnectionExt, InternAtomReply};
-/// # use x11rb::errors::{ConnectionError, ConnectionErrorOrX11Error};
+/// # use x11rb::errors::{ConnectionError, ReplyError};
 /// # use x11rb::cookie::Cookie;
 /// #[allow(non_snake_case)]
 /// pub struct AtomCollection {
@@ -368,7 +368,7 @@ macro_rules! bitmask_binop {
 /// impl<'c, Conn> AtomCollectionCookie<'c, Conn>
 /// where Conn: ConnectionExt
 /// {
-///     pub fn reply(self) -> Result<AtomCollection, ConnectionErrorOrX11Error> {
+///     pub fn reply(self) -> Result<AtomCollection, ReplyError> {
 ///         Ok(AtomCollection {
 ///             _NET_WM_NAME: self._NET_WM_NAME.reply()?.atom,
 ///             _NET_WM_ICON: self._NET_WM_ICON.reply()?.atom,
@@ -414,7 +414,7 @@ macro_rules! atom_manager {
         }
 
         impl<'a, C: ::x11rb::generated::xproto::ConnectionExt> $B<'a, C> {
-            pub fn reply(self) -> ::std::result::Result<$A, ::x11rb::errors::ConnectionErrorOrX11Error> {
+            pub fn reply(self) -> ::std::result::Result<$A, ::x11rb::errors::ReplyError> {
                 Ok($A {
                     $(
                         $x: self.$x.reply()?.atom,

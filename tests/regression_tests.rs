@@ -5,7 +5,7 @@ use std::ops::Deref;
 
 use x11rb::connection::{DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
-use x11rb::errors::{ConnectionError, ConnectionErrorOrX11Error, ParseError};
+use x11rb::errors::{ConnectionError, ReplyError, ParseError};
 use x11rb::generated::xproto::{
     ClientMessageData, ConnectionExt, KeymapNotifyEvent, QueryExtensionReply, Segment,
     SetupAuthenticate,
@@ -103,7 +103,7 @@ impl RequestConnection for FakeConnection {
     fn wait_for_reply_or_error(
         &self,
         _sequence: SequenceNumber,
-    ) -> Result<Buffer, ConnectionErrorOrX11Error> {
+    ) -> Result<Buffer, ReplyError> {
         unimplemented!()
     }
 
@@ -114,7 +114,7 @@ impl RequestConnection for FakeConnection {
     fn wait_for_reply_with_fds(
         &self,
         _sequence: SequenceNumber,
-    ) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error> {
+    ) -> Result<(Buffer, Vec<RawFdContainer>), ReplyError> {
         unimplemented!()
     }
 
@@ -132,7 +132,7 @@ impl RequestConnection for FakeConnection {
 }
 
 #[test]
-fn test_poly_segment() -> Result<(), ConnectionErrorOrX11Error> {
+fn test_poly_segment() -> Result<(), ReplyError> {
     let conn = FakeConnection::default();
     let drawable = 42;
     let gc = 0x1337;

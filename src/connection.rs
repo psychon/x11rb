@@ -41,7 +41,7 @@
 //! | Ignore | `Cookie::discard_reply_and_errors` | Just drop the cookie      |
 
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ConnectionError, ConnectionErrorOrX11Error, ParseError};
+use crate::errors::{ConnectionError, ReplyError, ParseError};
 use crate::generated::xproto::{QueryExtensionReply, Setup};
 use crate::utils::{Buffer, RawFdContainer};
 use crate::x11_utils::{GenericError, GenericEvent};
@@ -168,7 +168,7 @@ pub trait RequestConnection {
     fn wait_for_reply_or_error(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<Buffer, ConnectionErrorOrX11Error>;
+    ) -> Result<Buffer, ReplyError>;
 
     /// Wait for the reply to a request.
     ///
@@ -187,7 +187,7 @@ pub trait RequestConnection {
     fn wait_for_reply_with_fds(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<(Buffer, Vec<RawFdContainer>), ConnectionErrorOrX11Error>;
+    ) -> Result<(Buffer, Vec<RawFdContainer>), ReplyError>;
 
     /// Check whether a request that does not have a reply caused an X11 error.
     ///
@@ -239,7 +239,7 @@ pub trait RequestConnection {
     ///     #    unimplemented!()
     ///     # }
     ///     # fn wait_for_reply_or_error(&self, sequence: SequenceNumber)
-    ///     # -> Result<Buffer, x11rb::errors::ConnectionErrorOrX11Error> {
+    ///     # -> Result<Buffer, x11rb::errors::ReplyError> {
     ///     #    unimplemented!()
     ///     # }
     ///     # fn wait_for_reply(&self, sequence: SequenceNumber)
@@ -247,7 +247,7 @@ pub trait RequestConnection {
     ///     #    unimplemented!()
     ///     # }
     ///     # fn wait_for_reply_with_fds(&self, sequence: SequenceNumber)
-    ///     # -> Result<(Buffer, Vec<RawFdContainer>), x11rb::errors::ConnectionErrorOrX11Error> {
+    ///     # -> Result<(Buffer, Vec<RawFdContainer>), x11rb::errors::ReplyError> {
     ///     #    unimplemented!()
     ///     # }
     ///     # fn check_for_error(&self, sequence: SequenceNumber)
