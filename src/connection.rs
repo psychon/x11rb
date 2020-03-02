@@ -157,7 +157,10 @@ pub trait RequestConnection {
     ///
     /// The returned object is guaranteed to have a non-zero `present` field. Extensions that are
     /// not present are instead returned as `None`.
-    fn extension_information(&self, extension_name: &'static str) -> Option<QueryExtensionReply>;
+    fn extension_information(
+        &self,
+        extension_name: &'static str,
+    ) -> Result<Option<QueryExtensionReply>, ConnectionError>;
 
     /// Wait for the reply to a request.
     ///
@@ -232,7 +235,7 @@ pub trait RequestConnection {
     ///     #    unimplemented!()
     ///     # }
     ///     # fn extension_information(&self, ext: &'static str)
-    ///     # -> Option<x11rb::generated::xproto::QueryExtensionReply> {
+    ///     # -> Result<Option<x11rb::generated::xproto::QueryExtensionReply>, ConnectionError> {
     ///     #    unimplemented!()
     ///     # }
     ///     # fn wait_for_reply_or_error(&self, sequence: SequenceNumber)

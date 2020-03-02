@@ -17,7 +17,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (conn, screen_num) = x11rb::connect(None)?;
     let screen = &conn.setup().roots[screen_num];
 
-    let present_info = match conn.extension_information(present::X11_EXTENSION_NAME) {
+    let present_info = match conn.extension_information(present::X11_EXTENSION_NAME)? {
         Some(info) => info,
         None => {
             eprintln!("Present extension is not supported");

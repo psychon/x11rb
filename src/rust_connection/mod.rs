@@ -260,7 +260,10 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         self.inner.lock().unwrap().discard_reply(sequence, mode);
     }
 
-    fn extension_information(&self, extension_name: &'static str) -> Option<QueryExtensionReply> {
+    fn extension_information(
+        &self,
+        extension_name: &'static str,
+    ) -> Result<Option<QueryExtensionReply>, ConnectionError> {
         self.extension_information
             .extension_information(self, extension_name)
     }

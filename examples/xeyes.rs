@@ -284,6 +284,7 @@ fn main() {
     let mut window_size = (700, 500);
     let has_shape = conn
         .extension_information(shape::X11_EXTENSION_NAME)
+        .expect("failed to get extension information")
         .is_some();
     let win_id = setup_window(
         conn,

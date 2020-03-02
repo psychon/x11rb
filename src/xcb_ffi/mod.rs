@@ -353,7 +353,10 @@ impl RequestConnection for XCBConnection {
         }
     }
 
-    fn extension_information(&self, extension_name: &'static str) -> Option<QueryExtensionReply> {
+    fn extension_information(
+        &self,
+        extension_name: &'static str,
+    ) -> Result<Option<QueryExtensionReply>, ConnectionError> {
         self.ext_info.extension_information(self, extension_name)
     }
 
