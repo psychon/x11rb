@@ -1,6 +1,6 @@
 use crate::connection::RequestConnection;
 use crate::errors::{ConnectError, ReplyOrIdError};
-use crate::generated::xc_misc::ConnectionExt as _;
+use crate::generated::xc_misc::{self, ConnectionExt as _};
 
 /// An allocator for X11 IDs.
 ///
@@ -42,8 +42,13 @@ impl IDAllocator {
         conn: &impl RequestConnection,
     ) -> Result<u32, ReplyOrIdError> {
         if self.next_id > self.max_id {
-            // TODO: Check if XC-MISC is available.
-
+            if conn
+                .extension_information(xc_misc::X11_EXTENSION_NAME)?
+                .is_none()
+            {
+                // IDs are exhausted and XC-MISC is not available
+                return Err(ReplyOrIdError::IdsExhausted);
+            }
             // Send an XC-MISC GetXIDRange request.
             let xidrange = conn.xc_misc_get_xidrange()?.reply()?;
             let (start, count) = (xidrange.start_id, xidrange.count);
@@ -169,10 +174,10 @@ mod test {
         fn extension_information(
             &self,
             _extension_name: &'static str,
-        ) -> Option<QueryExtensionReply> {
+        ) -> Result<Option<QueryExtensionReply>, ConnectionError> {
             #[allow(trivial_casts, clippy::unnecessary_cast)]
             let present = true as _;
-            self.0.as_ref().map(|_| QueryExtensionReply {
+            Ok(self.0.as_ref().map(|_| QueryExtensionReply {
                 response_type: 1,
                 sequence: 0,
                 length: 0,
@@ -180,7 +185,7 @@ mod test {
                 major_opcode: 127,
                 first_event: 0,
                 first_error: 0,
-            })
+            }))
         }
 
         fn wait_for_reply_or_error(&self, _sequence: SequenceNumber) -> Result<Buffer, ReplyError> {
