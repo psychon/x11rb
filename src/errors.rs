@@ -223,3 +223,47 @@ impl From<GenericError> for ReplyError {
         Self::X11Error(err)
     }
 }
+
+/// An error caused by some request or by the exhaustion of IDs.
+#[derive(Debug)]
+pub enum ReplyOrIdError {
+    /// All available IDs have been exhausted.
+    IdsExhausted,
+    /// Some error occurred on the X11 connection.
+    ConnectionError(ConnectionError),
+    /// The X11 server sent an error in response to a XC-MISC request.
+    X11Error(GenericError),
+}
+
+impl std::fmt::Display for ReplyOrIdError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            ReplyOrIdError::IdsExhausted => f.write_str("X11 IDs have been exhausted"),
+            ReplyOrIdError::ConnectionError(e) => write!(f, "{}", e),
+            ReplyOrIdError::X11Error(e) => write!(f, "X11 error {:?}", e),
+        }
+    }
+}
+
+impl Error for ReplyOrIdError {}
+
+impl From<ConnectionError> for ReplyOrIdError {
+    fn from(err: ConnectionError) -> Self {
+        ReplyOrIdError::ConnectionError(err)
+    }
+}
+
+impl From<GenericError> for ReplyOrIdError {
+    fn from(err: GenericError) -> Self {
+        ReplyOrIdError::X11Error(err)
+    }
+}
+
+impl From<ReplyError> for ReplyOrIdError {
+    fn from(err: ReplyError) -> Self {
+        match err {
+            ReplyError::ConnectionError(err) => ReplyOrIdError::ConnectionError(err),
+            ReplyError::X11Error(err) => ReplyOrIdError::X11Error(err),
+        }
+    }
+}

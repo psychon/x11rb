@@ -22,7 +22,7 @@ extern crate x11rb;
 use std::error::Error;
 
 use x11rb::connection::{Connection, SequenceNumber};
-use x11rb::errors::{ConnectionError, ReplyError};
+use x11rb::errors::{ConnectionError, ReplyError, ReplyOrIdError};
 use x11rb::generated::xproto::{self, *};
 use x11rb::wrapper::{ConnectionExt as _, LazyAtom};
 use x11rb::x11_utils::Event;
@@ -420,7 +420,7 @@ fn example4() -> Result<(), Box<dyn Error>> {
     let screen = &conn.setup().roots[screen_num];
 
     // Ask for our window's Id
-    let win = conn.generate_id();
+    let win = conn.generate_id()?;
 
     // Create the window
     conn.create_window(
@@ -555,7 +555,7 @@ fn example5() -> Result<(), Box<dyn Error>> {
 
     // Create a black graphic context for drawing in the foreground.
     let win = screen.root;
-    let black = conn.generate_id();
+    let black = conn.generate_id()?;
     let values = CreateGCAux::default().foreground(screen.black_pixel);
     conn.create_gc(black, win, &values)?;
 
@@ -774,14 +774,14 @@ fn example6() -> Result<(), Box<dyn Error>> {
     // Create black (foreground) graphic context
     let win = screen.root;
 
-    let foreground = conn.generate_id();
+    let foreground = conn.generate_id()?;
     let values = CreateGCAux::default()
         .foreground(screen.black_pixel)
         .graphics_exposures(0);
     conn.create_gc(foreground, win, &values)?;
 
     // Ask for our window's Id
-    let win = conn.generate_id();
+    let win = conn.generate_id()?;
 
     // Create the window
     let values = CreateWindowAux::default()
@@ -863,7 +863,7 @@ fn example_expose<C: Connection>(
     screen: &Screen,
 ) -> Result<(), Box<dyn Error>> {
     let values = CreateWindowAux::default().event_mask(EventMask::Exposure);
-    let win = conn.generate_id();
+    let win = conn.generate_id()?;
     conn.create_window(
         depth,
         win,
@@ -889,7 +889,7 @@ fn example_expose<C: Connection>(
 fn example_or<C: Connection>(conn: &C, depth: u8, screen: &Screen) -> Result<(), Box<dyn Error>> {
     let values =
         CreateWindowAux::default().event_mask(EventMask::Exposure | EventMask::ButtonPress);
-    let win = conn.generate_id();
+    let win = conn.generate_id()?;
     conn.create_window(
         depth,
         win,
@@ -1295,7 +1295,7 @@ fn example7() -> Result<(), Box<dyn Error>> {
     let screen = &conn.setup().roots[screen_num];
 
     // Ask for our window's Id
-    let win = conn.generate_id();
+    let win = conn.generate_id()?;
 
     // Create the window
     let values = CreateWindowAux::default()
@@ -1456,7 +1456,7 @@ fn example_assign_font<C: Connection>(
     window: WINDOW,
     font: FONT,
 ) -> Result<(), Box<dyn Error>> {
-    let gc = conn.generate_id();
+    let gc = conn.generate_id()?;
     let values = CreateGCAux::default()
         .foreground(screen.black_pixel)
         .background(screen.white_pixel)
@@ -1511,12 +1511,12 @@ fn gc_font_get<C: Connection>(
     screen: &Screen,
     window: WINDOW,
     font_name: &str,
-) -> Result<GCONTEXT, ReplyError> {
-    let font = conn.generate_id();
+) -> Result<GCONTEXT, ReplyOrIdError> {
+    let font = conn.generate_id()?;
 
     conn.open_font(font, font_name.as_bytes())?;
 
-    let gc = conn.generate_id();
+    let gc = conn.generate_id()?;
     let values = CreateGCAux::default()
         .foreground(screen.black_pixel)
         .background(screen.white_pixel)
@@ -1539,7 +1539,7 @@ fn example8() -> Result<(), Box<dyn Error>> {
     const HEIGHT: u16 = 100;
 
     // Creating the window
-    let window = conn.generate_id();
+    let window = conn.generate_id()?;
     let values = CreateWindowAux::default()
         .background_pixel(screen.white_pixel)
         .event_mask(
@@ -1651,7 +1651,7 @@ fn example9() -> Result<(), Box<dyn Error>> {
     let screen = &conn.setup().roots[screen_num];
 
     // Ask for our window's Id
-    let win = conn.generate_id();
+    let win = conn.generate_id()?;
 
     // Create the window
     conn.create_window(
@@ -2051,8 +2051,8 @@ fn example_create_colormap<C: Connection>(
     conn: &C,
     win: WINDOW,
     screen: &Screen,
-) -> Result<(), ReplyError> {
-    let cmap = conn.generate_id();
+) -> Result<(), ReplyOrIdError> {
+    let cmap = conn.generate_id()?;
     conn.create_colormap(ColormapAlloc::None, cmap, win, screen.root_visual)?;
 
     Ok(())
@@ -2093,8 +2093,8 @@ fn example_fill_colormap<C: Connection>(
     conn: &C,
     win: WINDOW,
     screen: &Screen,
-) -> Result<(), ReplyError> {
-    let cmap = conn.generate_id();
+) -> Result<(), ReplyOrIdError> {
+    let cmap = conn.generate_id()?;
     conn.create_colormap(ColormapAlloc::None, cmap, win, screen.root_visual)?;
     let _rep = conn.alloc_color(cmap, 65535, 0, 0)?.reply()?;
 
@@ -2246,12 +2246,12 @@ fn example_create_glyph_cursor<C: Connection>(
     conn: &C,
     win: WINDOW,
     screen: &Screen,
-) -> Result<(), ReplyError> {
-    let font = conn.generate_id();
+) -> Result<(), ReplyOrIdError> {
+    let font = conn.generate_id()?;
     conn.open_font(font, b"cursor")?;
 
-    let cursor = conn.generate_id();
-    conn.create_glyph_cursor(cursor, font, font, 58, 58 + 1, 0, 0, 0, 0, 0, 0);
+    let cursor = conn.generate_id()?;
+    conn.create_glyph_cursor(cursor, font, font, 58, 58 + 1, 0, 0, 0, 0, 0, 0)?;
 
     Ok(())
 }
@@ -2307,7 +2307,7 @@ fn button_draw<C: Connection>(
     x1: i16,
     y1: i16,
     label: &str,
-) -> Result<(), ReplyError> {
+) -> Result<(), ReplyOrIdError> {
     let inset = 2;
     let gc = gc_font_get(conn, screen, window, "7x13")?;
     let width = 7 * label.len() + 2 * (inset + 1);
@@ -2344,11 +2344,11 @@ fn cursor_set<C: Connection>(
     screen: &Screen,
     window: WINDOW,
     cursor_id: u16,
-) -> Result<(), ReplyError> {
-    let font = conn.generate_id();
+) -> Result<(), ReplyOrIdError> {
+    let font = conn.generate_id()?;
     conn.open_font(font, b"cursor")?;
 
-    let cursor = conn.generate_id();
+    let cursor = conn.generate_id()?;
     conn.create_glyph_cursor(
         cursor,
         font,
@@ -2363,7 +2363,7 @@ fn cursor_set<C: Connection>(
         0,
     )?;
 
-    let gc = conn.generate_id();
+    let gc = conn.generate_id()?;
     let values = CreateGCAux::default()
         .foreground(screen.black_pixel)
         .background(screen.black_pixel)
@@ -2389,7 +2389,7 @@ fn example10() -> Result<(), Box<dyn Error>> {
     let screen = &conn.setup().roots[screen_num];
 
     // Creating the window
-    let window = conn.generate_id();
+    let window = conn.generate_id()?;
     let values = CreateWindowAux::default()
         .background_pixel(screen.white_pixel)
         .event_mask(EventMask::KeyRelease | EventMask::ButtonPress | EventMask::Exposure);
@@ -2716,12 +2716,12 @@ fn example_get_visual2<C: Connection>(conn: &C, screen_num: usize) {
 fn example_create_default_gc<C: Connection>(
     conn: &C,
     screen_num: usize,
-) -> Result<GCONTEXT, ReplyError> {
+) -> Result<GCONTEXT, ReplyOrIdError> {
     let screen = &conn.setup().roots[screen_num];
     let values = CreateGCAux::default()
         .foreground(screen.black_pixel)
         .background(screen.white_pixel);
-    let gc = conn.generate_id();
+    let gc = conn.generate_id()?;
     conn.create_gc(gc, screen.root, &values)?;
     Ok(gc)
 }

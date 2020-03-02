@@ -96,7 +96,10 @@ impl RequestConnection for FakeConnection {
         // Just ignore this
     }
 
-    fn extension_information(&self, _extension_name: &'static str) -> Option<QueryExtensionReply> {
+    fn extension_information(
+        &self,
+        _extension_name: &'static str,
+    ) -> Result<Option<QueryExtensionReply>, ConnectionError> {
         unimplemented!()
     }
 

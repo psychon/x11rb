@@ -41,7 +41,7 @@
 //! | Ignore | `Cookie::discard_reply_and_errors` | Just drop the cookie      |
 
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ConnectionError, ParseError, ReplyError};
+use crate::errors::{ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::generated::xproto::{QueryExtensionReply, Setup};
 use crate::utils::{Buffer, RawFdContainer};
 use crate::x11_utils::{GenericError, GenericEvent};
@@ -157,7 +157,10 @@ pub trait RequestConnection {
     ///
     /// The returned object is guaranteed to have a non-zero `present` field. Extensions that are
     /// not present are instead returned as `None`.
-    fn extension_information(&self, extension_name: &'static str) -> Option<QueryExtensionReply>;
+    fn extension_information(
+        &self,
+        extension_name: &'static str,
+    ) -> Result<Option<QueryExtensionReply>, ConnectionError>;
 
     /// Wait for the reply to a request.
     ///
@@ -232,7 +235,7 @@ pub trait RequestConnection {
     ///     #    unimplemented!()
     ///     # }
     ///     # fn extension_information(&self, ext: &'static str)
-    ///     # -> Option<x11rb::generated::xproto::QueryExtensionReply> {
+    ///     # -> Result<Option<x11rb::generated::xproto::QueryExtensionReply>, ConnectionError> {
     ///     #    unimplemented!()
     ///     # }
     ///     # fn wait_for_reply_or_error(&self, sequence: SequenceNumber)
@@ -397,7 +400,7 @@ pub trait Connection: RequestConnection {
     /// This method can, for example, be used for creating a new window. First, this method is
     /// called to generate an identifier. Next, `generated::xproto::create_window` can be called to
     /// actually create the window.
-    fn generate_id(&self) -> u32;
+    fn generate_id(&self) -> Result<u32, ReplyOrIdError>;
 }
 
 /// Does a request have a response?

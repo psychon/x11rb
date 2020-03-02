@@ -3,7 +3,7 @@
 extern crate x11rb;
 
 use x11rb::connection::{Connection, RequestConnection as _};
-use x11rb::errors::ConnectionError;
+use x11rb::errors::{ConnectionError, ReplyOrIdError};
 use x11rb::generated::shape::{self, ConnectionExt as _};
 use x11rb::generated::xproto::*;
 use x11rb::wrapper::{ConnectionExt as _, LazyAtom};
@@ -171,8 +171,8 @@ fn create_pixmap_wrapper<C: Connection>(
     depth: u8,
     drawable: DRAWABLE,
     size: (u16, u16),
-) -> Result<FreePixmap<C>, ConnectionError> {
-    let pixmap = conn.generate_id();
+) -> Result<FreePixmap<C>, ReplyOrIdError> {
+    let pixmap = conn.generate_id()?;
     conn.create_pixmap(depth, pixmap, drawable, size.0, size.1)?;
     Ok(FreePixmap(conn, pixmap))
 }
@@ -181,7 +181,7 @@ fn shape_window<C: Connection>(
     conn: &C,
     win_id: WINDOW,
     window_size: (u16, u16),
-) -> Result<(), ConnectionError> {
+) -> Result<(), ReplyOrIdError> {
     // Create a pixmap for the shape
     let pixmap = create_pixmap_wrapper(conn, 1, win_id, window_size)?;
 
@@ -213,8 +213,8 @@ fn setup_window<C: Connection>(
     window_size: (u16, u16),
     wm_protocols: ATOM,
     wm_delete_window: ATOM,
-) -> Result<WINDOW, ConnectionError> {
-    let win_id = conn.generate_id();
+) -> Result<WINDOW, ReplyOrIdError> {
+    let win_id = conn.generate_id()?;
     let win_aux = CreateWindowAux::new()
         .event_mask(EventMask::Exposure | EventMask::StructureNotify | EventMask::PointerMotion)
         .background_pixel(screen.white_pixel);
@@ -260,8 +260,8 @@ fn create_gc_with_foreground<C: Connection>(
     conn: &C,
     win_id: WINDOW,
     foreground: u32,
-) -> Result<GCONTEXT, ConnectionError> {
-    let gc = conn.generate_id();
+) -> Result<GCONTEXT, ReplyOrIdError> {
+    let gc = conn.generate_id()?;
     let gc_aux = CreateGCAux::new()
         .graphics_exposures(0)
         .foreground(foreground);
@@ -284,6 +284,7 @@ fn main() {
     let mut window_size = (700, 500);
     let has_shape = conn
         .extension_information(shape::X11_EXTENSION_NAME)
+        .expect("failed to get extension information")
         .is_some();
     let win_id = setup_window(
         conn,

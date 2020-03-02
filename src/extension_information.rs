@@ -1,8 +1,11 @@
-use crate::connection::RequestConnection;
-use crate::generated::xproto::{ConnectionExt, QueryExtensionReply};
-use std::collections::HashMap;
-/// Helper for implementing `RequestConnection::extension_information()`.
+//! Helper for implementing `RequestConnection::extension_information()`.
+
+use std::collections::{hash_map::Entry as HashMapEntry, HashMap};
 use std::sync::Mutex;
+
+use crate::connection::RequestConnection;
+use crate::errors::{ConnectionError, ReplyError};
+use crate::generated::xproto::{ConnectionExt, QueryExtensionReply};
 
 /// Helper for implementing `RequestConnection::extension_information()`.
 ///
@@ -19,28 +22,28 @@ impl ExtensionInformation {
         &self,
         conn: &C,
         extension_name: &'static str,
-    ) -> Option<QueryExtensionReply> {
-        // If locking the mutex fails, just return None
-        self.0.lock().ok().and_then(|mut map| {
-            *map.entry(extension_name)
-                // Insert the entry if it does not yet exist and get a copy
-                .or_insert_with(|| {
-                    let info = conn.query_extension(extension_name.as_bytes()).ok();
-                    let info = info.and_then(|c| c.reply().ok());
-                    if let Some(info) = info {
-                        // If the extension is not present, we return None, else we box it
-                        #[allow(trivial_numeric_casts)]
-                        let present = info.present as u8;
-                        if present == 0 {
-                            None
-                        } else {
-                            Some(info)
-                        }
-                    } else {
-                        // There was an error. Pretend the extension is not present.
-                        None
-                    }
-                })
-        })
+    ) -> Result<Option<QueryExtensionReply>, ConnectionError> {
+        let mut map = self.0.lock().unwrap();
+        match map.entry(extension_name) {
+            // Extension already checked, return the cached value
+            HashMapEntry::Occupied(entry) => Ok(*entry.get()),
+            // Extension not checked, check now and cache the result
+            HashMapEntry::Vacant(entry) => {
+                let info = conn
+                    .query_extension(extension_name.as_bytes())?
+                    .reply()
+                    .map_err(|e| match e {
+                        ReplyError::ConnectionError(e) => e,
+                        // The X11 protocol specification does not specify any error
+                        // for the QueryExtension request, so this should not happen.
+                        ReplyError::X11Error(_) => ConnectionError::UnknownError,
+                    })?;
+                // If the extension is not present, we return None, else we box it
+                #[allow(trivial_numeric_casts)]
+                let present = info.present as u8;
+                let info = if present == 0 { None } else { Some(info) };
+                Ok(*entry.insert(info))
+            }
+        }
     }
 }

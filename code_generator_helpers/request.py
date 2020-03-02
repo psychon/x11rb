@@ -121,7 +121,7 @@ def pick_return_type(module, obj, name, need_lifetime):
 def request_implementation(module, obj, name, fds, fds_is_list):
     """Generate the code that actually serialises all the arguments."""
     if module.namespace.is_ext:
-        module.out('let extension_information = conn.extension_information(X11_EXTENSION_NAME)')
+        module.out('let extension_information = conn.extension_information(X11_EXTENSION_NAME)?')
         module.out.indent(".ok_or(ConnectionError::UnsupportedExtension)?;")
 
     # Now generate code for serialising the request. The request bytes

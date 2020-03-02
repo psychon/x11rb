@@ -9,7 +9,7 @@ use std::ptr::null_mut;
 use libc::{mmap, MAP_FAILED, MAP_SHARED, PROT_READ, PROT_WRITE};
 
 use x11rb::connection::Connection;
-use x11rb::errors::{ConnectionError, ReplyError};
+use x11rb::errors::{ConnectionError, ReplyError, ReplyOrIdError};
 use x11rb::generated::shm::{self, ConnectionExt as _};
 use x11rb::generated::xproto::{self, ConnectionExt as _, ImageFormat};
 
@@ -25,7 +25,7 @@ impl<C: Connection> Drop for FreePixmap<'_, C> {
 /// Get the supported SHM version from the X11 server
 fn check_shm_version<C: Connection>(conn: &C) -> Result<Option<(u16, u16)>, ReplyError> {
     if conn
-        .extension_information(shm::X11_EXTENSION_NAME)
+        .extension_information(shm::X11_EXTENSION_NAME)?
         .is_none()
     {
         return Ok(None);
@@ -42,14 +42,14 @@ fn get_shared_memory_content_at_offset<C: Connection>(
     screen: &xproto::Screen,
     shmseg: shm::SEG,
     offset: u32,
-) -> Result<Vec<u8>, ReplyError> {
+) -> Result<Vec<u8>, ReplyOrIdError> {
     let width = match screen.root_depth {
         24 => 1,
         16 => 2,
         8 => 4,
         _ => panic!("I do not know how to handle depth {}", screen.root_depth),
     };
-    let pixmap = conn.generate_id();
+    let pixmap = conn.generate_id()?;
     conn.shm_create_pixmap(
         pixmap,
         screen.root,
@@ -70,7 +70,7 @@ fn use_shared_mem<C: Connection>(
     conn: &C,
     screen_num: usize,
     shmseg: shm::SEG,
-) -> Result<(), ReplyError> {
+) -> Result<(), ReplyOrIdError> {
     let screen = &conn.setup().roots[screen_num];
 
     let content = get_shared_memory_content_at_offset(conn, screen, shmseg, 0)?;
@@ -96,8 +96,8 @@ fn make_file() -> IOResult<File> {
     Ok(file)
 }
 
-fn send_fd<C: Connection>(conn: &C, screen_num: usize, file: File) -> Result<(), ReplyError> {
-    let shmseg = conn.generate_id();
+fn send_fd<C: Connection>(conn: &C, screen_num: usize, file: File) -> Result<(), ReplyOrIdError> {
+    let shmseg = conn.generate_id()?;
     conn.shm_attach_fd(shmseg, file, false)?;
 
     use_shared_mem(conn, screen_num, shmseg)?;
@@ -107,8 +107,8 @@ fn send_fd<C: Connection>(conn: &C, screen_num: usize, file: File) -> Result<(),
     Ok(())
 }
 
-fn receive_fd<C: Connection>(conn: &C, screen_num: usize) -> Result<(), ReplyError> {
-    let shmseg = conn.generate_id();
+fn receive_fd<C: Connection>(conn: &C, screen_num: usize) -> Result<(), ReplyOrIdError> {
+    let shmseg = conn.generate_id()?;
     let segment_size = TEMP_FILE_CONTENT.len() as _;
     let reply = conn
         .shm_create_segment(shmseg, segment_size, false)?
