@@ -20,12 +20,6 @@ impl std::fmt::Display for ParseError {
     }
 }
 
-impl From<std::convert::Infallible> for ParseError {
-    fn from(_: std::convert::Infallible) -> Self {
-        unreachable!()
-    }
-}
-
 impl From<std::num::TryFromIntError> for ParseError {
     fn from(_: std::num::TryFromIntError) -> Self {
         ParseError::ParseError

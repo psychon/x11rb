@@ -646,7 +646,7 @@ class Module(object):
 
     def _emit_serialize(self, obj, name, extra_name):
         # Emit code for serialising an event or an error into an [u8; 32]
-        self.out("impl From<&%s%s> for [u8; 32]{", self._name(name), extra_name)
+        self.out("impl From<&%s%s> for [u8; 32] {", self._name(name), extra_name)
         with Indent(self.out):
             self.out("fn from(input: &%s%s) -> Self {", self._name(name), extra_name)
             with Indent(self.out):
@@ -672,7 +672,7 @@ class Module(object):
                                         parts.append("%s_%d[%d]" % (field_name, i, n))
                         elif field.type.size == 1:
                             if is_bool(field.type):
-                                parts.append("(input.%s as u8)" % field_name)
+                                parts.append("u8::from(input.%s)" % field_name)
                             else:
                                 parts.append("input.%s" % field_name)
                         else:

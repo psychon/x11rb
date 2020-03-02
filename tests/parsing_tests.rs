@@ -31,10 +31,10 @@ fn get_setup_data() -> Vec<u8> {
     s.push(0); // min keycode
     s.push(0xff); // max keycode
     s.extend(&[0, 0, 0, 0]); // padding
-    assert_eq!(s.len(), header as usize * 4);
+    assert_eq!(s.len(), usize::from(header) * 4);
 
     s.extend("Vendor  ".bytes()); // vendor + padding
-    assert_eq!(s.len(), (header + vendor_len) as usize * 4);
+    assert_eq!(s.len(), usize::from(header + vendor_len) * 4);
 
     // Pixmap formats, we said above there is one entry
     s.push(15); // depth
@@ -75,7 +75,7 @@ fn get_setup_data() -> Vec<u8> {
     s.extend(&84u32.to_ne_bytes()); // blue mask
     s.extend(&[0, 0, 0, 0]); // padding
 
-    assert_eq!(s.len(), length as usize * 4);
+    assert_eq!(s.len(), usize::from(length) * 4);
 
     s
 }
