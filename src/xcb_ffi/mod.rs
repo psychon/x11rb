@@ -135,9 +135,9 @@ impl XCBConnection {
         let length = u16::from_ne_bytes([wrapper[6], wrapper[7]]);
 
         // The length is in four-byte-units after the known header
-        let length = length * 4 + 8;
+        let length = usize::from(length) * 4 + 8;
 
-        let slice = from_raw_parts(wrapper.as_ptr(), length.try_into()?);
+        let slice = from_raw_parts(wrapper.as_ptr(), length);
         let result = Setup::try_from(&*slice)?;
 
         Ok(result)
@@ -427,7 +427,7 @@ impl RequestConnection for XCBConnection {
         };
 
         // The number of FDs is in the second byte (= buffer[1]) in all replies.
-        let vector = unsafe { std::slice::from_raw_parts(fd_ptr, buffer[1] as usize) };
+        let vector = unsafe { std::slice::from_raw_parts(fd_ptr, usize::from(buffer[1])) };
         let vector = vector.iter().map(|&fd| RawFdContainer::new(fd)).collect();
 
         Ok((buffer, vector))

@@ -263,10 +263,10 @@ impl TryParse for bool {
 impl Serialize for bool {
     type Bytes = [u8; 1];
     fn serialize(&self) -> Self::Bytes {
-        [*self as u8]
+        [u8::from(*self)]
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        bytes.push(*self as u8);
+        bytes.push(u8::from(*self));
     }
 }
 

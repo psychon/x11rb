@@ -667,7 +667,7 @@ impl From<&GenericEvent> for KeyPressEvent {
         Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
     }
 }
-impl From<&KeyPressEvent> for [u8; 32]{
+impl From<&KeyPressEvent> for [u8; 32] {
     fn from(input: &KeyPressEvent) -> Self {
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
@@ -683,7 +683,7 @@ impl From<&KeyPressEvent> for [u8; 32]{
             input.response_type, input.detail, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
             root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
             child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], (input.same_screen as u8), 0
+            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], u8::from(input.same_screen), 0
         ]
     }
 }
@@ -764,7 +764,7 @@ impl From<&GenericError> for RequestError {
         Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
     }
 }
-impl From<&RequestError> for [u8; 32]{
+impl From<&RequestError> for [u8; 32] {
     fn from(input: &RequestError) -> Self {
         let sequence = input.sequence.serialize();
         let bad_value = input.bad_value.serialize();
