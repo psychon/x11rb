@@ -24,6 +24,8 @@ impl Stream {
                 TCP_PORT_BASE + display,
             ))?))
         } else {
+            // On non-unix, this variable is not mutated.
+            #[allow(unused_mut)]
             let mut error = None;
 
             #[cfg(unix)]
