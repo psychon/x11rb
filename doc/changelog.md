@@ -1,3 +1,62 @@
+# Version 0.4.0 (2020-XX-XX)
+
+* Add support for the XKB and XInput extensions to the code generator.
+  * x11rb now supports the same X11 extension that libxcb supports!
+  * The `GetKbdByName`, `GetGeometry`, `SetGeometry`, `ListComponents` are not
+    correctly described by xcb-proto and thus still unsupported.
+* Add an `allow-unsafe-code` and `forbid(unsafe-code)` without this feature.
+* Add feature gates for individual X11 extensions.
+* Add `x11rb::connect()` for establishing a connection to an X11 server.
+  Depending on the `allow-unsafe-code` feature, this either returns a
+  `RustConnection` or an `XCBConnection`.
+* Make `RustConnection` fully functional and thread-safe.
+  * The only known missing features are FD-passing and XDM-AUTHORIZATION-1
+    support.
+  * This required a new dependency on the `gethostname` crate.
+* Add an `atom_manager!` macro.
+  * This macro allows to generate a struct that queries many atoms with a single
+    round-trip.
+* Add a `Serialize` trait for producing wire bytes from an in-memory
+  representation.
+  * This trait can be implemented for all types and slices, simplifying the
+    generated Rust code.
+  * Serialization is possible into a returned `Vec<u8>` or by appending into a
+    provided `&mut Vec<u8>`.
+* Add helpers to `GetPropertyReply` that simplify its interpretation.
+  * This adds `value8(&self)`, `value16(&self)` and `value32(&self)` methods
+    that check for the correct format and return an iterator over the value.
+* Add a function to create an `XCBConnection` from a raw pointer.
+* Introduce `Result`s in some places that previously ignored errors or paniced.
+* Split up `ConnectionError` into two enums, one for errors that can occur while
+  establishing a connection and another for errors on an already-established
+  connection.
+* Prefix request function names in the `ConnectionExt` traits with the extension
+  name. This is necessary since several extensions contain different versions of
+  the same request.
+* Rename `ConnectionErrorOrX11Error` to `ReplyError`.
+* Add `Connection::wait_for_event_with_sequence()` and
+  `Connection::poll_for_event_with_sequence()` that allow to get an event
+  together with its full sequence number.
+* General improvements to the documentation.
+* Emit correct `cargo:rerun-if-changed=` lines from `build.rs`.
+* Make `x11rb::utils::CSlice` safer.
+* Use `rustfmt`.
+* Add AppVeyor for Windows CI.
+* Changes to the generated code and the code generator.
+  * Implement `From` instead of `Into` in the generated code.
+  * Use better type names in the generated code, e.g. `WINDOW` instead of `u32`.
+  * Simplify and fix some warnings in the generated code without changing visible
+    behaviour.
+  * Change internal storage of unions in the generated code from `Vec` to fixed
+    length arrays.
+  * Fix xproto's `SetModifierMapping` request. The code generator was ignoring an
+    expression that required a multiplication with a constant value to get the
+    length of a list.
+  * Fix xproto's `SetupAuthenticate` and res's `ClientIdValue` serialization. An
+    expression in the XMl was ignored.
+
+Many thanks to @dalcde and @eduardosm for their valuable contributions.
+
 # Version 0.3.0 (2020-01-04)
 
 * Split out some types from `x11rb::connection` into their own modules.
