@@ -51,6 +51,9 @@ def rs_close(self):
     current_module.out.write_file(output_file)
     current_module = None
 
+    WITHOUT_FEATURE = ["bigreq", "ge", "xc_misc", "xproto"]
+    if self.namespace.header not in WITHOUT_FEATURE:
+        main_output_file("#[cfg(feature = \"%s\")]", self.namespace.header)
     main_output_file("pub mod %s;", self.namespace.header)
 
 

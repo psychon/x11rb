@@ -17,7 +17,10 @@ gethostname = "0.2.1"
 pkg-config = "0.3"
 
 [features]
-default = ["vendor-xcb-proto", "allow-unsafe-code"]
+default = [
+    "vendor-xcb-proto",
+    "allow-unsafe-code",
+]
 
 # Enable use of the vendored copy of xcb-proto. Without this feature, pkg-config
 # is used to find it instead. Without this feature, no stable API can be
@@ -27,3 +30,77 @@ vendor-xcb-proto = []
 # Without this feature, all uses of `unsafe` in the crate are forbidden via
 # #![deny(unsafe_code)]. This has the effect of disabling the XCB FFI bindings.
 allow-unsafe-code = []
+
+# Enable this feature to enable all the X11 extensions
+all-extensions = [
+    "composite",
+    "damage",
+    "dpms",
+    "dri2",
+    "dri3",
+    "glx",
+    "present",
+    "randr",
+    "record",
+    "render",
+    "res",
+    "screensaver",
+    "shape",
+    "shm",
+    "sync",
+    "xevie",
+    "xf86dri",
+    "xf86vidmode",
+    "xfixes",
+    "xinerama",
+    "xinput",
+    "xkb",
+    "xprint",
+    "xproto",
+    "xselinux",
+    "xtest",
+    "xv",
+    "xvmc",
+]
+
+# Features to enable individual X11 extensions
+composite = ["xfixes"]
+damage = ["xfixes"]
+dpms = []
+dri2 = []
+dri3 = []
+glx = []
+present = ["randr", "xfixes", "sync"]
+randr = ["render"]
+record = []
+render = []
+res = []
+screensaver = []
+shape = []
+shm = []
+sync = []
+xevie = []
+xf86dri = []
+xf86vidmode = []
+xfixes = ["render", "shape"]
+xinerama = []
+xinput = ["xfixes"]
+xkb = []
+xprint = []
+xproto = []
+xselinux = []
+xtest = []
+xv = ["shm"]
+xvmc = ["xv"]
+
+[[example]]
+name = "generic_events"
+required-features = ["present"]
+
+[[example]]
+name = "shared_memory"
+required-features = ["shm"]
+
+[[example]]
+name = "xeyes"
+required-features = ["shape"]
