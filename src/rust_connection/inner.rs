@@ -149,7 +149,7 @@ where
     /// Send a request to the X11 server.
     pub(crate) fn send_request(
         &mut self,
-        bufs: &[IoSlice],
+        bufs: &[IoSlice<'_>],
         kind: RequestKind,
     ) -> Result<SequenceNumber, std::io::Error> {
         if self.next_reply_expected + SequenceNumber::from(u16::max_value())

@@ -59,7 +59,7 @@ pub trait ConnectionExt: XProtoConnectionExt {
         property: u32,
         type_: u32,
         data: &[u8],
-    ) -> Result<VoidCookie<Self>, ConnectionError>
+    ) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
         A: Into<u8>,
     {
@@ -82,7 +82,7 @@ pub trait ConnectionExt: XProtoConnectionExt {
         property: u32,
         type_: u32,
         data: &[u16],
-    ) -> Result<VoidCookie<Self>, ConnectionError>
+    ) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
         A: Into<u8>,
     {
@@ -109,7 +109,7 @@ pub trait ConnectionExt: XProtoConnectionExt {
         property: u32,
         type_: u32,
         data: &[u32],
-    ) -> Result<VoidCookie<Self>, ConnectionError>
+    ) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
         A: Into<u8>,
     {

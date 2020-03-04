@@ -71,13 +71,13 @@ extern "C" {
     pub(crate) fn xcb_send_request64(
         c: *const xcb_connection_t,
         flags: c_int,
-        vector: *mut IoSlice,
+        vector: *mut IoSlice<'_>,
         request: *const xcb_protocol_request_t,
     ) -> u64;
     pub(crate) fn xcb_send_request_with_fds64(
         c: *const xcb_connection_t,
         flags: c_int,
-        vector: *mut IoSlice,
+        vector: *mut IoSlice<'_>,
         request: *const xcb_protocol_request_t,
         num_fds: c_uint,
         fds: *const c_int,
@@ -179,7 +179,7 @@ mod mock {
     pub(crate) unsafe fn xcb_send_request64(
         _c: *const xcb_connection_t,
         _flags: c_int,
-        _vector: *mut IoSlice,
+        _vector: *mut IoSlice<'_>,
         _request: *const xcb_protocol_request_t,
     ) -> u64 {
         unimplemented!();
@@ -188,7 +188,7 @@ mod mock {
     pub(crate) unsafe fn xcb_send_request_with_fds64(
         _c: *const xcb_connection_t,
         _flags: c_int,
-        _vector: *mut IoSlice,
+        _vector: *mut IoSlice<'_>,
         _request: *const xcb_protocol_request_t,
         _num_fds: c_uint,
         _fds: *const c_int,

@@ -15,7 +15,7 @@ pub enum ParseError {
 impl Error for ParseError {}
 
 impl std::fmt::Display for ParseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "Error while parsing (not enough data?)")
     }
 }
@@ -67,8 +67,12 @@ pub enum ConnectError {
 impl Error for ConnectError {}
 
 impl std::fmt::Display for ConnectError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        fn display(f: &mut std::fmt::Formatter, prefix: &str, value: &[u8]) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fn display(
+            f: &mut std::fmt::Formatter<'_>,
+            prefix: &str,
+            value: &[u8],
+        ) -> std::fmt::Result {
             match std::str::from_utf8(value).ok() {
                 Some(value) => write!(f, "{}: '{}'", prefix, value),
                 None => write!(f, "{}: {:?} [message is not utf8]", prefix, value),
@@ -139,7 +143,7 @@ pub enum ConnectionError {
 impl Error for ConnectionError {}
 
 impl std::fmt::Display for ConnectionError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ConnectionError::UnknownError => write!(f, "Unknown connection error"),
             ConnectionError::UnsupportedExtension => write!(f, "Unsupported extension"),
@@ -186,7 +190,7 @@ pub enum ReplyError {
 impl Error for ReplyError {}
 
 impl std::fmt::Display for ReplyError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ReplyError::ConnectionError(e) => write!(f, "{}", e),
             ReplyError::X11Error(e) => write!(f, "X11 error {:?}", e),
@@ -236,7 +240,7 @@ pub enum ReplyOrIdError {
 }
 
 impl std::fmt::Display for ReplyOrIdError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ReplyOrIdError::IdsExhausted => f.write_str("X11 IDs have been exhausted"),
             ReplyOrIdError::ConnectionError(e) => write!(f, "{}", e),

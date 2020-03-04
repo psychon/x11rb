@@ -106,15 +106,15 @@ def pick_return_type(module, obj, name, need_lifetime):
             result_type_trait = "%s<'c, Self, %sReply>" % (cookie, module._name(name))
             result_type_func = "%s<'c, Conn, %sReply>" % (cookie, module._name(name))
         else:
-            result_type_trait = "%s<Self, %sReply>" % (cookie, module._name(name))
-            result_type_func = "%s<Conn, %sReply>" % (cookie, module._name(name))
+            result_type_trait = "%s<'_, Self, %sReply>" % (cookie, module._name(name))
+            result_type_func = "%s<'_, Conn, %sReply>" % (cookie, module._name(name))
     else:
         if need_lifetime:
             result_type_trait = "VoidCookie<'c, Self>"
             result_type_func = "VoidCookie<'c, Conn>"
         else:
-            result_type_trait = "VoidCookie<Self>"
-            result_type_func = "VoidCookie<Conn>"
+            result_type_trait = "VoidCookie<'_, Self>"
+            result_type_func = "VoidCookie<'_, Conn>"
     return result_type_trait, result_type_func
 
 

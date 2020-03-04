@@ -62,19 +62,20 @@
 //! More examples can be found in the
 //! [examples](https://github.com/psychon/x11rb/tree/master/examples) directory.
 
-#![deny(missing_copy_implementations,
-        missing_debug_implementations,
-        //missing_docs,
-        private_doc_tests,
-        single_use_lifetimes,
-        trivial_casts,
-        trivial_numeric_casts,
-        unreachable_pub,
-        unused_extern_crates,
-        unused_import_braces,
-        unused_qualifications,
-        unused_results,
-        )]
+#![deny(
+    missing_copy_implementations,
+    missing_debug_implementations,
+    //missing_docs,
+    private_doc_tests,
+    rust_2018_idioms,
+    single_use_lifetimes,
+    trivial_casts,
+    trivial_numeric_casts,
+    unreachable_pub,
+    unused_import_braces,
+    unused_qualifications,
+    unused_results,
+)]
 #![cfg_attr(not(feature = "allow-unsafe-code"), forbid(unsafe_code))]
 
 pub mod utils;

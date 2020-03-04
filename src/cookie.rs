@@ -29,7 +29,7 @@ where
     ///
     /// This function should only be used by implementations of
     /// `Connection::send_request_without_reply`.
-    pub fn new(connection: &C, sequence_number: SequenceNumber) -> VoidCookie<C> {
+    pub fn new(connection: &C, sequence_number: SequenceNumber) -> VoidCookie<'_, C> {
         VoidCookie {
             connection,
             sequence_number,
@@ -98,7 +98,7 @@ where
     ///
     /// This function should only be used by implementations of
     /// `RequestConnection::send_request_with_reply`.
-    fn new(connection: &C, sequence_number: SequenceNumber) -> RawCookie<C> {
+    fn new(connection: &C, sequence_number: SequenceNumber) -> RawCookie<'_, C> {
         RawCookie {
             connection,
             sequence_number,
@@ -149,7 +149,7 @@ where
     ///
     /// This function should only be used by implementations of
     /// `RequestConnection::send_request_with_reply`.
-    pub fn new(connection: &C, sequence_number: SequenceNumber) -> Cookie<C, R> {
+    pub fn new(connection: &C, sequence_number: SequenceNumber) -> Cookie<'_, C, R> {
         Cookie {
             raw_cookie: RawCookie::new(connection, sequence_number),
             phantom: PhantomData,
@@ -223,7 +223,7 @@ where
     ///
     /// This function should only be used by implementations of
     /// `RequestConnection::send_request_with_reply`.
-    pub fn new(connection: &C, sequence_number: SequenceNumber) -> CookieWithFds<C, R> {
+    pub fn new(connection: &C, sequence_number: SequenceNumber) -> CookieWithFds<'_, C, R> {
         CookieWithFds {
             raw_cookie: RawCookie::new(connection, sequence_number),
             phantom: PhantomData,
@@ -258,7 +258,9 @@ impl<C> ListFontsWithInfoCookie<'_, C>
 where
     C: RequestConnection + ?Sized,
 {
-    pub(crate) fn new(cookie: Cookie<C, ListFontsWithInfoReply>) -> ListFontsWithInfoCookie<C> {
+    pub(crate) fn new(
+        cookie: Cookie<'_, C, ListFontsWithInfoReply>,
+    ) -> ListFontsWithInfoCookie<'_, C> {
         ListFontsWithInfoCookie(Some(cookie.raw_cookie))
     }
 

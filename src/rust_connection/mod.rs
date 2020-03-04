@@ -137,7 +137,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
     /// `send_request_without_reply()`.
     fn send_request(
         &self,
-        bufs: &[IoSlice],
+        bufs: &[IoSlice<'_>],
         fds: Vec<RawFdContainer>,
         kind: RequestKind,
     ) -> Result<SequenceNumber, ConnectionError> {
@@ -212,9 +212,9 @@ impl<R: Read, W: Write> RustConnection<R, W> {
 impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
     fn send_request_with_reply<Reply>(
         &self,
-        bufs: &[IoSlice],
+        bufs: &[IoSlice<'_>],
         fds: Vec<RawFdContainer>,
-    ) -> Result<Cookie<Self, Reply>, ConnectionError>
+    ) -> Result<Cookie<'_, Self, Reply>, ConnectionError>
     where
         Reply: TryFrom<Buffer, Error = ParseError>,
     {
@@ -229,9 +229,9 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
 
     fn send_request_with_reply_with_fds<Reply>(
         &self,
-        bufs: &[IoSlice],
+        bufs: &[IoSlice<'_>],
         fds: Vec<RawFdContainer>,
-    ) -> Result<CookieWithFds<Self, Reply>, ConnectionError>
+    ) -> Result<CookieWithFds<'_, Self, Reply>, ConnectionError>
     where
         Reply: TryFrom<(Buffer, Vec<RawFdContainer>), Error = ParseError>,
     {
@@ -244,9 +244,9 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
 
     fn send_request_without_reply(
         &self,
-        bufs: &[IoSlice],
+        bufs: &[IoSlice<'_>],
         fds: Vec<RawFdContainer>,
-    ) -> Result<VoidCookie<Self>, ConnectionError> {
+    ) -> Result<VoidCookie<'_, Self>, ConnectionError> {
         let mut storage = Default::default();
         let bufs = self.compute_length_field(bufs, &mut storage)?;
 
