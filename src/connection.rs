@@ -84,9 +84,9 @@ pub trait RequestConnection {
     /// In any case, the request may not be larger than the server's maximum request length.
     fn send_request_with_reply<R>(
         &self,
-        bufs: &[IoSlice],
+        bufs: &[IoSlice<'_>],
         fds: Vec<RawFdContainer>,
-    ) -> Result<Cookie<Self, R>, ConnectionError>
+    ) -> Result<Cookie<'_, Self, R>, ConnectionError>
     where
         R: TryFrom<Buffer, Error = ParseError>;
 
@@ -111,9 +111,9 @@ pub trait RequestConnection {
     /// In any case, the request may not be larger than the server's maximum request length.
     fn send_request_with_reply_with_fds<R>(
         &self,
-        bufs: &[IoSlice],
+        bufs: &[IoSlice<'_>],
         fds: Vec<RawFdContainer>,
-    ) -> Result<CookieWithFds<Self, R>, ConnectionError>
+    ) -> Result<CookieWithFds<'_, Self, R>, ConnectionError>
     where
         R: TryFrom<(Buffer, Vec<RawFdContainer>), Error = ParseError>;
 
@@ -138,9 +138,9 @@ pub trait RequestConnection {
     /// In any case, the request may not be larger than the server's maximum request length.
     fn send_request_without_reply(
         &self,
-        bufs: &[IoSlice],
+        bufs: &[IoSlice<'_>],
         fds: Vec<RawFdContainer>,
-    ) -> Result<VoidCookie<Self>, ConnectionError>;
+    ) -> Result<VoidCookie<'_, Self>, ConnectionError>;
 
     /// A reply to an error should be discarded.
     ///

@@ -139,9 +139,9 @@ mod test {
     impl RequestConnection for DummyConnection {
         fn send_request_with_reply<R>(
             &self,
-            _bufs: &[IoSlice],
+            _bufs: &[IoSlice<'_>],
             _fds: Vec<RawFdContainer>,
-        ) -> Result<Cookie<Self, R>, ConnectionError>
+        ) -> Result<Cookie<'_, Self, R>, ConnectionError>
         where
             R: TryFrom<Buffer, Error = ParseError>,
         {
@@ -150,9 +150,9 @@ mod test {
 
         fn send_request_with_reply_with_fds<R>(
             &self,
-            _bufs: &[IoSlice],
+            _bufs: &[IoSlice<'_>],
             _fds: Vec<RawFdContainer>,
-        ) -> Result<CookieWithFds<Self, R>, ConnectionError>
+        ) -> Result<CookieWithFds<'_, Self, R>, ConnectionError>
         where
             R: TryFrom<(Buffer, Vec<RawFdContainer>), Error = ParseError>,
         {
@@ -161,9 +161,9 @@ mod test {
 
         fn send_request_without_reply(
             &self,
-            _bufs: &[IoSlice],
+            _bufs: &[IoSlice<'_>],
             _fds: Vec<RawFdContainer>,
-        ) -> Result<VoidCookie<Self>, ConnectionError> {
+        ) -> Result<VoidCookie<'_, Self>, ConnectionError> {
             unimplemented!()
         }
 
