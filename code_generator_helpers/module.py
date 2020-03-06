@@ -1107,6 +1107,26 @@ class Module(object):
                     self.out.indent("Some(result) => Ok((result, remaining))")
                     self.out("}")
             self.out("}")
+
+            # Create functions to access cases
+            if switch_type.bitcases[0].type.is_case:
+                for case in switch_type.bitcases:
+                    if hasattr(case, "rust_name"):
+                        func_suffix = self._to_rust_variable(case.type.name[-1])
+                        field_name = self._to_rust_identifier(case.type.name[-1])
+                        field_type = case.rust_name
+                    else:
+                        func_suffix = self._to_rust_variable(case.only_field.field_name)
+                        field_name = self._to_rust_identifier(case.only_field.field_name)
+                        field_type = self._to_complex_owned_rust_type(case.only_field)
+
+                    self.out("pub fn as_%s(&self) -> Option<&%s> {", func_suffix, field_type)
+                    with Indent(self.out):
+                        self.out("match self {")
+                        self.out.indent("%s::%s(value) => Some(value),", name, field_name)
+                        self.out.indent("_ => None,")
+                        self.out("}")
+                    self.out("}")
         self.out("}")
 
         if switch_type.bitcases[0].type.is_bitcase:
