@@ -22,7 +22,7 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use std::option::Option as RustOption;
 #[allow(unused_imports)]
-use crate::utils::{Buffer, RawFdContainer};
+use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::{GenericEvent as X11GenericEvent, GenericError as X11GenericError, Event as _};
 use crate::x11_utils::TryParse;
@@ -81,18 +81,6 @@ impl TryParse for Point {
         remaining = new_remaining;
         let result = Point { x, y };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&Buffer> for Point {
-    type Error = ParseError;
-    fn try_from(value: &Buffer) -> Result<Self, Self::Error> {
-        Self::try_from(&**value)
-    }
-}
-impl TryFrom<Buffer> for Point {
-    type Error = ParseError;
-    fn try_from(value: Buffer) -> Result<Self, Self::Error> {
-        Self::try_from(&*value)
     }
 }
 impl TryFrom<&[u8]> for Point {
@@ -155,18 +143,6 @@ impl TryParse for Depth {
         remaining = new_remaining;
         let result = Depth { depth, visuals };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&Buffer> for Depth {
-    type Error = ParseError;
-    fn try_from(value: &Buffer) -> Result<Self, Self::Error> {
-        Self::try_from(&**value)
-    }
-}
-impl TryFrom<Buffer> for Depth {
-    type Error = ParseError;
-    fn try_from(value: Buffer) -> Result<Self, Self::Error> {
-        Self::try_from(&*value)
     }
 }
 impl TryFrom<&[u8]> for Depth {
@@ -639,18 +615,6 @@ impl KeyPressEvent {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&Buffer> for KeyPressEvent {
-    type Error = ParseError;
-    fn try_from(value: &Buffer) -> Result<Self, Self::Error> {
-        Self::try_from(&**value)
-    }
-}
-impl TryFrom<Buffer> for KeyPressEvent {
-    type Error = ParseError;
-    fn try_from(value: Buffer) -> Result<Self, Self::Error> {
-        Self::try_from(&*value)
-    }
-}
 impl TryFrom<&[u8]> for KeyPressEvent {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
@@ -659,7 +623,7 @@ impl TryFrom<&[u8]> for KeyPressEvent {
 }
 impl From<GenericEvent> for KeyPressEvent {
     fn from(value: GenericEvent) -> Self {
-        Self::try_from(Into::<Buffer>::into(value)).expect("Buffer should be large enough so that parsing cannot fail")
+        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
     }
 }
 impl From<&GenericEvent> for KeyPressEvent {
@@ -736,18 +700,6 @@ impl RequestError {
         Ok((result, remaining))
     }
 }
-impl TryFrom<&Buffer> for RequestError {
-    type Error = ParseError;
-    fn try_from(value: &Buffer) -> Result<Self, Self::Error> {
-        Self::try_from(&**value)
-    }
-}
-impl TryFrom<Buffer> for RequestError {
-    type Error = ParseError;
-    fn try_from(value: Buffer) -> Result<Self, Self::Error> {
-        Self::try_from(&*value)
-    }
-}
 impl TryFrom<&[u8]> for RequestError {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
@@ -756,7 +708,7 @@ impl TryFrom<&[u8]> for RequestError {
 }
 impl From<GenericError> for RequestError {
     fn from(value: GenericError) -> Self {
-        Self::try_from(Into::<Buffer>::into(value)).expect("Buffer should be large enough so that parsing cannot fail")
+        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
     }
 }
 impl From<&GenericError> for RequestError {
@@ -881,18 +833,6 @@ impl GetInputFocusReply {
         remaining = new_remaining;
         let result = GetInputFocusReply { response_type, revert_to, sequence, length, focus };
         Ok((result, remaining))
-    }
-}
-impl TryFrom<&Buffer> for GetInputFocusReply {
-    type Error = ParseError;
-    fn try_from(value: &Buffer) -> Result<Self, Self::Error> {
-        Self::try_from(&**value)
-    }
-}
-impl TryFrom<Buffer> for GetInputFocusReply {
-    type Error = ParseError;
-    fn try_from(value: Buffer) -> Result<Self, Self::Error> {
-        Self::try_from(&*value)
     }
 }
 impl TryFrom<&[u8]> for GetInputFocusReply {

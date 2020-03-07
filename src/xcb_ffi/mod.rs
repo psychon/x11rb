@@ -309,7 +309,7 @@ impl RequestConnection for XCBConnection {
         fds: Vec<RawFdContainer>,
     ) -> Result<Cookie<'_, Self, R>, ConnectionError>
     where
-        R: TryFrom<Buffer, Error = ParseError>,
+        R: for<'a> TryFrom<&'a [u8], Error = ParseError>,
     {
         Ok(Cookie::new(
             self,
@@ -323,7 +323,7 @@ impl RequestConnection for XCBConnection {
         fds: Vec<RawFdContainer>,
     ) -> Result<CookieWithFds<'_, Self, R>, ConnectionError>
     where
-        R: TryFrom<(Buffer, Vec<RawFdContainer>), Error = ParseError>,
+        R: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>,
     {
         Ok(CookieWithFds::new(
             self,

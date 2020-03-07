@@ -88,7 +88,7 @@ pub trait RequestConnection {
         fds: Vec<RawFdContainer>,
     ) -> Result<Cookie<'_, Self, R>, ConnectionError>
     where
-        R: TryFrom<Buffer, Error = ParseError>;
+        R: for<'a> TryFrom<&'a [u8], Error = ParseError>;
 
     /// Send a request with a reply containing file descriptors to the server.
     ///
@@ -115,7 +115,7 @@ pub trait RequestConnection {
         fds: Vec<RawFdContainer>,
     ) -> Result<CookieWithFds<'_, Self, R>, ConnectionError>
     where
-        R: TryFrom<(Buffer, Vec<RawFdContainer>), Error = ParseError>;
+        R: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>;
 
     /// Send a request without a reply to the server.
     ///
@@ -260,13 +260,13 @@ pub trait RequestConnection {
     ///
     ///     fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
     ///     -> Result<Cookie<Self, R>, ConnectionError>
-    ///     where R: TryFrom<Buffer, Error=ParseError> {
+    ///     where R: for<'a> TryFrom<&'a [u8], Error=ParseError> {
     ///         Ok(Cookie::new(self, self.send_request(bufs, fds, true, false)?))
     ///     }
     ///
     ///     fn send_request_with_reply_with_fds<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
     ///     -> Result<CookieWithFds<Self, R>, ConnectionError>
-    ///     where R: TryFrom<(Buffer, Vec<RawFdContainer>), Error=ParseError> {
+    ///     where R: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error=ParseError> {
     ///         Ok(CookieWithFds::new(self, self.send_request(bufs, fds, true, true)?))
     ///     }
     ///

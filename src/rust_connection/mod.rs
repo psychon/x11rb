@@ -216,7 +216,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         fds: Vec<RawFdContainer>,
     ) -> Result<Cookie<'_, Self, Reply>, ConnectionError>
     where
-        Reply: TryFrom<Buffer, Error = ParseError>,
+        Reply: for<'a> TryFrom<&'a [u8], Error = ParseError>,
     {
         let mut storage = Default::default();
         let bufs = self.compute_length_field(bufs, &mut storage)?;
@@ -233,7 +233,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         fds: Vec<RawFdContainer>,
     ) -> Result<CookieWithFds<'_, Self, Reply>, ConnectionError>
     where
-        Reply: TryFrom<(Buffer, Vec<RawFdContainer>), Error = ParseError>,
+        Reply: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>,
     {
         let mut storage = Default::default();
         let bufs = self.compute_length_field(bufs, &mut storage)?;
