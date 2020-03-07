@@ -61,6 +61,27 @@
 //! ```
 //! More examples can be found in the
 //! [examples](https://github.com/psychon/x11rb/tree/master/examples) directory.
+//!
+//! ## Feature flags
+//!
+//! This crate uses [feature
+//! flags](https://doc.rust-lang.org/cargo/reference/manifest.html#the-features-section) to reduce
+//! the amount of compiled code. By default, only the core X11 protocol and X11 extensions that are
+//! needed internally are enabled. Further extensions need to be explicitly enabled via their
+//! feature flag:
+//!
+//! `composite`, `damage`, `dpms`, `dri2`, `dri3`, `glx`, `present`, `randr`, `record`, `render`,
+//! `res`, `screensaver`, `shape`, `shm`, `sync`, `xevie`, `xf86dri`, `xf86vidmode`, `xfixes`,
+//! `xinerama`, `xinput`, `xkb`, `xprint`, `xproto`, `xselinux`, `xtest`, `xv`, `xvmc`.
+//!
+//! If you want to take the "I do not want to think about this"-approach, you can enable the
+//! `all-extensions` feature to just enable, well, all extensions.
+//!
+//! Additionally, the following flags are enabled by default:
+//! * `vendor-xcb-proto`: Use a copy of `xcb-proto` that comes with x11rb. Without this flag,
+//!   `pkg-config` is used to find `xcb-proto` on the host system.
+//! * `allow-unsafe-code`: Enable features that require `unsafe`. Without this flag,
+//!   `x11rb::xcb_ffi::XCBConnection` and some support code for it are unavailable.
 
 #![deny(
     missing_copy_implementations,
