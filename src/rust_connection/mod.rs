@@ -265,6 +265,16 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         self.inner.lock().unwrap().discard_reply(sequence, mode);
     }
 
+    fn prefetch_extension_information(
+        &self,
+        extension_name: &'static str,
+    ) -> Result<(), ConnectionError> {
+        self.extension_information
+            .lock()
+            .unwrap()
+            .prefetch_extension_information(self, extension_name)
+    }
+
     fn extension_information(
         &self,
         extension_name: &'static str,

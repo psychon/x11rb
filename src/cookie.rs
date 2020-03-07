@@ -197,6 +197,11 @@ where
             DiscardMode::DiscardReplyAndError,
         )
     }
+
+    /// Consume this instance and get the contained sequence number out.
+    pub(crate) fn into_sequence_number(self) -> SequenceNumber {
+        self.raw_cookie.into_sequence_number()
+    }
 }
 
 /// A handle to a response containing `RawFd` from the X11 server.

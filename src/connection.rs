@@ -158,6 +158,20 @@ pub trait RequestConnection {
     /// Users of this library will most likely not want to use this function directly.
     fn discard_reply(&self, sequence: SequenceNumber, kind: RequestKind, mode: DiscardMode);
 
+    /// Prefetchs information about an extension.
+    ///
+    /// If the information of a extension is not cached yet, this function sends a
+    /// `QueryExtension` request, but it does not wait for the reply.
+    ///
+    /// You can use `extension_information()` to get the reply of such request.
+    ///
+    /// Using this function can help to reduce round-trip latency, but you can use
+    /// `extension_information()` directly without calling this previously function.
+    fn prefetch_extension_information(
+        &self,
+        extension_name: &'static str,
+    ) -> Result<(), ConnectionError>;
+
     /// Get information about an extension.
     ///
     /// To send a request for some extension, the `QueryExtensionReply` for the extension is
@@ -249,6 +263,12 @@ pub trait RequestConnection {
     ///     #                  kind: x11rb::connection::RequestKind,
     ///     #                  mode: x11rb::connection::DiscardMode) {
     ///     #    unimplemented!()
+    ///     # }
+    ///     # fn prefetch_extension_information(
+    ///     #     &self,
+    ///     #     extension_name: &'static str,
+    ///     # ) -> Result<(), ConnectionError> {
+    ///     #     unimplemented!()
     ///     # }
     ///     # fn extension_information(&self, ext: &'static str)
     ///     # -> Result<Option<x11rb::generated::xproto::QueryExtensionReply>, ConnectionError> {

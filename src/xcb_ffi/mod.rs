@@ -368,6 +368,16 @@ impl RequestConnection for XCBConnection {
         }
     }
 
+    fn prefetch_extension_information(
+        &self,
+        extension_name: &'static str,
+    ) -> Result<(), ConnectionError> {
+        self.ext_info
+            .lock()
+            .unwrap()
+            .prefetch_extension_information(self, extension_name)
+    }
+
     fn extension_information(
         &self,
         extension_name: &'static str,
