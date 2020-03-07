@@ -35,7 +35,7 @@ pub struct RustConnection<R: Read = BufReader<stream::Stream>, W: Write = BufWri
     reader_condition: Condvar,
     id_allocator: Mutex<id_allocator::IDAllocator>,
     setup: Setup,
-    extension_information: ExtensionInformation,
+    extension_information: Mutex<ExtensionInformation>,
     maximum_request_bytes: Mutex<Option<usize>>,
 }
 
@@ -270,6 +270,8 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         extension_name: &'static str,
     ) -> Result<Option<QueryExtensionReply>, ConnectionError> {
         self.extension_information
+            .lock()
+            .unwrap()
             .extension_information(self, extension_name)
     }
 

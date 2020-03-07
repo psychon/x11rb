@@ -1,7 +1,6 @@
 //! Helper for implementing `RequestConnection::extension_information()`.
 
 use std::collections::{hash_map::Entry as HashMapEntry, HashMap};
-use std::sync::Mutex;
 
 use crate::connection::RequestConnection;
 use crate::errors::{ConnectionError, ReplyError};
@@ -12,19 +11,18 @@ use crate::generated::xproto::{ConnectionExt, QueryExtensionReply};
 /// This helps with implementing `RequestConnection`. Most likely, you do not need this in your own
 /// code, unless you really want to implement your own X11 connection.
 #[derive(Debug, Default)]
-pub struct ExtensionInformation(Mutex<HashMap<&'static str, Option<QueryExtensionReply>>>);
+pub struct ExtensionInformation(HashMap<&'static str, Option<QueryExtensionReply>>);
 
 impl ExtensionInformation {
     /// An implementation of `RequestConnection::extension_information()`.
     ///
     /// The given connection is used for sending a `QueryExtension` request if needed.
     pub fn extension_information<C: RequestConnection>(
-        &self,
+        &mut self,
         conn: &C,
         extension_name: &'static str,
     ) -> Result<Option<QueryExtensionReply>, ConnectionError> {
-        let mut map = self.0.lock().unwrap();
-        match map.entry(extension_name) {
+        match self.0.entry(extension_name) {
             // Extension already checked, return the cached value
             HashMapEntry::Occupied(entry) => Ok(*entry.get()),
             // Extension not checked, check now and cache the result
