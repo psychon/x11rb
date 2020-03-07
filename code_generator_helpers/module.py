@@ -187,7 +187,7 @@ class Module(object):
         self.out("use std::convert::TryInto;")
         self.out("use std::io::IoSlice;")
         self.out("#[allow(unused_imports)]")
-        self.out("use crate::utils::{Buffer, RawFdContainer};")
+        self.out("use crate::utils::RawFdContainer;")
         self.out("#[allow(unused_imports)]")
         self.out("use crate::x11_utils::Event as _;")
         self.out("use crate::x11_utils::{TryParse, Serialize};")
@@ -616,7 +616,7 @@ class Module(object):
         self.out("impl From<%s> for %s%s {", from_generic_type, self._name(name), extra_name)
         with Indent(self.out):
             self.out("fn from(value: %s) -> Self {", from_generic_type)
-            self.out.indent("Self::try_from(Into::<Buffer>::into(value))" +
+            self.out.indent("Self::try_from(value.raw_bytes())" +
                             ".expect(\"Buffer should be large enough so that parsing cannot fail\")")
             self.out("}")
         self.out("}")
@@ -633,7 +633,7 @@ class Module(object):
         with Indent(self.out):
             self.out("type Error = ParseError;")
             self.out("fn try_from(value: %s) -> Result<Self, Self::Error> {", from_generic_type)
-            self.out.indent("Self::try_from(Into::<Buffer>::into(value))")
+            self.out.indent("Self::try_from(value.raw_bytes())")
             self.out("}")
         self.out("}")
         self.out("impl TryFrom<&%s> for %s%s {", from_generic_type, self._name(name), extra_name)
@@ -877,30 +877,6 @@ class Module(object):
             # The remaining traits cannot be implemented
             self.out("// Skipping TryFrom implementations because of unresolved members")
             return
-
-        if has_fds:
-            value = "(Buffer, Vec<RawFdContainer>)"
-        else:
-            value = "&Buffer"
-        self.out("impl TryFrom<%s> for %s {", value, name)
-        with Indent(self.out):
-            self.out("type Error = ParseError;")
-            self.out("fn try_from(value: %s) -> Result<Self, Self::Error> {", value)
-            if has_fds:
-                self.out.indent("Self::try_from((&*value.0, value.1))")
-            else:
-                self.out.indent("Self::try_from(&**value)")
-            self.out("}")
-        self.out("}")
-
-        if not has_fds:
-            self.out("impl TryFrom<Buffer> for %s {", name)
-            with Indent(self.out):
-                self.out("type Error = ParseError;")
-                self.out("fn try_from(value: Buffer) -> Result<Self, Self::Error> {")
-                self.out.indent("Self::try_from(&*value)")
-                self.out("}")
-            self.out("}")
 
         if has_fds:
             value = "(&[u8], Vec<RawFdContainer>)"

@@ -130,6 +130,12 @@ impl Deref for Buffer {
     }
 }
 
+impl AsRef<[u8]> for Buffer {
+    fn as_ref(&self) -> &[u8] {
+        &**self
+    }
+}
+
 impl<I> Index<I> for Buffer
 where
     I: SliceIndex<[u8]>,

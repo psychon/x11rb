@@ -65,7 +65,7 @@ impl RequestConnection for FakeConnection {
         fds: Vec<RawFdContainer>,
     ) -> Result<Cookie<Self, R>, ConnectionError>
     where
-        R: TryFrom<Buffer, Error = ParseError>,
+        R: for<'a> TryFrom<&'a [u8], Error = ParseError>,
     {
         Ok(Cookie::new(self, self.internal_send_request(bufs, fds)?))
     }
@@ -76,7 +76,7 @@ impl RequestConnection for FakeConnection {
         _fds: Vec<RawFdContainer>,
     ) -> Result<CookieWithFds<Self, R>, ConnectionError>
     where
-        R: TryFrom<(Buffer, Vec<RawFdContainer>), Error = ParseError>,
+        R: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>,
     {
         unimplemented!()
     }

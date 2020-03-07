@@ -68,7 +68,7 @@
     //missing_docs,
     private_doc_tests,
     rust_2018_idioms,
-    single_use_lifetimes,
+    //single_use_lifetimes,
     trivial_casts,
     trivial_numeric_casts,
     unreachable_pub,

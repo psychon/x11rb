@@ -142,7 +142,7 @@ where
 
 impl<C, R> Cookie<'_, C, R>
 where
-    R: TryFrom<Buffer, Error = ParseError>,
+    R: for<'a> TryFrom<&'a [u8], Error = ParseError>,
     C: RequestConnection + ?Sized,
 {
     /// Construct a new cookie.
@@ -175,13 +175,13 @@ where
 
     /// Get the reply that the server sent.
     pub fn reply(self) -> Result<R, ReplyError> {
-        Ok(self.raw_reply()?.try_into()?)
+        Ok(self.raw_reply()?.as_ref().try_into()?)
     }
 
     /// Get the reply that the server sent, but have errors handled as events.
     pub fn reply_unchecked(self) -> Result<Option<R>, ConnectionError> {
         self.raw_reply_unchecked()?
-            .map(TryInto::try_into)
+            .map(|buf| buf.as_ref().try_into())
             .transpose()
             .map_err(Into::into)
     }
@@ -216,7 +216,7 @@ where
 
 impl<C, R> CookieWithFds<'_, C, R>
 where
-    R: TryFrom<(Buffer, Vec<RawFdContainer>), Error = ParseError>,
+    R: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>,
     C: RequestConnection + ?Sized,
 {
     /// Construct a new cookie.
@@ -243,7 +243,8 @@ where
 
     /// Get the reply that the server sent.
     pub fn reply(self) -> Result<R, ReplyError> {
-        Ok(self.raw_reply()?.try_into()?)
+        let (buffer, fds) = self.raw_reply()?;
+        Ok(R::try_from((buffer.as_ref(), fds))?)
     }
 }
 
@@ -288,8 +289,7 @@ where
             Err(e) => return Some(Err(e)),
             Ok(v) => v,
         };
-        let reply: Result<ListFontsWithInfoReply, ParseError> = reply.try_into();
-        let reply = reply.map_err(ReplyError::from);
+        let reply = ListFontsWithInfoReply::try_from(reply.as_ref()).map_err(ReplyError::from);
         if reply.is_ok() {
             // Is this an indicator that no more replies follow?
             if !reply.as_ref().unwrap().name.is_empty() {
