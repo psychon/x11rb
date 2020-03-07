@@ -1,9 +1,9 @@
 //! Cookies are handles to future replies or errors from the X11 server.
 
-use crate::connection::{DiscardMode, RequestConnection, RequestKind, SequenceNumber};
+use crate::connection::{BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use crate::errors::{ConnectionError, ParseError, ReplyError};
 use crate::generated::xproto::ListFontsWithInfoReply;
-use crate::utils::{Buffer, RawFdContainer};
+use crate::utils::RawFdContainer;
 use crate::x11_utils::GenericError;
 use std::convert::{TryFrom, TryInto};
 use std::marker::PhantomData;
@@ -48,7 +48,7 @@ where
     }
 
     /// Check if the original request caused an X11 error.
-    pub fn check(self) -> Result<Option<GenericError>, ConnectionError> {
+    pub fn check(self) -> Result<Option<GenericError<C::Buf>>, ConnectionError> {
         let (connection, sequence) = self.consume();
         connection.check_for_error(sequence)
     }
@@ -162,19 +162,19 @@ where
     }
 
     /// Get the raw reply that the server sent.
-    pub fn raw_reply(self) -> Result<Buffer, ReplyError> {
+    pub fn raw_reply(self) -> Result<C::Buf, ReplyError<C::Buf>> {
         let conn = self.raw_cookie.connection;
         Ok(conn.wait_for_reply_or_error(self.raw_cookie.into_sequence_number())?)
     }
 
     /// Get the raw reply that the server sent, but have errors handled as events.
-    pub fn raw_reply_unchecked(self) -> Result<Option<Buffer>, ConnectionError> {
+    pub fn raw_reply_unchecked(self) -> Result<Option<C::Buf>, ConnectionError> {
         let conn = self.raw_cookie.connection;
         Ok(conn.wait_for_reply(self.raw_cookie.into_sequence_number())?)
     }
 
     /// Get the reply that the server sent.
-    pub fn reply(self) -> Result<R, ReplyError> {
+    pub fn reply(self) -> Result<R, ReplyError<C::Buf>> {
         Ok(self.raw_reply()?.as_ref().try_into()?)
     }
 
@@ -236,13 +236,13 @@ where
     }
 
     /// Get the raw reply that the server sent.
-    pub fn raw_reply(self) -> Result<(Buffer, Vec<RawFdContainer>), ReplyError> {
+    pub fn raw_reply(self) -> Result<BufWithFds<C::Buf>, ReplyError<C::Buf>> {
         let conn = self.raw_cookie.connection;
         Ok(conn.wait_for_reply_with_fds(self.raw_cookie.into_sequence_number())?)
     }
 
     /// Get the reply that the server sent.
-    pub fn reply(self) -> Result<R, ReplyError> {
+    pub fn reply(self) -> Result<R, ReplyError<C::Buf>> {
         let (buffer, fds) = self.raw_reply()?;
         Ok(R::try_from((buffer.as_ref(), fds))?)
     }
@@ -275,7 +275,7 @@ impl<C> Iterator for ListFontsWithInfoCookie<'_, C>
 where
     C: RequestConnection + ?Sized,
 {
-    type Item = Result<ListFontsWithInfoReply, ReplyError>;
+    type Item = Result<ListFontsWithInfoReply, ReplyError<C::Buf>>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let cookie = match self.0.take() {

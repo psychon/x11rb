@@ -1,7 +1,6 @@
 use std::convert::{TryFrom, TryInto};
 
 use crate::errors::ParseError;
-use crate::utils::Buffer;
 
 /// Common information on events and errors.
 ///
@@ -58,33 +57,23 @@ pub trait Event {
 /// Examine the event's `response_type()` and use `TryInto::try_into()` to convert the event to the
 /// desired type.
 #[derive(Debug, Clone)]
-pub struct GenericEvent(Buffer);
+pub struct GenericEvent<B: AsRef<[u8]>>(B);
 
-impl Event for GenericEvent {
-    fn raw_bytes(&self) -> &[u8] {
-        &self.0
-    }
-}
-
-impl Into<Buffer> for GenericEvent {
-    fn into(self) -> Buffer {
-        self.0
-    }
-}
-
-const REPLY: u8 = 1;
-
-impl TryFrom<Buffer> for GenericEvent {
-    type Error = ParseError;
-
-    fn try_from(value: Buffer) -> Result<Self, Self::Error> {
+impl<B: AsRef<[u8]>> GenericEvent<B> {
+    pub fn new(value: B) -> Result<Self, ParseError> {
         use super::generated::xproto::GE_GENERIC_EVENT;
-        if value.len() < 32 {
+        let value_slice = value.as_ref();
+        if value_slice.len() < 32 {
             return Err(ParseError::ParseError);
         }
-        let length_field = u32::from_ne_bytes([value[4], value[5], value[6], value[7]]);
+        let length_field = u32::from_ne_bytes([
+            value_slice[4],
+            value_slice[5],
+            value_slice[6],
+            value_slice[7],
+        ]);
         let length_field: usize = length_field.try_into()?;
-        let actual_length = value.len();
+        let actual_length = value_slice.len();
         let event = GenericEvent(value);
         let expected_length = match event.response_type() {
             GE_GENERIC_EVENT | REPLY => 32 + 4 * length_field,
@@ -95,11 +84,23 @@ impl TryFrom<Buffer> for GenericEvent {
         }
         Ok(event)
     }
+
+    pub fn into_buffer(self) -> B {
+        self.0
+    }
 }
 
-impl From<GenericError> for GenericEvent {
-    fn from(value: GenericError) -> Self {
-        GenericEvent(value.into())
+impl<B: AsRef<[u8]>> Event for GenericEvent<B> {
+    fn raw_bytes(&self) -> &[u8] {
+        self.0.as_ref()
+    }
+}
+
+const REPLY: u8 = 1;
+
+impl<B: AsRef<[u8]>> From<GenericError<B>> for GenericEvent<B> {
+    fn from(value: GenericError<B>) -> Self {
+        GenericEvent(value.into_buffer())
     }
 }
 
@@ -109,9 +110,17 @@ impl From<GenericError> for GenericEvent {
 /// the contained error code. This error code allows you to pick the right error type for
 /// conversion via `TryInto::try_into()`.
 #[derive(Debug, Clone)]
-pub struct GenericError(Buffer);
+pub struct GenericError<B: AsRef<[u8]>>(B);
 
-impl GenericError {
+impl<B: AsRef<[u8]>> GenericError<B> {
+    pub fn new(value: B) -> Result<Self, ParseError> {
+        GenericEvent::new(value)?.try_into()
+    }
+
+    pub fn into_buffer(self) -> B {
+        self.0
+    }
+
     /// Get the error code of this error.
     ///
     /// The error code identifies what kind of error this packet contains. Note that extensions
@@ -121,35 +130,20 @@ impl GenericError {
     }
 }
 
-impl Event for GenericError {
+impl<B: AsRef<[u8]>> Event for GenericError<B> {
     fn raw_bytes(&self) -> &[u8] {
-        &self.0
+        self.0.as_ref()
     }
 }
 
-impl Into<Buffer> for GenericError {
-    fn into(self) -> Buffer {
-        self.0
-    }
-}
-
-impl TryFrom<GenericEvent> for GenericError {
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for GenericError<B> {
     type Error = ParseError;
 
-    fn try_from(event: GenericEvent) -> Result<Self, Self::Error> {
+    fn try_from(event: GenericEvent<B>) -> Result<Self, Self::Error> {
         if event.response_type() != 0 {
             return Err(ParseError::ParseError);
         }
-        Ok(GenericError(event.into()))
-    }
-}
-
-impl TryFrom<Buffer> for GenericError {
-    type Error = ParseError;
-
-    fn try_from(value: Buffer) -> Result<Self, Self::Error> {
-        let event: GenericEvent = value.try_into()?;
-        event.try_into()
+        Ok(GenericError(event.into_buffer()))
     }
 }
 
@@ -368,10 +362,10 @@ macro_rules! bitmask_binop {
 ///     }
 /// }
 ///
-/// impl<'c, Conn> AtomCollectionCookie<'c, Conn>
-/// where Conn: ConnectionExt
+/// impl<'c, C> AtomCollectionCookie<'c, C>
+/// where C: ConnectionExt
 /// {
-///     pub fn reply(self) -> Result<AtomCollection, ReplyError> {
+///     pub fn reply(self) -> Result<AtomCollection, ReplyError<C::Buf>> {
 ///         Ok(AtomCollection {
 ///             _NET_WM_NAME: self._NET_WM_NAME.reply()?.atom,
 ///             _NET_WM_ICON: self._NET_WM_ICON.reply()?.atom,
@@ -434,7 +428,7 @@ macro_rules! atom_manager {
         }
 
         impl<'a, C: $crate::generated::xproto::ConnectionExt> $cookie_name<'a, C> {
-            $vis fn reply(self) -> ::std::result::Result<$struct_name, $crate::errors::ReplyError> {
+            $vis fn reply(self) -> ::std::result::Result<$struct_name, $crate::errors::ReplyError<C::Buf>> {
                 Ok($struct_name {
                     $(
                         $field_name: self.$field_name.reply()?.atom,

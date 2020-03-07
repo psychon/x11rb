@@ -46,7 +46,7 @@
 //! use x11rb::errors::ReplyOrIdError;
 //! use x11rb::COPY_DEPTH_FROM_PARENT;
 //!
-//! fn main() -> Result<(), ReplyOrIdError> {
+//! fn main() -> Result<(), Box<dyn std::error::Error>> {
 //!     let (conn, screen_num) = x11rb::connect(None).unwrap();
 //!     let screen = &conn.setup().roots[screen_num];
 //!     let win_id = conn.generate_id()?;

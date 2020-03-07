@@ -5,11 +5,14 @@
 #![allow(clippy::cast_ptr_alignment)] // FIXME: Remove this
 
 use super::generated::xproto::{QueryExtensionReply, Setup};
-use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
+use crate::connection::{
+    BufWithFds, Connection, DiscardMode, EventAndSeqNumber, RequestConnection, RequestKind,
+    SequenceNumber,
+};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::extension_information::ExtensionInformation;
-use crate::utils::{Buffer, CSlice, RawFdContainer};
+use crate::utils::{CSlice, RawFdContainer};
 use crate::x11_utils::{GenericError, GenericEvent};
 use libc::c_void;
 use std::convert::{TryFrom, TryInto};
@@ -244,7 +247,7 @@ impl XCBConnection {
     /// Return Err(()) when the reply was not yet received. Returns Ok(None) when there can be no
     /// reply. Returns Ok(buffer) with the reply if there is one (this buffer can be an error or a
     /// reply).
-    fn poll_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Buffer>, ()> {
+    fn poll_for_reply(&self, sequence: SequenceNumber) -> Result<Option<CSlice>, ()> {
         unsafe {
             let mut reply = null_mut();
             let mut error = null_mut();
@@ -263,7 +266,7 @@ impl XCBConnection {
         }
     }
 
-    unsafe fn wrap_reply(reply: *const u8) -> Buffer {
+    unsafe fn wrap_reply(reply: *const u8) -> CSlice {
         let header = CSlice::new(reply, 32);
 
         let length_field = u32::from_ne_bytes(header[4..8].try_into().unwrap());
@@ -272,14 +275,16 @@ impl XCBConnection {
             .expect("usize should have at least 32 bits");
 
         let length = 32 + length_field * 4;
-        Buffer::from_raw_parts(header.into_ptr(), length)
+        CSlice::new(header.into_ptr(), length)
     }
 
-    unsafe fn wrap_error(error: *const u8) -> Buffer {
-        Buffer::from_raw_parts(error, 32)
+    unsafe fn wrap_error(error: *const u8) -> CSlice {
+        CSlice::new(error, 32)
     }
 
-    unsafe fn wrap_event(event: *mut u8) -> Result<(SequenceNumber, GenericEvent), ParseError> {
+    unsafe fn wrap_event(
+        event: *mut u8,
+    ) -> Result<(SequenceNumber, GenericEvent<CSlice>), ParseError> {
         let mut length = 32;
         // XCB inserts a uint32_t with the sequence number after the first 32 bytes.
         let mut seqno = [0; 4];
@@ -298,11 +303,13 @@ impl XCBConnection {
             // the 32-byte boundary.
             std::ptr::copy(event.add(36), event.add(32), length_field * 4);
         }
-        Ok((seqno, Buffer::from_raw_parts(event, length).try_into()?))
+        Ok((seqno, GenericEvent::new(CSlice::new(event, length))?))
     }
 }
 
 impl RequestConnection for XCBConnection {
+    type Buf = CSlice;
+
     fn send_request_with_reply<R>(
         &self,
         bufs: &[IoSlice<'_>],
@@ -360,7 +367,10 @@ impl RequestConnection for XCBConnection {
         self.ext_info.extension_information(self, extension_name)
     }
 
-    fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Buffer, ReplyError> {
+    fn wait_for_reply_or_error(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<CSlice, ReplyError<CSlice>> {
         unsafe {
             let mut error = null_mut();
             let reply = raw_ffi::xcb_wait_for_reply64((self.conn).0, sequence, &mut error);
@@ -376,13 +386,13 @@ impl RequestConnection for XCBConnection {
             if !reply.is_null() {
                 Ok(XCBConnection::wrap_reply(reply as _))
             } else {
-                let error: GenericError = XCBConnection::wrap_error(error as _).try_into()?;
+                let error = GenericError::new(XCBConnection::wrap_error(error as _))?;
                 Err(error.into())
             }
         }
     }
 
-    fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError> {
+    fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<CSlice>, ConnectionError> {
         use ReplyError::*;
         match self.wait_for_reply_or_error(sequence) {
             Ok(buffer) => Ok(Some(buffer)),
@@ -399,7 +409,7 @@ impl RequestConnection for XCBConnection {
     fn check_for_error(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<Option<GenericError>, ConnectionError> {
+    ) -> Result<Option<GenericError<CSlice>>, ConnectionError> {
         let cookie = raw_ffi::xcb_void_cookie_t {
             sequence: sequence as _,
         };
@@ -407,7 +417,11 @@ impl RequestConnection for XCBConnection {
         if error.is_null() {
             Ok(None)
         } else {
-            unsafe { Ok(Some(XCBConnection::wrap_error(error as _).try_into()?)) }
+            unsafe {
+                Ok(Some(GenericError::new(XCBConnection::wrap_error(
+                    error as _,
+                ))?))
+            }
         }
     }
 
@@ -415,19 +429,14 @@ impl RequestConnection for XCBConnection {
     fn wait_for_reply_with_fds(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<(Buffer, Vec<RawFdContainer>), ReplyError> {
+    ) -> Result<BufWithFds<CSlice>, ReplyError<CSlice>> {
         let buffer = self.wait_for_reply_or_error(sequence)?;
 
-        // Get a pointer to the array of integers where libxcb saved the FD numbers
-        let fd_ptr = match buffer {
-            Buffer::Vec(_) => unreachable!(), // wait_for_reply() always returns a CSlice
-            Buffer::CSlice(ref slice) => {
-                // libxcb saves the list of FDs after the data of the reply. Since the reply's
-                // length is encoded in "number of 4 bytes block", the following pointer is aligned
-                // correctly (if malloc() returned an alloced chunk, which it does).
-                (unsafe { slice.as_ptr().add(slice.len()) }) as *const RawFd
-            }
-        };
+        // Get a pointer to the array of integers where libxcb saved the FD numbers.
+        // libxcb saves the list of FDs after the data of the reply. Since the reply's
+        // length is encoded in "number of 4 bytes block", the following pointer is aligned
+        // correctly (if malloc() returned an alloced chunk, which it does).
+        let fd_ptr = (unsafe { buffer.as_ptr().add(buffer.len()) }) as *const RawFd;
 
         // The number of FDs is in the second byte (= buffer[1]) in all replies.
         let vector = unsafe { std::slice::from_raw_parts(fd_ptr, usize::from(buffer[1])) };
@@ -450,9 +459,7 @@ impl RequestConnection for XCBConnection {
 }
 
 impl Connection for XCBConnection {
-    fn wait_for_event_with_sequence(
-        &self,
-    ) -> Result<(SequenceNumber, GenericEvent), ConnectionError> {
+    fn wait_for_event_with_sequence(&self) -> Result<EventAndSeqNumber<CSlice>, ConnectionError> {
         if let Some(error) = self.errors.get(self) {
             return Ok((error.0, error.1.into()));
         }
@@ -467,7 +474,7 @@ impl Connection for XCBConnection {
 
     fn poll_for_event_with_sequence(
         &self,
-    ) -> Result<Option<(SequenceNumber, GenericEvent)>, ConnectionError> {
+    ) -> Result<Option<EventAndSeqNumber<CSlice>>, ConnectionError> {
         if let Some(error) = self.errors.get(self) {
             return Ok(Some((error.0, error.1.into())));
         }
@@ -495,7 +502,7 @@ impl Connection for XCBConnection {
         }
     }
 
-    fn generate_id(&self) -> Result<u32, ReplyOrIdError> {
+    fn generate_id(&self) -> Result<u32, ReplyOrIdError<CSlice>> {
         unsafe {
             let id = raw_ffi::xcb_generate_id((self.conn).0);
             // XCB does not document the behaviour of `xcb_generate_id` when

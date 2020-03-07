@@ -74,7 +74,7 @@ fn run<C: Connection>(
     screen_num: usize,
     white: GCONTEXT,
     black: GCONTEXT,
-) -> Result<(), ReplyOrIdError> {
+) -> Result<(), ReplyOrIdError<C::Buf>> {
     let screen = &conn.setup().roots[screen_num];
     let default_size = 300;
     let pixmap = conn.generate_id()?;
@@ -180,7 +180,7 @@ fn event_thread<C>(
     conn_arc: Arc<C>,
     windows: Vec<Arc<Mutex<Window>>>,
     white: GCONTEXT,
-) -> Result<(), ReplyError>
+) -> Result<(), ReplyError<C::Buf>>
 where
     C: Connection + Send + Sync + 'static,
 {

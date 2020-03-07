@@ -43,7 +43,7 @@
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::generated::xproto::{QueryExtensionReply, Setup};
-use crate::utils::{Buffer, RawFdContainer};
+use crate::utils::RawFdContainer;
 use crate::x11_utils::{GenericError, GenericEvent};
 use std::convert::{TryFrom, TryInto};
 use std::io::IoSlice;
@@ -57,12 +57,20 @@ use std::io::IoSlice;
 /// caused an error.
 pub type SequenceNumber = u64;
 
+// Used to avoid too-complex types.
+pub type BufWithFds<B> = (B, Vec<RawFdContainer>);
+pub type EventAndSeqNumber<B> = (SequenceNumber, GenericEvent<B>);
+
 /// A connection to an X11 server for sending requests.
 ///
 /// This trait only contains functions that are used by other parts of this library. This means
 /// that users of this library will most likely not need these functions, unless they want to
 /// implement their own X11 connection.
 pub trait RequestConnection {
+    /// Type used as buffer to store raw replies or events before
+    /// they are parsed.
+    type Buf: AsRef<[u8]> + std::fmt::Debug + Send + Sync + 'static;
+
     /// Send a request with a reply to the server.
     ///
     /// The `bufs` parameter describes the raw bytes that should be sent. The returned cookie
@@ -168,7 +176,10 @@ pub trait RequestConnection {
     /// server answered the request with an error, that error is returned as an `Err`.
     ///
     /// Users of this library will most likely not want to use this function directly.
-    fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Buffer, ReplyError>;
+    fn wait_for_reply_or_error(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<Self::Buf, ReplyError<Self::Buf>>;
 
     /// Wait for the reply to a request.
     ///
@@ -177,7 +188,10 @@ pub trait RequestConnection {
     /// instead returned by `wait_for_event()` or `poll_for_event()`.
     ///
     /// Users of this library will most likely not want to use this function directly.
-    fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError>;
+    fn wait_for_reply(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<Option<Self::Buf>, ConnectionError>;
 
     /// Wait for the reply to a request that has FDs.
     ///
@@ -187,7 +201,7 @@ pub trait RequestConnection {
     fn wait_for_reply_with_fds(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<(Buffer, Vec<RawFdContainer>), ReplyError>;
+    ) -> Result<BufWithFds<Self::Buf>, ReplyError<Self::Buf>>;
 
     /// Check whether a request that does not have a reply caused an X11 error.
     ///
@@ -197,7 +211,7 @@ pub trait RequestConnection {
     fn check_for_error(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<Option<GenericError>, ConnectionError>;
+    ) -> Result<Option<GenericError<Self::Buf>>, ConnectionError>;
 
     /// The maximum number of bytes that the X11 server accepts in a request.
     fn maximum_request_bytes(&self) -> usize;
@@ -220,14 +234,16 @@ pub trait RequestConnection {
     /// ```
     /// use std::io::IoSlice;
     /// use std::convert::TryFrom;
-    /// use x11rb::connection::{RequestConnection, SequenceNumber};
+    /// use x11rb::connection::{BufWithFds, RequestConnection, SequenceNumber};
     /// use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
     /// use x11rb::errors::{ParseError, ConnectionError};
-    /// use x11rb::utils::{Buffer, RawFdContainer};
+    /// use x11rb::utils::RawFdContainer;
     ///
     /// struct MyConnection();
     ///
     /// impl RequestConnection for MyConnection {
+    ///     type Buf = Vec<u8>;
+    ///
     ///     // [snip, other functions here]
     ///     # fn discard_reply(&self, sequence: SequenceNumber,
     ///     #                  kind: x11rb::connection::RequestKind,
@@ -239,19 +255,19 @@ pub trait RequestConnection {
     ///     #    unimplemented!()
     ///     # }
     ///     # fn wait_for_reply_or_error(&self, sequence: SequenceNumber)
-    ///     # -> Result<Buffer, x11rb::errors::ReplyError> {
+    ///     # -> Result<Vec<u8>, x11rb::errors::ReplyError<Vec<u8>>> {
     ///     #    unimplemented!()
     ///     # }
     ///     # fn wait_for_reply(&self, sequence: SequenceNumber)
-    ///     # -> Result<Option<Buffer>, x11rb::errors::ConnectionError> {
+    ///     # -> Result<Option<Vec<u8>>, x11rb::errors::ConnectionError> {
     ///     #    unimplemented!()
     ///     # }
     ///     # fn wait_for_reply_with_fds(&self, sequence: SequenceNumber)
-    ///     # -> Result<(Buffer, Vec<RawFdContainer>), x11rb::errors::ReplyError> {
+    ///     # -> Result<BufWithFds<Vec<u8>>, x11rb::errors::ReplyError<Vec<u8>>> {
     ///     #    unimplemented!()
     ///     # }
     ///     # fn check_for_error(&self, sequence: SequenceNumber)
-    ///     # ->Result<Option<x11rb::x11_utils::GenericError>, ConnectionError> {
+    ///     # ->Result<Option<x11rb::x11_utils::GenericError<Vec<u8>>>, ConnectionError> {
     ///     #    unimplemented!()
     ///     # }
     ///     # fn maximum_request_bytes(&self) -> usize {
@@ -362,24 +378,23 @@ pub trait RequestConnection {
 /// A connection to an X11 server.
 pub trait Connection: RequestConnection {
     /// Wait for a new event from the X11 server.
-    fn wait_for_event(&self) -> Result<GenericEvent, ConnectionError> {
+    fn wait_for_event(&self) -> Result<GenericEvent<Self::Buf>, ConnectionError> {
         Ok(self.wait_for_event_with_sequence()?.1)
     }
 
     /// Wait for a new event from the X11 server.
-    fn wait_for_event_with_sequence(
-        &self,
-    ) -> Result<(SequenceNumber, GenericEvent), ConnectionError>;
+    fn wait_for_event_with_sequence(&self)
+        -> Result<EventAndSeqNumber<Self::Buf>, ConnectionError>;
 
     /// Poll for a new event from the X11 server.
-    fn poll_for_event(&self) -> Result<Option<GenericEvent>, ConnectionError> {
+    fn poll_for_event(&self) -> Result<Option<GenericEvent<Self::Buf>>, ConnectionError> {
         Ok(self.poll_for_event_with_sequence()?.map(|r| r.1))
     }
 
     /// Poll for a new event from the X11 server.
     fn poll_for_event_with_sequence(
         &self,
-    ) -> Result<Option<(SequenceNumber, GenericEvent)>, ConnectionError>;
+    ) -> Result<Option<EventAndSeqNumber<Self::Buf>>, ConnectionError>;
 
     /// Send all pending requests to the server.
     ///
@@ -400,7 +415,7 @@ pub trait Connection: RequestConnection {
     /// This method can, for example, be used for creating a new window. First, this method is
     /// called to generate an identifier. Next, `generated::xproto::create_window` can be called to
     /// actually create the window.
-    fn generate_id(&self) -> Result<u32, ReplyOrIdError>;
+    fn generate_id(&self) -> Result<u32, ReplyOrIdError<Self::Buf>>;
 }
 
 /// Does a request have a response?

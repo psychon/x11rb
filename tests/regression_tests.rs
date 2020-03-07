@@ -3,14 +3,14 @@ use std::convert::TryFrom;
 use std::io::IoSlice;
 use std::ops::Deref;
 
-use x11rb::connection::{DiscardMode, RequestConnection, RequestKind, SequenceNumber};
+use x11rb::connection::{BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
 use x11rb::errors::{ConnectionError, ParseError, ReplyError};
 use x11rb::generated::xproto::{
     ClientMessageData, ConnectionExt, KeymapNotifyEvent, QueryExtensionReply, Segment,
     SetupAuthenticate,
 };
-use x11rb::utils::{Buffer, RawFdContainer};
+use x11rb::utils::RawFdContainer;
 use x11rb::x11_utils::{GenericError, Serialize, TryParse};
 
 #[derive(Debug)]
@@ -59,6 +59,8 @@ impl FakeConnection {
 }
 
 impl RequestConnection for FakeConnection {
+    type Buf = Vec<u8>;
+
     fn send_request_with_reply<R>(
         &self,
         bufs: &[IoSlice],
@@ -103,25 +105,31 @@ impl RequestConnection for FakeConnection {
         unimplemented!()
     }
 
-    fn wait_for_reply_or_error(&self, _sequence: SequenceNumber) -> Result<Buffer, ReplyError> {
+    fn wait_for_reply_or_error(
+        &self,
+        _sequence: SequenceNumber,
+    ) -> Result<Vec<u8>, ReplyError<Vec<u8>>> {
         unimplemented!()
     }
 
-    fn wait_for_reply(&self, _sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError> {
+    fn wait_for_reply(
+        &self,
+        _sequence: SequenceNumber,
+    ) -> Result<Option<Vec<u8>>, ConnectionError> {
         unimplemented!()
     }
 
     fn wait_for_reply_with_fds(
         &self,
         _sequence: SequenceNumber,
-    ) -> Result<(Buffer, Vec<RawFdContainer>), ReplyError> {
+    ) -> Result<BufWithFds<Vec<u8>>, ReplyError<Vec<u8>>> {
         unimplemented!()
     }
 
     fn check_for_error(
         &self,
         _sequence: SequenceNumber,
-    ) -> Result<Option<GenericError>, ConnectionError> {
+    ) -> Result<Option<GenericError<Vec<u8>>>, ConnectionError> {
         unimplemented!()
     }
 
@@ -132,7 +140,7 @@ impl RequestConnection for FakeConnection {
 }
 
 #[test]
-fn test_poly_segment() -> Result<(), ReplyError> {
+fn test_poly_segment() -> Result<(), ReplyError<Vec<u8>>> {
     let conn = FakeConnection::default();
     let drawable = 42;
     let gc = 0x1337;
