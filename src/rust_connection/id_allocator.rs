@@ -37,10 +37,10 @@ impl IDAllocator {
     }
 
     /// Generate the next ID.
-    pub(crate) fn generate_id(
+    pub(crate) fn generate_id<C: RequestConnection>(
         &mut self,
-        conn: &impl RequestConnection,
-    ) -> Result<u32, ReplyOrIdError> {
+        conn: &C,
+    ) -> Result<u32, ReplyOrIdError<C::Buf>> {
         if self.next_id > self.max_id {
             if conn
                 .extension_information(xc_misc::X11_EXTENSION_NAME)?
@@ -72,11 +72,13 @@ mod test {
     use std::convert::TryFrom;
     use std::io::IoSlice;
 
-    use crate::connection::{DiscardMode, RequestConnection, RequestKind, SequenceNumber};
+    use crate::connection::{
+        BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber,
+    };
     use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
     use crate::errors::{ConnectionError, ParseError, ReplyError};
     use crate::generated::xproto::QueryExtensionReply;
-    use crate::utils::{Buffer, RawFdContainer};
+    use crate::utils::RawFdContainer;
     use crate::x11_utils::GenericError;
 
     use super::IDAllocator;
@@ -137,6 +139,8 @@ mod test {
     struct DummyConnection(Option<Vec<u8>>);
 
     impl RequestConnection for DummyConnection {
+        type Buf = Vec<u8>;
+
         fn send_request_with_reply<R>(
             &self,
             _bufs: &[IoSlice<'_>],
@@ -188,28 +192,31 @@ mod test {
             }))
         }
 
-        fn wait_for_reply_or_error(&self, _sequence: SequenceNumber) -> Result<Buffer, ReplyError> {
-            Ok(Buffer::from_vec(self.0.as_ref().unwrap().clone()))
+        fn wait_for_reply_or_error(
+            &self,
+            _sequence: SequenceNumber,
+        ) -> Result<Vec<u8>, ReplyError<Vec<u8>>> {
+            Ok(self.0.as_ref().unwrap().clone())
         }
 
         fn wait_for_reply(
             &self,
             _sequence: SequenceNumber,
-        ) -> Result<Option<Buffer>, ConnectionError> {
+        ) -> Result<Option<Vec<u8>>, ConnectionError> {
             unimplemented!()
         }
 
         fn wait_for_reply_with_fds(
             &self,
             _sequence: SequenceNumber,
-        ) -> Result<(Buffer, Vec<RawFdContainer>), ReplyError> {
+        ) -> Result<BufWithFds<Vec<u8>>, ReplyError<Vec<u8>>> {
             unimplemented!()
         }
 
         fn check_for_error(
             &self,
             _sequence: SequenceNumber,
-        ) -> Result<Option<GenericError>, ConnectionError> {
+        ) -> Result<Option<GenericError<Vec<u8>>>, ConnectionError> {
             unimplemented!()
         }
 

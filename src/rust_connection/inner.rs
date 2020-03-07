@@ -7,7 +7,6 @@ use std::io::{ErrorKind, IoSlice, Read, Write};
 use crate::connection::{DiscardMode, RequestKind, SequenceNumber};
 use crate::errors::{ConnectError, ParseError};
 use crate::generated::xproto::{Setup, SetupRequest, GET_INPUT_FOCUS_REQUEST};
-use crate::utils::Buffer;
 use crate::x11_utils::{GenericEvent, Serialize};
 
 #[derive(Debug, Clone)]
@@ -17,7 +16,7 @@ pub(crate) enum PollReply {
     /// There will be no reply; polling is done.
     NoReply,
     /// Here is the result of the polling; polling is done.
-    Reply(Buffer),
+    Reply(Vec<u8>),
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -47,9 +46,9 @@ where
     // The sequence number of the last reply/error/event that was read
     last_sequence_read: SequenceNumber,
     // Events that were read, but not yet returned to the API user
-    pending_events: VecDeque<(SequenceNumber, Buffer)>,
+    pending_events: VecDeque<(SequenceNumber, Vec<u8>)>,
     // Replies that were read, but not yet returned to the API user
-    pending_replies: VecDeque<(SequenceNumber, Buffer)>,
+    pending_replies: VecDeque<(SequenceNumber, Vec<u8>)>,
 }
 
 impl<W> ConnectionInner<W>
@@ -235,7 +234,7 @@ where
     // Extract the sequence number from a packet read from the X11 server. The packet must be a
     // reply, an event, or an error. All of these have a u16 sequence number in bytes 2 and 3...
     // except for KeymapNotify events.
-    fn extract_sequence_number(&mut self, buffer: &Buffer) -> Option<SequenceNumber> {
+    fn extract_sequence_number(&mut self, buffer: &[u8]) -> Option<SequenceNumber> {
         use crate::generated::xproto::KEYMAP_NOTIFY_EVENT;
         if buffer[0] == KEYMAP_NOTIFY_EVENT {
             return None;
@@ -261,7 +260,7 @@ where
     }
 
     /// An X11 packet was received from the connection and is now enqueued into our state.
-    pub(crate) fn enqueue_packet(&mut self, packet: Buffer) {
+    pub(crate) fn enqueue_packet(&mut self, packet: Vec<u8>) {
         let kind = packet[0];
 
         // extract_sequence_number() updates our state and is thus important to call even when we
@@ -311,7 +310,7 @@ where
     ///
     /// This function is meant to be used for requests that have a reply. Such requests always
     /// cause a reply or an error to be sent.
-    pub(crate) fn poll_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Option<Buffer> {
+    pub(crate) fn poll_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Option<Vec<u8>> {
         for (index, (seqno, _packet)) in self.pending_replies.iter().enumerate() {
             if *seqno == sequence {
                 return Some(self.pending_replies.remove(index).unwrap().1);
@@ -380,10 +379,10 @@ where
     /// Get a pending event.
     pub(crate) fn poll_for_event_with_sequence(
         &mut self,
-    ) -> Option<(SequenceNumber, GenericEvent)> {
+    ) -> Option<(SequenceNumber, GenericEvent<Vec<u8>>)> {
         self.pending_events
             .pop_front()
-            .map(|(seqno, event)| (seqno, event.try_into().unwrap()))
+            .map(|(seqno, event)| (seqno, GenericEvent::new(event).unwrap()))
     }
 
     /// Send all pending events by flushing the output buffer.

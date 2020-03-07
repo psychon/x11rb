@@ -4,14 +4,17 @@ use std::convert::{TryFrom, TryInto};
 use std::io::{BufReader, BufWriter, IoSlice, Read, Write};
 use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 
-use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
+use crate::connection::{
+    BufWithFds, Connection, DiscardMode, EventAndSeqNumber, RequestConnection, RequestKind,
+    SequenceNumber,
+};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::extension_information::ExtensionInformation;
 use crate::generated::bigreq::ConnectionExt as _;
 use crate::generated::xproto::{QueryExtensionReply, Setup};
-use crate::utils::{Buffer, RawFdContainer};
-use crate::x11_utils::{GenericError, GenericEvent};
+use crate::utils::RawFdContainer;
+use crate::x11_utils::GenericError;
 
 mod id_allocator;
 mod inner;
@@ -210,6 +213,8 @@ impl<R: Read, W: Write> RustConnection<R, W> {
 }
 
 impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
+    type Buf = Vec<u8>;
+
     fn send_request_with_reply<Reply>(
         &self,
         bufs: &[IoSlice<'_>],
@@ -268,13 +273,16 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
             .extension_information(self, extension_name)
     }
 
-    fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Buffer, ReplyError> {
+    fn wait_for_reply_or_error(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<Vec<u8>, ReplyError<Vec<u8>>> {
         let mut inner = self.inner.lock().unwrap();
         inner.flush()?; // Ensure the request is sent
         loop {
             if let Some(reply) = inner.poll_for_reply_or_error(sequence) {
                 if reply[0] == 0 {
-                    let error: GenericError = reply.try_into()?;
+                    let error = GenericError::new(reply)?;
                     return Err(error.into());
                 } else {
                     return Ok(reply);
@@ -284,7 +292,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         }
     }
 
-    fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Buffer>, ConnectionError> {
+    fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Vec<u8>>, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
         inner.flush()?; // Ensure the request is sent
         loop {
@@ -300,7 +308,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
     fn check_for_error(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<Option<GenericError>, ConnectionError> {
+    ) -> Result<Option<GenericError<Vec<u8>>>, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
         inner.prepare_check_for_reply_or_error(sequence)?;
         inner.flush()?; // Ensure the request is sent
@@ -308,7 +316,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
             match inner.poll_check_for_reply_or_error(sequence) {
                 PollReply::TryAgain => {}
                 PollReply::NoReply => return Ok(None),
-                PollReply::Reply(buffer) => return Ok(buffer.try_into().ok()),
+                PollReply::Reply(buffer) => return Ok(GenericError::new(buffer).ok()),
             }
             inner = self.read_packet_and_enqueue(inner)?;
         }
@@ -317,7 +325,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
     fn wait_for_reply_with_fds(
         &self,
         _sequence: SequenceNumber,
-    ) -> Result<(Buffer, Vec<RawFdContainer>), ReplyError> {
+    ) -> Result<BufWithFds<Vec<u8>>, ReplyError<Vec<u8>>> {
         unreachable!(
             "To wait for a reply containing FDs, a successful call to \
         send_request_with_reply_with_fds() is necessary. However, this function never succeeds."
@@ -349,9 +357,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
 }
 
 impl<R: Read, W: Write> Connection for RustConnection<R, W> {
-    fn wait_for_event_with_sequence(
-        &self,
-    ) -> Result<(SequenceNumber, GenericEvent), ConnectionError> {
+    fn wait_for_event_with_sequence(&self) -> Result<EventAndSeqNumber<Vec<u8>>, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
         loop {
             if let Some(event) = inner.poll_for_event_with_sequence() {
@@ -363,7 +369,7 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
 
     fn poll_for_event_with_sequence(
         &self,
-    ) -> Result<Option<(SequenceNumber, GenericEvent)>, ConnectionError> {
+    ) -> Result<Option<EventAndSeqNumber<Vec<u8>>>, ConnectionError> {
         Ok(self.inner.lock().unwrap().poll_for_event_with_sequence())
     }
 
@@ -376,7 +382,7 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
         &self.setup
     }
 
-    fn generate_id(&self) -> Result<u32, ReplyOrIdError> {
+    fn generate_id(&self) -> Result<u32, ReplyOrIdError<Vec<u8>>> {
         self.id_allocator.lock().unwrap().generate_id(self)
     }
 }
@@ -385,7 +391,7 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
 //
 // This function only supports errors, events, and replies. Namely, this cannot be used to receive
 // the initial setup reply from the X11 server.
-fn read_packet(read: &mut impl Read) -> Result<Buffer, std::io::Error> {
+fn read_packet(read: &mut impl Read) -> Result<Vec<u8>, std::io::Error> {
     let mut buffer = vec![0; 32];
     read.read_exact(&mut buffer)?;
 
@@ -404,5 +410,5 @@ fn read_packet(read: &mut impl Read) -> Result<Buffer, std::io::Error> {
     buffer.resize(32 + extra_length, 0);
     read.read_exact(&mut buffer[32..])?;
 
-    Ok(Buffer::from_vec(buffer))
+    Ok(buffer)
 }
