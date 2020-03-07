@@ -21,7 +21,7 @@ use std::io::{Error, ErrorKind, IoSlice};
 use std::ops::Deref;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, RawFd};
-use std::ptr::{null, null_mut};
+use std::ptr::{null, null_mut, NonNull};
 
 mod pending_errors;
 mod raw_ffi;
@@ -95,7 +95,8 @@ impl XCBConnection {
             } else {
                 let setup = raw_ffi::xcb_get_setup(connection);
                 let conn = XCBConnection {
-                    conn: raw_ffi::XCBConnectionWrapper(connection),
+                    // `xcb_connect` will never return null.
+                    conn: raw_ffi::XCBConnectionWrapper(NonNull::new(connection).unwrap()),
                     setup: Self::parse_setup(setup)?,
                     ext_info: Default::default(),
                     errors: Default::default(),
@@ -108,7 +109,7 @@ impl XCBConnection {
 
     /// Create a connection wrapper for a raw libxcb `xcb_connection_t`.
     ///
-    /// `xcb_disconnect` is not called on drop.
+    /// `xcb_disconnect` is called on drop only if `should_drop` is `true`.
     ///
     /// # Safety
     ///
@@ -116,14 +117,16 @@ impl XCBConnection {
     /// than the returned XCBConnection.
     pub unsafe fn from_raw_xcb_connection(
         ptr: *mut c_void,
+        should_drop: bool,
     ) -> Result<XCBConnection, ConnectionError> {
-        let setup = raw_ffi::xcb_get_setup(ptr as *mut raw_ffi::xcb_connection_t);
+        let ptr = ptr as *mut raw_ffi::xcb_connection_t;
+        let setup = raw_ffi::xcb_get_setup(ptr);
         Ok(XCBConnection {
-            conn: raw_ffi::XCBConnectionWrapper(ptr as *mut raw_ffi::xcb_connection_t),
+            conn: raw_ffi::XCBConnectionWrapper(NonNull::new(ptr).unwrap()),
             setup: Self::parse_setup(setup)?,
             ext_info: Default::default(),
             errors: Default::default(),
-            should_drop: false,
+            should_drop,
         })
     }
 
@@ -191,7 +194,7 @@ impl XCBConnection {
         let seqno = if fds.is_empty() {
             unsafe {
                 raw_ffi::xcb_send_request64(
-                    (self.conn).0,
+                    self.conn.0.as_ptr(),
                     flags,
                     &mut new_bufs[2],
                     &protocol_request,
@@ -202,7 +205,7 @@ impl XCBConnection {
             let fds_ptr = fds.as_ptr();
             unsafe {
                 raw_ffi::xcb_send_request_with_fds64(
-                    (self.conn).0,
+                    self.conn.0.as_ptr(),
                     flags,
                     &mut new_bufs[2],
                     &protocol_request,
@@ -214,7 +217,7 @@ impl XCBConnection {
         if seqno == 0 {
             unsafe {
                 Err(XCBConnection::connection_error_from_connection(
-                    (self.conn).0,
+                    self.conn.0.as_ptr(),
                 ))
             }
         } else {
@@ -225,7 +228,7 @@ impl XCBConnection {
     /// Check if the underlying XCB connection is in an error state.
     pub fn has_error(&self) -> Option<ConnectionError> {
         unsafe {
-            let error = raw_ffi::xcb_connection_has_error((self.conn).0);
+            let error = raw_ffi::xcb_connection_has_error(self.conn.0.as_ptr());
             if error == 0 {
                 None
             } else {
@@ -239,7 +242,7 @@ impl XCBConnection {
     /// The returned pointer is valid for as long as the original object was not dropped. No
     /// ownerhsip is transferred.
     pub fn get_raw_xcb_connection(&self) -> *mut c_void {
-        (self.conn).0 as _
+        self.conn.0.as_ptr() as _
     }
 
     /// Check if a reply to the given request already received.
@@ -251,8 +254,12 @@ impl XCBConnection {
         unsafe {
             let mut reply = null_mut();
             let mut error = null_mut();
-            let found =
-                raw_ffi::xcb_poll_for_reply((self.conn).0, sequence as _, &mut reply, &mut error);
+            let found = raw_ffi::xcb_poll_for_reply(
+                self.conn.0.as_ptr(),
+                sequence as _,
+                &mut reply,
+                &mut error,
+            );
             if found == 0 {
                 return Err(());
             }
@@ -353,7 +360,7 @@ impl RequestConnection for XCBConnection {
         match mode {
             DiscardMode::DiscardReplyAndError => unsafe {
                 // libxcb can throw away everything for us
-                raw_ffi::xcb_discard_reply64((self.conn).0, sequence);
+                raw_ffi::xcb_discard_reply64(self.conn.0.as_ptr(), sequence);
             },
             // We have to check for errors ourselves
             DiscardMode::DiscardReply => self.errors.discard_reply(sequence),
@@ -373,14 +380,14 @@ impl RequestConnection for XCBConnection {
     ) -> Result<CSlice, ReplyError<CSlice>> {
         unsafe {
             let mut error = null_mut();
-            let reply = raw_ffi::xcb_wait_for_reply64((self.conn).0, sequence, &mut error);
+            let reply = raw_ffi::xcb_wait_for_reply64(self.conn.0.as_ptr(), sequence, &mut error);
 
             // At least one of these pointers must be NULL.
             assert!(reply.is_null() || error.is_null());
 
             // If both pointers are NULL, the xcb connection must be in an error state
             if reply.is_null() && error.is_null() {
-                return Err(Self::connection_error_from_connection((self.conn).0).into());
+                return Err(Self::connection_error_from_connection(self.conn.0.as_ptr()).into());
             }
 
             if !reply.is_null() {
@@ -413,7 +420,7 @@ impl RequestConnection for XCBConnection {
         let cookie = raw_ffi::xcb_void_cookie_t {
             sequence: sequence as _,
         };
-        let error = unsafe { raw_ffi::xcb_request_check((self.conn).0, cookie) };
+        let error = unsafe { raw_ffi::xcb_request_check(self.conn.0.as_ptr(), cookie) };
         if error.is_null() {
             Ok(None)
         } else {
@@ -454,7 +461,7 @@ impl RequestConnection for XCBConnection {
     }
 
     fn maximum_request_bytes(&self) -> usize {
-        4 * unsafe { raw_ffi::xcb_get_maximum_request_length((self.conn).0) as usize }
+        4 * unsafe { raw_ffi::xcb_get_maximum_request_length(self.conn.0.as_ptr()) as usize }
     }
 }
 
@@ -464,9 +471,9 @@ impl Connection for XCBConnection {
             return Ok((error.0, error.1.into()));
         }
         unsafe {
-            let event = raw_ffi::xcb_wait_for_event((self.conn).0);
+            let event = raw_ffi::xcb_wait_for_event(self.conn.0.as_ptr());
             if event.is_null() {
-                return Err(Self::connection_error_from_connection((self.conn).0));
+                return Err(Self::connection_error_from_connection(self.conn.0.as_ptr()));
             }
             Ok(XCBConnection::wrap_event(event as _)?)
         }
@@ -479,9 +486,9 @@ impl Connection for XCBConnection {
             return Ok(Some((error.0, error.1.into())));
         }
         unsafe {
-            let event = raw_ffi::xcb_poll_for_event((self.conn).0);
+            let event = raw_ffi::xcb_poll_for_event(self.conn.0.as_ptr());
             if event.is_null() {
-                let err = raw_ffi::xcb_connection_has_error((self.conn).0);
+                let err = raw_ffi::xcb_connection_has_error(self.conn.0.as_ptr());
                 if err == 0 {
                     return Ok(None);
                 } else {
@@ -494,22 +501,22 @@ impl Connection for XCBConnection {
 
     fn flush(&self) -> Result<(), ConnectionError> {
         // xcb_flush() returns 0 if the connection is in (or just entered) an error state, else 1.
-        let res = unsafe { raw_ffi::xcb_flush((self.conn).0) };
+        let res = unsafe { raw_ffi::xcb_flush(self.conn.0.as_ptr()) };
         if res != 0 {
             Ok(())
         } else {
-            unsafe { Err(Self::connection_error_from_connection((self.conn).0)) }
+            unsafe { Err(Self::connection_error_from_connection(self.conn.0.as_ptr())) }
         }
     }
 
     fn generate_id(&self) -> Result<u32, ReplyOrIdError<CSlice>> {
         unsafe {
-            let id = raw_ffi::xcb_generate_id((self.conn).0);
+            let id = raw_ffi::xcb_generate_id(self.conn.0.as_ptr());
             // XCB does not document the behaviour of `xcb_generate_id` when
             // there is an error. Looking at its source code it seems that it
             // returns `-1` (presumably `u32::max_value()`).
             if id == u32::max_value() {
-                Err(Self::connection_error_from_connection((self.conn).0).into())
+                Err(Self::connection_error_from_connection(self.conn.0.as_ptr()).into())
             } else {
                 Ok(id)
             }
@@ -525,7 +532,7 @@ impl Drop for XCBConnection {
     fn drop(&mut self) {
         if self.should_drop {
             unsafe {
-                raw_ffi::xcb_disconnect((self.conn).0 as *mut raw_ffi::xcb_connection_t);
+                raw_ffi::xcb_disconnect(self.conn.0.as_ptr());
             }
         }
     }
@@ -534,7 +541,7 @@ impl Drop for XCBConnection {
 #[cfg(unix)]
 impl AsRawFd for XCBConnection {
     fn as_raw_fd(&self) -> RawFd {
-        unsafe { raw_ffi::xcb_get_file_descriptor((self.conn).0) }
+        unsafe { raw_ffi::xcb_get_file_descriptor(self.conn.0.as_ptr()) }
     }
 }
 
