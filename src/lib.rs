@@ -61,6 +61,16 @@
 //! ```
 //! More examples can be found in the
 //! [examples](https://github.com/psychon/x11rb/tree/master/examples) directory.
+//!
+//! ## Feature flags
+//!
+//! This crate uses [feature
+//! flags](https://doc.rust-lang.org/cargo/reference/manifest.html#the-features-section) to reduce
+//! the amount of compiled code. By default, only the core X11 protocol and X11 extensions that are
+//! needed internally are enabled. Further extensions need to be explicitly enabled.
+//!
+//! If you want to take the "I do not want to think about this"-approach, you can enable the
+//! `all-extensions` feature to just enable, well, all extensions.
 
 #![deny(missing_copy_implementations,
         missing_debug_implementations,
