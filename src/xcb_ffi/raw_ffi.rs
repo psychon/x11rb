@@ -3,6 +3,7 @@ use libc::c_void;
 use libc::{c_char, c_int, c_uint};
 #[cfg(not(test))]
 use std::io::IoSlice;
+use std::ptr::NonNull;
 
 #[allow(non_camel_case_types)]
 #[repr(C)]
@@ -11,7 +12,7 @@ pub(crate) struct xcb_connection_t {
 }
 
 #[derive(Debug)]
-pub(crate) struct XCBConnectionWrapper(pub(crate) *const xcb_connection_t);
+pub(crate) struct XCBConnectionWrapper(pub(crate) NonNull<xcb_connection_t>);
 
 // libxcb is fully thread-safe (well, except for xcb_disconnect()), so the following is
 // actually fine and safe:
