@@ -1,11 +1,11 @@
 # Version 0.4.0 (2020-XX-XX)
 
+New features:
 * Add support for the XKB and XInput extensions to the code generator.
   * x11rb now supports the same X11 extension that libxcb supports!
   * The `GetKbdByName`, `GetGeometry`, `SetGeometry`, `ListComponents` are not
     correctly described by xcb-proto and thus still unsupported.
 * Add an `allow-unsafe-code` and `forbid(unsafe-code)` without this feature.
-* Add feature gates for individual X11 extensions.
 * Add `x11rb::connect()` for establishing a connection to an X11 server.
   Depending on the `allow-unsafe-code` feature, this either returns a
   `RustConnection` or an `XCBConnection`.
@@ -26,14 +26,6 @@
   * This adds `value8(&self)`, `value16(&self)` and `value32(&self)` methods
     that check for the correct format and return an iterator over the value.
 * Add a function to create an `XCBConnection` from a raw pointer.
-* Introduce `Result`s in some places that previously ignored errors or paniced.
-* Split up `ConnectionError` into two enums, one for errors that can occur while
-  establishing a connection and another for errors on an already-established
-  connection.
-* Prefix request function names in the `ConnectionExt` traits with the extension
-  name. This is necessary since several extensions contain different versions of
-  the same request.
-* Rename `ConnectionErrorOrX11Error` to `ReplyError`.
 * Add `Connection::wait_for_event_with_sequence()` and
   `Connection::poll_for_event_with_sequence()` that allow to get an event
   together with its full sequence number.
@@ -42,18 +34,34 @@
 * Make `x11rb::utils::CSlice` safer.
 * Use `rustfmt`.
 * Add AppVeyor for Windows CI.
-* Changes to the generated code and the code generator.
-  * Implement `From` instead of `Into` in the generated code.
-  * Use better type names in the generated code, e.g. `WINDOW` instead of `u32`.
-  * Simplify and fix some warnings in the generated code without changing visible
-    behaviour.
-  * Change internal storage of unions in the generated code from `Vec` to fixed
-    length arrays.
-  * Fix xproto's `SetModifierMapping` request. The code generator was ignoring an
-    expression that required a multiplication with a constant value to get the
-    length of a list.
-  * Fix xproto's `SetupAuthenticate` and res's `ClientIdValue` serialization. An
-    expression in the XMl was ignored.
+
+Breaking changes:
+* Add feature gates for individual X11 extensions.
+* Introduce `Result`s in some places that previously ignored errors or paniced.
+* Split up `ConnectionError` into two enums, one for errors that can occur while
+  establishing a connection and another for errors on an already-established
+  connection.
+* Prefix request function names in the `ConnectionExt` traits with the extension
+  name. This is necessary since several extensions contain different versions of
+  the same request.
+  * As an example, `x11rb::generated::shm::ConnectionExt::create_pixmap` is
+    now called `shm_create_pixmap` to avoid a collision with
+    `x11rb::generated::xproto::ConnectionExt::create_pixmap`. The plain function
+    `shm::create_pixmap` kept its name.
+* Rename `ConnectionErrorOrX11Error` to `ReplyError`.
+
+Changes to the generated code and the code generator.
+* Implement `From` instead of `Into` in the generated code.
+* Use better type names in the generated code, e.g. `WINDOW` instead of `u32`.
+* Simplify and fix some warnings in the generated code without changing visible
+  behaviour.
+* Change internal storage of unions in the generated code from `Vec` to fixed
+  length arrays.
+* Fix xproto's `SetModifierMapping` request. The code generator was ignoring an
+  expression that required a multiplication with a constant value to get the
+  length of a list.
+* Fix xproto's `SetupAuthenticate` and res's `ClientIdValue` serialization. An
+  expression in the XMl was ignored.
 
 Many thanks to @dalcde and @eduardosm for their valuable contributions.
 
