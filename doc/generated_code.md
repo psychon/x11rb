@@ -20,17 +20,19 @@ use std::convert::TryFrom;
 use std::convert::TryInto;
 use std::io::IoSlice;
 #[allow(unused_imports)]
-use std::option::Option as RustOption;
-#[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::{GenericEvent as X11GenericEvent, GenericError as X11GenericError, Event as _};
-use crate::x11_utils::TryParse;
+use crate::x11_utils::Event as _;
+use crate::x11_utils::{TryParse, Serialize};
 use crate::connection::RequestConnection;
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::cookie::ListFontsWithInfoCookie;
 use crate::errors::{ParseError, ConnectionError};
+#[allow(unused_imports)]
+use crate::x11_utils::GenericEvent;
+#[allow(unused_imports)]
+use crate::x11_utils::GenericError;
 ```
 
 ## XID types
@@ -757,7 +759,7 @@ This code is generated in the module:
 ```rust
 /// Opcode for the NoOperation request
 pub const NO_OPERATION_REQUEST: u8 = 127;
-pub fn no_operation<Conn>(conn: &Conn) -> Result<VoidCookie<Conn>, ConnectionError>
+pub fn no_operation<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (4) / 4;
@@ -775,7 +777,7 @@ where Conn: RequestConnection + ?Sized
 ```
 And this code is in the extension trait:
 ```rust
-fn no_operation(&self) -> Result<VoidCookie<Self>, ConnectionError>
+fn no_operation(&self) -> Result<VoidCookie<'_, Self>, ConnectionError>
 {
     no_operation(self)
 }
@@ -795,7 +797,7 @@ This code is generated in the module:
 ```rust
 /// Opcode for the GetInputFocus request
 pub const GET_INPUT_FOCUS_REQUEST: u8 = 43;
-pub fn get_input_focus<Conn>(conn: &Conn) -> Result<Cookie<Conn, GetInputFocusReply>, ConnectionError>
+pub fn get_input_focus<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetInputFocusReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (4) / 4;
@@ -844,7 +846,7 @@ impl TryFrom<&[u8]> for GetInputFocusReply {
 ```
 And this code is in the extension trait:
 ```rust
-fn get_input_focus(&self) -> Result<Cookie<Self, GetInputFocusReply>, ConnectionError>
+fn get_input_focus(&self) -> Result<Cookie<'_, Self, GetInputFocusReply>, ConnectionError>
 {
     get_input_focus(self)
 }
@@ -1008,7 +1010,6 @@ impl Serialize for ConfigureWindowAux {
     }
 }
 /// [SNIP]
-/// ```
 pub fn configure_window<'c, Conn>(conn: &'c Conn, window: WINDOW, value_list: &ConfigureWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
