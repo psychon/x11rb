@@ -247,6 +247,12 @@ class Module(object):
         self.out("impl<C: RequestConnection + ?Sized> ConnectionExt for C {}")
 
     def enum(self, enum, name):
+        values = [value for (ename, value) in enum.values]
+        has_duplicate_values = len(values) != len(set(values))
+        max_value = max([int(value) for (ename, value) in enum.values])
+        # Discriminators must be unique and must be below 2^31 (for to 32 bit targets)
+        assign_discriminators = (not has_duplicate_values) and max_value < 1 << 31
+
         rust_name = self._name(name)
         emit_doc(self.out, enum.doc)
         self.out("#[derive(Debug, Clone, Copy, PartialEq, Eq)]")
@@ -255,7 +261,14 @@ class Module(object):
             self.out("#[allow(non_camel_case_types)]")
         self.out("pub enum %s {", rust_name)
         for (ename, value) in enum.values:
-            self.out.indent("%s,", ename_to_rust(ename))
+            if not assign_discriminators:
+                self.out.indent("%s,", ename_to_rust(ename))
+            else:
+                # Is this a <bit>?
+                bit = next(iter(filter(lambda x: x[0] == ename, enum.bits)), None)
+                if bit is not None:
+                    value = "1 << %s" % bit[1]
+                self.out.indent("%s = %s,", ename_to_rust(ename), value)
         self.out("}")
 
         # Guess which types this enum can be represented in. We do this based on the
