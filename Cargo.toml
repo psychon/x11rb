@@ -10,7 +10,7 @@ license = "MIT OR Apache-2.0"
 keywords = ["xcb", "X11"]
 
 [dependencies]
-libc = "0.2"
+libc = { version = "0.2", optional = true }
 gethostname = "0.2.1"
 
 [build-dependencies]
@@ -29,7 +29,7 @@ vendor-xcb-proto = []
 
 # Without this feature, all uses of `unsafe` in the crate are forbidden via
 # #![deny(unsafe_code)]. This has the effect of disabling the XCB FFI bindings.
-allow-unsafe-code = []
+allow-unsafe-code = ["libc"]
 
 # Enable this feature to enable all the X11 extensions
 all-extensions = [
@@ -102,7 +102,7 @@ required-features = ["present"]
 
 [[example]]
 name = "shared_memory"
-required-features = ["shm"]
+required-features = ["libc", "shm"]
 
 [[example]]
 name = "xeyes"

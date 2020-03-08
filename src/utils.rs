@@ -3,10 +3,7 @@ use std::mem::forget;
 use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
 
 #[cfg(not(unix))]
-use libc::c_int;
-
-#[cfg(not(unix))]
-type RawFd = c_int;
+type RawFd = std::os::raw::c_int;
 
 #[cfg(feature = "allow-unsafe-code")]
 mod unsafe_code {

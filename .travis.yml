@@ -68,4 +68,4 @@ script:
   - cargo build --verbose --all-targets --no-default-features --features "vendor-xcb-proto all-extensions"
 
   # Run the examples as 'integration tests'. This time using RustConnection.
-  - run_examples --no-default-features --features "vendor-xcb-proto all-extensions"
+  - run_examples --no-default-features --features "vendor-xcb-proto all-extensions libc"
