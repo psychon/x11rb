@@ -9,7 +9,6 @@ use std::process::exit;
 use x11rb::connection::Connection;
 use x11rb::errors::{ReplyError, ReplyOrIdError};
 use x11rb::generated::xproto::*;
-use x11rb::wrapper::LazyAtom;
 use x11rb::x11_utils::{Event, GenericEvent};
 use x11rb::COPY_DEPTH_FROM_PARENT;
 
@@ -70,8 +69,8 @@ impl<'a, C: Connection> WMState<'a, C> {
         conn.create_gc(black_gc, screen.root, &gc_aux)?;
         conn.close_font(font)?;
 
-        let mut wm_protocols = LazyAtom::new(conn, false, b"WM_PROTOCOLS");
-        let mut wm_delete_window = LazyAtom::new(conn, false, b"WM_DELETE_WINDOW");
+        let wm_protocols = conn.intern_atom(false, b"WM_PROTOCOLS")?;
+        let wm_delete_window = conn.intern_atom(false, b"WM_DELETE_WINDOW")?;
 
         Ok(WMState {
             conn,
@@ -79,8 +78,8 @@ impl<'a, C: Connection> WMState<'a, C> {
             black_gc,
             windows: Vec::default(),
             pending_expose: HashSet::default(),
-            wm_protocols: wm_protocols.atom()?,
-            wm_delete_window: wm_delete_window.atom()?,
+            wm_protocols: wm_protocols.reply()?.atom,
+            wm_delete_window: wm_delete_window.reply()?.atom,
         })
     }
 
