@@ -26,7 +26,6 @@ test_script:
   - cargo run --verbose --no-default-features --features "vendor-xcb-proto all-extensions" --example generic_events
   - cargo run --verbose --no-default-features --features "vendor-xcb-proto all-extensions" --example hypnomoire
   - cargo run --verbose --no-default-features --features "vendor-xcb-proto all-extensions" --example list_fonts
-  - cargo run --verbose --no-default-features --features "vendor-xcb-proto all-extensions" --example multithread_test
   - cargo run --verbose --no-default-features --features "vendor-xcb-proto all-extensions" --example simple_window
   - cargo run --verbose --no-default-features --features "vendor-xcb-proto all-extensions" --example simple_window_manager
   #- cargo run --verbose --no-default-features --features "vendor-xcb-proto all-extensions" --example tutorial
