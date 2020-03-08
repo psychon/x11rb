@@ -1,4 +1,4 @@
-# Version 0.4.0 (2020-XX-XX)
+# Version 0.4.0 (2020-03-08)
 
 New features:
 * Add support for the XKB and XInput extensions to the code generator.
@@ -29,6 +29,7 @@ New features:
 * Add `Connection::wait_for_event_with_sequence()` and
   `Connection::poll_for_event_with_sequence()` that allow to get an event
   together with its full sequence number.
+* Add API for prefetching extension information.
 * General improvements to the documentation.
 * Emit correct `cargo:rerun-if-changed=` lines from `build.rs`.
 * Make `x11rb::utils::CSlice` safer.
@@ -36,7 +37,8 @@ New features:
 * Add AppVeyor for Windows CI.
 
 Breaking changes:
-* Add feature gates for individual X11 extensions.
+* Add feature gates for individual X11 extensions. The `all-extensions` feature
+  enables all X11 extensions.
 * Introduce `Result`s in some places that previously ignored errors or paniced.
 * Split up `ConnectionError` into two enums, one for errors that can occur while
   establishing a connection and another for errors on an already-established
@@ -49,6 +51,10 @@ Breaking changes:
     `x11rb::generated::xproto::ConnectionExt::create_pixmap`. The plain function
     `shm::create_pixmap` kept its name.
 * Rename `ConnectionErrorOrX11Error` to `ReplyError`.
+* Remove `x11rb::utils::Buffer` type. Instead, there is an associated type
+  `Connection::Buf`. This is `Vec<u8>` for `RustConnection` and `CSlice` for
+  `XCBConnection`.
+* Remove `LazyAtom`.
 
 Changes to the generated code and the code generator.
 * Implement `From` instead of `Into` in the generated code.
@@ -62,6 +68,8 @@ Changes to the generated code and the code generator.
   length of a list.
 * Fix xproto's `SetupAuthenticate` and res's `ClientIdValue` serialization. An
   expression in the XMl was ignored.
+* Specify enum discriminators where possible.
+* Implement `TryFrom<uX>` for enums.
 
 Many thanks to @dalcde and @eduardosm for their valuable contributions.
 
