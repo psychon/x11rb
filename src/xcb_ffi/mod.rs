@@ -195,9 +195,6 @@ impl XCBConnection {
             flags |= raw_ffi::send_request_flags::REPLY_FDS;
         }
 
-        // Convert the FDs into an array of ints. libxcb will close the FDs.
-        let fds: Vec<_> = fds.into_iter().map(RawFdContainer::into_raw_fd).collect();
-
         let seqno = if fds.is_empty() {
             unsafe {
                 raw_ffi::xcb_send_request64(
@@ -208,8 +205,10 @@ impl XCBConnection {
                 )
             }
         } else {
+            // Convert the FDs into an array of ints. libxcb will close the FDs.
+            let mut fds: Vec<_> = fds.into_iter().map(RawFdContainer::into_raw_fd).collect();
             let num_fds = fds.len().try_into().unwrap();
-            let fds_ptr = fds.as_ptr();
+            let fds_ptr = fds.as_mut_ptr();
             unsafe {
                 raw_ffi::xcb_send_request_with_fds64(
                     self.conn.0.as_ptr(),
@@ -222,11 +221,7 @@ impl XCBConnection {
             }
         };
         if seqno == 0 {
-            unsafe {
-                Err(XCBConnection::connection_error_from_connection(
-                    self.conn.0.as_ptr(),
-                ))
-            }
+            unsafe { Err(Self::connection_error_from_connection(self.conn.0.as_ptr())) }
         } else {
             Ok(seqno)
         }
@@ -273,8 +268,8 @@ impl XCBConnection {
             assert_eq!(found, 1);
             match (reply.is_null(), error.is_null()) {
                 (true, true) => Ok(None),
-                (true, false) => Ok(Some(XCBConnection::wrap_error(error as _))),
-                (false, true) => Ok(Some(XCBConnection::wrap_reply(reply as _))),
+                (true, false) => Ok(Some(Self::wrap_error(error as _))),
+                (false, true) => Ok(Some(Self::wrap_reply(reply as _))),
                 (false, false) => unreachable!(),
             }
         }
@@ -297,25 +292,26 @@ impl XCBConnection {
     }
 
     unsafe fn wrap_event(event: *mut u8) -> Result<(SequenceNumber, GenericEvent), ParseError> {
+        let header = CSlice::new(event, 36);
         let mut length = 32;
         // XCB inserts a uint32_t with the sequence number after the first 32 bytes.
-        let mut seqno = [0; 4];
-        seqno.as_mut_ptr().copy_from(event.add(32), 4);
-        let seqno = u32::from_ne_bytes(seqno);
+        let seqno = u32::from_ne_bytes([header[32], header[33], header[34], header[35]]);
         let seqno = SequenceNumber::from(seqno); // FIXME: Figure out a way to get the high bytes
 
         // The first byte contains the event type, check for XGE events
         if (*event & 0x7f) == super::generated::xproto::GE_GENERIC_EVENT {
             // Read the length field of the event to get its length
-            let slice = std::slice::from_raw_parts(event, 8);
-            let length_field = u32::from_ne_bytes([slice[4], slice[5], slice[6], slice[7]]);
+            let length_field = u32::from_ne_bytes([header[4], header[5], header[6], header[7]]);
             let length_field: usize = length_field.try_into()?;
             length += length_field * 4;
             // Discard the `full_sequence` field inserted by xcb at
             // the 32-byte boundary.
             std::ptr::copy(event.add(36), event.add(32), length_field * 4);
         }
-        Ok((seqno, GenericEvent::new(CSlice::new(event, length))?))
+        Ok((
+            seqno,
+            GenericEvent::new(CSlice::new(header.into_ptr(), length))?,
+        ))
     }
 }
 
@@ -396,20 +392,16 @@ impl RequestConnection for XCBConnection {
         unsafe {
             let mut error = null_mut();
             let reply = raw_ffi::xcb_wait_for_reply64(self.conn.0.as_ptr(), sequence, &mut error);
-
-            // At least one of these pointers must be NULL.
-            assert!(reply.is_null() || error.is_null());
-
-            // If both pointers are NULL, the xcb connection must be in an error state
-            if reply.is_null() && error.is_null() {
-                return Err(Self::connection_error_from_connection(self.conn.0.as_ptr()).into());
-            }
-
-            if !reply.is_null() {
-                Ok(XCBConnection::wrap_reply(reply as _))
-            } else {
-                let error = GenericError::new(XCBConnection::wrap_error(error as _))?;
-                Err(error.into())
+            match (reply.is_null(), error.is_null()) {
+                (true, true) => {
+                    Err(Self::connection_error_from_connection(self.conn.0.as_ptr()).into())
+                }
+                (false, true) => Ok(Self::wrap_reply(reply as _)),
+                (true, false) => Err(GenericError::new(Self::wrap_error(error as _))
+                    .unwrap()
+                    .into()),
+                // At least one of these pointers must be NULL.
+                (false, false) => unreachable!(),
             }
         }
     }
@@ -424,25 +416,6 @@ impl RequestConnection for XCBConnection {
                     Ok(None)
                 }
             },
-        }
-    }
-
-    fn check_for_error(
-        &self,
-        sequence: SequenceNumber,
-    ) -> Result<Option<GenericError>, ConnectionError> {
-        let cookie = raw_ffi::xcb_void_cookie_t {
-            sequence: sequence as _,
-        };
-        let error = unsafe { raw_ffi::xcb_request_check(self.conn.0.as_ptr(), cookie) };
-        if error.is_null() {
-            Ok(None)
-        } else {
-            unsafe {
-                Ok(Some(GenericError::new(XCBConnection::wrap_error(
-                    error as _,
-                ))?))
-            }
         }
     }
 
@@ -464,11 +437,23 @@ impl RequestConnection for XCBConnection {
     }
 
     #[cfg(not(unix))]
-    fn wait_for_reply_with_fds(
-        &self,
-        _sequence: SequenceNumber,
-    ) -> Result<(Buffer, Vec<RawFdContainer>), ReplyError> {
+    fn wait_for_reply_with_fds(&self, _sequence: SequenceNumber) -> Result<BufWithFds, ReplyError> {
         unimplemented!("FD passing is currently only implemented on Unix-like systems")
+    }
+
+    fn check_for_error(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<Option<GenericError>, ConnectionError> {
+        let cookie = raw_ffi::xcb_void_cookie_t {
+            sequence: sequence as _,
+        };
+        let error = unsafe { raw_ffi::xcb_request_check(self.conn.0.as_ptr(), cookie) };
+        if error.is_null() {
+            Ok(None)
+        } else {
+            unsafe { Ok(Some(GenericError::new(Self::wrap_error(error as _))?)) }
+        }
     }
 
     fn maximum_request_bytes(&self) -> usize {
@@ -486,7 +471,7 @@ impl Connection for XCBConnection {
             if event.is_null() {
                 return Err(Self::connection_error_from_connection(self.conn.0.as_ptr()));
             }
-            Ok(XCBConnection::wrap_event(event as _)?)
+            Ok(Self::wrap_event(event as _)?)
         }
     }
 
@@ -504,7 +489,7 @@ impl Connection for XCBConnection {
                     return Err(Self::connection_error_from_c_error(err));
                 }
             }
-            Ok(Some(XCBConnection::wrap_event(event as _)?))
+            Ok(Some(Self::wrap_event(event as _)?))
         }
     }
 
