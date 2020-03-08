@@ -324,6 +324,42 @@ class Module(object):
                 self.out("}")
             self.out("}")
 
+        self.out("impl Serialize for %s {", rust_name)
+        with Indent(self.out):
+            self.out("type Bytes = <%s as Serialize>::Bytes;", to_type)
+            self.out("fn serialize(&self) -> Self::Bytes {")
+            self.out.indent("%s::from(*self).serialize()", to_type)
+            self.out("}")
+            self.out("fn serialize_into(&self, bytes: &mut Vec<u8>) {")
+            self.out.indent("%s::from(*self).serialize_into(bytes)", to_type)
+            self.out("}")
+        self.out("}")
+
+        # Can this enum be parsed? Its values must be unique for this.
+        if not has_duplicate_values:
+            self.out("impl TryFrom<%s> for %s {", to_type, rust_name)
+            with Indent(self.out):
+                self.out("type Error = ParseError;")
+                self.out("fn try_from(value: %s) -> Result<Self, Self::Error> {", to_type)
+                with Indent(self.out):
+                    self.out("match value {")
+                    for (ename, value) in enum.values:
+                        self.out.indent("%s => Ok(%s::%s),", value,
+                                        rust_name, ename_to_rust(ename))
+                    self.out.indent("_ => Err(ParseError::ParseError)")
+                    self.out("}")
+                self.out("}")
+            self.out("}")
+
+            self.out("impl TryParse for %s {", rust_name)
+            with Indent(self.out):
+                self.out("fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {")
+                with Indent(self.out):
+                    self.out("let (value, remaining) = %s::try_parse(value)?;", to_type)
+                    self.out("Ok((Self::try_from(value)?, remaining))")
+                self.out("}")
+            self.out("}")
+
         # Is this enum a bitmask? It is all values are bits or the special value zero...
         def ok_for_bitmask(ename, value):
             return ename in bits or value == "0"
