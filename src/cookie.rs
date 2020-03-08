@@ -290,14 +290,14 @@ where
             Ok(v) => v,
         };
         let reply = ListFontsWithInfoReply::try_from(reply.as_ref()).map_err(ReplyError::from);
-        if reply.is_ok() {
+        match reply {
             // Is this an indicator that no more replies follow?
-            if !reply.as_ref().unwrap().name.is_empty() {
+            Ok(ref reply) if reply.name.is_empty() => None,
+            Ok(reply) => {
                 self.0 = Some(cookie);
-            } else {
-                return None;
+                Some(Ok(reply))
             }
+            Err(e) => Some(Err(e)),
         }
-        Some(reply)
     }
 }
