@@ -324,6 +324,17 @@ class Module(object):
                 self.out("}")
             self.out("}")
 
+        self.out("impl Serialize for %s {", rust_name)
+        with Indent(self.out):
+            self.out("type Bytes = <%s as Serialize>::Bytes;", to_type)
+            self.out("fn serialize(&self) -> Self::Bytes {")
+            self.out.indent("%s::from(*self).serialize()", to_type)
+            self.out("}")
+            self.out("fn serialize_into(&self, bytes: &mut Vec<u8>) {")
+            self.out.indent("%s::from(*self).serialize_into(bytes)", to_type)
+            self.out("}")
+        self.out("}")
+
         # Can this enum be parsed? Its values must be unique for this.
         if not has_duplicate_values:
             self.out("impl TryFrom<%s> for %s {", to_type, rust_name)
