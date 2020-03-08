@@ -22,6 +22,7 @@ use std::ops::Deref;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, RawFd};
 use std::ptr::{null, null_mut, NonNull};
+use std::sync::Mutex;
 
 mod pending_errors;
 mod raw_ffi;
@@ -34,7 +35,7 @@ mod raw_ffi;
 pub struct XCBConnection {
     conn: raw_ffi::XCBConnectionWrapper,
     setup: Setup,
-    ext_info: ExtensionInformation,
+    ext_info: Mutex<ExtensionInformation>,
     errors: pending_errors::PendingErrors,
     should_drop: bool,
 }
@@ -367,11 +368,24 @@ impl RequestConnection for XCBConnection {
         }
     }
 
+    fn prefetch_extension_information(
+        &self,
+        extension_name: &'static str,
+    ) -> Result<(), ConnectionError> {
+        self.ext_info
+            .lock()
+            .unwrap()
+            .prefetch_extension_information(self, extension_name)
+    }
+
     fn extension_information(
         &self,
         extension_name: &'static str,
     ) -> Result<Option<QueryExtensionReply>, ConnectionError> {
-        self.ext_info.extension_information(self, extension_name)
+        self.ext_info
+            .lock()
+            .unwrap()
+            .extension_information(self, extension_name)
     }
 
     fn wait_for_reply_or_error(

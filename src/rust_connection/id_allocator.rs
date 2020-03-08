@@ -175,6 +175,13 @@ mod test {
             unimplemented!()
         }
 
+        fn prefetch_extension_information(
+            &self,
+            _extension_name: &'static str,
+        ) -> Result<(), ConnectionError> {
+            unimplemented!();
+        }
+
         fn extension_information(
             &self,
             _extension_name: &'static str,
