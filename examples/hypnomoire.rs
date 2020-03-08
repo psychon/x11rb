@@ -8,6 +8,7 @@ use std::f64::consts::PI;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::Duration;
+
 use x11rb::connection::Connection;
 use x11rb::errors::{ReplyError, ReplyOrIdError};
 use x11rb::generated::xproto::*;

@@ -1,19 +1,21 @@
-#[cfg(not(unix))]
-use libc::c_int;
 use std::mem::forget;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
+
+#[cfg(not(unix))]
+use libc::c_int;
 
 #[cfg(not(unix))]
 type RawFd = c_int;
 
 #[cfg(feature = "allow-unsafe-code")]
 mod unsafe_code {
-    use libc::free;
     use std::mem::forget;
     use std::ops::{Deref, Index};
     use std::ptr::NonNull;
     use std::slice::{from_raw_parts, SliceIndex};
+
+    use libc::free;
 
     /// Wrapper around a slice that was allocated in C code.
     ///

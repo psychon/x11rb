@@ -40,13 +40,14 @@
 //! | Get    | `Cookie::reply`                    | `Cookie::reply_unchecked` |
 //! | Ignore | `Cookie::discard_reply_and_errors` | Just drop the cookie      |
 
+use std::convert::{TryFrom, TryInto};
+use std::io::IoSlice;
+
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::generated::xproto::{QueryExtensionReply, Setup};
 use crate::utils::RawFdContainer;
 use crate::x11_utils::{GenericError, GenericEvent};
-use std::convert::{TryFrom, TryInto};
-use std::io::IoSlice;
 
 /// Number type used for referring to things that were sent to the server in responses from the
 /// server.
