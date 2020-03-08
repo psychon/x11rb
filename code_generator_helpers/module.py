@@ -250,8 +250,20 @@ class Module(object):
         values = [value for (ename, value) in enum.values]
         has_duplicate_values = len(values) != len(set(values))
         max_value = max([int(value) for (ename, value) in enum.values])
-        # Discriminators must be unique and must be below 2^31 (for to 32 bit targets)
-        assign_discriminators = (not has_duplicate_values) and max_value < 1 << 31
+        assign_discriminators = not has_duplicate_values
+
+        # Guess which types this enum can be represented in. We do this based on the
+        # highest value that appears in any of the variants.
+        if max_value < 1 << 8:
+            to_type = "u8"
+            larger_types = ["u16", "u32"]
+        elif max_value < 1 << 16:
+            to_type = "u16"
+            larger_types = ["u32"]
+        else:
+            assert max_value < 1 << 32
+            to_type = "u32"
+            larger_types = []
 
         rust_name = self._name(name)
         emit_doc(self.out, enum.doc)
@@ -259,6 +271,10 @@ class Module(object):
         # Is any of the variants all upper-case?
         if any(ename.isupper() and len(ename) > 1 for (ename, value) in enum.values):
             self.out("#[allow(non_camel_case_types)]")
+        # Specify the representation if we are assigning discriminators, so we make sure that
+        # all the values fit. This prevents the 'enum_clike_unportable_variant' clippy warning.
+        if assign_discriminators:
+            self.out("#[repr(%s)]", to_type)
         self.out("pub enum %s {", rust_name)
         for (ename, value) in enum.values:
             if not assign_discriminators:
@@ -270,20 +286,6 @@ class Module(object):
                     value = "1 << %s" % bit[1]
                 self.out.indent("%s = %s,", ename_to_rust(ename), value)
         self.out("}")
-
-        # Guess which types this enum can be represented in. We do this based on the
-        # highest value that appears in any of the variants.
-        highest_value = max((int(value) for (ename, value) in enum.values))
-        if highest_value < 1 << 8:
-            to_type = "u8"
-            larger_types = ["u16", "u32"]
-        elif highest_value < 1 << 16:
-            to_type = "u16"
-            larger_types = ["u32"]
-        else:
-            assert highest_value < 1 << 32
-            to_type = "u32"
-            larger_types = []
 
         self.out("impl From<%s> for %s {", rust_name, to_type)
         with Indent(self.out):
