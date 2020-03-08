@@ -534,7 +534,7 @@ class Module(object):
                             self.out("let (event, remaining) = %s::try_parse(value)?;",
                                      result_type)
                         else:
-                            self.out("let mut remaining = value;")
+                            self.out("let remaining = value;")
                             parts = self._emit_parsing_code([field])
                         self.out("let _ = remaining;")
                         assert len(parts) == 1
@@ -786,13 +786,12 @@ class Module(object):
                     length = "misalignment"
                 else:
                     length = field.type.get_total_size()
-                self.out("remaining = &remaining.get(%s..).ok_or(ParseError::ParseError)?;", length)
+                self.out("let remaining = &remaining.get(%s..).ok_or(ParseError::ParseError)?;", length)
             elif field.type.is_list and field.type.nmemb is not None:
                 for i in range(field.type.nmemb):
-                    self.out("let (%s_%s, new_remaining) = %s::try_parse(%s)?;",
+                    self.out("let (%s_%s, remaining) = %s::try_parse(%s)?;",
                              field_name, i, self._field_type(field),
                              ", ".join(try_parse_args))
-                    self.out("remaining = new_remaining;")
                 self.out("let %s = [", field_name)
                 for i in range(field.type.nmemb):
                     self.out.indent("%s_%s,", field_name, i)
@@ -801,9 +800,8 @@ class Module(object):
             elif field.type.is_list:
                 if field.type.expr.op != 'calculate_len' and len(try_parse_args) == 1:
                     assert try_parse_args == ["remaining"], try_parse_args
-                    self.out("let (%s, new_remaining) = crate::x11_utils::parse_list::<%s>(remaining, %s)?;",
+                    self.out("let (%s, remaining) = crate::x11_utils::parse_list::<%s>(remaining, %s)?;",
                              field_name, rust_type, self.expr_to_str(field.type.expr, 'usize'))
-                    self.out("remaining = new_remaining;")
                 else:
                     if field.type.expr.op != 'calculate_len':
                         self.out("let list_length = %s;", self.expr_to_str(field.type.expr, 'usize'))
@@ -815,16 +813,14 @@ class Module(object):
                         self.out("while !remaining.is_empty() {")
 
                     with Indent(self.out):
-                        self.out("let (v, new_remaining) = %s::try_parse(%s)?;", rust_type, ", ".join(try_parse_args))
+                        self.out("let (v, remaining) = %s::try_parse(%s)?;", rust_type, ", ".join(try_parse_args))
                         self.out("%s.push(v);", field_name)
-                        self.out("remaining = new_remaining;")
                     self.out("}")
 
                 parts.append(field_name)
             else:
-                self.out("let (%s, new_remaining) = %s::try_parse(%s)?;",
+                self.out("let (%s, remaining) = %s::try_parse(%s)?;",
                          field_name, rust_type, ", ".join(try_parse_args))
-                self.out("remaining = new_remaining;")
                 if not hasattr(field, 'is_length_field_for'):
                     parts.append(self._to_rust_variable(field.field_name))
 
@@ -906,7 +902,7 @@ class Module(object):
         with Indent(self.out):
             self.out("%s {", method)
             with Indent(self.out):
-                self.out("let mut remaining = value;")
+                self.out("let remaining = value;")
                 parts = self._emit_parsing_code(complex.fields)
                 self.out("let result = %s { %s };", name, ", ".join(parts))
                 self.out("Ok((result, remaining))")
@@ -1053,7 +1049,7 @@ class Module(object):
             self.out("fn try_parse(%s) -> Result<(Self, &[u8]), ParseError> {",
                      ", ".join(args))
             with Indent(self.out):
-                self.out("let mut remaining = value;")
+                self.out("let remaining = value;")
                 if switch_type.bitcases[0].type.is_bitcase:
                     all_parts = []
                     for case in switch_type.bitcases:
@@ -1075,9 +1071,8 @@ class Module(object):
                                 args = ["remaining"]
                                 if hasattr(case.type, "extra_try_parse_args"):
                                     args += case.type.extra_try_parse_args
-                                self.out("let (%s, new_remaining) = %s::try_parse(%s)?;",
+                                self.out("let (%s, remaining) = %s::try_parse(%s)?;",
                                          field_name, field_type, ", ".join(args))
-                                self.out("remaining = new_remaining;")
                             else:
                                 self._emit_parsing_code(case.type.fields)
                             self.out("Some(%s)", field_name)
@@ -1107,9 +1102,8 @@ class Module(object):
                                 args = ["remaining"]
                                 if hasattr(case.type, "extra_try_parse_args"):
                                     args += case.type.extra_try_parse_args
-                                self.out("let (%s, new_remaining) = %s::try_parse(%s)?;",
+                                self.out("let (%s, remaining) = %s::try_parse(%s)?;",
                                          field_name, field_type, ", ".join(args))
-                                self.out("remaining = new_remaining;")
                                 variant_name = self._to_rust_identifier(case.type.name[-1])
                             else:
                                 self._emit_parsing_code(case.type.fields)
