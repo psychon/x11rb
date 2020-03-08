@@ -111,10 +111,10 @@ mod fake_stream {
     }
 
     impl Packet {
-        fn to_raw(self) -> Vec<u8> {
+        fn to_raw(&self) -> Vec<u8> {
             match self {
                 Packet::GetInputFocusReply(seqno) => {
-                    let seqno = (seqno as u16).to_ne_bytes();
+                    let seqno = (*seqno as u16).to_ne_bytes();
                     let mut reply = vec![0; 32];
                     reply[0] = 1; // This is a reply
                     reply[2..4].copy_from_slice(&seqno);
