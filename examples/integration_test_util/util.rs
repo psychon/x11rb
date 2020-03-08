@@ -13,7 +13,6 @@ mod util {
         ClientMessageData, ClientMessageEvent, ConnectionExt as _, EventMask, CLIENT_MESSAGE_EVENT,
         WINDOW,
     };
-    use x11rb::wrapper::LazyAtom;
     use x11rb::x11_utils::TryParse;
 
     pub fn start_timeout_thread<C>(conn: Arc<C>, window: WINDOW)
@@ -29,20 +28,20 @@ mod util {
         };
 
         thread::spawn(move || {
-            let mut wm_protocols = LazyAtom::new(&*conn, false, b"WM_PROTOCOLS");
-            let mut wm_delete_window = LazyAtom::new(&*conn, false, b"WM_DELETE_WINDOW");
+            let wm_protocols = conn.intern_atom(false, b"WM_PROTOCOLS").unwrap();
+            let wm_delete_window = conn.intern_atom(false, b"WM_DELETE_WINDOW").unwrap();
 
             thread::sleep(Duration::from_secs(timeout));
 
             let mut data = [0; 20];
-            data[..4].copy_from_slice(&wm_delete_window.atom().unwrap().to_ne_bytes());
+            data[..4].copy_from_slice(&wm_delete_window.reply().unwrap().atom.to_ne_bytes());
             let (data, _): (ClientMessageData, _) = TryParse::try_parse(&data).unwrap();
             let event = ClientMessageEvent {
                 response_type: CLIENT_MESSAGE_EVENT,
                 format: 32,
                 sequence: 0,
                 window: window,
-                type_: wm_protocols.atom().unwrap(),
+                type_: wm_protocols.reply().unwrap().atom,
                 data,
             };
 

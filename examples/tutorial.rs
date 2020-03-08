@@ -24,7 +24,7 @@ use std::error::Error;
 use x11rb::connection::{Connection, SequenceNumber};
 use x11rb::errors::{ConnectionError, ReplyError, ReplyOrIdError};
 use x11rb::generated::xproto::{self, *};
-use x11rb::wrapper::{ConnectionExt as _, LazyAtom};
+use x11rb::wrapper::ConnectionExt as _;
 use x11rb::x11_utils::Event;
 use x11rb::COPY_DEPTH_FROM_PARENT;
 
@@ -231,30 +231,6 @@ fn example1() -> Result<(), Box<dyn Error>> {
     println!(
         "ratio:         {:?}",
         diff.as_nanos() as f64 / diff2.as_nanos() as f64
-    );
-
-    // The original tutorial has an Xlib example. This was not ported to rust. Instead, there is an
-    // x11rb-specific wrapper type that is presented here. This wrapper internally does the good
-    // use above, but simplifies the API.
-
-    println!();
-    let start = Instant::now();
-    let cookies = names
-        .iter()
-        .map(|name| LazyAtom::new(&conn, false, name.as_bytes()))
-        .collect::<Vec<_>>();
-    for (i, mut atom) in cookies.into_iter().enumerate() {
-        atoms[i] = atom.atom()?;
-    }
-    let diff3 = start.elapsed();
-    println!("LazyAtom time: {:?}", diff3);
-    println!(
-        "ratio to bad:  {:?}",
-        diff.as_nanos() as f64 / diff3.as_nanos() as f64
-    );
-    println!(
-        "ratio to good: {:?}",
-        diff2.as_nanos() as f64 / diff3.as_nanos() as f64
     );
 
     Ok(())

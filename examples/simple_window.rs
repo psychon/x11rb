@@ -4,7 +4,7 @@ use std::convert::TryFrom;
 
 use x11rb::connection::Connection;
 use x11rb::generated::xproto::*;
-use x11rb::wrapper::{ConnectionExt as _, LazyAtom};
+use x11rb::wrapper::ConnectionExt as _;
 use x11rb::x11_utils::{Event, GenericError};
 
 fn main() {
@@ -18,8 +18,10 @@ fn main() {
     let win_id = conn.generate_id().unwrap();
     let gc_id = conn.generate_id().unwrap();
 
-    let mut wm_protocols = LazyAtom::new(conn, false, b"WM_PROTOCOLS");
-    let mut wm_delete_window = LazyAtom::new(conn, false, b"WM_DELETE_WINDOW");
+    let wm_protocols = conn.intern_atom(false, b"WM_PROTOCOLS").unwrap();
+    let wm_delete_window = conn.intern_atom(false, b"WM_DELETE_WINDOW").unwrap();
+    let wm_protocols = wm_protocols.reply().unwrap().atom;
+    let wm_delete_window = wm_delete_window.reply().unwrap().atom;
 
     let win_aux = CreateWindowAux::new()
         .event_mask(EventMask::Exposure | EventMask::StructureNotify | EventMask::NoEvent)
@@ -59,9 +61,9 @@ fn main() {
     conn.change_property32(
         PropMode::Replace,
         win_id,
-        wm_protocols.atom().unwrap(),
+        wm_protocols,
         Atom::ATOM.into(),
-        &[wm_delete_window.atom().unwrap()],
+        &[wm_delete_window],
     )
     .unwrap();
 
@@ -123,10 +125,7 @@ fn main() {
                 let event = ClientMessageEvent::from(event);
                 println!("{:?})", event);
                 let data = event.data.as_data32();
-                if event.format == 32
-                    && event.window == win_id
-                    && data[0] == wm_delete_window.atom().unwrap()
-                {
+                if event.format == 32 && event.window == win_id && data[0] == wm_delete_window {
                     println!("Window was asked to close");
                     return;
                 }
