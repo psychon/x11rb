@@ -82,7 +82,7 @@ extern "C" {
         vector: *mut IoSlice<'_>,
         request: *const xcb_protocol_request_t,
         num_fds: c_uint,
-        fds: *const c_int,
+        fds: *mut c_int,
     ) -> u64;
     pub(crate) fn xcb_discard_reply64(c: *const xcb_connection_t, sequence: u64);
     pub(crate) fn xcb_wait_for_reply64(
@@ -193,7 +193,7 @@ mod mock {
         _vector: *mut IoSlice<'_>,
         _request: *const xcb_protocol_request_t,
         _num_fds: c_uint,
-        _fds: *const c_int,
+        _fds: *mut c_int,
     ) -> u64 {
         unimplemented!();
     }
