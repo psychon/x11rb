@@ -340,6 +340,15 @@ class Module(object):
                 self.out("}")
             self.out("}")
 
+            for larger_type in larger_types:
+                self.out("impl TryFrom<%s> for %s {", larger_type, rust_name)
+                with Indent(self.out):
+                    self.out("type Error = ParseError;")
+                    self.out("fn try_from(value: %s) -> Result<Self, Self::Error> {", larger_type)
+                    self.out.indent("Self::try_from(%s::try_from(value).or(Err(ParseError::ParseError))?)", to_type)
+                    self.out("}")
+                self.out("}")
+
         # Is this enum a bitmask? It is all values are bits or the special value zero...
         def ok_for_bitmask(ename, value):
             return ename in bits or value == "0"
