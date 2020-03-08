@@ -21,12 +21,14 @@ test_script:
   - set "DISPLAY=127.0.0.1:0"
   - set "X11RB_EXAMPLE_TIMEOUT=1"
 
+  # Run tests that requiere a X11 server
+  - cargo test --verbose --no-default-features --features vendor-xcb-proto --test x11_server_dependant_tests -- --ignored --test-threads=1 --nocapture
+
   # FIXME: Can this list be automated? somehow?
   - cargo run --verbose --no-default-features --features "vendor-xcb-proto all-extensions" --example check_unchecked_requests
   - cargo run --verbose --no-default-features --features "vendor-xcb-proto all-extensions" --example generic_events
   - cargo run --verbose --no-default-features --features "vendor-xcb-proto all-extensions" --example hypnomoire
   - cargo run --verbose --no-default-features --features "vendor-xcb-proto all-extensions" --example list_fonts
-  - cargo run --verbose --no-default-features --features "vendor-xcb-proto all-extensions" --example multithread_test
   - cargo run --verbose --no-default-features --features "vendor-xcb-proto all-extensions" --example simple_window
   - cargo run --verbose --no-default-features --features "vendor-xcb-proto all-extensions" --example simple_window_manager
   #- cargo run --verbose --no-default-features --features "vendor-xcb-proto all-extensions" --example tutorial

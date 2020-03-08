@@ -1,4 +1,5 @@
-// Regression test for https://github.com/psychon/x11rb/issues/231
+//! Tests that requiere a running X11 server, so they are disabled by
+//! default.
 
 use std::sync::Arc;
 
@@ -10,7 +11,10 @@ use x11rb::generated::xproto::{
 use x11rb::x11_utils::Event as _;
 use x11rb::COPY_DEPTH_FROM_PARENT;
 
-fn main() {
+/// Regression test for https://github.com/psychon/x11rb/issues/231
+#[test]
+#[ignore]
+fn bug_231_multithread_hang_test() {
     let (conn, screen_num) = x11rb::connect(None).unwrap();
     let conn = Arc::new(conn);
 
@@ -27,7 +31,7 @@ fn main() {
         0,
         WindowClass::InputOutput,
         screen.root_visual,
-        &CreateWindowAux::new().event_mask(EventMask::NoEvent),
+        &CreateWindowAux::new(),
     )
     .unwrap();
     conn.flush().unwrap();
