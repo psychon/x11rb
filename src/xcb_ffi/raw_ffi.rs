@@ -1,9 +1,10 @@
 #[cfg(not(test))]
-use libc::c_void;
-use libc::{c_char, c_int, c_uint};
-#[cfg(not(test))]
 use std::io::IoSlice;
 use std::ptr::NonNull;
+
+#[cfg(not(test))]
+use libc::c_void;
+use libc::{c_char, c_int, c_uint};
 
 #[allow(non_camel_case_types)]
 #[repr(C)]

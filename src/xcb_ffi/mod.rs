@@ -4,6 +4,17 @@
 
 #![allow(clippy::cast_ptr_alignment)] // FIXME: Remove this
 
+use std::convert::{TryFrom, TryInto};
+use std::ffi::CStr;
+use std::io::{Error, ErrorKind, IoSlice};
+use std::ops::Deref;
+#[cfg(unix)]
+use std::os::unix::io::{AsRawFd, RawFd};
+use std::ptr::{null, null_mut, NonNull};
+use std::sync::Mutex;
+
+use libc::c_void;
+
 use super::generated::xproto::{QueryExtensionReply, Setup};
 use crate::connection::{
     BufWithFds, Connection, DiscardMode, EventAndSeqNumber, RequestConnection, RequestKind,
@@ -14,15 +25,6 @@ use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError, Reply
 use crate::extension_information::ExtensionInformation;
 use crate::utils::{CSlice, RawFdContainer};
 use crate::x11_utils::{GenericError, GenericEvent};
-use libc::c_void;
-use std::convert::{TryFrom, TryInto};
-use std::ffi::CStr;
-use std::io::{Error, ErrorKind, IoSlice};
-use std::ops::Deref;
-#[cfg(unix)]
-use std::os::unix::io::{AsRawFd, RawFd};
-use std::ptr::{null, null_mut, NonNull};
-use std::sync::Mutex;
 
 mod pending_errors;
 mod raw_ffi;
