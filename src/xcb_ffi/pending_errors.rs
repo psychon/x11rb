@@ -8,15 +8,14 @@ use std::cmp::Reverse;
 use std::collections::{BinaryHeap, VecDeque};
 use std::sync::Mutex;
 
+use super::GenericError;
 use super::XCBConnection;
 use crate::connection::SequenceNumber;
-use crate::utils::CSlice;
-use crate::x11_utils::GenericError;
 
 #[derive(Debug, Default)]
 struct PendingErrorsInner {
     in_flight: BinaryHeap<Reverse<SequenceNumber>>,
-    pending: VecDeque<(SequenceNumber, GenericError<CSlice>)>,
+    pending: VecDeque<(SequenceNumber, GenericError)>,
 }
 
 /// A management struct for pending X11 errors
@@ -26,7 +25,7 @@ pub(crate) struct PendingErrors {
 }
 
 impl PendingErrors {
-    pub(crate) fn append_error(&self, error: (SequenceNumber, GenericError<CSlice>)) {
+    pub(crate) fn append_error(&self, error: (SequenceNumber, GenericError)) {
         self.inner.lock().unwrap().pending.push_back(error)
     }
 
@@ -34,10 +33,7 @@ impl PendingErrors {
         self.inner.lock().unwrap().in_flight.push(Reverse(sequence));
     }
 
-    pub(crate) fn get(
-        &self,
-        conn: &XCBConnection,
-    ) -> Option<(SequenceNumber, GenericError<CSlice>)> {
+    pub(crate) fn get(&self, conn: &XCBConnection) -> Option<(SequenceNumber, GenericError)> {
         let mut inner = self.inner.lock().unwrap();
 
         // Check if we already have an element at hand

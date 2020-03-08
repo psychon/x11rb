@@ -16,18 +16,22 @@ use std::sync::Mutex;
 use libc::c_void;
 
 use super::generated::xproto::{QueryExtensionReply, Setup};
-use crate::connection::{
-    BufWithFds, Connection, DiscardMode, EventAndSeqNumber, RequestConnection, RequestKind,
-    SequenceNumber,
-};
+use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError, ReplyOrIdError};
+pub use crate::errors::{ConnectError, ConnectionError, ParseError};
 use crate::extension_information::ExtensionInformation;
 use crate::utils::{CSlice, RawFdContainer};
-use crate::x11_utils::{GenericError, GenericEvent};
 
 mod pending_errors;
 mod raw_ffi;
+
+type Buffer = <XCBConnection as RequestConnection>::Buf;
+pub type ReplyOrIdError = crate::errors::ReplyOrIdError<Buffer>;
+pub type ReplyError = crate::errors::ReplyError<Buffer>;
+pub type GenericError = crate::x11_utils::GenericError<Buffer>;
+pub type GenericEvent = crate::x11_utils::GenericEvent<Buffer>;
+pub type EventAndSeqNumber = crate::connection::EventAndSeqNumber<Buffer>;
+pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
 
 /// A connection to an X11 server.
 ///
@@ -292,9 +296,7 @@ impl XCBConnection {
         CSlice::new(error, 32)
     }
 
-    unsafe fn wrap_event(
-        event: *mut u8,
-    ) -> Result<(SequenceNumber, GenericEvent<CSlice>), ParseError> {
+    unsafe fn wrap_event(event: *mut u8) -> Result<(SequenceNumber, GenericEvent), ParseError> {
         let mut length = 32;
         // XCB inserts a uint32_t with the sequence number after the first 32 bytes.
         let mut seqno = [0; 4];
@@ -390,10 +392,7 @@ impl RequestConnection for XCBConnection {
             .extension_information(self, extension_name)
     }
 
-    fn wait_for_reply_or_error(
-        &self,
-        sequence: SequenceNumber,
-    ) -> Result<CSlice, ReplyError<CSlice>> {
+    fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<CSlice, ReplyError> {
         unsafe {
             let mut error = null_mut();
             let reply = raw_ffi::xcb_wait_for_reply64(self.conn.0.as_ptr(), sequence, &mut error);
@@ -416,12 +415,11 @@ impl RequestConnection for XCBConnection {
     }
 
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<CSlice>, ConnectionError> {
-        use ReplyError::*;
         match self.wait_for_reply_or_error(sequence) {
             Ok(buffer) => Ok(Some(buffer)),
             Err(err) => match err {
-                ConnectionError(err) => Err(err),
-                X11Error(err) => {
+                ReplyError::ConnectionError(err) => Err(err),
+                ReplyError::X11Error(err) => {
                     self.errors.append_error((sequence, err));
                     Ok(None)
                 }
@@ -432,7 +430,7 @@ impl RequestConnection for XCBConnection {
     fn check_for_error(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<Option<GenericError<CSlice>>, ConnectionError> {
+    ) -> Result<Option<GenericError>, ConnectionError> {
         let cookie = raw_ffi::xcb_void_cookie_t {
             sequence: sequence as _,
         };
@@ -449,10 +447,7 @@ impl RequestConnection for XCBConnection {
     }
 
     #[cfg(unix)]
-    fn wait_for_reply_with_fds(
-        &self,
-        sequence: SequenceNumber,
-    ) -> Result<BufWithFds<CSlice>, ReplyError<CSlice>> {
+    fn wait_for_reply_with_fds(&self, sequence: SequenceNumber) -> Result<BufWithFds, ReplyError> {
         let buffer = self.wait_for_reply_or_error(sequence)?;
 
         // Get a pointer to the array of integers where libxcb saved the FD numbers.
@@ -482,7 +477,7 @@ impl RequestConnection for XCBConnection {
 }
 
 impl Connection for XCBConnection {
-    fn wait_for_event_with_sequence(&self) -> Result<EventAndSeqNumber<CSlice>, ConnectionError> {
+    fn wait_for_event_with_sequence(&self) -> Result<EventAndSeqNumber, ConnectionError> {
         if let Some(error) = self.errors.get(self) {
             return Ok((error.0, error.1.into()));
         }
@@ -495,9 +490,7 @@ impl Connection for XCBConnection {
         }
     }
 
-    fn poll_for_event_with_sequence(
-        &self,
-    ) -> Result<Option<EventAndSeqNumber<CSlice>>, ConnectionError> {
+    fn poll_for_event_with_sequence(&self) -> Result<Option<EventAndSeqNumber>, ConnectionError> {
         if let Some(error) = self.errors.get(self) {
             return Ok(Some((error.0, error.1.into())));
         }
@@ -525,7 +518,7 @@ impl Connection for XCBConnection {
         }
     }
 
-    fn generate_id(&self) -> Result<u32, ReplyOrIdError<CSlice>> {
+    fn generate_id(&self) -> Result<u32, ReplyOrIdError> {
         unsafe {
             let id = raw_ffi::xcb_generate_id(self.conn.0.as_ptr());
             // XCB does not document the behaviour of `xcb_generate_id` when

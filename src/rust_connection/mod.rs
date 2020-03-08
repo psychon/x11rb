@@ -4,17 +4,13 @@ use std::convert::{TryFrom, TryInto};
 use std::io::{BufReader, BufWriter, IoSlice, Read, Write};
 use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 
-use crate::connection::{
-    BufWithFds, Connection, DiscardMode, EventAndSeqNumber, RequestConnection, RequestKind,
-    SequenceNumber,
-};
+use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError, ReplyOrIdError};
+pub use crate::errors::{ConnectError, ConnectionError, ParseError};
 use crate::extension_information::ExtensionInformation;
 use crate::generated::bigreq::ConnectionExt as _;
 use crate::generated::xproto::{QueryExtensionReply, Setup};
 use crate::utils::RawFdContainer;
-use crate::x11_utils::GenericError;
 
 mod id_allocator;
 mod inner;
@@ -23,6 +19,14 @@ mod stream;
 mod xauth;
 
 use inner::PollReply;
+
+type Buffer = <RustConnection as RequestConnection>::Buf;
+pub type ReplyOrIdError = crate::errors::ReplyOrIdError<Buffer>;
+pub type ReplyError = crate::errors::ReplyError<Buffer>;
+pub type GenericError = crate::x11_utils::GenericError<Buffer>;
+pub type GenericEvent = crate::x11_utils::GenericEvent<Buffer>;
+pub type EventAndSeqNumber = crate::connection::EventAndSeqNumber<Buffer>;
+pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
 
 type MutexGuardInner<'a, W> = MutexGuard<'a, inner::ConnectionInner<W>>;
 
@@ -285,10 +289,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
             .extension_information(self, extension_name)
     }
 
-    fn wait_for_reply_or_error(
-        &self,
-        sequence: SequenceNumber,
-    ) -> Result<Vec<u8>, ReplyError<Vec<u8>>> {
+    fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Vec<u8>, ReplyError> {
         let mut inner = self.inner.lock().unwrap();
         inner.flush()?; // Ensure the request is sent
         loop {
@@ -320,7 +321,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
     fn check_for_error(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<Option<GenericError<Vec<u8>>>, ConnectionError> {
+    ) -> Result<Option<GenericError>, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
         inner.prepare_check_for_reply_or_error(sequence)?;
         inner.flush()?; // Ensure the request is sent
@@ -334,10 +335,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         }
     }
 
-    fn wait_for_reply_with_fds(
-        &self,
-        _sequence: SequenceNumber,
-    ) -> Result<BufWithFds<Vec<u8>>, ReplyError<Vec<u8>>> {
+    fn wait_for_reply_with_fds(&self, _sequence: SequenceNumber) -> Result<BufWithFds, ReplyError> {
         unreachable!(
             "To wait for a reply containing FDs, a successful call to \
         send_request_with_reply_with_fds() is necessary. However, this function never succeeds."
@@ -369,7 +367,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
 }
 
 impl<R: Read, W: Write> Connection for RustConnection<R, W> {
-    fn wait_for_event_with_sequence(&self) -> Result<EventAndSeqNumber<Vec<u8>>, ConnectionError> {
+    fn wait_for_event_with_sequence(&self) -> Result<EventAndSeqNumber, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
         loop {
             if let Some(event) = inner.poll_for_event_with_sequence() {
@@ -379,9 +377,7 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
         }
     }
 
-    fn poll_for_event_with_sequence(
-        &self,
-    ) -> Result<Option<EventAndSeqNumber<Vec<u8>>>, ConnectionError> {
+    fn poll_for_event_with_sequence(&self) -> Result<Option<EventAndSeqNumber>, ConnectionError> {
         Ok(self.inner.lock().unwrap().poll_for_event_with_sequence())
     }
 
@@ -394,7 +390,7 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
         &self.setup
     }
 
-    fn generate_id(&self) -> Result<u32, ReplyOrIdError<Vec<u8>>> {
+    fn generate_id(&self) -> Result<u32, ReplyOrIdError> {
         self.id_allocator.lock().unwrap().generate_id(self)
     }
 }
