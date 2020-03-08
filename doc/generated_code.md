@@ -187,10 +187,11 @@ Depending on the largest value, appropriate `From` implementations are
 generated.
 ```rust
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
 pub enum BackingStore {
-    NotUseful,
-    WhenMapped,
-    Always,
+    NotUseful = 0,
+    WhenMapped = 1,
+    Always = 2,
 }
 impl From<BackingStore> for u8 {
     fn from(input: BackingStore) -> Self {
@@ -226,6 +227,29 @@ impl From<BackingStore> for Option<u32> {
         Some(u32::from(input))
     }
 }
+impl TryFrom<u8> for BackingStore {
+    type Error = ParseError;
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            0 => Ok(BackingStore::NotUseful),
+            1 => Ok(BackingStore::WhenMapped),
+            2 => Ok(BackingStore::Always),
+            _ => Err(ParseError::ParseError)
+        }
+    }
+}
+impl TryFrom<u16> for BackingStore {
+    type Error = ParseError;
+    fn try_from(value: u16) -> Result<Self, Self::Error> {
+        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+    }
+}
+impl TryFrom<u32> for BackingStore {
+    type Error = ParseError;
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+    }
+}
 ```
 
 ### Bitmask enumerations
@@ -245,14 +269,15 @@ implementations of `BitOr` and `BitOrAssign`.
 ```
 ```rust
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[repr(u8)]
 pub enum ConfigWindow {
-    X,
-    Y,
-    Width,
-    Height,
-    BorderWidth,
-    Sibling,
-    StackMode,
+    X = 1 << 0,
+    Y = 1 << 1,
+    Width = 1 << 2,
+    Height = 1 << 3,
+    BorderWidth = 1 << 4,
+    Sibling = 1 << 5,
+    StackMode = 1 << 6,
 }
 impl From<ConfigWindow> for u8 {
     fn from(input: ConfigWindow) -> Self {
@@ -290,6 +315,33 @@ impl From<ConfigWindow> for u32 {
 impl From<ConfigWindow> for Option<u32> {
     fn from(input: ConfigWindow) -> Self {
         Some(u32::from(input))
+    }
+}
+impl TryFrom<u8> for ConfigWindow {
+    type Error = ParseError;
+    fn try_from(value: u8) -> Result<Self, Self::Error> {
+        match value {
+            1 => Ok(ConfigWindow::X),
+            2 => Ok(ConfigWindow::Y),
+            4 => Ok(ConfigWindow::Width),
+            8 => Ok(ConfigWindow::Height),
+            16 => Ok(ConfigWindow::BorderWidth),
+            32 => Ok(ConfigWindow::Sibling),
+            64 => Ok(ConfigWindow::StackMode),
+            _ => Err(ParseError::ParseError)
+        }
+    }
+}
+impl TryFrom<u16> for ConfigWindow {
+    type Error = ParseError;
+    fn try_from(value: u16) -> Result<Self, Self::Error> {
+        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
+    }
+}
+impl TryFrom<u32> for ConfigWindow {
+    type Error = ParseError;
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
     }
 }
 bitmask_binop!(ConfigWindow, u8);
@@ -623,13 +675,13 @@ impl TryFrom<&[u8]> for KeyPressEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl From<GenericEvent> for KeyPressEvent {
-    fn from(value: GenericEvent) -> Self {
+impl<B: AsRef<[u8]>> From<GenericEvent<B>> for KeyPressEvent {
+    fn from(value: GenericEvent<B>) -> Self {
         Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
     }
 }
-impl From<&GenericEvent> for KeyPressEvent {
-    fn from(value: &GenericEvent) -> Self {
+impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for KeyPressEvent {
+    fn from(value: &GenericEvent<B>) -> Self {
         Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
     }
 }
