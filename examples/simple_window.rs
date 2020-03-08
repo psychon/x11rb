@@ -125,10 +125,7 @@ fn main() {
                 let event = ClientMessageEvent::from(event);
                 println!("{:?})", event);
                 let data = event.data.as_data32();
-                if event.format == 32
-                    && event.window == win_id
-                    && data[0] == wm_delete_window
-                {
+                if event.format == 32 && event.window == win_id && data[0] == wm_delete_window {
                     println!("Window was asked to close");
                     return;
                 }

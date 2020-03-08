@@ -286,15 +286,11 @@ fn main() {
         .extension_information(shape::X11_EXTENSION_NAME)
         .expect("failed to get extension information")
         .is_some();
-    let (wm_protocols, wm_delete_window) = (wm_protocols.reply().unwrap().atom, wm_delete_window.reply().unwrap().atom);
-    let win_id = setup_window(
-        conn,
-        screen,
-        window_size,
-        wm_protocols,
-        wm_delete_window,
-    )
-    .unwrap();
+    let (wm_protocols, wm_delete_window) = (
+        wm_protocols.reply().unwrap().atom,
+        wm_delete_window.reply().unwrap().atom,
+    );
+    let win_id = setup_window(conn, screen, window_size, wm_protocols, wm_delete_window).unwrap();
     let mut pixmap = create_pixmap_wrapper(conn, screen.root_depth, win_id, window_size).unwrap();
 
     let black_gc = create_gc_with_foreground(conn, win_id, screen.black_pixel).unwrap();
@@ -337,10 +333,7 @@ fn main() {
                 CLIENT_MESSAGE_EVENT => {
                     let event = ClientMessageEvent::from(event);
                     let data = event.data.as_data32();
-                    if event.format == 32
-                        && event.window == win_id
-                        && data[0] == wm_delete_window
-                    {
+                    if event.format == 32 && event.window == win_id && data[0] == wm_delete_window {
                         println!("Window was asked to close");
                         return;
                     }
