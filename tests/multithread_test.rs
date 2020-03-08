@@ -57,18 +57,19 @@ fn multithread_test() {
 
 /// Implementations of `Read` and `Write` that do enough for the test to work.
 mod fake_stream {
-    use std::sync::mpsc::{channel, Sender, Receiver};
-    use std::io::{Read, Write, IoSlice};
+    use std::io::{IoSlice, Read, Write};
+    use std::sync::mpsc::{channel, Receiver, Sender};
 
     use x11rb::connection::SequenceNumber;
+    use x11rb::errors::ConnectError;
     use x11rb::generated::xproto::{
         Setup, CLIENT_MESSAGE_EVENT, GET_INPUT_FOCUS_REQUEST, SEND_EVENT_REQUEST,
     };
-    use x11rb::errors::ConnectError;
     use x11rb::rust_connection::RustConnection;
 
     /// Create a new `RustConnection` connected to a fake stream
-    pub(crate) fn connect() -> Result<RustConnection<FakeStreamRead, FakeStreamWrite>, ConnectError> {
+    pub(crate) fn connect() -> Result<RustConnection<FakeStreamRead, FakeStreamWrite>, ConnectError>
+    {
         let setup = Setup {
             status: 0,
             protocol_major_version: 0,
@@ -96,14 +97,9 @@ mod fake_stream {
     /// Get a pair of fake streams that are connected to each other
     fn fake_stream() -> (FakeStreamRead, FakeStreamWrite) {
         let (send, recv) = channel();
-        let read = FakeStreamRead {
-            recv,
-            pending: Vec::new(),
-        };
-        let write = FakeStreamWrite {
-            send,
-            seqno: 0,
-        };
+        let pending = Vec::new();
+        let read = FakeStreamRead { recv, pending };
+        let write = FakeStreamWrite { send, seqno: 0 };
         (read, write)
     }
 
@@ -123,7 +119,7 @@ mod fake_stream {
                     reply[0] = 1; // This is a reply
                     reply[2..4].copy_from_slice(&seqno);
                     reply
-                },
+                }
                 Packet::Event => {
                     let mut reply = vec![0; 32];
                     reply[0] = CLIENT_MESSAGE_EVENT;
@@ -163,7 +159,10 @@ mod fake_stream {
         fn write(&mut self, buf: &[u8]) -> Result<usize, std::io::Error> {
             self.seqno += 1;
             match buf[0] {
-                GET_INPUT_FOCUS_REQUEST => self.send.send(Packet::GetInputFocusReply(self.seqno)).unwrap(),
+                GET_INPUT_FOCUS_REQUEST => self
+                    .send
+                    .send(Packet::GetInputFocusReply(self.seqno))
+                    .unwrap(),
                 SEND_EVENT_REQUEST => self.send.send(Packet::Event).unwrap(),
                 _ => unimplemented!(),
             }
