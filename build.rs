@@ -1,5 +1,3 @@
-extern crate pkg_config;
-
 use std::env;
 use std::ffi::OsStr;
 use std::fs::{create_dir, read_dir};
@@ -17,14 +15,6 @@ fn create_dir_if_not_exist(dir: &PathBuf) -> Result<()> {
     result
 }
 
-#[cfg(not(feature = "vendor-xcb-proto"))]
-fn get_paths() -> (PathBuf, PathBuf) {
-    let pythondir = pkg_config::get_variable("xcb-proto", "pythondir").unwrap();
-    let includedir = pkg_config::get_variable("xcb-proto", "xcbincludedir").unwrap();
-    (pythondir.into(), includedir.into())
-}
-
-#[cfg(feature = "vendor-xcb-proto")]
 fn get_paths() -> (PathBuf, PathBuf) {
     let dir = Path::new("xcbproto-1.13-6-ge79f6b0");
     let pythondir = dir.to_path_buf();

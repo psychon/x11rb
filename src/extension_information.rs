@@ -71,9 +71,7 @@ impl ExtensionInformation {
                         ReplyError::X11Error(_) => ConnectionError::UnknownError,
                     })?;
                 // If the extension is not present, we return None, else we box it
-                #[allow(trivial_numeric_casts)]
-                let present = info.present as u8;
-                if present != 0 {
+                if info.present {
                     *entry = CheckState::Present(info);
                     Ok(Some(info))
                 } else {

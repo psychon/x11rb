@@ -17,15 +17,8 @@ document](doc/comparison.md).
 This crate uses a code generator that is implemented in Python. As such, you
 need to have Python available to build this crate.
 
-The code generator uses the X11 XML description from `xcb-proto`. When the
-`vendor-xcb-proto` is enabled, which it is by default, a copy of xcb-proto that
-comes with the source code is used.
-
-When that feature is disabled, `pkg-config` is used to find `xcb-proto`.  In a
-nutshell, if you can run `pkg-config --modversion xcb-proto` successfully, you
-should be fine. On Debian, the necessary packages are called `pkg-config`,
-`xcb-proto`, and `python-xcbgen`. I hope that other distros use similarly
-obvious naming.
+The code generator uses the X11 XML description from `xcb-proto`. A copy of
+xcb-proto that comes with the source code is used.
 
 
 ## Does this support async/await
@@ -39,8 +32,6 @@ of sending multiple requests and only afterwards wait for the replies.
 
 The following features are enabled by default:
 
-* `vendor-xcb-proto`: Use our own copy of `xcb-proto`. Without this feature,
-  `pkg-config` is used to find `xcb-proto`.
 * `allow-unsafe-code`: Without this feature, `forbid(unsafe_code)` forbids all
   unsafe code. With this feature, `XCBConnection` and FD passing become
   available.

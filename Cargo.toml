@@ -13,19 +13,10 @@ keywords = ["xcb", "X11"]
 libc = { version = "0.2", optional = true }
 gethostname = "0.2.1"
 
-[build-dependencies]
-pkg-config = "0.3"
-
 [features]
 default = [
-    "vendor-xcb-proto",
     "allow-unsafe-code",
 ]
-
-# Enable use of the vendored copy of xcb-proto. Without this feature, pkg-config
-# is used to find it instead. Without this feature, no stable API can be
-# guaranteed, because the protocol description can differ.
-vendor-xcb-proto = []
 
 # Without this feature, all uses of `unsafe` in the crate are forbidden via
 # #![deny(unsafe_code)]. This has the effect of disabling the XCB FFI bindings.

@@ -186,13 +186,11 @@ mod test {
             &self,
             _extension_name: &'static str,
         ) -> Result<Option<QueryExtensionReply>, ConnectionError> {
-            #[allow(trivial_casts, clippy::unnecessary_cast)]
-            let present = true as _;
             Ok(self.0.as_ref().map(|_| QueryExtensionReply {
                 response_type: 1,
                 sequence: 0,
                 length: 0,
-                present,
+                present: true,
                 major_opcode: 127,
                 first_event: 0,
                 first_error: 0,
