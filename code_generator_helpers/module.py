@@ -1342,9 +1342,13 @@ class Module(object):
     def _lower_snake_name(self, name):
         """Convert a name tuple to a lowercase snake name. MonitorInfo is turned
         into monitor_info."""
+
         name = self._name(name)
-        name = re.sub('([a-z0-9])([A-Z])', '\\1_\\2', name)
-        return name.lower()
+        # Based on _cname_re from libxcb's c_client.py
+        pattern = re.compile('([A-Z][a-z0-9]+|[A-Z]+(?![a-z0-9])|[a-z0-9]+)')
+        split = pattern.finditer(name)
+        name_parts = [match.group(0) for match in split]
+        return '_'.join(name_parts).lower()
 
     def _upper_snake_name(self, name):
         """Convert a name tuple to a uppercase snake name. MonitorInfo is turned
