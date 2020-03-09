@@ -996,11 +996,11 @@ class Module(object):
             self.out("pub struct %s {", name)
             for case in switch_type.bitcases:
                 if hasattr(case, "rust_name"):
-                    self.out.indent("%s: %s<%s>,", case.type.name[-1], self.option_name, case.rust_name)
+                    self.out.indent("pub %s: %s<%s>,", case.type.name[-1], self.option_name, case.rust_name)
                 else:
                     field = case.only_field
                     field_type = self._to_complex_owned_rust_type(field)
-                    self.out.indent("%s: %s<%s>,", self._aux_field_name(field), self.option_name, field_type)
+                    self.out.indent("pub %s: %s<%s>,", self._aux_field_name(field), self.option_name, field_type)
         else:
             self.out("pub enum %s {", name)
             for case in switch_type.bitcases:
