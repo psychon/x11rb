@@ -38,14 +38,23 @@ def handle_switches(module, obj, name, function_name):
     switch = switches[0]
 
     # Find the mask field for the switch
-    lenfield_name = switch.type.expr.lenfield_name
-    mask_field = list(filter(lambda field: field.field_name == lenfield_name, obj.fields))
-    assert len(mask_field) == 1
-    mask_field = mask_field[0]
+    expr = switch.type.expr
+    if expr.op is None:
+        lenfield_name = expr.lenfield_name
+        mask_field = list(filter(lambda field: field.field_name == lenfield_name, obj.fields))
+        assert len(mask_field) == 1
+        mask_field = mask_field[0]
 
-    # Hide it from the API and "connect" it to the switch
-    mask_field.visible = False
-    mask_field.lenfield_for_switch = switch
+        # Hide it from the API and "connect" it to the switch
+        mask_field.visible = False
+        mask_field.lenfield_for_switch = switch
+    else:
+        # Well, this case is complicated. We handle it as a special case.
+        from collections import namedtuple
+        from xcbgen.xtypes import tcard16
+
+        assert name == ('xcb', 'xkb', 'SelectEvents')
+        mask_field = namedtuple('FakeField', 'type field_type')(tcard16, ('uint16_t',))
 
     module._generate_aux(aux_name, obj, switch, mask_field, function_name)
     return aux_name
@@ -337,6 +346,12 @@ def request_implementation(module, obj, name, fds, fds_is_list):
                     module.out("let %s = %s.serialize();", field_bytes, source)
             if field.type.is_switch or field.type.size is None:
                 # We have a byte array that we can directly send
+                if field.type.is_switch and field.type.expr.op is not None:
+                    expr = module.expr_to_str(field.type.expr)
+                    module.out("assert_eq!(%s, %s.value_mask(),", expr, rust_variable)
+                    module.out.indent(
+                        "\"Expression %s must match present values of '%s' argument (%s.value_mask())\");",
+                        expr, rust_variable, rust_variable)
                 _emit_request()
                 _emit_add_to_requests("&" + field_bytes)
             else:
