@@ -78,8 +78,6 @@
 //! `all-extensions` feature to just enable, well, all extensions.
 //!
 //! Additionally, the following flags are enabled by default:
-//! * `vendor-xcb-proto`: Use a copy of `xcb-proto` that comes with x11rb. Without this flag,
-//!   `pkg-config` is used to find `xcb-proto` on the host system.
 //! * `allow-unsafe-code`: Enable features that require `unsafe`. Without this flag,
 //!   `x11rb::xcb_ffi::XCBConnection` and some support code for it are unavailable.
 

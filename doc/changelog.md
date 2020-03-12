@@ -1,3 +1,9 @@
+# Version 0.5.0 (2020-XX-XX)
+
+Breaking changes:
+* The `vendor-xcb-proto` feature flag is no longer available. The included
+  xcb-proto is now always used.
+
 # Version 0.4.1 (2020-03-12)
 
 Fixes for XKB:

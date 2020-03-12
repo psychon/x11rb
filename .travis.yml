@@ -15,9 +15,6 @@ matrix:
 addons:
   apt:
     packages:
-      - xcb-proto
-      - python-xcbgen
-      - pkg-config
       - pycodestyle
       - xvfb
 
@@ -38,10 +35,9 @@ install:
 script:
   # Check the code generator against python 2 and 3. Both versions should
   # produce identical output.
-  - PYDIR="$(pkg-config --variable=pythondir xcb-proto)"
-  - PROTO="$(pkg-config --variable=xcbincludedir xcb-proto)"
-  - echo $PYDIR
-  - echo $PROTO
+  - XCB_PROTO_DIR="xcbproto-1.13-6-ge79f6b0"
+  - PYDIR="$XCB_PROTO_DIR"
+  - PROTO="$XCB_PROTO_DIR/src"
   - mkdir /tmp/py2 /tmp/py3
   - python3 rs_code_generator.py -p "$PYDIR" -i "$PROTO" -o /tmp/py3 generated
   - python2 rs_code_generator.py -p "$PYDIR" -i "$PROTO" -o /tmp/py2 generated
@@ -65,7 +61,7 @@ script:
   # Enable the 'all-extensions' feature or Cargo will complain
   - run_examples --features all-extensions
 
-  - cargo build --verbose --all-targets --no-default-features --features "vendor-xcb-proto all-extensions"
+  - cargo build --verbose --all-targets --no-default-features --features all-extensions
 
   # Run the examples as 'integration tests'. This time using RustConnection.
-  - run_examples --no-default-features --features "vendor-xcb-proto all-extensions libc"
+  - run_examples --no-default-features --features "all-extensions libc"
