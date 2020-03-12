@@ -619,7 +619,7 @@ class Module(object):
 
     def request(self, obj, name):
         mark_length_fields(obj)
-        self.emit_opcode(name, 'REQUEST', obj.opcode)
+        self.emit_opcode(name, 'REQUEST', 'u8', obj.opcode)
 
         function_name = self._lower_snake_name(name)
         if function_name == "await":
@@ -633,7 +633,14 @@ class Module(object):
         self.union(eventstruct, name)
 
     def event(self, event, name):
-        self.emit_opcode(name, 'Event', event.opcodes[name])
+        # The opcode specified for GeGeneric in xproto (35) is the value
+        # in the 8-bit response_type field
+        if event.is_ge_event and name != ('xcb', 'GeGeneric'):
+            opcode_type = 'u16'
+        else:
+            opcode_type = 'u8'
+
+        self.emit_opcode(name, 'Event', opcode_type, event.opcodes[name])
         emit_doc(self.out, event.doc)
         self.complex_type(event, self._name(name) + 'Event', False, [])
 
@@ -646,7 +653,7 @@ class Module(object):
 
     def error(self, error, name):
         assert not hasattr(error, "doc")
-        self.emit_opcode(name, 'Error', error.opcodes[name])
+        self.emit_opcode(name, 'Error', 'u8', error.opcodes[name])
         self.complex_type(error, self._name(name) + 'Error', False, [])
         self._emit_from_generic(name, self.generic_error_name, 'Error')
         self._emit_serialize(error, name, 'Error')
@@ -743,11 +750,11 @@ class Module(object):
             self.out("}")
         self.out("}")
 
-    def emit_opcode(self, name, extra_name, opcode):
+    def emit_opcode(self, name, extra_name, type, opcode):
         if opcode == "-1" and name == ('xcb', 'Glx', 'Generic'):
             return  # The XML has a comment saying "fake number"
         self.out("/// Opcode for the %s %s", self._name(name), extra_name.lower())
-        self.out("pub const %s_%s: u8 = %s;", self._upper_snake_name(name), extra_name.upper(), opcode)
+        self.out("pub const %s_%s: %s = %s;", self._upper_snake_name(name), extra_name.upper(), type, opcode)
 
     def _emit_parsing_code(self, fields):
         """Emit the code for parsing the given fields. After this code runs, the
