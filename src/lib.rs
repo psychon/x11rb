@@ -108,9 +108,7 @@ pub mod errors;
 pub mod extension_information;
 pub mod rust_connection;
 
-pub mod generated {
-    include!(concat!(env!("OUT_DIR"), "/generated/mod.rs"));
-}
+pub mod generated;
 pub mod wrapper;
 
 use connection::Connection;
