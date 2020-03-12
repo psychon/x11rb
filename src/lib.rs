@@ -117,7 +117,8 @@ pub mod wrapper;
 
 use connection::Connection;
 use errors::ConnectError;
-use generated::xproto::{KEYSYM, TIMESTAMP};
+pub use generated::*;
+use xproto::{KEYSYM, TIMESTAMP};
 
 /// Establish a new connection to an X11 server.
 ///
