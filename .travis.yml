@@ -35,13 +35,10 @@ install:
 script:
   # Check the code generator against python 2 and 3. Both versions should
   # produce identical output.
-  - XCB_PROTO_DIR="xcbproto-1.13-6-ge79f6b0"
-  - PYDIR="$XCB_PROTO_DIR"
-  - PROTO="$XCB_PROTO_DIR/src"
-  - mkdir /tmp/py2 /tmp/py3
-  - python3 rs_code_generator.py -p "$PYDIR" -i "$PROTO" -o /tmp/py3 generated
-  - python2 rs_code_generator.py -p "$PYDIR" -i "$PROTO" -o /tmp/py2 generated
-  - diff -Nurp /tmp/py2 /tmp/py3
+  - make PYTHON=python3
+  - if ! git diff --exit-code; then exit 1; fi
+  - make PYTHON=python2
+  - if ! git diff --exit-code; then exit 1; fi
 
   - rustup component add clippy
   - cargo clippy --all-targets --all-features -- -D warnings
