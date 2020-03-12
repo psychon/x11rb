@@ -102,7 +102,7 @@ output = {'open':        rs_open,
 from xcbgen.state import Module  # noqa
 
 names = glob.glob(input_dir + "/*.xml")
-for name in names:
+for name in sorted(names):
     module = Module(name, None)
     module.register()
     module.resolve()
