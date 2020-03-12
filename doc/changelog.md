@@ -4,6 +4,19 @@ Breaking changes:
 * The `vendor-xcb-proto` feature flag is no longer available. The included
   xcb-proto is now always used.
 
+# Version 0.4.1 (2020-03-12)
+
+Fixes for XKB:
+* Fix encoding of `xkb::SelectEvents`. More details can be found in commit
+  83ff34452bf9.
+* Make fields of `switch` structs public so that e.g. `GetMapMap` becomes
+  usable.
+
+Minor changes:
+* Only depend on libc if the `allow-unsafe-code` feature is enabled.
+* Reexport error/event type in `rust_connection`/`xcb_ffi` modules.
+* Move `multithread_test` from `examples/` to `tests/`.
+
 # Version 0.4.0 (2020-03-08)
 
 New features:

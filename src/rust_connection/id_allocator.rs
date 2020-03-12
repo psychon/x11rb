@@ -50,7 +50,7 @@ impl IDAllocator {
                 return Err(ReplyOrIdError::IdsExhausted);
             }
             // Send an XC-MISC GetXIDRange request.
-            let xidrange = conn.xc_misc_get_xidrange()?.reply()?;
+            let xidrange = conn.xc_misc_get_xid_range()?.reply()?;
             let (start, count) = (xidrange.start_id, xidrange.count);
             // Apparently (0, 1) is how the server signals "I am out of IDs".
             // The second case avoids an underflow below and should never happen.

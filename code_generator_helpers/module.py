@@ -619,7 +619,7 @@ class Module(object):
 
     def request(self, obj, name):
         mark_length_fields(obj)
-        self.emit_opcode(name, 'REQUEST', obj.opcode)
+        self.emit_opcode(name, 'REQUEST', 'u8', obj.opcode)
 
         function_name = self._lower_snake_name(name)
         if function_name == "await":
@@ -633,7 +633,14 @@ class Module(object):
         self.union(eventstruct, name)
 
     def event(self, event, name):
-        self.emit_opcode(name, 'Event', event.opcodes[name])
+        # The opcode specified for GeGeneric in xproto (35) is the value
+        # in the 8-bit response_type field
+        if event.is_ge_event and name != ('xcb', 'GeGeneric'):
+            opcode_type = 'u16'
+        else:
+            opcode_type = 'u8'
+
+        self.emit_opcode(name, 'Event', opcode_type, event.opcodes[name])
         emit_doc(self.out, event.doc)
         self.complex_type(event, self._name(name) + 'Event', False, [])
 
@@ -646,7 +653,7 @@ class Module(object):
 
     def error(self, error, name):
         assert not hasattr(error, "doc")
-        self.emit_opcode(name, 'Error', error.opcodes[name])
+        self.emit_opcode(name, 'Error', 'u8', error.opcodes[name])
         self.complex_type(error, self._name(name) + 'Error', False, [])
         self._emit_from_generic(name, self.generic_error_name, 'Error')
         self._emit_serialize(error, name, 'Error')
@@ -743,11 +750,11 @@ class Module(object):
             self.out("}")
         self.out("}")
 
-    def emit_opcode(self, name, extra_name, opcode):
+    def emit_opcode(self, name, extra_name, type, opcode):
         if opcode == "-1" and name == ('xcb', 'Glx', 'Generic'):
             return  # The XML has a comment saying "fake number"
         self.out("/// Opcode for the %s %s", self._name(name), extra_name.lower())
-        self.out("pub const %s_%s: u8 = %s;", self._upper_snake_name(name), extra_name.upper(), opcode)
+        self.out("pub const %s_%s: %s = %s;", self._upper_snake_name(name), extra_name.upper(), type, opcode)
 
     def _emit_parsing_code(self, fields):
         """Emit the code for parsing the given fields. After this code runs, the
@@ -996,11 +1003,11 @@ class Module(object):
             self.out("pub struct %s {", name)
             for case in switch_type.bitcases:
                 if hasattr(case, "rust_name"):
-                    self.out.indent("%s: %s<%s>,", case.type.name[-1], self.option_name, case.rust_name)
+                    self.out.indent("pub %s: %s<%s>,", case.type.name[-1], self.option_name, case.rust_name)
                 else:
                     field = case.only_field
                     field_type = self._to_complex_owned_rust_type(field)
-                    self.out.indent("%s: %s<%s>,", self._aux_field_name(field), self.option_name, field_type)
+                    self.out.indent("pub %s: %s<%s>,", self._aux_field_name(field), self.option_name, field_type)
         else:
             self.out("pub enum %s {", name)
             for case in switch_type.bitcases:
@@ -1342,9 +1349,13 @@ class Module(object):
     def _lower_snake_name(self, name):
         """Convert a name tuple to a lowercase snake name. MonitorInfo is turned
         into monitor_info."""
+
         name = self._name(name)
-        name = re.sub('([a-z0-9])([A-Z])', '\\1_\\2', name)
-        return name.lower()
+        # Based on _cname_re from libxcb's c_client.py
+        pattern = re.compile('([A-Z][a-z0-9]+|[A-Z]+(?![a-z0-9])|[a-z0-9]+)')
+        split = pattern.finditer(name)
+        name_parts = [match.group(0) for match in split]
+        return '_'.join(name_parts).lower()
 
     def _upper_snake_name(self, name):
         """Convert a name tuple to a uppercase snake name. MonitorInfo is turned

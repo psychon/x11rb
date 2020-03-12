@@ -1,10 +1,19 @@
-#[cfg(not(test))]
-use std::io::IoSlice;
 use std::ptr::NonNull;
 
-#[cfg(not(test))]
+#[cfg(not(all(test, unix)))]
 use libc::c_void;
+#[cfg(unix)]
+pub(crate) use libc::iovec;
 use libc::{c_char, c_int, c_uint};
+
+// As defined in xcb_windefs.h
+#[cfg(not(unix))]
+#[derive(Copy, Clone, Debug)]
+#[repr(C)]
+pub(crate) struct iovec {
+    iov_base: *mut c_void,
+    iov_len: c_int,
+}
 
 #[allow(non_camel_case_types)]
 #[repr(C)]
@@ -73,13 +82,13 @@ extern "C" {
     pub(crate) fn xcb_send_request64(
         c: *const xcb_connection_t,
         flags: c_int,
-        vector: *mut IoSlice<'_>,
+        vector: *mut iovec,
         request: *const xcb_protocol_request_t,
     ) -> u64;
     pub(crate) fn xcb_send_request_with_fds64(
         c: *const xcb_connection_t,
         flags: c_int,
-        vector: *mut IoSlice<'_>,
+        vector: *mut iovec,
         request: *const xcb_protocol_request_t,
         num_fds: c_uint,
         fds: *mut c_int,
@@ -112,12 +121,13 @@ extern "C" {
 
 #[cfg(test)]
 mod mock {
-    use super::{xcb_connection_t, xcb_protocol_request_t, xcb_void_cookie_t};
+    use std::ffi::CStr;
+
+    use libc::{c_char, c_int, c_uint, c_void};
+
+    use super::{iovec, xcb_connection_t, xcb_protocol_request_t, xcb_void_cookie_t};
     use crate::generated::xproto::Setup;
     use crate::x11_utils::Serialize;
-    use libc::{c_char, c_int, c_uint, c_void};
-    use std::ffi::CStr;
-    use std::io::IoSlice;
 
     #[repr(C)]
     struct ConnectionMock {
@@ -181,7 +191,7 @@ mod mock {
     pub(crate) unsafe fn xcb_send_request64(
         _c: *const xcb_connection_t,
         _flags: c_int,
-        _vector: *mut IoSlice<'_>,
+        _vector: *mut iovec,
         _request: *const xcb_protocol_request_t,
     ) -> u64 {
         unimplemented!();
@@ -190,7 +200,7 @@ mod mock {
     pub(crate) unsafe fn xcb_send_request_with_fds64(
         _c: *const xcb_connection_t,
         _flags: c_int,
-        _vector: *mut IoSlice<'_>,
+        _vector: *mut iovec,
         _request: *const xcb_protocol_request_t,
         _num_fds: c_uint,
         _fds: *mut c_int,

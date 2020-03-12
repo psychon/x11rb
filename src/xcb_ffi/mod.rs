@@ -7,7 +7,6 @@
 use std::convert::{TryFrom, TryInto};
 use std::ffi::CStr;
 use std::io::{Error, ErrorKind, IoSlice};
-use std::ops::Deref;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, RawFd};
 use std::ptr::{null, null_mut, NonNull};
@@ -163,27 +162,28 @@ impl XCBConnection {
         has_reply: bool,
         reply_has_fds: bool,
     ) -> Result<SequenceNumber, ConnectionError> {
-        // For this, we derefence the IoSlices, add two new entries, and create new IoSlices.
-        let mut new_bufs = Vec::with_capacity(2 + bufs.len());
-
-        // XCB wants to access bufs[-1] and bufs[-2], so we need to add two empty items in front.
-        new_bufs.push(&[][..]);
-        new_bufs.push(&[][..]);
-
-        // Add the actual request buffers
         let mut storage = Default::default();
-        new_bufs.extend(
-            self.compute_length_field(bufs, &mut storage)?
-                .iter()
-                .map(Deref::deref),
-        );
+        let new_bufs = self.compute_length_field(bufs, &mut storage)?;
 
         // Now wrap the buffers with IoSlice
-        let mut new_bufs = new_bufs.into_iter().map(IoSlice::new).collect::<Vec<_>>();
+        let mut new_bufs_ffi = Vec::with_capacity(2 + new_bufs.len());
+        // XCB wants to access bufs[-1] and bufs[-2], so we need to add two empty items in front.
+        new_bufs_ffi.push(raw_ffi::iovec {
+            iov_base: null_mut(),
+            iov_len: 0,
+        });
+        new_bufs_ffi.push(raw_ffi::iovec {
+            iov_base: null_mut(),
+            iov_len: 0,
+        });
+        new_bufs_ffi.extend(new_bufs.iter().map(|ioslice| raw_ffi::iovec {
+            iov_base: ioslice.as_ptr() as _,
+            iov_len: ioslice.len().try_into().unwrap(),
+        }));
 
         // Set up the information that libxcb needs
         let protocol_request = raw_ffi::xcb_protocol_request_t {
-            count: bufs.len(),
+            count: new_bufs.len(),
             ext: null_mut(), // Not needed since we always use raw
             opcode: 0,
             isvoid: if has_reply { 0 } else { 1 },
@@ -200,7 +200,7 @@ impl XCBConnection {
                 raw_ffi::xcb_send_request64(
                     self.conn.0.as_ptr(),
                     flags,
-                    &mut new_bufs[2],
+                    &mut new_bufs_ffi[2],
                     &protocol_request,
                 )
             }
@@ -213,7 +213,7 @@ impl XCBConnection {
                 raw_ffi::xcb_send_request_with_fds64(
                     self.conn.0.as_ptr(),
                     flags,
-                    &mut new_bufs[2],
+                    &mut new_bufs_ffi[2],
                     &protocol_request,
                     num_fds,
                     fds_ptr,
