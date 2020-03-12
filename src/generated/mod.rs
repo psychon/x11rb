@@ -1,3 +1,6 @@
+// This file contains generated code. Do not edit directly.
+// To regenerate this, run 'make'.
+
 #[cfg(feature = "damage")]
 pub mod damage;
 pub mod xproto;

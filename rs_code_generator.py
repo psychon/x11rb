@@ -27,6 +27,7 @@ if args:
     sys.exit(1)
 
 main_output_file = output_helper.Output()
+output_helper.generated_code_header(main_output_file)
 
 
 # Now the real fun begins
