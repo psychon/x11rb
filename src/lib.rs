@@ -108,6 +108,7 @@ pub mod errors;
 pub mod extension_information;
 pub mod rust_connection;
 
+#[rustfmt::skip]
 pub mod generated;
 pub mod wrapper;
 
