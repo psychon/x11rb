@@ -117,6 +117,7 @@ extern "C" {
     #[cfg(unix)]
     pub(crate) fn xcb_get_file_descriptor(c: *const xcb_connection_t) -> c_int;
     pub(crate) fn xcb_get_maximum_request_length(c: *const xcb_connection_t) -> u32;
+    pub(crate) fn xcb_prefetch_maximum_request_length(c: *const xcb_connection_t);
 }
 
 #[cfg(test)]
@@ -262,6 +263,10 @@ mod mock {
     }
 
     pub(crate) unsafe fn xcb_get_maximum_request_length(_c: *const xcb_connection_t) -> u32 {
+        unimplemented!();
+    }
+
+    pub(crate) unsafe fn xcb_prefetch_maximum_request_length(_c: *const xcb_connection_t) {
         unimplemented!();
     }
 }
