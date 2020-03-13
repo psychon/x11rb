@@ -1,6 +1,6 @@
 import re
 
-from .output import Output, Indent
+from .output import Output, Indent, generated_code_header
 import code_generator_helpers.special_cases as special_cases
 from .request import generate_request_code as generate_request_code
 
@@ -176,6 +176,8 @@ class Module(object):
         self.trait_out = Output()
         self.namespace = outer_module.namespace
         self.outer_module = outer_module
+
+        generated_code_header(self.out)
 
         self.out("#![allow(clippy::unreadable_literal)]")
         self.out("#![allow(clippy::too_many_arguments)]")

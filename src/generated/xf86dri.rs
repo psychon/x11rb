@@ -1,0 +1,822 @@
+// This file contains generated code. Do not edit directly.
+// To regenerate this, run 'make'.
+
+#![allow(clippy::unreadable_literal)]
+#![allow(clippy::too_many_arguments)]
+#![allow(clippy::identity_op)]
+#![allow(clippy::trivially_copy_pass_by_ref)]
+#![allow(clippy::eq_op)]
+use std::convert::TryFrom;
+#[allow(unused_imports)]
+use std::convert::TryInto;
+use std::io::IoSlice;
+#[allow(unused_imports)]
+use crate::utils::RawFdContainer;
+#[allow(unused_imports)]
+use crate::x11_utils::Event as _;
+use crate::x11_utils::{TryParse, Serialize};
+use crate::connection::RequestConnection;
+#[allow(unused_imports)]
+use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
+use crate::errors::{ParseError, ConnectionError};
+#[allow(unused_imports)]
+use crate::x11_utils::GenericEvent;
+#[allow(unused_imports)]
+use crate::x11_utils::GenericError;
+
+/// The X11 name of the extension for QueryExtension
+pub const X11_EXTENSION_NAME: &str = "XFree86-DRI";
+
+/// The version number of this extension that this client library supports.
+///
+/// This constant contains the version number of this extension that is supported
+/// by this build of x11rb. For most things, it does not make sense to use this
+/// information. If you need to send a `QueryVersion`, it is recommended to instead
+/// send the maximum version of the extension that you need.
+pub const X11_XML_VERSION: (u32, u32) = (4, 1);
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DrmClipRect {
+    pub x1: i16,
+    pub y1: i16,
+    pub x2: i16,
+    pub x3: i16,
+}
+impl TryParse for DrmClipRect {
+    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let mut remaining = value;
+        let (x1, new_remaining) = i16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (y1, new_remaining) = i16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (x2, new_remaining) = i16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (x3, new_remaining) = i16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let result = DrmClipRect { x1, y1, x2, x3 };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for DrmClipRect {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
+impl Serialize for DrmClipRect {
+    type Bytes = [u8; 8];
+    fn serialize(&self) -> Self::Bytes {
+        let x1_bytes = self.x1.serialize();
+        let y1_bytes = self.y1.serialize();
+        let x2_bytes = self.x2.serialize();
+        let x3_bytes = self.x3.serialize();
+        [
+            x1_bytes[0],
+            x1_bytes[1],
+            y1_bytes[0],
+            y1_bytes[1],
+            x2_bytes[0],
+            x2_bytes[1],
+            x3_bytes[0],
+            x3_bytes[1],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(8);
+        self.x1.serialize_into(bytes);
+        self.y1.serialize_into(bytes);
+        self.x2.serialize_into(bytes);
+        self.x3.serialize_into(bytes);
+    }
+}
+
+/// Opcode for the QueryVersion request
+pub const QUERY_VERSION_REQUEST: u8 = 0;
+pub fn query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
+where Conn: RequestConnection + ?Sized
+{
+    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+        .ok_or(ConnectionError::UnsupportedExtension)?;
+    let length: usize = (4) / 4;
+    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let request0 = [
+        extension_information.major_opcode,
+        QUERY_VERSION_REQUEST,
+        length_bytes[0],
+        length_bytes[1],
+    ];
+    let length_so_far = (&request0).len();
+    assert_eq!(length_so_far, length * 4);
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct QueryVersionReply {
+    pub response_type: u8,
+    pub sequence: u16,
+    pub length: u32,
+    pub dri_major_version: u16,
+    pub dri_minor_version: u16,
+    pub dri_minor_patch: u32,
+}
+impl QueryVersionReply {
+    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let mut remaining = value;
+        let (response_type, new_remaining) = u8::try_parse(remaining)?;
+        remaining = new_remaining;
+        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, new_remaining) = u16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (length, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (dri_major_version, new_remaining) = u16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (dri_minor_version, new_remaining) = u16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (dri_minor_patch, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let result = QueryVersionReply { response_type, sequence, length, dri_major_version, dri_minor_version, dri_minor_patch };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for QueryVersionReply {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
+
+/// Opcode for the QueryDirectRenderingCapable request
+pub const QUERY_DIRECT_RENDERING_CAPABLE_REQUEST: u8 = 1;
+pub fn query_direct_rendering_capable<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, QueryDirectRenderingCapableReply>, ConnectionError>
+where Conn: RequestConnection + ?Sized
+{
+    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+        .ok_or(ConnectionError::UnsupportedExtension)?;
+    let length: usize = (8) / 4;
+    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let screen_bytes = screen.serialize();
+    let request0 = [
+        extension_information.major_opcode,
+        QUERY_DIRECT_RENDERING_CAPABLE_REQUEST,
+        length_bytes[0],
+        length_bytes[1],
+        screen_bytes[0],
+        screen_bytes[1],
+        screen_bytes[2],
+        screen_bytes[3],
+    ];
+    let length_so_far = (&request0).len();
+    assert_eq!(length_so_far, length * 4);
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct QueryDirectRenderingCapableReply {
+    pub response_type: u8,
+    pub sequence: u16,
+    pub length: u32,
+    pub is_capable: bool,
+}
+impl QueryDirectRenderingCapableReply {
+    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let mut remaining = value;
+        let (response_type, new_remaining) = u8::try_parse(remaining)?;
+        remaining = new_remaining;
+        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, new_remaining) = u16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (length, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (is_capable, new_remaining) = bool::try_parse(remaining)?;
+        remaining = new_remaining;
+        let result = QueryDirectRenderingCapableReply { response_type, sequence, length, is_capable };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for QueryDirectRenderingCapableReply {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
+
+/// Opcode for the OpenConnection request
+pub const OPEN_CONNECTION_REQUEST: u8 = 2;
+pub fn open_connection<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, OpenConnectionReply>, ConnectionError>
+where Conn: RequestConnection + ?Sized
+{
+    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+        .ok_or(ConnectionError::UnsupportedExtension)?;
+    let length: usize = (8) / 4;
+    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let screen_bytes = screen.serialize();
+    let request0 = [
+        extension_information.major_opcode,
+        OPEN_CONNECTION_REQUEST,
+        length_bytes[0],
+        length_bytes[1],
+        screen_bytes[0],
+        screen_bytes[1],
+        screen_bytes[2],
+        screen_bytes[3],
+    ];
+    let length_so_far = (&request0).len();
+    assert_eq!(length_so_far, length * 4);
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct OpenConnectionReply {
+    pub response_type: u8,
+    pub sequence: u16,
+    pub length: u32,
+    pub sarea_handle_low: u32,
+    pub sarea_handle_high: u32,
+    pub bus_id: Vec<u8>,
+}
+impl OpenConnectionReply {
+    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let mut remaining = value;
+        let (response_type, new_remaining) = u8::try_parse(remaining)?;
+        remaining = new_remaining;
+        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, new_remaining) = u16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (length, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (sarea_handle_low, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (sarea_handle_high, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (bus_id_len, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        remaining = &remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let (bus_id, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, bus_id_len as usize)?;
+        remaining = new_remaining;
+        let result = OpenConnectionReply { response_type, sequence, length, sarea_handle_low, sarea_handle_high, bus_id };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for OpenConnectionReply {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
+
+/// Opcode for the CloseConnection request
+pub const CLOSE_CONNECTION_REQUEST: u8 = 3;
+pub fn close_connection<Conn>(conn: &Conn, screen: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+where Conn: RequestConnection + ?Sized
+{
+    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+        .ok_or(ConnectionError::UnsupportedExtension)?;
+    let length: usize = (8) / 4;
+    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let screen_bytes = screen.serialize();
+    let request0 = [
+        extension_information.major_opcode,
+        CLOSE_CONNECTION_REQUEST,
+        length_bytes[0],
+        length_bytes[1],
+        screen_bytes[0],
+        screen_bytes[1],
+        screen_bytes[2],
+        screen_bytes[3],
+    ];
+    let length_so_far = (&request0).len();
+    assert_eq!(length_so_far, length * 4);
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+}
+
+/// Opcode for the GetClientDriverName request
+pub const GET_CLIENT_DRIVER_NAME_REQUEST: u8 = 4;
+pub fn get_client_driver_name<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, GetClientDriverNameReply>, ConnectionError>
+where Conn: RequestConnection + ?Sized
+{
+    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+        .ok_or(ConnectionError::UnsupportedExtension)?;
+    let length: usize = (8) / 4;
+    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let screen_bytes = screen.serialize();
+    let request0 = [
+        extension_information.major_opcode,
+        GET_CLIENT_DRIVER_NAME_REQUEST,
+        length_bytes[0],
+        length_bytes[1],
+        screen_bytes[0],
+        screen_bytes[1],
+        screen_bytes[2],
+        screen_bytes[3],
+    ];
+    let length_so_far = (&request0).len();
+    assert_eq!(length_so_far, length * 4);
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GetClientDriverNameReply {
+    pub response_type: u8,
+    pub sequence: u16,
+    pub length: u32,
+    pub client_driver_major_version: u32,
+    pub client_driver_minor_version: u32,
+    pub client_driver_patch_version: u32,
+    pub client_driver_name: Vec<u8>,
+}
+impl GetClientDriverNameReply {
+    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let mut remaining = value;
+        let (response_type, new_remaining) = u8::try_parse(remaining)?;
+        remaining = new_remaining;
+        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, new_remaining) = u16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (length, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (client_driver_major_version, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (client_driver_minor_version, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (client_driver_patch_version, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (client_driver_name_len, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        remaining = &remaining.get(8..).ok_or(ParseError::ParseError)?;
+        let (client_driver_name, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, client_driver_name_len as usize)?;
+        remaining = new_remaining;
+        let result = GetClientDriverNameReply { response_type, sequence, length, client_driver_major_version, client_driver_minor_version, client_driver_patch_version, client_driver_name };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for GetClientDriverNameReply {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
+
+/// Opcode for the CreateContext request
+pub const CREATE_CONTEXT_REQUEST: u8 = 5;
+pub fn create_context<Conn>(conn: &Conn, screen: u32, visual: u32, context: u32) -> Result<Cookie<'_, Conn, CreateContextReply>, ConnectionError>
+where Conn: RequestConnection + ?Sized
+{
+    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+        .ok_or(ConnectionError::UnsupportedExtension)?;
+    let length: usize = (16) / 4;
+    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let screen_bytes = screen.serialize();
+    let visual_bytes = visual.serialize();
+    let context_bytes = context.serialize();
+    let request0 = [
+        extension_information.major_opcode,
+        CREATE_CONTEXT_REQUEST,
+        length_bytes[0],
+        length_bytes[1],
+        screen_bytes[0],
+        screen_bytes[1],
+        screen_bytes[2],
+        screen_bytes[3],
+        visual_bytes[0],
+        visual_bytes[1],
+        visual_bytes[2],
+        visual_bytes[3],
+        context_bytes[0],
+        context_bytes[1],
+        context_bytes[2],
+        context_bytes[3],
+    ];
+    let length_so_far = (&request0).len();
+    assert_eq!(length_so_far, length * 4);
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CreateContextReply {
+    pub response_type: u8,
+    pub sequence: u16,
+    pub length: u32,
+    pub hw_context: u32,
+}
+impl CreateContextReply {
+    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let mut remaining = value;
+        let (response_type, new_remaining) = u8::try_parse(remaining)?;
+        remaining = new_remaining;
+        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, new_remaining) = u16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (length, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (hw_context, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let result = CreateContextReply { response_type, sequence, length, hw_context };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for CreateContextReply {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
+
+/// Opcode for the DestroyContext request
+pub const DESTROY_CONTEXT_REQUEST: u8 = 6;
+pub fn destroy_context<Conn>(conn: &Conn, screen: u32, context: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+where Conn: RequestConnection + ?Sized
+{
+    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+        .ok_or(ConnectionError::UnsupportedExtension)?;
+    let length: usize = (12) / 4;
+    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let screen_bytes = screen.serialize();
+    let context_bytes = context.serialize();
+    let request0 = [
+        extension_information.major_opcode,
+        DESTROY_CONTEXT_REQUEST,
+        length_bytes[0],
+        length_bytes[1],
+        screen_bytes[0],
+        screen_bytes[1],
+        screen_bytes[2],
+        screen_bytes[3],
+        context_bytes[0],
+        context_bytes[1],
+        context_bytes[2],
+        context_bytes[3],
+    ];
+    let length_so_far = (&request0).len();
+    assert_eq!(length_so_far, length * 4);
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+}
+
+/// Opcode for the CreateDrawable request
+pub const CREATE_DRAWABLE_REQUEST: u8 = 7;
+pub fn create_drawable<Conn>(conn: &Conn, screen: u32, drawable: u32) -> Result<Cookie<'_, Conn, CreateDrawableReply>, ConnectionError>
+where Conn: RequestConnection + ?Sized
+{
+    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+        .ok_or(ConnectionError::UnsupportedExtension)?;
+    let length: usize = (12) / 4;
+    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let screen_bytes = screen.serialize();
+    let drawable_bytes = drawable.serialize();
+    let request0 = [
+        extension_information.major_opcode,
+        CREATE_DRAWABLE_REQUEST,
+        length_bytes[0],
+        length_bytes[1],
+        screen_bytes[0],
+        screen_bytes[1],
+        screen_bytes[2],
+        screen_bytes[3],
+        drawable_bytes[0],
+        drawable_bytes[1],
+        drawable_bytes[2],
+        drawable_bytes[3],
+    ];
+    let length_so_far = (&request0).len();
+    assert_eq!(length_so_far, length * 4);
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct CreateDrawableReply {
+    pub response_type: u8,
+    pub sequence: u16,
+    pub length: u32,
+    pub hw_drawable_handle: u32,
+}
+impl CreateDrawableReply {
+    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let mut remaining = value;
+        let (response_type, new_remaining) = u8::try_parse(remaining)?;
+        remaining = new_remaining;
+        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, new_remaining) = u16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (length, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (hw_drawable_handle, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let result = CreateDrawableReply { response_type, sequence, length, hw_drawable_handle };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for CreateDrawableReply {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
+
+/// Opcode for the DestroyDrawable request
+pub const DESTROY_DRAWABLE_REQUEST: u8 = 8;
+pub fn destroy_drawable<Conn>(conn: &Conn, screen: u32, drawable: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+where Conn: RequestConnection + ?Sized
+{
+    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+        .ok_or(ConnectionError::UnsupportedExtension)?;
+    let length: usize = (12) / 4;
+    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let screen_bytes = screen.serialize();
+    let drawable_bytes = drawable.serialize();
+    let request0 = [
+        extension_information.major_opcode,
+        DESTROY_DRAWABLE_REQUEST,
+        length_bytes[0],
+        length_bytes[1],
+        screen_bytes[0],
+        screen_bytes[1],
+        screen_bytes[2],
+        screen_bytes[3],
+        drawable_bytes[0],
+        drawable_bytes[1],
+        drawable_bytes[2],
+        drawable_bytes[3],
+    ];
+    let length_so_far = (&request0).len();
+    assert_eq!(length_so_far, length * 4);
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+}
+
+/// Opcode for the GetDrawableInfo request
+pub const GET_DRAWABLE_INFO_REQUEST: u8 = 9;
+pub fn get_drawable_info<Conn>(conn: &Conn, screen: u32, drawable: u32) -> Result<Cookie<'_, Conn, GetDrawableInfoReply>, ConnectionError>
+where Conn: RequestConnection + ?Sized
+{
+    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+        .ok_or(ConnectionError::UnsupportedExtension)?;
+    let length: usize = (12) / 4;
+    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let screen_bytes = screen.serialize();
+    let drawable_bytes = drawable.serialize();
+    let request0 = [
+        extension_information.major_opcode,
+        GET_DRAWABLE_INFO_REQUEST,
+        length_bytes[0],
+        length_bytes[1],
+        screen_bytes[0],
+        screen_bytes[1],
+        screen_bytes[2],
+        screen_bytes[3],
+        drawable_bytes[0],
+        drawable_bytes[1],
+        drawable_bytes[2],
+        drawable_bytes[3],
+    ];
+    let length_so_far = (&request0).len();
+    assert_eq!(length_so_far, length * 4);
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GetDrawableInfoReply {
+    pub response_type: u8,
+    pub sequence: u16,
+    pub length: u32,
+    pub drawable_table_index: u32,
+    pub drawable_table_stamp: u32,
+    pub drawable_origin_x: i16,
+    pub drawable_origin_y: i16,
+    pub drawable_size_w: i16,
+    pub drawable_size_h: i16,
+    pub back_x: i16,
+    pub back_y: i16,
+    pub clip_rects: Vec<DrmClipRect>,
+    pub back_clip_rects: Vec<DrmClipRect>,
+}
+impl GetDrawableInfoReply {
+    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let mut remaining = value;
+        let (response_type, new_remaining) = u8::try_parse(remaining)?;
+        remaining = new_remaining;
+        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, new_remaining) = u16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (length, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (drawable_table_index, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (drawable_table_stamp, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (drawable_origin_x, new_remaining) = i16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (drawable_origin_y, new_remaining) = i16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (drawable_size_w, new_remaining) = i16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (drawable_size_h, new_remaining) = i16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (num_clip_rects, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (back_x, new_remaining) = i16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (back_y, new_remaining) = i16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (num_back_clip_rects, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (clip_rects, new_remaining) = crate::x11_utils::parse_list::<DrmClipRect>(remaining, num_clip_rects as usize)?;
+        remaining = new_remaining;
+        let (back_clip_rects, new_remaining) = crate::x11_utils::parse_list::<DrmClipRect>(remaining, num_back_clip_rects as usize)?;
+        remaining = new_remaining;
+        let result = GetDrawableInfoReply { response_type, sequence, length, drawable_table_index, drawable_table_stamp, drawable_origin_x, drawable_origin_y, drawable_size_w, drawable_size_h, back_x, back_y, clip_rects, back_clip_rects };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for GetDrawableInfoReply {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
+
+/// Opcode for the GetDeviceInfo request
+pub const GET_DEVICE_INFO_REQUEST: u8 = 10;
+pub fn get_device_info<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, GetDeviceInfoReply>, ConnectionError>
+where Conn: RequestConnection + ?Sized
+{
+    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+        .ok_or(ConnectionError::UnsupportedExtension)?;
+    let length: usize = (8) / 4;
+    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let screen_bytes = screen.serialize();
+    let request0 = [
+        extension_information.major_opcode,
+        GET_DEVICE_INFO_REQUEST,
+        length_bytes[0],
+        length_bytes[1],
+        screen_bytes[0],
+        screen_bytes[1],
+        screen_bytes[2],
+        screen_bytes[3],
+    ];
+    let length_so_far = (&request0).len();
+    assert_eq!(length_so_far, length * 4);
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct GetDeviceInfoReply {
+    pub response_type: u8,
+    pub sequence: u16,
+    pub length: u32,
+    pub framebuffer_handle_low: u32,
+    pub framebuffer_handle_high: u32,
+    pub framebuffer_origin_offset: u32,
+    pub framebuffer_size: u32,
+    pub framebuffer_stride: u32,
+    pub device_private: Vec<u32>,
+}
+impl GetDeviceInfoReply {
+    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let mut remaining = value;
+        let (response_type, new_remaining) = u8::try_parse(remaining)?;
+        remaining = new_remaining;
+        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, new_remaining) = u16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (length, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (framebuffer_handle_low, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (framebuffer_handle_high, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (framebuffer_origin_offset, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (framebuffer_size, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (framebuffer_stride, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (device_private_size, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (device_private, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, device_private_size as usize)?;
+        remaining = new_remaining;
+        let result = GetDeviceInfoReply { response_type, sequence, length, framebuffer_handle_low, framebuffer_handle_high, framebuffer_origin_offset, framebuffer_size, framebuffer_stride, device_private };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for GetDeviceInfoReply {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
+
+/// Opcode for the AuthConnection request
+pub const AUTH_CONNECTION_REQUEST: u8 = 11;
+pub fn auth_connection<Conn>(conn: &Conn, screen: u32, magic: u32) -> Result<Cookie<'_, Conn, AuthConnectionReply>, ConnectionError>
+where Conn: RequestConnection + ?Sized
+{
+    let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
+        .ok_or(ConnectionError::UnsupportedExtension)?;
+    let length: usize = (12) / 4;
+    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let screen_bytes = screen.serialize();
+    let magic_bytes = magic.serialize();
+    let request0 = [
+        extension_information.major_opcode,
+        AUTH_CONNECTION_REQUEST,
+        length_bytes[0],
+        length_bytes[1],
+        screen_bytes[0],
+        screen_bytes[1],
+        screen_bytes[2],
+        screen_bytes[3],
+        magic_bytes[0],
+        magic_bytes[1],
+        magic_bytes[2],
+        magic_bytes[3],
+    ];
+    let length_so_far = (&request0).len();
+    assert_eq!(length_so_far, length * 4);
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AuthConnectionReply {
+    pub response_type: u8,
+    pub sequence: u16,
+    pub length: u32,
+    pub authenticated: u32,
+}
+impl AuthConnectionReply {
+    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let mut remaining = value;
+        let (response_type, new_remaining) = u8::try_parse(remaining)?;
+        remaining = new_remaining;
+        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, new_remaining) = u16::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (length, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let (authenticated, new_remaining) = u32::try_parse(remaining)?;
+        remaining = new_remaining;
+        let result = AuthConnectionReply { response_type, sequence, length, authenticated };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for AuthConnectionReply {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
+
+/// Extension trait defining the requests of this extension.
+pub trait ConnectionExt: RequestConnection {
+    fn xf86dri_query_version(&self) -> Result<Cookie<'_, Self, QueryVersionReply>, ConnectionError>
+    {
+        query_version(self)
+    }
+
+    fn xf86dri_query_direct_rendering_capable(&self, screen: u32) -> Result<Cookie<'_, Self, QueryDirectRenderingCapableReply>, ConnectionError>
+    {
+        query_direct_rendering_capable(self, screen)
+    }
+
+    fn xf86dri_open_connection(&self, screen: u32) -> Result<Cookie<'_, Self, OpenConnectionReply>, ConnectionError>
+    {
+        open_connection(self, screen)
+    }
+
+    fn xf86dri_close_connection(&self, screen: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    {
+        close_connection(self, screen)
+    }
+
+    fn xf86dri_get_client_driver_name(&self, screen: u32) -> Result<Cookie<'_, Self, GetClientDriverNameReply>, ConnectionError>
+    {
+        get_client_driver_name(self, screen)
+    }
+
+    fn xf86dri_create_context(&self, screen: u32, visual: u32, context: u32) -> Result<Cookie<'_, Self, CreateContextReply>, ConnectionError>
+    {
+        create_context(self, screen, visual, context)
+    }
+
+    fn xf86dri_destroy_context(&self, screen: u32, context: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    {
+        destroy_context(self, screen, context)
+    }
+
+    fn xf86dri_create_drawable(&self, screen: u32, drawable: u32) -> Result<Cookie<'_, Self, CreateDrawableReply>, ConnectionError>
+    {
+        create_drawable(self, screen, drawable)
+    }
+
+    fn xf86dri_destroy_drawable(&self, screen: u32, drawable: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    {
+        destroy_drawable(self, screen, drawable)
+    }
+
+    fn xf86dri_get_drawable_info(&self, screen: u32, drawable: u32) -> Result<Cookie<'_, Self, GetDrawableInfoReply>, ConnectionError>
+    {
+        get_drawable_info(self, screen, drawable)
+    }
+
+    fn xf86dri_get_device_info(&self, screen: u32) -> Result<Cookie<'_, Self, GetDeviceInfoReply>, ConnectionError>
+    {
+        get_device_info(self, screen)
+    }
+
+    fn xf86dri_auth_connection(&self, screen: u32, magic: u32) -> Result<Cookie<'_, Self, AuthConnectionReply>, ConnectionError>
+    {
+        auth_connection(self, screen, magic)
+    }
+
+}
+impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

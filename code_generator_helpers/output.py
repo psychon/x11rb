@@ -89,3 +89,10 @@ class Indent(object):
 
     def __exit__(self, type, value, traceback):
         self.output.indent_decr()
+
+
+def generated_code_header(output):
+    """Add a Rust-header to the output saying that this file is generated."""
+    output("// This file contains generated code. Do not edit directly.")
+    output("// To regenerate this, run 'make'.")
+    output("")

@@ -11,7 +11,7 @@ try:
     opts, args = getopt.getopt(sys.argv[1:], "p:o:i:")
 except getopt.GetoptError as err:
     print(err)
-    print('Usage: %s [-p path] -i input -o output main_module' % (sys.argv[0]))
+    print('Usage: %s [-p path] -i input -o output' % (sys.argv[0]))
     sys.exit(1)
 
 for (opt, arg) in opts:
@@ -22,15 +22,12 @@ for (opt, arg) in opts:
     if opt == '-o':
         output_dir = arg
 
-if not args:
-    print("Missing name for main module")
-    sys.exit()
-main_module = args.pop()
 if args:
     print('No further arguments expected')
     sys.exit(1)
 
 main_output_file = output_helper.Output()
+output_helper.generated_code_header(main_output_file)
 
 
 # Now the real fun begins
@@ -105,7 +102,7 @@ output = {'open':        rs_open,
 from xcbgen.state import Module  # noqa
 
 names = glob.glob(input_dir + "/*.xml")
-for name in names:
+for name in sorted(names):
     module = Module(name, None)
     module.register()
     module.resolve()
@@ -115,5 +112,5 @@ for name in names:
         sys.stderr.write('Error occurred while generating: %s\n' % module.namespace.header)
         raise
 
-output_file = os.path.join(output_dir, "%s.rs" % main_module)
+output_file = os.path.join(output_dir, "mod.rs")
 main_output_file.write_file(output_file)
