@@ -4,7 +4,7 @@ use std::convert::{TryFrom, TryInto};
 use std::io::{BufReader, BufWriter, IoSlice, Read, Write};
 use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 
-use crate::bigreq::ConnectionExt as _;
+use crate::bigreq::{ConnectionExt as _, EnableReply};
 use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 pub use crate::errors::{ConnectError, ConnectionError, ParseError};
@@ -28,6 +28,13 @@ pub type GenericEvent = crate::x11_utils::GenericEvent<Buffer>;
 pub type EventAndSeqNumber = crate::connection::EventAndSeqNumber<Buffer>;
 pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
 
+#[derive(Debug)]
+enum MaxRequestBytes {
+    Unknown,
+    Requested(Option<SequenceNumber>),
+    Known(usize),
+}
+
 type MutexGuardInner<'a, W> = MutexGuard<'a, inner::ConnectionInner<W>>;
 
 /// A connection to an X11 server implemented in pure rust
@@ -40,7 +47,7 @@ pub struct RustConnection<R: Read = BufReader<stream::Stream>, W: Write = BufWri
     id_allocator: Mutex<id_allocator::IDAllocator>,
     setup: Setup,
     extension_information: Mutex<ExtensionInformation>,
-    maximum_request_bytes: Mutex<Option<usize>>,
+    maximum_request_bytes: Mutex<MaxRequestBytes>,
 }
 
 impl RustConnection<BufReader<stream::Stream>, BufWriter<stream::Stream>> {
@@ -134,7 +141,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
             id_allocator: Mutex::new(allocator),
             setup,
             extension_information: Default::default(),
-            maximum_request_bytes: Mutex::new(None),
+            maximum_request_bytes: Mutex::new(MaxRequestBytes::Unknown),
         })
     }
 
@@ -212,6 +219,13 @@ impl<R: Read, W: Write> RustConnection<R, W> {
                 // 2.7. Return the locked `inner` to the caller.
                 Ok(inner)
             }
+        }
+    }
+
+    fn prefetch_maximum_request_bytes_impl(&self, max_bytes: &mut MutexGuard<'_, MaxRequestBytes>) {
+        if let MaxRequestBytes::Unknown = **max_bytes {
+            let request = self.bigreq_enable().map(|cookie| cookie.into_sequence_number()).ok();
+            **max_bytes = MaxRequestBytes::Requested(request);
         }
     }
 }
@@ -344,29 +358,36 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
 
     fn maximum_request_bytes(&self) -> usize {
         let mut max_bytes = self.maximum_request_bytes.lock().unwrap();
+        self.prefetch_maximum_request_bytes_impl(&mut max_bytes);
+        use MaxRequestBytes::*;
         match *max_bytes {
-            None => {
-                // TODO: Make it possible to prefetch extensions?
-                // TODO: Make it possible to prefetch the maximum request length?
-                let length = match self
-                    .bigreq_enable()
-                    .ok()
-                    .and_then(|cookie| cookie.reply().ok())
-                {
-                    Some(reply) => reply.maximum_request_length,
-                    None => self.setup.maximum_request_length.into(),
-                };
-                let length = length.try_into().unwrap_or(usize::max_value());
+            Unknown => unreachable!("We just prefetched this"),
+            Requested(seqno) => {
+                let length = seqno
+                    // If prefetching the request succeeded, get a cookie
+                    .and_then(|seqno|
+                              Cookie::<_, EnableReply>::new(self, seqno)
+                              // and then get the reply to the request
+                              .reply()
+                              .map(|reply| reply.maximum_request_length)
+                              .ok())
+                    // If anything failed (sending the request, getting the reply), use Setup
+                    .unwrap_or(self.setup.maximum_request_length.into())
+                    // Turn the u32 into usize, using the max value in case of overflow
+                    .try_into()
+                    .unwrap_or(usize::max_value());
                 let length = length * 4;
-                *max_bytes = Some(length);
+                *max_bytes = Known(length);
                 length
-            }
-            Some(length) => length,
+            },
+            Known(length) => length,
         }
     }
 
     fn prefetch_maximum_request_bytes(&self) -> Result<(), ConnectionError> {
-        unimplemented!()
+        let mut max_bytes = self.maximum_request_bytes.lock().unwrap();
+        self.prefetch_maximum_request_bytes_impl(&mut max_bytes);
+        Ok(())
     }
 }
 
