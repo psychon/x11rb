@@ -15,7 +15,7 @@ use std::sync::Mutex;
 use libc::c_void;
 
 use super::xproto::{QueryExtensionReply, Setup};
-use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
+use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber, compute_length_field};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 pub use crate::errors::{ConnectError, ConnectionError, ParseError};
 use crate::extension_information::ExtensionInformation;
@@ -163,7 +163,7 @@ impl XCBConnection {
         reply_has_fds: bool,
     ) -> Result<SequenceNumber, ConnectionError> {
         let mut storage = Default::default();
-        let new_bufs = self.compute_length_field(bufs, &mut storage)?;
+        let new_bufs = compute_length_field(self, bufs, &mut storage)?;
 
         // Now wrap the buffers with IoSlice
         let mut new_bufs_ffi = Vec::with_capacity(2 + new_bufs.len());

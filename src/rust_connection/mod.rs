@@ -5,7 +5,7 @@ use std::io::{BufReader, BufWriter, IoSlice, Read, Write};
 use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 
 use crate::bigreq::{ConnectionExt as _, EnableReply};
-use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
+use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber, compute_length_field};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 pub use crate::errors::{ConnectError, ConnectionError, ParseError};
 use crate::extension_information::ExtensionInformation;
@@ -242,7 +242,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         Reply: for<'a> TryFrom<&'a [u8], Error = ParseError>,
     {
         let mut storage = Default::default();
-        let bufs = self.compute_length_field(bufs, &mut storage)?;
+        let bufs = compute_length_field(self, bufs, &mut storage)?;
 
         Ok(Cookie::new(
             self,
@@ -259,7 +259,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         Reply: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>,
     {
         let mut storage = Default::default();
-        let bufs = self.compute_length_field(bufs, &mut storage)?;
+        let bufs = compute_length_field(self, bufs, &mut storage)?;
 
         let _ = (bufs, fds);
         Err(ConnectionError::FDPassingFailed)
@@ -271,7 +271,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         fds: Vec<RawFdContainer>,
     ) -> Result<VoidCookie<'_, Self>, ConnectionError> {
         let mut storage = Default::default();
-        let bufs = self.compute_length_field(bufs, &mut storage)?;
+        let bufs = compute_length_field(self, bufs, &mut storage)?;
 
         Ok(VoidCookie::new(
             self,

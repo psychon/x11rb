@@ -257,173 +257,6 @@ pub trait RequestConnection {
 
     /// The maximum number of bytes that the X11 server accepts in a request.
     fn maximum_request_bytes(&self) -> usize;
-
-    /// Check the request length and use BIG-REQUESTS if necessary.
-    ///
-    /// Users of this library will most likely not want to use this function directly.
-    ///
-    /// This function is provided by the trait. It examines the given request buffers and checks
-    /// that the length field is set correctly.
-    ///
-    /// If the request has more than 2^18 bytes, this function handles using the BIG-REQUESTS
-    /// extension. The request is rewritten to include the correct length field. For this case, the
-    /// `storage` parameter is needed. This function uses it to store the necessary buffers.
-    ///
-    /// When using this function, it is recommended to allocate the `storage` parameter with
-    /// `Default::default()`.
-    ///
-    /// Example usage:
-    /// ```
-    /// use std::io::IoSlice;
-    /// use std::convert::TryFrom;
-    /// use x11rb::connection::{BufWithFds, RequestConnection, SequenceNumber};
-    /// use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
-    /// use x11rb::errors::{ParseError, ConnectionError};
-    /// use x11rb::utils::RawFdContainer;
-    ///
-    /// struct MyConnection();
-    ///
-    /// impl RequestConnection for MyConnection {
-    ///     type Buf = Vec<u8>;
-    ///
-    ///     // [snip, other functions here]
-    ///     # fn discard_reply(&self, sequence: SequenceNumber,
-    ///     #                  kind: x11rb::connection::RequestKind,
-    ///     #                  mode: x11rb::connection::DiscardMode) {
-    ///     #    unimplemented!()
-    ///     # }
-    ///     # fn prefetch_extension_information(
-    ///     #     &self,
-    ///     #     extension_name: &'static str,
-    ///     # ) -> Result<(), ConnectionError> {
-    ///     #     unimplemented!()
-    ///     # }
-    ///     # fn extension_information(&self, ext: &'static str)
-    ///     # -> Result<Option<x11rb::xproto::QueryExtensionReply>, ConnectionError> {
-    ///     #    unimplemented!()
-    ///     # }
-    ///     # fn wait_for_reply_or_error(&self, sequence: SequenceNumber)
-    ///     # -> Result<Vec<u8>, x11rb::errors::ReplyError<Vec<u8>>> {
-    ///     #    unimplemented!()
-    ///     # }
-    ///     # fn wait_for_reply(&self, sequence: SequenceNumber)
-    ///     # -> Result<Option<Vec<u8>>, x11rb::errors::ConnectionError> {
-    ///     #    unimplemented!()
-    ///     # }
-    ///     # fn wait_for_reply_with_fds(&self, sequence: SequenceNumber)
-    ///     # -> Result<BufWithFds<Vec<u8>>, x11rb::errors::ReplyError<Vec<u8>>> {
-    ///     #    unimplemented!()
-    ///     # }
-    ///     # fn check_for_error(&self, sequence: SequenceNumber)
-    ///     # ->Result<Option<x11rb::x11_utils::GenericError<Vec<u8>>>, ConnectionError> {
-    ///     #    unimplemented!()
-    ///     # }
-    ///     # fn maximum_request_bytes(&self) -> usize {
-    ///     #    unimplemented!()
-    ///     # }
-    ///     # fn prefetch_maximum_request_bytes(&self) {
-    ///     #    unimplemented!()
-    ///     # }
-    ///
-    ///     fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
-    ///     -> Result<Cookie<Self, R>, ConnectionError>
-    ///     where R: for<'a> TryFrom<&'a [u8], Error=ParseError> {
-    ///         Ok(Cookie::new(self, self.send_request(bufs, fds, true, false)?))
-    ///     }
-    ///
-    ///     fn send_request_with_reply_with_fds<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
-    ///     -> Result<CookieWithFds<Self, R>, ConnectionError>
-    ///     where R: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error=ParseError> {
-    ///         Ok(CookieWithFds::new(self, self.send_request(bufs, fds, true, true)?))
-    ///     }
-    ///
-    ///     fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
-    ///     -> Result<VoidCookie<Self>, ConnectionError> {
-    ///         Ok(VoidCookie::new(self, self.send_request(bufs, fds, false, false)?))
-    ///     }
-    /// }
-    ///
-    /// impl MyConnection {
-    ///     fn send_request(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>,
-    ///                     has_reply: bool, reply_has_fds: bool)
-    ///     -> Result<SequenceNumber, ConnectionError>
-    ///     {
-    ///         let mut storage = Default::default();
-    ///         let bufs = self.compute_length_field(bufs, &mut storage)?;
-    ///         unimplemented!("Now send bufs and fds to the X11 server");
-    ///     }
-    /// }
-    /// ```
-    fn compute_length_field<'b>(
-        &self,
-        request_buffers: &'b [IoSlice<'b>],
-        storage: &'b mut (Vec<IoSlice<'b>>, [u8; 8]),
-    ) -> Result<&'b [IoSlice<'b>], ConnectionError> {
-        // Compute the total length of the request
-        let length: usize = request_buffers.iter().map(|buf| buf.len()).sum();
-        assert_eq!(
-            length % 4,
-            0,
-            "The length of X11 requests must be a multiple of 4, got {}",
-            length
-        );
-        let wire_length = length / 4;
-
-        let first_buf = &request_buffers[0];
-
-        // If the length fits into an u16, just return the request as-is
-        if let Ok(wire_length) = TryInto::<u16>::try_into(wire_length) {
-            // Check that the request contains the correct length field
-            let length_field = u16::from_ne_bytes([first_buf[2], first_buf[3]]);
-            assert_eq!(
-                wire_length, length_field,
-                "Length field contains incorrect value"
-            );
-            return Ok(request_buffers);
-        }
-
-        // Check that the total length is not too large
-        if length > self.maximum_request_bytes() {
-            return Err(ConnectionError::MaximumRequestLengthExceeded);
-        }
-
-        // Okay, we need to use big requests.
-        let wire_length: u32 = wire_length
-            .try_into()
-            .expect("X11 request larger than 2^34 bytes?!?");
-        let wire_length = wire_length.to_ne_bytes();
-
-        // Now construct the new IoSlices
-
-        // Replacement for the first four bytes of the request
-        storage.1.copy_from_slice(&[
-            // First part of the request
-            first_buf[0],
-            first_buf[1],
-            // length field zero indicates big requests
-            0,
-            0,
-            // New bytes: extended length
-            wire_length[0],
-            wire_length[1],
-            wire_length[2],
-            wire_length[3],
-        ]);
-        storage.0.push(IoSlice::new(&storage.1));
-
-        // The remaining part of the first buffer of the request
-        storage.0.push(IoSlice::new(&first_buf[4..]));
-
-        // and the rest of the request
-        storage.0.extend(
-            request_buffers[1..]
-                .iter()
-                .map(std::ops::Deref::deref)
-                .map(IoSlice::new),
-        );
-
-        Ok(&storage.0[..])
-    }
 }
 
 /// A connection to an X11 server.
@@ -485,4 +318,171 @@ pub enum DiscardMode {
     DiscardReply,
     /// Ignore any kind of response that this request generates.
     DiscardReplyAndError,
+}
+
+/// Check the request length and use BIG-REQUESTS if necessary.
+///
+/// Users of this library will most likely not want to use this function directly.
+///
+/// This function is used by implementations of `RequestConnection` for sending requests. It
+/// examines the given request buffers and checks that the length field is set correctly.
+///
+/// If the request has more than 2^18 bytes, this function handles using the BIG-REQUESTS
+/// extension. The request is rewritten to include the correct length field. For this case, the
+/// `storage` parameter is needed. This function uses it to store the necessary buffers.
+///
+/// When using this function, it is recommended to allocate the `storage` parameter with
+/// `Default::default()`.
+///
+/// Example usage:
+/// ```
+/// use std::io::IoSlice;
+/// use std::convert::TryFrom;
+/// use x11rb::connection::{BufWithFds, RequestConnection, SequenceNumber, compute_length_field};
+/// use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
+/// use x11rb::errors::{ParseError, ConnectionError};
+/// use x11rb::utils::RawFdContainer;
+///
+/// struct MyConnection();
+///
+/// impl RequestConnection for MyConnection {
+///     type Buf = Vec<u8>;
+///
+///     // [snip, other functions here]
+///     # fn discard_reply(&self, sequence: SequenceNumber,
+///     #                  kind: x11rb::connection::RequestKind,
+///     #                  mode: x11rb::connection::DiscardMode) {
+///     #    unimplemented!()
+///     # }
+///     # fn prefetch_extension_information(
+///     #     &self,
+///     #     extension_name: &'static str,
+///     # ) -> Result<(), ConnectionError> {
+///     #     unimplemented!()
+///     # }
+///     # fn extension_information(&self, ext: &'static str)
+///     # -> Result<Option<x11rb::xproto::QueryExtensionReply>, ConnectionError> {
+///     #    unimplemented!()
+///     # }
+///     # fn wait_for_reply_or_error(&self, sequence: SequenceNumber)
+///     # -> Result<Vec<u8>, x11rb::errors::ReplyError<Vec<u8>>> {
+///     #    unimplemented!()
+///     # }
+///     # fn wait_for_reply(&self, sequence: SequenceNumber)
+///     # -> Result<Option<Vec<u8>>, x11rb::errors::ConnectionError> {
+///     #    unimplemented!()
+///     # }
+///     # fn wait_for_reply_with_fds(&self, sequence: SequenceNumber)
+///     # -> Result<BufWithFds<Vec<u8>>, x11rb::errors::ReplyError<Vec<u8>>> {
+///     #    unimplemented!()
+///     # }
+///     # fn check_for_error(&self, sequence: SequenceNumber)
+///     # ->Result<Option<x11rb::x11_utils::GenericError<Vec<u8>>>, ConnectionError> {
+///     #    unimplemented!()
+///     # }
+///     # fn maximum_request_bytes(&self) -> usize {
+///     #    unimplemented!()
+///     # }
+///     # fn prefetch_maximum_request_bytes(&self) {
+///     #    unimplemented!()
+///     # }
+///
+///     fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
+///     -> Result<Cookie<Self, R>, ConnectionError>
+///     where R: for<'a> TryFrom<&'a [u8], Error=ParseError> {
+///         Ok(Cookie::new(self, self.send_request(bufs, fds, true, false)?))
+///     }
+///
+///     fn send_request_with_reply_with_fds<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
+///     -> Result<CookieWithFds<Self, R>, ConnectionError>
+///     where R: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error=ParseError> {
+///         Ok(CookieWithFds::new(self, self.send_request(bufs, fds, true, true)?))
+///     }
+///
+///     fn send_request_without_reply(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
+///     -> Result<VoidCookie<Self>, ConnectionError> {
+///         Ok(VoidCookie::new(self, self.send_request(bufs, fds, false, false)?))
+///     }
+/// }
+///
+/// impl MyConnection {
+///     fn send_request(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>,
+///                     has_reply: bool, reply_has_fds: bool)
+///     -> Result<SequenceNumber, ConnectionError>
+///     {
+///         let mut storage = Default::default();
+///         let bufs = compute_length_field(self, bufs, &mut storage)?;
+///         unimplemented!("Now send bufs and fds to the X11 server");
+///     }
+/// }
+/// ```
+pub fn compute_length_field<'b>(
+    conn: &impl RequestConnection,
+    request_buffers: &'b [IoSlice<'b>],
+    storage: &'b mut (Vec<IoSlice<'b>>, [u8; 8]),
+) -> Result<&'b [IoSlice<'b>], ConnectionError> {
+    // Compute the total length of the request
+    let length: usize = request_buffers.iter().map(|buf| buf.len()).sum();
+    assert_eq!(
+        length % 4,
+        0,
+        "The length of X11 requests must be a multiple of 4, got {}",
+        length
+    );
+    let wire_length = length / 4;
+
+    let first_buf = &request_buffers[0];
+
+    // If the length fits into an u16, just return the request as-is
+    if let Ok(wire_length) = TryInto::<u16>::try_into(wire_length) {
+        // Check that the request contains the correct length field
+        let length_field = u16::from_ne_bytes([first_buf[2], first_buf[3]]);
+        assert_eq!(
+            wire_length, length_field,
+            "Length field contains incorrect value"
+        );
+        return Ok(request_buffers);
+    }
+
+    // Check that the total length is not too large
+    if length > conn.maximum_request_bytes() {
+        return Err(ConnectionError::MaximumRequestLengthExceeded);
+    }
+
+    // Okay, we need to use big requests.
+    let wire_length: u32 = wire_length
+        .try_into()
+        .expect("X11 request larger than 2^34 bytes?!?");
+    let wire_length = wire_length.to_ne_bytes();
+
+    // Now construct the new IoSlices
+
+    // Replacement for the first four bytes of the request
+    storage.1.copy_from_slice(&[
+        // First part of the request
+        first_buf[0],
+        first_buf[1],
+        // length field zero indicates big requests
+        0,
+        0,
+        // New bytes: extended length
+        wire_length[0],
+        wire_length[1],
+        wire_length[2],
+        wire_length[3],
+    ]);
+    storage.0.push(IoSlice::new(&storage.1));
+
+    // The remaining part of the first buffer of the request
+    storage.0.push(IoSlice::new(&first_buf[4..]));
+
+    // and the rest of the request
+    storage.0.extend(
+        request_buffers[1..]
+            .iter()
+            .map(std::ops::Deref::deref)
+            .map(IoSlice::new),
+    );
+
+    Ok(&storage.0[..])
 }
