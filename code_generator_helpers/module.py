@@ -1190,14 +1190,13 @@ class Module(object):
             self.out("}")
         self.out("}")
 
-    def _generate_aux(self, name, request, switch, mask_field, request_function_name):
+    def _generate_aux(self, name, request, switch, mask_field_name, mask_field_type, request_function_name):
         if switch.type.bitcases[0].type.is_case:
             self._emit_switch_type(switch.type, name, [], False)
             self._emit_switch_serialize(name, switch.type)
             self.out("impl %s {", name)
             with Indent(self.out):
-                self.out("fn %s(&self) -> %s {",
-                         mask_field.field_name, self._field_type(mask_field))
+                self.out("fn %s(&self) -> %s {", mask_field_name, mask_field_type)
                 with Indent(self.out):
                     self.out("match self {")
                     with Indent(self.out):
@@ -1237,7 +1236,7 @@ class Module(object):
             self.out.indent("Default::default()")
             self.out("}")
 
-            self.out("fn value_mask(&self) -> %s {", self._field_type(mask_field))
+            self.out("fn value_mask(&self) -> %s {", mask_field_type)
             with Indent(self.out):
                 self.out("let mut mask = 0;")
                 for case in switch.type.bitcases:
@@ -1250,7 +1249,7 @@ class Module(object):
                         field = case.only_field
                         field_name = self._aux_field_name(field)
                     self.out("if self.%s.is_some() {", field_name)
-                    self.out.indent("mask |= Into::<%s>::into(%s::%s);", self._field_type(mask_field),
+                    self.out.indent("mask |= Into::<%s>::into(%s::%s);", mask_field_type,
                                     enum_name, ename_to_rust(expr.lenfield_name))
                     self.out("}")
                 self.out("mask")
