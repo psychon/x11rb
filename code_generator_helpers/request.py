@@ -48,15 +48,15 @@ def handle_switches(module, obj, name, function_name):
         # Hide it from the API and "connect" it to the switch
         mask_field.visible = False
         mask_field.lenfield_for_switch = switch
+
+        mask_field_name = mask_field.field_name
+        mask_field_type = module._field_type(mask_field)
     else:
         # Well, this case is complicated. We handle it as a special case.
-        from collections import namedtuple
-        from xcbgen.xtypes import tcard16
+        mask_field_name = "This should be unused so cause a compiler error if used"
+        mask_field_type = "u16"
 
-        assert name == ('xcb', 'xkb', 'SelectEvents')
-        mask_field = namedtuple('FakeField', 'type field_type')(tcard16, ('uint16_t',))
-
-    module._generate_aux(aux_name, obj, switch, mask_field, function_name)
+    module._generate_aux(aux_name, obj, switch, mask_field_name, mask_field_type, function_name)
     return aux_name
 
 
