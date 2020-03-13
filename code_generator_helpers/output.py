@@ -66,10 +66,20 @@ class Output(object):
             self("%s", line)
 
     def write_file(self, filename):
+        expected = "".join([line.rstrip() + '\n' for line in self._lines])
+
+        # First read the file to check if it already has the right content
+        try:
+            with open(filename, 'r') as target:
+                content = target.read()
+                if content == expected:
+                    return
+        except IOError:
+            # Well, okay... just try to write the file
+            pass
+
         with open(filename, 'w') as target:
-            for line in self._lines:
-                target.write(line.rstrip())
-                target.write('\n')
+            target.write(expected)
 
     def __bool__(self):
         return bool(self._lines)
