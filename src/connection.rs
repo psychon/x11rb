@@ -253,7 +253,7 @@ pub trait RequestConnection {
     /// # Ok(())
     /// # }
     /// ```
-    fn prefetch_maximum_request_bytes(&self) -> Result<(), ConnectionError>;
+    fn prefetch_maximum_request_bytes(&self);
 
     /// The maximum number of bytes that the X11 server accepts in a request.
     fn maximum_request_bytes(&self) -> usize;
@@ -321,7 +321,7 @@ pub trait RequestConnection {
     ///     # fn maximum_request_bytes(&self) -> usize {
     ///     #    unimplemented!()
     ///     # }
-    ///     # fn prefetch_maximum_request_bytes(&self) -> Result<(), ConnectionError> {
+    ///     # fn prefetch_maximum_request_bytes(&self) {
     ///     #    unimplemented!()
     ///     # }
     ///

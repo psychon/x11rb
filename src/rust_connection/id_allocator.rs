@@ -229,7 +229,7 @@ mod test {
             unimplemented!()
         }
 
-        fn prefetch_maximum_request_bytes(&self) -> Result<(), ConnectionError> {
+        fn prefetch_maximum_request_bytes(&self) {
             unimplemented!()
         }
     }

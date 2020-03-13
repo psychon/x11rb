@@ -145,7 +145,7 @@ impl RequestConnection for FakeConnection {
         2usize.pow(19)
     }
 
-    fn prefetch_maximum_request_bytes(&self) -> Result<(), ConnectionError> {
+    fn prefetch_maximum_request_bytes(&self) {
         unimplemented!()
     }
 }

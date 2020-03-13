@@ -384,10 +384,9 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         }
     }
 
-    fn prefetch_maximum_request_bytes(&self) -> Result<(), ConnectionError> {
+    fn prefetch_maximum_request_bytes(&self) {
         let mut max_bytes = self.maximum_request_bytes.lock().unwrap();
         self.prefetch_maximum_request_bytes_impl(&mut max_bytes);
-        Ok(())
     }
 }
 

@@ -460,9 +460,8 @@ impl RequestConnection for XCBConnection {
         4 * unsafe { raw_ffi::xcb_get_maximum_request_length(self.conn.0.as_ptr()) as usize }
     }
 
-    fn prefetch_maximum_request_bytes(&self) -> Result<(), ConnectionError> {
+    fn prefetch_maximum_request_bytes(&self) {
         unsafe { raw_ffi::xcb_prefetch_maximum_request_length(self.conn.0.as_ptr()) };
-        Ok(())
     }
 }
 
