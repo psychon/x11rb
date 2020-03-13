@@ -3,9 +3,9 @@ extern crate x11rb;
 use std::convert::TryFrom;
 
 use x11rb::connection::Connection;
-use x11rb::generated::xproto::*;
 use x11rb::wrapper::ConnectionExt as _;
 use x11rb::x11_utils::{Event, GenericError};
+use x11rb::xproto::*;
 
 fn main() {
     let (conn, screen_num) = x11rb::connect(None).unwrap();

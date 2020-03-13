@@ -5,9 +5,9 @@ use std::marker::PhantomData;
 
 use crate::connection::{BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use crate::errors::{ConnectionError, ParseError, ReplyError};
-use crate::generated::xproto::ListFontsWithInfoReply;
 use crate::utils::RawFdContainer;
 use crate::x11_utils::GenericError;
+use crate::xproto::ListFontsWithInfoReply;
 
 /// A handle to a possible error from the X11 server.
 ///

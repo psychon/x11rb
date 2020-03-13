@@ -5,12 +5,12 @@ use std::convert::TryFrom;
 use std::process::exit;
 
 use x11rb::connection::{Connection as _, RequestConnection as _};
-use x11rb::generated::present;
-use x11rb::generated::xproto::{
+use x11rb::present;
+use x11rb::x11_utils::Event;
+use x11rb::xproto::{
     ConfigureWindowAux, ConnectionExt as _, CreateWindowAux, GeGenericEvent, WindowClass,
     GE_GENERIC_EVENT,
 };
-use x11rb::x11_utils::Event;
 use x11rb::COPY_DEPTH_FROM_PARENT;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

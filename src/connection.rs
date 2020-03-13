@@ -45,9 +45,9 @@ use std::io::IoSlice;
 
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError, ReplyError, ReplyOrIdError};
-use crate::generated::xproto::{QueryExtensionReply, Setup};
 use crate::utils::RawFdContainer;
 use crate::x11_utils::{GenericError, GenericEvent};
+use crate::xproto::{QueryExtensionReply, Setup};
 
 /// Number type used for referring to things that were sent to the server in responses from the
 /// server.
@@ -272,7 +272,7 @@ pub trait RequestConnection {
     ///     #     unimplemented!()
     ///     # }
     ///     # fn extension_information(&self, ext: &'static str)
-    ///     # -> Result<Option<x11rb::generated::xproto::QueryExtensionReply>, ConnectionError> {
+    ///     # -> Result<Option<x11rb::xproto::QueryExtensionReply>, ConnectionError> {
     ///     #    unimplemented!()
     ///     # }
     ///     # fn wait_for_reply_or_error(&self, sequence: SequenceNumber)
@@ -434,7 +434,7 @@ pub trait Connection: RequestConnection {
     /// Generate a new X11 identifier.
     ///
     /// This method can, for example, be used for creating a new window. First, this method is
-    /// called to generate an identifier. Next, `generated::xproto::create_window` can be called to
+    /// called to generate an identifier. Next, `xproto::create_window` can be called to
     /// actually create the window.
     fn generate_id(&self) -> Result<u32, ReplyOrIdError<Self::Buf>>;
 }

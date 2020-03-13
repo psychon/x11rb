@@ -1,6 +1,6 @@
 use x11rb::errors::ParseError;
-use x11rb::generated::xproto::Setup;
 use x11rb::x11_utils::TryParse;
+use x11rb::xproto::Setup;
 
 fn get_setup_data() -> Vec<u8> {
     let mut s = Vec::new();

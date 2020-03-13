@@ -2,7 +2,7 @@
 
 extern crate x11rb;
 
-use x11rb::generated::xproto::{ConnectionExt, FontDraw};
+use x11rb::xproto::{ConnectionExt, FontDraw};
 
 fn main() {
     let (conn, _) = x11rb::connect(None).unwrap();

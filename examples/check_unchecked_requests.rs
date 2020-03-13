@@ -8,9 +8,9 @@
 extern crate x11rb;
 
 use x11rb::connection::Connection;
-use x11rb::generated::xproto::ConnectionExt;
 use x11rb::wrapper::ConnectionExt as _;
 use x11rb::x11_utils::Event;
+use x11rb::xproto::ConnectionExt as _;
 
 const INVALID_WINDOW: u32 = 0;
 

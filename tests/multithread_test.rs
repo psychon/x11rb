@@ -1,10 +1,10 @@
 use std::sync::Arc;
 
 use x11rb::connection::Connection as _;
-use x11rb::generated::xproto::{
+use x11rb::x11_utils::Event as _;
+use x11rb::xproto::{
     ClientMessageData, ClientMessageEvent, ConnectionExt as _, EventMask, CLIENT_MESSAGE_EVENT,
 };
-use x11rb::x11_utils::Event as _;
 
 // Regression test for https://github.com/psychon/x11rb/issues/231
 #[test]
@@ -62,10 +62,8 @@ mod fake_stream {
 
     use x11rb::connection::SequenceNumber;
     use x11rb::errors::ConnectError;
-    use x11rb::generated::xproto::{
-        Setup, CLIENT_MESSAGE_EVENT, GET_INPUT_FOCUS_REQUEST, SEND_EVENT_REQUEST,
-    };
     use x11rb::rust_connection::RustConnection;
+    use x11rb::xproto::{Setup, CLIENT_MESSAGE_EVENT, GET_INPUT_FOCUS_REQUEST, SEND_EVENT_REQUEST};
 
     /// Create a new `RustConnection` connected to a fake stream
     pub(crate) fn connect() -> Result<RustConnection<FakeStreamRead, FakeStreamWrite>, ConnectError>

@@ -5,7 +5,7 @@ use std::collections::{hash_map::Entry as HashMapEntry, HashMap};
 use crate::connection::{RequestConnection, SequenceNumber};
 use crate::cookie::Cookie;
 use crate::errors::{ConnectionError, ReplyError};
-use crate::generated::xproto::{ConnectionExt, QueryExtensionReply};
+use crate::xproto::{ConnectionExt, QueryExtensionReply};
 
 /// Helper for implementing `RequestConnection::extension_information()`.
 ///

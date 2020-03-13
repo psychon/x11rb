@@ -10,8 +10,8 @@ use libc::{mmap, MAP_FAILED, MAP_SHARED, PROT_READ, PROT_WRITE};
 
 use x11rb::connection::Connection;
 use x11rb::errors::{ConnectionError, ReplyError, ReplyOrIdError};
-use x11rb::generated::shm::{self, ConnectionExt as _};
-use x11rb::generated::xproto::{self, ConnectionExt as _, ImageFormat};
+use x11rb::shm::{self, ConnectionExt as _};
+use x11rb::xproto::{self, ConnectionExt as _, ImageFormat};
 
 const TEMP_FILE_CONTENT: [u8; 8] = [0x00, 0x01, 0x02, 0x03, 0xff, 0xfe, 0xfd, 0xfc];
 

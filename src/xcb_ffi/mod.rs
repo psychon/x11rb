@@ -14,7 +14,7 @@ use std::sync::Mutex;
 
 use libc::c_void;
 
-use super::generated::xproto::{QueryExtensionReply, Setup};
+use super::xproto::{QueryExtensionReply, Setup};
 use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 pub use crate::errors::{ConnectError, ConnectionError, ParseError};
@@ -299,7 +299,7 @@ impl XCBConnection {
         let seqno = SequenceNumber::from(seqno); // FIXME: Figure out a way to get the high bytes
 
         // The first byte contains the event type, check for XGE events
-        if (*event & 0x7f) == super::generated::xproto::GE_GENERIC_EVENT {
+        if (*event & 0x7f) == super::xproto::GE_GENERIC_EVENT {
             // Read the length field of the event to get its length
             let length_field = u32::from_ne_bytes([header[4], header[5], header[6], header[7]]);
             let length_field: usize = length_field.try_into()?;
