@@ -3,7 +3,9 @@ use std::convert::TryFrom;
 use std::io::IoSlice;
 use std::ops::Deref;
 
-use x11rb::connection::{BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
+use x11rb::connection::{
+    compute_length_field, BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber,
+};
 use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
 use x11rb::errors::{ConnectionError, ParseError, ReplyError};
 use x11rb::utils::RawFdContainer;
@@ -51,7 +53,7 @@ impl FakeConnection {
         assert_eq!(fds.len(), 0);
 
         let mut storage = Default::default();
-        let bufs = self.compute_length_field(bufs, &mut storage)?;
+        let bufs = compute_length_field(self, bufs, &mut storage)?;
 
         self.0.borrow_mut().push(SavedRequest::new(false, bufs));
         Ok(0)
@@ -143,6 +145,10 @@ impl RequestConnection for FakeConnection {
     fn maximum_request_bytes(&self) -> usize {
         // Must be at least 4 * 2^16 so that we can test BIG-REQUESTS
         2usize.pow(19)
+    }
+
+    fn prefetch_maximum_request_bytes(&self) {
+        unimplemented!()
     }
 }
 
