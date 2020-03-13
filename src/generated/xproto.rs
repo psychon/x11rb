@@ -9113,7 +9113,7 @@ impl GetPropertyReply {
     /// Successfully iterate over the value:
     /// ```
     /// // First, we have to 'invent' a GetPropertyReply.
-    /// let reply = x11rb::generated::xproto::GetPropertyReply {
+    /// let reply = x11rb::xproto::GetPropertyReply {
     ///     response_type: 1,
     ///     format: 8,
     ///     sequence: 0,
@@ -9137,7 +9137,7 @@ impl GetPropertyReply {
     /// The following example shows this.
     /// ```
     /// // First, we have to 'invent' a GetPropertyReply.
-    /// let reply = x11rb::generated::xproto::GetPropertyReply {
+    /// let reply = x11rb::xproto::GetPropertyReply {
     ///     response_type: 1,
     ///     format: 42, // Not allowed in X11, but used for the example
     ///     sequence: 0,
@@ -9169,7 +9169,7 @@ impl GetPropertyReply {
     /// Successfully iterate over the value:
     /// ```
     /// // First, we have to 'invent' a GetPropertyReply.
-    /// let reply = x11rb::generated::xproto::GetPropertyReply {
+    /// let reply = x11rb::xproto::GetPropertyReply {
     ///     response_type: 1,
     ///     format: 16,
     ///     sequence: 0,
@@ -9191,7 +9191,7 @@ impl GetPropertyReply {
     /// The following example shows this.
     /// ```
     /// // First, we have to 'invent' a GetPropertyReply.
-    /// let reply = x11rb::generated::xproto::GetPropertyReply {
+    /// let reply = x11rb::xproto::GetPropertyReply {
     ///     response_type: 1,
     ///     format: 42, // Not allowed in X11, but used for the example
     ///     sequence: 0,
@@ -9223,7 +9223,7 @@ impl GetPropertyReply {
     /// Successfully iterate over the value:
     /// ```
     /// // First, we have to 'invent' a GetPropertyReply.
-    /// let reply = x11rb::generated::xproto::GetPropertyReply {
+    /// let reply = x11rb::xproto::GetPropertyReply {
     ///     response_type: 1,
     ///     format: 32,
     ///     sequence: 0,
@@ -9244,7 +9244,7 @@ impl GetPropertyReply {
     /// The following example shows this.
     /// ```
     /// // First, we have to 'invent' a GetPropertyReply.
-    /// let reply = x11rb::generated::xproto::GetPropertyReply {
+    /// let reply = x11rb::xproto::GetPropertyReply {
     ///     response_type: 1,
     ///     format: 42, // Not allowed in X11, but used for the example
     ///     sequence: 0,

@@ -8,8 +8,8 @@ use std::process::exit;
 
 use x11rb::connection::Connection;
 use x11rb::errors::{ReplyError, ReplyOrIdError};
-use x11rb::generated::xproto::*;
 use x11rb::x11_utils::{Event, GenericEvent};
+use x11rb::xproto::*;
 use x11rb::COPY_DEPTH_FROM_PARENT;
 
 const TITLEBAR_HEIGHT: u16 = 20;

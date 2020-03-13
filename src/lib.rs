@@ -42,7 +42,7 @@
 //! For example, here is how to create a new window with x11rb:
 //! ```no_run
 //! use x11rb::connection::Connection;
-//! use x11rb::generated::xproto::*;
+//! use x11rb::xproto::*;
 //! use x11rb::errors::ReplyOrIdError;
 //! use x11rb::COPY_DEPTH_FROM_PARENT;
 //!
@@ -107,10 +107,10 @@ pub mod cookie;
 pub mod errors;
 pub mod extension_information;
 pub mod rust_connection;
+pub mod wrapper;
 
 #[rustfmt::skip]
-pub mod generated;
-pub mod wrapper;
+mod generated;
 
 use connection::Connection;
 use errors::ConnectError;

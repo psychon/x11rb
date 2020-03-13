@@ -6,8 +6,8 @@ use std::io::{ErrorKind, IoSlice, Read, Write};
 
 use crate::connection::{DiscardMode, RequestKind, SequenceNumber};
 use crate::errors::{ConnectError, ParseError};
-use crate::generated::xproto::{Setup, SetupRequest, GET_INPUT_FOCUS_REQUEST};
 use crate::x11_utils::{GenericEvent, Serialize};
+use crate::xproto::{Setup, SetupRequest, GET_INPUT_FOCUS_REQUEST};
 
 #[derive(Debug, Clone)]
 pub(crate) enum PollReply {
@@ -235,7 +235,7 @@ where
     // reply, an event, or an error. All of these have a u16 sequence number in bytes 2 and 3...
     // except for KeymapNotify events.
     fn extract_sequence_number(&mut self, buffer: &[u8]) -> Option<SequenceNumber> {
-        use crate::generated::xproto::KEYMAP_NOTIFY_EVENT;
+        use crate::xproto::KEYMAP_NOTIFY_EVENT;
         if buffer[0] == KEYMAP_NOTIFY_EVENT {
             return None;
         }
@@ -423,8 +423,8 @@ mod test {
     use super::{read_setup, ConnectionInner};
     use crate::connection::RequestKind;
     use crate::errors::ConnectError;
-    use crate::generated::xproto::{Setup, SetupAuthenticate, SetupFailed};
     use crate::x11_utils::Serialize;
+    use crate::xproto::{Setup, SetupAuthenticate, SetupFailed};
 
     #[test]
     fn read_setup_success() {

@@ -2,8 +2,8 @@
 
 use std::error::Error;
 
-use crate::generated::xproto::{SetupAuthenticate, SetupFailed};
 use crate::x11_utils::{Event as _, GenericError};
+use crate::xproto::{SetupAuthenticate, SetupFailed};
 
 /// An error occurred while parsing some data
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]

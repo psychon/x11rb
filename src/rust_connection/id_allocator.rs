@@ -1,6 +1,6 @@
 use crate::connection::RequestConnection;
 use crate::errors::{ConnectError, ReplyOrIdError};
-use crate::generated::xc_misc::{self, ConnectionExt as _};
+use crate::xc_misc::{self, ConnectionExt as _};
 
 /// An allocator for X11 IDs.
 ///
@@ -77,9 +77,9 @@ mod test {
     };
     use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
     use crate::errors::{ConnectionError, ParseError, ReplyError};
-    use crate::generated::xproto::QueryExtensionReply;
     use crate::utils::RawFdContainer;
     use crate::x11_utils::GenericError;
+    use crate::xproto::QueryExtensionReply;
 
     use super::IDAllocator;
 

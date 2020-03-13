@@ -4,13 +4,13 @@ use std::convert::{TryFrom, TryInto};
 use std::io::{BufReader, BufWriter, IoSlice, Read, Write};
 use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 
+use crate::bigreq::ConnectionExt as _;
 use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 pub use crate::errors::{ConnectError, ConnectionError, ParseError};
 use crate::extension_information::ExtensionInformation;
-use crate::generated::bigreq::ConnectionExt as _;
-use crate::generated::xproto::{QueryExtensionReply, Setup};
 use crate::utils::RawFdContainer;
+use crate::xproto::{QueryExtensionReply, Setup};
 
 mod id_allocator;
 mod inner;
@@ -403,7 +403,7 @@ fn read_packet(read: &mut impl Read) -> Result<Vec<u8>, std::io::Error> {
     let mut buffer = vec![0; 32];
     read.read_exact(&mut buffer)?;
 
-    use crate::generated::xproto::GE_GENERIC_EVENT;
+    use crate::xproto::GE_GENERIC_EVENT;
     const REPLY: u8 = 1;
     const SENT_GE_GENERIC_EVENT: u8 = GE_GENERIC_EVENT | 0x80;
     let extra_length = match buffer[0] {

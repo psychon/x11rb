@@ -3,6 +3,8 @@
 Breaking changes:
 * The `vendor-xcb-proto` feature flag is no longer available. The included
   xcb-proto is now always used.
+* The generated code is accessed directly without going through the `generated`
+  module (e.g., `x11rb::generated::xproto` is now `x11rb::xproto`).
 
 # Version 0.4.1 (2020-03-12)
 

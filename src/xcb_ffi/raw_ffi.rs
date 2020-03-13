@@ -126,8 +126,8 @@ mod mock {
     use libc::{c_char, c_int, c_uint, c_void};
 
     use super::{iovec, xcb_connection_t, xcb_protocol_request_t, xcb_void_cookie_t};
-    use crate::generated::xproto::Setup;
     use crate::x11_utils::Serialize;
+    use crate::xproto::Setup;
 
     #[repr(C)]
     struct ConnectionMock {

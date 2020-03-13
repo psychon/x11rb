@@ -23,9 +23,9 @@ use std::error::Error;
 
 use x11rb::connection::{Connection, SequenceNumber};
 use x11rb::errors::{ConnectionError, ReplyError, ReplyOrIdError};
-use x11rb::generated::xproto::{self, *};
 use x11rb::wrapper::ConnectionExt as _;
 use x11rb::x11_utils::Event;
+use x11rb::xproto::{self, *};
 use x11rb::COPY_DEPTH_FROM_PARENT;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -299,7 +299,7 @@ fn example2() -> Result<(), Box<dyn Error>> {
 // Once we have opened a connection to an X server, we should check some basic information about
 // it: what screens it has, what is the size (width and height) of the screen, how many colors it
 // supports (black and white ? grey scale ?, 256 colors ? more ?), and so on. We get such
-// information from the x11rb::generated::xproto::Screen structure:
+// information from the x11rb::xproto::Screen structure:
 
 #[allow(unused)]
 #[derive(Debug, Clone)]
