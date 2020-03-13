@@ -3,7 +3,9 @@ use std::convert::TryFrom;
 use std::io::IoSlice;
 use std::ops::Deref;
 
-use x11rb::connection::{BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber, compute_length_field};
+use x11rb::connection::{
+    compute_length_field, BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber,
+};
 use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
 use x11rb::errors::{ConnectionError, ParseError, ReplyError};
 use x11rb::utils::RawFdContainer;

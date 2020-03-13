@@ -15,7 +15,9 @@ use std::sync::Mutex;
 use libc::c_void;
 
 use super::xproto::{QueryExtensionReply, Setup};
-use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber, compute_length_field};
+use crate::connection::{
+    compute_length_field, Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber,
+};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 pub use crate::errors::{ConnectError, ConnectionError, ParseError};
 use crate::extension_information::ExtensionInformation;

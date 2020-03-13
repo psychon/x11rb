@@ -5,7 +5,9 @@ use std::io::{BufReader, BufWriter, IoSlice, Read, Write};
 use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 
 use crate::bigreq::{ConnectionExt as _, EnableReply};
-use crate::connection::{Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber, compute_length_field};
+use crate::connection::{
+    compute_length_field, Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber,
+};
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 pub use crate::errors::{ConnectError, ConnectionError, ParseError};
 use crate::extension_information::ExtensionInformation;
@@ -224,7 +226,10 @@ impl<R: Read, W: Write> RustConnection<R, W> {
 
     fn prefetch_maximum_request_bytes_impl(&self, max_bytes: &mut MutexGuard<'_, MaxRequestBytes>) {
         if let MaxRequestBytes::Unknown = **max_bytes {
-            let request = self.bigreq_enable().map(|cookie| cookie.into_sequence_number()).ok();
+            let request = self
+                .bigreq_enable()
+                .map(|cookie| cookie.into_sequence_number())
+                .ok();
             **max_bytes = MaxRequestBytes::Requested(request);
         }
     }
@@ -365,21 +370,22 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
             Requested(seqno) => {
                 let length = seqno
                     // If prefetching the request succeeded, get a cookie
-                    .and_then(|seqno|
-                              Cookie::<_, EnableReply>::new(self, seqno)
-                              // and then get the reply to the request
-                              .reply()
-                              .map(|reply| reply.maximum_request_length)
-                              .ok())
+                    .and_then(|seqno| {
+                        Cookie::<_, EnableReply>::new(self, seqno)
+                            // and then get the reply to the request
+                            .reply()
+                            .map(|reply| reply.maximum_request_length)
+                            .ok()
+                    })
                     // If anything failed (sending the request, getting the reply), use Setup
-                    .unwrap_or(self.setup.maximum_request_length.into())
+                    .unwrap_or_else(|| self.setup.maximum_request_length.into())
                     // Turn the u32 into usize, using the max value in case of overflow
                     .try_into()
                     .unwrap_or(usize::max_value());
                 let length = length * 4;
                 *max_bytes = Known(length);
                 length
-            },
+            }
             Known(length) => length,
         }
     }
