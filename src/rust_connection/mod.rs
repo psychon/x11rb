@@ -364,6 +364,10 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
             Some(length) => length,
         }
     }
+
+    fn prefetch_maximum_request_bytes(&self) -> Result<(), ConnectionError> {
+        unimplemented!()
+    }
 }
 
 impl<R: Read, W: Write> Connection for RustConnection<R, W> {

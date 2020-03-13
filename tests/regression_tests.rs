@@ -144,6 +144,10 @@ impl RequestConnection for FakeConnection {
         // Must be at least 4 * 2^16 so that we can test BIG-REQUESTS
         2usize.pow(19)
     }
+
+    fn prefetch_maximum_request_bytes(&self) -> Result<(), ConnectionError> {
+        unimplemented!()
+    }
 }
 
 #[test]

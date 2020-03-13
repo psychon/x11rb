@@ -159,7 +159,7 @@ pub trait RequestConnection {
     /// Users of this library will most likely not want to use this function directly.
     fn discard_reply(&self, sequence: SequenceNumber, kind: RequestKind, mode: DiscardMode);
 
-    /// Prefetchs information about an extension.
+    /// Prefetches information about an extension.
     ///
     /// If the information of a extension is not cached yet, this function sends a
     /// `QueryExtension` request, but it does not wait for the reply.
@@ -167,7 +167,7 @@ pub trait RequestConnection {
     /// You can use `extension_information()` to get the reply of such request.
     ///
     /// Using this function can help to reduce round-trip latency, but you can use
-    /// `extension_information()` directly without calling this previously function.
+    /// `extension_information()` directly without calling this function first.
     fn prefetch_extension_information(
         &self,
         extension_name: &'static str,
@@ -227,6 +227,33 @@ pub trait RequestConnection {
         &self,
         sequence: SequenceNumber,
     ) -> Result<Option<GenericError<Self::Buf>>, ConnectionError>;
+
+    /// Prefetches the maximum request length.
+    ///
+    /// If the maximum request length is not cached yet, this function sends a `BigRequests::Enable`
+    /// request, but it does not wait for the reply.
+    ///
+    /// You can use `maximum_request_bytes()` to get the result of this request.
+    ///
+    /// Using this function can help to reduce round-trip latency, but you can use
+    /// `maximum_request_bytes()` directly without calling this function first.
+    ///
+    /// Since this uses the `BigRequests` extension, the information about that extension needs to
+    /// available. Otherwise, this has to wait for the reply when calling
+    /// `extension_information()`.
+    ///
+    /// To prefetch the necessary information, you can do the following:
+    /// ```no_run
+    /// use x11rb::bigreq;
+    /// use x11rb::connection::RequestConnection;
+    /// use x11rb::errors::ConnectionError;
+    /// # fn do_it(conn: impl RequestConnection) -> Result<(), ConnectionError> {
+    /// // conn is a RequestConnection
+    /// conn.prefetch_extension_information(bigreq::X11_EXTENSION_NAME)?;
+    /// # Ok(())
+    /// # }
+    /// ```
+    fn prefetch_maximum_request_bytes(&self) -> Result<(), ConnectionError>;
 
     /// The maximum number of bytes that the X11 server accepts in a request.
     fn maximum_request_bytes(&self) -> usize;
@@ -292,6 +319,9 @@ pub trait RequestConnection {
     ///     #    unimplemented!()
     ///     # }
     ///     # fn maximum_request_bytes(&self) -> usize {
+    ///     #    unimplemented!()
+    ///     # }
+    ///     # fn prefetch_maximum_request_bytes(&self) -> Result<(), ConnectionError> {
     ///     #    unimplemented!()
     ///     # }
     ///

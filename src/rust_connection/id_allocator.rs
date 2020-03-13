@@ -228,5 +228,9 @@ mod test {
         fn maximum_request_bytes(&self) -> usize {
             unimplemented!()
         }
+
+        fn prefetch_maximum_request_bytes(&self) -> Result<(), ConnectionError> {
+            unimplemented!()
+        }
     }
 }
