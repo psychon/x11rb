@@ -3,7 +3,7 @@
 My main motivation for writing this library is fun and getting some experience
 with Rust. As such, "there is already a library" does not count.
 
-![Motivation](https://imgs.xkcd.com/comics/standards.png)
+[![Motivation](https://imgs.xkcd.com/comics/standards.png)](https://xkcd.com/927/)
 
 (The image is licensed under a Creative Commons Attribution-NonCommercial 2.5 License)
 
