@@ -2,8 +2,6 @@
 //!
 //! This module is only available when the `allow-unsafe-code` feature is enabled.
 
-#![allow(clippy::cast_ptr_alignment)] // FIXME: Remove this
-
 use std::convert::{TryFrom, TryInto};
 use std::ffi::CStr;
 use std::io::{Error, ErrorKind, IoSlice};
@@ -428,7 +426,8 @@ impl RequestConnection for XCBConnection {
         // Get a pointer to the array of integers where libxcb saved the FD numbers.
         // libxcb saves the list of FDs after the data of the reply. Since the reply's
         // length is encoded in "number of 4 bytes block", the following pointer is aligned
-        // correctly (if malloc() returned an alloced chunk, which it does).
+        // correctly (if malloc() returned an aligned chunk, which it does).
+        #[allow(clippy::cast_ptr_alignment)]
         let fd_ptr = (unsafe { buffer.as_ptr().add(buffer.len()) }) as *const RawFd;
 
         // The number of FDs is in the second byte (= buffer[1]) in all replies.
