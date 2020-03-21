@@ -84,3 +84,136 @@ impl ExtensionInformation {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use std::cell::RefCell;
+    use std::convert::TryFrom;
+    use std::io::IoSlice;
+
+    use crate::connection::{
+        BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber,
+    };
+    use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
+    use crate::errors::{ConnectionError, ParseError, ReplyError};
+    use crate::utils::RawFdContainer;
+    use crate::x11_utils::GenericError;
+    use crate::xproto::QueryExtensionReply;
+
+    use super::ExtensionInformation;
+
+    struct FakeConnection(RefCell<SequenceNumber>);
+
+    impl RequestConnection for FakeConnection {
+        type Buf = Vec<u8>;
+
+        fn send_request_with_reply<R>(
+            &self,
+            _bufs: &[IoSlice<'_>],
+            _fds: Vec<RawFdContainer>,
+        ) -> Result<Cookie<'_, Self, R>, ConnectionError>
+        where
+            R: for<'a> TryFrom<&'a [u8], Error = ParseError>,
+        {
+            Ok(Cookie::new(self, 1))
+        }
+
+        fn send_request_with_reply_with_fds<R>(
+            &self,
+            _bufs: &[IoSlice<'_>],
+            _fds: Vec<RawFdContainer>,
+        ) -> Result<CookieWithFds<'_, Self, R>, ConnectionError>
+        where
+            R: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>,
+        {
+            unimplemented!()
+        }
+
+        fn send_request_without_reply(
+            &self,
+            _bufs: &[IoSlice<'_>],
+            _fds: Vec<RawFdContainer>,
+        ) -> Result<VoidCookie<'_, Self>, ConnectionError> {
+            unimplemented!()
+        }
+
+        fn discard_reply(&self, _sequence: SequenceNumber, _kind: RequestKind, _mode: DiscardMode) {
+            unimplemented!()
+        }
+
+        fn prefetch_extension_information(
+            &self,
+            _extension_name: &'static str,
+        ) -> Result<(), ConnectionError> {
+            unimplemented!();
+        }
+
+        fn extension_information(
+            &self,
+            _extension_name: &'static str,
+        ) -> Result<Option<QueryExtensionReply>, ConnectionError> {
+            unimplemented!()
+        }
+
+        fn wait_for_reply_or_error(
+            &self,
+            sequence: SequenceNumber,
+        ) -> Result<Vec<u8>, ReplyError<Vec<u8>>> {
+            // Code should only ask once for the reply to a request. Check that this is the case
+            // (by requiring monotonically increasing sequence numbers here).
+            let mut last = self.0.borrow_mut();
+            assert!(*last < sequence, "Last sequence number that was awaited was {}, but now {}", *last, sequence);
+            *last = sequence;
+            // Then return an error, because that's what the #[test] below needs.
+            Err(ReplyError::ConnectionError(ConnectionError::UnknownError))
+        }
+
+        fn wait_for_reply(
+            &self,
+            _sequence: SequenceNumber,
+        ) -> Result<Option<Vec<u8>>, ConnectionError> {
+            unimplemented!()
+        }
+
+        fn wait_for_reply_with_fds(
+            &self,
+            _sequence: SequenceNumber,
+        ) -> Result<BufWithFds<Vec<u8>>, ReplyError<Vec<u8>>> {
+            unimplemented!()
+        }
+
+        fn check_for_error(
+            &self,
+            _sequence: SequenceNumber,
+        ) -> Result<Option<GenericError<Vec<u8>>>, ConnectionError> {
+            unimplemented!()
+        }
+
+        fn maximum_request_bytes(&self) -> usize {
+            0
+        }
+
+        fn prefetch_maximum_request_bytes(&self) {
+            unimplemented!()
+        }
+    }
+
+    #[test]
+    fn test_double_await() {
+        let conn = FakeConnection(RefCell::new(0));
+        let mut ext_info = ExtensionInformation::default();
+
+        // Ask for an extension info. FakeConnection will return an error.
+        match ext_info.extension_information(&conn, "whatever") {
+            Err(ConnectionError::UnknownError) => {},
+            r => panic!("Unexpected result: {:?}", r)
+        }
+
+        // Ask again for the extension information. ExtensionInformation should not try to get the
+        // reply again, because that would just hang. Once upon a time, this caused a hang.
+        match ext_info.extension_information(&conn, "whatever") {
+            Err(ConnectionError::UnknownError) => {},
+            r => panic!("Unexpected result: {:?}", r)
+        }
+    }
+}
