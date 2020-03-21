@@ -851,12 +851,14 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericEvent<B>> for GenericEvent {
 }
 impl From<&GenericEvent> for [u8; 32] {
     fn from(input: &GenericEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let extension = input.extension.serialize();
         let sequence = input.sequence.serialize();
         let length = input.length.serialize();
         let evtype = input.evtype.serialize();
         let event = input.event.serialize();
         [
-            input.response_type, input.extension, sequence[0], sequence[1], length[0], length[1], length[2], length[3],
+            response_type[0], extension[0], sequence[0], sequence[1], length[0], length[1], length[2], length[3],
             evtype[0], evtype[1], 0, 0, event[0], event[1], event[2], event[3],
             /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0

@@ -4164,12 +4164,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for KeyboardError {
 }
 impl From<&KeyboardError> for [u8; 32] {
     fn from(input: &KeyboardError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let value = input.value.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], value[0], value[1], value[2], value[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, 0, 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], value[0], value[1], value[2], value[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -9378,12 +9381,22 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for NewKeyboardNotifyEvent {
 }
 impl From<&NewKeyboardNotifyEvent> for [u8; 32] {
     fn from(input: &NewKeyboardNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let xkb_type = input.xkb_type.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
+        let device_id = input.device_id.serialize();
+        let old_device_id = input.old_device_id.serialize();
+        let min_key_code = input.min_key_code.serialize();
+        let max_key_code = input.max_key_code.serialize();
+        let old_min_key_code = input.old_min_key_code.serialize();
+        let old_max_key_code = input.old_max_key_code.serialize();
+        let request_major = input.request_major.serialize();
+        let request_minor = input.request_minor.serialize();
         let changed = input.changed.serialize();
         [
-            input.response_type, input.xkb_type, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            input.device_id, input.old_device_id, input.min_key_code, input.max_key_code, input.old_min_key_code, input.old_max_key_code, input.request_major, input.request_minor,
+            response_type[0], xkb_type[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            device_id[0], old_device_id[0], min_key_code[0], max_key_code[0], old_min_key_code[0], old_max_key_code[0], request_major[0], request_minor[0],
             changed[0], changed[1], 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -9473,15 +9486,35 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for MapNotifyEvent {
 }
 impl From<&MapNotifyEvent> for [u8; 32] {
     fn from(input: &MapNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let xkb_type = input.xkb_type.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
+        let device_id = input.device_id.serialize();
+        let ptr_btn_actions = input.ptr_btn_actions.serialize();
         let changed = input.changed.serialize();
+        let min_key_code = input.min_key_code.serialize();
+        let max_key_code = input.max_key_code.serialize();
+        let first_type = input.first_type.serialize();
+        let n_types = input.n_types.serialize();
+        let first_key_sym = input.first_key_sym.serialize();
+        let n_key_syms = input.n_key_syms.serialize();
+        let first_key_act = input.first_key_act.serialize();
+        let n_key_acts = input.n_key_acts.serialize();
+        let first_key_behavior = input.first_key_behavior.serialize();
+        let n_key_behavior = input.n_key_behavior.serialize();
+        let first_key_explicit = input.first_key_explicit.serialize();
+        let n_key_explicit = input.n_key_explicit.serialize();
+        let first_mod_map_key = input.first_mod_map_key.serialize();
+        let n_mod_map_keys = input.n_mod_map_keys.serialize();
+        let first_v_mod_map_key = input.first_v_mod_map_key.serialize();
+        let n_v_mod_map_keys = input.n_v_mod_map_keys.serialize();
         let virtual_mods = input.virtual_mods.serialize();
         [
-            input.response_type, input.xkb_type, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            input.device_id, input.ptr_btn_actions, changed[0], changed[1], input.min_key_code, input.max_key_code, input.first_type, input.n_types,
-            input.first_key_sym, input.n_key_syms, input.first_key_act, input.n_key_acts, input.first_key_behavior, input.n_key_behavior, input.first_key_explicit, input.n_key_explicit,
-            input.first_mod_map_key, input.n_mod_map_keys, input.first_v_mod_map_key, input.n_v_mod_map_keys, virtual_mods[0], virtual_mods[1], 0, 0
+            response_type[0], xkb_type[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            device_id[0], ptr_btn_actions[0], changed[0], changed[1], min_key_code[0], max_key_code[0], first_type[0], n_types[0],
+            first_key_sym[0], n_key_syms[0], first_key_act[0], n_key_acts[0], first_key_behavior[0], n_key_behavior[0], first_key_explicit[0], n_key_explicit[0],
+            first_mod_map_key[0], n_mod_map_keys[0], first_v_mod_map_key[0], n_v_mod_map_keys[0], virtual_mods[0], virtual_mods[1], 0, 0
         ]
     }
 }
@@ -9568,17 +9601,35 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for StateNotifyEvent {
 }
 impl From<&StateNotifyEvent> for [u8; 32] {
     fn from(input: &StateNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let xkb_type = input.xkb_type.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
+        let device_id = input.device_id.serialize();
+        let mods = input.mods.serialize();
+        let base_mods = input.base_mods.serialize();
+        let latched_mods = input.latched_mods.serialize();
+        let locked_mods = input.locked_mods.serialize();
+        let group = input.group.serialize();
         let base_group = input.base_group.serialize();
         let latched_group = input.latched_group.serialize();
+        let locked_group = input.locked_group.serialize();
+        let compat_state = input.compat_state.serialize();
+        let grab_mods = input.grab_mods.serialize();
+        let compat_grab_mods = input.compat_grab_mods.serialize();
+        let lookup_mods = input.lookup_mods.serialize();
+        let compat_loockup_mods = input.compat_loockup_mods.serialize();
         let ptr_btn_state = input.ptr_btn_state.serialize();
         let changed = input.changed.serialize();
+        let keycode = input.keycode.serialize();
+        let event_type = input.event_type.serialize();
+        let request_major = input.request_major.serialize();
+        let request_minor = input.request_minor.serialize();
         [
-            input.response_type, input.xkb_type, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            input.device_id, input.mods, input.base_mods, input.latched_mods, input.locked_mods, input.group, base_group[0], base_group[1],
-            latched_group[0], latched_group[1], input.locked_group, input.compat_state, input.grab_mods, input.compat_grab_mods, input.lookup_mods, input.compat_loockup_mods,
-            ptr_btn_state[0], ptr_btn_state[1], changed[0], changed[1], input.keycode, input.event_type, input.request_major, input.request_minor
+            response_type[0], xkb_type[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            device_id[0], mods[0], base_mods[0], latched_mods[0], locked_mods[0], group[0], base_group[0], base_group[1],
+            latched_group[0], latched_group[1], locked_group[0], compat_state[0], grab_mods[0], compat_grab_mods[0], lookup_mods[0], compat_loockup_mods[0],
+            ptr_btn_state[0], ptr_btn_state[1], changed[0], changed[1], keycode[0], event_type[0], request_major[0], request_minor[0]
         ]
     }
 }
@@ -9645,16 +9696,24 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ControlsNotifyEvent {
 }
 impl From<&ControlsNotifyEvent> for [u8; 32] {
     fn from(input: &ControlsNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let xkb_type = input.xkb_type.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
+        let device_id = input.device_id.serialize();
+        let num_groups = input.num_groups.serialize();
         let changed_controls = input.changed_controls.serialize();
         let enabled_controls = input.enabled_controls.serialize();
         let enabled_control_changes = input.enabled_control_changes.serialize();
+        let keycode = input.keycode.serialize();
+        let event_type = input.event_type.serialize();
+        let request_major = input.request_major.serialize();
+        let request_minor = input.request_minor.serialize();
         [
-            input.response_type, input.xkb_type, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            input.device_id, input.num_groups, 0, 0, changed_controls[0], changed_controls[1], changed_controls[2], changed_controls[3],
+            response_type[0], xkb_type[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            device_id[0], num_groups[0], 0, 0, changed_controls[0], changed_controls[1], changed_controls[2], changed_controls[3],
             enabled_controls[0], enabled_controls[1], enabled_controls[2], enabled_controls[3], enabled_control_changes[0], enabled_control_changes[1], enabled_control_changes[2], enabled_control_changes[3],
-            input.keycode, input.event_type, input.request_major, input.request_minor, 0, 0, 0, 0
+            keycode[0], event_type[0], request_major[0], request_minor[0], 0, 0, 0, 0
         ]
     }
 }
@@ -9709,13 +9768,16 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for IndicatorStateNotifyEvent {
 }
 impl From<&IndicatorStateNotifyEvent> for [u8; 32] {
     fn from(input: &IndicatorStateNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let xkb_type = input.xkb_type.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
+        let device_id = input.device_id.serialize();
         let state = input.state.serialize();
         let state_changed = input.state_changed.serialize();
         [
-            input.response_type, input.xkb_type, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            input.device_id, 0, 0, 0, state[0], state[1], state[2], state[3],
+            response_type[0], xkb_type[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            device_id[0], 0, 0, 0, state[0], state[1], state[2], state[3],
             state_changed[0], state_changed[1], state_changed[2], state_changed[3], 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -9772,13 +9834,16 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for IndicatorMapNotifyEvent {
 }
 impl From<&IndicatorMapNotifyEvent> for [u8; 32] {
     fn from(input: &IndicatorMapNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let xkb_type = input.xkb_type.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
+        let device_id = input.device_id.serialize();
         let state = input.state.serialize();
         let map_changed = input.map_changed.serialize();
         [
-            input.response_type, input.xkb_type, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            input.device_id, 0, 0, 0, state[0], state[1], state[2], state[3],
+            response_type[0], xkb_type[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            device_id[0], 0, 0, 0, state[0], state[1], state[2], state[3],
             map_changed[0], map_changed[1], map_changed[2], map_changed[3], 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -9856,15 +9921,27 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for NamesNotifyEvent {
 }
 impl From<&NamesNotifyEvent> for [u8; 32] {
     fn from(input: &NamesNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let xkb_type = input.xkb_type.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
+        let device_id = input.device_id.serialize();
         let changed = input.changed.serialize();
+        let first_type = input.first_type.serialize();
+        let n_types = input.n_types.serialize();
+        let first_level_name = input.first_level_name.serialize();
+        let n_level_names = input.n_level_names.serialize();
+        let n_radio_groups = input.n_radio_groups.serialize();
+        let n_key_aliases = input.n_key_aliases.serialize();
+        let changed_group_names = input.changed_group_names.serialize();
         let changed_virtual_mods = input.changed_virtual_mods.serialize();
+        let first_key = input.first_key.serialize();
+        let n_keys = input.n_keys.serialize();
         let changed_indicators = input.changed_indicators.serialize();
         [
-            input.response_type, input.xkb_type, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            input.device_id, 0, changed[0], changed[1], input.first_type, input.n_types, input.first_level_name, input.n_level_names,
-            0, input.n_radio_groups, input.n_key_aliases, input.changed_group_names, changed_virtual_mods[0], changed_virtual_mods[1], input.first_key, input.n_keys,
+            response_type[0], xkb_type[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            device_id[0], 0, changed[0], changed[1], first_type[0], n_types[0], first_level_name[0], n_level_names[0],
+            0, n_radio_groups[0], n_key_aliases[0], changed_group_names[0], changed_virtual_mods[0], changed_virtual_mods[1], first_key[0], n_keys[0],
             changed_indicators[0], changed_indicators[1], changed_indicators[2], changed_indicators[3], 0, 0, 0, 0
         ]
     }
@@ -9923,14 +10000,18 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for CompatMapNotifyEvent {
 }
 impl From<&CompatMapNotifyEvent> for [u8; 32] {
     fn from(input: &CompatMapNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let xkb_type = input.xkb_type.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
+        let device_id = input.device_id.serialize();
+        let changed_groups = input.changed_groups.serialize();
         let first_si = input.first_si.serialize();
         let n_si = input.n_si.serialize();
         let n_total_si = input.n_total_si.serialize();
         [
-            input.response_type, input.xkb_type, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            input.device_id, input.changed_groups, first_si[0], first_si[1], n_si[0], n_si[1], n_total_si[0], n_total_si[1],
+            response_type[0], xkb_type[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            device_id[0], changed_groups[0], first_si[0], first_si[1], n_si[0], n_si[1], n_total_si[0], n_total_si[1],
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -9998,17 +10079,24 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for BellNotifyEvent {
 }
 impl From<&BellNotifyEvent> for [u8; 32] {
     fn from(input: &BellNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let xkb_type = input.xkb_type.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
+        let device_id = input.device_id.serialize();
+        let bell_class = input.bell_class.serialize();
+        let bell_id = input.bell_id.serialize();
+        let percent = input.percent.serialize();
         let pitch = input.pitch.serialize();
         let duration = input.duration.serialize();
         let name = input.name.serialize();
         let window = input.window.serialize();
+        let event_only = input.event_only.serialize();
         [
-            input.response_type, input.xkb_type, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            input.device_id, input.bell_class, input.bell_id, input.percent, pitch[0], pitch[1], duration[0], duration[1],
+            response_type[0], xkb_type[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            device_id[0], bell_class[0], bell_id[0], percent[0], pitch[0], pitch[1], duration[0], duration[1],
             name[0], name[1], name[2], name[3], window[0], window[1], window[2], window[3],
-            u8::from(input.event_only), 0, 0, 0, 0, 0, 0, 0
+            event_only[0], 0, 0, 0, 0, 0, 0, 0
         ]
     }
 }
@@ -10087,11 +10175,19 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ActionMessageEvent {
 }
 impl From<&ActionMessageEvent> for [u8; 32] {
     fn from(input: &ActionMessageEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let xkb_type = input.xkb_type.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
+        let device_id = input.device_id.serialize();
+        let keycode = input.keycode.serialize();
+        let press = input.press.serialize();
+        let key_event_follows = input.key_event_follows.serialize();
+        let mods = input.mods.serialize();
+        let group = input.group.serialize();
         [
-            input.response_type, input.xkb_type, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            input.device_id, input.keycode, u8::from(input.press), u8::from(input.key_event_follows), input.mods, input.group, input.message[0], input.message[1],
+            response_type[0], xkb_type[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            device_id[0], keycode[0], press[0], key_event_follows[0], mods[0], group[0], input.message[0], input.message[1],
             input.message[2], input.message[3], input.message[4], input.message[5], input.message[6], input.message[7], 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -10151,14 +10247,18 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for AccessXNotifyEvent {
 }
 impl From<&AccessXNotifyEvent> for [u8; 32] {
     fn from(input: &AccessXNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let xkb_type = input.xkb_type.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
+        let device_id = input.device_id.serialize();
+        let keycode = input.keycode.serialize();
         let detailt = input.detailt.serialize();
         let slow_keys_delay = input.slow_keys_delay.serialize();
         let debounce_delay = input.debounce_delay.serialize();
         [
-            input.response_type, input.xkb_type, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            input.device_id, input.keycode, detailt[0], detailt[1], slow_keys_delay[0], slow_keys_delay[1], debounce_delay[0], debounce_delay[1],
+            response_type[0], xkb_type[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            device_id[0], keycode[0], detailt[0], detailt[1], slow_keys_delay[0], slow_keys_delay[1], debounce_delay[0], debounce_delay[1],
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -10229,20 +10329,25 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ExtensionDeviceNotifyEvent {
 }
 impl From<&ExtensionDeviceNotifyEvent> for [u8; 32] {
     fn from(input: &ExtensionDeviceNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let xkb_type = input.xkb_type.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
+        let device_id = input.device_id.serialize();
         let reason = input.reason.serialize();
         let led_class = input.led_class.serialize();
         let led_id = input.led_id.serialize();
         let leds_defined = input.leds_defined.serialize();
         let led_state = input.led_state.serialize();
+        let first_button = input.first_button.serialize();
+        let n_buttons = input.n_buttons.serialize();
         let supported = input.supported.serialize();
         let unsupported = input.unsupported.serialize();
         [
-            input.response_type, input.xkb_type, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            input.device_id, 0, reason[0], reason[1], led_class[0], led_class[1], led_id[0], led_id[1],
+            response_type[0], xkb_type[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            device_id[0], 0, reason[0], reason[1], led_class[0], led_class[1], led_id[0], led_id[1],
             leds_defined[0], leds_defined[1], leds_defined[2], leds_defined[3], led_state[0], led_state[1], led_state[2], led_state[3],
-            input.first_button, input.n_buttons, supported[0], supported[1], unsupported[0], unsupported[1], 0, 0
+            first_button[0], n_buttons[0], supported[0], supported[1], unsupported[0], unsupported[1], 0, 0
         ]
     }
 }

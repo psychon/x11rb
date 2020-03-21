@@ -718,11 +718,6 @@ class Module(object):
                                              field_name, i, field_name, i)
                                     for n in range(field.type.size):
                                         parts.append("%s_%d[%d]" % (field_name, i, n))
-                        elif field.type.size == 1:
-                            if is_bool(field.type):
-                                parts.append("u8::from(input.%s)" % field_name)
-                            else:
-                                parts.append("input.%s" % field_name)
                         else:
                             self.out("let %s = input.%s.serialize();", field_name, field_name)
                             for i in range(field.type.size):

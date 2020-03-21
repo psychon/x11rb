@@ -445,10 +445,12 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadContextError {
 }
 impl From<&BadContextError> for [u8; 32] {
     fn from(input: &BadContextError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let invalid_record = input.invalid_record.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], invalid_record[0], invalid_record[1], invalid_record[2], invalid_record[3],
+            response_type[0], error_code[0], sequence[0], sequence[1], invalid_record[0], invalid_record[1], invalid_record[2], invalid_record[3],
             /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0

@@ -227,6 +227,8 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for NotifyEvent {
 }
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let shape_kind = input.shape_kind.serialize();
         let sequence = input.sequence.serialize();
         let affected_window = input.affected_window.serialize();
         let extents_x = input.extents_x.serialize();
@@ -234,10 +236,11 @@ impl From<&NotifyEvent> for [u8; 32] {
         let extents_width = input.extents_width.serialize();
         let extents_height = input.extents_height.serialize();
         let server_time = input.server_time.serialize();
+        let shaped = input.shaped.serialize();
         [
-            input.response_type, input.shape_kind, sequence[0], sequence[1], affected_window[0], affected_window[1], affected_window[2], affected_window[3],
+            response_type[0], shape_kind[0], sequence[0], sequence[1], affected_window[0], affected_window[1], affected_window[2], affected_window[3],
             extents_x[0], extents_x[1], extents_y[0], extents_y[1], extents_width[0], extents_width[1], extents_height[0], extents_height[1],
-            server_time[0], server_time[1], server_time[2], server_time[3], u8::from(input.shaped), 0, 0, 0,
+            server_time[0], server_time[1], server_time[2], server_time[3], shaped[0], 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
     }

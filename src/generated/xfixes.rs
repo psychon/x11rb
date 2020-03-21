@@ -496,6 +496,8 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for SelectionNotifyEvent {
 }
 impl From<&SelectionNotifyEvent> for [u8; 32] {
     fn from(input: &SelectionNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let subtype = input.subtype.serialize();
         let sequence = input.sequence.serialize();
         let window = input.window.serialize();
         let owner = input.owner.serialize();
@@ -503,7 +505,7 @@ impl From<&SelectionNotifyEvent> for [u8; 32] {
         let timestamp = input.timestamp.serialize();
         let selection_timestamp = input.selection_timestamp.serialize();
         [
-            input.response_type, input.subtype, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
+            response_type[0], subtype[0], sequence[0], sequence[1], window[0], window[1], window[2], window[3],
             owner[0], owner[1], owner[2], owner[3], selection[0], selection[1], selection[2], selection[3],
             timestamp[0], timestamp[1], timestamp[2], timestamp[3], selection_timestamp[0], selection_timestamp[1], selection_timestamp[2], selection_timestamp[3],
             0, 0, 0, 0, 0, 0, 0, 0
@@ -714,13 +716,15 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for CursorNotifyEvent {
 }
 impl From<&CursorNotifyEvent> for [u8; 32] {
     fn from(input: &CursorNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let subtype = input.subtype.serialize();
         let sequence = input.sequence.serialize();
         let window = input.window.serialize();
         let cursor_serial = input.cursor_serial.serialize();
         let timestamp = input.timestamp.serialize();
         let name = input.name.serialize();
         [
-            input.response_type, input.subtype, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
+            response_type[0], subtype[0], sequence[0], sequence[1], window[0], window[1], window[2], window[3],
             cursor_serial[0], cursor_serial[1], cursor_serial[2], cursor_serial[3], timestamp[0], timestamp[1], timestamp[2], timestamp[3],
             name[0], name[1], name[2], name[3], 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -859,9 +863,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadRegionError {
 }
 impl From<&BadRegionError> for [u8; 32] {
     fn from(input: &BadRegionError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0

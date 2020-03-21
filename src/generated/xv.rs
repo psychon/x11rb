@@ -1187,9 +1187,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadPortError {
 }
 impl From<&BadPortError> for [u8; 32] {
     fn from(input: &BadPortError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -1237,9 +1239,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadEncodingError {
 }
 impl From<&BadEncodingError> for [u8; 32] {
     fn from(input: &BadEncodingError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -1287,9 +1291,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadControlError {
 }
 impl From<&BadControlError> for [u8; 32] {
     fn from(input: &BadControlError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -1343,12 +1349,14 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for VideoNotifyEvent {
 }
 impl From<&VideoNotifyEvent> for [u8; 32] {
     fn from(input: &VideoNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let reason = input.reason.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let drawable = input.drawable.serialize();
         let port = input.port.serialize();
         [
-            input.response_type, input.reason, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            response_type[0], reason[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
             drawable[0], drawable[1], drawable[2], drawable[3], port[0], port[1], port[2], port[3],
             /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -1403,13 +1411,14 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for PortNotifyEvent {
 }
 impl From<&PortNotifyEvent> for [u8; 32] {
     fn from(input: &PortNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let port = input.port.serialize();
         let attribute = input.attribute.serialize();
         let value = input.value.serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            response_type[0], 0, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
             port[0], port[1], port[2], port[3], attribute[0], attribute[1], attribute[2], attribute[3],
             value[0], value[1], value[2], value[3], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0

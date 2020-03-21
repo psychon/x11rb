@@ -565,12 +565,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for CounterError {
 }
 impl From<&CounterError> for [u8; 32] {
     fn from(input: &CounterError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let bad_counter = input.bad_counter.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], bad_counter[0], bad_counter[1], bad_counter[2], bad_counter[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, /* trailing padding */ 0, 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], bad_counter[0], bad_counter[1], bad_counter[2], bad_counter[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], /* trailing padding */ 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -623,12 +626,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for AlarmError {
 }
 impl From<&AlarmError> for [u8; 32] {
     fn from(input: &AlarmError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let bad_alarm = input.bad_alarm.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], bad_alarm[0], bad_alarm[1], bad_alarm[2], bad_alarm[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, /* trailing padding */ 0, 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], bad_alarm[0], bad_alarm[1], bad_alarm[2], bad_alarm[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], /* trailing padding */ 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -1593,17 +1599,20 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for CounterNotifyEvent {
 }
 impl From<&CounterNotifyEvent> for [u8; 32] {
     fn from(input: &CounterNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let kind = input.kind.serialize();
         let sequence = input.sequence.serialize();
         let counter = input.counter.serialize();
         let wait_value = input.wait_value.serialize();
         let counter_value = input.counter_value.serialize();
         let timestamp = input.timestamp.serialize();
         let count = input.count.serialize();
+        let destroyed = input.destroyed.serialize();
         [
-            input.response_type, input.kind, sequence[0], sequence[1], counter[0], counter[1], counter[2], counter[3],
+            response_type[0], kind[0], sequence[0], sequence[1], counter[0], counter[1], counter[2], counter[3],
             wait_value[0], wait_value[1], wait_value[2], wait_value[3], wait_value[4], wait_value[5], wait_value[6], wait_value[7],
             counter_value[0], counter_value[1], counter_value[2], counter_value[3], counter_value[4], counter_value[5], counter_value[6], counter_value[7],
-            timestamp[0], timestamp[1], timestamp[2], timestamp[3], count[0], count[1], u8::from(input.destroyed), 0
+            timestamp[0], timestamp[1], timestamp[2], timestamp[3], count[0], count[1], destroyed[0], 0
         ]
     }
 }
@@ -1659,16 +1668,19 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for AlarmNotifyEvent {
 }
 impl From<&AlarmNotifyEvent> for [u8; 32] {
     fn from(input: &AlarmNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let kind = input.kind.serialize();
         let sequence = input.sequence.serialize();
         let alarm = input.alarm.serialize();
         let counter_value = input.counter_value.serialize();
         let alarm_value = input.alarm_value.serialize();
         let timestamp = input.timestamp.serialize();
+        let state = input.state.serialize();
         [
-            input.response_type, input.kind, sequence[0], sequence[1], alarm[0], alarm[1], alarm[2], alarm[3],
+            response_type[0], kind[0], sequence[0], sequence[1], alarm[0], alarm[1], alarm[2], alarm[3],
             counter_value[0], counter_value[1], counter_value[2], counter_value[3], counter_value[4], counter_value[5], counter_value[6], counter_value[7],
             alarm_value[0], alarm_value[1], alarm_value[2], alarm_value[3], alarm_value[4], alarm_value[5], alarm_value[6], alarm_value[7],
-            timestamp[0], timestamp[1], timestamp[2], timestamp[3], input.state, 0, 0, 0
+            timestamp[0], timestamp[1], timestamp[2], timestamp[3], state[0], 0, 0, 0
         ]
     }
 }

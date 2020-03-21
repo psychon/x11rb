@@ -735,14 +735,18 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for NotifyEvent {
 }
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let state = input.state.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let root = input.root.serialize();
         let window = input.window.serialize();
+        let kind = input.kind.serialize();
+        let forced = input.forced.serialize();
         [
-            input.response_type, input.state, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            response_type[0], state[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
             root[0], root[1], root[2], root[3], window[0], window[1], window[2], window[3],
-            input.kind, u8::from(input.forced), 0, 0, 0, 0, 0, 0,
+            kind[0], forced[0], 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
     }

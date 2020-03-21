@@ -148,9 +148,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadDamageError {
 }
 impl From<&BadDamageError> for [u8; 32] {
     fn from(input: &BadDamageError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -391,6 +393,8 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for NotifyEvent {
 }
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let level = input.level.serialize();
         let sequence = input.sequence.serialize();
         let drawable = input.drawable.serialize();
         let damage = input.damage.serialize();
@@ -398,7 +402,7 @@ impl From<&NotifyEvent> for [u8; 32] {
         let area = input.area.serialize();
         let geometry = input.geometry.serialize();
         [
-            input.response_type, input.level, sequence[0], sequence[1], drawable[0], drawable[1], drawable[2], drawable[3],
+            response_type[0], level[0], sequence[0], sequence[1], drawable[0], drawable[1], drawable[2], drawable[3],
             damage[0], damage[1], damage[2], damage[3], timestamp[0], timestamp[1], timestamp[2], timestamp[3],
             area[0], area[1], area[2], area[3], area[4], area[5], area[6], area[7],
             geometry[0], geometry[1], geometry[2], geometry[3], geometry[4], geometry[5], geometry[6], geometry[7]

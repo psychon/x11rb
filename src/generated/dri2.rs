@@ -1208,6 +1208,7 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for BufferSwapCompleteEvent {
 }
 impl From<&BufferSwapCompleteEvent> for [u8; 32] {
     fn from(input: &BufferSwapCompleteEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let event_type = input.event_type.serialize();
         let drawable = input.drawable.serialize();
@@ -1217,7 +1218,7 @@ impl From<&BufferSwapCompleteEvent> for [u8; 32] {
         let msc_lo = input.msc_lo.serialize();
         let sbc = input.sbc.serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], event_type[0], event_type[1], 0, 0,
+            response_type[0], 0, sequence[0], sequence[1], event_type[0], event_type[1], 0, 0,
             drawable[0], drawable[1], drawable[2], drawable[3], ust_hi[0], ust_hi[1], ust_hi[2], ust_hi[3],
             ust_lo[0], ust_lo[1], ust_lo[2], ust_lo[3], msc_hi[0], msc_hi[1], msc_hi[2], msc_hi[3],
             msc_lo[0], msc_lo[1], msc_lo[2], msc_lo[3], sbc[0], sbc[1], sbc[2], sbc[3]
@@ -1266,10 +1267,11 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for InvalidateBuffersEvent {
 }
 impl From<&InvalidateBuffersEvent> for [u8; 32] {
     fn from(input: &InvalidateBuffersEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let drawable = input.drawable.serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], drawable[0], drawable[1], drawable[2], drawable[3],
+            response_type[0], 0, sequence[0], sequence[1], drawable[0], drawable[1], drawable[2], drawable[3],
             /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
