@@ -403,9 +403,9 @@ impl Serialize for Systemcounter {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Trigger {
     pub counter: COUNTER,
-    pub wait_type: u32,
+    pub wait_type: VALUETYPE,
     pub wait_value: Int64,
-    pub test_type: u32,
+    pub test_type: TESTTYPE,
 }
 impl TryParse for Trigger {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -413,6 +413,8 @@ impl TryParse for Trigger {
         let (wait_type, remaining) = u32::try_parse(remaining)?;
         let (wait_value, remaining) = Int64::try_parse(remaining)?;
         let (test_type, remaining) = u32::try_parse(remaining)?;
+        let wait_type = wait_type.try_into()?;
+        let test_type = test_type.try_into()?;
         let result = Trigger { counter, wait_type, wait_value, test_type };
         Ok((result, remaining))
     }
@@ -427,9 +429,9 @@ impl Serialize for Trigger {
     type Bytes = [u8; 20];
     fn serialize(&self) -> Self::Bytes {
         let counter_bytes = self.counter.serialize();
-        let wait_type_bytes = self.wait_type.serialize();
+        let wait_type_bytes = Into::<u32>::into(self.wait_type).serialize();
         let wait_value_bytes = self.wait_value.serialize();
-        let test_type_bytes = self.test_type.serialize();
+        let test_type_bytes = Into::<u32>::into(self.test_type).serialize();
         [
             counter_bytes[0],
             counter_bytes[1],
@@ -456,9 +458,9 @@ impl Serialize for Trigger {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(20);
         self.counter.serialize_into(bytes);
-        self.wait_type.serialize_into(bytes);
+        Into::<u32>::into(self.wait_type).serialize_into(bytes);
         self.wait_value.serialize_into(bytes);
-        self.test_type.serialize_into(bytes);
+        Into::<u32>::into(self.test_type).serialize_into(bytes);
     }
 }
 
@@ -1264,7 +1266,7 @@ pub struct QueryAlarmReply {
     pub trigger: Trigger,
     pub delta: Int64,
     pub events: bool,
-    pub state: u8,
+    pub state: ALARMSTATE,
 }
 impl QueryAlarmReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1277,6 +1279,7 @@ impl QueryAlarmReply {
         let (events, remaining) = bool::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let state = state.try_into()?;
         let result = QueryAlarmReply { response_type, sequence, length, trigger, delta, events, state };
         Ok((result, remaining))
     }
@@ -1633,7 +1636,7 @@ pub struct AlarmNotifyEvent {
     pub counter_value: Int64,
     pub alarm_value: Int64,
     pub timestamp: TIMESTAMP,
-    pub state: u8,
+    pub state: ALARMSTATE,
 }
 impl AlarmNotifyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1646,6 +1649,7 @@ impl AlarmNotifyEvent {
         let (timestamp, remaining) = TIMESTAMP::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let state = state.try_into()?;
         let result = AlarmNotifyEvent { response_type, kind, sequence, alarm, counter_value, alarm_value, timestamp, state };
         Ok((result, remaining))
     }
@@ -1675,7 +1679,7 @@ impl From<&AlarmNotifyEvent> for [u8; 32] {
         let counter_value = input.counter_value.serialize();
         let alarm_value = input.alarm_value.serialize();
         let timestamp = input.timestamp.serialize();
-        let state = input.state.serialize();
+        let state = Into::<u8>::into(input.state).serialize();
         [
             response_type[0], kind[0], sequence[0], sequence[1], alarm[0], alarm[1], alarm[2], alarm[3],
             counter_value[0], counter_value[1], counter_value[2], counter_value[3], counter_value[4], counter_value[5], counter_value[6], counter_value[7],

@@ -424,7 +424,7 @@ mod test {
     use crate::connection::RequestKind;
     use crate::errors::ConnectError;
     use crate::x11_utils::Serialize;
-    use crate::xproto::{Setup, SetupAuthenticate, SetupFailed};
+    use crate::xproto::{ImageOrder, Setup, SetupAuthenticate, SetupFailed};
 
     #[test]
     fn read_setup_success() {
@@ -438,8 +438,8 @@ mod test {
             resource_id_mask: 0,
             motion_buffer_size: 0,
             maximum_request_length: 0,
-            image_byte_order: 0,
-            bitmap_format_bit_order: 0,
+            image_byte_order: ImageOrder::LSBFirst,
+            bitmap_format_bit_order: ImageOrder::LSBFirst,
             bitmap_format_scanline_unit: 0,
             bitmap_format_scanline_pad: 0,
             min_keycode: 0,

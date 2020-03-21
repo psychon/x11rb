@@ -368,7 +368,7 @@ impl TryFrom<u32> for VisualClass {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Visualtype {
     pub visual_id: VISUALID,
-    pub class: u8,
+    pub class: VisualClass,
     pub bits_per_rgb_value: u8,
     pub colormap_entries: u16,
     pub red_mask: u32,
@@ -385,6 +385,7 @@ impl TryParse for Visualtype {
         let (green_mask, remaining) = u32::try_parse(remaining)?;
         let (blue_mask, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let class = class.try_into()?;
         let result = Visualtype { visual_id, class, bits_per_rgb_value, colormap_entries, red_mask, green_mask, blue_mask };
         Ok((result, remaining))
     }
@@ -399,7 +400,7 @@ impl Serialize for Visualtype {
     type Bytes = [u8; 24];
     fn serialize(&self) -> Self::Bytes {
         let visual_id_bytes = self.visual_id.serialize();
-        let class_bytes = self.class.serialize();
+        let class_bytes = Into::<u8>::into(self.class).serialize();
         let bits_per_rgb_value_bytes = self.bits_per_rgb_value.serialize();
         let colormap_entries_bytes = self.colormap_entries.serialize();
         let red_mask_bytes = self.red_mask.serialize();
@@ -435,7 +436,7 @@ impl Serialize for Visualtype {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(24);
         self.visual_id.serialize_into(bytes);
-        self.class.serialize_into(bytes);
+        Into::<u8>::into(self.class).serialize_into(bytes);
         self.bits_per_rgb_value.serialize_into(bytes);
         self.colormap_entries.serialize_into(bytes);
         self.red_mask.serialize_into(bytes);
@@ -667,7 +668,7 @@ pub struct Screen {
     pub min_installed_maps: u16,
     pub max_installed_maps: u16,
     pub root_visual: VISUALID,
-    pub backing_stores: u8,
+    pub backing_stores: BackingStore,
     pub save_unders: bool,
     pub root_depth: u8,
     pub allowed_depths: Vec<Depth>,
@@ -691,6 +692,7 @@ impl TryParse for Screen {
         let (root_depth, remaining) = u8::try_parse(remaining)?;
         let (allowed_depths_len, remaining) = u8::try_parse(remaining)?;
         let (allowed_depths, remaining) = crate::x11_utils::parse_list::<Depth>(remaining, allowed_depths_len as usize)?;
+        let backing_stores = backing_stores.try_into()?;
         let result = Screen { root, default_colormap, white_pixel, black_pixel, current_input_masks, width_in_pixels, height_in_pixels, width_in_millimeters, height_in_millimeters, min_installed_maps, max_installed_maps, root_visual, backing_stores, save_unders, root_depth, allowed_depths };
         Ok((result, remaining))
     }
@@ -722,7 +724,7 @@ impl Serialize for Screen {
         self.min_installed_maps.serialize_into(bytes);
         self.max_installed_maps.serialize_into(bytes);
         self.root_visual.serialize_into(bytes);
-        self.backing_stores.serialize_into(bytes);
+        Into::<u8>::into(self.backing_stores).serialize_into(bytes);
         self.save_unders.serialize_into(bytes);
         self.root_depth.serialize_into(bytes);
         let allowed_depths_len = self.allowed_depths.len() as u8;
@@ -951,8 +953,8 @@ pub struct Setup {
     pub resource_id_mask: u32,
     pub motion_buffer_size: u32,
     pub maximum_request_length: u16,
-    pub image_byte_order: u8,
-    pub bitmap_format_bit_order: u8,
+    pub image_byte_order: ImageOrder,
+    pub bitmap_format_bit_order: ImageOrder,
     pub bitmap_format_scanline_unit: u8,
     pub bitmap_format_scanline_pad: u8,
     pub min_keycode: KEYCODE,
@@ -991,6 +993,8 @@ impl TryParse for Setup {
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
         let (pixmap_formats, remaining) = crate::x11_utils::parse_list::<Format>(remaining, pixmap_formats_len as usize)?;
         let (roots, remaining) = crate::x11_utils::parse_list::<Screen>(remaining, roots_len as usize)?;
+        let image_byte_order = image_byte_order.try_into()?;
+        let bitmap_format_bit_order = bitmap_format_bit_order.try_into()?;
         let result = Setup { status, protocol_major_version, protocol_minor_version, length, release_number, resource_id_base, resource_id_mask, motion_buffer_size, maximum_request_length, image_byte_order, bitmap_format_bit_order, bitmap_format_scanline_unit, bitmap_format_scanline_pad, min_keycode, max_keycode, vendor, pixmap_formats, roots };
         Ok((result, remaining))
     }
@@ -1026,8 +1030,8 @@ impl Serialize for Setup {
         roots_len.serialize_into(bytes);
         let pixmap_formats_len = self.pixmap_formats.len() as u8;
         pixmap_formats_len.serialize_into(bytes);
-        self.image_byte_order.serialize_into(bytes);
-        self.bitmap_format_bit_order.serialize_into(bytes);
+        Into::<u8>::into(self.image_byte_order).serialize_into(bytes);
+        Into::<u8>::into(self.bitmap_format_bit_order).serialize_into(bytes);
         self.bitmap_format_scanline_unit.serialize_into(bytes);
         self.bitmap_format_scanline_pad.serialize_into(bytes);
         self.min_keycode.serialize_into(bytes);
@@ -1830,7 +1834,7 @@ pub const MOTION_NOTIFY_EVENT: u8 = 6;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MotionNotifyEvent {
     pub response_type: u8,
-    pub detail: u8,
+    pub detail: Motion,
     pub sequence: u16,
     pub time: TIMESTAMP,
     pub root: WINDOW,
@@ -1859,6 +1863,7 @@ impl MotionNotifyEvent {
         let (state, remaining) = u16::try_parse(remaining)?;
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let detail = detail.try_into()?;
         let result = MotionNotifyEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen };
         Ok((result, remaining))
     }
@@ -1882,7 +1887,7 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for MotionNotifyEvent {
 impl From<&MotionNotifyEvent> for [u8; 32] {
     fn from(input: &MotionNotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
+        let detail = Into::<u8>::into(input.detail).serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let root = input.root.serialize();
@@ -2076,7 +2081,7 @@ pub const ENTER_NOTIFY_EVENT: u8 = 7;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EnterNotifyEvent {
     pub response_type: u8,
-    pub detail: u8,
+    pub detail: NotifyDetail,
     pub sequence: u16,
     pub time: TIMESTAMP,
     pub root: WINDOW,
@@ -2087,7 +2092,7 @@ pub struct EnterNotifyEvent {
     pub event_x: i16,
     pub event_y: i16,
     pub state: u16,
-    pub mode: u8,
+    pub mode: NotifyMode,
     pub same_screen_focus: u8,
 }
 impl EnterNotifyEvent {
@@ -2106,6 +2111,8 @@ impl EnterNotifyEvent {
         let (state, remaining) = u16::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (same_screen_focus, remaining) = u8::try_parse(remaining)?;
+        let detail = detail.try_into()?;
+        let mode = mode.try_into()?;
         let result = EnterNotifyEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, mode, same_screen_focus };
         Ok((result, remaining))
     }
@@ -2129,7 +2136,7 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for EnterNotifyEvent {
 impl From<&EnterNotifyEvent> for [u8; 32] {
     fn from(input: &EnterNotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
+        let detail = Into::<u8>::into(input.detail).serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let root = input.root.serialize();
@@ -2140,7 +2147,7 @@ impl From<&EnterNotifyEvent> for [u8; 32] {
         let event_x = input.event_x.serialize();
         let event_y = input.event_y.serialize();
         let state = input.state.serialize();
-        let mode = input.mode.serialize();
+        let mode = Into::<u8>::into(input.mode).serialize();
         let same_screen_focus = input.same_screen_focus.serialize();
         [
             response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
@@ -2176,7 +2183,7 @@ pub const LEAVE_NOTIFY_EVENT: u8 = 8;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LeaveNotifyEvent {
     pub response_type: u8,
-    pub detail: u8,
+    pub detail: NotifyDetail,
     pub sequence: u16,
     pub time: TIMESTAMP,
     pub root: WINDOW,
@@ -2187,7 +2194,7 @@ pub struct LeaveNotifyEvent {
     pub event_x: i16,
     pub event_y: i16,
     pub state: u16,
-    pub mode: u8,
+    pub mode: NotifyMode,
     pub same_screen_focus: u8,
 }
 impl LeaveNotifyEvent {
@@ -2206,6 +2213,8 @@ impl LeaveNotifyEvent {
         let (state, remaining) = u16::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (same_screen_focus, remaining) = u8::try_parse(remaining)?;
+        let detail = detail.try_into()?;
+        let mode = mode.try_into()?;
         let result = LeaveNotifyEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, mode, same_screen_focus };
         Ok((result, remaining))
     }
@@ -2229,7 +2238,7 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for LeaveNotifyEvent {
 impl From<&LeaveNotifyEvent> for [u8; 32] {
     fn from(input: &LeaveNotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
+        let detail = Into::<u8>::into(input.detail).serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let root = input.root.serialize();
@@ -2240,7 +2249,7 @@ impl From<&LeaveNotifyEvent> for [u8; 32] {
         let event_x = input.event_x.serialize();
         let event_y = input.event_y.serialize();
         let state = input.state.serialize();
-        let mode = input.mode.serialize();
+        let mode = Into::<u8>::into(input.mode).serialize();
         let same_screen_focus = input.same_screen_focus.serialize();
         [
             response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
@@ -2268,10 +2277,10 @@ pub const FOCUS_IN_EVENT: u8 = 9;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FocusInEvent {
     pub response_type: u8,
-    pub detail: u8,
+    pub detail: NotifyDetail,
     pub sequence: u16,
     pub event: WINDOW,
-    pub mode: u8,
+    pub mode: NotifyMode,
 }
 impl FocusInEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2281,6 +2290,8 @@ impl FocusInEvent {
         let (event, remaining) = WINDOW::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let detail = detail.try_into()?;
+        let mode = mode.try_into()?;
         let result = FocusInEvent { response_type, detail, sequence, event, mode };
         Ok((result, remaining))
     }
@@ -2304,10 +2315,10 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for FocusInEvent {
 impl From<&FocusInEvent> for [u8; 32] {
     fn from(input: &FocusInEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
+        let detail = Into::<u8>::into(input.detail).serialize();
         let sequence = input.sequence.serialize();
         let event = input.event.serialize();
-        let mode = input.mode.serialize();
+        let mode = Into::<u8>::into(input.mode).serialize();
         [
             response_type[0], detail[0], sequence[0], sequence[1], event[0], event[1], event[2], event[3],
             mode[0], 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
@@ -2334,10 +2345,10 @@ pub const FOCUS_OUT_EVENT: u8 = 10;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FocusOutEvent {
     pub response_type: u8,
-    pub detail: u8,
+    pub detail: NotifyDetail,
     pub sequence: u16,
     pub event: WINDOW,
-    pub mode: u8,
+    pub mode: NotifyMode,
 }
 impl FocusOutEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2347,6 +2358,8 @@ impl FocusOutEvent {
         let (event, remaining) = WINDOW::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let detail = detail.try_into()?;
+        let mode = mode.try_into()?;
         let result = FocusOutEvent { response_type, detail, sequence, event, mode };
         Ok((result, remaining))
     }
@@ -2370,10 +2383,10 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for FocusOutEvent {
 impl From<&FocusOutEvent> for [u8; 32] {
     fn from(input: &FocusOutEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
+        let detail = Into::<u8>::into(input.detail).serialize();
         let sequence = input.sequence.serialize();
         let event = input.event.serialize();
-        let mode = input.mode.serialize();
+        let mode = Into::<u8>::into(input.mode).serialize();
         [
             response_type[0], detail[0], sequence[0], sequence[1], event[0], event[1], event[2], event[3],
             mode[0], 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
@@ -2791,7 +2804,7 @@ pub struct VisibilityNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
     pub window: WINDOW,
-    pub state: u8,
+    pub state: Visibility,
 }
 impl VisibilityNotifyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2801,6 +2814,7 @@ impl VisibilityNotifyEvent {
         let (window, remaining) = WINDOW::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let state = state.try_into()?;
         let result = VisibilityNotifyEvent { response_type, sequence, window, state };
         Ok((result, remaining))
     }
@@ -2826,7 +2840,7 @@ impl From<&VisibilityNotifyEvent> for [u8; 32] {
         let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let window = input.window.serialize();
-        let state = input.state.serialize();
+        let state = Into::<u8>::into(input.state).serialize();
         [
             response_type[0], 0, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
             state[0], 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
@@ -3373,7 +3387,7 @@ pub const CONFIGURE_REQUEST_EVENT: u8 = 23;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ConfigureRequestEvent {
     pub response_type: u8,
-    pub stack_mode: u8,
+    pub stack_mode: StackMode,
     pub sequence: u16,
     pub parent: WINDOW,
     pub window: WINDOW,
@@ -3399,6 +3413,7 @@ impl ConfigureRequestEvent {
         let (height, remaining) = u16::try_parse(remaining)?;
         let (border_width, remaining) = u16::try_parse(remaining)?;
         let (value_mask, remaining) = u16::try_parse(remaining)?;
+        let stack_mode = stack_mode.try_into()?;
         let result = ConfigureRequestEvent { response_type, stack_mode, sequence, parent, window, sibling, x, y, width, height, border_width, value_mask };
         Ok((result, remaining))
     }
@@ -3422,7 +3437,7 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ConfigureRequestEvent {
 impl From<&ConfigureRequestEvent> for [u8; 32] {
     fn from(input: &ConfigureRequestEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let stack_mode = input.stack_mode.serialize();
+        let stack_mode = Into::<u8>::into(input.stack_mode).serialize();
         let sequence = input.sequence.serialize();
         let parent = input.parent.serialize();
         let window = input.window.serialize();
@@ -3657,7 +3672,7 @@ pub struct CirculateNotifyEvent {
     pub sequence: u16,
     pub event: WINDOW,
     pub window: WINDOW,
-    pub place: u8,
+    pub place: Place,
 }
 impl CirculateNotifyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3669,6 +3684,7 @@ impl CirculateNotifyEvent {
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (place, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let place = place.try_into()?;
         let result = CirculateNotifyEvent { response_type, sequence, event, window, place };
         Ok((result, remaining))
     }
@@ -3695,7 +3711,7 @@ impl From<&CirculateNotifyEvent> for [u8; 32] {
         let sequence = input.sequence.serialize();
         let event = input.event.serialize();
         let window = input.window.serialize();
-        let place = input.place.serialize();
+        let place = Into::<u8>::into(input.place).serialize();
         [
             response_type[0], 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
             window[0], window[1], window[2], window[3], 0, 0, 0, 0,
@@ -3730,7 +3746,7 @@ pub struct CirculateRequestEvent {
     pub sequence: u16,
     pub event: WINDOW,
     pub window: WINDOW,
-    pub place: u8,
+    pub place: Place,
 }
 impl CirculateRequestEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3742,6 +3758,7 @@ impl CirculateRequestEvent {
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (place, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let place = place.try_into()?;
         let result = CirculateRequestEvent { response_type, sequence, event, window, place };
         Ok((result, remaining))
     }
@@ -3768,7 +3785,7 @@ impl From<&CirculateRequestEvent> for [u8; 32] {
         let sequence = input.sequence.serialize();
         let event = input.event.serialize();
         let window = input.window.serialize();
-        let place = input.place.serialize();
+        let place = Into::<u8>::into(input.place).serialize();
         [
             response_type[0], 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
             window[0], window[1], window[2], window[3], 0, 0, 0, 0,
@@ -3866,7 +3883,7 @@ pub struct PropertyNotifyEvent {
     pub window: WINDOW,
     pub atom: ATOM,
     pub time: TIMESTAMP,
-    pub state: u8,
+    pub state: Property,
 }
 impl PropertyNotifyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3878,6 +3895,7 @@ impl PropertyNotifyEvent {
         let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let state = state.try_into()?;
         let result = PropertyNotifyEvent { response_type, sequence, window, atom, time, state };
         Ok((result, remaining))
     }
@@ -3905,7 +3923,7 @@ impl From<&PropertyNotifyEvent> for [u8; 32] {
         let window = input.window.serialize();
         let atom = input.atom.serialize();
         let time = input.time.serialize();
-        let state = input.state.serialize();
+        let state = Into::<u8>::into(input.state).serialize();
         [
             response_type[0], 0, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
             atom[0], atom[1], atom[2], atom[3], time[0], time[1], time[2], time[3],
@@ -4497,7 +4515,7 @@ pub struct ColormapNotifyEvent {
     pub window: WINDOW,
     pub colormap: COLORMAP,
     pub new: bool,
-    pub state: u8,
+    pub state: ColormapState,
 }
 impl ColormapNotifyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4509,6 +4527,7 @@ impl ColormapNotifyEvent {
         let (new, remaining) = bool::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let state = state.try_into()?;
         let result = ColormapNotifyEvent { response_type, sequence, window, colormap, new, state };
         Ok((result, remaining))
     }
@@ -4536,7 +4555,7 @@ impl From<&ColormapNotifyEvent> for [u8; 32] {
         let window = input.window.serialize();
         let colormap = input.colormap.serialize();
         let new = input.new.serialize();
-        let state = input.state.serialize();
+        let state = Into::<u8>::into(input.state).serialize();
         [
             response_type[0], 0, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
             colormap[0], colormap[1], colormap[2], colormap[3], new[0], state[0], 0, 0,
@@ -4902,7 +4921,7 @@ pub const MAPPING_NOTIFY_EVENT: u8 = 34;
 pub struct MappingNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub request: u8,
+    pub request: Mapping,
     pub first_keycode: KEYCODE,
     pub count: u8,
 }
@@ -4915,6 +4934,7 @@ impl MappingNotifyEvent {
         let (first_keycode, remaining) = KEYCODE::try_parse(remaining)?;
         let (count, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let request = request.try_into()?;
         let result = MappingNotifyEvent { response_type, sequence, request, first_keycode, count };
         Ok((result, remaining))
     }
@@ -4939,7 +4959,7 @@ impl From<&MappingNotifyEvent> for [u8; 32] {
     fn from(input: &MappingNotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
-        let request = input.request.serialize();
+        let request = Into::<u8>::into(input.request).serialize();
         let first_keycode = input.first_keycode.serialize();
         let count = input.count.serialize();
         [
@@ -7097,18 +7117,18 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetWindowAttributesReply {
     pub response_type: u8,
-    pub backing_store: u8,
+    pub backing_store: BackingStore,
     pub sequence: u16,
     pub length: u32,
     pub visual: VISUALID,
-    pub class: u16,
+    pub class: WindowClass,
     pub bit_gravity: u8,
     pub win_gravity: u8,
     pub backing_planes: u32,
     pub backing_pixel: u32,
     pub save_under: bool,
     pub map_is_installed: bool,
-    pub map_state: u8,
+    pub map_state: MapState,
     pub override_redirect: bool,
     pub colormap: COLORMAP,
     pub all_event_masks: u32,
@@ -7136,6 +7156,9 @@ impl GetWindowAttributesReply {
         let (your_event_mask, remaining) = u32::try_parse(remaining)?;
         let (do_not_propagate_mask, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let backing_store = backing_store.try_into()?;
+        let class = class.try_into()?;
+        let map_state = map_state.try_into()?;
         let result = GetWindowAttributesReply { response_type, backing_store, sequence, length, visual, class, bit_gravity, win_gravity, backing_planes, backing_pixel, save_under, map_is_installed, map_state, override_redirect, colormap, all_event_masks, your_event_mask, do_not_propagate_mask };
         Ok((result, remaining))
     }
@@ -9632,7 +9655,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabPointerReply {
     pub response_type: u8,
-    pub status: u8,
+    pub status: GrabStatus,
     pub sequence: u16,
     pub length: u32,
 }
@@ -9642,6 +9665,7 @@ impl GrabPointerReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
+        let status = status.try_into()?;
         let result = GrabPointerReply { response_type, status, sequence, length };
         Ok((result, remaining))
     }
@@ -10060,7 +10084,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabKeyboardReply {
     pub response_type: u8,
-    pub status: u8,
+    pub status: GrabStatus,
     pub sequence: u16,
     pub length: u32,
 }
@@ -10070,6 +10094,7 @@ impl GrabKeyboardReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
+        let status = status.try_into()?;
         let result = GrabKeyboardReply { response_type, status, sequence, length };
         Ok((result, remaining))
     }
@@ -11040,7 +11065,7 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetInputFocusReply {
     pub response_type: u8,
-    pub revert_to: u8,
+    pub revert_to: InputFocus,
     pub sequence: u16,
     pub length: u32,
     pub focus: WINDOW,
@@ -11052,6 +11077,7 @@ impl GetInputFocusReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (focus, remaining) = WINDOW::try_parse(remaining)?;
+        let revert_to = revert_to.try_into()?;
         let result = GetInputFocusReply { response_type, revert_to, sequence, length, focus };
         Ok((result, remaining))
     }
@@ -11464,7 +11490,7 @@ pub struct QueryFontReply {
     pub min_char_or_byte2: u16,
     pub max_char_or_byte2: u16,
     pub default_char: u16,
-    pub draw_direction: u8,
+    pub draw_direction: FontDraw,
     pub min_byte1: u8,
     pub max_byte1: u8,
     pub all_chars_exist: bool,
@@ -11496,6 +11522,7 @@ impl QueryFontReply {
         let (char_infos_len, remaining) = u32::try_parse(remaining)?;
         let (properties, remaining) = crate::x11_utils::parse_list::<Fontprop>(remaining, properties_len as usize)?;
         let (char_infos, remaining) = crate::x11_utils::parse_list::<Charinfo>(remaining, char_infos_len as usize)?;
+        let draw_direction = draw_direction.try_into()?;
         let result = QueryFontReply { response_type, sequence, length, min_bounds, max_bounds, min_char_or_byte2, max_char_or_byte2, default_char, draw_direction, min_byte1, max_byte1, all_chars_exist, font_ascent, font_descent, properties, char_infos };
         Ok((result, remaining))
     }
@@ -11575,7 +11602,7 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryTextExtentsReply {
     pub response_type: u8,
-    pub draw_direction: u8,
+    pub draw_direction: FontDraw,
     pub sequence: u16,
     pub length: u32,
     pub font_ascent: i16,
@@ -11599,6 +11626,7 @@ impl QueryTextExtentsReply {
         let (overall_width, remaining) = i32::try_parse(remaining)?;
         let (overall_left, remaining) = i32::try_parse(remaining)?;
         let (overall_right, remaining) = i32::try_parse(remaining)?;
+        let draw_direction = draw_direction.try_into()?;
         let result = QueryTextExtentsReply { response_type, draw_direction, sequence, length, font_ascent, font_descent, overall_ascent, overall_descent, overall_width, overall_left, overall_right };
         Ok((result, remaining))
     }
@@ -11784,7 +11812,7 @@ pub struct ListFontsWithInfoReply {
     pub min_char_or_byte2: u16,
     pub max_char_or_byte2: u16,
     pub default_char: u16,
-    pub draw_direction: u8,
+    pub draw_direction: FontDraw,
     pub min_byte1: u8,
     pub max_byte1: u8,
     pub all_chars_exist: bool,
@@ -11817,6 +11845,7 @@ impl ListFontsWithInfoReply {
         let (replies_hint, remaining) = u32::try_parse(remaining)?;
         let (properties, remaining) = crate::x11_utils::parse_list::<Fontprop>(remaining, properties_len as usize)?;
         let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_len as usize)?;
+        let draw_direction = draw_direction.try_into()?;
         let result = ListFontsWithInfoReply { response_type, sequence, length, min_bounds, max_bounds, min_char_or_byte2, max_char_or_byte2, default_char, draw_direction, min_byte1, max_byte1, all_chars_exist, font_ascent, font_descent, replies_hint, properties, name };
         Ok((result, remaining))
     }
@@ -16761,7 +16790,7 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetKeyboardControlReply {
     pub response_type: u8,
-    pub global_auto_repeat: u8,
+    pub global_auto_repeat: AutoRepeatMode,
     pub sequence: u16,
     pub length: u32,
     pub led_mask: u32,
@@ -16849,6 +16878,7 @@ impl GetKeyboardControlReply {
             auto_repeats_30,
             auto_repeats_31,
         ];
+        let global_auto_repeat = global_auto_repeat.try_into()?;
         let result = GetKeyboardControlReply { response_type, global_auto_repeat, sequence, length, led_mask, key_click_percent, bell_percent, bell_pitch, bell_duration, auto_repeats };
         Ok((result, remaining))
     }
@@ -17143,8 +17173,8 @@ pub struct GetScreenSaverReply {
     pub length: u32,
     pub timeout: u16,
     pub interval: u16,
-    pub prefer_blanking: u8,
-    pub allow_exposures: u8,
+    pub prefer_blanking: Blanking,
+    pub allow_exposures: Exposures,
 }
 impl GetScreenSaverReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -17157,6 +17187,8 @@ impl GetScreenSaverReply {
         let (prefer_blanking, remaining) = u8::try_parse(remaining)?;
         let (allow_exposures, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
+        let prefer_blanking = prefer_blanking.try_into()?;
+        let allow_exposures = allow_exposures.try_into()?;
         let result = GetScreenSaverReply { response_type, sequence, length, timeout, interval, prefer_blanking, allow_exposures };
         Ok((result, remaining))
     }
@@ -17334,7 +17366,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Host {
-    pub family: u8,
+    pub family: Family,
     pub address: Vec<u8>,
 }
 impl TryParse for Host {
@@ -17348,6 +17380,7 @@ impl TryParse for Host {
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let family = family.try_into()?;
         let result = Host { family, address };
         Ok((result, remaining))
     }
@@ -17367,7 +17400,7 @@ impl Serialize for Host {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        self.family.serialize_into(bytes);
+        Into::<u8>::into(self.family).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         let address_len = self.address.len() as u16;
         address_len.serialize_into(bytes);
@@ -17396,7 +17429,7 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListHostsReply {
     pub response_type: u8,
-    pub mode: u8,
+    pub mode: AccessControl,
     pub sequence: u16,
     pub length: u32,
     pub hosts: Vec<Host>,
@@ -17410,6 +17443,7 @@ impl ListHostsReply {
         let (hosts_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (hosts, remaining) = crate::x11_utils::parse_list::<Host>(remaining, hosts_len as usize)?;
+        let mode = mode.try_into()?;
         let result = ListHostsReply { response_type, mode, sequence, length, hosts };
         Ok((result, remaining))
     }
@@ -17895,7 +17929,7 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetPointerMappingReply {
     pub response_type: u8,
-    pub status: u8,
+    pub status: MappingStatus,
     pub sequence: u16,
     pub length: u32,
 }
@@ -17905,6 +17939,7 @@ impl SetPointerMappingReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
+        let status = status.try_into()?;
         let result = SetPointerMappingReply { response_type, status, sequence, length };
         Ok((result, remaining))
     }
@@ -18065,7 +18100,7 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetModifierMappingReply {
     pub response_type: u8,
-    pub status: u8,
+    pub status: MappingStatus,
     pub sequence: u16,
     pub length: u32,
 }
@@ -18075,6 +18110,7 @@ impl SetModifierMappingReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
+        let status = status.try_into()?;
         let result = SetModifierMappingReply { response_type, status, sequence, length };
         Ok((result, remaining))
     }

@@ -367,7 +367,7 @@ pub struct DeviceInfo {
     pub device_type: ATOM,
     pub device_id: u8,
     pub num_class_info: u8,
-    pub device_use: u8,
+    pub device_use: DeviceUse,
 }
 impl TryParse for DeviceInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -376,6 +376,7 @@ impl TryParse for DeviceInfo {
         let (num_class_info, remaining) = u8::try_parse(remaining)?;
         let (device_use, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let device_use = device_use.try_into()?;
         let result = DeviceInfo { device_type, device_id, num_class_info, device_use };
         Ok((result, remaining))
     }
@@ -392,7 +393,7 @@ impl Serialize for DeviceInfo {
         let device_type_bytes = self.device_type.serialize();
         let device_id_bytes = self.device_id.serialize();
         let num_class_info_bytes = self.num_class_info.serialize();
-        let device_use_bytes = self.device_use.serialize();
+        let device_use_bytes = Into::<u8>::into(self.device_use).serialize();
         [
             device_type_bytes[0],
             device_type_bytes[1],
@@ -409,14 +410,14 @@ impl Serialize for DeviceInfo {
         self.device_type.serialize_into(bytes);
         self.device_id.serialize_into(bytes);
         self.num_class_info.serialize_into(bytes);
-        self.device_use.serialize_into(bytes);
+        Into::<u8>::into(self.device_use).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct KeyInfo {
-    pub class_id: u8,
+    pub class_id: InputClass,
     pub len: u8,
     pub min_keycode: KeyCode,
     pub max_keycode: KeyCode,
@@ -430,6 +431,7 @@ impl TryParse for KeyInfo {
         let (max_keycode, remaining) = KeyCode::try_parse(remaining)?;
         let (num_keys, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let class_id = class_id.try_into()?;
         let result = KeyInfo { class_id, len, min_keycode, max_keycode, num_keys };
         Ok((result, remaining))
     }
@@ -443,7 +445,7 @@ impl TryFrom<&[u8]> for KeyInfo {
 impl Serialize for KeyInfo {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = self.class_id.serialize();
+        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
         let len_bytes = self.len.serialize();
         let min_keycode_bytes = self.min_keycode.serialize();
         let max_keycode_bytes = self.max_keycode.serialize();
@@ -461,7 +463,7 @@ impl Serialize for KeyInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.min_keycode.serialize_into(bytes);
         self.max_keycode.serialize_into(bytes);
@@ -472,7 +474,7 @@ impl Serialize for KeyInfo {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ButtonInfo {
-    pub class_id: u8,
+    pub class_id: InputClass,
     pub len: u8,
     pub num_buttons: u16,
 }
@@ -481,6 +483,7 @@ impl TryParse for ButtonInfo {
         let (class_id, remaining) = u8::try_parse(remaining)?;
         let (len, remaining) = u8::try_parse(remaining)?;
         let (num_buttons, remaining) = u16::try_parse(remaining)?;
+        let class_id = class_id.try_into()?;
         let result = ButtonInfo { class_id, len, num_buttons };
         Ok((result, remaining))
     }
@@ -494,7 +497,7 @@ impl TryFrom<&[u8]> for ButtonInfo {
 impl Serialize for ButtonInfo {
     type Bytes = [u8; 4];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = self.class_id.serialize();
+        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
         let len_bytes = self.len.serialize();
         let num_buttons_bytes = self.num_buttons.serialize();
         [
@@ -506,7 +509,7 @@ impl Serialize for ButtonInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.num_buttons.serialize_into(bytes);
     }
@@ -564,9 +567,9 @@ impl Serialize for AxisInfo {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ValuatorInfo {
-    pub class_id: u8,
+    pub class_id: InputClass,
     pub len: u8,
-    pub mode: u8,
+    pub mode: ValuatorMode,
     pub motion_size: u32,
     pub axes: Vec<AxisInfo>,
 }
@@ -578,6 +581,8 @@ impl TryParse for ValuatorInfo {
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (motion_size, remaining) = u32::try_parse(remaining)?;
         let (axes, remaining) = crate::x11_utils::parse_list::<AxisInfo>(remaining, axes_len as usize)?;
+        let class_id = class_id.try_into()?;
+        let mode = mode.try_into()?;
         let result = ValuatorInfo { class_id, len, mode, motion_size, axes };
         Ok((result, remaining))
     }
@@ -597,11 +602,11 @@ impl Serialize for ValuatorInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         let axes_len = self.axes.len() as u8;
         axes_len.serialize_into(bytes);
-        self.mode.serialize_into(bytes);
+        Into::<u8>::into(self.mode).serialize_into(bytes);
         self.motion_size.serialize_into(bytes);
         self.axes.serialize_into(bytes);
     }
@@ -654,7 +659,7 @@ impl Serialize for InputInfoInfoKey {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct InputInfoInfoValuator {
-    pub mode: u8,
+    pub mode: ValuatorMode,
     pub motion_size: u32,
     pub axes: Vec<AxisInfo>,
 }
@@ -664,6 +669,7 @@ impl TryParse for InputInfoInfoValuator {
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (motion_size, remaining) = u32::try_parse(remaining)?;
         let (axes, remaining) = crate::x11_utils::parse_list::<AxisInfo>(remaining, axes_len as usize)?;
+        let mode = mode.try_into()?;
         let result = InputInfoInfoValuator { mode, motion_size, axes };
         Ok((result, remaining))
     }
@@ -685,7 +691,7 @@ impl Serialize for InputInfoInfoValuator {
         bytes.reserve(6);
         let axes_len = self.axes.len() as u8;
         axes_len.serialize_into(bytes);
-        self.mode.serialize_into(bytes);
+        Into::<u8>::into(self.mode).serialize_into(bytes);
         self.motion_size.serialize_into(bytes);
         self.axes.serialize_into(bytes);
     }
@@ -762,7 +768,7 @@ impl Serialize for InputInfoInfo {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct InputInfo {
-    pub class_id: u8,
+    pub class_id: InputClass,
     pub len: u8,
     pub info: InputInfoInfo,
 }
@@ -771,6 +777,7 @@ impl TryParse for InputInfo {
         let (class_id, remaining) = u8::try_parse(remaining)?;
         let (len, remaining) = u8::try_parse(remaining)?;
         let (info, remaining) = InputInfoInfo::try_parse(remaining, class_id)?;
+        let class_id = class_id.try_into()?;
         let result = InputInfo { class_id, len, info };
         Ok((result, remaining))
     }
@@ -790,7 +797,7 @@ impl Serialize for InputInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.info.serialize_into(bytes);
     }
@@ -890,13 +897,14 @@ pub type EventTypeBase = u8;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InputClassInfo {
-    pub class_id: u8,
+    pub class_id: InputClass,
     pub event_type_base: EventTypeBase,
 }
 impl TryParse for InputClassInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (class_id, remaining) = u8::try_parse(remaining)?;
         let (event_type_base, remaining) = EventTypeBase::try_parse(remaining)?;
+        let class_id = class_id.try_into()?;
         let result = InputClassInfo { class_id, event_type_base };
         Ok((result, remaining))
     }
@@ -910,7 +918,7 @@ impl TryFrom<&[u8]> for InputClassInfo {
 impl Serialize for InputClassInfo {
     type Bytes = [u8; 2];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = self.class_id.serialize();
+        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
         let event_type_base_bytes = self.event_type_base.serialize();
         [
             class_id_bytes[0],
@@ -919,7 +927,7 @@ impl Serialize for InputClassInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.event_type_base.serialize_into(bytes);
     }
 }
@@ -1038,7 +1046,7 @@ pub struct SetDeviceModeReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub status: u8,
+    pub status: GrabStatus,
 }
 impl SetDeviceModeReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1048,6 +1056,7 @@ impl SetDeviceModeReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let status = status.try_into()?;
         let result = SetDeviceModeReply { response_type, xi_reply_type, sequence, length, status };
         Ok((result, remaining))
     }
@@ -1371,7 +1380,7 @@ pub struct GetDeviceMotionEventsReply {
     pub sequence: u16,
     pub length: u32,
     pub num_axes: u8,
-    pub device_mode: u8,
+    pub device_mode: ValuatorMode,
     pub events: Vec<DeviceTimeCoord>,
 }
 impl GetDeviceMotionEventsReply {
@@ -1392,6 +1401,7 @@ impl GetDeviceMotionEventsReply {
             events.push(v);
             remaining = new_remaining;
         }
+        let device_mode = device_mode.try_into()?;
         let result = GetDeviceMotionEventsReply { response_type, xi_reply_type, sequence, length, num_axes, device_mode, events };
         Ok((result, remaining))
     }
@@ -1433,7 +1443,7 @@ pub struct ChangeKeyboardDeviceReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub status: u8,
+    pub status: GrabStatus,
 }
 impl ChangeKeyboardDeviceReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1443,6 +1453,7 @@ impl ChangeKeyboardDeviceReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let status = status.try_into()?;
         let result = ChangeKeyboardDeviceReply { response_type, xi_reply_type, sequence, length, status };
         Ok((result, remaining))
     }
@@ -1486,7 +1497,7 @@ pub struct ChangePointerDeviceReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub status: u8,
+    pub status: GrabStatus,
 }
 impl ChangePointerDeviceReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1496,6 +1507,7 @@ impl ChangePointerDeviceReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let status = status.try_into()?;
         let result = ChangePointerDeviceReply { response_type, xi_reply_type, sequence, length, status };
         Ok((result, remaining))
     }
@@ -1562,7 +1574,7 @@ pub struct GrabDeviceReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub status: u8,
+    pub status: GrabStatus,
 }
 impl GrabDeviceReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1572,6 +1584,7 @@ impl GrabDeviceReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let status = status.try_into()?;
         let result = GrabDeviceReply { response_type, xi_reply_type, sequence, length, status };
         Ok((result, remaining))
     }
@@ -1988,7 +2001,7 @@ pub struct GetDeviceFocusReply {
     pub length: u32,
     pub focus: WINDOW,
     pub time: TIMESTAMP,
-    pub revert_to: u8,
+    pub revert_to: InputFocus,
 }
 impl GetDeviceFocusReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2000,6 +2013,7 @@ impl GetDeviceFocusReply {
         let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
         let (revert_to, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(15..).ok_or(ParseError::ParseError)?;
+        let revert_to = revert_to.try_into()?;
         let result = GetDeviceFocusReply { response_type, xi_reply_type, sequence, length, focus, time, revert_to };
         Ok((result, remaining))
     }
@@ -2124,7 +2138,7 @@ impl TryFrom<u32> for FeedbackClass {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct KbdFeedbackState {
-    pub class_id: u8,
+    pub class_id: FeedbackClass,
     pub feedback_id: u8,
     pub len: u16,
     pub pitch: u16,
@@ -2215,6 +2229,7 @@ impl TryParse for KbdFeedbackState {
             auto_repeats_30,
             auto_repeats_31,
         ];
+        let class_id = class_id.try_into()?;
         let result = KbdFeedbackState { class_id, feedback_id, len, pitch, duration, led_mask, led_values, global_auto_repeat, click, percent, auto_repeats };
         Ok((result, remaining))
     }
@@ -2228,7 +2243,7 @@ impl TryFrom<&[u8]> for KbdFeedbackState {
 impl Serialize for KbdFeedbackState {
     type Bytes = [u8; 52];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = self.class_id.serialize();
+        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let pitch_bytes = self.pitch.serialize();
@@ -2295,7 +2310,7 @@ impl Serialize for KbdFeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(52);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.pitch.serialize_into(bytes);
@@ -2312,7 +2327,7 @@ impl Serialize for KbdFeedbackState {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PtrFeedbackState {
-    pub class_id: u8,
+    pub class_id: FeedbackClass,
     pub feedback_id: u8,
     pub len: u16,
     pub accel_num: u16,
@@ -2328,6 +2343,7 @@ impl TryParse for PtrFeedbackState {
         let (accel_num, remaining) = u16::try_parse(remaining)?;
         let (accel_denom, remaining) = u16::try_parse(remaining)?;
         let (threshold, remaining) = u16::try_parse(remaining)?;
+        let class_id = class_id.try_into()?;
         let result = PtrFeedbackState { class_id, feedback_id, len, accel_num, accel_denom, threshold };
         Ok((result, remaining))
     }
@@ -2341,7 +2357,7 @@ impl TryFrom<&[u8]> for PtrFeedbackState {
 impl Serialize for PtrFeedbackState {
     type Bytes = [u8; 12];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = self.class_id.serialize();
+        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let accel_num_bytes = self.accel_num.serialize();
@@ -2364,7 +2380,7 @@ impl Serialize for PtrFeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
@@ -2376,7 +2392,7 @@ impl Serialize for PtrFeedbackState {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IntegerFeedbackState {
-    pub class_id: u8,
+    pub class_id: FeedbackClass,
     pub feedback_id: u8,
     pub len: u16,
     pub resolution: u32,
@@ -2391,6 +2407,7 @@ impl TryParse for IntegerFeedbackState {
         let (resolution, remaining) = u32::try_parse(remaining)?;
         let (min_value, remaining) = i32::try_parse(remaining)?;
         let (max_value, remaining) = i32::try_parse(remaining)?;
+        let class_id = class_id.try_into()?;
         let result = IntegerFeedbackState { class_id, feedback_id, len, resolution, min_value, max_value };
         Ok((result, remaining))
     }
@@ -2404,7 +2421,7 @@ impl TryFrom<&[u8]> for IntegerFeedbackState {
 impl Serialize for IntegerFeedbackState {
     type Bytes = [u8; 16];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = self.class_id.serialize();
+        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let resolution_bytes = self.resolution.serialize();
@@ -2431,7 +2448,7 @@ impl Serialize for IntegerFeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(16);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.resolution.serialize_into(bytes);
@@ -2442,7 +2459,7 @@ impl Serialize for IntegerFeedbackState {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct StringFeedbackState {
-    pub class_id: u8,
+    pub class_id: FeedbackClass,
     pub feedback_id: u8,
     pub len: u16,
     pub max_symbols: u16,
@@ -2456,6 +2473,7 @@ impl TryParse for StringFeedbackState {
         let (max_symbols, remaining) = u16::try_parse(remaining)?;
         let (num_keysyms, remaining) = u16::try_parse(remaining)?;
         let (keysyms, remaining) = crate::x11_utils::parse_list::<KEYSYM>(remaining, num_keysyms as usize)?;
+        let class_id = class_id.try_into()?;
         let result = StringFeedbackState { class_id, feedback_id, len, max_symbols, keysyms };
         Ok((result, remaining))
     }
@@ -2475,7 +2493,7 @@ impl Serialize for StringFeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.max_symbols.serialize_into(bytes);
@@ -2487,7 +2505,7 @@ impl Serialize for StringFeedbackState {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BellFeedbackState {
-    pub class_id: u8,
+    pub class_id: FeedbackClass,
     pub feedback_id: u8,
     pub len: u16,
     pub percent: u8,
@@ -2503,6 +2521,7 @@ impl TryParse for BellFeedbackState {
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (pitch, remaining) = u16::try_parse(remaining)?;
         let (duration, remaining) = u16::try_parse(remaining)?;
+        let class_id = class_id.try_into()?;
         let result = BellFeedbackState { class_id, feedback_id, len, percent, pitch, duration };
         Ok((result, remaining))
     }
@@ -2516,7 +2535,7 @@ impl TryFrom<&[u8]> for BellFeedbackState {
 impl Serialize for BellFeedbackState {
     type Bytes = [u8; 12];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = self.class_id.serialize();
+        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let percent_bytes = self.percent.serialize();
@@ -2539,7 +2558,7 @@ impl Serialize for BellFeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.percent.serialize_into(bytes);
@@ -2551,7 +2570,7 @@ impl Serialize for BellFeedbackState {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LedFeedbackState {
-    pub class_id: u8,
+    pub class_id: FeedbackClass,
     pub feedback_id: u8,
     pub len: u16,
     pub led_mask: u32,
@@ -2564,6 +2583,7 @@ impl TryParse for LedFeedbackState {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (led_mask, remaining) = u32::try_parse(remaining)?;
         let (led_values, remaining) = u32::try_parse(remaining)?;
+        let class_id = class_id.try_into()?;
         let result = LedFeedbackState { class_id, feedback_id, len, led_mask, led_values };
         Ok((result, remaining))
     }
@@ -2577,7 +2597,7 @@ impl TryFrom<&[u8]> for LedFeedbackState {
 impl Serialize for LedFeedbackState {
     type Bytes = [u8; 12];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = self.class_id.serialize();
+        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let led_mask_bytes = self.led_mask.serialize();
@@ -2599,7 +2619,7 @@ impl Serialize for LedFeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.led_mask.serialize_into(bytes);
@@ -3113,7 +3133,7 @@ impl Serialize for FeedbackStateData {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FeedbackState {
-    pub class_id: u8,
+    pub class_id: FeedbackClass,
     pub feedback_id: u8,
     pub len: u16,
     pub data: FeedbackStateData,
@@ -3124,6 +3144,7 @@ impl TryParse for FeedbackState {
         let (feedback_id, remaining) = u8::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
         let (data, remaining) = FeedbackStateData::try_parse(remaining, class_id)?;
+        let class_id = class_id.try_into()?;
         let result = FeedbackState { class_id, feedback_id, len, data };
         Ok((result, remaining))
     }
@@ -3143,7 +3164,7 @@ impl Serialize for FeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes);
@@ -3204,7 +3225,7 @@ impl TryFrom<&[u8]> for GetFeedbackControlReply {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct KbdFeedbackCtl {
-    pub class_id: u8,
+    pub class_id: FeedbackClass,
     pub feedback_id: u8,
     pub len: u16,
     pub key: KeyCode,
@@ -3229,6 +3250,7 @@ impl TryParse for KbdFeedbackCtl {
         let (bell_duration, remaining) = i16::try_parse(remaining)?;
         let (led_mask, remaining) = u32::try_parse(remaining)?;
         let (led_values, remaining) = u32::try_parse(remaining)?;
+        let class_id = class_id.try_into()?;
         let result = KbdFeedbackCtl { class_id, feedback_id, len, key, auto_repeat_mode, key_click_percent, bell_percent, bell_pitch, bell_duration, led_mask, led_values };
         Ok((result, remaining))
     }
@@ -3242,7 +3264,7 @@ impl TryFrom<&[u8]> for KbdFeedbackCtl {
 impl Serialize for KbdFeedbackCtl {
     type Bytes = [u8; 20];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = self.class_id.serialize();
+        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let key_bytes = self.key.serialize();
@@ -3278,7 +3300,7 @@ impl Serialize for KbdFeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(20);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.key.serialize_into(bytes);
@@ -3294,7 +3316,7 @@ impl Serialize for KbdFeedbackCtl {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PtrFeedbackCtl {
-    pub class_id: u8,
+    pub class_id: FeedbackClass,
     pub feedback_id: u8,
     pub len: u16,
     pub num: i16,
@@ -3310,6 +3332,7 @@ impl TryParse for PtrFeedbackCtl {
         let (num, remaining) = i16::try_parse(remaining)?;
         let (denom, remaining) = i16::try_parse(remaining)?;
         let (threshold, remaining) = i16::try_parse(remaining)?;
+        let class_id = class_id.try_into()?;
         let result = PtrFeedbackCtl { class_id, feedback_id, len, num, denom, threshold };
         Ok((result, remaining))
     }
@@ -3323,7 +3346,7 @@ impl TryFrom<&[u8]> for PtrFeedbackCtl {
 impl Serialize for PtrFeedbackCtl {
     type Bytes = [u8; 12];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = self.class_id.serialize();
+        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let num_bytes = self.num.serialize();
@@ -3346,7 +3369,7 @@ impl Serialize for PtrFeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
@@ -3358,7 +3381,7 @@ impl Serialize for PtrFeedbackCtl {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IntegerFeedbackCtl {
-    pub class_id: u8,
+    pub class_id: FeedbackClass,
     pub feedback_id: u8,
     pub len: u16,
     pub int_to_display: i32,
@@ -3369,6 +3392,7 @@ impl TryParse for IntegerFeedbackCtl {
         let (feedback_id, remaining) = u8::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
         let (int_to_display, remaining) = i32::try_parse(remaining)?;
+        let class_id = class_id.try_into()?;
         let result = IntegerFeedbackCtl { class_id, feedback_id, len, int_to_display };
         Ok((result, remaining))
     }
@@ -3382,7 +3406,7 @@ impl TryFrom<&[u8]> for IntegerFeedbackCtl {
 impl Serialize for IntegerFeedbackCtl {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = self.class_id.serialize();
+        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let int_to_display_bytes = self.int_to_display.serialize();
@@ -3399,7 +3423,7 @@ impl Serialize for IntegerFeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.int_to_display.serialize_into(bytes);
@@ -3408,7 +3432,7 @@ impl Serialize for IntegerFeedbackCtl {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct StringFeedbackCtl {
-    pub class_id: u8,
+    pub class_id: FeedbackClass,
     pub feedback_id: u8,
     pub len: u16,
     pub keysyms: Vec<KEYSYM>,
@@ -3421,6 +3445,7 @@ impl TryParse for StringFeedbackCtl {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (num_keysyms, remaining) = u16::try_parse(remaining)?;
         let (keysyms, remaining) = crate::x11_utils::parse_list::<KEYSYM>(remaining, num_keysyms as usize)?;
+        let class_id = class_id.try_into()?;
         let result = StringFeedbackCtl { class_id, feedback_id, len, keysyms };
         Ok((result, remaining))
     }
@@ -3440,7 +3465,7 @@ impl Serialize for StringFeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
@@ -3452,7 +3477,7 @@ impl Serialize for StringFeedbackCtl {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BellFeedbackCtl {
-    pub class_id: u8,
+    pub class_id: FeedbackClass,
     pub feedback_id: u8,
     pub len: u16,
     pub percent: i8,
@@ -3468,6 +3493,7 @@ impl TryParse for BellFeedbackCtl {
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (pitch, remaining) = i16::try_parse(remaining)?;
         let (duration, remaining) = i16::try_parse(remaining)?;
+        let class_id = class_id.try_into()?;
         let result = BellFeedbackCtl { class_id, feedback_id, len, percent, pitch, duration };
         Ok((result, remaining))
     }
@@ -3481,7 +3507,7 @@ impl TryFrom<&[u8]> for BellFeedbackCtl {
 impl Serialize for BellFeedbackCtl {
     type Bytes = [u8; 12];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = self.class_id.serialize();
+        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let percent_bytes = self.percent.serialize();
@@ -3504,7 +3530,7 @@ impl Serialize for BellFeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.percent.serialize_into(bytes);
@@ -3516,7 +3542,7 @@ impl Serialize for BellFeedbackCtl {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LedFeedbackCtl {
-    pub class_id: u8,
+    pub class_id: FeedbackClass,
     pub feedback_id: u8,
     pub len: u16,
     pub led_mask: u32,
@@ -3529,6 +3555,7 @@ impl TryParse for LedFeedbackCtl {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (led_mask, remaining) = u32::try_parse(remaining)?;
         let (led_values, remaining) = u32::try_parse(remaining)?;
+        let class_id = class_id.try_into()?;
         let result = LedFeedbackCtl { class_id, feedback_id, len, led_mask, led_values };
         Ok((result, remaining))
     }
@@ -3542,7 +3569,7 @@ impl TryFrom<&[u8]> for LedFeedbackCtl {
 impl Serialize for LedFeedbackCtl {
     type Bytes = [u8; 12];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = self.class_id.serialize();
+        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let led_mask_bytes = self.led_mask.serialize();
@@ -3564,7 +3591,7 @@ impl Serialize for LedFeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.led_mask.serialize_into(bytes);
@@ -3931,7 +3958,7 @@ impl Serialize for FeedbackCtlData {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FeedbackCtl {
-    pub class_id: u8,
+    pub class_id: FeedbackClass,
     pub feedback_id: u8,
     pub len: u16,
     pub data: FeedbackCtlData,
@@ -3942,6 +3969,7 @@ impl TryParse for FeedbackCtl {
         let (feedback_id, remaining) = u8::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
         let (data, remaining) = FeedbackCtlData::try_parse(remaining, class_id)?;
+        let class_id = class_id.try_into()?;
         let result = FeedbackCtl { class_id, feedback_id, len, data };
         Ok((result, remaining))
     }
@@ -3961,7 +3989,7 @@ impl Serialize for FeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes);
@@ -4240,7 +4268,7 @@ pub struct SetDeviceModifierMappingReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub status: u8,
+    pub status: MappingStatus,
 }
 impl SetDeviceModifierMappingReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4250,6 +4278,7 @@ impl SetDeviceModifierMappingReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let status = status.try_into()?;
         let result = SetDeviceModifierMappingReply { response_type, xi_reply_type, sequence, length, status };
         Ok((result, remaining))
     }
@@ -4353,7 +4382,7 @@ pub struct SetDeviceButtonMappingReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub status: u8,
+    pub status: MappingStatus,
 }
 impl SetDeviceButtonMappingReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4363,6 +4392,7 @@ impl SetDeviceButtonMappingReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let status = status.try_into()?;
         let result = SetDeviceButtonMappingReply { response_type, xi_reply_type, sequence, length, status };
         Ok((result, remaining))
     }
@@ -4376,7 +4406,7 @@ impl TryFrom<&[u8]> for SetDeviceButtonMappingReply {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct KeyState {
-    pub class_id: u8,
+    pub class_id: InputClass,
     pub len: u8,
     pub num_keys: u8,
     pub keys: [u8; 32],
@@ -4453,6 +4483,7 @@ impl TryParse for KeyState {
             keys_30,
             keys_31,
         ];
+        let class_id = class_id.try_into()?;
         let result = KeyState { class_id, len, num_keys, keys };
         Ok((result, remaining))
     }
@@ -4466,7 +4497,7 @@ impl TryFrom<&[u8]> for KeyState {
 impl Serialize for KeyState {
     type Bytes = [u8; 36];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = self.class_id.serialize();
+        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
         let len_bytes = self.len.serialize();
         let num_keys_bytes = self.num_keys.serialize();
         [
@@ -4510,7 +4541,7 @@ impl Serialize for KeyState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(36);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.num_keys.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
@@ -4520,7 +4551,7 @@ impl Serialize for KeyState {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ButtonState {
-    pub class_id: u8,
+    pub class_id: InputClass,
     pub len: u8,
     pub num_buttons: u8,
     pub buttons: [u8; 32],
@@ -4597,6 +4628,7 @@ impl TryParse for ButtonState {
             buttons_30,
             buttons_31,
         ];
+        let class_id = class_id.try_into()?;
         let result = ButtonState { class_id, len, num_buttons, buttons };
         Ok((result, remaining))
     }
@@ -4610,7 +4642,7 @@ impl TryFrom<&[u8]> for ButtonState {
 impl Serialize for ButtonState {
     type Bytes = [u8; 36];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = self.class_id.serialize();
+        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
         let len_bytes = self.len.serialize();
         let num_buttons_bytes = self.num_buttons.serialize();
         [
@@ -4654,7 +4686,7 @@ impl Serialize for ButtonState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(36);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.num_buttons.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
@@ -4727,7 +4759,7 @@ bitmask_binop!(ValuatorStateModeMask, u8);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ValuatorState {
-    pub class_id: u8,
+    pub class_id: InputClass,
     pub len: u8,
     pub mode: u8,
     pub valuators: Vec<i32>,
@@ -4739,6 +4771,7 @@ impl TryParse for ValuatorState {
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (valuators, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_valuators as usize)?;
+        let class_id = class_id.try_into()?;
         let result = ValuatorState { class_id, len, mode, valuators };
         Ok((result, remaining))
     }
@@ -4758,7 +4791,7 @@ impl Serialize for ValuatorState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         let num_valuators = self.valuators.len() as u8;
         num_valuators.serialize_into(bytes);
@@ -5139,7 +5172,7 @@ impl Serialize for InputStateData {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct InputState {
-    pub class_id: u8,
+    pub class_id: InputClass,
     pub len: u8,
     pub data: InputStateData,
 }
@@ -5148,6 +5181,7 @@ impl TryParse for InputState {
         let (class_id, remaining) = u8::try_parse(remaining)?;
         let (len, remaining) = u8::try_parse(remaining)?;
         let (data, remaining) = InputStateData::try_parse(remaining, class_id)?;
+        let class_id = class_id.try_into()?;
         let result = InputState { class_id, len, data };
         Ok((result, remaining))
     }
@@ -5167,7 +5201,7 @@ impl Serialize for InputState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        self.class_id.serialize_into(bytes);
+        Into::<u8>::into(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes);
     }
@@ -5290,7 +5324,7 @@ pub struct SetDeviceValuatorsReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub status: u8,
+    pub status: GrabStatus,
 }
 impl SetDeviceValuatorsReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5300,6 +5334,7 @@ impl SetDeviceValuatorsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let status = status.try_into()?;
         let result = SetDeviceValuatorsReply { response_type, xi_reply_type, sequence, length, status };
         Ok((result, remaining))
     }
@@ -5384,7 +5419,7 @@ impl TryFrom<u32> for DeviceControl {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DeviceResolutionState {
-    pub control_id: u16,
+    pub control_id: DeviceControl,
     pub len: u16,
     pub num_valuators: u32,
     pub resolution_values: Vec<u32>,
@@ -5399,6 +5434,7 @@ impl TryParse for DeviceResolutionState {
         let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
         let (resolution_min, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
         let (resolution_max, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
+        let control_id = control_id.try_into()?;
         let result = DeviceResolutionState { control_id, len, num_valuators, resolution_values, resolution_min, resolution_max };
         Ok((result, remaining))
     }
@@ -5418,7 +5454,7 @@ impl Serialize for DeviceResolutionState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.control_id.serialize_into(bytes);
+        Into::<u16>::into(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.num_valuators.serialize_into(bytes);
         self.resolution_values.serialize_into(bytes);
@@ -5429,7 +5465,7 @@ impl Serialize for DeviceResolutionState {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeviceAbsCalibState {
-    pub control_id: u16,
+    pub control_id: DeviceControl,
     pub len: u16,
     pub min_x: i32,
     pub max_x: i32,
@@ -5452,6 +5488,7 @@ impl TryParse for DeviceAbsCalibState {
         let (flip_y, remaining) = u32::try_parse(remaining)?;
         let (rotation, remaining) = u32::try_parse(remaining)?;
         let (button_threshold, remaining) = u32::try_parse(remaining)?;
+        let control_id = control_id.try_into()?;
         let result = DeviceAbsCalibState { control_id, len, min_x, max_x, min_y, max_y, flip_x, flip_y, rotation, button_threshold };
         Ok((result, remaining))
     }
@@ -5465,7 +5502,7 @@ impl TryFrom<&[u8]> for DeviceAbsCalibState {
 impl Serialize for DeviceAbsCalibState {
     type Bytes = [u8; 36];
     fn serialize(&self) -> Self::Bytes {
-        let control_id_bytes = self.control_id.serialize();
+        let control_id_bytes = Into::<u16>::into(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let min_x_bytes = self.min_x.serialize();
         let max_x_bytes = self.max_x.serialize();
@@ -5516,7 +5553,7 @@ impl Serialize for DeviceAbsCalibState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(36);
-        self.control_id.serialize_into(bytes);
+        Into::<u16>::into(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.min_x.serialize_into(bytes);
         self.max_x.serialize_into(bytes);
@@ -5531,7 +5568,7 @@ impl Serialize for DeviceAbsCalibState {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeviceAbsAreaState {
-    pub control_id: u16,
+    pub control_id: DeviceControl,
     pub len: u16,
     pub offset_x: u32,
     pub offset_y: u32,
@@ -5550,6 +5587,7 @@ impl TryParse for DeviceAbsAreaState {
         let (height, remaining) = u32::try_parse(remaining)?;
         let (screen, remaining) = u32::try_parse(remaining)?;
         let (following, remaining) = u32::try_parse(remaining)?;
+        let control_id = control_id.try_into()?;
         let result = DeviceAbsAreaState { control_id, len, offset_x, offset_y, width, height, screen, following };
         Ok((result, remaining))
     }
@@ -5563,7 +5601,7 @@ impl TryFrom<&[u8]> for DeviceAbsAreaState {
 impl Serialize for DeviceAbsAreaState {
     type Bytes = [u8; 28];
     fn serialize(&self) -> Self::Bytes {
-        let control_id_bytes = self.control_id.serialize();
+        let control_id_bytes = Into::<u16>::into(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let offset_x_bytes = self.offset_x.serialize();
         let offset_y_bytes = self.offset_y.serialize();
@@ -5604,7 +5642,7 @@ impl Serialize for DeviceAbsAreaState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(28);
-        self.control_id.serialize_into(bytes);
+        Into::<u16>::into(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.offset_x.serialize_into(bytes);
         self.offset_y.serialize_into(bytes);
@@ -5617,7 +5655,7 @@ impl Serialize for DeviceAbsAreaState {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeviceCoreState {
-    pub control_id: u16,
+    pub control_id: DeviceControl,
     pub len: u16,
     pub status: u8,
     pub iscore: u8,
@@ -5629,6 +5667,7 @@ impl TryParse for DeviceCoreState {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (iscore, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let control_id = control_id.try_into()?;
         let result = DeviceCoreState { control_id, len, status, iscore };
         Ok((result, remaining))
     }
@@ -5642,7 +5681,7 @@ impl TryFrom<&[u8]> for DeviceCoreState {
 impl Serialize for DeviceCoreState {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let control_id_bytes = self.control_id.serialize();
+        let control_id_bytes = Into::<u16>::into(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let status_bytes = self.status.serialize();
         let iscore_bytes = self.iscore.serialize();
@@ -5659,7 +5698,7 @@ impl Serialize for DeviceCoreState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.control_id.serialize_into(bytes);
+        Into::<u16>::into(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.status.serialize_into(bytes);
         self.iscore.serialize_into(bytes);
@@ -5669,7 +5708,7 @@ impl Serialize for DeviceCoreState {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeviceEnableState {
-    pub control_id: u16,
+    pub control_id: DeviceControl,
     pub len: u16,
     pub enable: u8,
 }
@@ -5679,6 +5718,7 @@ impl TryParse for DeviceEnableState {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (enable, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let control_id = control_id.try_into()?;
         let result = DeviceEnableState { control_id, len, enable };
         Ok((result, remaining))
     }
@@ -5692,7 +5732,7 @@ impl TryFrom<&[u8]> for DeviceEnableState {
 impl Serialize for DeviceEnableState {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let control_id_bytes = self.control_id.serialize();
+        let control_id_bytes = Into::<u16>::into(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let enable_bytes = self.enable.serialize();
         [
@@ -5708,7 +5748,7 @@ impl Serialize for DeviceEnableState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.control_id.serialize_into(bytes);
+        Into::<u16>::into(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.enable.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
@@ -6057,7 +6097,7 @@ impl Serialize for DeviceStateData {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DeviceState {
-    pub control_id: u16,
+    pub control_id: DeviceControl,
     pub len: u16,
     pub data: DeviceStateData,
 }
@@ -6066,6 +6106,7 @@ impl TryParse for DeviceState {
         let (control_id, remaining) = u16::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
         let (data, remaining) = DeviceStateData::try_parse(remaining, control_id)?;
+        let control_id = control_id.try_into()?;
         let result = DeviceState { control_id, len, data };
         Ok((result, remaining))
     }
@@ -6085,7 +6126,7 @@ impl Serialize for DeviceState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        self.control_id.serialize_into(bytes);
+        Into::<u16>::into(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes);
     }
@@ -6148,7 +6189,7 @@ impl TryFrom<&[u8]> for GetDeviceControlReply {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DeviceResolutionCtl {
-    pub control_id: u16,
+    pub control_id: DeviceControl,
     pub len: u16,
     pub first_valuator: u8,
     pub resolution_values: Vec<u32>,
@@ -6161,6 +6202,7 @@ impl TryParse for DeviceResolutionCtl {
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
+        let control_id = control_id.try_into()?;
         let result = DeviceResolutionCtl { control_id, len, first_valuator, resolution_values };
         Ok((result, remaining))
     }
@@ -6180,7 +6222,7 @@ impl Serialize for DeviceResolutionCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.control_id.serialize_into(bytes);
+        Into::<u16>::into(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.first_valuator.serialize_into(bytes);
         let num_valuators = self.resolution_values.len() as u8;
@@ -6192,7 +6234,7 @@ impl Serialize for DeviceResolutionCtl {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeviceAbsCalibCtl {
-    pub control_id: u16,
+    pub control_id: DeviceControl,
     pub len: u16,
     pub min_x: i32,
     pub max_x: i32,
@@ -6215,6 +6257,7 @@ impl TryParse for DeviceAbsCalibCtl {
         let (flip_y, remaining) = u32::try_parse(remaining)?;
         let (rotation, remaining) = u32::try_parse(remaining)?;
         let (button_threshold, remaining) = u32::try_parse(remaining)?;
+        let control_id = control_id.try_into()?;
         let result = DeviceAbsCalibCtl { control_id, len, min_x, max_x, min_y, max_y, flip_x, flip_y, rotation, button_threshold };
         Ok((result, remaining))
     }
@@ -6228,7 +6271,7 @@ impl TryFrom<&[u8]> for DeviceAbsCalibCtl {
 impl Serialize for DeviceAbsCalibCtl {
     type Bytes = [u8; 36];
     fn serialize(&self) -> Self::Bytes {
-        let control_id_bytes = self.control_id.serialize();
+        let control_id_bytes = Into::<u16>::into(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let min_x_bytes = self.min_x.serialize();
         let max_x_bytes = self.max_x.serialize();
@@ -6279,7 +6322,7 @@ impl Serialize for DeviceAbsCalibCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(36);
-        self.control_id.serialize_into(bytes);
+        Into::<u16>::into(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.min_x.serialize_into(bytes);
         self.max_x.serialize_into(bytes);
@@ -6294,7 +6337,7 @@ impl Serialize for DeviceAbsCalibCtl {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeviceAbsAreaCtrl {
-    pub control_id: u16,
+    pub control_id: DeviceControl,
     pub len: u16,
     pub offset_x: u32,
     pub offset_y: u32,
@@ -6313,6 +6356,7 @@ impl TryParse for DeviceAbsAreaCtrl {
         let (height, remaining) = i32::try_parse(remaining)?;
         let (screen, remaining) = i32::try_parse(remaining)?;
         let (following, remaining) = u32::try_parse(remaining)?;
+        let control_id = control_id.try_into()?;
         let result = DeviceAbsAreaCtrl { control_id, len, offset_x, offset_y, width, height, screen, following };
         Ok((result, remaining))
     }
@@ -6326,7 +6370,7 @@ impl TryFrom<&[u8]> for DeviceAbsAreaCtrl {
 impl Serialize for DeviceAbsAreaCtrl {
     type Bytes = [u8; 28];
     fn serialize(&self) -> Self::Bytes {
-        let control_id_bytes = self.control_id.serialize();
+        let control_id_bytes = Into::<u16>::into(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let offset_x_bytes = self.offset_x.serialize();
         let offset_y_bytes = self.offset_y.serialize();
@@ -6367,7 +6411,7 @@ impl Serialize for DeviceAbsAreaCtrl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(28);
-        self.control_id.serialize_into(bytes);
+        Into::<u16>::into(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.offset_x.serialize_into(bytes);
         self.offset_y.serialize_into(bytes);
@@ -6380,7 +6424,7 @@ impl Serialize for DeviceAbsAreaCtrl {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeviceCoreCtrl {
-    pub control_id: u16,
+    pub control_id: DeviceControl,
     pub len: u16,
     pub status: u8,
 }
@@ -6390,6 +6434,7 @@ impl TryParse for DeviceCoreCtrl {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let control_id = control_id.try_into()?;
         let result = DeviceCoreCtrl { control_id, len, status };
         Ok((result, remaining))
     }
@@ -6403,7 +6448,7 @@ impl TryFrom<&[u8]> for DeviceCoreCtrl {
 impl Serialize for DeviceCoreCtrl {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let control_id_bytes = self.control_id.serialize();
+        let control_id_bytes = Into::<u16>::into(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let status_bytes = self.status.serialize();
         [
@@ -6419,7 +6464,7 @@ impl Serialize for DeviceCoreCtrl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.control_id.serialize_into(bytes);
+        Into::<u16>::into(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.status.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
@@ -6428,7 +6473,7 @@ impl Serialize for DeviceCoreCtrl {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeviceEnableCtrl {
-    pub control_id: u16,
+    pub control_id: DeviceControl,
     pub len: u16,
     pub enable: u8,
 }
@@ -6438,6 +6483,7 @@ impl TryParse for DeviceEnableCtrl {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (enable, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let control_id = control_id.try_into()?;
         let result = DeviceEnableCtrl { control_id, len, enable };
         Ok((result, remaining))
     }
@@ -6451,7 +6497,7 @@ impl TryFrom<&[u8]> for DeviceEnableCtrl {
 impl Serialize for DeviceEnableCtrl {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let control_id_bytes = self.control_id.serialize();
+        let control_id_bytes = Into::<u16>::into(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let enable_bytes = self.enable.serialize();
         [
@@ -6467,7 +6513,7 @@ impl Serialize for DeviceEnableCtrl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.control_id.serialize_into(bytes);
+        Into::<u16>::into(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.enable.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
@@ -6778,7 +6824,7 @@ impl Serialize for DeviceCtlData {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DeviceCtl {
-    pub control_id: u16,
+    pub control_id: DeviceControl,
     pub len: u16,
     pub data: DeviceCtlData,
 }
@@ -6787,6 +6833,7 @@ impl TryParse for DeviceCtl {
         let (control_id, remaining) = u16::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
         let (data, remaining) = DeviceCtlData::try_parse(remaining, control_id)?;
+        let control_id = control_id.try_into()?;
         let result = DeviceCtl { control_id, len, data };
         Ok((result, remaining))
     }
@@ -6806,7 +6853,7 @@ impl Serialize for DeviceCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        self.control_id.serialize_into(bytes);
+        Into::<u16>::into(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes);
     }
@@ -7232,7 +7279,7 @@ pub struct GetDevicePropertyReply {
     pub type_: ATOM,
     pub bytes_after: u32,
     pub num_items: u32,
-    pub format: u8,
+    pub format: PropertyFormat,
     pub device_id: u8,
     pub items: GetDevicePropertyItems,
 }
@@ -7249,6 +7296,7 @@ impl GetDevicePropertyReply {
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(10..).ok_or(ParseError::ParseError)?;
         let (items, remaining) = GetDevicePropertyItems::try_parse(remaining, format, num_items)?;
+        let format = format.try_into()?;
         let result = GetDevicePropertyReply { response_type, xi_reply_type, sequence, length, type_, bytes_after, num_items, format, device_id, items };
         Ok((result, remaining))
     }
@@ -7728,7 +7776,7 @@ impl TryFrom<u32> for ChangeMode {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AddMaster {
-    pub type_: u16,
+    pub type_: HierarchyChangeType,
     pub len: u16,
     pub send_core: bool,
     pub enable: bool,
@@ -7747,6 +7795,7 @@ impl TryParse for AddMaster {
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let type_ = type_.try_into()?;
         let result = AddMaster { type_, len, send_core, enable, name };
         Ok((result, remaining))
     }
@@ -7766,7 +7815,7 @@ impl Serialize for AddMaster {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u16>::into(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         let name_len = self.name.len() as u16;
         name_len.serialize_into(bytes);
@@ -7779,10 +7828,10 @@ impl Serialize for AddMaster {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct RemoveMaster {
-    pub type_: u16,
+    pub type_: HierarchyChangeType,
     pub len: u16,
     pub deviceid: DeviceId,
-    pub return_mode: u8,
+    pub return_mode: ChangeMode,
     pub return_pointer: DeviceId,
     pub return_keyboard: DeviceId,
 }
@@ -7795,6 +7844,8 @@ impl TryParse for RemoveMaster {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (return_pointer, remaining) = DeviceId::try_parse(remaining)?;
         let (return_keyboard, remaining) = DeviceId::try_parse(remaining)?;
+        let type_ = type_.try_into()?;
+        let return_mode = return_mode.try_into()?;
         let result = RemoveMaster { type_, len, deviceid, return_mode, return_pointer, return_keyboard };
         Ok((result, remaining))
     }
@@ -7808,10 +7859,10 @@ impl TryFrom<&[u8]> for RemoveMaster {
 impl Serialize for RemoveMaster {
     type Bytes = [u8; 12];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u16>::into(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let deviceid_bytes = self.deviceid.serialize();
-        let return_mode_bytes = self.return_mode.serialize();
+        let return_mode_bytes = Into::<u8>::into(self.return_mode).serialize();
         let return_pointer_bytes = self.return_pointer.serialize();
         let return_keyboard_bytes = self.return_keyboard.serialize();
         [
@@ -7831,10 +7882,10 @@ impl Serialize for RemoveMaster {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        self.type_.serialize_into(bytes);
+        Into::<u16>::into(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.deviceid.serialize_into(bytes);
-        self.return_mode.serialize_into(bytes);
+        Into::<u8>::into(self.return_mode).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         self.return_pointer.serialize_into(bytes);
         self.return_keyboard.serialize_into(bytes);
@@ -7843,7 +7894,7 @@ impl Serialize for RemoveMaster {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AttachSlave {
-    pub type_: u16,
+    pub type_: HierarchyChangeType,
     pub len: u16,
     pub deviceid: DeviceId,
     pub master: DeviceId,
@@ -7854,6 +7905,7 @@ impl TryParse for AttachSlave {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let (master, remaining) = DeviceId::try_parse(remaining)?;
+        let type_ = type_.try_into()?;
         let result = AttachSlave { type_, len, deviceid, master };
         Ok((result, remaining))
     }
@@ -7867,7 +7919,7 @@ impl TryFrom<&[u8]> for AttachSlave {
 impl Serialize for AttachSlave {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u16>::into(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let deviceid_bytes = self.deviceid.serialize();
         let master_bytes = self.master.serialize();
@@ -7884,7 +7936,7 @@ impl Serialize for AttachSlave {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u16>::into(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.deviceid.serialize_into(bytes);
         self.master.serialize_into(bytes);
@@ -7893,7 +7945,7 @@ impl Serialize for AttachSlave {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DetachSlave {
-    pub type_: u16,
+    pub type_: HierarchyChangeType,
     pub len: u16,
     pub deviceid: DeviceId,
 }
@@ -7903,6 +7955,7 @@ impl TryParse for DetachSlave {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let type_ = type_.try_into()?;
         let result = DetachSlave { type_, len, deviceid };
         Ok((result, remaining))
     }
@@ -7916,7 +7969,7 @@ impl TryFrom<&[u8]> for DetachSlave {
 impl Serialize for DetachSlave {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u16>::into(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let deviceid_bytes = self.deviceid.serialize();
         [
@@ -7932,7 +7985,7 @@ impl Serialize for DetachSlave {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u16>::into(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.deviceid.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
@@ -7986,7 +8039,7 @@ impl Serialize for HierarchyChangeDataAddMaster {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct HierarchyChangeDataRemoveMaster {
     pub deviceid: DeviceId,
-    pub return_mode: u8,
+    pub return_mode: ChangeMode,
     pub return_pointer: DeviceId,
     pub return_keyboard: DeviceId,
 }
@@ -7997,6 +8050,7 @@ impl TryParse for HierarchyChangeDataRemoveMaster {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (return_pointer, remaining) = DeviceId::try_parse(remaining)?;
         let (return_keyboard, remaining) = DeviceId::try_parse(remaining)?;
+        let return_mode = return_mode.try_into()?;
         let result = HierarchyChangeDataRemoveMaster { deviceid, return_mode, return_pointer, return_keyboard };
         Ok((result, remaining))
     }
@@ -8011,7 +8065,7 @@ impl Serialize for HierarchyChangeDataRemoveMaster {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
         let deviceid_bytes = self.deviceid.serialize();
-        let return_mode_bytes = self.return_mode.serialize();
+        let return_mode_bytes = Into::<u8>::into(self.return_mode).serialize();
         let return_pointer_bytes = self.return_pointer.serialize();
         let return_keyboard_bytes = self.return_keyboard.serialize();
         [
@@ -8028,7 +8082,7 @@ impl Serialize for HierarchyChangeDataRemoveMaster {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
         self.deviceid.serialize_into(bytes);
-        self.return_mode.serialize_into(bytes);
+        Into::<u8>::into(self.return_mode).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         self.return_pointer.serialize_into(bytes);
         self.return_keyboard.serialize_into(bytes);
@@ -8159,7 +8213,7 @@ impl Serialize for HierarchyChangeData {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct HierarchyChange {
-    pub type_: u16,
+    pub type_: HierarchyChangeType,
     pub len: u16,
     pub data: HierarchyChangeData,
 }
@@ -8168,6 +8222,7 @@ impl TryParse for HierarchyChange {
         let (type_, remaining) = u16::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
         let (data, remaining) = HierarchyChangeData::try_parse(remaining, type_)?;
+        let type_ = type_.try_into()?;
         let result = HierarchyChange { type_, len, data };
         Ok((result, remaining))
     }
@@ -8187,7 +8242,7 @@ impl Serialize for HierarchyChange {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        self.type_.serialize_into(bytes);
+        Into::<u16>::into(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes);
     }
@@ -8864,7 +8919,7 @@ impl TryFrom<u32> for TouchMode {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ButtonClass {
-    pub type_: u16,
+    pub type_: DeviceClassType,
     pub len: u16,
     pub sourceid: DeviceId,
     pub num_buttons: u16,
@@ -8879,6 +8934,7 @@ impl TryParse for ButtonClass {
         let (num_buttons, remaining) = u16::try_parse(remaining)?;
         let (state, remaining) = crate::x11_utils::parse_list::<u32>(remaining, ((num_buttons as usize) + (31)) / (32))?;
         let (labels, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, num_buttons as usize)?;
+        let type_ = type_.try_into()?;
         let result = ButtonClass { type_, len, sourceid, num_buttons, state, labels };
         Ok((result, remaining))
     }
@@ -8898,7 +8954,7 @@ impl Serialize for ButtonClass {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u16>::into(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
         self.num_buttons.serialize_into(bytes);
@@ -8909,7 +8965,7 @@ impl Serialize for ButtonClass {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct KeyClass {
-    pub type_: u16,
+    pub type_: DeviceClassType,
     pub len: u16,
     pub sourceid: DeviceId,
     pub keys: Vec<u32>,
@@ -8921,6 +8977,7 @@ impl TryParse for KeyClass {
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (num_keys, remaining) = u16::try_parse(remaining)?;
         let (keys, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_keys as usize)?;
+        let type_ = type_.try_into()?;
         let result = KeyClass { type_, len, sourceid, keys };
         Ok((result, remaining))
     }
@@ -8940,7 +8997,7 @@ impl Serialize for KeyClass {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u16>::into(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
         let num_keys = self.keys.len() as u16;
@@ -8951,11 +9008,11 @@ impl Serialize for KeyClass {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ScrollClass {
-    pub type_: u16,
+    pub type_: DeviceClassType,
     pub len: u16,
     pub sourceid: DeviceId,
     pub number: u16,
-    pub scroll_type: u16,
+    pub scroll_type: ScrollType,
     pub flags: u32,
     pub increment: Fp3232,
 }
@@ -8969,6 +9026,8 @@ impl TryParse for ScrollClass {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (increment, remaining) = Fp3232::try_parse(remaining)?;
+        let type_ = type_.try_into()?;
+        let scroll_type = scroll_type.try_into()?;
         let result = ScrollClass { type_, len, sourceid, number, scroll_type, flags, increment };
         Ok((result, remaining))
     }
@@ -8982,11 +9041,11 @@ impl TryFrom<&[u8]> for ScrollClass {
 impl Serialize for ScrollClass {
     type Bytes = [u8; 24];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u16>::into(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let sourceid_bytes = self.sourceid.serialize();
         let number_bytes = self.number.serialize();
-        let scroll_type_bytes = self.scroll_type.serialize();
+        let scroll_type_bytes = Into::<u16>::into(self.scroll_type).serialize();
         let flags_bytes = self.flags.serialize();
         let increment_bytes = self.increment.serialize();
         [
@@ -9018,11 +9077,11 @@ impl Serialize for ScrollClass {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(24);
-        self.type_.serialize_into(bytes);
+        Into::<u16>::into(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
         self.number.serialize_into(bytes);
-        self.scroll_type.serialize_into(bytes);
+        Into::<u16>::into(self.scroll_type).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.flags.serialize_into(bytes);
         self.increment.serialize_into(bytes);
@@ -9031,10 +9090,10 @@ impl Serialize for ScrollClass {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TouchClass {
-    pub type_: u16,
+    pub type_: DeviceClassType,
     pub len: u16,
     pub sourceid: DeviceId,
-    pub mode: u8,
+    pub mode: TouchMode,
     pub num_touches: u8,
 }
 impl TryParse for TouchClass {
@@ -9044,6 +9103,8 @@ impl TryParse for TouchClass {
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (num_touches, remaining) = u8::try_parse(remaining)?;
+        let type_ = type_.try_into()?;
+        let mode = mode.try_into()?;
         let result = TouchClass { type_, len, sourceid, mode, num_touches };
         Ok((result, remaining))
     }
@@ -9057,10 +9118,10 @@ impl TryFrom<&[u8]> for TouchClass {
 impl Serialize for TouchClass {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u16>::into(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let sourceid_bytes = self.sourceid.serialize();
-        let mode_bytes = self.mode.serialize();
+        let mode_bytes = Into::<u8>::into(self.mode).serialize();
         let num_touches_bytes = self.num_touches.serialize();
         [
             type_bytes[0],
@@ -9075,17 +9136,17 @@ impl Serialize for TouchClass {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u16>::into(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
-        self.mode.serialize_into(bytes);
+        Into::<u8>::into(self.mode).serialize_into(bytes);
         self.num_touches.serialize_into(bytes);
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ValuatorClass {
-    pub type_: u16,
+    pub type_: DeviceClassType,
     pub len: u16,
     pub sourceid: DeviceId,
     pub number: u16,
@@ -9094,7 +9155,7 @@ pub struct ValuatorClass {
     pub max: Fp3232,
     pub value: Fp3232,
     pub resolution: u32,
-    pub mode: u8,
+    pub mode: ValuatorMode,
 }
 impl TryParse for ValuatorClass {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -9109,6 +9170,8 @@ impl TryParse for ValuatorClass {
         let (resolution, remaining) = u32::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let type_ = type_.try_into()?;
+        let mode = mode.try_into()?;
         let result = ValuatorClass { type_, len, sourceid, number, label, min, max, value, resolution, mode };
         Ok((result, remaining))
     }
@@ -9122,7 +9185,7 @@ impl TryFrom<&[u8]> for ValuatorClass {
 impl Serialize for ValuatorClass {
     type Bytes = [u8; 44];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u16>::into(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let sourceid_bytes = self.sourceid.serialize();
         let number_bytes = self.number.serialize();
@@ -9131,7 +9194,7 @@ impl Serialize for ValuatorClass {
         let max_bytes = self.max.serialize();
         let value_bytes = self.value.serialize();
         let resolution_bytes = self.resolution.serialize();
-        let mode_bytes = self.mode.serialize();
+        let mode_bytes = Into::<u8>::into(self.mode).serialize();
         [
             type_bytes[0],
             type_bytes[1],
@@ -9181,7 +9244,7 @@ impl Serialize for ValuatorClass {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(44);
-        self.type_.serialize_into(bytes);
+        Into::<u16>::into(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
         self.number.serialize_into(bytes);
@@ -9190,7 +9253,7 @@ impl Serialize for ValuatorClass {
         self.max.serialize_into(bytes);
         self.value.serialize_into(bytes);
         self.resolution.serialize_into(bytes);
-        self.mode.serialize_into(bytes);
+        Into::<u8>::into(self.mode).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
     }
 }
@@ -9270,7 +9333,7 @@ pub struct DeviceClassDataValuator {
     pub max: Fp3232,
     pub value: Fp3232,
     pub resolution: u32,
-    pub mode: u8,
+    pub mode: ValuatorMode,
 }
 impl TryParse for DeviceClassDataValuator {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -9282,6 +9345,7 @@ impl TryParse for DeviceClassDataValuator {
         let (resolution, remaining) = u32::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let mode = mode.try_into()?;
         let result = DeviceClassDataValuator { number, label, min, max, value, resolution, mode };
         Ok((result, remaining))
     }
@@ -9301,7 +9365,7 @@ impl Serialize for DeviceClassDataValuator {
         let max_bytes = self.max.serialize();
         let value_bytes = self.value.serialize();
         let resolution_bytes = self.resolution.serialize();
-        let mode_bytes = self.mode.serialize();
+        let mode_bytes = Into::<u8>::into(self.mode).serialize();
         [
             number_bytes[0],
             number_bytes[1],
@@ -9351,14 +9415,14 @@ impl Serialize for DeviceClassDataValuator {
         self.max.serialize_into(bytes);
         self.value.serialize_into(bytes);
         self.resolution.serialize_into(bytes);
-        self.mode.serialize_into(bytes);
+        Into::<u8>::into(self.mode).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeviceClassDataScroll {
     pub number: u16,
-    pub scroll_type: u16,
+    pub scroll_type: ScrollType,
     pub flags: u32,
     pub increment: Fp3232,
 }
@@ -9369,6 +9433,7 @@ impl TryParse for DeviceClassDataScroll {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (increment, remaining) = Fp3232::try_parse(remaining)?;
+        let scroll_type = scroll_type.try_into()?;
         let result = DeviceClassDataScroll { number, scroll_type, flags, increment };
         Ok((result, remaining))
     }
@@ -9383,7 +9448,7 @@ impl Serialize for DeviceClassDataScroll {
     type Bytes = [u8; 18];
     fn serialize(&self) -> Self::Bytes {
         let number_bytes = self.number.serialize();
-        let scroll_type_bytes = self.scroll_type.serialize();
+        let scroll_type_bytes = Into::<u16>::into(self.scroll_type).serialize();
         let flags_bytes = self.flags.serialize();
         let increment_bytes = self.increment.serialize();
         [
@@ -9410,7 +9475,7 @@ impl Serialize for DeviceClassDataScroll {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(18);
         self.number.serialize_into(bytes);
-        self.scroll_type.serialize_into(bytes);
+        Into::<u16>::into(self.scroll_type).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.flags.serialize_into(bytes);
         self.increment.serialize_into(bytes);
@@ -9418,13 +9483,14 @@ impl Serialize for DeviceClassDataScroll {
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeviceClassDataTouch {
-    pub mode: u8,
+    pub mode: TouchMode,
     pub num_touches: u8,
 }
 impl TryParse for DeviceClassDataTouch {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (num_touches, remaining) = u8::try_parse(remaining)?;
+        let mode = mode.try_into()?;
         let result = DeviceClassDataTouch { mode, num_touches };
         Ok((result, remaining))
     }
@@ -9438,7 +9504,7 @@ impl TryFrom<&[u8]> for DeviceClassDataTouch {
 impl Serialize for DeviceClassDataTouch {
     type Bytes = [u8; 2];
     fn serialize(&self) -> Self::Bytes {
-        let mode_bytes = self.mode.serialize();
+        let mode_bytes = Into::<u8>::into(self.mode).serialize();
         let num_touches_bytes = self.num_touches.serialize();
         [
             mode_bytes[0],
@@ -9447,7 +9513,7 @@ impl Serialize for DeviceClassDataTouch {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        self.mode.serialize_into(bytes);
+        Into::<u8>::into(self.mode).serialize_into(bytes);
         self.num_touches.serialize_into(bytes);
     }
 }
@@ -9552,7 +9618,7 @@ impl Serialize for DeviceClassData {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DeviceClass {
-    pub type_: u16,
+    pub type_: DeviceClassType,
     pub len: u16,
     pub sourceid: DeviceId,
     pub data: DeviceClassData,
@@ -9563,6 +9629,7 @@ impl TryParse for DeviceClass {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (data, remaining) = DeviceClassData::try_parse(remaining, type_)?;
+        let type_ = type_.try_into()?;
         let result = DeviceClass { type_, len, sourceid, data };
         Ok((result, remaining))
     }
@@ -9582,7 +9649,7 @@ impl Serialize for DeviceClass {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(6);
-        self.type_.serialize_into(bytes);
+        Into::<u16>::into(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
         self.data.serialize_into(bytes);
@@ -9592,7 +9659,7 @@ impl Serialize for DeviceClass {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIDeviceInfo {
     pub deviceid: DeviceId,
-    pub type_: u16,
+    pub type_: DeviceType,
     pub attachment: DeviceId,
     pub enabled: bool,
     pub name: Vec<u8>,
@@ -9614,6 +9681,7 @@ impl TryParse for XIDeviceInfo {
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<DeviceClass>(remaining, num_classes as usize)?;
+        let type_ = type_.try_into()?;
         let result = XIDeviceInfo { deviceid, type_, attachment, enabled, name, classes };
         Ok((result, remaining))
     }
@@ -9634,7 +9702,7 @@ impl Serialize for XIDeviceInfo {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
         self.deviceid.serialize_into(bytes);
-        self.type_.serialize_into(bytes);
+        Into::<u16>::into(self.type_).serialize_into(bytes);
         self.attachment.serialize_into(bytes);
         let num_classes = self.classes.len() as u16;
         num_classes.serialize_into(bytes);
@@ -9906,7 +9974,7 @@ pub struct XIGrabDeviceReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub status: u8,
+    pub status: GrabStatus,
 }
 impl XIGrabDeviceReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -9916,6 +9984,7 @@ impl XIGrabDeviceReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let status = status.try_into()?;
         let result = XIGrabDeviceReply { response_type, sequence, length, status };
         Ok((result, remaining))
     }
@@ -10246,13 +10315,14 @@ bitmask_binop!(ModifierMask, u32);
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabModifierInfo {
     pub modifiers: u32,
-    pub status: u8,
+    pub status: GrabStatus,
 }
 impl TryParse for GrabModifierInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (modifiers, remaining) = u32::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let status = status.try_into()?;
         let result = GrabModifierInfo { modifiers, status };
         Ok((result, remaining))
     }
@@ -10267,7 +10337,7 @@ impl Serialize for GrabModifierInfo {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
         let modifiers_bytes = self.modifiers.serialize();
-        let status_bytes = self.status.serialize();
+        let status_bytes = Into::<u8>::into(self.status).serialize();
         [
             modifiers_bytes[0],
             modifiers_bytes[1],
@@ -10282,7 +10352,7 @@ impl Serialize for GrabModifierInfo {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
         self.modifiers.serialize_into(bytes);
-        self.status.serialize_into(bytes);
+        Into::<u8>::into(self.status).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
     }
 }
@@ -10727,7 +10797,7 @@ pub struct XIGetPropertyReply {
     pub type_: ATOM,
     pub bytes_after: u32,
     pub num_items: u32,
-    pub format: u8,
+    pub format: PropertyFormat,
     pub items: XIGetPropertyItems,
 }
 impl XIGetPropertyReply {
@@ -10742,6 +10812,7 @@ impl XIGetPropertyReply {
         let (format, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
         let (items, remaining) = XIGetPropertyItems::try_parse(remaining, format, num_items)?;
+        let format = format.try_into()?;
         let result = XIGetPropertyReply { response_type, sequence, length, type_, bytes_after, num_items, format, items };
         Ok((result, remaining))
     }
@@ -11458,11 +11529,11 @@ pub const DEVICE_FOCUS_IN_EVENT: u8 = 6;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeviceFocusInEvent {
     pub response_type: u8,
-    pub detail: u8,
+    pub detail: NotifyDetail,
     pub sequence: u16,
     pub time: TIMESTAMP,
     pub window: WINDOW,
-    pub mode: u8,
+    pub mode: NotifyMode,
     pub device_id: u8,
 }
 impl DeviceFocusInEvent {
@@ -11475,6 +11546,8 @@ impl DeviceFocusInEvent {
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
+        let detail = detail.try_into()?;
+        let mode = mode.try_into()?;
         let result = DeviceFocusInEvent { response_type, detail, sequence, time, window, mode, device_id };
         Ok((result, remaining))
     }
@@ -11498,11 +11571,11 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for DeviceFocusInEvent {
 impl From<&DeviceFocusInEvent> for [u8; 32] {
     fn from(input: &DeviceFocusInEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
+        let detail = Into::<u8>::into(input.detail).serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let window = input.window.serialize();
-        let mode = input.mode.serialize();
+        let mode = Into::<u8>::into(input.mode).serialize();
         let device_id = input.device_id.serialize();
         [
             response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
@@ -11523,11 +11596,11 @@ pub const DEVICE_FOCUS_OUT_EVENT: u8 = 7;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeviceFocusOutEvent {
     pub response_type: u8,
-    pub detail: u8,
+    pub detail: NotifyDetail,
     pub sequence: u16,
     pub time: TIMESTAMP,
     pub window: WINDOW,
-    pub mode: u8,
+    pub mode: NotifyMode,
     pub device_id: u8,
 }
 impl DeviceFocusOutEvent {
@@ -11540,6 +11613,8 @@ impl DeviceFocusOutEvent {
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
+        let detail = detail.try_into()?;
+        let mode = mode.try_into()?;
         let result = DeviceFocusOutEvent { response_type, detail, sequence, time, window, mode, device_id };
         Ok((result, remaining))
     }
@@ -11563,11 +11638,11 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for DeviceFocusOutEvent {
 impl From<&DeviceFocusOutEvent> for [u8; 32] {
     fn from(input: &DeviceFocusOutEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
+        let detail = Into::<u8>::into(input.detail).serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let window = input.window.serialize();
-        let mode = input.mode.serialize();
+        let mode = Into::<u8>::into(input.mode).serialize();
         let device_id = input.device_id.serialize();
         [
             response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
@@ -11933,7 +12008,7 @@ pub struct DeviceMappingNotifyEvent {
     pub response_type: u8,
     pub device_id: u8,
     pub sequence: u16,
-    pub request: u8,
+    pub request: Mapping,
     pub first_keycode: KeyCode,
     pub count: u8,
     pub time: TIMESTAMP,
@@ -11949,6 +12024,7 @@ impl DeviceMappingNotifyEvent {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let request = request.try_into()?;
         let result = DeviceMappingNotifyEvent { response_type, device_id, sequence, request, first_keycode, count, time };
         Ok((result, remaining))
     }
@@ -11974,7 +12050,7 @@ impl From<&DeviceMappingNotifyEvent> for [u8; 32] {
         let response_type = input.response_type.serialize();
         let device_id = input.device_id.serialize();
         let sequence = input.sequence.serialize();
-        let request = input.request.serialize();
+        let request = Into::<u8>::into(input.request).serialize();
         let first_keycode = input.first_keycode.serialize();
         let count = input.count.serialize();
         let time = input.time.serialize();
@@ -12062,7 +12138,7 @@ pub struct ChangeDeviceNotifyEvent {
     pub device_id: u8,
     pub sequence: u16,
     pub time: TIMESTAMP,
-    pub request: u8,
+    pub request: ChangeDevice,
 }
 impl ChangeDeviceNotifyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -12072,6 +12148,7 @@ impl ChangeDeviceNotifyEvent {
         let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
         let (request, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let request = request.try_into()?;
         let result = ChangeDeviceNotifyEvent { response_type, device_id, sequence, time, request };
         Ok((result, remaining))
     }
@@ -12098,7 +12175,7 @@ impl From<&ChangeDeviceNotifyEvent> for [u8; 32] {
         let device_id = input.device_id.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
-        let request = input.request.serialize();
+        let request = Into::<u8>::into(input.request).serialize();
         [
             response_type[0], device_id[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
             request[0], 0, 0, 0, 0, 0, 0, 0,
@@ -12416,7 +12493,7 @@ pub struct DevicePresenceNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
     pub time: TIMESTAMP,
-    pub devchange: u8,
+    pub devchange: DeviceChange,
     pub device_id: u8,
     pub control: u16,
 }
@@ -12430,6 +12507,7 @@ impl DevicePresenceNotifyEvent {
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (control, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let devchange = devchange.try_into()?;
         let result = DevicePresenceNotifyEvent { response_type, sequence, time, devchange, device_id, control };
         Ok((result, remaining))
     }
@@ -12455,7 +12533,7 @@ impl From<&DevicePresenceNotifyEvent> for [u8; 32] {
         let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
-        let devchange = input.devchange.serialize();
+        let devchange = Into::<u8>::into(input.devchange).serialize();
         let device_id = input.device_id.serialize();
         let control = input.control.serialize();
         [
@@ -12477,7 +12555,7 @@ pub const DEVICE_PROPERTY_NOTIFY_EVENT: u8 = 16;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DevicePropertyNotifyEvent {
     pub response_type: u8,
-    pub state: u8,
+    pub state: Property,
     pub sequence: u16,
     pub time: TIMESTAMP,
     pub property: ATOM,
@@ -12492,6 +12570,7 @@ impl DevicePropertyNotifyEvent {
         let (property, remaining) = ATOM::try_parse(remaining)?;
         let remaining = remaining.get(19..).ok_or(ParseError::ParseError)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
+        let state = state.try_into()?;
         let result = DevicePropertyNotifyEvent { response_type, state, sequence, time, property, device_id };
         Ok((result, remaining))
     }
@@ -12515,7 +12594,7 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for DevicePropertyNotifyEvent {
 impl From<&DevicePropertyNotifyEvent> for [u8; 32] {
     fn from(input: &DevicePropertyNotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let state = input.state.serialize();
+        let state = Into::<u8>::into(input.state).serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let property = input.property.serialize();
@@ -12608,7 +12687,7 @@ pub struct DeviceChangedEvent {
     pub deviceid: DeviceId,
     pub time: TIMESTAMP,
     pub sourceid: DeviceId,
-    pub reason: u8,
+    pub reason: ChangeReason,
     pub classes: Vec<DeviceClass>,
 }
 impl DeviceChangedEvent {
@@ -12625,6 +12704,7 @@ impl DeviceChangedEvent {
         let (reason, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
         let (classes, remaining) = crate::x11_utils::parse_list::<DeviceClass>(remaining, num_classes as usize)?;
+        let reason = reason.try_into()?;
         let result = DeviceChangedEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, reason, classes };
         Ok((result, remaining))
     }
@@ -13255,8 +13335,8 @@ pub struct EnterEvent {
     pub deviceid: DeviceId,
     pub time: TIMESTAMP,
     pub sourceid: DeviceId,
-    pub mode: u8,
-    pub detail: u8,
+    pub mode: NotifyMode,
+    pub detail: NotifyDetail,
     pub root: WINDOW,
     pub event: WINDOW,
     pub child: WINDOW,
@@ -13295,6 +13375,8 @@ impl EnterEvent {
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
         let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
+        let mode = mode.try_into()?;
+        let detail = detail.try_into()?;
         let result = EnterEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, mode, detail, root, event, child, root_x, root_y, event_x, event_y, same_screen, focus, mods, group, buttons };
         Ok((result, remaining))
     }
@@ -13330,8 +13412,8 @@ pub struct LeaveEvent {
     pub deviceid: DeviceId,
     pub time: TIMESTAMP,
     pub sourceid: DeviceId,
-    pub mode: u8,
-    pub detail: u8,
+    pub mode: NotifyMode,
+    pub detail: NotifyDetail,
     pub root: WINDOW,
     pub event: WINDOW,
     pub child: WINDOW,
@@ -13370,6 +13452,8 @@ impl LeaveEvent {
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
         let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
+        let mode = mode.try_into()?;
+        let detail = detail.try_into()?;
         let result = LeaveEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, mode, detail, root, event, child, root_x, root_y, event_x, event_y, same_screen, focus, mods, group, buttons };
         Ok((result, remaining))
     }
@@ -13405,8 +13489,8 @@ pub struct FocusInEvent {
     pub deviceid: DeviceId,
     pub time: TIMESTAMP,
     pub sourceid: DeviceId,
-    pub mode: u8,
-    pub detail: u8,
+    pub mode: NotifyMode,
+    pub detail: NotifyDetail,
     pub root: WINDOW,
     pub event: WINDOW,
     pub child: WINDOW,
@@ -13445,6 +13529,8 @@ impl FocusInEvent {
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
         let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
+        let mode = mode.try_into()?;
+        let detail = detail.try_into()?;
         let result = FocusInEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, mode, detail, root, event, child, root_x, root_y, event_x, event_y, same_screen, focus, mods, group, buttons };
         Ok((result, remaining))
     }
@@ -13480,8 +13566,8 @@ pub struct FocusOutEvent {
     pub deviceid: DeviceId,
     pub time: TIMESTAMP,
     pub sourceid: DeviceId,
-    pub mode: u8,
-    pub detail: u8,
+    pub mode: NotifyMode,
+    pub detail: NotifyDetail,
     pub root: WINDOW,
     pub event: WINDOW,
     pub child: WINDOW,
@@ -13520,6 +13606,8 @@ impl FocusOutEvent {
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
         let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
+        let mode = mode.try_into()?;
+        let detail = detail.try_into()?;
         let result = FocusOutEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, mode, detail, root, event, child, root_x, root_y, event_x, event_y, same_screen, focus, mods, group, buttons };
         Ok((result, remaining))
     }
@@ -13628,7 +13716,7 @@ bitmask_binop!(HierarchyMask, u8);
 pub struct HierarchyInfo {
     pub deviceid: DeviceId,
     pub attachment: DeviceId,
-    pub type_: u8,
+    pub type_: DeviceType,
     pub enabled: bool,
     pub flags: u32,
 }
@@ -13640,6 +13728,7 @@ impl TryParse for HierarchyInfo {
         let (enabled, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
+        let type_ = type_.try_into()?;
         let result = HierarchyInfo { deviceid, attachment, type_, enabled, flags };
         Ok((result, remaining))
     }
@@ -13655,7 +13744,7 @@ impl Serialize for HierarchyInfo {
     fn serialize(&self) -> Self::Bytes {
         let deviceid_bytes = self.deviceid.serialize();
         let attachment_bytes = self.attachment.serialize();
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         let enabled_bytes = self.enabled.serialize();
         let flags_bytes = self.flags.serialize();
         [
@@ -13677,7 +13766,7 @@ impl Serialize for HierarchyInfo {
         bytes.reserve(12);
         self.deviceid.serialize_into(bytes);
         self.attachment.serialize_into(bytes);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         self.enabled.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.flags.serialize_into(bytes);
@@ -13811,7 +13900,7 @@ pub struct PropertyEvent {
     pub deviceid: DeviceId,
     pub time: TIMESTAMP,
     pub property: ATOM,
-    pub what: u8,
+    pub what: PropertyFlag,
 }
 impl PropertyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -13825,6 +13914,7 @@ impl PropertyEvent {
         let (property, remaining) = ATOM::try_parse(remaining)?;
         let (what, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
+        let what = what.try_into()?;
         let result = PropertyEvent { response_type, extension, sequence, length, event_type, deviceid, time, property, what };
         Ok((result, remaining))
     }
@@ -14475,7 +14565,7 @@ pub struct TouchOwnershipEvent {
     pub event: WINDOW,
     pub child: WINDOW,
     pub sourceid: DeviceId,
-    pub flags: u32,
+    pub flags: TouchOwnershipFlags,
 }
 impl TouchOwnershipEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -14494,6 +14584,7 @@ impl TouchOwnershipEvent {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
+        let flags = flags.try_into()?;
         let result = TouchOwnershipEvent { response_type, extension, sequence, length, event_type, deviceid, time, touchid, root, event, child, sourceid, flags };
         Ok((result, remaining))
     }

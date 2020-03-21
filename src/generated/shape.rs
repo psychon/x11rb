@@ -182,7 +182,7 @@ pub const NOTIFY_EVENT: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct NotifyEvent {
     pub response_type: u8,
-    pub shape_kind: KIND,
+    pub shape_kind: SK,
     pub sequence: u16,
     pub affected_window: WINDOW,
     pub extents_x: i16,
@@ -205,6 +205,7 @@ impl NotifyEvent {
         let (server_time, remaining) = TIMESTAMP::try_parse(remaining)?;
         let (shaped, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
+        let shape_kind = shape_kind.try_into()?;
         let result = NotifyEvent { response_type, shape_kind, sequence, affected_window, extents_x, extents_y, extents_width, extents_height, server_time, shaped };
         Ok((result, remaining))
     }
@@ -228,7 +229,7 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for NotifyEvent {
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let shape_kind = input.shape_kind.serialize();
+        let shape_kind = Into::<KIND>::into(input.shape_kind).serialize();
         let sequence = input.sequence.serialize();
         let affected_window = input.affected_window.serialize();
         let extents_x = input.extents_x.serialize();
@@ -648,7 +649,7 @@ where Conn: RequestConnection + ?Sized, A: Into<KIND>
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetRectanglesReply {
     pub response_type: u8,
-    pub ordering: u8,
+    pub ordering: ClipOrdering,
     pub sequence: u16,
     pub length: u32,
     pub rectangles: Vec<Rectangle>,
@@ -662,6 +663,7 @@ impl GetRectanglesReply {
         let (rectangles_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (rectangles, remaining) = crate::x11_utils::parse_list::<Rectangle>(remaining, rectangles_len as usize)?;
+        let ordering = ordering.try_into()?;
         let result = GetRectanglesReply { response_type, ordering, sequence, length, rectangles };
         Ok((result, remaining))
     }

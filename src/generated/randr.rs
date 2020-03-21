@@ -588,13 +588,13 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetScreenConfigReply {
     pub response_type: u8,
-    pub status: u8,
+    pub status: SetConfig,
     pub sequence: u16,
     pub length: u32,
     pub new_timestamp: TIMESTAMP,
     pub config_timestamp: TIMESTAMP,
     pub root: WINDOW,
-    pub subpixel_order: u16,
+    pub subpixel_order: render::SubPixel,
 }
 impl SetScreenConfigReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -607,6 +607,8 @@ impl SetScreenConfigReply {
         let (root, remaining) = WINDOW::try_parse(remaining)?;
         let (subpixel_order, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(10..).ok_or(ParseError::ParseError)?;
+        let status = status.try_into()?;
+        let subpixel_order = subpixel_order.try_into()?;
         let result = SetScreenConfigReply { response_type, status, sequence, length, new_timestamp, config_timestamp, root, subpixel_order };
         Ok((result, remaining))
     }
@@ -1248,15 +1250,15 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetOutputInfoReply {
     pub response_type: u8,
-    pub status: u8,
+    pub status: SetConfig,
     pub sequence: u16,
     pub length: u32,
     pub timestamp: TIMESTAMP,
     pub crtc: CRTC,
     pub mm_width: u32,
     pub mm_height: u32,
-    pub connection: u8,
-    pub subpixel_order: u8,
+    pub connection: Connection,
+    pub subpixel_order: render::SubPixel,
     pub num_preferred: u16,
     pub crtcs: Vec<CRTC>,
     pub modes: Vec<MODE>,
@@ -1284,6 +1286,9 @@ impl GetOutputInfoReply {
         let (modes, remaining) = crate::x11_utils::parse_list::<MODE>(remaining, num_modes as usize)?;
         let (clones, remaining) = crate::x11_utils::parse_list::<OUTPUT>(remaining, num_clones as usize)?;
         let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_len as usize)?;
+        let status = status.try_into()?;
+        let connection = connection.try_into()?;
+        let subpixel_order = subpixel_order.try_into()?;
         let result = GetOutputInfoReply { response_type, status, sequence, length, timestamp, crtc, mm_width, mm_height, connection, subpixel_order, num_preferred, crtcs, modes, clones, name };
         Ok((result, remaining))
     }
@@ -1813,7 +1818,7 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCrtcInfoReply {
     pub response_type: u8,
-    pub status: u8,
+    pub status: SetConfig,
     pub sequence: u16,
     pub length: u32,
     pub timestamp: TIMESTAMP,
@@ -1845,6 +1850,7 @@ impl GetCrtcInfoReply {
         let (num_possible_outputs, remaining) = u16::try_parse(remaining)?;
         let (outputs, remaining) = crate::x11_utils::parse_list::<OUTPUT>(remaining, num_outputs as usize)?;
         let (possible, remaining) = crate::x11_utils::parse_list::<OUTPUT>(remaining, num_possible_outputs as usize)?;
+        let status = status.try_into()?;
         let result = GetCrtcInfoReply { response_type, status, sequence, length, timestamp, x, y, width, height, mode, rotation, rotations, outputs, possible };
         Ok((result, remaining))
     }
@@ -1913,7 +1919,7 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetCrtcConfigReply {
     pub response_type: u8,
-    pub status: u8,
+    pub status: SetConfig,
     pub sequence: u16,
     pub length: u32,
     pub timestamp: TIMESTAMP,
@@ -1926,6 +1932,7 @@ impl SetCrtcConfigReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (timestamp, remaining) = TIMESTAMP::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let status = status.try_into()?;
         let result = SetCrtcConfigReply { response_type, status, sequence, length, timestamp };
         Ok((result, remaining))
     }
@@ -2395,7 +2402,7 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPanningReply {
     pub response_type: u8,
-    pub status: u8,
+    pub status: SetConfig,
     pub sequence: u16,
     pub length: u32,
     pub timestamp: TIMESTAMP,
@@ -2431,6 +2438,7 @@ impl GetPanningReply {
         let (border_top, remaining) = i16::try_parse(remaining)?;
         let (border_right, remaining) = i16::try_parse(remaining)?;
         let (border_bottom, remaining) = i16::try_parse(remaining)?;
+        let status = status.try_into()?;
         let result = GetPanningReply { response_type, status, sequence, length, timestamp, left, top, width, height, track_left, track_top, track_width, track_height, border_left, border_top, border_right, border_bottom };
         Ok((result, remaining))
     }
@@ -2510,7 +2518,7 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetPanningReply {
     pub response_type: u8,
-    pub status: u8,
+    pub status: SetConfig,
     pub sequence: u16,
     pub length: u32,
     pub timestamp: TIMESTAMP,
@@ -2522,6 +2530,7 @@ impl SetPanningReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (timestamp, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let status = status.try_into()?;
         let result = SetPanningReply { response_type, status, sequence, length, timestamp };
         Ok((result, remaining))
     }
@@ -3203,7 +3212,7 @@ pub struct ScreenChangeNotifyEvent {
     pub root: WINDOW,
     pub request_window: WINDOW,
     pub size_id: u16,
-    pub subpixel_order: u16,
+    pub subpixel_order: render::SubPixel,
     pub width: u16,
     pub height: u16,
     pub mwidth: u16,
@@ -3224,6 +3233,7 @@ impl ScreenChangeNotifyEvent {
         let (height, remaining) = u16::try_parse(remaining)?;
         let (mwidth, remaining) = u16::try_parse(remaining)?;
         let (mheight, remaining) = u16::try_parse(remaining)?;
+        let subpixel_order = subpixel_order.try_into()?;
         let result = ScreenChangeNotifyEvent { response_type, rotation, sequence, timestamp, config_timestamp, root, request_window, size_id, subpixel_order, width, height, mwidth, mheight };
         Ok((result, remaining))
     }
@@ -3254,7 +3264,7 @@ impl From<&ScreenChangeNotifyEvent> for [u8; 32] {
         let root = input.root.serialize();
         let request_window = input.request_window.serialize();
         let size_id = input.size_id.serialize();
-        let subpixel_order = input.subpixel_order.serialize();
+        let subpixel_order = Into::<u16>::into(input.subpixel_order).serialize();
         let width = input.width.serialize();
         let height = input.height.serialize();
         let mwidth = input.mwidth.serialize();
@@ -3451,8 +3461,8 @@ pub struct OutputChange {
     pub crtc: CRTC,
     pub mode: MODE,
     pub rotation: u16,
-    pub connection: u8,
-    pub subpixel_order: u8,
+    pub connection: Connection,
+    pub subpixel_order: render::SubPixel,
 }
 impl TryParse for OutputChange {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3465,6 +3475,8 @@ impl TryParse for OutputChange {
         let (rotation, remaining) = u16::try_parse(remaining)?;
         let (connection, remaining) = u8::try_parse(remaining)?;
         let (subpixel_order, remaining) = u8::try_parse(remaining)?;
+        let connection = connection.try_into()?;
+        let subpixel_order = subpixel_order.try_into()?;
         let result = OutputChange { timestamp, config_timestamp, window, output, crtc, mode, rotation, connection, subpixel_order };
         Ok((result, remaining))
     }
@@ -3485,8 +3497,8 @@ impl Serialize for OutputChange {
         let crtc_bytes = self.crtc.serialize();
         let mode_bytes = self.mode.serialize();
         let rotation_bytes = self.rotation.serialize();
-        let connection_bytes = self.connection.serialize();
-        let subpixel_order_bytes = self.subpixel_order.serialize();
+        let connection_bytes = Into::<u8>::into(self.connection).serialize();
+        let subpixel_order_bytes = Into::<u8>::into(self.subpixel_order).serialize();
         [
             timestamp_bytes[0],
             timestamp_bytes[1],
@@ -3527,8 +3539,8 @@ impl Serialize for OutputChange {
         self.crtc.serialize_into(bytes);
         self.mode.serialize_into(bytes);
         self.rotation.serialize_into(bytes);
-        self.connection.serialize_into(bytes);
-        self.subpixel_order.serialize_into(bytes);
+        Into::<u8>::into(self.connection).serialize_into(bytes);
+        Into::<u8>::into(self.subpixel_order).serialize_into(bytes);
     }
 }
 
@@ -3538,7 +3550,7 @@ pub struct OutputProperty {
     pub output: OUTPUT,
     pub atom: ATOM,
     pub timestamp: TIMESTAMP,
-    pub status: u8,
+    pub status: Property,
 }
 impl TryParse for OutputProperty {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3548,6 +3560,7 @@ impl TryParse for OutputProperty {
         let (timestamp, remaining) = TIMESTAMP::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
+        let status = status.try_into()?;
         let result = OutputProperty { window, output, atom, timestamp, status };
         Ok((result, remaining))
     }
@@ -3565,7 +3578,7 @@ impl Serialize for OutputProperty {
         let output_bytes = self.output.serialize();
         let atom_bytes = self.atom.serialize();
         let timestamp_bytes = self.timestamp.serialize();
-        let status_bytes = self.status.serialize();
+        let status_bytes = Into::<u8>::into(self.status).serialize();
         [
             window_bytes[0],
             window_bytes[1],
@@ -3603,7 +3616,7 @@ impl Serialize for OutputProperty {
         self.output.serialize_into(bytes);
         self.atom.serialize_into(bytes);
         self.timestamp.serialize_into(bytes);
-        self.status.serialize_into(bytes);
+        Into::<u8>::into(self.status).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 11]);
     }
 }
@@ -4289,7 +4302,7 @@ pub const NOTIFY_EVENT: u8 = 1;
 #[derive(Debug, Clone, Copy)]
 pub struct NotifyEvent {
     pub response_type: u8,
-    pub sub_code: u8,
+    pub sub_code: Notify,
     pub sequence: u16,
     pub u: NotifyData,
 }
@@ -4299,6 +4312,7 @@ impl NotifyEvent {
         let (sub_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (u, remaining) = NotifyData::try_parse(remaining)?;
+        let sub_code = sub_code.try_into()?;
         let result = NotifyEvent { response_type, sub_code, sequence, u };
         Ok((result, remaining))
     }
@@ -4322,7 +4336,7 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for NotifyEvent {
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let sub_code = input.sub_code.serialize();
+        let sub_code = Into::<u8>::into(input.sub_code).serialize();
         let sequence = input.sequence.serialize();
         let u = input.u.serialize();
         [

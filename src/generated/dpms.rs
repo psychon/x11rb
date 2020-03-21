@@ -370,7 +370,7 @@ pub struct InfoReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub power_level: u16,
+    pub power_level: DPMSMode,
     pub state: bool,
 }
 impl InfoReply {
@@ -382,6 +382,7 @@ impl InfoReply {
         let (power_level, remaining) = u16::try_parse(remaining)?;
         let (state, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(21..).ok_or(ParseError::ParseError)?;
+        let power_level = power_level.try_into()?;
         let result = InfoReply { response_type, sequence, length, power_level, state };
         Ok((result, remaining))
     }

@@ -353,7 +353,7 @@ pub const NOTIFY_EVENT: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct NotifyEvent {
     pub response_type: u8,
-    pub level: u8,
+    pub level: ReportLevel,
     pub sequence: u16,
     pub drawable: DRAWABLE,
     pub damage: DAMAGE,
@@ -371,6 +371,7 @@ impl NotifyEvent {
         let (timestamp, remaining) = TIMESTAMP::try_parse(remaining)?;
         let (area, remaining) = Rectangle::try_parse(remaining)?;
         let (geometry, remaining) = Rectangle::try_parse(remaining)?;
+        let level = level.try_into()?;
         let result = NotifyEvent { response_type, level, sequence, drawable, damage, timestamp, area, geometry };
         Ok((result, remaining))
     }
@@ -394,7 +395,7 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for NotifyEvent {
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let level = input.level.serialize();
+        let level = Into::<u8>::into(input.level).serialize();
         let sequence = input.sequence.serialize();
         let drawable = input.drawable.serialize();
         let damage = input.damage.serialize();

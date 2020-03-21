@@ -807,8 +807,8 @@ impl Serialize for AttributeInfo {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ImageFormatInfo {
     pub id: u32,
-    pub type_: u8,
-    pub byte_order: u8,
+    pub type_: ImageFormatInfoType,
+    pub byte_order: ImageOrder,
     pub guid: [u8; 16],
     pub bpp: u8,
     pub num_planes: u8,
@@ -816,7 +816,7 @@ pub struct ImageFormatInfo {
     pub red_mask: u32,
     pub green_mask: u32,
     pub blue_mask: u32,
-    pub format: u8,
+    pub format: ImageFormatInfoFormat,
     pub y_sample_bits: u32,
     pub u_sample_bits: u32,
     pub v_sample_bits: u32,
@@ -827,7 +827,7 @@ pub struct ImageFormatInfo {
     pub vvert_u_period: u32,
     pub vvert_v_period: u32,
     pub vcomp_order: [u8; 32],
-    pub vscanline_order: u8,
+    pub vscanline_order: ScanlineOrder,
 }
 impl TryParse for ImageFormatInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -956,6 +956,10 @@ impl TryParse for ImageFormatInfo {
         ];
         let (vscanline_order, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
+        let type_ = type_.try_into()?;
+        let byte_order = byte_order.try_into()?;
+        let format = format.try_into()?;
+        let vscanline_order = vscanline_order.try_into()?;
         let result = ImageFormatInfo { id, type_, byte_order, guid, bpp, num_planes, depth, red_mask, green_mask, blue_mask, format, y_sample_bits, u_sample_bits, v_sample_bits, vhorz_y_period, vhorz_u_period, vhorz_v_period, vvert_y_period, vvert_u_period, vvert_v_period, vcomp_order, vscanline_order };
         Ok((result, remaining))
     }
@@ -970,15 +974,15 @@ impl Serialize for ImageFormatInfo {
     type Bytes = [u8; 128];
     fn serialize(&self) -> Self::Bytes {
         let id_bytes = self.id.serialize();
-        let type_bytes = self.type_.serialize();
-        let byte_order_bytes = self.byte_order.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let byte_order_bytes = Into::<u8>::into(self.byte_order).serialize();
         let bpp_bytes = self.bpp.serialize();
         let num_planes_bytes = self.num_planes.serialize();
         let depth_bytes = self.depth.serialize();
         let red_mask_bytes = self.red_mask.serialize();
         let green_mask_bytes = self.green_mask.serialize();
         let blue_mask_bytes = self.blue_mask.serialize();
-        let format_bytes = self.format.serialize();
+        let format_bytes = Into::<u8>::into(self.format).serialize();
         let y_sample_bits_bytes = self.y_sample_bits.serialize();
         let u_sample_bits_bytes = self.u_sample_bits.serialize();
         let v_sample_bits_bytes = self.v_sample_bits.serialize();
@@ -988,7 +992,7 @@ impl Serialize for ImageFormatInfo {
         let vvert_y_period_bytes = self.vvert_y_period.serialize();
         let vvert_u_period_bytes = self.vvert_u_period.serialize();
         let vvert_v_period_bytes = self.vvert_v_period.serialize();
-        let vscanline_order_bytes = self.vscanline_order.serialize();
+        let vscanline_order_bytes = Into::<u8>::into(self.vscanline_order).serialize();
         [
             id_bytes[0],
             id_bytes[1],
@@ -1123,8 +1127,8 @@ impl Serialize for ImageFormatInfo {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(128);
         self.id.serialize_into(bytes);
-        self.type_.serialize_into(bytes);
-        self.byte_order.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
+        Into::<u8>::into(self.byte_order).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.guid.serialize_into(bytes);
         self.bpp.serialize_into(bytes);
@@ -1135,7 +1139,7 @@ impl Serialize for ImageFormatInfo {
         self.red_mask.serialize_into(bytes);
         self.green_mask.serialize_into(bytes);
         self.blue_mask.serialize_into(bytes);
-        self.format.serialize_into(bytes);
+        Into::<u8>::into(self.format).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
         self.y_sample_bits.serialize_into(bytes);
         self.u_sample_bits.serialize_into(bytes);
@@ -1147,7 +1151,7 @@ impl Serialize for ImageFormatInfo {
         self.vvert_u_period.serialize_into(bytes);
         self.vvert_v_period.serialize_into(bytes);
         self.vcomp_order.serialize_into(bytes);
-        self.vscanline_order.serialize_into(bytes);
+        Into::<u8>::into(self.vscanline_order).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 11]);
     }
 }
@@ -1313,7 +1317,7 @@ pub const VIDEO_NOTIFY_EVENT: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct VideoNotifyEvent {
     pub response_type: u8,
-    pub reason: u8,
+    pub reason: VideoNotifyReason,
     pub sequence: u16,
     pub time: TIMESTAMP,
     pub drawable: DRAWABLE,
@@ -1327,6 +1331,7 @@ impl VideoNotifyEvent {
         let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
         let (drawable, remaining) = DRAWABLE::try_parse(remaining)?;
         let (port, remaining) = PORT::try_parse(remaining)?;
+        let reason = reason.try_into()?;
         let result = VideoNotifyEvent { response_type, reason, sequence, time, drawable, port };
         Ok((result, remaining))
     }
@@ -1350,7 +1355,7 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for VideoNotifyEvent {
 impl From<&VideoNotifyEvent> for [u8; 32] {
     fn from(input: &VideoNotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let reason = input.reason.serialize();
+        let reason = Into::<u8>::into(input.reason).serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let drawable = input.drawable.serialize();
@@ -1611,7 +1616,7 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabPortReply {
     pub response_type: u8,
-    pub result: u8,
+    pub result: GrabPortStatus,
     pub sequence: u16,
     pub length: u32,
 }
@@ -1621,6 +1626,7 @@ impl GrabPortReply {
         let (result, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
+        let result = result.try_into()?;
         let result = GrabPortReply { response_type, result, sequence, length };
         Ok((result, remaining))
     }

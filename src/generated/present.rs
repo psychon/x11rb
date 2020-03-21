@@ -943,8 +943,8 @@ pub struct CompleteNotifyEvent {
     pub sequence: u16,
     pub length: u32,
     pub event_type: u16,
-    pub kind: u8,
-    pub mode: u8,
+    pub kind: CompleteKind,
+    pub mode: CompleteMode,
     pub event: EVENT,
     pub window: WINDOW,
     pub serial: u32,
@@ -965,6 +965,8 @@ impl CompleteNotifyEvent {
         let (serial, remaining) = u32::try_parse(remaining)?;
         let (ust, remaining) = u64::try_parse(remaining)?;
         let (msc, remaining) = u64::try_parse(remaining)?;
+        let kind = kind.try_into()?;
+        let mode = mode.try_into()?;
         let result = CompleteNotifyEvent { response_type, extension, sequence, length, event_type, kind, mode, event, window, serial, ust, msc };
         Ok((result, remaining))
     }

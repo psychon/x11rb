@@ -455,7 +455,7 @@ pub const SELECTION_NOTIFY_EVENT: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SelectionNotifyEvent {
     pub response_type: u8,
-    pub subtype: u8,
+    pub subtype: SelectionEvent,
     pub sequence: u16,
     pub window: WINDOW,
     pub owner: WINDOW,
@@ -474,6 +474,7 @@ impl SelectionNotifyEvent {
         let (timestamp, remaining) = TIMESTAMP::try_parse(remaining)?;
         let (selection_timestamp, remaining) = TIMESTAMP::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
+        let subtype = subtype.try_into()?;
         let result = SelectionNotifyEvent { response_type, subtype, sequence, window, owner, selection, timestamp, selection_timestamp };
         Ok((result, remaining))
     }
@@ -497,7 +498,7 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for SelectionNotifyEvent {
 impl From<&SelectionNotifyEvent> for [u8; 32] {
     fn from(input: &SelectionNotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let subtype = input.subtype.serialize();
+        let subtype = Into::<u8>::into(input.subtype).serialize();
         let sequence = input.sequence.serialize();
         let window = input.window.serialize();
         let owner = input.owner.serialize();
@@ -677,7 +678,7 @@ pub const CURSOR_NOTIFY_EVENT: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CursorNotifyEvent {
     pub response_type: u8,
-    pub subtype: u8,
+    pub subtype: CursorNotify,
     pub sequence: u16,
     pub window: WINDOW,
     pub cursor_serial: u32,
@@ -694,6 +695,7 @@ impl CursorNotifyEvent {
         let (timestamp, remaining) = TIMESTAMP::try_parse(remaining)?;
         let (name, remaining) = ATOM::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let subtype = subtype.try_into()?;
         let result = CursorNotifyEvent { response_type, subtype, sequence, window, cursor_serial, timestamp, name };
         Ok((result, remaining))
     }
@@ -717,7 +719,7 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for CursorNotifyEvent {
 impl From<&CursorNotifyEvent> for [u8; 32] {
     fn from(input: &CursorNotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let subtype = input.subtype.serialize();
+        let subtype = Into::<u8>::into(input.subtype).serialize();
         let sequence = input.sequence.serialize();
         let window = input.window.serialize();
         let cursor_serial = input.cursor_serial.serialize();

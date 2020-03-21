@@ -2043,10 +2043,10 @@ bitmask_binop!(IMGroupsWhich, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IndicatorMap {
-    pub flags: u8,
-    pub which_groups: u8,
-    pub groups: u8,
-    pub which_mods: u8,
+    pub flags: IMFlag,
+    pub which_groups: IMGroupsWhich,
+    pub groups: SetOfGroup,
+    pub which_mods: IMModsWhich,
     pub mods: u8,
     pub real_mods: u8,
     pub vmods: u16,
@@ -2062,6 +2062,10 @@ impl TryParse for IndicatorMap {
         let (real_mods, remaining) = u8::try_parse(remaining)?;
         let (vmods, remaining) = u16::try_parse(remaining)?;
         let (ctrls, remaining) = u32::try_parse(remaining)?;
+        let flags = flags.try_into()?;
+        let which_groups = which_groups.try_into()?;
+        let groups = groups.try_into()?;
+        let which_mods = which_mods.try_into()?;
         let result = IndicatorMap { flags, which_groups, groups, which_mods, mods, real_mods, vmods, ctrls };
         Ok((result, remaining))
     }
@@ -2075,10 +2079,10 @@ impl TryFrom<&[u8]> for IndicatorMap {
 impl Serialize for IndicatorMap {
     type Bytes = [u8; 12];
     fn serialize(&self) -> Self::Bytes {
-        let flags_bytes = self.flags.serialize();
-        let which_groups_bytes = self.which_groups.serialize();
-        let groups_bytes = self.groups.serialize();
-        let which_mods_bytes = self.which_mods.serialize();
+        let flags_bytes = Into::<u8>::into(self.flags).serialize();
+        let which_groups_bytes = Into::<u8>::into(self.which_groups).serialize();
+        let groups_bytes = Into::<u8>::into(self.groups).serialize();
+        let which_mods_bytes = Into::<u8>::into(self.which_mods).serialize();
         let mods_bytes = self.mods.serialize();
         let real_mods_bytes = self.real_mods.serialize();
         let vmods_bytes = self.vmods.serialize();
@@ -2100,10 +2104,10 @@ impl Serialize for IndicatorMap {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        self.flags.serialize_into(bytes);
-        self.which_groups.serialize_into(bytes);
-        self.groups.serialize_into(bytes);
-        self.which_mods.serialize_into(bytes);
+        Into::<u8>::into(self.flags).serialize_into(bytes);
+        Into::<u8>::into(self.which_groups).serialize_into(bytes);
+        Into::<u8>::into(self.groups).serialize_into(bytes);
+        Into::<u8>::into(self.which_mods).serialize_into(bytes);
         self.mods.serialize_into(bytes);
         self.real_mods.serialize_into(bytes);
         self.vmods.serialize_into(bytes);
@@ -4008,7 +4012,7 @@ impl Serialize for Listing {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DeviceLedInfo {
-    pub led_class: LedClassSpec,
+    pub led_class: LedClass,
     pub led_id: IDSpec,
     pub names_present: u32,
     pub maps_present: u32,
@@ -4027,6 +4031,7 @@ impl TryParse for DeviceLedInfo {
         let (state, remaining) = u32::try_parse(remaining)?;
         let (names, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, TryInto::<usize>::try_into(names_present.count_ones()).unwrap())?;
         let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, TryInto::<usize>::try_into(maps_present.count_ones()).unwrap())?;
+        let led_class = led_class.try_into()?;
         let result = DeviceLedInfo { led_class, led_id, names_present, maps_present, phys_indicators, state, names, maps };
         Ok((result, remaining))
     }
@@ -4046,7 +4051,7 @@ impl Serialize for DeviceLedInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(20);
-        self.led_class.serialize_into(bytes);
+        Into::<LedClassSpec>::into(self.led_class).serialize_into(bytes);
         self.led_id.serialize_into(bytes);
         self.names_present.serialize_into(bytes);
         self.maps_present.serialize_into(bytes);
@@ -4349,12 +4354,13 @@ impl TryFrom<u32> for SAType {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SANoAction {
-    pub type_: u8,
+    pub type_: SAType,
 }
 impl TryParse for SANoAction {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(7..).ok_or(ParseError::ParseError)?;
+        let type_ = type_.try_into()?;
         let result = SANoAction { type_ };
         Ok((result, remaining))
     }
@@ -4368,7 +4374,7 @@ impl TryFrom<&[u8]> for SANoAction {
 impl Serialize for SANoAction {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         [
             type_bytes[0],
             0,
@@ -4382,14 +4388,14 @@ impl Serialize for SANoAction {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 7]);
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SASetMods {
-    pub type_: u8,
+    pub type_: SAType,
     pub flags: u8,
     pub mask: u8,
     pub real_mods: u8,
@@ -4405,6 +4411,7 @@ impl TryParse for SASetMods {
         let (vmods_high, remaining) = u8::try_parse(remaining)?;
         let (vmods_low, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let type_ = type_.try_into()?;
         let result = SASetMods { type_, flags, mask, real_mods, vmods_high, vmods_low };
         Ok((result, remaining))
     }
@@ -4418,7 +4425,7 @@ impl TryFrom<&[u8]> for SASetMods {
 impl Serialize for SASetMods {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let mask_bytes = self.mask.serialize();
         let real_mods_bytes = self.real_mods.serialize();
@@ -4437,7 +4444,7 @@ impl Serialize for SASetMods {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.mask.serialize_into(bytes);
         self.real_mods.serialize_into(bytes);
@@ -4449,7 +4456,7 @@ impl Serialize for SASetMods {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SALatchMods {
-    pub type_: u8,
+    pub type_: SAType,
     pub flags: u8,
     pub mask: u8,
     pub real_mods: u8,
@@ -4465,6 +4472,7 @@ impl TryParse for SALatchMods {
         let (vmods_high, remaining) = u8::try_parse(remaining)?;
         let (vmods_low, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let type_ = type_.try_into()?;
         let result = SALatchMods { type_, flags, mask, real_mods, vmods_high, vmods_low };
         Ok((result, remaining))
     }
@@ -4478,7 +4486,7 @@ impl TryFrom<&[u8]> for SALatchMods {
 impl Serialize for SALatchMods {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let mask_bytes = self.mask.serialize();
         let real_mods_bytes = self.real_mods.serialize();
@@ -4497,7 +4505,7 @@ impl Serialize for SALatchMods {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.mask.serialize_into(bytes);
         self.real_mods.serialize_into(bytes);
@@ -4509,7 +4517,7 @@ impl Serialize for SALatchMods {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SALockMods {
-    pub type_: u8,
+    pub type_: SAType,
     pub flags: u8,
     pub mask: u8,
     pub real_mods: u8,
@@ -4525,6 +4533,7 @@ impl TryParse for SALockMods {
         let (vmods_high, remaining) = u8::try_parse(remaining)?;
         let (vmods_low, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let type_ = type_.try_into()?;
         let result = SALockMods { type_, flags, mask, real_mods, vmods_high, vmods_low };
         Ok((result, remaining))
     }
@@ -4538,7 +4547,7 @@ impl TryFrom<&[u8]> for SALockMods {
 impl Serialize for SALockMods {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let mask_bytes = self.mask.serialize();
         let real_mods_bytes = self.real_mods.serialize();
@@ -4557,7 +4566,7 @@ impl Serialize for SALockMods {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.mask.serialize_into(bytes);
         self.real_mods.serialize_into(bytes);
@@ -4569,7 +4578,7 @@ impl Serialize for SALockMods {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SASetGroup {
-    pub type_: u8,
+    pub type_: SAType,
     pub flags: u8,
     pub group: i8,
 }
@@ -4579,6 +4588,7 @@ impl TryParse for SASetGroup {
         let (flags, remaining) = u8::try_parse(remaining)?;
         let (group, remaining) = i8::try_parse(remaining)?;
         let remaining = remaining.get(5..).ok_or(ParseError::ParseError)?;
+        let type_ = type_.try_into()?;
         let result = SASetGroup { type_, flags, group };
         Ok((result, remaining))
     }
@@ -4592,7 +4602,7 @@ impl TryFrom<&[u8]> for SASetGroup {
 impl Serialize for SASetGroup {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let group_bytes = self.group.serialize();
         [
@@ -4608,7 +4618,7 @@ impl Serialize for SASetGroup {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.group.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 5]);
@@ -4617,7 +4627,7 @@ impl Serialize for SASetGroup {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SALatchGroup {
-    pub type_: u8,
+    pub type_: SAType,
     pub flags: u8,
     pub group: i8,
 }
@@ -4627,6 +4637,7 @@ impl TryParse for SALatchGroup {
         let (flags, remaining) = u8::try_parse(remaining)?;
         let (group, remaining) = i8::try_parse(remaining)?;
         let remaining = remaining.get(5..).ok_or(ParseError::ParseError)?;
+        let type_ = type_.try_into()?;
         let result = SALatchGroup { type_, flags, group };
         Ok((result, remaining))
     }
@@ -4640,7 +4651,7 @@ impl TryFrom<&[u8]> for SALatchGroup {
 impl Serialize for SALatchGroup {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let group_bytes = self.group.serialize();
         [
@@ -4656,7 +4667,7 @@ impl Serialize for SALatchGroup {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.group.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 5]);
@@ -4665,7 +4676,7 @@ impl Serialize for SALatchGroup {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SALockGroup {
-    pub type_: u8,
+    pub type_: SAType,
     pub flags: u8,
     pub group: i8,
 }
@@ -4675,6 +4686,7 @@ impl TryParse for SALockGroup {
         let (flags, remaining) = u8::try_parse(remaining)?;
         let (group, remaining) = i8::try_parse(remaining)?;
         let remaining = remaining.get(5..).ok_or(ParseError::ParseError)?;
+        let type_ = type_.try_into()?;
         let result = SALockGroup { type_, flags, group };
         Ok((result, remaining))
     }
@@ -4688,7 +4700,7 @@ impl TryFrom<&[u8]> for SALockGroup {
 impl Serialize for SALockGroup {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let group_bytes = self.group.serialize();
         [
@@ -4704,7 +4716,7 @@ impl Serialize for SALockGroup {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.group.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 5]);
@@ -4779,7 +4791,7 @@ bitmask_binop!(SAMovePtrFlag, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SAMovePtr {
-    pub type_: u8,
+    pub type_: SAType,
     pub flags: u8,
     pub x_high: i8,
     pub x_low: u8,
@@ -4795,6 +4807,7 @@ impl TryParse for SAMovePtr {
         let (y_high, remaining) = i8::try_parse(remaining)?;
         let (y_low, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let type_ = type_.try_into()?;
         let result = SAMovePtr { type_, flags, x_high, x_low, y_high, y_low };
         Ok((result, remaining))
     }
@@ -4808,7 +4821,7 @@ impl TryFrom<&[u8]> for SAMovePtr {
 impl Serialize for SAMovePtr {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let x_high_bytes = self.x_high.serialize();
         let x_low_bytes = self.x_low.serialize();
@@ -4827,7 +4840,7 @@ impl Serialize for SAMovePtr {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.x_high.serialize_into(bytes);
         self.x_low.serialize_into(bytes);
@@ -4839,7 +4852,7 @@ impl Serialize for SAMovePtr {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SAPtrBtn {
-    pub type_: u8,
+    pub type_: SAType,
     pub flags: u8,
     pub count: u8,
     pub button: u8,
@@ -4851,6 +4864,7 @@ impl TryParse for SAPtrBtn {
         let (count, remaining) = u8::try_parse(remaining)?;
         let (button, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let type_ = type_.try_into()?;
         let result = SAPtrBtn { type_, flags, count, button };
         Ok((result, remaining))
     }
@@ -4864,7 +4878,7 @@ impl TryFrom<&[u8]> for SAPtrBtn {
 impl Serialize for SAPtrBtn {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let count_bytes = self.count.serialize();
         let button_bytes = self.button.serialize();
@@ -4881,7 +4895,7 @@ impl Serialize for SAPtrBtn {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.count.serialize_into(bytes);
         self.button.serialize_into(bytes);
@@ -4891,7 +4905,7 @@ impl Serialize for SAPtrBtn {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SALockPtrBtn {
-    pub type_: u8,
+    pub type_: SAType,
     pub flags: u8,
     pub button: u8,
 }
@@ -4902,6 +4916,7 @@ impl TryParse for SALockPtrBtn {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (button, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let type_ = type_.try_into()?;
         let result = SALockPtrBtn { type_, flags, button };
         Ok((result, remaining))
     }
@@ -4915,7 +4930,7 @@ impl TryFrom<&[u8]> for SALockPtrBtn {
 impl Serialize for SALockPtrBtn {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let button_bytes = self.button.serialize();
         [
@@ -4931,7 +4946,7 @@ impl Serialize for SALockPtrBtn {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         self.button.serialize_into(bytes);
@@ -5004,7 +5019,7 @@ bitmask_binop!(SASetPtrDfltFlag, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SASetPtrDflt {
-    pub type_: u8,
+    pub type_: SAType,
     pub flags: u8,
     pub affect: u8,
     pub value: i8,
@@ -5016,6 +5031,7 @@ impl TryParse for SASetPtrDflt {
         let (affect, remaining) = u8::try_parse(remaining)?;
         let (value, remaining) = i8::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let type_ = type_.try_into()?;
         let result = SASetPtrDflt { type_, flags, affect, value };
         Ok((result, remaining))
     }
@@ -5029,7 +5045,7 @@ impl TryFrom<&[u8]> for SASetPtrDflt {
 impl Serialize for SASetPtrDflt {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let affect_bytes = self.affect.serialize();
         let value_bytes = self.value.serialize();
@@ -5046,7 +5062,7 @@ impl Serialize for SASetPtrDflt {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.affect.serialize_into(bytes);
         self.value.serialize_into(bytes);
@@ -5171,7 +5187,7 @@ bitmask_binop!(SAIsoLockNoAffect, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SAIsoLock {
-    pub type_: u8,
+    pub type_: SAType,
     pub flags: u8,
     pub mask: u8,
     pub real_mods: u8,
@@ -5190,6 +5206,7 @@ impl TryParse for SAIsoLock {
         let (affect, remaining) = u8::try_parse(remaining)?;
         let (vmods_high, remaining) = u8::try_parse(remaining)?;
         let (vmods_low, remaining) = u8::try_parse(remaining)?;
+        let type_ = type_.try_into()?;
         let result = SAIsoLock { type_, flags, mask, real_mods, group, affect, vmods_high, vmods_low };
         Ok((result, remaining))
     }
@@ -5203,7 +5220,7 @@ impl TryFrom<&[u8]> for SAIsoLock {
 impl Serialize for SAIsoLock {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let mask_bytes = self.mask.serialize();
         let real_mods_bytes = self.real_mods.serialize();
@@ -5224,7 +5241,7 @@ impl Serialize for SAIsoLock {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.mask.serialize_into(bytes);
         self.real_mods.serialize_into(bytes);
@@ -5237,12 +5254,13 @@ impl Serialize for SAIsoLock {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SATerminate {
-    pub type_: u8,
+    pub type_: SAType,
 }
 impl TryParse for SATerminate {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(7..).ok_or(ParseError::ParseError)?;
+        let type_ = type_.try_into()?;
         let result = SATerminate { type_ };
         Ok((result, remaining))
     }
@@ -5256,7 +5274,7 @@ impl TryFrom<&[u8]> for SATerminate {
 impl Serialize for SATerminate {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         [
             type_bytes[0],
             0,
@@ -5270,7 +5288,7 @@ impl Serialize for SATerminate {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 7]);
     }
 }
@@ -5340,7 +5358,7 @@ bitmask_binop!(SwitchScreenFlag, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SASwitchScreen {
-    pub type_: u8,
+    pub type_: SAType,
     pub flags: u8,
     pub new_screen: i8,
 }
@@ -5350,6 +5368,7 @@ impl TryParse for SASwitchScreen {
         let (flags, remaining) = u8::try_parse(remaining)?;
         let (new_screen, remaining) = i8::try_parse(remaining)?;
         let remaining = remaining.get(5..).ok_or(ParseError::ParseError)?;
+        let type_ = type_.try_into()?;
         let result = SASwitchScreen { type_, flags, new_screen };
         Ok((result, remaining))
     }
@@ -5363,7 +5382,7 @@ impl TryFrom<&[u8]> for SASwitchScreen {
 impl Serialize for SASwitchScreen {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let new_screen_bytes = self.new_screen.serialize();
         [
@@ -5379,7 +5398,7 @@ impl Serialize for SASwitchScreen {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.new_screen.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 5]);
@@ -5541,7 +5560,7 @@ bitmask_binop!(BoolCtrlsLow, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SASetControls {
-    pub type_: u8,
+    pub type_: SAType,
     pub bool_ctrls_high: u8,
     pub bool_ctrls_low: u8,
 }
@@ -5552,6 +5571,7 @@ impl TryParse for SASetControls {
         let (bool_ctrls_high, remaining) = u8::try_parse(remaining)?;
         let (bool_ctrls_low, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let type_ = type_.try_into()?;
         let result = SASetControls { type_, bool_ctrls_high, bool_ctrls_low };
         Ok((result, remaining))
     }
@@ -5565,7 +5585,7 @@ impl TryFrom<&[u8]> for SASetControls {
 impl Serialize for SASetControls {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         let bool_ctrls_high_bytes = self.bool_ctrls_high.serialize();
         let bool_ctrls_low_bytes = self.bool_ctrls_low.serialize();
         [
@@ -5581,7 +5601,7 @@ impl Serialize for SASetControls {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
         self.bool_ctrls_high.serialize_into(bytes);
         self.bool_ctrls_low.serialize_into(bytes);
@@ -5591,7 +5611,7 @@ impl Serialize for SASetControls {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SALockControls {
-    pub type_: u8,
+    pub type_: SAType,
     pub bool_ctrls_high: u8,
     pub bool_ctrls_low: u8,
 }
@@ -5602,6 +5622,7 @@ impl TryParse for SALockControls {
         let (bool_ctrls_high, remaining) = u8::try_parse(remaining)?;
         let (bool_ctrls_low, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let type_ = type_.try_into()?;
         let result = SALockControls { type_, bool_ctrls_high, bool_ctrls_low };
         Ok((result, remaining))
     }
@@ -5615,7 +5636,7 @@ impl TryFrom<&[u8]> for SALockControls {
 impl Serialize for SALockControls {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         let bool_ctrls_high_bytes = self.bool_ctrls_high.serialize();
         let bool_ctrls_low_bytes = self.bool_ctrls_low.serialize();
         [
@@ -5631,7 +5652,7 @@ impl Serialize for SALockControls {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
         self.bool_ctrls_high.serialize_into(bytes);
         self.bool_ctrls_low.serialize_into(bytes);
@@ -5707,7 +5728,7 @@ bitmask_binop!(ActionMessageFlag, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SAActionMessage {
-    pub type_: u8,
+    pub type_: SAType,
     pub flags: u8,
     pub message: [u8; 6],
 }
@@ -5729,6 +5750,7 @@ impl TryParse for SAActionMessage {
             message_4,
             message_5,
         ];
+        let type_ = type_.try_into()?;
         let result = SAActionMessage { type_, flags, message };
         Ok((result, remaining))
     }
@@ -5742,7 +5764,7 @@ impl TryFrom<&[u8]> for SAActionMessage {
 impl Serialize for SAActionMessage {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         [
             type_bytes[0],
@@ -5757,7 +5779,7 @@ impl Serialize for SAActionMessage {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.message.serialize_into(bytes);
     }
@@ -5765,7 +5787,7 @@ impl Serialize for SAActionMessage {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SARedirectKey {
-    pub type_: u8,
+    pub type_: SAType,
     pub newkey: KEYCODE,
     pub mask: u8,
     pub real_modifiers: u8,
@@ -5784,6 +5806,7 @@ impl TryParse for SARedirectKey {
         let (vmods_mask_low, remaining) = u8::try_parse(remaining)?;
         let (vmods_high, remaining) = u8::try_parse(remaining)?;
         let (vmods_low, remaining) = u8::try_parse(remaining)?;
+        let type_ = type_.try_into()?;
         let result = SARedirectKey { type_, newkey, mask, real_modifiers, vmods_mask_high, vmods_mask_low, vmods_high, vmods_low };
         Ok((result, remaining))
     }
@@ -5797,7 +5820,7 @@ impl TryFrom<&[u8]> for SARedirectKey {
 impl Serialize for SARedirectKey {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         let newkey_bytes = self.newkey.serialize();
         let mask_bytes = self.mask.serialize();
         let real_modifiers_bytes = self.real_modifiers.serialize();
@@ -5818,7 +5841,7 @@ impl Serialize for SARedirectKey {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         self.newkey.serialize_into(bytes);
         self.mask.serialize_into(bytes);
         self.real_modifiers.serialize_into(bytes);
@@ -5831,7 +5854,7 @@ impl Serialize for SARedirectKey {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SADeviceBtn {
-    pub type_: u8,
+    pub type_: SAType,
     pub flags: u8,
     pub count: u8,
     pub button: u8,
@@ -5845,6 +5868,7 @@ impl TryParse for SADeviceBtn {
         let (button, remaining) = u8::try_parse(remaining)?;
         let (device, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let type_ = type_.try_into()?;
         let result = SADeviceBtn { type_, flags, count, button, device };
         Ok((result, remaining))
     }
@@ -5858,7 +5882,7 @@ impl TryFrom<&[u8]> for SADeviceBtn {
 impl Serialize for SADeviceBtn {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let count_bytes = self.count.serialize();
         let button_bytes = self.button.serialize();
@@ -5876,7 +5900,7 @@ impl Serialize for SADeviceBtn {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.count.serialize_into(bytes);
         self.button.serialize_into(bytes);
@@ -5950,7 +5974,7 @@ bitmask_binop!(LockDeviceFlags, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SALockDeviceBtn {
-    pub type_: u8,
+    pub type_: SAType,
     pub flags: u8,
     pub button: u8,
     pub device: u8,
@@ -5963,6 +5987,7 @@ impl TryParse for SALockDeviceBtn {
         let (button, remaining) = u8::try_parse(remaining)?;
         let (device, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let type_ = type_.try_into()?;
         let result = SALockDeviceBtn { type_, flags, button, device };
         Ok((result, remaining))
     }
@@ -5976,7 +6001,7 @@ impl TryFrom<&[u8]> for SALockDeviceBtn {
 impl Serialize for SALockDeviceBtn {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let button_bytes = self.button.serialize();
         let device_bytes = self.device.serialize();
@@ -5993,7 +6018,7 @@ impl Serialize for SALockDeviceBtn {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         self.button.serialize_into(bytes);
@@ -6078,12 +6103,12 @@ impl TryFrom<u32> for SAValWhat {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SADeviceValuator {
-    pub type_: u8,
+    pub type_: SAType,
     pub device: u8,
-    pub val1what: u8,
+    pub val1what: SAValWhat,
     pub val1index: u8,
     pub val1value: u8,
-    pub val2what: u8,
+    pub val2what: SAValWhat,
     pub val2index: u8,
     pub val2value: u8,
 }
@@ -6097,6 +6122,9 @@ impl TryParse for SADeviceValuator {
         let (val2what, remaining) = u8::try_parse(remaining)?;
         let (val2index, remaining) = u8::try_parse(remaining)?;
         let (val2value, remaining) = u8::try_parse(remaining)?;
+        let type_ = type_.try_into()?;
+        let val1what = val1what.try_into()?;
+        let val2what = val2what.try_into()?;
         let result = SADeviceValuator { type_, device, val1what, val1index, val1value, val2what, val2index, val2value };
         Ok((result, remaining))
     }
@@ -6110,12 +6138,12 @@ impl TryFrom<&[u8]> for SADeviceValuator {
 impl Serialize for SADeviceValuator {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         let device_bytes = self.device.serialize();
-        let val1what_bytes = self.val1what.serialize();
+        let val1what_bytes = Into::<u8>::into(self.val1what).serialize();
         let val1index_bytes = self.val1index.serialize();
         let val1value_bytes = self.val1value.serialize();
-        let val2what_bytes = self.val2what.serialize();
+        let val2what_bytes = Into::<u8>::into(self.val2what).serialize();
         let val2index_bytes = self.val2index.serialize();
         let val2value_bytes = self.val2value.serialize();
         [
@@ -6131,12 +6159,12 @@ impl Serialize for SADeviceValuator {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         self.device.serialize_into(bytes);
-        self.val1what.serialize_into(bytes);
+        Into::<u8>::into(self.val1what).serialize_into(bytes);
         self.val1index.serialize_into(bytes);
         self.val1value.serialize_into(bytes);
-        self.val2what.serialize_into(bytes);
+        Into::<u8>::into(self.val2what).serialize_into(bytes);
         self.val2index.serialize_into(bytes);
         self.val2value.serialize_into(bytes);
     }
@@ -6144,7 +6172,7 @@ impl Serialize for SADeviceValuator {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SIAction {
-    pub type_: u8,
+    pub type_: SAType,
     pub data: [u8; 7],
 }
 impl TryParse for SIAction {
@@ -6166,6 +6194,7 @@ impl TryParse for SIAction {
             data_5,
             data_6,
         ];
+        let type_ = type_.try_into()?;
         let result = SIAction { type_, data };
         Ok((result, remaining))
     }
@@ -6179,7 +6208,7 @@ impl TryFrom<&[u8]> for SIAction {
 impl Serialize for SIAction {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         [
             type_bytes[0],
             self.data[0],
@@ -6193,7 +6222,7 @@ impl Serialize for SIAction {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         self.data.serialize_into(bytes);
     }
 }
@@ -7154,8 +7183,8 @@ pub struct GetStateReply {
     pub base_mods: u8,
     pub latched_mods: u8,
     pub locked_mods: u8,
-    pub group: u8,
-    pub locked_group: u8,
+    pub group: Group,
+    pub locked_group: Group,
     pub base_group: i16,
     pub latched_group: i16,
     pub compat_state: u8,
@@ -7187,6 +7216,8 @@ impl GetStateReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (ptr_btn_state, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(6..).ok_or(ParseError::ParseError)?;
+        let group = group.try_into()?;
+        let locked_group = locked_group.try_into()?;
         let result = GetStateReply { response_type, device_id, sequence, length, mods, base_mods, latched_mods, locked_mods, group, locked_group, base_group, latched_group, compat_state, grab_mods, compat_grab_mods, lookup_mods, compat_lookup_mods, ptr_btn_state };
         Ok((result, remaining))
     }
@@ -9537,10 +9568,10 @@ pub struct StateNotifyEvent {
     pub base_mods: u8,
     pub latched_mods: u8,
     pub locked_mods: u8,
-    pub group: u8,
+    pub group: Group,
     pub base_group: i16,
     pub latched_group: i16,
-    pub locked_group: u8,
+    pub locked_group: Group,
     pub compat_state: u8,
     pub grab_mods: u8,
     pub compat_grab_mods: u8,
@@ -9579,6 +9610,8 @@ impl StateNotifyEvent {
         let (event_type, remaining) = u8::try_parse(remaining)?;
         let (request_major, remaining) = u8::try_parse(remaining)?;
         let (request_minor, remaining) = u8::try_parse(remaining)?;
+        let group = group.try_into()?;
+        let locked_group = locked_group.try_into()?;
         let result = StateNotifyEvent { response_type, xkb_type, sequence, time, device_id, mods, base_mods, latched_mods, locked_mods, group, base_group, latched_group, locked_group, compat_state, grab_mods, compat_grab_mods, lookup_mods, compat_loockup_mods, ptr_btn_state, changed, keycode, event_type, request_major, request_minor };
         Ok((result, remaining))
     }
@@ -9610,10 +9643,10 @@ impl From<&StateNotifyEvent> for [u8; 32] {
         let base_mods = input.base_mods.serialize();
         let latched_mods = input.latched_mods.serialize();
         let locked_mods = input.locked_mods.serialize();
-        let group = input.group.serialize();
+        let group = Into::<u8>::into(input.group).serialize();
         let base_group = input.base_group.serialize();
         let latched_group = input.latched_group.serialize();
-        let locked_group = input.locked_group.serialize();
+        let locked_group = Into::<u8>::into(input.locked_group).serialize();
         let compat_state = input.compat_state.serialize();
         let grab_mods = input.grab_mods.serialize();
         let compat_grab_mods = input.compat_grab_mods.serialize();
@@ -10032,7 +10065,7 @@ pub struct BellNotifyEvent {
     pub sequence: u16,
     pub time: TIMESTAMP,
     pub device_id: u8,
-    pub bell_class: u8,
+    pub bell_class: BellClassResult,
     pub bell_id: u8,
     pub percent: u8,
     pub pitch: u16,
@@ -10057,6 +10090,7 @@ impl BellNotifyEvent {
         let (window, remaining) = WINDOW::try_parse(remaining)?;
         let (event_only, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(7..).ok_or(ParseError::ParseError)?;
+        let bell_class = bell_class.try_into()?;
         let result = BellNotifyEvent { response_type, xkb_type, sequence, time, device_id, bell_class, bell_id, percent, pitch, duration, name, window, event_only };
         Ok((result, remaining))
     }
@@ -10084,7 +10118,7 @@ impl From<&BellNotifyEvent> for [u8; 32] {
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let device_id = input.device_id.serialize();
-        let bell_class = input.bell_class.serialize();
+        let bell_class = Into::<u8>::into(input.bell_class).serialize();
         let bell_id = input.bell_id.serialize();
         let percent = input.percent.serialize();
         let pitch = input.pitch.serialize();
@@ -10119,7 +10153,7 @@ pub struct ActionMessageEvent {
     pub press: bool,
     pub key_event_follows: bool,
     pub mods: u8,
-    pub group: u8,
+    pub group: Group,
     pub message: [STRING8; 8],
 }
 impl ActionMessageEvent {
@@ -10153,6 +10187,7 @@ impl ActionMessageEvent {
             message_7,
         ];
         let remaining = remaining.get(10..).ok_or(ParseError::ParseError)?;
+        let group = group.try_into()?;
         let result = ActionMessageEvent { response_type, xkb_type, sequence, time, device_id, keycode, press, key_event_follows, mods, group, message };
         Ok((result, remaining))
     }
@@ -10184,7 +10219,7 @@ impl From<&ActionMessageEvent> for [u8; 32] {
         let press = input.press.serialize();
         let key_event_follows = input.key_event_follows.serialize();
         let mods = input.mods.serialize();
-        let group = input.group.serialize();
+        let group = Into::<u8>::into(input.group).serialize();
         [
             response_type[0], xkb_type[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
             device_id[0], keycode[0], press[0], key_event_follows[0], mods[0], group[0], input.message[0], input.message[1],
@@ -10280,7 +10315,7 @@ pub struct ExtensionDeviceNotifyEvent {
     pub time: TIMESTAMP,
     pub device_id: u8,
     pub reason: u16,
-    pub led_class: u16,
+    pub led_class: LedClassResult,
     pub led_id: u16,
     pub leds_defined: u32,
     pub led_state: u32,
@@ -10307,6 +10342,7 @@ impl ExtensionDeviceNotifyEvent {
         let (supported, remaining) = u16::try_parse(remaining)?;
         let (unsupported, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let led_class = led_class.try_into()?;
         let result = ExtensionDeviceNotifyEvent { response_type, xkb_type, sequence, time, device_id, reason, led_class, led_id, leds_defined, led_state, first_button, n_buttons, supported, unsupported };
         Ok((result, remaining))
     }
@@ -10335,7 +10371,7 @@ impl From<&ExtensionDeviceNotifyEvent> for [u8; 32] {
         let time = input.time.serialize();
         let device_id = input.device_id.serialize();
         let reason = input.reason.serialize();
-        let led_class = input.led_class.serialize();
+        let led_class = Into::<u16>::into(input.led_class).serialize();
         let led_id = input.led_id.serialize();
         let leds_defined = input.leds_defined.serialize();
         let led_state = input.led_state.serialize();

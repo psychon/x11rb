@@ -320,7 +320,7 @@ pub struct QueryInfoReply {
     pub ms_until_server: u32,
     pub ms_since_user_input: u32,
     pub event_mask: u32,
-    pub kind: u8,
+    pub kind: Kind,
 }
 impl QueryInfoReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -334,6 +334,7 @@ impl QueryInfoReply {
         let (event_mask, remaining) = u32::try_parse(remaining)?;
         let (kind, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(7..).ok_or(ParseError::ParseError)?;
+        let kind = kind.try_into()?;
         let result = QueryInfoReply { response_type, state, sequence, length, saver_window, ms_until_server, ms_since_user_input, event_mask, kind };
         Ok((result, remaining))
     }
@@ -694,12 +695,12 @@ pub const NOTIFY_EVENT: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct NotifyEvent {
     pub response_type: u8,
-    pub state: u8,
+    pub state: State,
     pub sequence: u16,
     pub time: TIMESTAMP,
     pub root: WINDOW,
     pub window: WINDOW,
-    pub kind: u8,
+    pub kind: Kind,
     pub forced: bool,
 }
 impl NotifyEvent {
@@ -713,6 +714,8 @@ impl NotifyEvent {
         let (kind, remaining) = u8::try_parse(remaining)?;
         let (forced, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(14..).ok_or(ParseError::ParseError)?;
+        let state = state.try_into()?;
+        let kind = kind.try_into()?;
         let result = NotifyEvent { response_type, state, sequence, time, root, window, kind, forced };
         Ok((result, remaining))
     }
@@ -736,12 +739,12 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for NotifyEvent {
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let state = input.state.serialize();
+        let state = Into::<u8>::into(input.state).serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let root = input.root.serialize();
         let window = input.window.serialize();
-        let kind = input.kind.serialize();
+        let kind = Into::<u8>::into(input.kind).serialize();
         let forced = input.forced.serialize();
         [
             response_type[0], state[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],

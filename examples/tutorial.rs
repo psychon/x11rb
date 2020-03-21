@@ -2572,14 +2572,14 @@ fn example11() -> Result<(), Box<dyn Error>> {
         setup.bitmap_format_scanline_unit
     );
     println!(
-        "Bitmap format bit order is {}",
+        "Bitmap format bit order is {:?}",
         setup.bitmap_format_bit_order
     );
     println!(
         "Bitmap format scanline pad is {}",
         setup.bitmap_format_scanline_pad
     );
-    println!("Image byte order is {}", setup.image_byte_order);
+    println!("Image byte order is {:?}", setup.image_byte_order);
 
     Ok(())
 }

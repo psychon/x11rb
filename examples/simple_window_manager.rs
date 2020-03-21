@@ -104,7 +104,7 @@ impl<'a, C: Connection> WMState<'a, C> {
                 continue;
             }
             let (attr, geom) = (attr.unwrap(), geom.unwrap());
-            if !attr.override_redirect && attr.map_state != MapState::Unmapped.into() {
+            if !attr.override_redirect && attr.map_state != MapState::Unmapped {
                 self.manage_window(win, &geom)?;
             }
         }

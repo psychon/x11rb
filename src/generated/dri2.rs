@@ -256,7 +256,7 @@ impl TryFrom<u32> for EventType {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DRI2Buffer {
-    pub attachment: u32,
+    pub attachment: Attachment,
     pub name: u32,
     pub pitch: u32,
     pub cpp: u32,
@@ -269,6 +269,7 @@ impl TryParse for DRI2Buffer {
         let (pitch, remaining) = u32::try_parse(remaining)?;
         let (cpp, remaining) = u32::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
+        let attachment = attachment.try_into()?;
         let result = DRI2Buffer { attachment, name, pitch, cpp, flags };
         Ok((result, remaining))
     }
@@ -282,7 +283,7 @@ impl TryFrom<&[u8]> for DRI2Buffer {
 impl Serialize for DRI2Buffer {
     type Bytes = [u8; 20];
     fn serialize(&self) -> Self::Bytes {
-        let attachment_bytes = self.attachment.serialize();
+        let attachment_bytes = Into::<u32>::into(self.attachment).serialize();
         let name_bytes = self.name.serialize();
         let pitch_bytes = self.pitch.serialize();
         let cpp_bytes = self.cpp.serialize();
@@ -312,7 +313,7 @@ impl Serialize for DRI2Buffer {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(20);
-        self.attachment.serialize_into(bytes);
+        Into::<u32>::into(self.attachment).serialize_into(bytes);
         self.name.serialize_into(bytes);
         self.pitch.serialize_into(bytes);
         self.cpp.serialize_into(bytes);
@@ -322,13 +323,14 @@ impl Serialize for DRI2Buffer {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AttachFormat {
-    pub attachment: u32,
+    pub attachment: Attachment,
     pub format: u32,
 }
 impl TryParse for AttachFormat {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (attachment, remaining) = u32::try_parse(remaining)?;
         let (format, remaining) = u32::try_parse(remaining)?;
+        let attachment = attachment.try_into()?;
         let result = AttachFormat { attachment, format };
         Ok((result, remaining))
     }
@@ -342,7 +344,7 @@ impl TryFrom<&[u8]> for AttachFormat {
 impl Serialize for AttachFormat {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let attachment_bytes = self.attachment.serialize();
+        let attachment_bytes = Into::<u32>::into(self.attachment).serialize();
         let format_bytes = self.format.serialize();
         [
             attachment_bytes[0],
@@ -357,7 +359,7 @@ impl Serialize for AttachFormat {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.attachment.serialize_into(bytes);
+        Into::<u32>::into(self.attachment).serialize_into(bytes);
         self.format.serialize_into(bytes);
     }
 }
@@ -1165,7 +1167,7 @@ pub const BUFFER_SWAP_COMPLETE_EVENT: u8 = 0;
 pub struct BufferSwapCompleteEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub event_type: u16,
+    pub event_type: EventType,
     pub drawable: DRAWABLE,
     pub ust_hi: u32,
     pub ust_lo: u32,
@@ -1186,6 +1188,7 @@ impl BufferSwapCompleteEvent {
         let (msc_hi, remaining) = u32::try_parse(remaining)?;
         let (msc_lo, remaining) = u32::try_parse(remaining)?;
         let (sbc, remaining) = u32::try_parse(remaining)?;
+        let event_type = event_type.try_into()?;
         let result = BufferSwapCompleteEvent { response_type, sequence, event_type, drawable, ust_hi, ust_lo, msc_hi, msc_lo, sbc };
         Ok((result, remaining))
     }
@@ -1210,7 +1213,7 @@ impl From<&BufferSwapCompleteEvent> for [u8; 32] {
     fn from(input: &BufferSwapCompleteEvent) -> Self {
         let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
-        let event_type = input.event_type.serialize();
+        let event_type = Into::<u16>::into(input.event_type).serialize();
         let drawable = input.drawable.serialize();
         let ust_hi = input.ust_hi.serialize();
         let ust_lo = input.ust_lo.serialize();
