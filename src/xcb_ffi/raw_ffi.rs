@@ -186,6 +186,8 @@ mod mock {
     }
 
     pub(crate) unsafe fn xcb_connection_has_error(c: *const xcb_connection_t) -> c_int {
+        // The pointer is suitable aligned since our xcb_connect() mock above created it
+        #[allow(clippy::cast_ptr_alignment)]
         (*(c as *const ConnectionMock)).error
     }
 
@@ -254,6 +256,8 @@ mod mock {
     }
 
     pub(crate) unsafe fn xcb_get_setup(c: *const xcb_connection_t) -> *const u8 {
+        // The pointer is suitable aligned since our xcb_connect() mock above created it
+        #[allow(clippy::cast_ptr_alignment)]
         (*(c as *const ConnectionMock)).setup.as_ptr()
     }
 
