@@ -19,6 +19,7 @@ enum CheckState {
     Prefetched(SequenceNumber),
     Present(QueryExtensionReply),
     Missing,
+    Error,
 }
 
 impl ExtensionInformation {
@@ -62,25 +63,31 @@ impl ExtensionInformation {
         let entry = self.prefetch_extension_information_aux(conn, extension_name)?;
         match entry {
             CheckState::Prefetched(sequence_number) => {
-                let info = Cookie::<C, QueryExtensionReply>::new(conn, *sequence_number)
-                    .reply()
-                    .map_err(|e| match e {
-                        ReplyError::ConnectionError(e) => e,
-                        // The X11 protocol specification does not specify any error
-                        // for the QueryExtension request, so this should not happen.
-                        ReplyError::X11Error(_) => ConnectionError::UnknownError,
-                    })?;
-                // If the extension is not present, we return None, else we box it
-                if info.present {
-                    *entry = CheckState::Present(info);
-                    Ok(Some(info))
-                } else {
-                    *entry = CheckState::Missing;
-                    Ok(None)
+                match Cookie::<C, QueryExtensionReply>::new(conn, *sequence_number)
+                        .reply() {
+                    Err(err) => {
+                        *entry = CheckState::Error;
+                        match err {
+                            ReplyError::ConnectionError(e) => Err(e),
+                            // The X11 protocol specification does not specify any error
+                            // for the QueryExtension request, so this should not happen.
+                            ReplyError::X11Error(_) => Err(ConnectionError::UnknownError),
+                        }
+                    },
+                    Ok(info) => {
+                        if info.present {
+                            *entry = CheckState::Present(info);
+                            Ok(Some(info))
+                        } else {
+                            *entry = CheckState::Missing;
+                            Ok(None)
+                        }
+                    },
                 }
             }
             CheckState::Present(info) => Ok(Some(*info)),
             CheckState::Missing => Ok(None),
+            CheckState::Error => Err(ConnectionError::UnknownError),
         }
     }
 }
