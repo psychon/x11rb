@@ -72,7 +72,7 @@
 //!
 //! `composite`, `damage`, `dpms`, `dri2`, `dri3`, `glx`, `present`, `randr`, `record`, `render`,
 //! `res`, `screensaver`, `shape`, `shm`, `sync`, `xevie`, `xf86dri`, `xf86vidmode`, `xfixes`,
-//! `xinerama`, `xinput`, `xkb`, `xprint`, `xproto`, `xselinux`, `xtest`, `xv`, `xvmc`.
+//! `xinerama`, `xinput`, `xkb`, `xprint`, `xselinux`, `xtest`, `xv`, `xvmc`.
 //!
 //! If you want to take the "I do not want to think about this"-approach, you can enable the
 //! `all-extensions` feature to just enable, well, all extensions.
