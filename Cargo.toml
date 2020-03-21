@@ -47,7 +47,6 @@ all-extensions = [
     "xinput",
     "xkb",
     "xprint",
-    "xproto",
     "xselinux",
     "xtest",
     "xv",
@@ -78,7 +77,6 @@ xinerama = []
 xinput = ["xfixes"]
 xkb = []
 xprint = []
-xproto = []
 xselinux = []
 xtest = []
 xv = ["shm"]
