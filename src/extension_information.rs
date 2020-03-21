@@ -63,8 +63,7 @@ impl ExtensionInformation {
         let entry = self.prefetch_extension_information_aux(conn, extension_name)?;
         match entry {
             CheckState::Prefetched(sequence_number) => {
-                match Cookie::<C, QueryExtensionReply>::new(conn, *sequence_number)
-                        .reply() {
+                match Cookie::<C, QueryExtensionReply>::new(conn, *sequence_number).reply() {
                     Err(err) => {
                         *entry = CheckState::Error;
                         match err {
@@ -73,7 +72,7 @@ impl ExtensionInformation {
                             // for the QueryExtension request, so this should not happen.
                             ReplyError::X11Error(_) => Err(ConnectionError::UnknownError),
                         }
-                    },
+                    }
                     Ok(info) => {
                         if info.present {
                             *entry = CheckState::Present(info);
@@ -82,7 +81,7 @@ impl ExtensionInformation {
                             *entry = CheckState::Missing;
                             Ok(None)
                         }
-                    },
+                    }
                 }
             }
             CheckState::Present(info) => Ok(Some(*info)),
@@ -169,7 +168,12 @@ mod test {
             // Code should only ask once for the reply to a request. Check that this is the case
             // (by requiring monotonically increasing sequence numbers here).
             let mut last = self.0.borrow_mut();
-            assert!(*last < sequence, "Last sequence number that was awaited was {}, but now {}", *last, sequence);
+            assert!(
+                *last < sequence,
+                "Last sequence number that was awaited was {}, but now {}",
+                *last,
+                sequence
+            );
             *last = sequence;
             // Then return an error, because that's what the #[test] below needs.
             Err(ReplyError::ConnectionError(ConnectionError::UnknownError))
@@ -212,15 +216,15 @@ mod test {
 
         // Ask for an extension info. FakeConnection will return an error.
         match ext_info.extension_information(&conn, "whatever") {
-            Err(ConnectionError::UnknownError) => {},
-            r => panic!("Unexpected result: {:?}", r)
+            Err(ConnectionError::UnknownError) => {}
+            r => panic!("Unexpected result: {:?}", r),
         }
 
         // Ask again for the extension information. ExtensionInformation should not try to get the
         // reply again, because that would just hang. Once upon a time, this caused a hang.
         match ext_info.extension_information(&conn, "whatever") {
-            Err(ConnectionError::UnknownError) => {},
-            r => panic!("Unexpected result: {:?}", r)
+            Err(ConnectionError::UnknownError) => {}
+            r => panic!("Unexpected result: {:?}", r),
         }
     }
 }
