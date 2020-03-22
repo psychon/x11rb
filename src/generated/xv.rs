@@ -516,12 +516,9 @@ pub struct Rational {
     pub denominator: i32,
 }
 impl TryParse for Rational {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (numerator, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (denominator, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (numerator, remaining) = i32::try_parse(remaining)?;
+        let (denominator, remaining) = i32::try_parse(remaining)?;
         let result = Rational { numerator, denominator };
         Ok((result, remaining))
     }
@@ -561,13 +558,10 @@ pub struct Format {
     pub depth: u8,
 }
 impl TryParse for Format {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (visual, new_remaining) = VISUALID::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (depth, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (visual, remaining) = VISUALID::try_parse(remaining)?;
+        let (depth, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let result = Format { visual, depth };
         Ok((result, remaining))
     }
@@ -611,27 +605,20 @@ pub struct AdaptorInfo {
     pub formats: Vec<Format>,
 }
 impl TryParse for AdaptorInfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (base_id, new_remaining) = PORT::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (name_size, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_ports, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_formats, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (name, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_size as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let value = remaining;
+        let (base_id, remaining) = PORT::try_parse(remaining)?;
+        let (name_size, remaining) = u16::try_parse(remaining)?;
+        let (num_ports, remaining) = u16::try_parse(remaining)?;
+        let (num_formats, remaining) = u16::try_parse(remaining)?;
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_size as usize)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let (formats, new_remaining) = crate::x11_utils::parse_list::<Format>(remaining, num_formats as usize)?;
-        remaining = new_remaining;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let (formats, remaining) = crate::x11_utils::parse_list::<Format>(remaining, num_formats as usize)?;
         let result = AdaptorInfo { base_id, num_ports, type_, name, formats };
         Ok((result, remaining))
     }
@@ -674,25 +661,19 @@ pub struct EncodingInfo {
     pub name: Vec<u8>,
 }
 impl TryParse for EncodingInfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (encoding, new_remaining) = ENCODING::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (name_size, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (width, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (height, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (rate, new_remaining) = Rational::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (name, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_size as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let value = remaining;
+        let (encoding, remaining) = ENCODING::try_parse(remaining)?;
+        let (name_size, remaining) = u16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (rate, remaining) = Rational::try_parse(remaining)?;
+        let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_size as usize)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
         let result = EncodingInfo { encoding, width, height, rate, name };
         Ok((result, remaining))
     }
@@ -735,24 +716,15 @@ pub struct Image {
     pub data: Vec<u8>,
 }
 impl TryParse for Image {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (id, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (width, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (height, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (data_size, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_planes, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (pitches, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes as usize)?;
-        remaining = new_remaining;
-        let (offsets, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes as usize)?;
-        remaining = new_remaining;
-        let (data, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, data_size as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (id, remaining) = u32::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (data_size, remaining) = u32::try_parse(remaining)?;
+        let (num_planes, remaining) = u32::try_parse(remaining)?;
+        let (pitches, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes as usize)?;
+        let (offsets, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes as usize)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, data_size as usize)?;
         let result = Image { id, width, height, num_planes, pitches, offsets, data };
         Ok((result, remaining))
     }
@@ -792,22 +764,17 @@ pub struct AttributeInfo {
     pub name: Vec<u8>,
 }
 impl TryParse for AttributeInfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (min, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (size, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (name, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, size as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let value = remaining;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (min, remaining) = i32::try_parse(remaining)?;
+        let (max, remaining) = i32::try_parse(remaining)?;
+        let (size, remaining) = u32::try_parse(remaining)?;
+        let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, size as usize)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
         let result = AttributeInfo { flags, min, max, name };
         Ok((result, remaining))
     }
@@ -863,47 +830,27 @@ pub struct ImageFormatInfo {
     pub vscanline_order: u8,
 }
 impl TryParse for ImageFormatInfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (id, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (byte_order, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (guid_0, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (guid_1, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (guid_2, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (guid_3, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (guid_4, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (guid_5, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (guid_6, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (guid_7, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (guid_8, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (guid_9, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (guid_10, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (guid_11, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (guid_12, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (guid_13, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (guid_14, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (guid_15, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (id, remaining) = u32::try_parse(remaining)?;
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (byte_order, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (guid_0, remaining) = u8::try_parse(remaining)?;
+        let (guid_1, remaining) = u8::try_parse(remaining)?;
+        let (guid_2, remaining) = u8::try_parse(remaining)?;
+        let (guid_3, remaining) = u8::try_parse(remaining)?;
+        let (guid_4, remaining) = u8::try_parse(remaining)?;
+        let (guid_5, remaining) = u8::try_parse(remaining)?;
+        let (guid_6, remaining) = u8::try_parse(remaining)?;
+        let (guid_7, remaining) = u8::try_parse(remaining)?;
+        let (guid_8, remaining) = u8::try_parse(remaining)?;
+        let (guid_9, remaining) = u8::try_parse(remaining)?;
+        let (guid_10, remaining) = u8::try_parse(remaining)?;
+        let (guid_11, remaining) = u8::try_parse(remaining)?;
+        let (guid_12, remaining) = u8::try_parse(remaining)?;
+        let (guid_13, remaining) = u8::try_parse(remaining)?;
+        let (guid_14, remaining) = u8::try_parse(remaining)?;
+        let (guid_15, remaining) = u8::try_parse(remaining)?;
         let guid = [
             guid_0,
             guid_1,
@@ -922,105 +869,57 @@ impl TryParse for ImageFormatInfo {
             guid_14,
             guid_15,
         ];
-        let (bpp, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_planes, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (depth, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let (red_mask, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (green_mask, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (blue_mask, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (format, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let (y_sample_bits, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (u_sample_bits, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (v_sample_bits, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vhorz_y_period, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vhorz_u_period, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vhorz_v_period, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vvert_y_period, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vvert_u_period, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vvert_v_period, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_0, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_1, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_2, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_3, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_4, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_5, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_6, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_7, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_8, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_9, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_10, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_11, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_12, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_13, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_14, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_15, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_16, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_17, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_18, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_19, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_20, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_21, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_22, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_23, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_24, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_25, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_26, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_27, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_28, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_29, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_30, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vcomp_order_31, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+        let (bpp, remaining) = u8::try_parse(remaining)?;
+        let (num_planes, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (depth, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (red_mask, remaining) = u32::try_parse(remaining)?;
+        let (green_mask, remaining) = u32::try_parse(remaining)?;
+        let (blue_mask, remaining) = u32::try_parse(remaining)?;
+        let (format, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (y_sample_bits, remaining) = u32::try_parse(remaining)?;
+        let (u_sample_bits, remaining) = u32::try_parse(remaining)?;
+        let (v_sample_bits, remaining) = u32::try_parse(remaining)?;
+        let (vhorz_y_period, remaining) = u32::try_parse(remaining)?;
+        let (vhorz_u_period, remaining) = u32::try_parse(remaining)?;
+        let (vhorz_v_period, remaining) = u32::try_parse(remaining)?;
+        let (vvert_y_period, remaining) = u32::try_parse(remaining)?;
+        let (vvert_u_period, remaining) = u32::try_parse(remaining)?;
+        let (vvert_v_period, remaining) = u32::try_parse(remaining)?;
+        let (vcomp_order_0, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_1, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_2, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_3, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_4, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_5, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_6, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_7, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_8, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_9, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_10, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_11, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_12, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_13, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_14, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_15, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_16, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_17, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_18, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_19, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_20, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_21, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_22, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_23, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_24, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_25, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_26, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_27, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_28, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_29, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_30, remaining) = u8::try_parse(remaining)?;
+        let (vcomp_order_31, remaining) = u8::try_parse(remaining)?;
         let vcomp_order = [
             vcomp_order_0,
             vcomp_order_1,
@@ -1055,9 +954,8 @@ impl TryParse for ImageFormatInfo {
             vcomp_order_30,
             vcomp_order_31,
         ];
-        let (vscanline_order, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(11..).ok_or(ParseError::ParseError)?;
+        let (vscanline_order, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
         let result = ImageFormatInfo { id, type_, byte_order, guid, bpp, num_planes, depth, red_mask, green_mask, blue_mask, format, y_sample_bits, u_sample_bits, v_sample_bits, vhorz_y_period, vhorz_u_period, vhorz_v_period, vvert_y_period, vvert_u_period, vvert_v_period, vcomp_order, vscanline_order };
         Ok((result, remaining))
     }
@@ -1263,14 +1161,10 @@ pub struct BadPortError {
     pub sequence: u16,
 }
 impl BadPortError {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (error_code, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (error_code, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
         let result = BadPortError { response_type, error_code, sequence };
         Ok((result, remaining))
     }
@@ -1317,14 +1211,10 @@ pub struct BadEncodingError {
     pub sequence: u16,
 }
 impl BadEncodingError {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (error_code, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (error_code, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
         let result = BadEncodingError { response_type, error_code, sequence };
         Ok((result, remaining))
     }
@@ -1371,14 +1261,10 @@ pub struct BadControlError {
     pub sequence: u16,
 }
 impl BadControlError {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (error_code, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (error_code, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
         let result = BadControlError { response_type, error_code, sequence };
         Ok((result, remaining))
     }
@@ -1428,20 +1314,13 @@ pub struct VideoNotifyEvent {
     pub port: PORT,
 }
 impl VideoNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (reason, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (drawable, new_remaining) = DRAWABLE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (port, new_remaining) = PORT::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (reason, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (drawable, remaining) = DRAWABLE::try_parse(remaining)?;
+        let (port, remaining) = PORT::try_parse(remaining)?;
         let result = VideoNotifyEvent { response_type, reason, sequence, time, drawable, port };
         Ok((result, remaining))
     }
@@ -1494,21 +1373,14 @@ pub struct PortNotifyEvent {
     pub value: i32,
 }
 impl PortNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (port, new_remaining) = PORT::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (attribute, new_remaining) = ATOM::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (value, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (port, remaining) = PORT::try_parse(remaining)?;
+        let (attribute, remaining) = ATOM::try_parse(remaining)?;
+        let (value, remaining) = i32::try_parse(remaining)?;
         let result = PortNotifyEvent { response_type, sequence, time, port, attribute, value };
         Ok((result, remaining))
     }
@@ -1578,19 +1450,13 @@ pub struct QueryExtensionReply {
     pub minor: u16,
 }
 impl QueryExtensionReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (major, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (minor, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (major, remaining) = u16::try_parse(remaining)?;
+        let (minor, remaining) = u16::try_parse(remaining)?;
         let result = QueryExtensionReply { response_type, sequence, length, major, minor };
         Ok((result, remaining))
     }
@@ -1634,20 +1500,14 @@ pub struct QueryAdaptorsReply {
     pub info: Vec<AdaptorInfo>,
 }
 impl QueryAdaptorsReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_adaptors, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (info, new_remaining) = crate::x11_utils::parse_list::<AdaptorInfo>(remaining, num_adaptors as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_adaptors, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
+        let (info, remaining) = crate::x11_utils::parse_list::<AdaptorInfo>(remaining, num_adaptors as usize)?;
         let result = QueryAdaptorsReply { response_type, sequence, length, info };
         Ok((result, remaining))
     }
@@ -1691,20 +1551,14 @@ pub struct QueryEncodingsReply {
     pub info: Vec<EncodingInfo>,
 }
 impl QueryEncodingsReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_encodings, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (info, new_remaining) = crate::x11_utils::parse_list::<EncodingInfo>(remaining, num_encodings as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_encodings, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
+        let (info, remaining) = crate::x11_utils::parse_list::<EncodingInfo>(remaining, num_encodings as usize)?;
         let result = QueryEncodingsReply { response_type, sequence, length, info };
         Ok((result, remaining))
     }
@@ -1753,16 +1607,11 @@ pub struct GrabPortReply {
     pub length: u32,
 }
 impl GrabPortReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (result, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (result, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
         let result = GrabPortReply { response_type, result, sequence, length };
         Ok((result, remaining))
     }
@@ -2180,19 +2029,13 @@ pub struct QueryBestSizeReply {
     pub actual_height: u16,
 }
 impl QueryBestSizeReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (actual_width, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (actual_height, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (actual_width, remaining) = u16::try_parse(remaining)?;
+        let (actual_height, remaining) = u16::try_parse(remaining)?;
         let result = QueryBestSizeReply { response_type, sequence, length, actual_width, actual_height };
         Ok((result, remaining))
     }
@@ -2276,17 +2119,12 @@ pub struct GetPortAttributeReply {
     pub value: i32,
 }
 impl GetPortAttributeReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (value, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (value, remaining) = i32::try_parse(remaining)?;
         let result = GetPortAttributeReply { response_type, sequence, length, value };
         Ok((result, remaining))
     }
@@ -2331,22 +2169,15 @@ pub struct QueryPortAttributesReply {
     pub attributes: Vec<AttributeInfo>,
 }
 impl QueryPortAttributesReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_attributes, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (text_size, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(16..).ok_or(ParseError::ParseError)?;
-        let (attributes, new_remaining) = crate::x11_utils::parse_list::<AttributeInfo>(remaining, num_attributes as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_attributes, remaining) = u32::try_parse(remaining)?;
+        let (text_size, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
+        let (attributes, remaining) = crate::x11_utils::parse_list::<AttributeInfo>(remaining, num_attributes as usize)?;
         let result = QueryPortAttributesReply { response_type, sequence, length, text_size, attributes };
         Ok((result, remaining))
     }
@@ -2390,20 +2221,14 @@ pub struct ListImageFormatsReply {
     pub format: Vec<ImageFormatInfo>,
 }
 impl ListImageFormatsReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_formats, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (format, new_remaining) = crate::x11_utils::parse_list::<ImageFormatInfo>(remaining, num_formats as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_formats, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let (format, remaining) = crate::x11_utils::parse_list::<ImageFormatInfo>(remaining, num_formats as usize)?;
         let result = ListImageFormatsReply { response_type, sequence, length, format };
         Ok((result, remaining))
     }
@@ -2463,28 +2288,18 @@ pub struct QueryImageAttributesReply {
     pub offsets: Vec<u32>,
 }
 impl QueryImageAttributesReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_planes, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (data_size, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (width, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (height, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (pitches, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes as usize)?;
-        remaining = new_remaining;
-        let (offsets, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_planes, remaining) = u32::try_parse(remaining)?;
+        let (data_size, remaining) = u32::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let (pitches, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes as usize)?;
+        let (offsets, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes as usize)?;
         let result = QueryImageAttributesReply { response_type, sequence, length, num_planes, data_size, width, height, pitches, offsets };
         Ok((result, remaining))
     }

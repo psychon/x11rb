@@ -122,14 +122,10 @@ pub struct BadDamageError {
     pub sequence: u16,
 }
 impl BadDamageError {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (error_code, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (error_code, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
         let result = BadDamageError { response_type, error_code, sequence };
         Ok((result, remaining))
     }
@@ -205,20 +201,14 @@ pub struct QueryVersionReply {
     pub minor_version: u32,
 }
 impl QueryVersionReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (major_version, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (minor_version, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(16..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (major_version, remaining) = u32::try_parse(remaining)?;
+        let (minor_version, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
         let result = QueryVersionReply { response_type, sequence, length, major_version, minor_version };
         Ok((result, remaining))
     }
@@ -370,24 +360,15 @@ pub struct NotifyEvent {
     pub geometry: Rectangle,
 }
 impl NotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (level, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (drawable, new_remaining) = DRAWABLE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (damage, new_remaining) = DAMAGE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (timestamp, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (area, new_remaining) = Rectangle::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (geometry, new_remaining) = Rectangle::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (level, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (drawable, remaining) = DRAWABLE::try_parse(remaining)?;
+        let (damage, remaining) = DAMAGE::try_parse(remaining)?;
+        let (timestamp, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (area, remaining) = Rectangle::try_parse(remaining)?;
+        let (geometry, remaining) = Rectangle::try_parse(remaining)?;
         let result = NotifyEvent { response_type, level, sequence, drawable, damage, timestamp, area, geometry };
         Ok((result, remaining))
     }

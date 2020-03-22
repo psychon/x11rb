@@ -43,12 +43,9 @@ pub struct Client {
     pub resource_mask: u32,
 }
 impl TryParse for Client {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (resource_base, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (resource_mask, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (resource_base, remaining) = u32::try_parse(remaining)?;
+        let (resource_mask, remaining) = u32::try_parse(remaining)?;
         let result = Client { resource_base, resource_mask };
         Ok((result, remaining))
     }
@@ -88,12 +85,9 @@ pub struct Type {
     pub count: u32,
 }
 impl TryParse for Type {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (resource_type, new_remaining) = ATOM::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (count, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (resource_type, remaining) = ATOM::try_parse(remaining)?;
+        let (count, remaining) = u32::try_parse(remaining)?;
         let result = Type { resource_type, count };
         Ok((result, remaining))
     }
@@ -196,12 +190,9 @@ pub struct ClientIdSpec {
     pub mask: u32,
 }
 impl TryParse for ClientIdSpec {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (client, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mask, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (client, remaining) = u32::try_parse(remaining)?;
+        let (mask, remaining) = u32::try_parse(remaining)?;
         let result = ClientIdSpec { client, mask };
         Ok((result, remaining))
     }
@@ -241,14 +232,10 @@ pub struct ClientIdValue {
     pub value: Vec<u32>,
 }
 impl TryParse for ClientIdValue {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (spec, new_remaining) = ClientIdSpec::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (value, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, (length as usize) / (4))?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (spec, remaining) = ClientIdSpec::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (value, remaining) = crate::x11_utils::parse_list::<u32>(remaining, (length as usize) / (4))?;
         let result = ClientIdValue { spec, value };
         Ok((result, remaining))
     }
@@ -282,12 +269,9 @@ pub struct ResourceIdSpec {
     pub type_: u32,
 }
 impl TryParse for ResourceIdSpec {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (resource, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (type_, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (resource, remaining) = u32::try_parse(remaining)?;
+        let (type_, remaining) = u32::try_parse(remaining)?;
         let result = ResourceIdSpec { resource, type_ };
         Ok((result, remaining))
     }
@@ -329,16 +313,11 @@ pub struct ResourceSizeSpec {
     pub use_count: u32,
 }
 impl TryParse for ResourceSizeSpec {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (spec, new_remaining) = ResourceIdSpec::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bytes, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (ref_count, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (use_count, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (spec, remaining) = ResourceIdSpec::try_parse(remaining)?;
+        let (bytes, remaining) = u32::try_parse(remaining)?;
+        let (ref_count, remaining) = u32::try_parse(remaining)?;
+        let (use_count, remaining) = u32::try_parse(remaining)?;
         let result = ResourceSizeSpec { spec, bytes, ref_count, use_count };
         Ok((result, remaining))
     }
@@ -394,14 +373,10 @@ pub struct ResourceSizeValue {
     pub cross_references: Vec<ResourceSizeSpec>,
 }
 impl TryParse for ResourceSizeValue {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (size, new_remaining) = ResourceSizeSpec::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_cross_references, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (cross_references, new_remaining) = crate::x11_utils::parse_list::<ResourceSizeSpec>(remaining, num_cross_references as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (size, remaining) = ResourceSizeSpec::try_parse(remaining)?;
+        let (num_cross_references, remaining) = u32::try_parse(remaining)?;
+        let (cross_references, remaining) = crate::x11_utils::parse_list::<ResourceSizeSpec>(remaining, num_cross_references as usize)?;
         let result = ResourceSizeValue { size, cross_references };
         Ok((result, remaining))
     }
@@ -462,19 +437,13 @@ pub struct QueryVersionReply {
     pub server_minor: u16,
 }
 impl QueryVersionReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (server_major, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (server_minor, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (server_major, remaining) = u16::try_parse(remaining)?;
+        let (server_minor, remaining) = u16::try_parse(remaining)?;
         let result = QueryVersionReply { response_type, sequence, length, server_major, server_minor };
         Ok((result, remaining))
     }
@@ -513,20 +482,14 @@ pub struct QueryClientsReply {
     pub clients: Vec<Client>,
 }
 impl QueryClientsReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_clients, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (clients, new_remaining) = crate::x11_utils::parse_list::<Client>(remaining, num_clients as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_clients, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let (clients, remaining) = crate::x11_utils::parse_list::<Client>(remaining, num_clients as usize)?;
         let result = QueryClientsReply { response_type, sequence, length, clients };
         Ok((result, remaining))
     }
@@ -570,20 +533,14 @@ pub struct QueryClientResourcesReply {
     pub types: Vec<Type>,
 }
 impl QueryClientResourcesReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_types, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (types, new_remaining) = crate::x11_utils::parse_list::<Type>(remaining, num_types as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_types, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let (types, remaining) = crate::x11_utils::parse_list::<Type>(remaining, num_types as usize)?;
         let result = QueryClientResourcesReply { response_type, sequence, length, types };
         Ok((result, remaining))
     }
@@ -628,19 +585,13 @@ pub struct QueryClientPixmapBytesReply {
     pub bytes_overflow: u32,
 }
 impl QueryClientPixmapBytesReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bytes, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bytes_overflow, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (bytes, remaining) = u32::try_parse(remaining)?;
+        let (bytes_overflow, remaining) = u32::try_parse(remaining)?;
         let result = QueryClientPixmapBytesReply { response_type, sequence, length, bytes, bytes_overflow };
         Ok((result, remaining))
     }
@@ -689,20 +640,14 @@ pub struct QueryClientIdsReply {
     pub ids: Vec<ClientIdValue>,
 }
 impl QueryClientIdsReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_ids, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (ids, new_remaining) = crate::x11_utils::parse_list::<ClientIdValue>(remaining, num_ids as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_ids, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let (ids, remaining) = crate::x11_utils::parse_list::<ClientIdValue>(remaining, num_ids as usize)?;
         let result = QueryClientIdsReply { response_type, sequence, length, ids };
         Ok((result, remaining))
     }
@@ -756,20 +701,14 @@ pub struct QueryResourceBytesReply {
     pub sizes: Vec<ResourceSizeValue>,
 }
 impl QueryResourceBytesReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_sizes, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (sizes, new_remaining) = crate::x11_utils::parse_list::<ResourceSizeValue>(remaining, num_sizes as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_sizes, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let (sizes, remaining) = crate::x11_utils::parse_list::<ResourceSizeValue>(remaining, num_sizes as usize)?;
         let result = QueryResourceBytesReply { response_type, sequence, length, sizes };
         Ok((result, remaining))
     }

@@ -75,19 +75,13 @@ pub struct QueryVersionReply {
     pub minor_version: u32,
 }
 impl QueryVersionReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (major_version, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (minor_version, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (major_version, remaining) = u32::try_parse(remaining)?;
+        let (minor_version, remaining) = u32::try_parse(remaining)?;
         let result = QueryVersionReply { response_type, sequence, length, major_version, minor_version };
         Ok((result, remaining))
     }
@@ -137,19 +131,14 @@ pub struct OpenReply {
     pub device_fd: RawFdContainer,
 }
 impl OpenReply {
-    fn try_parse_fd<'a>(value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (nfd, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse_fd<'a>(remaining: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (nfd, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
         if fds.is_empty() { return Err(ParseError::ParseError) }
         let device_fd = fds.remove(0);
-        remaining = &remaining.get(24..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
         let result = OpenReply { response_type, nfd, sequence, length, device_fd };
         Ok((result, remaining))
     }
@@ -250,31 +239,20 @@ pub struct BufferFromPixmapReply {
     pub pixmap_fd: RawFdContainer,
 }
 impl BufferFromPixmapReply {
-    fn try_parse_fd<'a>(value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (nfd, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (size, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (width, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (height, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (stride, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (depth, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bpp, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse_fd<'a>(remaining: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (nfd, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (size, remaining) = u32::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (stride, remaining) = u16::try_parse(remaining)?;
+        let (depth, remaining) = u8::try_parse(remaining)?;
+        let (bpp, remaining) = u8::try_parse(remaining)?;
         if fds.is_empty() { return Err(ParseError::ParseError) }
         let pixmap_fd = fds.remove(0);
-        remaining = &remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let result = BufferFromPixmapReply { response_type, nfd, sequence, length, size, width, height, stride, depth, bpp, pixmap_fd };
         Ok((result, remaining))
     }
@@ -361,19 +339,14 @@ pub struct FDFromFenceReply {
     pub fence_fd: RawFdContainer,
 }
 impl FDFromFenceReply {
-    fn try_parse_fd<'a>(value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (nfd, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse_fd<'a>(remaining: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (nfd, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
         if fds.is_empty() { return Err(ParseError::ParseError) }
         let fence_fd = fds.remove(0);
-        remaining = &remaining.get(24..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
         let result = FDFromFenceReply { response_type, nfd, sequence, length, fence_fd };
         Ok((result, remaining))
     }
@@ -425,24 +398,16 @@ pub struct GetSupportedModifiersReply {
     pub screen_modifiers: Vec<u64>,
 }
 impl GetSupportedModifiersReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_window_modifiers, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_screen_modifiers, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(16..).ok_or(ParseError::ParseError)?;
-        let (window_modifiers, new_remaining) = crate::x11_utils::parse_list::<u64>(remaining, num_window_modifiers as usize)?;
-        remaining = new_remaining;
-        let (screen_modifiers, new_remaining) = crate::x11_utils::parse_list::<u64>(remaining, num_screen_modifiers as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_window_modifiers, remaining) = u32::try_parse(remaining)?;
+        let (num_screen_modifiers, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
+        let (window_modifiers, remaining) = crate::x11_utils::parse_list::<u64>(remaining, num_window_modifiers as usize)?;
+        let (screen_modifiers, remaining) = crate::x11_utils::parse_list::<u64>(remaining, num_screen_modifiers as usize)?;
         let result = GetSupportedModifiersReply { response_type, sequence, length, window_modifiers, screen_modifiers };
         Ok((result, remaining))
     }
@@ -591,32 +556,20 @@ pub struct BuffersFromPixmapReply {
     pub buffers: Vec<RawFdContainer>,
 }
 impl BuffersFromPixmapReply {
-    fn try_parse_fd<'a>(value: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (nfd, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (width, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (height, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (modifier, new_remaining) = u64::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (depth, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bpp, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(6..).ok_or(ParseError::ParseError)?;
-        let (strides, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, nfd as usize)?;
-        remaining = new_remaining;
-        let (offsets, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, nfd as usize)?;
-        remaining = new_remaining;
+    fn try_parse_fd<'a>(remaining: &'a [u8], fds: &mut Vec<RawFdContainer>) -> Result<(Self, &'a [u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (nfd, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let (modifier, remaining) = u64::try_parse(remaining)?;
+        let (depth, remaining) = u8::try_parse(remaining)?;
+        let (bpp, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(6..).ok_or(ParseError::ParseError)?;
+        let (strides, remaining) = crate::x11_utils::parse_list::<u32>(remaining, nfd as usize)?;
+        let (offsets, remaining) = crate::x11_utils::parse_list::<u32>(remaining, nfd as usize)?;
         let fds_len = nfd as usize;
         if fds.len() < fds_len { return Err(ParseError::ParseError) }
         let mut buffers = fds.split_off(fds_len);

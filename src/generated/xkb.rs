@@ -2053,24 +2053,15 @@ pub struct IndicatorMap {
     pub ctrls: u32,
 }
 impl TryParse for IndicatorMap {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (flags, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (which_groups, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (groups, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (which_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (real_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vmods, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (ctrls, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (flags, remaining) = u8::try_parse(remaining)?;
+        let (which_groups, remaining) = u8::try_parse(remaining)?;
+        let (groups, remaining) = u8::try_parse(remaining)?;
+        let (which_mods, remaining) = u8::try_parse(remaining)?;
+        let (mods, remaining) = u8::try_parse(remaining)?;
+        let (real_mods, remaining) = u8::try_parse(remaining)?;
+        let (vmods, remaining) = u16::try_parse(remaining)?;
+        let (ctrls, remaining) = u32::try_parse(remaining)?;
         let result = IndicatorMap { flags, which_groups, groups, which_mods, mods, real_mods, vmods, ctrls };
         Ok((result, remaining))
     }
@@ -2498,14 +2489,10 @@ pub struct ModDef {
     pub vmods: u16,
 }
 impl TryParse for ModDef {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (mask, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (real_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vmods, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (mask, remaining) = u8::try_parse(remaining)?;
+        let (real_mods, remaining) = u8::try_parse(remaining)?;
+        let (vmods, remaining) = u16::try_parse(remaining)?;
         let result = ModDef { mask, real_mods, vmods };
         Ok((result, remaining))
     }
@@ -2542,16 +2529,11 @@ pub struct KeyName {
     pub name: [u8; 4],
 }
 impl TryParse for KeyName {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (name_0, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (name_1, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (name_2, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (name_3, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (name_0, remaining) = u8::try_parse(remaining)?;
+        let (name_1, remaining) = u8::try_parse(remaining)?;
+        let (name_2, remaining) = u8::try_parse(remaining)?;
+        let (name_3, remaining) = u8::try_parse(remaining)?;
         let name = [
             name_0,
             name_1,
@@ -2590,30 +2572,21 @@ pub struct KeyAlias {
     pub alias: [u8; 4],
 }
 impl TryParse for KeyAlias {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (real_0, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (real_1, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (real_2, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (real_3, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (real_0, remaining) = u8::try_parse(remaining)?;
+        let (real_1, remaining) = u8::try_parse(remaining)?;
+        let (real_2, remaining) = u8::try_parse(remaining)?;
+        let (real_3, remaining) = u8::try_parse(remaining)?;
         let real = [
             real_0,
             real_1,
             real_2,
             real_3,
         ];
-        let (alias_0, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (alias_1, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (alias_2, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (alias_3, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+        let (alias_0, remaining) = u8::try_parse(remaining)?;
+        let (alias_1, remaining) = u8::try_parse(remaining)?;
+        let (alias_2, remaining) = u8::try_parse(remaining)?;
+        let (alias_3, remaining) = u8::try_parse(remaining)?;
         let alias = [
             alias_0,
             alias_1,
@@ -2657,14 +2630,10 @@ pub struct CountedString16 {
     pub alignment_pad: Vec<u8>,
 }
 impl TryParse for CountedString16 {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (length, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (string, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, length as usize)?;
-        remaining = new_remaining;
-        let (alignment_pad, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, (((length as usize) + (5)) & (!(3))) - ((length as usize) + (2)))?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (length, remaining) = u16::try_parse(remaining)?;
+        let (string, remaining) = crate::x11_utils::parse_list::<u8>(remaining, length as usize)?;
+        let (alignment_pad, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (((length as usize) + (5)) & (!(3))) - ((length as usize) + (2)))?;
         let result = CountedString16 { string, alignment_pad };
         Ok((result, remaining))
     }
@@ -2700,19 +2669,13 @@ pub struct KTMapEntry {
     pub mods_vmods: u16,
 }
 impl TryParse for KTMapEntry {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (active, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods_mask, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (level, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods_vmods, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (active, remaining) = bool::try_parse(remaining)?;
+        let (mods_mask, remaining) = u8::try_parse(remaining)?;
+        let (level, remaining) = u8::try_parse(remaining)?;
+        let (mods_mods, remaining) = u8::try_parse(remaining)?;
+        let (mods_vmods, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let result = KTMapEntry { active, mods_mask, level, mods_mods, mods_vmods };
         Ok((result, remaining))
     }
@@ -2764,25 +2727,16 @@ pub struct KeyType {
     pub preserve: Vec<ModDef>,
 }
 impl TryParse for KeyType {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (mods_mask, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods_vmods, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_levels, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_map_entries, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (has_preserve, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (map, new_remaining) = crate::x11_utils::parse_list::<KTMapEntry>(remaining, n_map_entries as usize)?;
-        remaining = new_remaining;
-        let (preserve, new_remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, (has_preserve as usize) * (n_map_entries as usize))?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (mods_mask, remaining) = u8::try_parse(remaining)?;
+        let (mods_mods, remaining) = u8::try_parse(remaining)?;
+        let (mods_vmods, remaining) = u16::try_parse(remaining)?;
+        let (num_levels, remaining) = u8::try_parse(remaining)?;
+        let (n_map_entries, remaining) = u8::try_parse(remaining)?;
+        let (has_preserve, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (map, remaining) = crate::x11_utils::parse_list::<KTMapEntry>(remaining, n_map_entries as usize)?;
+        let (preserve, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, (has_preserve as usize) * (n_map_entries as usize))?;
         let result = KeyType { mods_mask, mods_mods, mods_vmods, num_levels, has_preserve, map, preserve };
         Ok((result, remaining))
     }
@@ -2823,30 +2777,21 @@ pub struct KeySymMap {
     pub syms: Vec<KEYSYM>,
 }
 impl TryParse for KeySymMap {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (kt_index_0, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (kt_index_1, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (kt_index_2, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (kt_index_3, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (kt_index_0, remaining) = u8::try_parse(remaining)?;
+        let (kt_index_1, remaining) = u8::try_parse(remaining)?;
+        let (kt_index_2, remaining) = u8::try_parse(remaining)?;
+        let (kt_index_3, remaining) = u8::try_parse(remaining)?;
         let kt_index = [
             kt_index_0,
             kt_index_1,
             kt_index_2,
             kt_index_3,
         ];
-        let (group_info, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (width, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_syms, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (syms, new_remaining) = crate::x11_utils::parse_list::<KEYSYM>(remaining, n_syms as usize)?;
-        remaining = new_remaining;
+        let (group_info, remaining) = u8::try_parse(remaining)?;
+        let (width, remaining) = u8::try_parse(remaining)?;
+        let (n_syms, remaining) = u16::try_parse(remaining)?;
+        let (syms, remaining) = crate::x11_utils::parse_list::<KEYSYM>(remaining, n_syms as usize)?;
         let result = KeySymMap { kt_index, group_info, width, syms };
         Ok((result, remaining))
     }
@@ -2881,12 +2826,9 @@ pub struct CommonBehavior {
     pub data: u8,
 }
 impl TryParse for CommonBehavior {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (data, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (data, remaining) = u8::try_parse(remaining)?;
         let result = CommonBehavior { type_, data };
         Ok((result, remaining))
     }
@@ -2919,11 +2861,9 @@ pub struct DefaultBehavior {
     pub type_: u8,
 }
 impl TryParse for DefaultBehavior {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let result = DefaultBehavior { type_ };
         Ok((result, remaining))
     }
@@ -2955,11 +2895,9 @@ pub struct LockBehavior {
     pub type_: u8,
 }
 impl TryParse for LockBehavior {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let result = LockBehavior { type_ };
         Ok((result, remaining))
     }
@@ -2992,12 +2930,9 @@ pub struct RadioGroupBehavior {
     pub group: u8,
 }
 impl TryParse for RadioGroupBehavior {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (group, remaining) = u8::try_parse(remaining)?;
         let result = RadioGroupBehavior { type_, group };
         Ok((result, remaining))
     }
@@ -3031,12 +2966,9 @@ pub struct OverlayBehavior {
     pub key: KEYCODE,
 }
 impl TryParse for OverlayBehavior {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (key, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (key, remaining) = KEYCODE::try_parse(remaining)?;
         let result = OverlayBehavior { type_, key };
         Ok((result, remaining))
     }
@@ -3069,11 +3001,9 @@ pub struct PermamentLockBehavior {
     pub type_: u8,
 }
 impl TryParse for PermamentLockBehavior {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let result = PermamentLockBehavior { type_ };
         Ok((result, remaining))
     }
@@ -3106,12 +3036,9 @@ pub struct PermamentRadioGroupBehavior {
     pub group: u8,
 }
 impl TryParse for PermamentRadioGroupBehavior {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (group, remaining) = u8::try_parse(remaining)?;
         let result = PermamentRadioGroupBehavior { type_, group };
         Ok((result, remaining))
     }
@@ -3145,12 +3072,9 @@ pub struct PermamentOverlayBehavior {
     pub key: KEYCODE,
 }
 impl TryParse for PermamentOverlayBehavior {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (key, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (key, remaining) = KEYCODE::try_parse(remaining)?;
         let result = PermamentOverlayBehavior { type_, key };
         Ok((result, remaining))
     }
@@ -3182,110 +3106,88 @@ impl Serialize for PermamentOverlayBehavior {
 pub struct Behavior([u8; 2]);
 impl Behavior {
     pub fn as_common(&self) -> CommonBehavior {
-        fn do_the_parse(value: &[u8]) -> Result<CommonBehavior, ParseError> {
-            let mut remaining = value;
-            let (common, new_remaining) = CommonBehavior::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<CommonBehavior, ParseError> {
+            let (common, remaining) = CommonBehavior::try_parse(remaining)?;
             let _ = remaining;
             Ok(common)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_default(&self) -> DefaultBehavior {
-        fn do_the_parse(value: &[u8]) -> Result<DefaultBehavior, ParseError> {
-            let mut remaining = value;
-            let (default, new_remaining) = DefaultBehavior::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<DefaultBehavior, ParseError> {
+            let (default, remaining) = DefaultBehavior::try_parse(remaining)?;
             let _ = remaining;
             Ok(default)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_lock(&self) -> LockBehavior {
-        fn do_the_parse(value: &[u8]) -> Result<LockBehavior, ParseError> {
-            let mut remaining = value;
-            let (lock, new_remaining) = LockBehavior::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<LockBehavior, ParseError> {
+            let (lock, remaining) = LockBehavior::try_parse(remaining)?;
             let _ = remaining;
             Ok(lock)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_radio_group(&self) -> RadioGroupBehavior {
-        fn do_the_parse(value: &[u8]) -> Result<RadioGroupBehavior, ParseError> {
-            let mut remaining = value;
-            let (radio_group, new_remaining) = RadioGroupBehavior::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<RadioGroupBehavior, ParseError> {
+            let (radio_group, remaining) = RadioGroupBehavior::try_parse(remaining)?;
             let _ = remaining;
             Ok(radio_group)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_overlay1(&self) -> OverlayBehavior {
-        fn do_the_parse(value: &[u8]) -> Result<OverlayBehavior, ParseError> {
-            let mut remaining = value;
-            let (overlay1, new_remaining) = OverlayBehavior::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<OverlayBehavior, ParseError> {
+            let (overlay1, remaining) = OverlayBehavior::try_parse(remaining)?;
             let _ = remaining;
             Ok(overlay1)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_overlay2(&self) -> OverlayBehavior {
-        fn do_the_parse(value: &[u8]) -> Result<OverlayBehavior, ParseError> {
-            let mut remaining = value;
-            let (overlay2, new_remaining) = OverlayBehavior::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<OverlayBehavior, ParseError> {
+            let (overlay2, remaining) = OverlayBehavior::try_parse(remaining)?;
             let _ = remaining;
             Ok(overlay2)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_permament_lock(&self) -> PermamentLockBehavior {
-        fn do_the_parse(value: &[u8]) -> Result<PermamentLockBehavior, ParseError> {
-            let mut remaining = value;
-            let (permament_lock, new_remaining) = PermamentLockBehavior::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<PermamentLockBehavior, ParseError> {
+            let (permament_lock, remaining) = PermamentLockBehavior::try_parse(remaining)?;
             let _ = remaining;
             Ok(permament_lock)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_permament_radio_group(&self) -> PermamentRadioGroupBehavior {
-        fn do_the_parse(value: &[u8]) -> Result<PermamentRadioGroupBehavior, ParseError> {
-            let mut remaining = value;
-            let (permament_radio_group, new_remaining) = PermamentRadioGroupBehavior::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<PermamentRadioGroupBehavior, ParseError> {
+            let (permament_radio_group, remaining) = PermamentRadioGroupBehavior::try_parse(remaining)?;
             let _ = remaining;
             Ok(permament_radio_group)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_permament_overlay1(&self) -> PermamentOverlayBehavior {
-        fn do_the_parse(value: &[u8]) -> Result<PermamentOverlayBehavior, ParseError> {
-            let mut remaining = value;
-            let (permament_overlay1, new_remaining) = PermamentOverlayBehavior::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<PermamentOverlayBehavior, ParseError> {
+            let (permament_overlay1, remaining) = PermamentOverlayBehavior::try_parse(remaining)?;
             let _ = remaining;
             Ok(permament_overlay1)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_permament_overlay2(&self) -> PermamentOverlayBehavior {
-        fn do_the_parse(value: &[u8]) -> Result<PermamentOverlayBehavior, ParseError> {
-            let mut remaining = value;
-            let (permament_overlay2, new_remaining) = PermamentOverlayBehavior::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<PermamentOverlayBehavior, ParseError> {
+            let (permament_overlay2, remaining) = PermamentOverlayBehavior::try_parse(remaining)?;
             let _ = remaining;
             Ok(permament_overlay2)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_type(&self) -> u8 {
-        fn do_the_parse(value: &[u8]) -> Result<u8, ParseError> {
-            let mut remaining = value;
-            let (type_, new_remaining) = u8::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<u8, ParseError> {
+            let (type_, remaining) = u8::try_parse(remaining)?;
             let _ = remaining;
             Ok(type_)
         }
@@ -3430,13 +3332,10 @@ pub struct SetBehavior {
     pub behavior: Behavior,
 }
 impl TryParse for SetBehavior {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (keycode, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (behavior, new_remaining) = Behavior::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (keycode, remaining) = KEYCODE::try_parse(remaining)?;
+        let (behavior, remaining) = Behavior::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let result = SetBehavior { keycode, behavior };
         Ok((result, remaining))
     }
@@ -3473,12 +3372,9 @@ pub struct SetExplicit {
     pub explicit: u8,
 }
 impl TryParse for SetExplicit {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (keycode, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (explicit, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (keycode, remaining) = KEYCODE::try_parse(remaining)?;
+        let (explicit, remaining) = u8::try_parse(remaining)?;
         let result = SetExplicit { keycode, explicit };
         Ok((result, remaining))
     }
@@ -3512,12 +3408,9 @@ pub struct KeyModMap {
     pub mods: u8,
 }
 impl TryParse for KeyModMap {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (keycode, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (keycode, remaining) = KEYCODE::try_parse(remaining)?;
+        let (mods, remaining) = u8::try_parse(remaining)?;
         let result = KeyModMap { keycode, mods };
         Ok((result, remaining))
     }
@@ -3551,13 +3444,10 @@ pub struct KeyVModMap {
     pub vmods: u16,
 }
 impl TryParse for KeyVModMap {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (keycode, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (vmods, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (keycode, remaining) = KEYCODE::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (vmods, remaining) = u16::try_parse(remaining)?;
         let result = KeyVModMap { keycode, vmods };
         Ok((result, remaining))
     }
@@ -3595,14 +3485,10 @@ pub struct KTSetMapEntry {
     pub virtual_mods: u16,
 }
 impl TryParse for KTSetMapEntry {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (level, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (real_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (virtual_mods, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (level, remaining) = u8::try_parse(remaining)?;
+        let (real_mods, remaining) = u8::try_parse(remaining)?;
+        let (virtual_mods, remaining) = u16::try_parse(remaining)?;
         let result = KTSetMapEntry { level, real_mods, virtual_mods };
         Ok((result, remaining))
     }
@@ -3645,25 +3531,16 @@ pub struct SetKeyType {
     pub preserve_entries: Vec<KTSetMapEntry>,
 }
 impl TryParse for SetKeyType {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (mask, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (real_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (virtual_mods, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_levels, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_map_entries, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (preserve, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (entries, new_remaining) = crate::x11_utils::parse_list::<KTSetMapEntry>(remaining, n_map_entries as usize)?;
-        remaining = new_remaining;
-        let (preserve_entries, new_remaining) = crate::x11_utils::parse_list::<KTSetMapEntry>(remaining, (preserve as usize) * (n_map_entries as usize))?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (mask, remaining) = u8::try_parse(remaining)?;
+        let (real_mods, remaining) = u8::try_parse(remaining)?;
+        let (virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let (num_levels, remaining) = u8::try_parse(remaining)?;
+        let (n_map_entries, remaining) = u8::try_parse(remaining)?;
+        let (preserve, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (entries, remaining) = crate::x11_utils::parse_list::<KTSetMapEntry>(remaining, n_map_entries as usize)?;
+        let (preserve_entries, remaining) = crate::x11_utils::parse_list::<KTSetMapEntry>(remaining, (preserve as usize) * (n_map_entries as usize))?;
         let result = SetKeyType { mask, real_mods, virtual_mods, num_levels, preserve, entries, preserve_entries };
         Ok((result, remaining))
     }
@@ -3704,15 +3581,11 @@ pub struct Outline {
     pub points: Vec<Point>,
 }
 impl TryParse for Outline {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (n_points, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (corner_radius, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (points, new_remaining) = crate::x11_utils::parse_list::<Point>(remaining, n_points as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (n_points, remaining) = u8::try_parse(remaining)?;
+        let (corner_radius, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (points, remaining) = crate::x11_utils::parse_list::<Point>(remaining, n_points as usize)?;
         let result = Outline { corner_radius, points };
         Ok((result, remaining))
     }
@@ -3748,19 +3621,13 @@ pub struct Shape {
     pub outlines: Vec<Outline>,
 }
 impl TryParse for Shape {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (name, new_remaining) = ATOM::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_outlines, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (primary_ndx, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (approx_ndx, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (outlines, new_remaining) = crate::x11_utils::parse_list::<Outline>(remaining, n_outlines as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (name, remaining) = ATOM::try_parse(remaining)?;
+        let (n_outlines, remaining) = u8::try_parse(remaining)?;
+        let (primary_ndx, remaining) = u8::try_parse(remaining)?;
+        let (approx_ndx, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (outlines, remaining) = crate::x11_utils::parse_list::<Outline>(remaining, n_outlines as usize)?;
         let result = Shape { name, primary_ndx, approx_ndx, outlines };
         Ok((result, remaining))
     }
@@ -3798,28 +3665,20 @@ pub struct Key {
     pub color_ndx: u8,
 }
 impl TryParse for Key {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (name_0, new_remaining) = STRING8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (name_1, new_remaining) = STRING8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (name_2, new_remaining) = STRING8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (name_3, new_remaining) = STRING8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (name_0, remaining) = STRING8::try_parse(remaining)?;
+        let (name_1, remaining) = STRING8::try_parse(remaining)?;
+        let (name_2, remaining) = STRING8::try_parse(remaining)?;
+        let (name_3, remaining) = STRING8::try_parse(remaining)?;
         let name = [
             name_0,
             name_1,
             name_2,
             name_3,
         ];
-        let (gap, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (shape_ndx, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (color_ndx, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+        let (gap, remaining) = i16::try_parse(remaining)?;
+        let (shape_ndx, remaining) = u8::try_parse(remaining)?;
+        let (color_ndx, remaining) = u8::try_parse(remaining)?;
         let result = Key { name, gap, shape_ndx, color_ndx };
         Ok((result, remaining))
     }
@@ -3862,30 +3721,21 @@ pub struct OverlayKey {
     pub under: [STRING8; 4],
 }
 impl TryParse for OverlayKey {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (over_0, new_remaining) = STRING8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (over_1, new_remaining) = STRING8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (over_2, new_remaining) = STRING8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (over_3, new_remaining) = STRING8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (over_0, remaining) = STRING8::try_parse(remaining)?;
+        let (over_1, remaining) = STRING8::try_parse(remaining)?;
+        let (over_2, remaining) = STRING8::try_parse(remaining)?;
+        let (over_3, remaining) = STRING8::try_parse(remaining)?;
         let over = [
             over_0,
             over_1,
             over_2,
             over_3,
         ];
-        let (under_0, new_remaining) = STRING8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (under_1, new_remaining) = STRING8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (under_2, new_remaining) = STRING8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (under_3, new_remaining) = STRING8::try_parse(remaining)?;
-        remaining = new_remaining;
+        let (under_0, remaining) = STRING8::try_parse(remaining)?;
+        let (under_1, remaining) = STRING8::try_parse(remaining)?;
+        let (under_2, remaining) = STRING8::try_parse(remaining)?;
+        let (under_3, remaining) = STRING8::try_parse(remaining)?;
         let under = [
             under_0,
             under_1,
@@ -3929,15 +3779,11 @@ pub struct OverlayRow {
     pub keys: Vec<OverlayKey>,
 }
 impl TryParse for OverlayRow {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (row_under, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_keys, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (keys, new_remaining) = crate::x11_utils::parse_list::<OverlayKey>(remaining, n_keys as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (row_under, remaining) = u8::try_parse(remaining)?;
+        let (n_keys, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (keys, remaining) = crate::x11_utils::parse_list::<OverlayKey>(remaining, n_keys as usize)?;
         let result = OverlayRow { row_under, keys };
         Ok((result, remaining))
     }
@@ -3971,15 +3817,11 @@ pub struct Overlay {
     pub rows: Vec<OverlayRow>,
 }
 impl TryParse for Overlay {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (name, new_remaining) = ATOM::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_rows, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let (rows, new_remaining) = crate::x11_utils::parse_list::<OverlayRow>(remaining, n_rows as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (name, remaining) = ATOM::try_parse(remaining)?;
+        let (n_rows, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (rows, remaining) = crate::x11_utils::parse_list::<OverlayRow>(remaining, n_rows as usize)?;
         let result = Overlay { name, rows };
         Ok((result, remaining))
     }
@@ -4015,19 +3857,13 @@ pub struct Row {
     pub keys: Vec<Key>,
 }
 impl TryParse for Row {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (top, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (left, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_keys, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vertical, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (keys, new_remaining) = crate::x11_utils::parse_list::<Key>(remaining, n_keys as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (top, remaining) = i16::try_parse(remaining)?;
+        let (left, remaining) = i16::try_parse(remaining)?;
+        let (n_keys, remaining) = u8::try_parse(remaining)?;
+        let (vertical, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (keys, remaining) = crate::x11_utils::parse_list::<Key>(remaining, n_keys as usize)?;
         let result = Row { top, left, vertical, keys };
         Ok((result, remaining))
     }
@@ -4134,18 +3970,15 @@ pub struct Listing {
     pub string: Vec<STRING8>,
 }
 impl TryParse for Listing {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (flags, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (string, new_remaining) = crate::x11_utils::parse_list::<STRING8>(remaining, length as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let value = remaining;
+        let (flags, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u16::try_parse(remaining)?;
+        let (string, remaining) = crate::x11_utils::parse_list::<STRING8>(remaining, length as usize)?;
         // Align offset to multiple of 2
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (2 - (offset % 2)) % 2;
-        remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
         let result = Listing { flags, string };
         Ok((result, remaining))
     }
@@ -4185,24 +4018,15 @@ pub struct DeviceLedInfo {
     pub maps: Vec<IndicatorMap>,
 }
 impl TryParse for DeviceLedInfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (led_class, new_remaining) = LedClassSpec::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (led_id, new_remaining) = IDSpec::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (names_present, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (maps_present, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (phys_indicators, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (state, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (names, new_remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, TryInto::<usize>::try_into(names_present.count_ones()).unwrap())?;
-        remaining = new_remaining;
-        let (maps, new_remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, TryInto::<usize>::try_into(maps_present.count_ones()).unwrap())?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (led_class, remaining) = LedClassSpec::try_parse(remaining)?;
+        let (led_id, remaining) = IDSpec::try_parse(remaining)?;
+        let (names_present, remaining) = u32::try_parse(remaining)?;
+        let (maps_present, remaining) = u32::try_parse(remaining)?;
+        let (phys_indicators, remaining) = u32::try_parse(remaining)?;
+        let (state, remaining) = u32::try_parse(remaining)?;
+        let (names, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, TryInto::<usize>::try_into(names_present.count_ones()).unwrap())?;
+        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, TryInto::<usize>::try_into(maps_present.count_ones()).unwrap())?;
         let result = DeviceLedInfo { led_class, led_id, names_present, maps_present, phys_indicators, state, names, maps };
         Ok((result, remaining))
     }
@@ -4310,21 +4134,14 @@ pub struct KeyboardError {
     pub major_opcode: u8,
 }
 impl KeyboardError {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (error_code, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (value, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (minor_opcode, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (major_opcode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(21..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (error_code, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (value, remaining) = u32::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(21..).ok_or(ParseError::ParseError)?;
         let result = KeyboardError { response_type, error_code, sequence, value, minor_opcode, major_opcode };
         Ok((result, remaining))
     }
@@ -4532,11 +4349,9 @@ pub struct SANoAction {
     pub type_: u8,
 }
 impl TryParse for SANoAction {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(7..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(7..).ok_or(ParseError::ParseError)?;
         let result = SANoAction { type_ };
         Ok((result, remaining))
     }
@@ -4579,21 +4394,14 @@ pub struct SASetMods {
     pub vmods_low: u8,
 }
 impl TryParse for SASetMods {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mask, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (real_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vmods_high, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vmods_low, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (flags, remaining) = u8::try_parse(remaining)?;
+        let (mask, remaining) = u8::try_parse(remaining)?;
+        let (real_mods, remaining) = u8::try_parse(remaining)?;
+        let (vmods_high, remaining) = u8::try_parse(remaining)?;
+        let (vmods_low, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let result = SASetMods { type_, flags, mask, real_mods, vmods_high, vmods_low };
         Ok((result, remaining))
     }
@@ -4646,21 +4454,14 @@ pub struct SALatchMods {
     pub vmods_low: u8,
 }
 impl TryParse for SALatchMods {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mask, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (real_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vmods_high, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vmods_low, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (flags, remaining) = u8::try_parse(remaining)?;
+        let (mask, remaining) = u8::try_parse(remaining)?;
+        let (real_mods, remaining) = u8::try_parse(remaining)?;
+        let (vmods_high, remaining) = u8::try_parse(remaining)?;
+        let (vmods_low, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let result = SALatchMods { type_, flags, mask, real_mods, vmods_high, vmods_low };
         Ok((result, remaining))
     }
@@ -4713,21 +4514,14 @@ pub struct SALockMods {
     pub vmods_low: u8,
 }
 impl TryParse for SALockMods {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mask, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (real_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vmods_high, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vmods_low, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (flags, remaining) = u8::try_parse(remaining)?;
+        let (mask, remaining) = u8::try_parse(remaining)?;
+        let (real_mods, remaining) = u8::try_parse(remaining)?;
+        let (vmods_high, remaining) = u8::try_parse(remaining)?;
+        let (vmods_low, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let result = SALockMods { type_, flags, mask, real_mods, vmods_high, vmods_low };
         Ok((result, remaining))
     }
@@ -4777,15 +4571,11 @@ pub struct SASetGroup {
     pub group: i8,
 }
 impl TryParse for SASetGroup {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = i8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(5..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (flags, remaining) = u8::try_parse(remaining)?;
+        let (group, remaining) = i8::try_parse(remaining)?;
+        let remaining = remaining.get(5..).ok_or(ParseError::ParseError)?;
         let result = SASetGroup { type_, flags, group };
         Ok((result, remaining))
     }
@@ -4829,15 +4619,11 @@ pub struct SALatchGroup {
     pub group: i8,
 }
 impl TryParse for SALatchGroup {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = i8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(5..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (flags, remaining) = u8::try_parse(remaining)?;
+        let (group, remaining) = i8::try_parse(remaining)?;
+        let remaining = remaining.get(5..).ok_or(ParseError::ParseError)?;
         let result = SALatchGroup { type_, flags, group };
         Ok((result, remaining))
     }
@@ -4881,15 +4667,11 @@ pub struct SALockGroup {
     pub group: i8,
 }
 impl TryParse for SALockGroup {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = i8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(5..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (flags, remaining) = u8::try_parse(remaining)?;
+        let (group, remaining) = i8::try_parse(remaining)?;
+        let remaining = remaining.get(5..).ok_or(ParseError::ParseError)?;
         let result = SALockGroup { type_, flags, group };
         Ok((result, remaining))
     }
@@ -5002,21 +4784,14 @@ pub struct SAMovePtr {
     pub y_low: u8,
 }
 impl TryParse for SAMovePtr {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (x_high, new_remaining) = i8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (x_low, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (y_high, new_remaining) = i8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (y_low, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (flags, remaining) = u8::try_parse(remaining)?;
+        let (x_high, remaining) = i8::try_parse(remaining)?;
+        let (x_low, remaining) = u8::try_parse(remaining)?;
+        let (y_high, remaining) = i8::try_parse(remaining)?;
+        let (y_low, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let result = SAMovePtr { type_, flags, x_high, x_low, y_high, y_low };
         Ok((result, remaining))
     }
@@ -5067,17 +4842,12 @@ pub struct SAPtrBtn {
     pub button: u8,
 }
 impl TryParse for SAPtrBtn {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (count, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (button, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (flags, remaining) = u8::try_parse(remaining)?;
+        let (count, remaining) = u8::try_parse(remaining)?;
+        let (button, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let result = SAPtrBtn { type_, flags, count, button };
         Ok((result, remaining))
     }
@@ -5123,16 +4893,12 @@ pub struct SALockPtrBtn {
     pub button: u8,
 }
 impl TryParse for SALockPtrBtn {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (button, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (flags, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (button, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let result = SALockPtrBtn { type_, flags, button };
         Ok((result, remaining))
     }
@@ -5241,17 +5007,12 @@ pub struct SASetPtrDflt {
     pub value: i8,
 }
 impl TryParse for SASetPtrDflt {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (affect, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (value, new_remaining) = i8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (flags, remaining) = u8::try_parse(remaining)?;
+        let (affect, remaining) = u8::try_parse(remaining)?;
+        let (value, remaining) = i8::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let result = SASetPtrDflt { type_, flags, affect, value };
         Ok((result, remaining))
     }
@@ -5417,24 +5178,15 @@ pub struct SAIsoLock {
     pub vmods_low: u8,
 }
 impl TryParse for SAIsoLock {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mask, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (real_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = i8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (affect, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vmods_high, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vmods_low, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (flags, remaining) = u8::try_parse(remaining)?;
+        let (mask, remaining) = u8::try_parse(remaining)?;
+        let (real_mods, remaining) = u8::try_parse(remaining)?;
+        let (group, remaining) = i8::try_parse(remaining)?;
+        let (affect, remaining) = u8::try_parse(remaining)?;
+        let (vmods_high, remaining) = u8::try_parse(remaining)?;
+        let (vmods_low, remaining) = u8::try_parse(remaining)?;
         let result = SAIsoLock { type_, flags, mask, real_mods, group, affect, vmods_high, vmods_low };
         Ok((result, remaining))
     }
@@ -5485,11 +5237,9 @@ pub struct SATerminate {
     pub type_: u8,
 }
 impl TryParse for SATerminate {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(7..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(7..).ok_or(ParseError::ParseError)?;
         let result = SATerminate { type_ };
         Ok((result, remaining))
     }
@@ -5592,15 +5342,11 @@ pub struct SASwitchScreen {
     pub new_screen: i8,
 }
 impl TryParse for SASwitchScreen {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (new_screen, new_remaining) = i8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(5..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (flags, remaining) = u8::try_parse(remaining)?;
+        let (new_screen, remaining) = i8::try_parse(remaining)?;
+        let remaining = remaining.get(5..).ok_or(ParseError::ParseError)?;
         let result = SASwitchScreen { type_, flags, new_screen };
         Ok((result, remaining))
     }
@@ -5797,16 +5543,12 @@ pub struct SASetControls {
     pub bool_ctrls_low: u8,
 }
 impl TryParse for SASetControls {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let (bool_ctrls_high, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bool_ctrls_low, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (bool_ctrls_high, remaining) = u8::try_parse(remaining)?;
+        let (bool_ctrls_low, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let result = SASetControls { type_, bool_ctrls_high, bool_ctrls_low };
         Ok((result, remaining))
     }
@@ -5851,16 +5593,12 @@ pub struct SALockControls {
     pub bool_ctrls_low: u8,
 }
 impl TryParse for SALockControls {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let (bool_ctrls_high, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bool_ctrls_low, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (bool_ctrls_high, remaining) = u8::try_parse(remaining)?;
+        let (bool_ctrls_low, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let result = SALockControls { type_, bool_ctrls_high, bool_ctrls_low };
         Ok((result, remaining))
     }
@@ -5971,24 +5709,15 @@ pub struct SAActionMessage {
     pub message: [u8; 6],
 }
 impl TryParse for SAActionMessage {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (message_0, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (message_1, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (message_2, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (message_3, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (message_4, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (message_5, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (flags, remaining) = u8::try_parse(remaining)?;
+        let (message_0, remaining) = u8::try_parse(remaining)?;
+        let (message_1, remaining) = u8::try_parse(remaining)?;
+        let (message_2, remaining) = u8::try_parse(remaining)?;
+        let (message_3, remaining) = u8::try_parse(remaining)?;
+        let (message_4, remaining) = u8::try_parse(remaining)?;
+        let (message_5, remaining) = u8::try_parse(remaining)?;
         let message = [
             message_0,
             message_1,
@@ -6043,24 +5772,15 @@ pub struct SARedirectKey {
     pub vmods_low: u8,
 }
 impl TryParse for SARedirectKey {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (newkey, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mask, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (real_modifiers, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vmods_mask_high, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vmods_mask_low, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vmods_high, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (vmods_low, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (newkey, remaining) = KEYCODE::try_parse(remaining)?;
+        let (mask, remaining) = u8::try_parse(remaining)?;
+        let (real_modifiers, remaining) = u8::try_parse(remaining)?;
+        let (vmods_mask_high, remaining) = u8::try_parse(remaining)?;
+        let (vmods_mask_low, remaining) = u8::try_parse(remaining)?;
+        let (vmods_high, remaining) = u8::try_parse(remaining)?;
+        let (vmods_low, remaining) = u8::try_parse(remaining)?;
         let result = SARedirectKey { type_, newkey, mask, real_modifiers, vmods_mask_high, vmods_mask_low, vmods_high, vmods_low };
         Ok((result, remaining))
     }
@@ -6115,19 +5835,13 @@ pub struct SADeviceBtn {
     pub device: u8,
 }
 impl TryParse for SADeviceBtn {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (count, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (button, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (flags, remaining) = u8::try_parse(remaining)?;
+        let (count, remaining) = u8::try_parse(remaining)?;
+        let (button, remaining) = u8::try_parse(remaining)?;
+        let (device, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let result = SADeviceBtn { type_, flags, count, button, device };
         Ok((result, remaining))
     }
@@ -6239,18 +5953,13 @@ pub struct SALockDeviceBtn {
     pub device: u8,
 }
 impl TryParse for SALockDeviceBtn {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (button, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (flags, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (button, remaining) = u8::try_parse(remaining)?;
+        let (device, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let result = SALockDeviceBtn { type_, flags, button, device };
         Ok((result, remaining))
     }
@@ -6376,24 +6085,15 @@ pub struct SADeviceValuator {
     pub val2value: u8,
 }
 impl TryParse for SADeviceValuator {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (val1what, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (val1index, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (val1value, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (val2what, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (val2index, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (val2value, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (device, remaining) = u8::try_parse(remaining)?;
+        let (val1what, remaining) = u8::try_parse(remaining)?;
+        let (val1index, remaining) = u8::try_parse(remaining)?;
+        let (val1value, remaining) = u8::try_parse(remaining)?;
+        let (val2what, remaining) = u8::try_parse(remaining)?;
+        let (val2index, remaining) = u8::try_parse(remaining)?;
+        let (val2value, remaining) = u8::try_parse(remaining)?;
         let result = SADeviceValuator { type_, device, val1what, val1index, val1value, val2what, val2index, val2value };
         Ok((result, remaining))
     }
@@ -6445,24 +6145,15 @@ pub struct SIAction {
     pub data: [u8; 7],
 }
 impl TryParse for SIAction {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (data_0, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (data_1, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (data_2, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (data_3, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (data_4, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (data_5, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (data_6, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (data_0, remaining) = u8::try_parse(remaining)?;
+        let (data_1, remaining) = u8::try_parse(remaining)?;
+        let (data_2, remaining) = u8::try_parse(remaining)?;
+        let (data_3, remaining) = u8::try_parse(remaining)?;
+        let (data_4, remaining) = u8::try_parse(remaining)?;
+        let (data_5, remaining) = u8::try_parse(remaining)?;
+        let (data_6, remaining) = u8::try_parse(remaining)?;
         let data = [
             data_0,
             data_1,
@@ -6514,20 +6205,13 @@ pub struct SymInterpret {
     pub action: SIAction,
 }
 impl TryParse for SymInterpret {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (sym, new_remaining) = KEYSYM::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (match_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (virtual_mod, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (action, new_remaining) = SIAction::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (sym, remaining) = KEYSYM::try_parse(remaining)?;
+        let (mods, remaining) = u8::try_parse(remaining)?;
+        let (match_, remaining) = u8::try_parse(remaining)?;
+        let (virtual_mod, remaining) = u8::try_parse(remaining)?;
+        let (flags, remaining) = u8::try_parse(remaining)?;
+        let (action, remaining) = SIAction::try_parse(remaining)?;
         let result = SymInterpret { sym, mods, match_, virtual_mod, flags, action };
         Ok((result, remaining))
     }
@@ -6581,220 +6265,176 @@ impl Serialize for SymInterpret {
 pub struct Action([u8; 8]);
 impl Action {
     pub fn as_noaction(&self) -> SANoAction {
-        fn do_the_parse(value: &[u8]) -> Result<SANoAction, ParseError> {
-            let mut remaining = value;
-            let (noaction, new_remaining) = SANoAction::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<SANoAction, ParseError> {
+            let (noaction, remaining) = SANoAction::try_parse(remaining)?;
             let _ = remaining;
             Ok(noaction)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_setmods(&self) -> SASetMods {
-        fn do_the_parse(value: &[u8]) -> Result<SASetMods, ParseError> {
-            let mut remaining = value;
-            let (setmods, new_remaining) = SASetMods::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<SASetMods, ParseError> {
+            let (setmods, remaining) = SASetMods::try_parse(remaining)?;
             let _ = remaining;
             Ok(setmods)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_latchmods(&self) -> SALatchMods {
-        fn do_the_parse(value: &[u8]) -> Result<SALatchMods, ParseError> {
-            let mut remaining = value;
-            let (latchmods, new_remaining) = SALatchMods::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<SALatchMods, ParseError> {
+            let (latchmods, remaining) = SALatchMods::try_parse(remaining)?;
             let _ = remaining;
             Ok(latchmods)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_lockmods(&self) -> SALockMods {
-        fn do_the_parse(value: &[u8]) -> Result<SALockMods, ParseError> {
-            let mut remaining = value;
-            let (lockmods, new_remaining) = SALockMods::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<SALockMods, ParseError> {
+            let (lockmods, remaining) = SALockMods::try_parse(remaining)?;
             let _ = remaining;
             Ok(lockmods)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_setgroup(&self) -> SASetGroup {
-        fn do_the_parse(value: &[u8]) -> Result<SASetGroup, ParseError> {
-            let mut remaining = value;
-            let (setgroup, new_remaining) = SASetGroup::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<SASetGroup, ParseError> {
+            let (setgroup, remaining) = SASetGroup::try_parse(remaining)?;
             let _ = remaining;
             Ok(setgroup)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_latchgroup(&self) -> SALatchGroup {
-        fn do_the_parse(value: &[u8]) -> Result<SALatchGroup, ParseError> {
-            let mut remaining = value;
-            let (latchgroup, new_remaining) = SALatchGroup::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<SALatchGroup, ParseError> {
+            let (latchgroup, remaining) = SALatchGroup::try_parse(remaining)?;
             let _ = remaining;
             Ok(latchgroup)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_lockgroup(&self) -> SALockGroup {
-        fn do_the_parse(value: &[u8]) -> Result<SALockGroup, ParseError> {
-            let mut remaining = value;
-            let (lockgroup, new_remaining) = SALockGroup::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<SALockGroup, ParseError> {
+            let (lockgroup, remaining) = SALockGroup::try_parse(remaining)?;
             let _ = remaining;
             Ok(lockgroup)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_moveptr(&self) -> SAMovePtr {
-        fn do_the_parse(value: &[u8]) -> Result<SAMovePtr, ParseError> {
-            let mut remaining = value;
-            let (moveptr, new_remaining) = SAMovePtr::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<SAMovePtr, ParseError> {
+            let (moveptr, remaining) = SAMovePtr::try_parse(remaining)?;
             let _ = remaining;
             Ok(moveptr)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_ptrbtn(&self) -> SAPtrBtn {
-        fn do_the_parse(value: &[u8]) -> Result<SAPtrBtn, ParseError> {
-            let mut remaining = value;
-            let (ptrbtn, new_remaining) = SAPtrBtn::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<SAPtrBtn, ParseError> {
+            let (ptrbtn, remaining) = SAPtrBtn::try_parse(remaining)?;
             let _ = remaining;
             Ok(ptrbtn)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_lockptrbtn(&self) -> SALockPtrBtn {
-        fn do_the_parse(value: &[u8]) -> Result<SALockPtrBtn, ParseError> {
-            let mut remaining = value;
-            let (lockptrbtn, new_remaining) = SALockPtrBtn::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<SALockPtrBtn, ParseError> {
+            let (lockptrbtn, remaining) = SALockPtrBtn::try_parse(remaining)?;
             let _ = remaining;
             Ok(lockptrbtn)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_setptrdflt(&self) -> SASetPtrDflt {
-        fn do_the_parse(value: &[u8]) -> Result<SASetPtrDflt, ParseError> {
-            let mut remaining = value;
-            let (setptrdflt, new_remaining) = SASetPtrDflt::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<SASetPtrDflt, ParseError> {
+            let (setptrdflt, remaining) = SASetPtrDflt::try_parse(remaining)?;
             let _ = remaining;
             Ok(setptrdflt)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_isolock(&self) -> SAIsoLock {
-        fn do_the_parse(value: &[u8]) -> Result<SAIsoLock, ParseError> {
-            let mut remaining = value;
-            let (isolock, new_remaining) = SAIsoLock::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<SAIsoLock, ParseError> {
+            let (isolock, remaining) = SAIsoLock::try_parse(remaining)?;
             let _ = remaining;
             Ok(isolock)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_terminate(&self) -> SATerminate {
-        fn do_the_parse(value: &[u8]) -> Result<SATerminate, ParseError> {
-            let mut remaining = value;
-            let (terminate, new_remaining) = SATerminate::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<SATerminate, ParseError> {
+            let (terminate, remaining) = SATerminate::try_parse(remaining)?;
             let _ = remaining;
             Ok(terminate)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_switchscreen(&self) -> SASwitchScreen {
-        fn do_the_parse(value: &[u8]) -> Result<SASwitchScreen, ParseError> {
-            let mut remaining = value;
-            let (switchscreen, new_remaining) = SASwitchScreen::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<SASwitchScreen, ParseError> {
+            let (switchscreen, remaining) = SASwitchScreen::try_parse(remaining)?;
             let _ = remaining;
             Ok(switchscreen)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_setcontrols(&self) -> SASetControls {
-        fn do_the_parse(value: &[u8]) -> Result<SASetControls, ParseError> {
-            let mut remaining = value;
-            let (setcontrols, new_remaining) = SASetControls::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<SASetControls, ParseError> {
+            let (setcontrols, remaining) = SASetControls::try_parse(remaining)?;
             let _ = remaining;
             Ok(setcontrols)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_lockcontrols(&self) -> SALockControls {
-        fn do_the_parse(value: &[u8]) -> Result<SALockControls, ParseError> {
-            let mut remaining = value;
-            let (lockcontrols, new_remaining) = SALockControls::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<SALockControls, ParseError> {
+            let (lockcontrols, remaining) = SALockControls::try_parse(remaining)?;
             let _ = remaining;
             Ok(lockcontrols)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_message(&self) -> SAActionMessage {
-        fn do_the_parse(value: &[u8]) -> Result<SAActionMessage, ParseError> {
-            let mut remaining = value;
-            let (message, new_remaining) = SAActionMessage::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<SAActionMessage, ParseError> {
+            let (message, remaining) = SAActionMessage::try_parse(remaining)?;
             let _ = remaining;
             Ok(message)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_redirect(&self) -> SARedirectKey {
-        fn do_the_parse(value: &[u8]) -> Result<SARedirectKey, ParseError> {
-            let mut remaining = value;
-            let (redirect, new_remaining) = SARedirectKey::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<SARedirectKey, ParseError> {
+            let (redirect, remaining) = SARedirectKey::try_parse(remaining)?;
             let _ = remaining;
             Ok(redirect)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_devbtn(&self) -> SADeviceBtn {
-        fn do_the_parse(value: &[u8]) -> Result<SADeviceBtn, ParseError> {
-            let mut remaining = value;
-            let (devbtn, new_remaining) = SADeviceBtn::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<SADeviceBtn, ParseError> {
+            let (devbtn, remaining) = SADeviceBtn::try_parse(remaining)?;
             let _ = remaining;
             Ok(devbtn)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_lockdevbtn(&self) -> SALockDeviceBtn {
-        fn do_the_parse(value: &[u8]) -> Result<SALockDeviceBtn, ParseError> {
-            let mut remaining = value;
-            let (lockdevbtn, new_remaining) = SALockDeviceBtn::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<SALockDeviceBtn, ParseError> {
+            let (lockdevbtn, remaining) = SALockDeviceBtn::try_parse(remaining)?;
             let _ = remaining;
             Ok(lockdevbtn)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_devval(&self) -> SADeviceValuator {
-        fn do_the_parse(value: &[u8]) -> Result<SADeviceValuator, ParseError> {
-            let mut remaining = value;
-            let (devval, new_remaining) = SADeviceValuator::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<SADeviceValuator, ParseError> {
+            let (devval, remaining) = SADeviceValuator::try_parse(remaining)?;
             let _ = remaining;
             Ok(devval)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_type(&self) -> u8 {
-        fn do_the_parse(value: &[u8]) -> Result<u8, ParseError> {
-            let mut remaining = value;
-            let (type_, new_remaining) = u8::try_parse(remaining)?;
-            remaining = new_remaining;
+        fn do_the_parse(remaining: &[u8]) -> Result<u8, ParseError> {
+            let (type_, remaining) = u8::try_parse(remaining)?;
             let _ = remaining;
             Ok(type_)
         }
@@ -6945,21 +6585,14 @@ pub struct UseExtensionReply {
     pub server_minor: u16,
 }
 impl UseExtensionReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (supported, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (server_major, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (server_minor, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (supported, remaining) = bool::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (server_major, remaining) = u16::try_parse(remaining)?;
+        let (server_minor, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let result = UseExtensionReply { response_type, supported, sequence, length, server_major, server_minor };
         Ok((result, remaining))
     }
@@ -7530,46 +7163,27 @@ pub struct GetStateReply {
     pub ptr_btn_state: u16,
 }
 impl GetStateReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (base_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (latched_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (locked_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (locked_group, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (base_group, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (latched_group, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (compat_state, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (grab_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (compat_grab_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (lookup_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (compat_lookup_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (ptr_btn_state, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(6..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (mods, remaining) = u8::try_parse(remaining)?;
+        let (base_mods, remaining) = u8::try_parse(remaining)?;
+        let (latched_mods, remaining) = u8::try_parse(remaining)?;
+        let (locked_mods, remaining) = u8::try_parse(remaining)?;
+        let (group, remaining) = u8::try_parse(remaining)?;
+        let (locked_group, remaining) = u8::try_parse(remaining)?;
+        let (base_group, remaining) = i16::try_parse(remaining)?;
+        let (latched_group, remaining) = i16::try_parse(remaining)?;
+        let (compat_state, remaining) = u8::try_parse(remaining)?;
+        let (grab_mods, remaining) = u8::try_parse(remaining)?;
+        let (compat_grab_mods, remaining) = u8::try_parse(remaining)?;
+        let (lookup_mods, remaining) = u8::try_parse(remaining)?;
+        let (compat_lookup_mods, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (ptr_btn_state, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(6..).ok_or(ParseError::ParseError)?;
         let result = GetStateReply { response_type, device_id, sequence, length, mods, base_mods, latched_mods, locked_mods, group, locked_group, base_group, latched_group, compat_state, grab_mods, compat_grab_mods, lookup_mods, compat_lookup_mods, ptr_btn_state };
         Ok((result, remaining))
     }
@@ -7680,132 +7294,70 @@ pub struct GetControlsReply {
     pub per_key_repeat: [u8; 32],
 }
 impl GetControlsReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mouse_keys_dflt_btn, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_groups, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (groups_wrap, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (internal_mods_mask, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (ignore_lock_mods_mask, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (internal_mods_real_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (ignore_lock_mods_real_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (internal_mods_vmods, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (ignore_lock_mods_vmods, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (repeat_delay, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (repeat_interval, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (slow_keys_delay, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (debounce_delay, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mouse_keys_delay, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mouse_keys_interval, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mouse_keys_time_to_max, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mouse_keys_max_speed, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mouse_keys_curve, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (access_x_option, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (access_x_timeout, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (access_x_timeout_options_mask, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (access_x_timeout_options_values, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (access_x_timeout_mask, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (access_x_timeout_values, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (enabled_controls, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_0, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_1, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_2, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_3, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_4, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_5, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_6, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_7, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_8, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_9, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_10, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_11, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_12, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_13, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_14, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_15, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_16, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_17, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_18, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_19, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_20, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_21, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_22, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_23, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_24, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_25, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_26, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_27, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_28, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_29, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_30, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (per_key_repeat_31, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (mouse_keys_dflt_btn, remaining) = u8::try_parse(remaining)?;
+        let (num_groups, remaining) = u8::try_parse(remaining)?;
+        let (groups_wrap, remaining) = u8::try_parse(remaining)?;
+        let (internal_mods_mask, remaining) = u8::try_parse(remaining)?;
+        let (ignore_lock_mods_mask, remaining) = u8::try_parse(remaining)?;
+        let (internal_mods_real_mods, remaining) = u8::try_parse(remaining)?;
+        let (ignore_lock_mods_real_mods, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (internal_mods_vmods, remaining) = u16::try_parse(remaining)?;
+        let (ignore_lock_mods_vmods, remaining) = u16::try_parse(remaining)?;
+        let (repeat_delay, remaining) = u16::try_parse(remaining)?;
+        let (repeat_interval, remaining) = u16::try_parse(remaining)?;
+        let (slow_keys_delay, remaining) = u16::try_parse(remaining)?;
+        let (debounce_delay, remaining) = u16::try_parse(remaining)?;
+        let (mouse_keys_delay, remaining) = u16::try_parse(remaining)?;
+        let (mouse_keys_interval, remaining) = u16::try_parse(remaining)?;
+        let (mouse_keys_time_to_max, remaining) = u16::try_parse(remaining)?;
+        let (mouse_keys_max_speed, remaining) = u16::try_parse(remaining)?;
+        let (mouse_keys_curve, remaining) = i16::try_parse(remaining)?;
+        let (access_x_option, remaining) = u16::try_parse(remaining)?;
+        let (access_x_timeout, remaining) = u16::try_parse(remaining)?;
+        let (access_x_timeout_options_mask, remaining) = u16::try_parse(remaining)?;
+        let (access_x_timeout_options_values, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (access_x_timeout_mask, remaining) = u32::try_parse(remaining)?;
+        let (access_x_timeout_values, remaining) = u32::try_parse(remaining)?;
+        let (enabled_controls, remaining) = u32::try_parse(remaining)?;
+        let (per_key_repeat_0, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_1, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_2, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_3, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_4, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_5, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_6, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_7, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_8, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_9, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_10, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_11, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_12, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_13, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_14, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_15, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_16, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_17, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_18, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_19, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_20, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_21, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_22, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_23, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_24, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_25, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_26, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_27, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_28, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_29, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_30, remaining) = u8::try_parse(remaining)?;
+        let (per_key_repeat_31, remaining) = u8::try_parse(remaining)?;
         let per_key_repeat = [
             per_key_repeat_0,
             per_key_repeat_1,
@@ -8032,16 +7584,14 @@ pub struct GetMapMapBitcase3 {
     pub acts_rtrn_acts: Vec<Action>,
 }
 impl GetMapMapBitcase3 {
-    pub fn try_parse(value: &[u8], n_key_actions: u8, total_actions: u16) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (acts_rtrn_count, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, n_key_actions as usize)?;
-        remaining = new_remaining;
+    pub fn try_parse(remaining: &[u8], n_key_actions: u8, total_actions: u16) -> Result<(Self, &[u8]), ParseError> {
+        let value = remaining;
+        let (acts_rtrn_count, remaining) = crate::x11_utils::parse_list::<u8>(remaining, n_key_actions as usize)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let (acts_rtrn_acts, new_remaining) = crate::x11_utils::parse_list::<Action>(remaining, total_actions as usize)?;
-        remaining = new_remaining;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let (acts_rtrn_acts, remaining) = crate::x11_utils::parse_list::<Action>(remaining, total_actions as usize)?;
         let result = GetMapMapBitcase3 { acts_rtrn_count, acts_rtrn_acts };
         Ok((result, remaining))
     }
@@ -8074,77 +7624,87 @@ pub struct GetMapMap {
 }
 impl GetMapMap {
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
+        let mut outer_remaining = value;
         let types_rtrn = if present & Into::<u16>::into(MapPart::KeyTypes) != 0 {
-            let (types_rtrn, new_remaining) = crate::x11_utils::parse_list::<KeyType>(remaining, n_types as usize)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let (types_rtrn, remaining) = crate::x11_utils::parse_list::<KeyType>(remaining, n_types as usize)?;
+            outer_remaining = remaining;
             Some(types_rtrn)
         } else {
             None
         };
         let syms_rtrn = if present & Into::<u16>::into(MapPart::KeySyms) != 0 {
-            let (syms_rtrn, new_remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms as usize)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let (syms_rtrn, remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms as usize)?;
+            outer_remaining = remaining;
             Some(syms_rtrn)
         } else {
             None
         };
         let bitcase3 = if present & Into::<u16>::into(MapPart::KeyActions) != 0 {
-            let (bitcase3, new_remaining) = GetMapMapBitcase3::try_parse(remaining, n_key_actions, total_actions)?;
-            remaining = new_remaining;
+            let (bitcase3, new_remaining) = GetMapMapBitcase3::try_parse(outer_remaining, n_key_actions, total_actions)?;
+            outer_remaining = new_remaining;
             Some(bitcase3)
         } else {
             None
         };
         let behaviors_rtrn = if present & Into::<u16>::into(MapPart::KeyBehaviors) != 0 {
-            let (behaviors_rtrn, new_remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors as usize)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let (behaviors_rtrn, remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors as usize)?;
+            outer_remaining = remaining;
             Some(behaviors_rtrn)
         } else {
             None
         };
         let vmods_rtrn = if present & Into::<u16>::into(MapPart::VirtualMods) != 0 {
-            let (vmods_rtrn, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, TryInto::<usize>::try_into(virtual_mods.count_ones()).unwrap())?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let value = remaining;
+            let (vmods_rtrn, remaining) = crate::x11_utils::parse_list::<u8>(remaining, TryInto::<usize>::try_into(virtual_mods.count_ones()).unwrap())?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
-            remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            outer_remaining = remaining;
             Some(vmods_rtrn)
         } else {
             None
         };
         let explicit_rtrn = if present & Into::<u16>::into(MapPart::ExplicitComponents) != 0 {
-            let (explicit_rtrn, new_remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit as usize)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let value = remaining;
+            let (explicit_rtrn, remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit as usize)?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
-            remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            outer_remaining = remaining;
             Some(explicit_rtrn)
         } else {
             None
         };
         let modmap_rtrn = if present & Into::<u16>::into(MapPart::ModifierMap) != 0 {
-            let (modmap_rtrn, new_remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys as usize)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let value = remaining;
+            let (modmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys as usize)?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
-            remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            outer_remaining = remaining;
             Some(modmap_rtrn)
         } else {
             None
         };
         let vmodmap_rtrn = if present & Into::<u16>::into(MapPart::VirtualModMap) != 0 {
-            let (vmodmap_rtrn, new_remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys as usize)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let (vmodmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys as usize)?;
+            outer_remaining = remaining;
             Some(vmodmap_rtrn)
         } else {
             None
         };
         let result = GetMapMap { types_rtrn, syms_rtrn, bitcase3, behaviors_rtrn, vmods_rtrn, explicit_rtrn, modmap_rtrn, vmodmap_rtrn };
-        Ok((result, remaining))
+        Ok((result, outer_remaining))
     }
 }
 #[derive(Debug, Clone)]
@@ -8181,70 +7741,39 @@ pub struct GetMapReply {
     pub map: GetMapMap,
 }
 impl GetMapReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (min_key_code, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max_key_code, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (present, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_types, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (total_types, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_key_sym, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (total_syms, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_key_syms, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_key_action, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (total_actions, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_key_actions, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_key_behavior, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_key_behaviors, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (total_key_behaviors, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_key_explicit, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_key_explicit, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (total_key_explicit, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_mod_map_key, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_mod_map_keys, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (total_mod_map_keys, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_v_mod_map_key, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_v_mod_map_keys, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (total_v_mod_map_keys, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (virtual_mods, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (map, new_remaining) = GetMapMap::try_parse(remaining, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (min_key_code, remaining) = KEYCODE::try_parse(remaining)?;
+        let (max_key_code, remaining) = KEYCODE::try_parse(remaining)?;
+        let (present, remaining) = u16::try_parse(remaining)?;
+        let (first_type, remaining) = u8::try_parse(remaining)?;
+        let (n_types, remaining) = u8::try_parse(remaining)?;
+        let (total_types, remaining) = u8::try_parse(remaining)?;
+        let (first_key_sym, remaining) = KEYCODE::try_parse(remaining)?;
+        let (total_syms, remaining) = u16::try_parse(remaining)?;
+        let (n_key_syms, remaining) = u8::try_parse(remaining)?;
+        let (first_key_action, remaining) = KEYCODE::try_parse(remaining)?;
+        let (total_actions, remaining) = u16::try_parse(remaining)?;
+        let (n_key_actions, remaining) = u8::try_parse(remaining)?;
+        let (first_key_behavior, remaining) = KEYCODE::try_parse(remaining)?;
+        let (n_key_behaviors, remaining) = u8::try_parse(remaining)?;
+        let (total_key_behaviors, remaining) = u8::try_parse(remaining)?;
+        let (first_key_explicit, remaining) = KEYCODE::try_parse(remaining)?;
+        let (n_key_explicit, remaining) = u8::try_parse(remaining)?;
+        let (total_key_explicit, remaining) = u8::try_parse(remaining)?;
+        let (first_mod_map_key, remaining) = KEYCODE::try_parse(remaining)?;
+        let (n_mod_map_keys, remaining) = u8::try_parse(remaining)?;
+        let (total_mod_map_keys, remaining) = u8::try_parse(remaining)?;
+        let (first_v_mod_map_key, remaining) = KEYCODE::try_parse(remaining)?;
+        let (n_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
+        let (total_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let (map, remaining) = GetMapMap::try_parse(remaining, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys)?;
         let result = GetMapReply { response_type, device_id, sequence, length, min_key_code, max_key_code, present, first_type, n_types, total_types, first_key_sym, total_syms, n_key_syms, first_key_action, total_actions, n_key_actions, first_key_behavior, n_key_behaviors, total_key_behaviors, first_key_explicit, n_key_explicit, total_key_explicit, first_mod_map_key, n_mod_map_keys, total_mod_map_keys, first_v_mod_map_key, n_v_mod_map_keys, total_v_mod_map_keys, virtual_mods, map };
         Ok((result, remaining))
     }
@@ -8523,30 +8052,19 @@ pub struct GetCompatMapReply {
     pub group_rtrn: Vec<ModDef>,
 }
 impl GetCompatMapReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (groups_rtrn, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (first_si_rtrn, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_si_rtrn, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_total_si, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(16..).ok_or(ParseError::ParseError)?;
-        let (si_rtrn, new_remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si_rtrn as usize)?;
-        remaining = new_remaining;
-        let (group_rtrn, new_remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, TryInto::<usize>::try_into(groups_rtrn.count_ones()).unwrap())?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (groups_rtrn, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (first_si_rtrn, remaining) = u16::try_parse(remaining)?;
+        let (n_si_rtrn, remaining) = u16::try_parse(remaining)?;
+        let (n_total_si, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
+        let (si_rtrn, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si_rtrn as usize)?;
+        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, TryInto::<usize>::try_into(groups_rtrn.count_ones()).unwrap())?;
         let result = GetCompatMapReply { response_type, device_id, sequence, length, groups_rtrn, first_si_rtrn, n_total_si, si_rtrn, group_rtrn };
         Ok((result, remaining))
     }
@@ -8637,19 +8155,13 @@ pub struct GetIndicatorStateReply {
     pub state: u32,
 }
 impl GetIndicatorStateReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (state, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (state, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let result = GetIndicatorStateReply { response_type, device_id, sequence, length, state };
         Ok((result, remaining))
     }
@@ -8702,25 +8214,16 @@ pub struct GetIndicatorMapReply {
     pub maps: Vec<IndicatorMap>,
 }
 impl GetIndicatorMapReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (which, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (real_indicators, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_indicators, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(15..).ok_or(ParseError::ParseError)?;
-        let (maps, new_remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, TryInto::<usize>::try_into(which.count_ones()).unwrap())?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (which, remaining) = u32::try_parse(remaining)?;
+        let (real_indicators, remaining) = u32::try_parse(remaining)?;
+        let (n_indicators, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(15..).ok_or(ParseError::ParseError)?;
+        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, TryInto::<usize>::try_into(which.count_ones()).unwrap())?;
         let result = GetIndicatorMapReply { response_type, device_id, sequence, length, which, real_indicators, n_indicators, maps };
         Ok((result, remaining))
     }
@@ -8825,45 +8328,26 @@ pub struct GetNamedIndicatorReply {
     pub supported: bool,
 }
 impl GetNamedIndicatorReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (indicator, new_remaining) = ATOM::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (found, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (on, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (real_indicator, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (ndx, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (map_flags, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (map_which_groups, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (map_groups, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (map_which_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (map_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (map_real_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (map_vmod, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (map_ctrls, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (supported, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (indicator, remaining) = ATOM::try_parse(remaining)?;
+        let (found, remaining) = bool::try_parse(remaining)?;
+        let (on, remaining) = bool::try_parse(remaining)?;
+        let (real_indicator, remaining) = bool::try_parse(remaining)?;
+        let (ndx, remaining) = u8::try_parse(remaining)?;
+        let (map_flags, remaining) = u8::try_parse(remaining)?;
+        let (map_which_groups, remaining) = u8::try_parse(remaining)?;
+        let (map_groups, remaining) = u8::try_parse(remaining)?;
+        let (map_which_mods, remaining) = u8::try_parse(remaining)?;
+        let (map_mods, remaining) = u8::try_parse(remaining)?;
+        let (map_real_mods, remaining) = u8::try_parse(remaining)?;
+        let (map_vmod, remaining) = u16::try_parse(remaining)?;
+        let (map_ctrls, remaining) = u32::try_parse(remaining)?;
+        let (supported, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let result = GetNamedIndicatorReply { response_type, device_id, sequence, length, indicator, found, on, real_indicator, ndx, map_flags, map_which_groups, map_groups, map_which_mods, map_mods, map_real_mods, map_vmod, map_ctrls, supported };
         Ok((result, remaining))
     }
@@ -8974,16 +8458,14 @@ pub struct GetNamesValueListBitcase8 {
     pub kt_level_names: Vec<ATOM>,
 }
 impl GetNamesValueListBitcase8 {
-    pub fn try_parse(value: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (n_levels_per_type, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, n_types as usize)?;
-        remaining = new_remaining;
+    pub fn try_parse(remaining: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
+        let value = remaining;
+        let (n_levels_per_type, remaining) = crate::x11_utils::parse_list::<u8>(remaining, n_types as usize)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let (kt_level_names, new_remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, n_levels_per_type.iter().map(|x| TryInto::<usize>::try_into(*x).unwrap()).sum())?;
-        remaining = new_remaining;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let (kt_level_names, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, n_levels_per_type.iter().map(|x| TryInto::<usize>::try_into(*x).unwrap()).sum())?;
         let result = GetNamesValueListBitcase8 { n_levels_per_type, kt_level_names };
         Ok((result, remaining))
     }
@@ -9022,107 +8504,120 @@ pub struct GetNamesValueList {
 }
 impl GetNamesValueList {
     fn try_parse(value: &[u8], which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
+        let mut outer_remaining = value;
         let keycodes_name = if which & Into::<u32>::into(NameDetail::Keycodes) != 0 {
-            let (keycodes_name, new_remaining) = ATOM::try_parse(remaining)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let (keycodes_name, remaining) = ATOM::try_parse(remaining)?;
+            outer_remaining = remaining;
             Some(keycodes_name)
         } else {
             None
         };
         let geometry_name = if which & Into::<u32>::into(NameDetail::Geometry) != 0 {
-            let (geometry_name, new_remaining) = ATOM::try_parse(remaining)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let (geometry_name, remaining) = ATOM::try_parse(remaining)?;
+            outer_remaining = remaining;
             Some(geometry_name)
         } else {
             None
         };
         let symbols_name = if which & Into::<u32>::into(NameDetail::Symbols) != 0 {
-            let (symbols_name, new_remaining) = ATOM::try_parse(remaining)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let (symbols_name, remaining) = ATOM::try_parse(remaining)?;
+            outer_remaining = remaining;
             Some(symbols_name)
         } else {
             None
         };
         let phys_symbols_name = if which & Into::<u32>::into(NameDetail::PhysSymbols) != 0 {
-            let (phys_symbols_name, new_remaining) = ATOM::try_parse(remaining)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let (phys_symbols_name, remaining) = ATOM::try_parse(remaining)?;
+            outer_remaining = remaining;
             Some(phys_symbols_name)
         } else {
             None
         };
         let types_name = if which & Into::<u32>::into(NameDetail::Types) != 0 {
-            let (types_name, new_remaining) = ATOM::try_parse(remaining)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let (types_name, remaining) = ATOM::try_parse(remaining)?;
+            outer_remaining = remaining;
             Some(types_name)
         } else {
             None
         };
         let compat_name = if which & Into::<u32>::into(NameDetail::Compat) != 0 {
-            let (compat_name, new_remaining) = ATOM::try_parse(remaining)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let (compat_name, remaining) = ATOM::try_parse(remaining)?;
+            outer_remaining = remaining;
             Some(compat_name)
         } else {
             None
         };
         let type_names = if which & Into::<u32>::into(NameDetail::KeyTypeNames) != 0 {
-            let (type_names, new_remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, n_types as usize)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let (type_names, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, n_types as usize)?;
+            outer_remaining = remaining;
             Some(type_names)
         } else {
             None
         };
         let bitcase8 = if which & Into::<u32>::into(NameDetail::KTLevelNames) != 0 {
-            let (bitcase8, new_remaining) = GetNamesValueListBitcase8::try_parse(remaining, n_types)?;
-            remaining = new_remaining;
+            let (bitcase8, new_remaining) = GetNamesValueListBitcase8::try_parse(outer_remaining, n_types)?;
+            outer_remaining = new_remaining;
             Some(bitcase8)
         } else {
             None
         };
         let indicator_names = if which & Into::<u32>::into(NameDetail::IndicatorNames) != 0 {
-            let (indicator_names, new_remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, TryInto::<usize>::try_into(indicators.count_ones()).unwrap())?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let (indicator_names, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, TryInto::<usize>::try_into(indicators.count_ones()).unwrap())?;
+            outer_remaining = remaining;
             Some(indicator_names)
         } else {
             None
         };
         let virtual_mod_names = if which & Into::<u32>::into(NameDetail::VirtualModNames) != 0 {
-            let (virtual_mod_names, new_remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, TryInto::<usize>::try_into(virtual_mods.count_ones()).unwrap())?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, TryInto::<usize>::try_into(virtual_mods.count_ones()).unwrap())?;
+            outer_remaining = remaining;
             Some(virtual_mod_names)
         } else {
             None
         };
         let groups = if which & Into::<u32>::into(NameDetail::GroupNames) != 0 {
-            let (groups, new_remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, TryInto::<usize>::try_into(group_names.count_ones()).unwrap())?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let (groups, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, TryInto::<usize>::try_into(group_names.count_ones()).unwrap())?;
+            outer_remaining = remaining;
             Some(groups)
         } else {
             None
         };
         let key_names = if which & Into::<u32>::into(NameDetail::KeyNames) != 0 {
-            let (key_names, new_remaining) = crate::x11_utils::parse_list::<KeyName>(remaining, n_keys as usize)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let (key_names, remaining) = crate::x11_utils::parse_list::<KeyName>(remaining, n_keys as usize)?;
+            outer_remaining = remaining;
             Some(key_names)
         } else {
             None
         };
         let key_aliases = if which & Into::<u32>::into(NameDetail::KeyAliases) != 0 {
-            let (key_aliases, new_remaining) = crate::x11_utils::parse_list::<KeyAlias>(remaining, n_key_aliases as usize)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let (key_aliases, remaining) = crate::x11_utils::parse_list::<KeyAlias>(remaining, n_key_aliases as usize)?;
+            outer_remaining = remaining;
             Some(key_aliases)
         } else {
             None
         };
         let radio_group_names = if which & Into::<u32>::into(NameDetail::RGNames) != 0 {
-            let (radio_group_names, new_remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, n_radio_groups as usize)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let (radio_group_names, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, n_radio_groups as usize)?;
+            outer_remaining = remaining;
             Some(radio_group_names)
         } else {
             None
         };
         let result = GetNamesValueList { keycodes_name, geometry_name, symbols_name, phys_symbols_name, types_name, compat_name, type_names, bitcase8, indicator_names, virtual_mod_names, groups, key_names, key_aliases, radio_group_names };
-        Ok((result, remaining))
+        Ok((result, outer_remaining))
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -9146,43 +8641,25 @@ pub struct GetNamesReply {
     pub value_list: GetNamesValueList,
 }
 impl GetNamesReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (which, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (min_key_code, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max_key_code, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_types, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group_names, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (virtual_mods, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_key, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_keys, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (indicators, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_radio_groups, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_key_aliases, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_kt_levels, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (value_list, new_remaining) = GetNamesValueList::try_parse(remaining, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (which, remaining) = u32::try_parse(remaining)?;
+        let (min_key_code, remaining) = KEYCODE::try_parse(remaining)?;
+        let (max_key_code, remaining) = KEYCODE::try_parse(remaining)?;
+        let (n_types, remaining) = u8::try_parse(remaining)?;
+        let (group_names, remaining) = u8::try_parse(remaining)?;
+        let (virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let (first_key, remaining) = KEYCODE::try_parse(remaining)?;
+        let (n_keys, remaining) = u8::try_parse(remaining)?;
+        let (indicators, remaining) = u32::try_parse(remaining)?;
+        let (n_radio_groups, remaining) = u8::try_parse(remaining)?;
+        let (n_key_aliases, remaining) = u8::try_parse(remaining)?;
+        let (n_kt_levels, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let (value_list, remaining) = GetNamesValueList::try_parse(remaining, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups)?;
         let result = GetNamesReply { response_type, device_id, sequence, length, which, min_key_code, max_key_code, n_types, group_names, virtual_mods, first_key, n_keys, indicators, n_radio_groups, n_key_aliases, n_kt_levels, value_list };
         Ok((result, remaining))
     }
@@ -9529,25 +9006,16 @@ pub struct PerClientFlagsReply {
     pub auto_ctrls_values: u32,
 }
 impl PerClientFlagsReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (supported, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (value, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_ctrls, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_ctrls_values, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(8..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (supported, remaining) = u32::try_parse(remaining)?;
+        let (value, remaining) = u32::try_parse(remaining)?;
+        let (auto_ctrls, remaining) = u32::try_parse(remaining)?;
+        let (auto_ctrls_values, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
         let result = PerClientFlagsReply { response_type, device_id, sequence, length, supported, value, auto_ctrls, auto_ctrls_values };
         Ok((result, remaining))
     }
@@ -9599,43 +9067,25 @@ pub struct ListComponentsReply {
     pub geometries: Vec<Listing>,
 }
 impl ListComponentsReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_keymaps, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_keycodes, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_types, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_compat_maps, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_symbols, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_geometries, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extra, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(10..).ok_or(ParseError::ParseError)?;
-        let (keymaps, new_remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_keymaps as usize)?;
-        remaining = new_remaining;
-        let (keycodes, new_remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_keycodes as usize)?;
-        remaining = new_remaining;
-        let (types, new_remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_types as usize)?;
-        remaining = new_remaining;
-        let (compat_maps, new_remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_compat_maps as usize)?;
-        remaining = new_remaining;
-        let (symbols, new_remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_symbols as usize)?;
-        remaining = new_remaining;
-        let (geometries, new_remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_geometries as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (n_keymaps, remaining) = u16::try_parse(remaining)?;
+        let (n_keycodes, remaining) = u16::try_parse(remaining)?;
+        let (n_types, remaining) = u16::try_parse(remaining)?;
+        let (n_compat_maps, remaining) = u16::try_parse(remaining)?;
+        let (n_symbols, remaining) = u16::try_parse(remaining)?;
+        let (n_geometries, remaining) = u16::try_parse(remaining)?;
+        let (extra, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(10..).ok_or(ParseError::ParseError)?;
+        let (keymaps, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_keymaps as usize)?;
+        let (keycodes, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_keycodes as usize)?;
+        let (types, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_types as usize)?;
+        let (compat_maps, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_compat_maps as usize)?;
+        let (symbols, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_symbols as usize)?;
+        let (geometries, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_geometries as usize)?;
         let result = ListComponentsReply { response_type, device_id, sequence, length, extra, keymaps, keycodes, types, compat_maps, symbols, geometries };
         Ok((result, remaining))
     }
@@ -9712,55 +9162,34 @@ pub struct GetDeviceInfoReply {
     pub leds: Vec<DeviceLedInfo>,
 }
 impl GetDeviceInfoReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (present, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (supported, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (unsupported, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_device_led_f_bs, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_btn_wanted, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_btns_wanted, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_btn_rtrn, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_btns_rtrn, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (total_btns, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (has_own_state, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (dflt_kbd_fb, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (dflt_led_fb, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (dev_type, new_remaining) = ATOM::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (name_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (name, new_remaining) = crate::x11_utils::parse_list::<STRING8>(remaining, name_len as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let value = remaining;
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (present, remaining) = u16::try_parse(remaining)?;
+        let (supported, remaining) = u16::try_parse(remaining)?;
+        let (unsupported, remaining) = u16::try_parse(remaining)?;
+        let (n_device_led_f_bs, remaining) = u16::try_parse(remaining)?;
+        let (first_btn_wanted, remaining) = u8::try_parse(remaining)?;
+        let (n_btns_wanted, remaining) = u8::try_parse(remaining)?;
+        let (first_btn_rtrn, remaining) = u8::try_parse(remaining)?;
+        let (n_btns_rtrn, remaining) = u8::try_parse(remaining)?;
+        let (total_btns, remaining) = u8::try_parse(remaining)?;
+        let (has_own_state, remaining) = bool::try_parse(remaining)?;
+        let (dflt_kbd_fb, remaining) = u16::try_parse(remaining)?;
+        let (dflt_led_fb, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (dev_type, remaining) = ATOM::try_parse(remaining)?;
+        let (name_len, remaining) = u16::try_parse(remaining)?;
+        let (name, remaining) = crate::x11_utils::parse_list::<STRING8>(remaining, name_len as usize)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let (btn_actions, new_remaining) = crate::x11_utils::parse_list::<Action>(remaining, n_btns_rtrn as usize)?;
-        remaining = new_remaining;
-        let (leds, new_remaining) = crate::x11_utils::parse_list::<DeviceLedInfo>(remaining, n_device_led_f_bs as usize)?;
-        remaining = new_remaining;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let (btn_actions, remaining) = crate::x11_utils::parse_list::<Action>(remaining, n_btns_rtrn as usize)?;
+        let (leds, remaining) = crate::x11_utils::parse_list::<DeviceLedInfo>(remaining, n_device_led_f_bs as usize)?;
         let result = GetDeviceInfoReply { response_type, device_id, sequence, length, present, supported, unsupported, first_btn_wanted, n_btns_wanted, first_btn_rtrn, total_btns, has_own_state, dflt_kbd_fb, dflt_led_fb, dev_type, name, btn_actions, leds };
         Ok((result, remaining))
     }
@@ -9872,24 +9301,16 @@ pub struct SetDebuggingFlagsReply {
     pub supported_ctrls: u32,
 }
 impl SetDebuggingFlagsReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (current_flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (current_ctrls, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (supported_flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (supported_ctrls, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(8..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (current_flags, remaining) = u32::try_parse(remaining)?;
+        let (current_ctrls, remaining) = u32::try_parse(remaining)?;
+        let (supported_flags, remaining) = u32::try_parse(remaining)?;
+        let (supported_ctrls, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
         let result = SetDebuggingFlagsReply { response_type, sequence, length, current_flags, current_ctrls, supported_flags, supported_ctrls };
         Ok((result, remaining))
     }
@@ -9920,35 +9341,21 @@ pub struct NewKeyboardNotifyEvent {
     pub changed: u16,
 }
 impl NewKeyboardNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xkb_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (old_device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (min_key_code, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max_key_code, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (old_min_key_code, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (old_max_key_code, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (request_major, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (request_minor, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (changed, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(14..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (old_device_id, remaining) = u8::try_parse(remaining)?;
+        let (min_key_code, remaining) = KEYCODE::try_parse(remaining)?;
+        let (max_key_code, remaining) = KEYCODE::try_parse(remaining)?;
+        let (old_min_key_code, remaining) = KEYCODE::try_parse(remaining)?;
+        let (old_max_key_code, remaining) = KEYCODE::try_parse(remaining)?;
+        let (request_major, remaining) = u8::try_parse(remaining)?;
+        let (request_minor, remaining) = u8::try_parse(remaining)?;
+        let (changed, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(14..).ok_or(ParseError::ParseError)?;
         let result = NewKeyboardNotifyEvent { response_type, xkb_type, sequence, time, device_id, old_device_id, min_key_code, max_key_code, old_min_key_code, old_max_key_code, request_major, request_minor, changed };
         Ok((result, remaining))
     }
@@ -10018,57 +9425,32 @@ pub struct MapNotifyEvent {
     pub virtual_mods: u16,
 }
 impl MapNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xkb_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (ptr_btn_actions, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (changed, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (min_key_code, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max_key_code, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_types, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_key_sym, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_key_syms, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_key_act, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_key_acts, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_key_behavior, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_key_behavior, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_key_explicit, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_key_explicit, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_mod_map_key, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_mod_map_keys, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_v_mod_map_key, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_v_mod_map_keys, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (virtual_mods, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (ptr_btn_actions, remaining) = u8::try_parse(remaining)?;
+        let (changed, remaining) = u16::try_parse(remaining)?;
+        let (min_key_code, remaining) = KEYCODE::try_parse(remaining)?;
+        let (max_key_code, remaining) = KEYCODE::try_parse(remaining)?;
+        let (first_type, remaining) = u8::try_parse(remaining)?;
+        let (n_types, remaining) = u8::try_parse(remaining)?;
+        let (first_key_sym, remaining) = KEYCODE::try_parse(remaining)?;
+        let (n_key_syms, remaining) = u8::try_parse(remaining)?;
+        let (first_key_act, remaining) = KEYCODE::try_parse(remaining)?;
+        let (n_key_acts, remaining) = u8::try_parse(remaining)?;
+        let (first_key_behavior, remaining) = KEYCODE::try_parse(remaining)?;
+        let (n_key_behavior, remaining) = u8::try_parse(remaining)?;
+        let (first_key_explicit, remaining) = KEYCODE::try_parse(remaining)?;
+        let (n_key_explicit, remaining) = u8::try_parse(remaining)?;
+        let (first_mod_map_key, remaining) = KEYCODE::try_parse(remaining)?;
+        let (n_mod_map_keys, remaining) = u8::try_parse(remaining)?;
+        let (first_v_mod_map_key, remaining) = KEYCODE::try_parse(remaining)?;
+        let (n_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
+        let (virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let result = MapNotifyEvent { response_type, xkb_type, sequence, time, device_id, ptr_btn_actions, changed, min_key_code, max_key_code, first_type, n_types, first_key_sym, n_key_syms, first_key_act, n_key_acts, first_key_behavior, n_key_behavior, first_key_explicit, n_key_explicit, first_mod_map_key, n_mod_map_keys, first_v_mod_map_key, n_v_mod_map_keys, virtual_mods };
         Ok((result, remaining))
     }
@@ -10139,56 +9521,31 @@ pub struct StateNotifyEvent {
     pub request_minor: u8,
 }
 impl StateNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xkb_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (base_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (latched_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (locked_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (base_group, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (latched_group, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (locked_group, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (compat_state, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (grab_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (compat_grab_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (lookup_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (compat_loockup_mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (ptr_btn_state, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (changed, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keycode, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (request_major, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (request_minor, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (mods, remaining) = u8::try_parse(remaining)?;
+        let (base_mods, remaining) = u8::try_parse(remaining)?;
+        let (latched_mods, remaining) = u8::try_parse(remaining)?;
+        let (locked_mods, remaining) = u8::try_parse(remaining)?;
+        let (group, remaining) = u8::try_parse(remaining)?;
+        let (base_group, remaining) = i16::try_parse(remaining)?;
+        let (latched_group, remaining) = i16::try_parse(remaining)?;
+        let (locked_group, remaining) = u8::try_parse(remaining)?;
+        let (compat_state, remaining) = u8::try_parse(remaining)?;
+        let (grab_mods, remaining) = u8::try_parse(remaining)?;
+        let (compat_grab_mods, remaining) = u8::try_parse(remaining)?;
+        let (lookup_mods, remaining) = u8::try_parse(remaining)?;
+        let (compat_loockup_mods, remaining) = u8::try_parse(remaining)?;
+        let (ptr_btn_state, remaining) = u16::try_parse(remaining)?;
+        let (changed, remaining) = u16::try_parse(remaining)?;
+        let (keycode, remaining) = KEYCODE::try_parse(remaining)?;
+        let (event_type, remaining) = u8::try_parse(remaining)?;
+        let (request_major, remaining) = u8::try_parse(remaining)?;
+        let (request_minor, remaining) = u8::try_parse(remaining)?;
         let result = StateNotifyEvent { response_type, xkb_type, sequence, time, device_id, mods, base_mods, latched_mods, locked_mods, group, base_group, latched_group, locked_group, compat_state, grab_mods, compat_grab_mods, lookup_mods, compat_loockup_mods, ptr_btn_state, changed, keycode, event_type, request_major, request_minor };
         Ok((result, remaining))
     }
@@ -10250,36 +9607,22 @@ pub struct ControlsNotifyEvent {
     pub request_minor: u8,
 }
 impl ControlsNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xkb_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_groups, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (changed_controls, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (enabled_controls, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (enabled_control_changes, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keycode, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (request_major, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (request_minor, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (num_groups, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (changed_controls, remaining) = u32::try_parse(remaining)?;
+        let (enabled_controls, remaining) = u32::try_parse(remaining)?;
+        let (enabled_control_changes, remaining) = u32::try_parse(remaining)?;
+        let (keycode, remaining) = KEYCODE::try_parse(remaining)?;
+        let (event_type, remaining) = u8::try_parse(remaining)?;
+        let (request_major, remaining) = u8::try_parse(remaining)?;
+        let (request_minor, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let result = ControlsNotifyEvent { response_type, xkb_type, sequence, time, device_id, num_groups, changed_controls, enabled_controls, enabled_control_changes, keycode, event_type, request_major, request_minor };
         Ok((result, remaining))
     }
@@ -10334,24 +9677,16 @@ pub struct IndicatorStateNotifyEvent {
     pub state_changed: u32,
 }
 impl IndicatorStateNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xkb_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let (state, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (state_changed, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(12..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (state, remaining) = u32::try_parse(remaining)?;
+        let (state_changed, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let result = IndicatorStateNotifyEvent { response_type, xkb_type, sequence, time, device_id, state, state_changed };
         Ok((result, remaining))
     }
@@ -10405,24 +9740,16 @@ pub struct IndicatorMapNotifyEvent {
     pub map_changed: u32,
 }
 impl IndicatorMapNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xkb_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let (state, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (map_changed, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(12..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (state, remaining) = u32::try_parse(remaining)?;
+        let (map_changed, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let result = IndicatorMapNotifyEvent { response_type, xkb_type, sequence, time, device_id, state, map_changed };
         Ok((result, remaining))
     }
@@ -10486,45 +9813,27 @@ pub struct NamesNotifyEvent {
     pub changed_indicators: u32,
 }
 impl NamesNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xkb_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (changed, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_types, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_level_name, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_level_names, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (n_radio_groups, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_key_aliases, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (changed_group_names, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (changed_virtual_mods, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_key, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_keys, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (changed_indicators, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (changed, remaining) = u16::try_parse(remaining)?;
+        let (first_type, remaining) = u8::try_parse(remaining)?;
+        let (n_types, remaining) = u8::try_parse(remaining)?;
+        let (first_level_name, remaining) = u8::try_parse(remaining)?;
+        let (n_level_names, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (n_radio_groups, remaining) = u8::try_parse(remaining)?;
+        let (n_key_aliases, remaining) = u8::try_parse(remaining)?;
+        let (changed_group_names, remaining) = u8::try_parse(remaining)?;
+        let (changed_virtual_mods, remaining) = u16::try_parse(remaining)?;
+        let (first_key, remaining) = KEYCODE::try_parse(remaining)?;
+        let (n_keys, remaining) = u8::try_parse(remaining)?;
+        let (changed_indicators, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let result = NamesNotifyEvent { response_type, xkb_type, sequence, time, device_id, changed, first_type, n_types, first_level_name, n_level_names, n_radio_groups, n_key_aliases, changed_group_names, changed_virtual_mods, first_key, n_keys, changed_indicators };
         Ok((result, remaining))
     }
@@ -10581,27 +9890,17 @@ pub struct CompatMapNotifyEvent {
     pub n_total_si: u16,
 }
 impl CompatMapNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xkb_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (changed_groups, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_si, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_si, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_total_si, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(16..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (changed_groups, remaining) = u8::try_parse(remaining)?;
+        let (first_si, remaining) = u16::try_parse(remaining)?;
+        let (n_si, remaining) = u16::try_parse(remaining)?;
+        let (n_total_si, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
         let result = CompatMapNotifyEvent { response_type, xkb_type, sequence, time, device_id, changed_groups, first_si, n_si, n_total_si };
         Ok((result, remaining))
     }
@@ -10662,35 +9961,21 @@ pub struct BellNotifyEvent {
     pub event_only: bool,
 }
 impl BellNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xkb_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bell_class, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bell_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (percent, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (pitch, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (duration, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (name, new_remaining) = ATOM::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (window, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_only, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(7..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (bell_class, remaining) = u8::try_parse(remaining)?;
+        let (bell_id, remaining) = u8::try_parse(remaining)?;
+        let (percent, remaining) = u8::try_parse(remaining)?;
+        let (pitch, remaining) = u16::try_parse(remaining)?;
+        let (duration, remaining) = u16::try_parse(remaining)?;
+        let (name, remaining) = ATOM::try_parse(remaining)?;
+        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (event_only, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(7..).ok_or(ParseError::ParseError)?;
         let result = BellNotifyEvent { response_type, xkb_type, sequence, time, device_id, bell_class, bell_id, percent, pitch, duration, name, window, event_only };
         Ok((result, remaining))
     }
@@ -10750,44 +10035,25 @@ pub struct ActionMessageEvent {
     pub message: [STRING8; 8],
 }
 impl ActionMessageEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xkb_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keycode, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (press, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (key_event_follows, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (message_0, new_remaining) = STRING8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (message_1, new_remaining) = STRING8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (message_2, new_remaining) = STRING8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (message_3, new_remaining) = STRING8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (message_4, new_remaining) = STRING8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (message_5, new_remaining) = STRING8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (message_6, new_remaining) = STRING8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (message_7, new_remaining) = STRING8::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (keycode, remaining) = KEYCODE::try_parse(remaining)?;
+        let (press, remaining) = bool::try_parse(remaining)?;
+        let (key_event_follows, remaining) = bool::try_parse(remaining)?;
+        let (mods, remaining) = u8::try_parse(remaining)?;
+        let (group, remaining) = u8::try_parse(remaining)?;
+        let (message_0, remaining) = STRING8::try_parse(remaining)?;
+        let (message_1, remaining) = STRING8::try_parse(remaining)?;
+        let (message_2, remaining) = STRING8::try_parse(remaining)?;
+        let (message_3, remaining) = STRING8::try_parse(remaining)?;
+        let (message_4, remaining) = STRING8::try_parse(remaining)?;
+        let (message_5, remaining) = STRING8::try_parse(remaining)?;
+        let (message_6, remaining) = STRING8::try_parse(remaining)?;
+        let (message_7, remaining) = STRING8::try_parse(remaining)?;
         let message = [
             message_0,
             message_1,
@@ -10798,7 +10064,7 @@ impl ActionMessageEvent {
             message_6,
             message_7,
         ];
-        remaining = &remaining.get(10..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(10..).ok_or(ParseError::ParseError)?;
         let result = ActionMessageEvent { response_type, xkb_type, sequence, time, device_id, keycode, press, key_event_follows, mods, group, message };
         Ok((result, remaining))
     }
@@ -10852,27 +10118,17 @@ pub struct AccessXNotifyEvent {
     pub debounce_delay: u16,
 }
 impl AccessXNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xkb_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keycode, new_remaining) = KEYCODE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detailt, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (slow_keys_delay, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (debounce_delay, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(16..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (keycode, remaining) = KEYCODE::try_parse(remaining)?;
+        let (detailt, remaining) = u16::try_parse(remaining)?;
+        let (slow_keys_delay, remaining) = u16::try_parse(remaining)?;
+        let (debounce_delay, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
         let result = AccessXNotifyEvent { response_type, xkb_type, sequence, time, device_id, keycode, detailt, slow_keys_delay, debounce_delay };
         Ok((result, remaining))
     }
@@ -10934,38 +10190,23 @@ pub struct ExtensionDeviceNotifyEvent {
     pub unsupported: u16,
 }
 impl ExtensionDeviceNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xkb_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (reason, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (led_class, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (led_id, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (leds_defined, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (led_state, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_button, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (n_buttons, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (supported, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (unsupported, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xkb_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (reason, remaining) = u16::try_parse(remaining)?;
+        let (led_class, remaining) = u16::try_parse(remaining)?;
+        let (led_id, remaining) = u16::try_parse(remaining)?;
+        let (leds_defined, remaining) = u32::try_parse(remaining)?;
+        let (led_state, remaining) = u32::try_parse(remaining)?;
+        let (first_button, remaining) = u8::try_parse(remaining)?;
+        let (n_buttons, remaining) = u8::try_parse(remaining)?;
+        let (supported, remaining) = u16::try_parse(remaining)?;
+        let (unsupported, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let result = ExtensionDeviceNotifyEvent { response_type, xkb_type, sequence, time, device_id, reason, led_class, led_id, leds_defined, led_state, first_button, n_buttons, supported, unsupported };
         Ok((result, remaining))
     }

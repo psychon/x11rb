@@ -738,14 +738,10 @@ pub struct PictFormatError {
     pub sequence: u16,
 }
 impl PictFormatError {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (error_code, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (error_code, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
         let result = PictFormatError { response_type, error_code, sequence };
         Ok((result, remaining))
     }
@@ -792,14 +788,10 @@ pub struct PictureError {
     pub sequence: u16,
 }
 impl PictureError {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (error_code, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (error_code, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
         let result = PictureError { response_type, error_code, sequence };
         Ok((result, remaining))
     }
@@ -846,14 +838,10 @@ pub struct PictOpError {
     pub sequence: u16,
 }
 impl PictOpError {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (error_code, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (error_code, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
         let result = PictOpError { response_type, error_code, sequence };
         Ok((result, remaining))
     }
@@ -900,14 +888,10 @@ pub struct GlyphSetError {
     pub sequence: u16,
 }
 impl GlyphSetError {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (error_code, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (error_code, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
         let result = GlyphSetError { response_type, error_code, sequence };
         Ok((result, remaining))
     }
@@ -954,14 +938,10 @@ pub struct GlyphError {
     pub sequence: u16,
 }
 impl GlyphError {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (error_code, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (error_code, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
         let result = GlyphError { response_type, error_code, sequence };
         Ok((result, remaining))
     }
@@ -1011,24 +991,15 @@ pub struct Directformat {
     pub alpha_mask: u16,
 }
 impl TryParse for Directformat {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (red_shift, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (red_mask, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (green_shift, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (green_mask, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (blue_shift, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (blue_mask, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (alpha_shift, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (alpha_mask, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (red_shift, remaining) = u16::try_parse(remaining)?;
+        let (red_mask, remaining) = u16::try_parse(remaining)?;
+        let (green_shift, remaining) = u16::try_parse(remaining)?;
+        let (green_mask, remaining) = u16::try_parse(remaining)?;
+        let (blue_shift, remaining) = u16::try_parse(remaining)?;
+        let (blue_mask, remaining) = u16::try_parse(remaining)?;
+        let (alpha_shift, remaining) = u16::try_parse(remaining)?;
+        let (alpha_mask, remaining) = u16::try_parse(remaining)?;
         let result = Directformat { red_shift, red_mask, green_shift, green_mask, blue_shift, blue_mask, alpha_shift, alpha_mask };
         Ok((result, remaining))
     }
@@ -1091,19 +1062,13 @@ pub struct Pictforminfo {
     pub colormap: COLORMAP,
 }
 impl TryParse for Pictforminfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (id, new_remaining) = PICTFORMAT::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (depth, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (direct, new_remaining) = Directformat::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (colormap, new_remaining) = COLORMAP::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (id, remaining) = PICTFORMAT::try_parse(remaining)?;
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (depth, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (direct, remaining) = Directformat::try_parse(remaining)?;
+        let (colormap, remaining) = COLORMAP::try_parse(remaining)?;
         let result = Pictforminfo { id, type_, depth, direct, colormap };
         Ok((result, remaining))
     }
@@ -1170,12 +1135,9 @@ pub struct Pictvisual {
     pub format: PICTFORMAT,
 }
 impl TryParse for Pictvisual {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (visual, new_remaining) = VISUALID::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (format, new_remaining) = PICTFORMAT::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (visual, remaining) = VISUALID::try_parse(remaining)?;
+        let (format, remaining) = PICTFORMAT::try_parse(remaining)?;
         let result = Pictvisual { visual, format };
         Ok((result, remaining))
     }
@@ -1215,16 +1177,12 @@ pub struct Pictdepth {
     pub visuals: Vec<Pictvisual>,
 }
 impl TryParse for Pictdepth {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (depth, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (num_visuals, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (visuals, new_remaining) = crate::x11_utils::parse_list::<Pictvisual>(remaining, num_visuals as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (depth, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (num_visuals, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let (visuals, remaining) = crate::x11_utils::parse_list::<Pictvisual>(remaining, num_visuals as usize)?;
         let result = Pictdepth { depth, visuals };
         Ok((result, remaining))
     }
@@ -1259,14 +1217,10 @@ pub struct Pictscreen {
     pub depths: Vec<Pictdepth>,
 }
 impl TryParse for Pictscreen {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (num_depths, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (fallback, new_remaining) = PICTFORMAT::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (depths, new_remaining) = crate::x11_utils::parse_list::<Pictdepth>(remaining, num_depths as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (num_depths, remaining) = u32::try_parse(remaining)?;
+        let (fallback, remaining) = PICTFORMAT::try_parse(remaining)?;
+        let (depths, remaining) = crate::x11_utils::parse_list::<Pictdepth>(remaining, num_depths as usize)?;
         let result = Pictscreen { fallback, depths };
         Ok((result, remaining))
     }
@@ -1302,18 +1256,12 @@ pub struct Indexvalue {
     pub alpha: u16,
 }
 impl TryParse for Indexvalue {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (pixel, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (red, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (green, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (blue, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (alpha, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (pixel, remaining) = u32::try_parse(remaining)?;
+        let (red, remaining) = u16::try_parse(remaining)?;
+        let (green, remaining) = u16::try_parse(remaining)?;
+        let (blue, remaining) = u16::try_parse(remaining)?;
+        let (alpha, remaining) = u16::try_parse(remaining)?;
         let result = Indexvalue { pixel, red, green, blue, alpha };
         Ok((result, remaining))
     }
@@ -1365,16 +1313,11 @@ pub struct Color {
     pub alpha: u16,
 }
 impl TryParse for Color {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (red, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (green, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (blue, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (alpha, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (red, remaining) = u16::try_parse(remaining)?;
+        let (green, remaining) = u16::try_parse(remaining)?;
+        let (blue, remaining) = u16::try_parse(remaining)?;
+        let (alpha, remaining) = u16::try_parse(remaining)?;
         let result = Color { red, green, blue, alpha };
         Ok((result, remaining))
     }
@@ -1418,12 +1361,9 @@ pub struct Pointfix {
     pub y: FIXED,
 }
 impl TryParse for Pointfix {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (x, new_remaining) = FIXED::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (y, new_remaining) = FIXED::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (x, remaining) = FIXED::try_parse(remaining)?;
+        let (y, remaining) = FIXED::try_parse(remaining)?;
         let result = Pointfix { x, y };
         Ok((result, remaining))
     }
@@ -1463,12 +1403,9 @@ pub struct Linefix {
     pub p2: Pointfix,
 }
 impl TryParse for Linefix {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (p1, new_remaining) = Pointfix::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (p2, new_remaining) = Pointfix::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (p1, remaining) = Pointfix::try_parse(remaining)?;
+        let (p2, remaining) = Pointfix::try_parse(remaining)?;
         let result = Linefix { p1, p2 };
         Ok((result, remaining))
     }
@@ -1517,14 +1454,10 @@ pub struct Triangle {
     pub p3: Pointfix,
 }
 impl TryParse for Triangle {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (p1, new_remaining) = Pointfix::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (p2, new_remaining) = Pointfix::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (p3, new_remaining) = Pointfix::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (p1, remaining) = Pointfix::try_parse(remaining)?;
+        let (p2, remaining) = Pointfix::try_parse(remaining)?;
+        let (p3, remaining) = Pointfix::try_parse(remaining)?;
         let result = Triangle { p1, p2, p3 };
         Ok((result, remaining))
     }
@@ -1584,16 +1517,11 @@ pub struct Trapezoid {
     pub right: Linefix,
 }
 impl TryParse for Trapezoid {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (top, new_remaining) = FIXED::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bottom, new_remaining) = FIXED::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (left, new_remaining) = Linefix::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (right, new_remaining) = Linefix::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (top, remaining) = FIXED::try_parse(remaining)?;
+        let (bottom, remaining) = FIXED::try_parse(remaining)?;
+        let (left, remaining) = Linefix::try_parse(remaining)?;
+        let (right, remaining) = Linefix::try_parse(remaining)?;
         let result = Trapezoid { top, bottom, left, right };
         Ok((result, remaining))
     }
@@ -1673,20 +1601,13 @@ pub struct Glyphinfo {
     pub y_off: i16,
 }
 impl TryParse for Glyphinfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (width, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (height, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (x, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (y, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (x_off, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (y_off, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (x, remaining) = i16::try_parse(remaining)?;
+        let (y, remaining) = i16::try_parse(remaining)?;
+        let (x_off, remaining) = i16::try_parse(remaining)?;
+        let (y_off, remaining) = i16::try_parse(remaining)?;
         let result = Glyphinfo { width, height, x, y, x_off, y_off };
         Ok((result, remaining))
     }
@@ -1770,20 +1691,14 @@ pub struct QueryVersionReply {
     pub minor_version: u32,
 }
 impl QueryVersionReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (major_version, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (minor_version, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(16..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (major_version, remaining) = u32::try_parse(remaining)?;
+        let (minor_version, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
         let result = QueryVersionReply { response_type, sequence, length, major_version, minor_version };
         Ok((result, remaining))
     }
@@ -1826,32 +1741,20 @@ pub struct QueryPictFormatsReply {
     pub subpixels: Vec<u32>,
 }
 impl QueryPictFormatsReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_formats, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_screens, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_depths, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_visuals, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_subpixel, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (formats, new_remaining) = crate::x11_utils::parse_list::<Pictforminfo>(remaining, num_formats as usize)?;
-        remaining = new_remaining;
-        let (screens, new_remaining) = crate::x11_utils::parse_list::<Pictscreen>(remaining, num_screens as usize)?;
-        remaining = new_remaining;
-        let (subpixels, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_subpixel as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_formats, remaining) = u32::try_parse(remaining)?;
+        let (num_screens, remaining) = u32::try_parse(remaining)?;
+        let (num_depths, remaining) = u32::try_parse(remaining)?;
+        let (num_visuals, remaining) = u32::try_parse(remaining)?;
+        let (num_subpixel, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let (formats, remaining) = crate::x11_utils::parse_list::<Pictforminfo>(remaining, num_formats as usize)?;
+        let (screens, remaining) = crate::x11_utils::parse_list::<Pictscreen>(remaining, num_screens as usize)?;
+        let (subpixels, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_subpixel as usize)?;
         let result = QueryPictFormatsReply { response_type, sequence, length, num_depths, num_visuals, formats, screens, subpixels };
         Ok((result, remaining))
     }
@@ -1895,20 +1798,14 @@ pub struct QueryPictIndexValuesReply {
     pub values: Vec<Indexvalue>,
 }
 impl QueryPictIndexValuesReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_values, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (values, new_remaining) = crate::x11_utils::parse_list::<Indexvalue>(remaining, num_values as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_values, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let (values, remaining) = crate::x11_utils::parse_list::<Indexvalue>(remaining, num_values as usize)?;
         let result = QueryPictIndexValuesReply { response_type, sequence, length, values };
         Ok((result, remaining))
     }
@@ -3100,26 +2997,16 @@ pub struct Transform {
     pub matrix33: FIXED,
 }
 impl TryParse for Transform {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (matrix11, new_remaining) = FIXED::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (matrix12, new_remaining) = FIXED::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (matrix13, new_remaining) = FIXED::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (matrix21, new_remaining) = FIXED::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (matrix22, new_remaining) = FIXED::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (matrix23, new_remaining) = FIXED::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (matrix31, new_remaining) = FIXED::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (matrix32, new_remaining) = FIXED::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (matrix33, new_remaining) = FIXED::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (matrix11, remaining) = FIXED::try_parse(remaining)?;
+        let (matrix12, remaining) = FIXED::try_parse(remaining)?;
+        let (matrix13, remaining) = FIXED::try_parse(remaining)?;
+        let (matrix21, remaining) = FIXED::try_parse(remaining)?;
+        let (matrix22, remaining) = FIXED::try_parse(remaining)?;
+        let (matrix23, remaining) = FIXED::try_parse(remaining)?;
+        let (matrix31, remaining) = FIXED::try_parse(remaining)?;
+        let (matrix32, remaining) = FIXED::try_parse(remaining)?;
+        let (matrix33, remaining) = FIXED::try_parse(remaining)?;
         let result = Transform { matrix11, matrix12, matrix13, matrix21, matrix22, matrix23, matrix31, matrix32, matrix33 };
         Ok((result, remaining))
     }
@@ -3290,24 +3177,16 @@ pub struct QueryFiltersReply {
     pub filters: Vec<Str>,
 }
 impl QueryFiltersReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_aliases, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_filters, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(16..).ok_or(ParseError::ParseError)?;
-        let (aliases, new_remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_aliases as usize)?;
-        remaining = new_remaining;
-        let (filters, new_remaining) = crate::x11_utils::parse_list::<Str>(remaining, num_filters as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_aliases, remaining) = u32::try_parse(remaining)?;
+        let (num_filters, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
+        let (aliases, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_aliases as usize)?;
+        let (filters, remaining) = crate::x11_utils::parse_list::<Str>(remaining, num_filters as usize)?;
         let result = QueryFiltersReply { response_type, sequence, length, aliases, filters };
         Ok((result, remaining))
     }
@@ -3363,12 +3242,9 @@ pub struct Animcursorelt {
     pub delay: u32,
 }
 impl TryParse for Animcursorelt {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (cursor, new_remaining) = CURSOR::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (delay, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (cursor, remaining) = CURSOR::try_parse(remaining)?;
+        let (delay, remaining) = u32::try_parse(remaining)?;
         let result = Animcursorelt { cursor, delay };
         Ok((result, remaining))
     }
@@ -3438,14 +3314,10 @@ pub struct Spanfix {
     pub y: FIXED,
 }
 impl TryParse for Spanfix {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (l, new_remaining) = FIXED::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (r, new_remaining) = FIXED::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (y, new_remaining) = FIXED::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (l, remaining) = FIXED::try_parse(remaining)?;
+        let (r, remaining) = FIXED::try_parse(remaining)?;
+        let (y, remaining) = FIXED::try_parse(remaining)?;
         let result = Spanfix { l, r, y };
         Ok((result, remaining))
     }
@@ -3491,12 +3363,9 @@ pub struct Trap {
     pub bot: Spanfix,
 }
 impl TryParse for Trap {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (top, new_remaining) = Spanfix::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bot, new_remaining) = Spanfix::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (top, remaining) = Spanfix::try_parse(remaining)?;
+        let (bot, remaining) = Spanfix::try_parse(remaining)?;
         let result = Trap { top, bot };
         Ok((result, remaining))
     }
