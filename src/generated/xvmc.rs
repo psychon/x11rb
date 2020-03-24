@@ -60,26 +60,16 @@ pub struct SurfaceInfo {
     pub flags: u32,
 }
 impl TryParse for SurfaceInfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (id, new_remaining) = SURFACE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (chroma_format, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (pad0, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max_width, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max_height, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (subpicture_max_width, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (subpicture_max_height, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mc_type, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (id, remaining) = SURFACE::try_parse(remaining)?;
+        let (chroma_format, remaining) = u16::try_parse(remaining)?;
+        let (pad0, remaining) = u16::try_parse(remaining)?;
+        let (max_width, remaining) = u16::try_parse(remaining)?;
+        let (max_height, remaining) = u16::try_parse(remaining)?;
+        let (subpicture_max_width, remaining) = u16::try_parse(remaining)?;
+        let (subpicture_max_height, remaining) = u16::try_parse(remaining)?;
+        let (mc_type, remaining) = u32::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
         let result = SurfaceInfo { id, chroma_format, pad0, max_width, max_height, subpicture_max_width, subpicture_max_height, mc_type, flags };
         Ok((result, remaining))
     }
@@ -171,19 +161,13 @@ pub struct QueryVersionReply {
     pub minor: u32,
 }
 impl QueryVersionReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (major, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (minor, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (major, remaining) = u32::try_parse(remaining)?;
+        let (minor, remaining) = u32::try_parse(remaining)?;
         let result = QueryVersionReply { response_type, sequence, length, major, minor };
         Ok((result, remaining))
     }
@@ -227,20 +211,14 @@ pub struct ListSurfaceTypesReply {
     pub surfaces: Vec<SurfaceInfo>,
 }
 impl ListSurfaceTypesReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (surfaces, new_remaining) = crate::x11_utils::parse_list::<SurfaceInfo>(remaining, num as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let (surfaces, remaining) = crate::x11_utils::parse_list::<SurfaceInfo>(remaining, num as usize)?;
         let result = ListSurfaceTypesReply { response_type, sequence, length, surfaces };
         Ok((result, remaining))
     }
@@ -307,24 +285,16 @@ pub struct CreateContextReply {
     pub priv_data: Vec<u32>,
 }
 impl CreateContextReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (width_actual, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (height_actual, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags_return, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (priv_data, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, length as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (width_actual, remaining) = u16::try_parse(remaining)?;
+        let (height_actual, remaining) = u16::try_parse(remaining)?;
+        let (flags_return, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let (priv_data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length as usize)?;
         let result = CreateContextReply { response_type, sequence, width_actual, height_actual, flags_return, priv_data };
         Ok((result, remaining))
     }
@@ -397,18 +367,13 @@ pub struct CreateSurfaceReply {
     pub priv_data: Vec<u32>,
 }
 impl CreateSurfaceReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let (priv_data, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, length as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
+        let (priv_data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length as usize)?;
         let result = CreateSurfaceReply { response_type, sequence, priv_data };
         Ok((result, remaining))
     }
@@ -497,40 +462,27 @@ pub struct CreateSubpictureReply {
     pub priv_data: Vec<u32>,
 }
 impl CreateSubpictureReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (width_actual, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (height_actual, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_palette_entries, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (entry_bytes, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (component_order_0, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (component_order_1, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (component_order_2, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (component_order_3, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (width_actual, remaining) = u16::try_parse(remaining)?;
+        let (height_actual, remaining) = u16::try_parse(remaining)?;
+        let (num_palette_entries, remaining) = u16::try_parse(remaining)?;
+        let (entry_bytes, remaining) = u16::try_parse(remaining)?;
+        let (component_order_0, remaining) = u8::try_parse(remaining)?;
+        let (component_order_1, remaining) = u8::try_parse(remaining)?;
+        let (component_order_2, remaining) = u8::try_parse(remaining)?;
+        let (component_order_3, remaining) = u8::try_parse(remaining)?;
         let component_order = [
             component_order_0,
             component_order_1,
             component_order_2,
             component_order_3,
         ];
-        remaining = &remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (priv_data, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, length as usize)?;
-        remaining = new_remaining;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let (priv_data, remaining) = crate::x11_utils::parse_list::<u32>(remaining, length as usize)?;
         let result = CreateSubpictureReply { response_type, sequence, width_actual, height_actual, num_palette_entries, entry_bytes, component_order, priv_data };
         Ok((result, remaining))
     }
@@ -604,20 +556,14 @@ pub struct ListSubpictureTypesReply {
     pub types: Vec<xv::ImageFormatInfo>,
 }
 impl ListSubpictureTypesReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (types, new_remaining) = crate::x11_utils::parse_list::<xv::ImageFormatInfo>(remaining, num as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let (types, remaining) = crate::x11_utils::parse_list::<xv::ImageFormatInfo>(remaining, num as usize)?;
         let result = ListSubpictureTypesReply { response_type, sequence, length, types };
         Ok((result, remaining))
     }

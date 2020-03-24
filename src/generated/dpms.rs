@@ -69,19 +69,13 @@ pub struct GetVersionReply {
     pub server_minor_version: u16,
 }
 impl GetVersionReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (server_major_version, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (server_minor_version, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (server_major_version, remaining) = u16::try_parse(remaining)?;
+        let (server_minor_version, remaining) = u16::try_parse(remaining)?;
         let result = GetVersionReply { response_type, sequence, length, server_major_version, server_minor_version };
         Ok((result, remaining))
     }
@@ -120,18 +114,13 @@ pub struct CapableReply {
     pub capable: bool,
 }
 impl CapableReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (capable, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(23..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (capable, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
         let result = CapableReply { response_type, sequence, length, capable };
         Ok((result, remaining))
     }
@@ -172,22 +161,15 @@ pub struct GetTimeoutsReply {
     pub off_timeout: u16,
 }
 impl GetTimeoutsReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (standby_timeout, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (suspend_timeout, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (off_timeout, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(18..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (standby_timeout, remaining) = u16::try_parse(remaining)?;
+        let (suspend_timeout, remaining) = u16::try_parse(remaining)?;
+        let (off_timeout, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
         let result = GetTimeoutsReply { response_type, sequence, length, standby_timeout, suspend_timeout, off_timeout };
         Ok((result, remaining))
     }
@@ -392,20 +374,14 @@ pub struct InfoReply {
     pub state: bool,
 }
 impl InfoReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (power_level, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (state, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(21..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (power_level, remaining) = u16::try_parse(remaining)?;
+        let (state, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(21..).ok_or(ParseError::ParseError)?;
         let result = InfoReply { response_type, sequence, length, power_level, state };
         Ok((result, remaining))
     }

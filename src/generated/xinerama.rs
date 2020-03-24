@@ -45,16 +45,11 @@ pub struct ScreenInfo {
     pub height: u16,
 }
 impl TryParse for ScreenInfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (x_org, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (y_org, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (width, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (height, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (x_org, remaining) = i16::try_parse(remaining)?;
+        let (y_org, remaining) = i16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
         let result = ScreenInfo { x_org, y_org, width, height };
         Ok((result, remaining))
     }
@@ -126,19 +121,13 @@ pub struct QueryVersionReply {
     pub minor: u16,
 }
 impl QueryVersionReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (major, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (minor, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (major, remaining) = u16::try_parse(remaining)?;
+        let (minor, remaining) = u16::try_parse(remaining)?;
         let result = QueryVersionReply { response_type, sequence, length, major, minor };
         Ok((result, remaining))
     }
@@ -183,18 +172,12 @@ pub struct GetStateReply {
     pub window: WINDOW,
 }
 impl GetStateReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (state, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (window, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (state, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (window, remaining) = WINDOW::try_parse(remaining)?;
         let result = GetStateReply { response_type, state, sequence, length, window };
         Ok((result, remaining))
     }
@@ -239,18 +222,12 @@ pub struct GetScreenCountReply {
     pub window: WINDOW,
 }
 impl GetScreenCountReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (screen_count, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (window, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (screen_count, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (window, remaining) = WINDOW::try_parse(remaining)?;
         let result = GetScreenCountReply { response_type, screen_count, sequence, length, window };
         Ok((result, remaining))
     }
@@ -302,23 +279,15 @@ pub struct GetScreenSizeReply {
     pub screen: u32,
 }
 impl GetScreenSizeReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (width, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (height, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (window, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (screen, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (width, remaining) = u32::try_parse(remaining)?;
+        let (height, remaining) = u32::try_parse(remaining)?;
+        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (screen, remaining) = u32::try_parse(remaining)?;
         let result = GetScreenSizeReply { response_type, sequence, length, width, height, window, screen };
         Ok((result, remaining))
     }
@@ -357,17 +326,12 @@ pub struct IsActiveReply {
     pub state: u32,
 }
 impl IsActiveReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (state, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (state, remaining) = u32::try_parse(remaining)?;
         let result = IsActiveReply { response_type, sequence, length, state };
         Ok((result, remaining))
     }
@@ -406,20 +370,14 @@ pub struct QueryScreensReply {
     pub screen_info: Vec<ScreenInfo>,
 }
 impl QueryScreensReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (number, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (screen_info, new_remaining) = crate::x11_utils::parse_list::<ScreenInfo>(remaining, number as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (number, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let (screen_info, remaining) = crate::x11_utils::parse_list::<ScreenInfo>(remaining, number as usize)?;
         let result = QueryScreensReply { response_type, sequence, length, screen_info };
         Ok((result, remaining))
     }

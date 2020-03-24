@@ -529,14 +529,13 @@ class Module(object):
                     result_type += "Event"
                 self.out("pub fn as_%s(&self) -> %s {", self._lower_snake_name(('xcb', field.field_name)), result_type)
                 with Indent(self.out):
-                    self.out("fn do_the_parse(value: &[u8]) -> Result<%s, ParseError> {", result_type)
+                    self.out("fn do_the_parse(remaining: &[u8]) -> Result<%s, ParseError> {", result_type)
                     with Indent(self.out):
                         if union.is_eventstruct:
                             parts = ["event"]
-                            self.out("let (event, remaining) = %s::try_parse(value)?;",
+                            self.out("let (event, remaining) = %s::try_parse(remaining)?;",
                                      result_type)
                         else:
-                            self.out("let mut remaining = value;")
                             parts = self._emit_parsing_code([field])
                         self.out("let _ = remaining;")
                         assert len(parts) == 1
@@ -763,6 +762,11 @@ class Module(object):
         fields will be available as rust variables. The list of variable names
         is returned."""
         parts = []
+
+        # If we have any dynamic padding, we have to remember the original position
+        if any(field.type.is_pad and field.type.align != 1 for field in fields):
+            self.out("let value = remaining;")
+
         for field in fields:
             field_name = self._to_rust_variable(field.field_name)
             if not field.isfd:
@@ -795,13 +799,12 @@ class Module(object):
                     length = "misalignment"
                 else:
                     length = field.type.get_total_size()
-                self.out("remaining = &remaining.get(%s..).ok_or(ParseError::ParseError)?;", length)
+                self.out("let remaining = remaining.get(%s..).ok_or(ParseError::ParseError)?;", length)
             elif field.type.is_list and field.type.nmemb is not None:
                 for i in range(field.type.nmemb):
-                    self.out("let (%s_%s, new_remaining) = %s::try_parse(%s)?;",
+                    self.out("let (%s_%s, remaining) = %s::try_parse(%s)?;",
                              field_name, i, self._field_type(field),
                              ", ".join(try_parse_args))
-                    self.out("remaining = new_remaining;")
                 self.out("let %s = [", field_name)
                 for i in range(field.type.nmemb):
                     self.out.indent("%s_%s,", field_name, i)
@@ -810,10 +813,10 @@ class Module(object):
             elif field.type.is_list:
                 if field.type.expr.op != 'calculate_len' and len(try_parse_args) == 1:
                     assert try_parse_args == ["remaining"], try_parse_args
-                    self.out("let (%s, new_remaining) = crate::x11_utils::parse_list::<%s>(remaining, %s)?;",
+                    self.out("let (%s, remaining) = crate::x11_utils::parse_list::<%s>(remaining, %s)?;",
                              field_name, rust_type, self.expr_to_str(field.type.expr, 'usize'))
-                    self.out("remaining = new_remaining;")
                 else:
+                    self.out("let mut remaining = remaining;")
                     if field.type.expr.op != 'calculate_len':
                         self.out("let list_length = %s;", self.expr_to_str(field.type.expr, 'usize'))
                         self.out("let mut %s = Vec::with_capacity(list_length);", field_name)
@@ -831,9 +834,8 @@ class Module(object):
 
                 parts.append(field_name)
             else:
-                self.out("let (%s, new_remaining) = %s::try_parse(%s)?;",
+                self.out("let (%s, remaining) = %s::try_parse(%s)?;",
                          field_name, rust_type, ", ".join(try_parse_args))
-                self.out("remaining = new_remaining;")
                 if not hasattr(field, 'is_length_field_for'):
                     parts.append(self._to_rust_variable(field.field_name))
 
@@ -879,11 +881,11 @@ class Module(object):
         unresolved = [field for field in referenced if field not in wire_fields]
 
         if impl_try_parse and not unresolved:
-            method = "fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError>"
+            method = "fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError>"
             self.out("impl TryParse for %s {", name)
         else:
             if has_fds:
-                method = "fn try_parse_fd<'a>(value: &'a [u8], fds: &mut Vec<RawFdContainer>)"
+                method = "fn try_parse_fd<'a>(remaining: &'a [u8], fds: &mut Vec<RawFdContainer>)"
                 method += " -> Result<(Self, &'a [u8]), ParseError>"
             elif impl_try_parse:
                 # Turn missing values into extra arguments
@@ -905,17 +907,16 @@ class Module(object):
                     unresolved_args.append("%s: %s" % (field_name, field_type))
                     extra_args.append(field_name)
 
-                method = "pub fn try_parse(value: &[u8], %s) -> Result<(Self, &[u8]), ParseError>"
+                method = "pub fn try_parse(remaining: &[u8], %s) -> Result<(Self, &[u8]), ParseError>"
                 method = method % ", ".join(unresolved_args)
 
                 complex.extra_try_parse_args = extra_args
             else:
-                method = "pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError>"
+                method = "pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError>"
             self.out("impl %s {", name)
         with Indent(self.out):
             self.out("%s {", method)
             with Indent(self.out):
-                self.out("let mut remaining = value;")
                 parts = self._emit_parsing_code(complex.fields)
                 self.out("let result = %s { %s };", name, ", ".join(parts))
                 self.out("Ok((result, remaining))")
@@ -1062,7 +1063,7 @@ class Module(object):
             self.out("fn try_parse(%s) -> Result<(Self, &[u8]), ParseError> {",
                      ", ".join(args))
             with Indent(self.out):
-                self.out("let mut remaining = value;")
+                self.out("let mut outer_remaining = value;")
                 if switch_type.bitcases[0].type.is_bitcase:
                     all_parts = []
                     for case in switch_type.bitcases:
@@ -1081,21 +1082,23 @@ class Module(object):
                                  ename_to_rust(expr.lenfield_name))
                         with Indent(self.out):
                             if hasattr(case, "rust_name"):
-                                args = ["remaining"]
+                                args = ["outer_remaining"]
                                 if hasattr(case.type, "extra_try_parse_args"):
                                     args += case.type.extra_try_parse_args
                                 self.out("let (%s, new_remaining) = %s::try_parse(%s)?;",
                                          field_name, field_type, ", ".join(args))
-                                self.out("remaining = new_remaining;")
+                                self.out("outer_remaining = new_remaining;")
                             else:
+                                self.out("let remaining = outer_remaining;")
                                 self._emit_parsing_code(case.type.fields)
+                                self.out("outer_remaining = remaining;")
                             self.out("Some(%s)", field_name)
                         self.out("} else {")
                         self.out.indent("None")
                         self.out("};")
                         all_parts.append(field_name)
                     self.out("let result = %s { %s };", name, ", ".join(all_parts))
-                    self.out("Ok((result, remaining))")
+                    self.out("Ok((result, outer_remaining))")
                 else:
                     self.out("let mut parse_result = None;")
                     for case in switch_type.bitcases:
@@ -1113,15 +1116,17 @@ class Module(object):
                                  ename_to_rust(expr.lenfield_name))
                         with Indent(self.out):
                             if hasattr(case, "rust_name"):
-                                args = ["remaining"]
+                                args = ["outer_remaining"]
                                 if hasattr(case.type, "extra_try_parse_args"):
                                     args += case.type.extra_try_parse_args
                                 self.out("let (%s, new_remaining) = %s::try_parse(%s)?;",
                                          field_name, field_type, ", ".join(args))
-                                self.out("remaining = new_remaining;")
+                                self.out("outer_remaining = new_remaining;")
                                 variant_name = self._to_rust_identifier(case.type.name[-1])
                             else:
+                                self.out("let remaining = outer_remaining;")
                                 self._emit_parsing_code(case.type.fields)
+                                self.out("outer_remaining = remaining;")
                                 variant_name = self._to_rust_identifier(case.only_field.field_name)
                             msg = "The XML should prevent more than one 'if' from matching"
                             self.out("assert!(parse_result.is_none(), \"%s\");", msg)
@@ -1129,7 +1134,7 @@ class Module(object):
                         self.out("}")
                     self.out("match parse_result {")
                     self.out.indent("None => Err(ParseError::ParseError),")
-                    self.out.indent("Some(result) => Ok((result, remaining))")
+                    self.out.indent("Some(result) => Ok((result, outer_remaining))")
                     self.out("}")
             self.out("}")
 

@@ -57,12 +57,9 @@ pub struct Fp3232 {
     pub frac: u32,
 }
 impl TryParse for Fp3232 {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (integral, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (frac, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (integral, remaining) = i32::try_parse(remaining)?;
+        let (frac, remaining) = u32::try_parse(remaining)?;
         let result = Fp3232 { integral, frac };
         Ok((result, remaining))
     }
@@ -135,23 +132,15 @@ pub struct GetExtensionVersionReply {
     pub present: bool,
 }
 impl GetExtensionVersionReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (server_major, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (server_minor, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (present, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(19..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (server_major, remaining) = u16::try_parse(remaining)?;
+        let (server_minor, remaining) = u16::try_parse(remaining)?;
+        let (present, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(19..).ok_or(ParseError::ParseError)?;
         let result = GetExtensionVersionReply { response_type, xi_reply_type, sequence, length, server_major, server_minor, present };
         Ok((result, remaining))
     }
@@ -381,17 +370,12 @@ pub struct DeviceInfo {
     pub device_use: u8,
 }
 impl TryParse for DeviceInfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (device_type, new_remaining) = ATOM::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_class_info, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_use, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (device_type, remaining) = ATOM::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (num_class_info, remaining) = u8::try_parse(remaining)?;
+        let (device_use, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let result = DeviceInfo { device_type, device_id, num_class_info, device_use };
         Ok((result, remaining))
     }
@@ -439,19 +423,13 @@ pub struct KeyInfo {
     pub num_keys: u16,
 }
 impl TryParse for KeyInfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (min_keycode, new_remaining) = KeyCode::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max_keycode, new_remaining) = KeyCode::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_keys, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u8::try_parse(remaining)?;
+        let (min_keycode, remaining) = KeyCode::try_parse(remaining)?;
+        let (max_keycode, remaining) = KeyCode::try_parse(remaining)?;
+        let (num_keys, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let result = KeyInfo { class_id, len, min_keycode, max_keycode, num_keys };
         Ok((result, remaining))
     }
@@ -499,14 +477,10 @@ pub struct ButtonInfo {
     pub num_buttons: u16,
 }
 impl TryParse for ButtonInfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_buttons, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u8::try_parse(remaining)?;
+        let (num_buttons, remaining) = u16::try_parse(remaining)?;
         let result = ButtonInfo { class_id, len, num_buttons };
         Ok((result, remaining))
     }
@@ -545,14 +519,10 @@ pub struct AxisInfo {
     pub maximum: i32,
 }
 impl TryParse for AxisInfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (resolution, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (minimum, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (maximum, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (resolution, remaining) = u32::try_parse(remaining)?;
+        let (minimum, remaining) = i32::try_parse(remaining)?;
+        let (maximum, remaining) = i32::try_parse(remaining)?;
         let result = AxisInfo { resolution, minimum, maximum };
         Ok((result, remaining))
     }
@@ -601,20 +571,13 @@ pub struct ValuatorInfo {
     pub axes: Vec<AxisInfo>,
 }
 impl TryParse for ValuatorInfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (axes_len, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (motion_size, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (axes, new_remaining) = crate::x11_utils::parse_list::<AxisInfo>(remaining, axes_len as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u8::try_parse(remaining)?;
+        let (axes_len, remaining) = u8::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let (motion_size, remaining) = u32::try_parse(remaining)?;
+        let (axes, remaining) = crate::x11_utils::parse_list::<AxisInfo>(remaining, axes_len as usize)?;
         let result = ValuatorInfo { class_id, len, mode, motion_size, axes };
         Ok((result, remaining))
     }
@@ -651,15 +614,11 @@ pub struct InputInfoInfoKey {
     pub num_keys: u16,
 }
 impl TryParse for InputInfoInfoKey {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (min_keycode, new_remaining) = KeyCode::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max_keycode, new_remaining) = KeyCode::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_keys, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (min_keycode, remaining) = KeyCode::try_parse(remaining)?;
+        let (max_keycode, remaining) = KeyCode::try_parse(remaining)?;
+        let (num_keys, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let result = InputInfoInfoKey { min_keycode, max_keycode, num_keys };
         Ok((result, remaining))
     }
@@ -700,16 +659,11 @@ pub struct InputInfoInfoValuator {
     pub axes: Vec<AxisInfo>,
 }
 impl TryParse for InputInfoInfoValuator {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (axes_len, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (motion_size, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (axes, new_remaining) = crate::x11_utils::parse_list::<AxisInfo>(remaining, axes_len as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (axes_len, remaining) = u8::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let (motion_size, remaining) = u32::try_parse(remaining)?;
+        let (axes, remaining) = crate::x11_utils::parse_list::<AxisInfo>(remaining, axes_len as usize)?;
         let result = InputInfoInfoValuator { mode, motion_size, axes };
         Ok((result, remaining))
     }
@@ -744,29 +698,30 @@ pub enum InputInfoInfo {
 }
 impl InputInfoInfo {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
+        let mut outer_remaining = value;
         let mut parse_result = None;
         if class_id == Into::<u8>::into(InputClass::Key) {
-            let (key, new_remaining) = InputInfoInfoKey::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (key, new_remaining) = InputInfoInfoKey::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputInfoInfo::Key(key));
         }
         if class_id == Into::<u8>::into(InputClass::Button) {
-            let (num_buttons, new_remaining) = u16::try_parse(remaining)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let (num_buttons, remaining) = u16::try_parse(remaining)?;
+            outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputInfoInfo::NumButtons(num_buttons));
         }
         if class_id == Into::<u8>::into(InputClass::Valuator) {
-            let (valuator, new_remaining) = InputInfoInfoValuator::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (valuator, new_remaining) = InputInfoInfoValuator::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputInfoInfo::Valuator(valuator));
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, remaining))
+            Some(result) => Ok((result, outer_remaining))
         }
     }
     pub fn as_key(&self) -> Option<&InputInfoInfoKey> {
@@ -812,14 +767,10 @@ pub struct InputInfo {
     pub info: InputInfoInfo,
 }
 impl TryParse for InputInfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (info, new_remaining) = InputInfoInfo::try_parse(remaining, class_id)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u8::try_parse(remaining)?;
+        let (info, remaining) = InputInfoInfo::try_parse(remaining, class_id)?;
         let result = InputInfo { class_id, len, info };
         Ok((result, remaining))
     }
@@ -850,12 +801,9 @@ pub struct DeviceName {
     pub string: Vec<u8>,
 }
 impl TryParse for DeviceName {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (len, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (string, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, len as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (len, remaining) = u8::try_parse(remaining)?;
+        let (string, remaining) = crate::x11_utils::parse_list::<u8>(remaining, len as usize)?;
         let result = DeviceName { string };
         Ok((result, remaining))
     }
@@ -912,29 +860,21 @@ pub struct ListInputDevicesReply {
     pub names: Vec<Str>,
 }
 impl ListInputDevicesReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (devices_len, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(23..).ok_or(ParseError::ParseError)?;
-        let (devices, new_remaining) = crate::x11_utils::parse_list::<DeviceInfo>(remaining, devices_len as usize)?;
-        remaining = new_remaining;
-        let (infos, new_remaining) = crate::x11_utils::parse_list::<InputInfo>(remaining, devices.iter().map(|x| TryInto::<usize>::try_into(x.num_class_info).unwrap()).sum())?;
-        remaining = new_remaining;
-        let (names, new_remaining) = crate::x11_utils::parse_list::<Str>(remaining, devices_len as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let value = remaining;
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (devices_len, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let (devices, remaining) = crate::x11_utils::parse_list::<DeviceInfo>(remaining, devices_len as usize)?;
+        let (infos, remaining) = crate::x11_utils::parse_list::<InputInfo>(remaining, devices.iter().map(|x| TryInto::<usize>::try_into(x.num_class_info).unwrap()).sum())?;
+        let (names, remaining) = crate::x11_utils::parse_list::<Str>(remaining, devices_len as usize)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
         let result = ListInputDevicesReply { response_type, xi_reply_type, sequence, length, devices_len, devices, infos, names };
         Ok((result, remaining))
     }
@@ -954,12 +894,9 @@ pub struct InputClassInfo {
     pub event_type_base: EventTypeBase,
 }
 impl TryParse for InputClassInfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type_base, new_remaining) = EventTypeBase::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (event_type_base, remaining) = EventTypeBase::try_parse(remaining)?;
         let result = InputClassInfo { class_id, event_type_base };
         Ok((result, remaining))
     }
@@ -1020,25 +957,19 @@ pub struct OpenDeviceReply {
     pub class_info: Vec<InputClassInfo>,
 }
 impl OpenDeviceReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_classes, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(23..).ok_or(ParseError::ParseError)?;
-        let (class_info, new_remaining) = crate::x11_utils::parse_list::<InputClassInfo>(remaining, num_classes as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let value = remaining;
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_classes, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let (class_info, remaining) = crate::x11_utils::parse_list::<InputClassInfo>(remaining, num_classes as usize)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
         let result = OpenDeviceReply { response_type, xi_reply_type, sequence, length, class_info };
         Ok((result, remaining))
     }
@@ -1110,19 +1041,13 @@ pub struct SetDeviceModeReply {
     pub status: u8,
 }
 impl SetDeviceModeReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (status, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(23..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (status, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
         let result = SetDeviceModeReply { response_type, xi_reply_type, sequence, length, status };
         Ok((result, remaining))
     }
@@ -1203,25 +1128,16 @@ pub struct GetSelectedExtensionEventsReply {
     pub all_classes: Vec<EventClass>,
 }
 impl GetSelectedExtensionEventsReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_this_classes, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_all_classes, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (this_classes, new_remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_this_classes as usize)?;
-        remaining = new_remaining;
-        let (all_classes, new_remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_all_classes as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_this_classes, remaining) = u16::try_parse(remaining)?;
+        let (num_all_classes, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let (this_classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_this_classes as usize)?;
+        let (all_classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_all_classes as usize)?;
         let result = GetSelectedExtensionEventsReply { response_type, xi_reply_type, sequence, length, this_classes, all_classes };
         Ok((result, remaining))
     }
@@ -1365,21 +1281,14 @@ pub struct GetDeviceDontPropagateListReply {
     pub classes: Vec<EventClass>,
 }
 impl GetDeviceDontPropagateListReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_classes, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (classes, new_remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_classes, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes as usize)?;
         let result = GetDeviceDontPropagateListReply { response_type, xi_reply_type, sequence, length, classes };
         Ok((result, remaining))
     }
@@ -1397,12 +1306,9 @@ pub struct DeviceTimeCoord {
     pub axisvalues: Vec<i32>,
 }
 impl DeviceTimeCoord {
-    pub fn try_parse(value: &[u8], num_axes: u8) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (axisvalues, new_remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_axes as usize)?;
-        remaining = new_remaining;
+    pub fn try_parse(remaining: &[u8], num_axes: u8) -> Result<(Self, &[u8]), ParseError> {
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_axes as usize)?;
         let result = DeviceTimeCoord { time, axisvalues };
         Ok((result, remaining))
     }
@@ -1469,23 +1375,16 @@ pub struct GetDeviceMotionEventsReply {
     pub events: Vec<DeviceTimeCoord>,
 }
 impl GetDeviceMotionEventsReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_events, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_axes, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_mode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(18..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_events, remaining) = u32::try_parse(remaining)?;
+        let (num_axes, remaining) = u8::try_parse(remaining)?;
+        let (device_mode, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
+        let mut remaining = remaining;
         let list_length = num_events as usize;
         let mut events = Vec::with_capacity(list_length);
         for _ in 0..list_length {
@@ -1537,19 +1436,13 @@ pub struct ChangeKeyboardDeviceReply {
     pub status: u8,
 }
 impl ChangeKeyboardDeviceReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (status, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(23..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (status, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
         let result = ChangeKeyboardDeviceReply { response_type, xi_reply_type, sequence, length, status };
         Ok((result, remaining))
     }
@@ -1596,19 +1489,13 @@ pub struct ChangePointerDeviceReply {
     pub status: u8,
 }
 impl ChangePointerDeviceReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (status, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(23..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (status, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
         let result = ChangePointerDeviceReply { response_type, xi_reply_type, sequence, length, status };
         Ok((result, remaining))
     }
@@ -1678,19 +1565,13 @@ pub struct GrabDeviceReply {
     pub status: u8,
 }
 impl GrabDeviceReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (status, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(23..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (status, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
         let result = GrabDeviceReply { response_type, xi_reply_type, sequence, length, status };
         Ok((result, remaining))
     }
@@ -2110,23 +1991,15 @@ pub struct GetDeviceFocusReply {
     pub revert_to: u8,
 }
 impl GetDeviceFocusReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (focus, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (revert_to, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(15..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (focus, remaining) = WINDOW::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (revert_to, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(15..).ok_or(ParseError::ParseError)?;
         let result = GetDeviceFocusReply { response_type, xi_reply_type, sequence, length, focus, time, revert_to };
         Ok((result, remaining))
     }
@@ -2264,93 +2137,50 @@ pub struct KbdFeedbackState {
     pub auto_repeats: [u8; 32],
 }
 impl TryParse for KbdFeedbackState {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (feedback_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (pitch, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (duration, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (led_mask, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (led_values, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (global_auto_repeat, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (click, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (percent, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (auto_repeats_0, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_1, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_2, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_3, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_4, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_5, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_6, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_7, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_8, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_9, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_10, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_11, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_12, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_13, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_14, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_15, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_16, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_17, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_18, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_19, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_20, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_21, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_22, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_23, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_24, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_25, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_26, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_27, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_28, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_29, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_30, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_31, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (feedback_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (pitch, remaining) = u16::try_parse(remaining)?;
+        let (duration, remaining) = u16::try_parse(remaining)?;
+        let (led_mask, remaining) = u32::try_parse(remaining)?;
+        let (led_values, remaining) = u32::try_parse(remaining)?;
+        let (global_auto_repeat, remaining) = bool::try_parse(remaining)?;
+        let (click, remaining) = u8::try_parse(remaining)?;
+        let (percent, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (auto_repeats_0, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_1, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_2, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_3, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_4, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_5, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_6, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_7, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_8, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_9, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_10, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_11, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_12, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_13, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_14, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_15, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_16, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_17, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_18, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_19, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_20, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_21, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_22, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_23, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_24, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_25, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_26, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_27, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_28, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_29, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_30, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_31, remaining) = u8::try_parse(remaining)?;
         let auto_repeats = [
             auto_repeats_0,
             auto_repeats_1,
@@ -2490,21 +2320,14 @@ pub struct PtrFeedbackState {
     pub threshold: u16,
 }
 impl TryParse for PtrFeedbackState {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (feedback_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (accel_num, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (accel_denom, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (threshold, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (feedback_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (accel_num, remaining) = u16::try_parse(remaining)?;
+        let (accel_denom, remaining) = u16::try_parse(remaining)?;
+        let (threshold, remaining) = u16::try_parse(remaining)?;
         let result = PtrFeedbackState { class_id, feedback_id, len, accel_num, accel_denom, threshold };
         Ok((result, remaining))
     }
@@ -2561,20 +2384,13 @@ pub struct IntegerFeedbackState {
     pub max_value: i32,
 }
 impl TryParse for IntegerFeedbackState {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (feedback_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (resolution, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (min_value, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max_value, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (feedback_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (resolution, remaining) = u32::try_parse(remaining)?;
+        let (min_value, remaining) = i32::try_parse(remaining)?;
+        let (max_value, remaining) = i32::try_parse(remaining)?;
         let result = IntegerFeedbackState { class_id, feedback_id, len, resolution, min_value, max_value };
         Ok((result, remaining))
     }
@@ -2633,20 +2449,13 @@ pub struct StringFeedbackState {
     pub keysyms: Vec<KEYSYM>,
 }
 impl TryParse for StringFeedbackState {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (feedback_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max_symbols, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_keysyms, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keysyms, new_remaining) = crate::x11_utils::parse_list::<KEYSYM>(remaining, num_keysyms as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (feedback_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (max_symbols, remaining) = u16::try_parse(remaining)?;
+        let (num_keysyms, remaining) = u16::try_parse(remaining)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<KEYSYM>(remaining, num_keysyms as usize)?;
         let result = StringFeedbackState { class_id, feedback_id, len, max_symbols, keysyms };
         Ok((result, remaining))
     }
@@ -2686,21 +2495,14 @@ pub struct BellFeedbackState {
     pub duration: u16,
 }
 impl TryParse for BellFeedbackState {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (feedback_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (percent, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let (pitch, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (duration, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (feedback_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (percent, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (pitch, remaining) = u16::try_parse(remaining)?;
+        let (duration, remaining) = u16::try_parse(remaining)?;
         let result = BellFeedbackState { class_id, feedback_id, len, percent, pitch, duration };
         Ok((result, remaining))
     }
@@ -2756,18 +2558,12 @@ pub struct LedFeedbackState {
     pub led_values: u32,
 }
 impl TryParse for LedFeedbackState {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (feedback_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (led_mask, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (led_values, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (feedback_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (led_mask, remaining) = u32::try_parse(remaining)?;
+        let (led_values, remaining) = u32::try_parse(remaining)?;
         let result = LedFeedbackState { class_id, feedback_id, len, led_mask, led_values };
         Ok((result, remaining))
     }
@@ -2823,87 +2619,47 @@ pub struct FeedbackStateDataKeyboard {
     pub auto_repeats: [u8; 32],
 }
 impl TryParse for FeedbackStateDataKeyboard {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (pitch, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (duration, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (led_mask, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (led_values, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (global_auto_repeat, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (click, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (percent, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (auto_repeats_0, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_1, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_2, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_3, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_4, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_5, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_6, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_7, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_8, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_9, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_10, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_11, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_12, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_13, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_14, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_15, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_16, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_17, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_18, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_19, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_20, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_21, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_22, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_23, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_24, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_25, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_26, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_27, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_28, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_29, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_30, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeats_31, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (pitch, remaining) = u16::try_parse(remaining)?;
+        let (duration, remaining) = u16::try_parse(remaining)?;
+        let (led_mask, remaining) = u32::try_parse(remaining)?;
+        let (led_values, remaining) = u32::try_parse(remaining)?;
+        let (global_auto_repeat, remaining) = bool::try_parse(remaining)?;
+        let (click, remaining) = u8::try_parse(remaining)?;
+        let (percent, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (auto_repeats_0, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_1, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_2, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_3, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_4, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_5, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_6, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_7, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_8, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_9, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_10, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_11, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_12, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_13, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_14, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_15, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_16, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_17, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_18, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_19, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_20, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_21, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_22, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_23, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_24, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_25, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_26, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_27, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_28, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_29, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_30, remaining) = u8::try_parse(remaining)?;
+        let (auto_repeats_31, remaining) = u8::try_parse(remaining)?;
         let auto_repeats = [
             auto_repeats_0,
             auto_repeats_1,
@@ -3029,15 +2785,11 @@ pub struct FeedbackStateDataPointer {
     pub threshold: u16,
 }
 impl TryParse for FeedbackStateDataPointer {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (accel_num, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (accel_denom, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (threshold, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (accel_num, remaining) = u16::try_parse(remaining)?;
+        let (accel_denom, remaining) = u16::try_parse(remaining)?;
+        let (threshold, remaining) = u16::try_parse(remaining)?;
         let result = FeedbackStateDataPointer { accel_num, accel_denom, threshold };
         Ok((result, remaining))
     }
@@ -3079,14 +2831,10 @@ pub struct FeedbackStateDataString {
     pub keysyms: Vec<KEYSYM>,
 }
 impl TryParse for FeedbackStateDataString {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (max_symbols, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_keysyms, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keysyms, new_remaining) = crate::x11_utils::parse_list::<KEYSYM>(remaining, num_keysyms as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (max_symbols, remaining) = u16::try_parse(remaining)?;
+        let (num_keysyms, remaining) = u16::try_parse(remaining)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<KEYSYM>(remaining, num_keysyms as usize)?;
         let result = FeedbackStateDataString { max_symbols, keysyms };
         Ok((result, remaining))
     }
@@ -3119,14 +2867,10 @@ pub struct FeedbackStateDataInteger {
     pub max_value: i32,
 }
 impl TryParse for FeedbackStateDataInteger {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (resolution, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (min_value, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max_value, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (resolution, remaining) = u32::try_parse(remaining)?;
+        let (min_value, remaining) = i32::try_parse(remaining)?;
+        let (max_value, remaining) = i32::try_parse(remaining)?;
         let result = FeedbackStateDataInteger { resolution, min_value, max_value };
         Ok((result, remaining))
     }
@@ -3171,12 +2915,9 @@ pub struct FeedbackStateDataLed {
     pub led_values: u32,
 }
 impl TryParse for FeedbackStateDataLed {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (led_mask, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (led_values, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (led_mask, remaining) = u32::try_parse(remaining)?;
+        let (led_values, remaining) = u32::try_parse(remaining)?;
         let result = FeedbackStateDataLed { led_mask, led_values };
         Ok((result, remaining))
     }
@@ -3216,15 +2957,11 @@ pub struct FeedbackStateDataBell {
     pub duration: u16,
 }
 impl TryParse for FeedbackStateDataBell {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (percent, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let (pitch, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (duration, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (percent, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (pitch, remaining) = u16::try_parse(remaining)?;
+        let (duration, remaining) = u16::try_parse(remaining)?;
         let result = FeedbackStateDataBell { percent, pitch, duration };
         Ok((result, remaining))
     }
@@ -3271,47 +3008,47 @@ pub enum FeedbackStateData {
 }
 impl FeedbackStateData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
+        let mut outer_remaining = value;
         let mut parse_result = None;
         if class_id == Into::<u8>::into(FeedbackClass::Keyboard) {
-            let (keyboard, new_remaining) = FeedbackStateDataKeyboard::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (keyboard, new_remaining) = FeedbackStateDataKeyboard::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Keyboard(keyboard));
         }
         if class_id == Into::<u8>::into(FeedbackClass::Pointer) {
-            let (pointer, new_remaining) = FeedbackStateDataPointer::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (pointer, new_remaining) = FeedbackStateDataPointer::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Pointer(pointer));
         }
         if class_id == Into::<u8>::into(FeedbackClass::String) {
-            let (string, new_remaining) = FeedbackStateDataString::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (string, new_remaining) = FeedbackStateDataString::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::String(string));
         }
         if class_id == Into::<u8>::into(FeedbackClass::Integer) {
-            let (integer, new_remaining) = FeedbackStateDataInteger::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (integer, new_remaining) = FeedbackStateDataInteger::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Integer(integer));
         }
         if class_id == Into::<u8>::into(FeedbackClass::Led) {
-            let (led, new_remaining) = FeedbackStateDataLed::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (led, new_remaining) = FeedbackStateDataLed::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Led(led));
         }
         if class_id == Into::<u8>::into(FeedbackClass::Bell) {
-            let (bell, new_remaining) = FeedbackStateDataBell::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (bell, new_remaining) = FeedbackStateDataBell::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Bell(bell));
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, remaining))
+            Some(result) => Ok((result, outer_remaining))
         }
     }
     pub fn as_keyboard(&self) -> Option<&FeedbackStateDataKeyboard> {
@@ -3382,16 +3119,11 @@ pub struct FeedbackState {
     pub data: FeedbackStateData,
 }
 impl TryParse for FeedbackState {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (feedback_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (data, new_remaining) = FeedbackStateData::try_parse(remaining, class_id)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (feedback_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (data, remaining) = FeedbackStateData::try_parse(remaining, class_id)?;
         let result = FeedbackState { class_id, feedback_id, len, data };
         Ok((result, remaining))
     }
@@ -3451,21 +3183,14 @@ pub struct GetFeedbackControlReply {
     pub feedbacks: Vec<FeedbackState>,
 }
 impl GetFeedbackControlReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_feedbacks, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (feedbacks, new_remaining) = crate::x11_utils::parse_list::<FeedbackState>(remaining, num_feedbacks as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_feedbacks, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
+        let (feedbacks, remaining) = crate::x11_utils::parse_list::<FeedbackState>(remaining, num_feedbacks as usize)?;
         let result = GetFeedbackControlReply { response_type, xi_reply_type, sequence, length, feedbacks };
         Ok((result, remaining))
     }
@@ -3492,30 +3217,18 @@ pub struct KbdFeedbackCtl {
     pub led_values: u32,
 }
 impl TryParse for KbdFeedbackCtl {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (feedback_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (key, new_remaining) = KeyCode::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeat_mode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (key_click_percent, new_remaining) = i8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bell_percent, new_remaining) = i8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bell_pitch, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bell_duration, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (led_mask, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (led_values, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (feedback_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (key, remaining) = KeyCode::try_parse(remaining)?;
+        let (auto_repeat_mode, remaining) = u8::try_parse(remaining)?;
+        let (key_click_percent, remaining) = i8::try_parse(remaining)?;
+        let (bell_percent, remaining) = i8::try_parse(remaining)?;
+        let (bell_pitch, remaining) = i16::try_parse(remaining)?;
+        let (bell_duration, remaining) = i16::try_parse(remaining)?;
+        let (led_mask, remaining) = u32::try_parse(remaining)?;
+        let (led_values, remaining) = u32::try_parse(remaining)?;
         let result = KbdFeedbackCtl { class_id, feedback_id, len, key, auto_repeat_mode, key_click_percent, bell_percent, bell_pitch, bell_duration, led_mask, led_values };
         Ok((result, remaining))
     }
@@ -3589,21 +3302,14 @@ pub struct PtrFeedbackCtl {
     pub threshold: i16,
 }
 impl TryParse for PtrFeedbackCtl {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (feedback_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (num, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (denom, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (threshold, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (feedback_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (num, remaining) = i16::try_parse(remaining)?;
+        let (denom, remaining) = i16::try_parse(remaining)?;
+        let (threshold, remaining) = i16::try_parse(remaining)?;
         let result = PtrFeedbackCtl { class_id, feedback_id, len, num, denom, threshold };
         Ok((result, remaining))
     }
@@ -3658,16 +3364,11 @@ pub struct IntegerFeedbackCtl {
     pub int_to_display: i32,
 }
 impl TryParse for IntegerFeedbackCtl {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (feedback_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (int_to_display, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (feedback_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (int_to_display, remaining) = i32::try_parse(remaining)?;
         let result = IntegerFeedbackCtl { class_id, feedback_id, len, int_to_display };
         Ok((result, remaining))
     }
@@ -3713,19 +3414,13 @@ pub struct StringFeedbackCtl {
     pub keysyms: Vec<KEYSYM>,
 }
 impl TryParse for StringFeedbackCtl {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (feedback_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (num_keysyms, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keysyms, new_remaining) = crate::x11_utils::parse_list::<KEYSYM>(remaining, num_keysyms as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (feedback_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (num_keysyms, remaining) = u16::try_parse(remaining)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<KEYSYM>(remaining, num_keysyms as usize)?;
         let result = StringFeedbackCtl { class_id, feedback_id, len, keysyms };
         Ok((result, remaining))
     }
@@ -3765,21 +3460,14 @@ pub struct BellFeedbackCtl {
     pub duration: i16,
 }
 impl TryParse for BellFeedbackCtl {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (feedback_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (percent, new_remaining) = i8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let (pitch, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (duration, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (feedback_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (percent, remaining) = i8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (pitch, remaining) = i16::try_parse(remaining)?;
+        let (duration, remaining) = i16::try_parse(remaining)?;
         let result = BellFeedbackCtl { class_id, feedback_id, len, percent, pitch, duration };
         Ok((result, remaining))
     }
@@ -3835,18 +3523,12 @@ pub struct LedFeedbackCtl {
     pub led_values: u32,
 }
 impl TryParse for LedFeedbackCtl {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (feedback_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (led_mask, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (led_values, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (feedback_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (led_mask, remaining) = u32::try_parse(remaining)?;
+        let (led_values, remaining) = u32::try_parse(remaining)?;
         let result = LedFeedbackCtl { class_id, feedback_id, len, led_mask, led_values };
         Ok((result, remaining))
     }
@@ -3902,24 +3584,15 @@ pub struct FeedbackCtlDataKeyboard {
     pub led_values: u32,
 }
 impl TryParse for FeedbackCtlDataKeyboard {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (key, new_remaining) = KeyCode::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (auto_repeat_mode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (key_click_percent, new_remaining) = i8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bell_percent, new_remaining) = i8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bell_pitch, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bell_duration, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (led_mask, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (led_values, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (key, remaining) = KeyCode::try_parse(remaining)?;
+        let (auto_repeat_mode, remaining) = u8::try_parse(remaining)?;
+        let (key_click_percent, remaining) = i8::try_parse(remaining)?;
+        let (bell_percent, remaining) = i8::try_parse(remaining)?;
+        let (bell_pitch, remaining) = i16::try_parse(remaining)?;
+        let (bell_duration, remaining) = i16::try_parse(remaining)?;
+        let (led_mask, remaining) = u32::try_parse(remaining)?;
+        let (led_values, remaining) = u32::try_parse(remaining)?;
         let result = FeedbackCtlDataKeyboard { key, auto_repeat_mode, key_click_percent, bell_percent, bell_pitch, bell_duration, led_mask, led_values };
         Ok((result, remaining))
     }
@@ -3979,15 +3652,11 @@ pub struct FeedbackCtlDataPointer {
     pub threshold: i16,
 }
 impl TryParse for FeedbackCtlDataPointer {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (num, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (denom, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (threshold, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (num, remaining) = i16::try_parse(remaining)?;
+        let (denom, remaining) = i16::try_parse(remaining)?;
+        let (threshold, remaining) = i16::try_parse(remaining)?;
         let result = FeedbackCtlDataPointer { num, denom, threshold };
         Ok((result, remaining))
     }
@@ -4028,13 +3697,10 @@ pub struct FeedbackCtlDataString {
     pub keysyms: Vec<KEYSYM>,
 }
 impl TryParse for FeedbackCtlDataString {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (num_keysyms, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keysyms, new_remaining) = crate::x11_utils::parse_list::<KEYSYM>(remaining, num_keysyms as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (num_keysyms, remaining) = u16::try_parse(remaining)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<KEYSYM>(remaining, num_keysyms as usize)?;
         let result = FeedbackCtlDataString { keysyms };
         Ok((result, remaining))
     }
@@ -4066,12 +3732,9 @@ pub struct FeedbackCtlDataLed {
     pub led_values: u32,
 }
 impl TryParse for FeedbackCtlDataLed {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (led_mask, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (led_values, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (led_mask, remaining) = u32::try_parse(remaining)?;
+        let (led_values, remaining) = u32::try_parse(remaining)?;
         let result = FeedbackCtlDataLed { led_mask, led_values };
         Ok((result, remaining))
     }
@@ -4111,15 +3774,11 @@ pub struct FeedbackCtlDataBell {
     pub duration: i16,
 }
 impl TryParse for FeedbackCtlDataBell {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (percent, new_remaining) = i8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let (pitch, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (duration, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (percent, remaining) = i8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let (pitch, remaining) = i16::try_parse(remaining)?;
+        let (duration, remaining) = i16::try_parse(remaining)?;
         let result = FeedbackCtlDataBell { percent, pitch, duration };
         Ok((result, remaining))
     }
@@ -4166,47 +3825,48 @@ pub enum FeedbackCtlData {
 }
 impl FeedbackCtlData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
+        let mut outer_remaining = value;
         let mut parse_result = None;
         if class_id == Into::<u8>::into(FeedbackClass::Keyboard) {
-            let (keyboard, new_remaining) = FeedbackCtlDataKeyboard::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (keyboard, new_remaining) = FeedbackCtlDataKeyboard::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Keyboard(keyboard));
         }
         if class_id == Into::<u8>::into(FeedbackClass::Pointer) {
-            let (pointer, new_remaining) = FeedbackCtlDataPointer::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (pointer, new_remaining) = FeedbackCtlDataPointer::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Pointer(pointer));
         }
         if class_id == Into::<u8>::into(FeedbackClass::String) {
-            let (string, new_remaining) = FeedbackCtlDataString::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (string, new_remaining) = FeedbackCtlDataString::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::String(string));
         }
         if class_id == Into::<u8>::into(FeedbackClass::Integer) {
-            let (int_to_display, new_remaining) = i32::try_parse(remaining)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let (int_to_display, remaining) = i32::try_parse(remaining)?;
+            outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::IntToDisplay(int_to_display));
         }
         if class_id == Into::<u8>::into(FeedbackClass::Led) {
-            let (led, new_remaining) = FeedbackCtlDataLed::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (led, new_remaining) = FeedbackCtlDataLed::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Led(led));
         }
         if class_id == Into::<u8>::into(FeedbackClass::Bell) {
-            let (bell, new_remaining) = FeedbackCtlDataBell::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (bell, new_remaining) = FeedbackCtlDataBell::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Bell(bell));
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, remaining))
+            Some(result) => Ok((result, outer_remaining))
         }
     }
     pub fn as_keyboard(&self) -> Option<&FeedbackCtlDataKeyboard> {
@@ -4277,16 +3937,11 @@ pub struct FeedbackCtl {
     pub data: FeedbackCtlData,
 }
 impl TryParse for FeedbackCtl {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (feedback_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (data, new_remaining) = FeedbackCtlData::try_parse(remaining, class_id)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (feedback_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (data, remaining) = FeedbackCtlData::try_parse(remaining, class_id)?;
         let result = FeedbackCtl { class_id, feedback_id, len, data };
         Ok((result, remaining))
     }
@@ -4445,21 +4100,14 @@ pub struct GetDeviceKeyMappingReply {
     pub keysyms: Vec<KEYSYM>,
 }
 impl GetDeviceKeyMappingReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keysyms_per_keycode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(23..).ok_or(ParseError::ParseError)?;
-        let (keysyms, new_remaining) = crate::x11_utils::parse_list::<KEYSYM>(remaining, length as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (keysyms_per_keycode, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<KEYSYM>(remaining, length as usize)?;
         let result = GetDeviceKeyMappingReply { response_type, xi_reply_type, sequence, keysyms_per_keycode, keysyms };
         Ok((result, remaining))
     }
@@ -4537,21 +4185,14 @@ pub struct GetDeviceModifierMappingReply {
     pub keymaps: Vec<u8>,
 }
 impl GetDeviceModifierMappingReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keycodes_per_modifier, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(23..).ok_or(ParseError::ParseError)?;
-        let (keymaps, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, (keycodes_per_modifier as usize) * (8))?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (keycodes_per_modifier, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let (keymaps, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (keycodes_per_modifier as usize) * (8))?;
         let result = GetDeviceModifierMappingReply { response_type, xi_reply_type, sequence, length, keymaps };
         Ok((result, remaining))
     }
@@ -4602,19 +4243,13 @@ pub struct SetDeviceModifierMappingReply {
     pub status: u8,
 }
 impl SetDeviceModifierMappingReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (status, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(23..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (status, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
         let result = SetDeviceModifierMappingReply { response_type, xi_reply_type, sequence, length, status };
         Ok((result, remaining))
     }
@@ -4659,25 +4294,19 @@ pub struct GetDeviceButtonMappingReply {
     pub map: Vec<u8>,
 }
 impl GetDeviceButtonMappingReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (map_size, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(23..).ok_or(ParseError::ParseError)?;
-        let (map, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, map_size as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let value = remaining;
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (map_size, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let (map, remaining) = crate::x11_utils::parse_list::<u8>(remaining, map_size as usize)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
         let result = GetDeviceButtonMappingReply { response_type, xi_reply_type, sequence, length, map };
         Ok((result, remaining))
     }
@@ -4727,19 +4356,13 @@ pub struct SetDeviceButtonMappingReply {
     pub status: u8,
 }
 impl SetDeviceButtonMappingReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (status, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(23..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (status, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
         let result = SetDeviceButtonMappingReply { response_type, xi_reply_type, sequence, length, status };
         Ok((result, remaining))
     }
@@ -4759,79 +4382,43 @@ pub struct KeyState {
     pub keys: [u8; 32],
 }
 impl TryParse for KeyState {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_keys, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (keys_0, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_1, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_2, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_3, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_4, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_5, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_6, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_7, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_8, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_9, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_10, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_11, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_12, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_13, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_14, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_15, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_16, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_17, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_18, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_19, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_20, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_21, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_22, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_23, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_24, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_25, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_26, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_27, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_28, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_29, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_30, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_31, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u8::try_parse(remaining)?;
+        let (num_keys, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (keys_0, remaining) = u8::try_parse(remaining)?;
+        let (keys_1, remaining) = u8::try_parse(remaining)?;
+        let (keys_2, remaining) = u8::try_parse(remaining)?;
+        let (keys_3, remaining) = u8::try_parse(remaining)?;
+        let (keys_4, remaining) = u8::try_parse(remaining)?;
+        let (keys_5, remaining) = u8::try_parse(remaining)?;
+        let (keys_6, remaining) = u8::try_parse(remaining)?;
+        let (keys_7, remaining) = u8::try_parse(remaining)?;
+        let (keys_8, remaining) = u8::try_parse(remaining)?;
+        let (keys_9, remaining) = u8::try_parse(remaining)?;
+        let (keys_10, remaining) = u8::try_parse(remaining)?;
+        let (keys_11, remaining) = u8::try_parse(remaining)?;
+        let (keys_12, remaining) = u8::try_parse(remaining)?;
+        let (keys_13, remaining) = u8::try_parse(remaining)?;
+        let (keys_14, remaining) = u8::try_parse(remaining)?;
+        let (keys_15, remaining) = u8::try_parse(remaining)?;
+        let (keys_16, remaining) = u8::try_parse(remaining)?;
+        let (keys_17, remaining) = u8::try_parse(remaining)?;
+        let (keys_18, remaining) = u8::try_parse(remaining)?;
+        let (keys_19, remaining) = u8::try_parse(remaining)?;
+        let (keys_20, remaining) = u8::try_parse(remaining)?;
+        let (keys_21, remaining) = u8::try_parse(remaining)?;
+        let (keys_22, remaining) = u8::try_parse(remaining)?;
+        let (keys_23, remaining) = u8::try_parse(remaining)?;
+        let (keys_24, remaining) = u8::try_parse(remaining)?;
+        let (keys_25, remaining) = u8::try_parse(remaining)?;
+        let (keys_26, remaining) = u8::try_parse(remaining)?;
+        let (keys_27, remaining) = u8::try_parse(remaining)?;
+        let (keys_28, remaining) = u8::try_parse(remaining)?;
+        let (keys_29, remaining) = u8::try_parse(remaining)?;
+        let (keys_30, remaining) = u8::try_parse(remaining)?;
+        let (keys_31, remaining) = u8::try_parse(remaining)?;
         let keys = [
             keys_0,
             keys_1,
@@ -4939,79 +4526,43 @@ pub struct ButtonState {
     pub buttons: [u8; 32],
 }
 impl TryParse for ButtonState {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_buttons, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (buttons_0, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_1, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_2, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_3, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_4, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_5, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_6, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_7, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_8, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_9, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_10, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_11, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_12, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_13, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_14, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_15, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_16, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_17, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_18, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_19, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_20, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_21, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_22, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_23, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_24, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_25, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_26, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_27, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_28, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_29, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_30, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_31, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u8::try_parse(remaining)?;
+        let (num_buttons, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (buttons_0, remaining) = u8::try_parse(remaining)?;
+        let (buttons_1, remaining) = u8::try_parse(remaining)?;
+        let (buttons_2, remaining) = u8::try_parse(remaining)?;
+        let (buttons_3, remaining) = u8::try_parse(remaining)?;
+        let (buttons_4, remaining) = u8::try_parse(remaining)?;
+        let (buttons_5, remaining) = u8::try_parse(remaining)?;
+        let (buttons_6, remaining) = u8::try_parse(remaining)?;
+        let (buttons_7, remaining) = u8::try_parse(remaining)?;
+        let (buttons_8, remaining) = u8::try_parse(remaining)?;
+        let (buttons_9, remaining) = u8::try_parse(remaining)?;
+        let (buttons_10, remaining) = u8::try_parse(remaining)?;
+        let (buttons_11, remaining) = u8::try_parse(remaining)?;
+        let (buttons_12, remaining) = u8::try_parse(remaining)?;
+        let (buttons_13, remaining) = u8::try_parse(remaining)?;
+        let (buttons_14, remaining) = u8::try_parse(remaining)?;
+        let (buttons_15, remaining) = u8::try_parse(remaining)?;
+        let (buttons_16, remaining) = u8::try_parse(remaining)?;
+        let (buttons_17, remaining) = u8::try_parse(remaining)?;
+        let (buttons_18, remaining) = u8::try_parse(remaining)?;
+        let (buttons_19, remaining) = u8::try_parse(remaining)?;
+        let (buttons_20, remaining) = u8::try_parse(remaining)?;
+        let (buttons_21, remaining) = u8::try_parse(remaining)?;
+        let (buttons_22, remaining) = u8::try_parse(remaining)?;
+        let (buttons_23, remaining) = u8::try_parse(remaining)?;
+        let (buttons_24, remaining) = u8::try_parse(remaining)?;
+        let (buttons_25, remaining) = u8::try_parse(remaining)?;
+        let (buttons_26, remaining) = u8::try_parse(remaining)?;
+        let (buttons_27, remaining) = u8::try_parse(remaining)?;
+        let (buttons_28, remaining) = u8::try_parse(remaining)?;
+        let (buttons_29, remaining) = u8::try_parse(remaining)?;
+        let (buttons_30, remaining) = u8::try_parse(remaining)?;
+        let (buttons_31, remaining) = u8::try_parse(remaining)?;
         let buttons = [
             buttons_0,
             buttons_1,
@@ -5182,18 +4733,12 @@ pub struct ValuatorState {
     pub valuators: Vec<i32>,
 }
 impl TryParse for ValuatorState {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_valuators, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators, new_remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_valuators as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u8::try_parse(remaining)?;
+        let (num_valuators, remaining) = u8::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let (valuators, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_valuators as usize)?;
         let result = ValuatorState { class_id, len, mode, valuators };
         Ok((result, remaining))
     }
@@ -5228,75 +4773,41 @@ pub struct InputStateDataKey {
     pub keys: [u8; 32],
 }
 impl TryParse for InputStateDataKey {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (num_keys, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (keys_0, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_1, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_2, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_3, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_4, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_5, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_6, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_7, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_8, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_9, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_10, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_11, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_12, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_13, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_14, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_15, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_16, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_17, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_18, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_19, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_20, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_21, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_22, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_23, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_24, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_25, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_26, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_27, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_28, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_29, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_30, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_31, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (num_keys, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (keys_0, remaining) = u8::try_parse(remaining)?;
+        let (keys_1, remaining) = u8::try_parse(remaining)?;
+        let (keys_2, remaining) = u8::try_parse(remaining)?;
+        let (keys_3, remaining) = u8::try_parse(remaining)?;
+        let (keys_4, remaining) = u8::try_parse(remaining)?;
+        let (keys_5, remaining) = u8::try_parse(remaining)?;
+        let (keys_6, remaining) = u8::try_parse(remaining)?;
+        let (keys_7, remaining) = u8::try_parse(remaining)?;
+        let (keys_8, remaining) = u8::try_parse(remaining)?;
+        let (keys_9, remaining) = u8::try_parse(remaining)?;
+        let (keys_10, remaining) = u8::try_parse(remaining)?;
+        let (keys_11, remaining) = u8::try_parse(remaining)?;
+        let (keys_12, remaining) = u8::try_parse(remaining)?;
+        let (keys_13, remaining) = u8::try_parse(remaining)?;
+        let (keys_14, remaining) = u8::try_parse(remaining)?;
+        let (keys_15, remaining) = u8::try_parse(remaining)?;
+        let (keys_16, remaining) = u8::try_parse(remaining)?;
+        let (keys_17, remaining) = u8::try_parse(remaining)?;
+        let (keys_18, remaining) = u8::try_parse(remaining)?;
+        let (keys_19, remaining) = u8::try_parse(remaining)?;
+        let (keys_20, remaining) = u8::try_parse(remaining)?;
+        let (keys_21, remaining) = u8::try_parse(remaining)?;
+        let (keys_22, remaining) = u8::try_parse(remaining)?;
+        let (keys_23, remaining) = u8::try_parse(remaining)?;
+        let (keys_24, remaining) = u8::try_parse(remaining)?;
+        let (keys_25, remaining) = u8::try_parse(remaining)?;
+        let (keys_26, remaining) = u8::try_parse(remaining)?;
+        let (keys_27, remaining) = u8::try_parse(remaining)?;
+        let (keys_28, remaining) = u8::try_parse(remaining)?;
+        let (keys_29, remaining) = u8::try_parse(remaining)?;
+        let (keys_30, remaining) = u8::try_parse(remaining)?;
+        let (keys_31, remaining) = u8::try_parse(remaining)?;
         let keys = [
             keys_0,
             keys_1,
@@ -5395,75 +4906,41 @@ pub struct InputStateDataButton {
     pub buttons: [u8; 32],
 }
 impl TryParse for InputStateDataButton {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (num_buttons, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (buttons_0, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_1, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_2, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_3, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_4, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_5, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_6, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_7, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_8, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_9, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_10, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_11, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_12, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_13, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_14, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_15, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_16, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_17, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_18, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_19, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_20, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_21, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_22, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_23, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_24, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_25, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_26, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_27, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_28, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_29, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_30, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_31, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (num_buttons, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (buttons_0, remaining) = u8::try_parse(remaining)?;
+        let (buttons_1, remaining) = u8::try_parse(remaining)?;
+        let (buttons_2, remaining) = u8::try_parse(remaining)?;
+        let (buttons_3, remaining) = u8::try_parse(remaining)?;
+        let (buttons_4, remaining) = u8::try_parse(remaining)?;
+        let (buttons_5, remaining) = u8::try_parse(remaining)?;
+        let (buttons_6, remaining) = u8::try_parse(remaining)?;
+        let (buttons_7, remaining) = u8::try_parse(remaining)?;
+        let (buttons_8, remaining) = u8::try_parse(remaining)?;
+        let (buttons_9, remaining) = u8::try_parse(remaining)?;
+        let (buttons_10, remaining) = u8::try_parse(remaining)?;
+        let (buttons_11, remaining) = u8::try_parse(remaining)?;
+        let (buttons_12, remaining) = u8::try_parse(remaining)?;
+        let (buttons_13, remaining) = u8::try_parse(remaining)?;
+        let (buttons_14, remaining) = u8::try_parse(remaining)?;
+        let (buttons_15, remaining) = u8::try_parse(remaining)?;
+        let (buttons_16, remaining) = u8::try_parse(remaining)?;
+        let (buttons_17, remaining) = u8::try_parse(remaining)?;
+        let (buttons_18, remaining) = u8::try_parse(remaining)?;
+        let (buttons_19, remaining) = u8::try_parse(remaining)?;
+        let (buttons_20, remaining) = u8::try_parse(remaining)?;
+        let (buttons_21, remaining) = u8::try_parse(remaining)?;
+        let (buttons_22, remaining) = u8::try_parse(remaining)?;
+        let (buttons_23, remaining) = u8::try_parse(remaining)?;
+        let (buttons_24, remaining) = u8::try_parse(remaining)?;
+        let (buttons_25, remaining) = u8::try_parse(remaining)?;
+        let (buttons_26, remaining) = u8::try_parse(remaining)?;
+        let (buttons_27, remaining) = u8::try_parse(remaining)?;
+        let (buttons_28, remaining) = u8::try_parse(remaining)?;
+        let (buttons_29, remaining) = u8::try_parse(remaining)?;
+        let (buttons_30, remaining) = u8::try_parse(remaining)?;
+        let (buttons_31, remaining) = u8::try_parse(remaining)?;
         let buttons = [
             buttons_0,
             buttons_1,
@@ -5562,14 +5039,10 @@ pub struct InputStateDataValuator {
     pub valuators: Vec<i32>,
 }
 impl TryParse for InputStateDataValuator {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (num_valuators, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators, new_remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_valuators as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (num_valuators, remaining) = u8::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let (valuators, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_valuators as usize)?;
         let result = InputStateDataValuator { mode, valuators };
         Ok((result, remaining))
     }
@@ -5603,29 +5076,29 @@ pub enum InputStateData {
 }
 impl InputStateData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
+        let mut outer_remaining = value;
         let mut parse_result = None;
         if class_id == Into::<u8>::into(InputClass::Key) {
-            let (key, new_remaining) = InputStateDataKey::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (key, new_remaining) = InputStateDataKey::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputStateData::Key(key));
         }
         if class_id == Into::<u8>::into(InputClass::Button) {
-            let (button, new_remaining) = InputStateDataButton::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (button, new_remaining) = InputStateDataButton::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputStateData::Button(button));
         }
         if class_id == Into::<u8>::into(InputClass::Valuator) {
-            let (valuator, new_remaining) = InputStateDataValuator::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (valuator, new_remaining) = InputStateDataValuator::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputStateData::Valuator(valuator));
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, remaining))
+            Some(result) => Ok((result, outer_remaining))
         }
     }
     pub fn as_key(&self) -> Option<&InputStateDataKey> {
@@ -5671,14 +5144,10 @@ pub struct InputState {
     pub data: InputStateData,
 }
 impl TryParse for InputState {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (class_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (data, new_remaining) = InputStateData::try_parse(remaining, class_id)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (class_id, remaining) = u8::try_parse(remaining)?;
+        let (len, remaining) = u8::try_parse(remaining)?;
+        let (data, remaining) = InputStateData::try_parse(remaining, class_id)?;
         let result = InputState { class_id, len, data };
         Ok((result, remaining))
     }
@@ -5737,21 +5206,14 @@ pub struct QueryDeviceStateReply {
     pub classes: Vec<InputState>,
 }
 impl QueryDeviceStateReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_classes, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(23..).ok_or(ParseError::ParseError)?;
-        let (classes, new_remaining) = crate::x11_utils::parse_list::<InputState>(remaining, num_classes as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_classes, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<InputState>(remaining, num_classes as usize)?;
         let result = QueryDeviceStateReply { response_type, xi_reply_type, sequence, length, classes };
         Ok((result, remaining))
     }
@@ -5831,19 +5293,13 @@ pub struct SetDeviceValuatorsReply {
     pub status: u8,
 }
 impl SetDeviceValuatorsReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (status, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(23..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (status, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
         let result = SetDeviceValuatorsReply { response_type, xi_reply_type, sequence, length, status };
         Ok((result, remaining))
     }
@@ -5936,20 +5392,13 @@ pub struct DeviceResolutionState {
     pub resolution_max: Vec<u32>,
 }
 impl TryParse for DeviceResolutionState {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (control_id, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_valuators, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (resolution_values, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
-        remaining = new_remaining;
-        let (resolution_min, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
-        remaining = new_remaining;
-        let (resolution_max, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (control_id, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (num_valuators, remaining) = u32::try_parse(remaining)?;
+        let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
+        let (resolution_min, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
+        let (resolution_max, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
         let result = DeviceResolutionState { control_id, len, num_valuators, resolution_values, resolution_min, resolution_max };
         Ok((result, remaining))
     }
@@ -5992,28 +5441,17 @@ pub struct DeviceAbsCalibState {
     pub button_threshold: u32,
 }
 impl TryParse for DeviceAbsCalibState {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (control_id, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (min_x, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max_x, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (min_y, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max_y, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flip_x, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flip_y, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (rotation, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (button_threshold, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (control_id, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (min_x, remaining) = i32::try_parse(remaining)?;
+        let (max_x, remaining) = i32::try_parse(remaining)?;
+        let (min_y, remaining) = i32::try_parse(remaining)?;
+        let (max_y, remaining) = i32::try_parse(remaining)?;
+        let (flip_x, remaining) = u32::try_parse(remaining)?;
+        let (flip_y, remaining) = u32::try_parse(remaining)?;
+        let (rotation, remaining) = u32::try_parse(remaining)?;
+        let (button_threshold, remaining) = u32::try_parse(remaining)?;
         let result = DeviceAbsCalibState { control_id, len, min_x, max_x, min_y, max_y, flip_x, flip_y, rotation, button_threshold };
         Ok((result, remaining))
     }
@@ -6103,24 +5541,15 @@ pub struct DeviceAbsAreaState {
     pub following: u32,
 }
 impl TryParse for DeviceAbsAreaState {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (control_id, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (offset_x, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (offset_y, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (width, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (height, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (screen, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (following, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (control_id, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (offset_x, remaining) = u32::try_parse(remaining)?;
+        let (offset_y, remaining) = u32::try_parse(remaining)?;
+        let (width, remaining) = u32::try_parse(remaining)?;
+        let (height, remaining) = u32::try_parse(remaining)?;
+        let (screen, remaining) = u32::try_parse(remaining)?;
+        let (following, remaining) = u32::try_parse(remaining)?;
         let result = DeviceAbsAreaState { control_id, len, offset_x, offset_y, width, height, screen, following };
         Ok((result, remaining))
     }
@@ -6194,17 +5623,12 @@ pub struct DeviceCoreState {
     pub iscore: u8,
 }
 impl TryParse for DeviceCoreState {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (control_id, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (status, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (iscore, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (control_id, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (status, remaining) = u8::try_parse(remaining)?;
+        let (iscore, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let result = DeviceCoreState { control_id, len, status, iscore };
         Ok((result, remaining))
     }
@@ -6250,15 +5674,11 @@ pub struct DeviceEnableState {
     pub enable: u8,
 }
 impl TryParse for DeviceEnableState {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (control_id, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (enable, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (control_id, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (enable, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let result = DeviceEnableState { control_id, len, enable };
         Ok((result, remaining))
     }
@@ -6303,16 +5723,11 @@ pub struct DeviceStateDataResolution {
     pub resolution_max: Vec<u32>,
 }
 impl TryParse for DeviceStateDataResolution {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (num_valuators, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (resolution_values, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
-        remaining = new_remaining;
-        let (resolution_min, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
-        remaining = new_remaining;
-        let (resolution_max, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (num_valuators, remaining) = u32::try_parse(remaining)?;
+        let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
+        let (resolution_min, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
+        let (resolution_max, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
         let result = DeviceStateDataResolution { num_valuators, resolution_values, resolution_min, resolution_max };
         Ok((result, remaining))
     }
@@ -6350,24 +5765,15 @@ pub struct DeviceStateDataAbsCalib {
     pub button_threshold: u32,
 }
 impl TryParse for DeviceStateDataAbsCalib {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (min_x, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max_x, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (min_y, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max_y, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flip_x, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flip_y, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (rotation, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (button_threshold, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (min_x, remaining) = i32::try_parse(remaining)?;
+        let (max_x, remaining) = i32::try_parse(remaining)?;
+        let (min_y, remaining) = i32::try_parse(remaining)?;
+        let (max_y, remaining) = i32::try_parse(remaining)?;
+        let (flip_x, remaining) = u32::try_parse(remaining)?;
+        let (flip_y, remaining) = u32::try_parse(remaining)?;
+        let (rotation, remaining) = u32::try_parse(remaining)?;
+        let (button_threshold, remaining) = u32::try_parse(remaining)?;
         let result = DeviceStateDataAbsCalib { min_x, max_x, min_y, max_y, flip_x, flip_y, rotation, button_threshold };
         Ok((result, remaining))
     }
@@ -6442,13 +5848,10 @@ pub struct DeviceStateDataCore {
     pub iscore: u8,
 }
 impl TryParse for DeviceStateDataCore {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (status, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (iscore, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (status, remaining) = u8::try_parse(remaining)?;
+        let (iscore, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let result = DeviceStateDataCore { status, iscore };
         Ok((result, remaining))
     }
@@ -6488,20 +5891,13 @@ pub struct DeviceStateDataAbsArea {
     pub following: u32,
 }
 impl TryParse for DeviceStateDataAbsArea {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (offset_x, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (offset_y, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (width, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (height, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (screen, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (following, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (offset_x, remaining) = u32::try_parse(remaining)?;
+        let (offset_y, remaining) = u32::try_parse(remaining)?;
+        let (width, remaining) = u32::try_parse(remaining)?;
+        let (height, remaining) = u32::try_parse(remaining)?;
+        let (screen, remaining) = u32::try_parse(remaining)?;
+        let (following, remaining) = u32::try_parse(remaining)?;
         let result = DeviceStateDataAbsArea { offset_x, offset_y, width, height, screen, following };
         Ok((result, remaining))
     }
@@ -6568,42 +5964,43 @@ pub enum DeviceStateData {
 }
 impl DeviceStateData {
     fn try_parse(value: &[u8], control_id: u16) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
+        let mut outer_remaining = value;
         let mut parse_result = None;
         if control_id == Into::<u16>::into(DeviceControl::Resolution) {
-            let (resolution, new_remaining) = DeviceStateDataResolution::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (resolution, new_remaining) = DeviceStateDataResolution::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Resolution(resolution));
         }
         if control_id == Into::<u16>::into(DeviceControl::Abscalib) {
-            let (abs_calib, new_remaining) = DeviceStateDataAbsCalib::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (abs_calib, new_remaining) = DeviceStateDataAbsCalib::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::AbsCalib(abs_calib));
         }
         if control_id == Into::<u16>::into(DeviceControl::Core) {
-            let (core, new_remaining) = DeviceStateDataCore::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (core, new_remaining) = DeviceStateDataCore::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Core(core));
         }
         if control_id == Into::<u16>::into(DeviceControl::Enable) {
-            let (enable, new_remaining) = u8::try_parse(remaining)?;
-            remaining = new_remaining;
-            remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
+            let remaining = outer_remaining;
+            let (enable, remaining) = u8::try_parse(remaining)?;
+            let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+            outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Enable(enable));
         }
         if control_id == Into::<u16>::into(DeviceControl::Absarea) {
-            let (abs_area, new_remaining) = DeviceStateDataAbsArea::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (abs_area, new_remaining) = DeviceStateDataAbsArea::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::AbsArea(abs_area));
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, remaining))
+            Some(result) => Ok((result, outer_remaining))
         }
     }
     pub fn as_resolution(&self) -> Option<&DeviceStateDataResolution> {
@@ -6665,14 +6062,10 @@ pub struct DeviceState {
     pub data: DeviceStateData,
 }
 impl TryParse for DeviceState {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (control_id, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (data, new_remaining) = DeviceStateData::try_parse(remaining, control_id)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (control_id, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (data, remaining) = DeviceStateData::try_parse(remaining, control_id)?;
         let result = DeviceState { control_id, len, data };
         Ok((result, remaining))
     }
@@ -6734,21 +6127,14 @@ pub struct GetDeviceControlReply {
     pub control: DeviceState,
 }
 impl GetDeviceControlReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (status, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(23..).ok_or(ParseError::ParseError)?;
-        let (control, new_remaining) = DeviceState::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (status, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
+        let (control, remaining) = DeviceState::try_parse(remaining)?;
         let result = GetDeviceControlReply { response_type, xi_reply_type, sequence, length, status, control };
         Ok((result, remaining))
     }
@@ -6768,19 +6154,13 @@ pub struct DeviceResolutionCtl {
     pub resolution_values: Vec<u32>,
 }
 impl TryParse for DeviceResolutionCtl {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (control_id, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_valuator, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_valuators, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (resolution_values, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (control_id, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (first_valuator, remaining) = u8::try_parse(remaining)?;
+        let (num_valuators, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
         let result = DeviceResolutionCtl { control_id, len, first_valuator, resolution_values };
         Ok((result, remaining))
     }
@@ -6824,28 +6204,17 @@ pub struct DeviceAbsCalibCtl {
     pub button_threshold: u32,
 }
 impl TryParse for DeviceAbsCalibCtl {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (control_id, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (min_x, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max_x, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (min_y, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max_y, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flip_x, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flip_y, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (rotation, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (button_threshold, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (control_id, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (min_x, remaining) = i32::try_parse(remaining)?;
+        let (max_x, remaining) = i32::try_parse(remaining)?;
+        let (min_y, remaining) = i32::try_parse(remaining)?;
+        let (max_y, remaining) = i32::try_parse(remaining)?;
+        let (flip_x, remaining) = u32::try_parse(remaining)?;
+        let (flip_y, remaining) = u32::try_parse(remaining)?;
+        let (rotation, remaining) = u32::try_parse(remaining)?;
+        let (button_threshold, remaining) = u32::try_parse(remaining)?;
         let result = DeviceAbsCalibCtl { control_id, len, min_x, max_x, min_y, max_y, flip_x, flip_y, rotation, button_threshold };
         Ok((result, remaining))
     }
@@ -6935,24 +6304,15 @@ pub struct DeviceAbsAreaCtrl {
     pub following: u32,
 }
 impl TryParse for DeviceAbsAreaCtrl {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (control_id, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (offset_x, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (offset_y, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (width, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (height, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (screen, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (following, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (control_id, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (offset_x, remaining) = u32::try_parse(remaining)?;
+        let (offset_y, remaining) = u32::try_parse(remaining)?;
+        let (width, remaining) = i32::try_parse(remaining)?;
+        let (height, remaining) = i32::try_parse(remaining)?;
+        let (screen, remaining) = i32::try_parse(remaining)?;
+        let (following, remaining) = u32::try_parse(remaining)?;
         let result = DeviceAbsAreaCtrl { control_id, len, offset_x, offset_y, width, height, screen, following };
         Ok((result, remaining))
     }
@@ -7025,15 +6385,11 @@ pub struct DeviceCoreCtrl {
     pub status: u8,
 }
 impl TryParse for DeviceCoreCtrl {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (control_id, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (status, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (control_id, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (status, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let result = DeviceCoreCtrl { control_id, len, status };
         Ok((result, remaining))
     }
@@ -7077,15 +6433,11 @@ pub struct DeviceEnableCtrl {
     pub enable: u8,
 }
 impl TryParse for DeviceEnableCtrl {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (control_id, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (enable, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (control_id, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (enable, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let result = DeviceEnableCtrl { control_id, len, enable };
         Ok((result, remaining))
     }
@@ -7128,15 +6480,11 @@ pub struct DeviceCtlDataResolution {
     pub resolution_values: Vec<u32>,
 }
 impl TryParse for DeviceCtlDataResolution {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (first_valuator, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_valuators, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (resolution_values, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (first_valuator, remaining) = u8::try_parse(remaining)?;
+        let (num_valuators, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
         let result = DeviceCtlDataResolution { first_valuator, resolution_values };
         Ok((result, remaining))
     }
@@ -7175,24 +6523,15 @@ pub struct DeviceCtlDataAbsCalib {
     pub button_threshold: u32,
 }
 impl TryParse for DeviceCtlDataAbsCalib {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (min_x, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max_x, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (min_y, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max_y, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flip_x, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flip_y, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (rotation, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (button_threshold, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (min_x, remaining) = i32::try_parse(remaining)?;
+        let (max_x, remaining) = i32::try_parse(remaining)?;
+        let (min_y, remaining) = i32::try_parse(remaining)?;
+        let (max_y, remaining) = i32::try_parse(remaining)?;
+        let (flip_x, remaining) = u32::try_parse(remaining)?;
+        let (flip_y, remaining) = u32::try_parse(remaining)?;
+        let (rotation, remaining) = u32::try_parse(remaining)?;
+        let (button_threshold, remaining) = u32::try_parse(remaining)?;
         let result = DeviceCtlDataAbsCalib { min_x, max_x, min_y, max_y, flip_x, flip_y, rotation, button_threshold };
         Ok((result, remaining))
     }
@@ -7271,20 +6610,13 @@ pub struct DeviceCtlDataAbsArea {
     pub following: u32,
 }
 impl TryParse for DeviceCtlDataAbsArea {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (offset_x, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (offset_y, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (width, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (height, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (screen, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (following, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (offset_x, remaining) = u32::try_parse(remaining)?;
+        let (offset_y, remaining) = u32::try_parse(remaining)?;
+        let (width, remaining) = i32::try_parse(remaining)?;
+        let (height, remaining) = i32::try_parse(remaining)?;
+        let (screen, remaining) = i32::try_parse(remaining)?;
+        let (following, remaining) = u32::try_parse(remaining)?;
         let result = DeviceCtlDataAbsArea { offset_x, offset_y, width, height, screen, following };
         Ok((result, remaining))
     }
@@ -7351,43 +6683,45 @@ pub enum DeviceCtlData {
 }
 impl DeviceCtlData {
     fn try_parse(value: &[u8], control_id: u16) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
+        let mut outer_remaining = value;
         let mut parse_result = None;
         if control_id == Into::<u16>::into(DeviceControl::Resolution) {
-            let (resolution, new_remaining) = DeviceCtlDataResolution::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (resolution, new_remaining) = DeviceCtlDataResolution::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Resolution(resolution));
         }
         if control_id == Into::<u16>::into(DeviceControl::Abscalib) {
-            let (abs_calib, new_remaining) = DeviceCtlDataAbsCalib::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (abs_calib, new_remaining) = DeviceCtlDataAbsCalib::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::AbsCalib(abs_calib));
         }
         if control_id == Into::<u16>::into(DeviceControl::Core) {
-            let (status, new_remaining) = u8::try_parse(remaining)?;
-            remaining = new_remaining;
-            remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
+            let remaining = outer_remaining;
+            let (status, remaining) = u8::try_parse(remaining)?;
+            let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+            outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Status(status));
         }
         if control_id == Into::<u16>::into(DeviceControl::Enable) {
-            let (enable, new_remaining) = u8::try_parse(remaining)?;
-            remaining = new_remaining;
-            remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
+            let remaining = outer_remaining;
+            let (enable, remaining) = u8::try_parse(remaining)?;
+            let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+            outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Enable(enable));
         }
         if control_id == Into::<u16>::into(DeviceControl::Absarea) {
-            let (abs_area, new_remaining) = DeviceCtlDataAbsArea::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (abs_area, new_remaining) = DeviceCtlDataAbsArea::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::AbsArea(abs_area));
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, remaining))
+            Some(result) => Ok((result, outer_remaining))
         }
     }
     pub fn as_resolution(&self) -> Option<&DeviceCtlDataResolution> {
@@ -7449,14 +6783,10 @@ pub struct DeviceCtl {
     pub data: DeviceCtlData,
 }
 impl TryParse for DeviceCtl {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (control_id, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (data, new_remaining) = DeviceCtlData::try_parse(remaining, control_id)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (control_id, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (data, remaining) = DeviceCtlData::try_parse(remaining, control_id)?;
         let result = DeviceCtl { control_id, len, data };
         Ok((result, remaining))
     }
@@ -7521,19 +6851,13 @@ pub struct ChangeDeviceControlReply {
     pub status: u8,
 }
 impl ChangeDeviceControlReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (status, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(23..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (status, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
         let result = ChangeDeviceControlReply { response_type, xi_reply_type, sequence, length, status };
         Ok((result, remaining))
     }
@@ -7578,21 +6902,14 @@ pub struct ListDevicePropertiesReply {
     pub atoms: Vec<ATOM>,
 }
 impl ListDevicePropertiesReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_atoms, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (atoms, new_remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, num_atoms as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_atoms, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
+        let (atoms, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, num_atoms as usize)?;
         let result = ListDevicePropertiesReply { response_type, xi_reply_type, sequence, length, atoms };
         Ok((result, remaining))
     }
@@ -7832,37 +7149,42 @@ pub enum GetDevicePropertyItems {
 }
 impl GetDevicePropertyItems {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
+        let mut outer_remaining = value;
         let mut parse_result = None;
         if format == Into::<u8>::into(PropertyFormat::M8Bits) {
-            let (data8, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, num_items as usize)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let value = remaining;
+            let (data8, remaining) = crate::x11_utils::parse_list::<u8>(remaining, num_items as usize)?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
-            remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(GetDevicePropertyItems::Data8(data8));
         }
         if format == Into::<u8>::into(PropertyFormat::M16Bits) {
-            let (data16, new_remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items as usize)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let value = remaining;
+            let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items as usize)?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
-            remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(GetDevicePropertyItems::Data16(data16));
         }
         if format == Into::<u8>::into(PropertyFormat::M32Bits) {
-            let (data32, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items as usize)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items as usize)?;
+            outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(GetDevicePropertyItems::Data32(data32));
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, remaining))
+            Some(result) => Ok((result, outer_remaining))
         }
     }
     pub fn as_data8(&self) -> Option<&Vec<u8>> {
@@ -7915,29 +7237,18 @@ pub struct GetDevicePropertyReply {
     pub items: GetDevicePropertyItems,
 }
 impl GetDevicePropertyReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (xi_reply_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (type_, new_remaining) = ATOM::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bytes_after, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_items, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (format, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(10..).ok_or(ParseError::ParseError)?;
-        let (items, new_remaining) = GetDevicePropertyItems::try_parse(remaining, format, num_items)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (type_, remaining) = ATOM::try_parse(remaining)?;
+        let (bytes_after, remaining) = u32::try_parse(remaining)?;
+        let (num_items, remaining) = u32::try_parse(remaining)?;
+        let (format, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(10..).ok_or(ParseError::ParseError)?;
+        let (items, remaining) = GetDevicePropertyItems::try_parse(remaining, format, num_items)?;
         let result = GetDevicePropertyReply { response_type, xi_reply_type, sequence, length, type_, bytes_after, num_items, format, device_id, items };
         Ok((result, remaining))
     }
@@ -8019,16 +7330,11 @@ pub struct GroupInfo {
     pub effective: u8,
 }
 impl TryParse for GroupInfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (base, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (latched, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (locked, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (effective, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (base, remaining) = u8::try_parse(remaining)?;
+        let (latched, remaining) = u8::try_parse(remaining)?;
+        let (locked, remaining) = u8::try_parse(remaining)?;
+        let (effective, remaining) = u8::try_parse(remaining)?;
         let result = GroupInfo { base, latched, locked, effective };
         Ok((result, remaining))
     }
@@ -8070,16 +7376,11 @@ pub struct ModifierInfo {
     pub effective: u32,
 }
 impl TryParse for ModifierInfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (base, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (latched, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (locked, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (effective, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (base, remaining) = u32::try_parse(remaining)?;
+        let (latched, remaining) = u32::try_parse(remaining)?;
+        let (locked, remaining) = u32::try_parse(remaining)?;
+        let (effective, remaining) = u32::try_parse(remaining)?;
         let result = ModifierInfo { base, latched, locked, effective };
         Ok((result, remaining))
     }
@@ -8171,38 +7472,23 @@ pub struct XIQueryPointerReply {
     pub buttons: Vec<u32>,
 }
 impl XIQueryPointerReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (win_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (win_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (same_screen, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (buttons_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods, new_remaining) = ModifierInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = GroupInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root_x, remaining) = FP1616::try_parse(remaining)?;
+        let (root_y, remaining) = FP1616::try_parse(remaining)?;
+        let (win_x, remaining) = FP1616::try_parse(remaining)?;
+        let (win_y, remaining) = FP1616::try_parse(remaining)?;
+        let (same_screen, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (buttons_len, remaining) = u16::try_parse(remaining)?;
+        let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
+        let (group, remaining) = GroupInfo::try_parse(remaining)?;
+        let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
         let result = XIQueryPointerReply { response_type, sequence, length, root, child, root_x, root_y, win_x, win_y, same_screen, mods, group, buttons };
         Ok((result, remaining))
     }
@@ -8449,24 +7735,18 @@ pub struct AddMaster {
     pub name: Vec<u8>,
 }
 impl TryParse for AddMaster {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (name_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (send_core, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (enable, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (name, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_len as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let value = remaining;
+        let (type_, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (name_len, remaining) = u16::try_parse(remaining)?;
+        let (send_core, remaining) = bool::try_parse(remaining)?;
+        let (enable, remaining) = bool::try_parse(remaining)?;
+        let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_len as usize)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
         let result = AddMaster { type_, len, send_core, enable, name };
         Ok((result, remaining))
     }
@@ -8507,21 +7787,14 @@ pub struct RemoveMaster {
     pub return_keyboard: DeviceId,
 }
 impl TryParse for RemoveMaster {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (return_mode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (return_pointer, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (return_keyboard, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (return_mode, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (return_pointer, remaining) = DeviceId::try_parse(remaining)?;
+        let (return_keyboard, remaining) = DeviceId::try_parse(remaining)?;
         let result = RemoveMaster { type_, len, deviceid, return_mode, return_pointer, return_keyboard };
         Ok((result, remaining))
     }
@@ -8576,16 +7849,11 @@ pub struct AttachSlave {
     pub master: DeviceId,
 }
 impl TryParse for AttachSlave {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (master, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (master, remaining) = DeviceId::try_parse(remaining)?;
         let result = AttachSlave { type_, len, deviceid, master };
         Ok((result, remaining))
     }
@@ -8630,15 +7898,11 @@ pub struct DetachSlave {
     pub deviceid: DeviceId,
 }
 impl TryParse for DetachSlave {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let result = DetachSlave { type_, len, deviceid };
         Ok((result, remaining))
     }
@@ -8682,20 +7946,16 @@ pub struct HierarchyChangeDataAddMaster {
     pub name: Vec<u8>,
 }
 impl TryParse for HierarchyChangeDataAddMaster {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (name_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (send_core, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (enable, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (name, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_len as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let value = remaining;
+        let (name_len, remaining) = u16::try_parse(remaining)?;
+        let (send_core, remaining) = bool::try_parse(remaining)?;
+        let (enable, remaining) = bool::try_parse(remaining)?;
+        let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_len as usize)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
         let result = HierarchyChangeDataAddMaster { send_core, enable, name };
         Ok((result, remaining))
     }
@@ -8731,17 +7991,12 @@ pub struct HierarchyChangeDataRemoveMaster {
     pub return_keyboard: DeviceId,
 }
 impl TryParse for HierarchyChangeDataRemoveMaster {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (return_mode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (return_pointer, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (return_keyboard, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (return_mode, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (return_pointer, remaining) = DeviceId::try_parse(remaining)?;
+        let (return_keyboard, remaining) = DeviceId::try_parse(remaining)?;
         let result = HierarchyChangeDataRemoveMaster { deviceid, return_mode, return_pointer, return_keyboard };
         Ok((result, remaining))
     }
@@ -8785,12 +8040,9 @@ pub struct HierarchyChangeDataAttachSlave {
     pub master: DeviceId,
 }
 impl TryParse for HierarchyChangeDataAttachSlave {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (master, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (master, remaining) = DeviceId::try_parse(remaining)?;
         let result = HierarchyChangeDataAttachSlave { deviceid, master };
         Ok((result, remaining))
     }
@@ -8828,36 +8080,37 @@ pub enum HierarchyChangeData {
 }
 impl HierarchyChangeData {
     fn try_parse(value: &[u8], type_: u16) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
+        let mut outer_remaining = value;
         let mut parse_result = None;
         if type_ == Into::<u16>::into(HierarchyChangeType::AddMaster) {
-            let (add_master, new_remaining) = HierarchyChangeDataAddMaster::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (add_master, new_remaining) = HierarchyChangeDataAddMaster::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::AddMaster(add_master));
         }
         if type_ == Into::<u16>::into(HierarchyChangeType::RemoveMaster) {
-            let (remove_master, new_remaining) = HierarchyChangeDataRemoveMaster::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (remove_master, new_remaining) = HierarchyChangeDataRemoveMaster::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::RemoveMaster(remove_master));
         }
         if type_ == Into::<u16>::into(HierarchyChangeType::AttachSlave) {
-            let (attach_slave, new_remaining) = HierarchyChangeDataAttachSlave::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (attach_slave, new_remaining) = HierarchyChangeDataAttachSlave::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::AttachSlave(attach_slave));
         }
         if type_ == Into::<u16>::into(HierarchyChangeType::DetachSlave) {
-            let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-            remaining = new_remaining;
-            remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
+            let remaining = outer_remaining;
+            let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+            let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+            outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::Deviceid(deviceid));
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, remaining))
+            Some(result) => Ok((result, outer_remaining))
         }
     }
     pub fn as_add_master(&self) -> Option<&HierarchyChangeDataAddMaster> {
@@ -8911,14 +8164,10 @@ pub struct HierarchyChange {
     pub data: HierarchyChangeData,
 }
 impl TryParse for HierarchyChange {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (data, new_remaining) = HierarchyChangeData::try_parse(remaining, type_)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (data, remaining) = HierarchyChangeData::try_parse(remaining, type_)?;
         let result = HierarchyChange { type_, len, data };
         Ok((result, remaining))
     }
@@ -9037,21 +8286,15 @@ pub struct XIGetClientPointerReply {
     pub deviceid: DeviceId,
 }
 impl XIGetClientPointerReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (set, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (set, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let result = XIGetClientPointerReply { response_type, sequence, length, set, deviceid };
         Ok((result, remaining))
     }
@@ -9172,14 +8415,10 @@ pub struct EventMask {
     pub mask: Vec<u32>,
 }
 impl TryParse for EventMask {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mask_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (mask_len, remaining) = u16::try_parse(remaining)?;
+        let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len as usize)?;
         let result = EventMask { deviceid, mask };
         Ok((result, remaining))
     }
@@ -9275,20 +8514,14 @@ pub struct XIQueryVersionReply {
     pub minor_version: u16,
 }
 impl XIQueryVersionReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (major_version, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (minor_version, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (major_version, remaining) = u16::try_parse(remaining)?;
+        let (minor_version, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let result = XIQueryVersionReply { response_type, sequence, length, major_version, minor_version };
         Ok((result, remaining))
     }
@@ -9639,20 +8872,13 @@ pub struct ButtonClass {
     pub labels: Vec<ATOM>,
 }
 impl TryParse for ButtonClass {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_buttons, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (state, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, ((num_buttons as usize) + (31)) / (32))?;
-        remaining = new_remaining;
-        let (labels, new_remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, num_buttons as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (num_buttons, remaining) = u16::try_parse(remaining)?;
+        let (state, remaining) = crate::x11_utils::parse_list::<u32>(remaining, ((num_buttons as usize) + (31)) / (32))?;
+        let (labels, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, num_buttons as usize)?;
         let result = ButtonClass { type_, len, sourceid, num_buttons, state, labels };
         Ok((result, remaining))
     }
@@ -9689,18 +8915,12 @@ pub struct KeyClass {
     pub keys: Vec<u32>,
 }
 impl TryParse for KeyClass {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_keys, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_keys as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (num_keys, remaining) = u16::try_parse(remaining)?;
+        let (keys, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_keys as usize)?;
         let result = KeyClass { type_, len, sourceid, keys };
         Ok((result, remaining))
     }
@@ -9740,23 +8960,15 @@ pub struct ScrollClass {
     pub increment: Fp3232,
 }
 impl TryParse for ScrollClass {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (number, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (scroll_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (increment, new_remaining) = Fp3232::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (number, remaining) = u16::try_parse(remaining)?;
+        let (scroll_type, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (increment, remaining) = Fp3232::try_parse(remaining)?;
         let result = ScrollClass { type_, len, sourceid, number, scroll_type, flags, increment };
         Ok((result, remaining))
     }
@@ -9826,18 +9038,12 @@ pub struct TouchClass {
     pub num_touches: u8,
 }
 impl TryParse for TouchClass {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_touches, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let (num_touches, remaining) = u8::try_parse(remaining)?;
         let result = TouchClass { type_, len, sourceid, mode, num_touches };
         Ok((result, remaining))
     }
@@ -9891,29 +9097,18 @@ pub struct ValuatorClass {
     pub mode: u8,
 }
 impl TryParse for ValuatorClass {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (number, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (label, new_remaining) = ATOM::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (min, new_remaining) = Fp3232::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max, new_remaining) = Fp3232::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (value, new_remaining) = Fp3232::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (resolution, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (number, remaining) = u16::try_parse(remaining)?;
+        let (label, remaining) = ATOM::try_parse(remaining)?;
+        let (min, remaining) = Fp3232::try_parse(remaining)?;
+        let (max, remaining) = Fp3232::try_parse(remaining)?;
+        let (value, remaining) = Fp3232::try_parse(remaining)?;
+        let (resolution, remaining) = u32::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let result = ValuatorClass { type_, len, sourceid, number, label, min, max, value, resolution, mode };
         Ok((result, remaining))
     }
@@ -10005,12 +9200,9 @@ pub struct DeviceClassDataKey {
     pub keys: Vec<u32>,
 }
 impl TryParse for DeviceClassDataKey {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (num_keys, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_keys as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (num_keys, remaining) = u16::try_parse(remaining)?;
+        let (keys, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_keys as usize)?;
         let result = DeviceClassDataKey { keys };
         Ok((result, remaining))
     }
@@ -10042,14 +9234,10 @@ pub struct DeviceClassDataButton {
     pub labels: Vec<ATOM>,
 }
 impl TryParse for DeviceClassDataButton {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (num_buttons, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (state, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, ((num_buttons as usize) + (31)) / (32))?;
-        remaining = new_remaining;
-        let (labels, new_remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, num_buttons as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (num_buttons, remaining) = u16::try_parse(remaining)?;
+        let (state, remaining) = crate::x11_utils::parse_list::<u32>(remaining, ((num_buttons as usize) + (31)) / (32))?;
+        let (labels, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, num_buttons as usize)?;
         let result = DeviceClassDataButton { num_buttons, state, labels };
         Ok((result, remaining))
     }
@@ -10085,23 +9273,15 @@ pub struct DeviceClassDataValuator {
     pub mode: u8,
 }
 impl TryParse for DeviceClassDataValuator {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (number, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (label, new_remaining) = ATOM::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (min, new_remaining) = Fp3232::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (max, new_remaining) = Fp3232::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (value, new_remaining) = Fp3232::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (resolution, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (number, remaining) = u16::try_parse(remaining)?;
+        let (label, remaining) = ATOM::try_parse(remaining)?;
+        let (min, remaining) = Fp3232::try_parse(remaining)?;
+        let (max, remaining) = Fp3232::try_parse(remaining)?;
+        let (value, remaining) = Fp3232::try_parse(remaining)?;
+        let (resolution, remaining) = u32::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let result = DeviceClassDataValuator { number, label, min, max, value, resolution, mode };
         Ok((result, remaining))
     }
@@ -10183,17 +9363,12 @@ pub struct DeviceClassDataScroll {
     pub increment: Fp3232,
 }
 impl TryParse for DeviceClassDataScroll {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (number, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (scroll_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (increment, new_remaining) = Fp3232::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (number, remaining) = u16::try_parse(remaining)?;
+        let (scroll_type, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (increment, remaining) = Fp3232::try_parse(remaining)?;
         let result = DeviceClassDataScroll { number, scroll_type, flags, increment };
         Ok((result, remaining))
     }
@@ -10247,12 +9422,9 @@ pub struct DeviceClassDataTouch {
     pub num_touches: u8,
 }
 impl TryParse for DeviceClassDataTouch {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (mode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_touches, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let (num_touches, remaining) = u8::try_parse(remaining)?;
         let result = DeviceClassDataTouch { mode, num_touches };
         Ok((result, remaining))
     }
@@ -10289,41 +9461,41 @@ pub enum DeviceClassData {
 }
 impl DeviceClassData {
     fn try_parse(value: &[u8], type_: u16) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
+        let mut outer_remaining = value;
         let mut parse_result = None;
         if type_ == Into::<u16>::into(DeviceClassType::Key) {
-            let (key, new_remaining) = DeviceClassDataKey::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (key, new_remaining) = DeviceClassDataKey::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Key(key));
         }
         if type_ == Into::<u16>::into(DeviceClassType::Button) {
-            let (button, new_remaining) = DeviceClassDataButton::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (button, new_remaining) = DeviceClassDataButton::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Button(button));
         }
         if type_ == Into::<u16>::into(DeviceClassType::Valuator) {
-            let (valuator, new_remaining) = DeviceClassDataValuator::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (valuator, new_remaining) = DeviceClassDataValuator::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Valuator(valuator));
         }
         if type_ == Into::<u16>::into(DeviceClassType::Scroll) {
-            let (scroll, new_remaining) = DeviceClassDataScroll::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (scroll, new_remaining) = DeviceClassDataScroll::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Scroll(scroll));
         }
         if type_ == Into::<u16>::into(DeviceClassType::Touch) {
-            let (touch, new_remaining) = DeviceClassDataTouch::try_parse(remaining)?;
-            remaining = new_remaining;
+            let (touch, new_remaining) = DeviceClassDataTouch::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Touch(touch));
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, remaining))
+            Some(result) => Ok((result, outer_remaining))
         }
     }
     pub fn as_key(&self) -> Option<&DeviceClassDataKey> {
@@ -10386,16 +9558,11 @@ pub struct DeviceClass {
     pub data: DeviceClassData,
 }
 impl TryParse for DeviceClass {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (type_, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (data, new_remaining) = DeviceClassData::try_parse(remaining, type_)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (type_, remaining) = u16::try_parse(remaining)?;
+        let (len, remaining) = u16::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (data, remaining) = DeviceClassData::try_parse(remaining, type_)?;
         let result = DeviceClass { type_, len, sourceid, data };
         Ok((result, remaining))
     }
@@ -10432,29 +9599,21 @@ pub struct XIDeviceInfo {
     pub classes: Vec<DeviceClass>,
 }
 impl TryParse for XIDeviceInfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (type_, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (attachment, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_classes, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (name_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (enabled, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (name, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_len as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let value = remaining;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (type_, remaining) = u16::try_parse(remaining)?;
+        let (attachment, remaining) = DeviceId::try_parse(remaining)?;
+        let (num_classes, remaining) = u16::try_parse(remaining)?;
+        let (name_len, remaining) = u16::try_parse(remaining)?;
+        let (enabled, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_len as usize)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let (classes, new_remaining) = crate::x11_utils::parse_list::<DeviceClass>(remaining, num_classes as usize)?;
-        remaining = new_remaining;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<DeviceClass>(remaining, num_classes as usize)?;
         let result = XIDeviceInfo { deviceid, type_, attachment, enabled, name, classes };
         Ok((result, remaining))
     }
@@ -10521,20 +9680,14 @@ pub struct XIQueryDeviceReply {
     pub infos: Vec<XIDeviceInfo>,
 }
 impl XIQueryDeviceReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_infos, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (infos, new_remaining) = crate::x11_utils::parse_list::<XIDeviceInfo>(remaining, num_infos as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_infos, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
+        let (infos, remaining) = crate::x11_utils::parse_list::<XIDeviceInfo>(remaining, num_infos as usize)?;
         let result = XIQueryDeviceReply { response_type, sequence, length, infos };
         Ok((result, remaining))
     }
@@ -10613,18 +9766,13 @@ pub struct XIGetFocusReply {
     pub focus: WINDOW,
 }
 impl XIGetFocusReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (focus, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (focus, remaining) = WINDOW::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let result = XIGetFocusReply { response_type, sequence, length, focus };
         Ok((result, remaining))
     }
@@ -10761,18 +9909,13 @@ pub struct XIGrabDeviceReply {
     pub status: u8,
 }
 impl XIGrabDeviceReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (status, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(23..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (status, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
         let result = XIGrabDeviceReply { response_type, sequence, length, status };
         Ok((result, remaining))
     }
@@ -11106,13 +10249,10 @@ pub struct GrabModifierInfo {
     pub status: u8,
 }
 impl TryParse for GrabModifierInfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (modifiers, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (status, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (modifiers, remaining) = u32::try_parse(remaining)?;
+        let (status, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let result = GrabModifierInfo { modifiers, status };
         Ok((result, remaining))
     }
@@ -11225,20 +10365,14 @@ pub struct XIPassiveGrabDeviceReply {
     pub modifiers: Vec<GrabModifierInfo>,
 }
 impl XIPassiveGrabDeviceReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_modifiers, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (modifiers, new_remaining) = crate::x11_utils::parse_list::<GrabModifierInfo>(remaining, num_modifiers as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_modifiers, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
+        let (modifiers, remaining) = crate::x11_utils::parse_list::<GrabModifierInfo>(remaining, num_modifiers as usize)?;
         let result = XIPassiveGrabDeviceReply { response_type, sequence, length, modifiers };
         Ok((result, remaining))
     }
@@ -11329,20 +10463,14 @@ pub struct XIListPropertiesReply {
     pub properties: Vec<ATOM>,
 }
 impl XIListPropertiesReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_properties, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (properties, new_remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, num_properties as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_properties, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
+        let (properties, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, num_properties as usize)?;
         let result = XIListPropertiesReply { response_type, sequence, length, properties };
         Ok((result, remaining))
     }
@@ -11517,37 +10645,42 @@ pub enum XIGetPropertyItems {
 }
 impl XIGetPropertyItems {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
+        let mut outer_remaining = value;
         let mut parse_result = None;
         if format == Into::<u8>::into(PropertyFormat::M8Bits) {
-            let (data8, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, num_items as usize)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let value = remaining;
+            let (data8, remaining) = crate::x11_utils::parse_list::<u8>(remaining, num_items as usize)?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
-            remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIGetPropertyItems::Data8(data8));
         }
         if format == Into::<u8>::into(PropertyFormat::M16Bits) {
-            let (data16, new_remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items as usize)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let value = remaining;
+            let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items as usize)?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
-            remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+            outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIGetPropertyItems::Data16(data16));
         }
         if format == Into::<u8>::into(PropertyFormat::M32Bits) {
-            let (data32, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items as usize)?;
-            remaining = new_remaining;
+            let remaining = outer_remaining;
+            let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items as usize)?;
+            outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIGetPropertyItems::Data32(data32));
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, remaining))
+            Some(result) => Ok((result, outer_remaining))
         }
     }
     pub fn as_data8(&self) -> Option<&Vec<u8>> {
@@ -11598,26 +10731,17 @@ pub struct XIGetPropertyReply {
     pub items: XIGetPropertyItems,
 }
 impl XIGetPropertyReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (type_, new_remaining) = ATOM::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bytes_after, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_items, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (format, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(11..).ok_or(ParseError::ParseError)?;
-        let (items, new_remaining) = XIGetPropertyItems::try_parse(remaining, format, num_items)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (type_, remaining) = ATOM::try_parse(remaining)?;
+        let (bytes_after, remaining) = u32::try_parse(remaining)?;
+        let (num_items, remaining) = u32::try_parse(remaining)?;
+        let (format, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
+        let (items, remaining) = XIGetPropertyItems::try_parse(remaining, format, num_items)?;
         let result = XIGetPropertyReply { response_type, sequence, length, type_, bytes_after, num_items, format, items };
         Ok((result, remaining))
     }
@@ -11661,20 +10785,14 @@ pub struct XIGetSelectedEventsReply {
     pub masks: Vec<EventMask>,
 }
 impl XIGetSelectedEventsReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_masks, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (masks, new_remaining) = crate::x11_utils::parse_list::<EventMask>(remaining, num_masks as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (num_masks, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
+        let (masks, remaining) = crate::x11_utils::parse_list::<EventMask>(remaining, num_masks as usize)?;
         let result = XIGetSelectedEventsReply { response_type, sequence, length, masks };
         Ok((result, remaining))
     }
@@ -11693,15 +10811,11 @@ pub struct BarrierReleasePointerInfo {
     pub eventid: u32,
 }
 impl TryParse for BarrierReleasePointerInfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (barrier, new_remaining) = xfixes::BARRIER::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (eventid, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (barrier, remaining) = xfixes::BARRIER::try_parse(remaining)?;
+        let (eventid, remaining) = u32::try_parse(remaining)?;
         let result = BarrierReleasePointerInfo { deviceid, barrier, eventid };
         Ok((result, remaining))
     }
@@ -11785,32 +10899,19 @@ pub struct DeviceValuatorEvent {
     pub valuators: [i32; 6],
 }
 impl DeviceValuatorEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_state, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_valuators, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_valuator, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_0, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_1, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_2, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_3, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_4, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_5, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (device_state, remaining) = u16::try_parse(remaining)?;
+        let (num_valuators, remaining) = u8::try_parse(remaining)?;
+        let (first_valuator, remaining) = u8::try_parse(remaining)?;
+        let (valuators_0, remaining) = i32::try_parse(remaining)?;
+        let (valuators_1, remaining) = i32::try_parse(remaining)?;
+        let (valuators_2, remaining) = i32::try_parse(remaining)?;
+        let (valuators_3, remaining) = i32::try_parse(remaining)?;
+        let (valuators_4, remaining) = i32::try_parse(remaining)?;
+        let (valuators_5, remaining) = i32::try_parse(remaining)?;
         let valuators = [
             valuators_0,
             valuators_1,
@@ -11943,36 +11044,21 @@ pub struct DeviceKeyPressEvent {
     pub device_id: u8,
 }
 impl DeviceKeyPressEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_x, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_x, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_y, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (state, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (same_screen, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root_x, remaining) = i16::try_parse(remaining)?;
+        let (root_y, remaining) = i16::try_parse(remaining)?;
+        let (event_x, remaining) = i16::try_parse(remaining)?;
+        let (event_y, remaining) = i16::try_parse(remaining)?;
+        let (state, remaining) = u16::try_parse(remaining)?;
+        let (same_screen, remaining) = bool::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
         let result = DeviceKeyPressEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen, device_id };
         Ok((result, remaining))
     }
@@ -12039,36 +11125,21 @@ pub struct DeviceKeyReleaseEvent {
     pub device_id: u8,
 }
 impl DeviceKeyReleaseEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_x, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_x, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_y, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (state, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (same_screen, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root_x, remaining) = i16::try_parse(remaining)?;
+        let (root_y, remaining) = i16::try_parse(remaining)?;
+        let (event_x, remaining) = i16::try_parse(remaining)?;
+        let (event_y, remaining) = i16::try_parse(remaining)?;
+        let (state, remaining) = u16::try_parse(remaining)?;
+        let (same_screen, remaining) = bool::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
         let result = DeviceKeyReleaseEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen, device_id };
         Ok((result, remaining))
     }
@@ -12135,36 +11206,21 @@ pub struct DeviceButtonPressEvent {
     pub device_id: u8,
 }
 impl DeviceButtonPressEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_x, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_x, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_y, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (state, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (same_screen, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root_x, remaining) = i16::try_parse(remaining)?;
+        let (root_y, remaining) = i16::try_parse(remaining)?;
+        let (event_x, remaining) = i16::try_parse(remaining)?;
+        let (event_y, remaining) = i16::try_parse(remaining)?;
+        let (state, remaining) = u16::try_parse(remaining)?;
+        let (same_screen, remaining) = bool::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
         let result = DeviceButtonPressEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen, device_id };
         Ok((result, remaining))
     }
@@ -12231,36 +11287,21 @@ pub struct DeviceButtonReleaseEvent {
     pub device_id: u8,
 }
 impl DeviceButtonReleaseEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_x, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_x, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_y, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (state, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (same_screen, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root_x, remaining) = i16::try_parse(remaining)?;
+        let (root_y, remaining) = i16::try_parse(remaining)?;
+        let (event_x, remaining) = i16::try_parse(remaining)?;
+        let (event_y, remaining) = i16::try_parse(remaining)?;
+        let (state, remaining) = u16::try_parse(remaining)?;
+        let (same_screen, remaining) = bool::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
         let result = DeviceButtonReleaseEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen, device_id };
         Ok((result, remaining))
     }
@@ -12327,36 +11368,21 @@ pub struct DeviceMotionNotifyEvent {
     pub device_id: u8,
 }
 impl DeviceMotionNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_x, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_x, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_y, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (state, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (same_screen, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root_x, remaining) = i16::try_parse(remaining)?;
+        let (root_y, remaining) = i16::try_parse(remaining)?;
+        let (event_x, remaining) = i16::try_parse(remaining)?;
+        let (event_y, remaining) = i16::try_parse(remaining)?;
+        let (state, remaining) = u16::try_parse(remaining)?;
+        let (same_screen, remaining) = bool::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
         let result = DeviceMotionNotifyEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen, device_id };
         Ok((result, remaining))
     }
@@ -12416,23 +11442,15 @@ pub struct DeviceFocusInEvent {
     pub device_id: u8,
 }
 impl DeviceFocusInEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (window, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(18..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
         let result = DeviceFocusInEvent { response_type, detail, sequence, time, window, mode, device_id };
         Ok((result, remaining))
     }
@@ -12485,23 +11503,15 @@ pub struct DeviceFocusOutEvent {
     pub device_id: u8,
 }
 impl DeviceFocusOutEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (window, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(18..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
         let result = DeviceFocusOutEvent { response_type, detail, sequence, time, window, mode, device_id };
         Ok((result, remaining))
     }
@@ -12561,36 +11571,21 @@ pub struct ProximityInEvent {
     pub device_id: u8,
 }
 impl ProximityInEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_x, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_x, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_y, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (state, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (same_screen, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root_x, remaining) = i16::try_parse(remaining)?;
+        let (root_y, remaining) = i16::try_parse(remaining)?;
+        let (event_x, remaining) = i16::try_parse(remaining)?;
+        let (event_y, remaining) = i16::try_parse(remaining)?;
+        let (state, remaining) = u16::try_parse(remaining)?;
+        let (same_screen, remaining) = bool::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
         let result = ProximityInEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen, device_id };
         Ok((result, remaining))
     }
@@ -12657,36 +11652,21 @@ pub struct ProximityOutEvent {
     pub device_id: u8,
 }
 impl ProximityOutEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_x, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_x, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_y, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (state, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (same_screen, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root_x, remaining) = i16::try_parse(remaining)?;
+        let (root_y, remaining) = i16::try_parse(remaining)?;
+        let (event_x, remaining) = i16::try_parse(remaining)?;
+        let (event_y, remaining) = i16::try_parse(remaining)?;
+        let (state, remaining) = u16::try_parse(remaining)?;
+        let (same_screen, remaining) = bool::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
         let result = ProximityOutEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen, device_id };
         Ok((result, remaining))
     }
@@ -12822,58 +11802,38 @@ pub struct DeviceStateNotifyEvent {
     pub valuators: [u32; 3],
 }
 impl DeviceStateNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_keys, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_buttons, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_valuators, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (classes_reported, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_0, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_1, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_2, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_3, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (num_keys, remaining) = u8::try_parse(remaining)?;
+        let (num_buttons, remaining) = u8::try_parse(remaining)?;
+        let (num_valuators, remaining) = u8::try_parse(remaining)?;
+        let (classes_reported, remaining) = u8::try_parse(remaining)?;
+        let (buttons_0, remaining) = u8::try_parse(remaining)?;
+        let (buttons_1, remaining) = u8::try_parse(remaining)?;
+        let (buttons_2, remaining) = u8::try_parse(remaining)?;
+        let (buttons_3, remaining) = u8::try_parse(remaining)?;
         let buttons = [
             buttons_0,
             buttons_1,
             buttons_2,
             buttons_3,
         ];
-        let (keys_0, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_1, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_2, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_3, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+        let (keys_0, remaining) = u8::try_parse(remaining)?;
+        let (keys_1, remaining) = u8::try_parse(remaining)?;
+        let (keys_2, remaining) = u8::try_parse(remaining)?;
+        let (keys_3, remaining) = u8::try_parse(remaining)?;
         let keys = [
             keys_0,
             keys_1,
             keys_2,
             keys_3,
         ];
-        let (valuators_0, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_1, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_2, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+        let (valuators_0, remaining) = u32::try_parse(remaining)?;
+        let (valuators_1, remaining) = u32::try_parse(remaining)?;
+        let (valuators_2, remaining) = u32::try_parse(remaining)?;
         let valuators = [
             valuators_0,
             valuators_1,
@@ -12933,24 +11893,16 @@ pub struct DeviceMappingNotifyEvent {
     pub time: TIMESTAMP,
 }
 impl DeviceMappingNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (request, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (first_keycode, new_remaining) = KeyCode::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (count, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (request, remaining) = u8::try_parse(remaining)?;
+        let (first_keycode, remaining) = KeyCode::try_parse(remaining)?;
+        let (count, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let result = DeviceMappingNotifyEvent { response_type, device_id, sequence, request, first_keycode, count, time };
         Ok((result, remaining))
     }
@@ -13062,19 +12014,13 @@ pub struct ChangeDeviceNotifyEvent {
     pub request: u8,
 }
 impl ChangeDeviceNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (request, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(23..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (request, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
         let result = ChangeDeviceNotifyEvent { response_type, device_id, sequence, time, request };
         Ok((result, remaining))
     }
@@ -13123,70 +12069,38 @@ pub struct DeviceKeyStateNotifyEvent {
     pub keys: [u8; 28],
 }
 impl DeviceKeyStateNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_0, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_1, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_2, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_3, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_4, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_5, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_6, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_7, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_8, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_9, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_10, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_11, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_12, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_13, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_14, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_15, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_16, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_17, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_18, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_19, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_20, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_21, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_22, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_23, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_24, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_25, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_26, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (keys_27, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (keys_0, remaining) = u8::try_parse(remaining)?;
+        let (keys_1, remaining) = u8::try_parse(remaining)?;
+        let (keys_2, remaining) = u8::try_parse(remaining)?;
+        let (keys_3, remaining) = u8::try_parse(remaining)?;
+        let (keys_4, remaining) = u8::try_parse(remaining)?;
+        let (keys_5, remaining) = u8::try_parse(remaining)?;
+        let (keys_6, remaining) = u8::try_parse(remaining)?;
+        let (keys_7, remaining) = u8::try_parse(remaining)?;
+        let (keys_8, remaining) = u8::try_parse(remaining)?;
+        let (keys_9, remaining) = u8::try_parse(remaining)?;
+        let (keys_10, remaining) = u8::try_parse(remaining)?;
+        let (keys_11, remaining) = u8::try_parse(remaining)?;
+        let (keys_12, remaining) = u8::try_parse(remaining)?;
+        let (keys_13, remaining) = u8::try_parse(remaining)?;
+        let (keys_14, remaining) = u8::try_parse(remaining)?;
+        let (keys_15, remaining) = u8::try_parse(remaining)?;
+        let (keys_16, remaining) = u8::try_parse(remaining)?;
+        let (keys_17, remaining) = u8::try_parse(remaining)?;
+        let (keys_18, remaining) = u8::try_parse(remaining)?;
+        let (keys_19, remaining) = u8::try_parse(remaining)?;
+        let (keys_20, remaining) = u8::try_parse(remaining)?;
+        let (keys_21, remaining) = u8::try_parse(remaining)?;
+        let (keys_22, remaining) = u8::try_parse(remaining)?;
+        let (keys_23, remaining) = u8::try_parse(remaining)?;
+        let (keys_24, remaining) = u8::try_parse(remaining)?;
+        let (keys_25, remaining) = u8::try_parse(remaining)?;
+        let (keys_26, remaining) = u8::try_parse(remaining)?;
+        let (keys_27, remaining) = u8::try_parse(remaining)?;
         let keys = [
             keys_0,
             keys_1,
@@ -13264,70 +12178,38 @@ pub struct DeviceButtonStateNotifyEvent {
     pub buttons: [u8; 28],
 }
 impl DeviceButtonStateNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_0, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_1, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_2, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_3, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_4, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_5, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_6, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_7, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_8, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_9, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_10, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_11, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_12, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_13, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_14, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_15, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_16, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_17, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_18, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_19, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_20, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_21, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_22, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_23, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_24, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_25, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_26, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_27, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (buttons_0, remaining) = u8::try_parse(remaining)?;
+        let (buttons_1, remaining) = u8::try_parse(remaining)?;
+        let (buttons_2, remaining) = u8::try_parse(remaining)?;
+        let (buttons_3, remaining) = u8::try_parse(remaining)?;
+        let (buttons_4, remaining) = u8::try_parse(remaining)?;
+        let (buttons_5, remaining) = u8::try_parse(remaining)?;
+        let (buttons_6, remaining) = u8::try_parse(remaining)?;
+        let (buttons_7, remaining) = u8::try_parse(remaining)?;
+        let (buttons_8, remaining) = u8::try_parse(remaining)?;
+        let (buttons_9, remaining) = u8::try_parse(remaining)?;
+        let (buttons_10, remaining) = u8::try_parse(remaining)?;
+        let (buttons_11, remaining) = u8::try_parse(remaining)?;
+        let (buttons_12, remaining) = u8::try_parse(remaining)?;
+        let (buttons_13, remaining) = u8::try_parse(remaining)?;
+        let (buttons_14, remaining) = u8::try_parse(remaining)?;
+        let (buttons_15, remaining) = u8::try_parse(remaining)?;
+        let (buttons_16, remaining) = u8::try_parse(remaining)?;
+        let (buttons_17, remaining) = u8::try_parse(remaining)?;
+        let (buttons_18, remaining) = u8::try_parse(remaining)?;
+        let (buttons_19, remaining) = u8::try_parse(remaining)?;
+        let (buttons_20, remaining) = u8::try_parse(remaining)?;
+        let (buttons_21, remaining) = u8::try_parse(remaining)?;
+        let (buttons_22, remaining) = u8::try_parse(remaining)?;
+        let (buttons_23, remaining) = u8::try_parse(remaining)?;
+        let (buttons_24, remaining) = u8::try_parse(remaining)?;
+        let (buttons_25, remaining) = u8::try_parse(remaining)?;
+        let (buttons_26, remaining) = u8::try_parse(remaining)?;
+        let (buttons_27, remaining) = u8::try_parse(remaining)?;
         let buttons = [
             buttons_0,
             buttons_1,
@@ -13481,22 +12363,15 @@ pub struct DevicePresenceNotifyEvent {
     pub control: u16,
 }
 impl DevicePresenceNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (devchange, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (control, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (devchange, remaining) = u8::try_parse(remaining)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
+        let (control, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let result = DevicePresenceNotifyEvent { response_type, sequence, time, devchange, device_id, control };
         Ok((result, remaining))
     }
@@ -13548,21 +12423,14 @@ pub struct DevicePropertyNotifyEvent {
     pub device_id: u8,
 }
 impl DevicePropertyNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (state, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (property, new_remaining) = ATOM::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(19..).ok_or(ParseError::ParseError)?;
-        let (device_id, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (state, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (property, remaining) = ATOM::try_parse(remaining)?;
+        let remaining = remaining.get(19..).ok_or(ParseError::ParseError)?;
+        let (device_id, remaining) = u8::try_parse(remaining)?;
         let result = DevicePropertyNotifyEvent { response_type, state, sequence, time, property, device_id };
         Ok((result, remaining))
     }
@@ -13680,31 +12548,19 @@ pub struct DeviceChangedEvent {
     pub classes: Vec<DeviceClass>,
 }
 impl DeviceChangedEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_classes, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (reason, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(11..).ok_or(ParseError::ParseError)?;
-        let (classes, new_remaining) = crate::x11_utils::parse_list::<DeviceClass>(remaining, num_classes as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (num_classes, remaining) = u16::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (reason, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<DeviceClass>(remaining, num_classes as usize)?;
         let result = DeviceChangedEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, reason, classes };
         Ok((result, remaining))
     }
@@ -13784,57 +12640,32 @@ pub struct KeyPressEvent {
     pub axisvalues: Vec<Fp3232>,
 }
 impl KeyPressEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods, new_remaining) = ModifierInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = GroupInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (button_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
-        remaining = new_remaining;
-        let (valuator_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        remaining = new_remaining;
-        let (axisvalues, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root_x, remaining) = FP1616::try_parse(remaining)?;
+        let (root_y, remaining) = FP1616::try_parse(remaining)?;
+        let (event_x, remaining) = FP1616::try_parse(remaining)?;
+        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (buttons_len, remaining) = u16::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
+        let (group, remaining) = GroupInfo::try_parse(remaining)?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
         let result = KeyPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -13886,57 +12717,32 @@ pub struct KeyReleaseEvent {
     pub axisvalues: Vec<Fp3232>,
 }
 impl KeyReleaseEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods, new_remaining) = ModifierInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = GroupInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (button_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
-        remaining = new_remaining;
-        let (valuator_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        remaining = new_remaining;
-        let (axisvalues, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root_x, remaining) = FP1616::try_parse(remaining)?;
+        let (root_y, remaining) = FP1616::try_parse(remaining)?;
+        let (event_x, remaining) = FP1616::try_parse(remaining)?;
+        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (buttons_len, remaining) = u16::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
+        let (group, remaining) = GroupInfo::try_parse(remaining)?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
         let result = KeyReleaseEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -14016,57 +12822,32 @@ pub struct ButtonPressEvent {
     pub axisvalues: Vec<Fp3232>,
 }
 impl ButtonPressEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods, new_remaining) = ModifierInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = GroupInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (button_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
-        remaining = new_remaining;
-        let (valuator_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        remaining = new_remaining;
-        let (axisvalues, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root_x, remaining) = FP1616::try_parse(remaining)?;
+        let (root_y, remaining) = FP1616::try_parse(remaining)?;
+        let (event_x, remaining) = FP1616::try_parse(remaining)?;
+        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (buttons_len, remaining) = u16::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
+        let (group, remaining) = GroupInfo::try_parse(remaining)?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
         let result = ButtonPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -14118,57 +12899,32 @@ pub struct ButtonReleaseEvent {
     pub axisvalues: Vec<Fp3232>,
 }
 impl ButtonReleaseEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods, new_remaining) = ModifierInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = GroupInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (button_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
-        remaining = new_remaining;
-        let (valuator_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        remaining = new_remaining;
-        let (axisvalues, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root_x, remaining) = FP1616::try_parse(remaining)?;
+        let (root_y, remaining) = FP1616::try_parse(remaining)?;
+        let (event_x, remaining) = FP1616::try_parse(remaining)?;
+        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (buttons_len, remaining) = u16::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
+        let (group, remaining) = GroupInfo::try_parse(remaining)?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
         let result = ButtonReleaseEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -14220,57 +12976,32 @@ pub struct MotionEvent {
     pub axisvalues: Vec<Fp3232>,
 }
 impl MotionEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods, new_remaining) = ModifierInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = GroupInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (button_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
-        remaining = new_remaining;
-        let (valuator_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        remaining = new_remaining;
-        let (axisvalues, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root_x, remaining) = FP1616::try_parse(remaining)?;
+        let (root_y, remaining) = FP1616::try_parse(remaining)?;
+        let (event_x, remaining) = FP1616::try_parse(remaining)?;
+        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (buttons_len, remaining) = u16::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
+        let (group, remaining) = GroupInfo::try_parse(remaining)?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
         let result = MotionEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -14476,54 +13207,30 @@ pub struct EnterEvent {
     pub buttons: Vec<u32>,
 }
 impl EnterEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (same_screen, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (focus, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods, new_remaining) = ModifierInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = GroupInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root_x, remaining) = FP1616::try_parse(remaining)?;
+        let (root_y, remaining) = FP1616::try_parse(remaining)?;
+        let (event_x, remaining) = FP1616::try_parse(remaining)?;
+        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (same_screen, remaining) = bool::try_parse(remaining)?;
+        let (focus, remaining) = bool::try_parse(remaining)?;
+        let (buttons_len, remaining) = u16::try_parse(remaining)?;
+        let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
+        let (group, remaining) = GroupInfo::try_parse(remaining)?;
+        let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
         let result = EnterEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, mode, detail, root, event, child, root_x, root_y, event_x, event_y, same_screen, focus, mods, group, buttons };
         Ok((result, remaining))
     }
@@ -14575,54 +13282,30 @@ pub struct LeaveEvent {
     pub buttons: Vec<u32>,
 }
 impl LeaveEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (same_screen, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (focus, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods, new_remaining) = ModifierInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = GroupInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root_x, remaining) = FP1616::try_parse(remaining)?;
+        let (root_y, remaining) = FP1616::try_parse(remaining)?;
+        let (event_x, remaining) = FP1616::try_parse(remaining)?;
+        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (same_screen, remaining) = bool::try_parse(remaining)?;
+        let (focus, remaining) = bool::try_parse(remaining)?;
+        let (buttons_len, remaining) = u16::try_parse(remaining)?;
+        let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
+        let (group, remaining) = GroupInfo::try_parse(remaining)?;
+        let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
         let result = LeaveEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, mode, detail, root, event, child, root_x, root_y, event_x, event_y, same_screen, focus, mods, group, buttons };
         Ok((result, remaining))
     }
@@ -14674,54 +13357,30 @@ pub struct FocusInEvent {
     pub buttons: Vec<u32>,
 }
 impl FocusInEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (same_screen, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (focus, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods, new_remaining) = ModifierInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = GroupInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root_x, remaining) = FP1616::try_parse(remaining)?;
+        let (root_y, remaining) = FP1616::try_parse(remaining)?;
+        let (event_x, remaining) = FP1616::try_parse(remaining)?;
+        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (same_screen, remaining) = bool::try_parse(remaining)?;
+        let (focus, remaining) = bool::try_parse(remaining)?;
+        let (buttons_len, remaining) = u16::try_parse(remaining)?;
+        let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
+        let (group, remaining) = GroupInfo::try_parse(remaining)?;
+        let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
         let result = FocusInEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, mode, detail, root, event, child, root_x, root_y, event_x, event_y, same_screen, focus, mods, group, buttons };
         Ok((result, remaining))
     }
@@ -14773,54 +13432,30 @@ pub struct FocusOutEvent {
     pub buttons: Vec<u32>,
 }
 impl FocusOutEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (same_screen, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (focus, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods, new_remaining) = ModifierInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = GroupInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root_x, remaining) = FP1616::try_parse(remaining)?;
+        let (root_y, remaining) = FP1616::try_parse(remaining)?;
+        let (event_x, remaining) = FP1616::try_parse(remaining)?;
+        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (same_screen, remaining) = bool::try_parse(remaining)?;
+        let (focus, remaining) = bool::try_parse(remaining)?;
+        let (buttons_len, remaining) = u16::try_parse(remaining)?;
+        let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
+        let (group, remaining) = GroupInfo::try_parse(remaining)?;
+        let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
         let result = FocusOutEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, mode, detail, root, event, child, root_x, root_y, event_x, event_y, same_screen, focus, mods, group, buttons };
         Ok((result, remaining))
     }
@@ -14934,19 +13569,13 @@ pub struct HierarchyInfo {
     pub flags: u32,
 }
 impl TryParse for HierarchyInfo {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (attachment, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (type_, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (enabled, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (attachment, remaining) = DeviceId::try_parse(remaining)?;
+        let (type_, remaining) = u8::try_parse(remaining)?;
+        let (enabled, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
         let result = HierarchyInfo { deviceid, attachment, type_, enabled, flags };
         Ok((result, remaining))
     }
@@ -15006,29 +13635,18 @@ pub struct HierarchyEvent {
     pub infos: Vec<HierarchyInfo>,
 }
 impl HierarchyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_infos, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(10..).ok_or(ParseError::ParseError)?;
-        let (infos, new_remaining) = crate::x11_utils::parse_list::<HierarchyInfo>(remaining, num_infos as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (num_infos, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(10..).ok_or(ParseError::ParseError)?;
+        let (infos, remaining) = crate::x11_utils::parse_list::<HierarchyInfo>(remaining, num_infos as usize)?;
         let result = HierarchyEvent { response_type, extension, sequence, length, event_type, deviceid, time, flags, infos };
         Ok((result, remaining))
     }
@@ -15132,27 +13750,17 @@ pub struct PropertyEvent {
     pub what: u8,
 }
 impl PropertyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (property, new_remaining) = ATOM::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (what, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(11..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (property, remaining) = ATOM::try_parse(remaining)?;
+        let (what, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
         let result = PropertyEvent { response_type, extension, sequence, length, event_type, deviceid, time, property, what };
         Ok((result, remaining))
     }
@@ -15195,37 +13803,22 @@ pub struct RawKeyPressEvent {
     pub axisvalues_raw: Vec<Fp3232>,
 }
 impl RawKeyPressEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (valuator_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        remaining = new_remaining;
-        let (axisvalues, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
-        let (axisvalues_raw, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
         let result = RawKeyPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -15268,37 +13861,22 @@ pub struct RawKeyReleaseEvent {
     pub axisvalues_raw: Vec<Fp3232>,
 }
 impl RawKeyReleaseEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (valuator_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        remaining = new_remaining;
-        let (axisvalues, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
-        let (axisvalues_raw, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
         let result = RawKeyReleaseEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -15341,37 +13919,22 @@ pub struct RawButtonPressEvent {
     pub axisvalues_raw: Vec<Fp3232>,
 }
 impl RawButtonPressEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (valuator_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        remaining = new_remaining;
-        let (axisvalues, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
-        let (axisvalues_raw, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
         let result = RawButtonPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -15414,37 +13977,22 @@ pub struct RawButtonReleaseEvent {
     pub axisvalues_raw: Vec<Fp3232>,
 }
 impl RawButtonReleaseEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (valuator_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        remaining = new_remaining;
-        let (axisvalues, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
-        let (axisvalues_raw, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
         let result = RawButtonReleaseEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -15487,37 +14035,22 @@ pub struct RawMotionEvent {
     pub axisvalues_raw: Vec<Fp3232>,
 }
 impl RawMotionEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (valuator_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        remaining = new_remaining;
-        let (axisvalues, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
-        let (axisvalues_raw, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
         let result = RawMotionEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -15600,57 +14133,32 @@ pub struct TouchBeginEvent {
     pub axisvalues: Vec<Fp3232>,
 }
 impl TouchBeginEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods, new_remaining) = ModifierInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = GroupInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (button_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
-        remaining = new_remaining;
-        let (valuator_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        remaining = new_remaining;
-        let (axisvalues, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root_x, remaining) = FP1616::try_parse(remaining)?;
+        let (root_y, remaining) = FP1616::try_parse(remaining)?;
+        let (event_x, remaining) = FP1616::try_parse(remaining)?;
+        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (buttons_len, remaining) = u16::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
+        let (group, remaining) = GroupInfo::try_parse(remaining)?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
         let result = TouchBeginEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -15702,57 +14210,32 @@ pub struct TouchUpdateEvent {
     pub axisvalues: Vec<Fp3232>,
 }
 impl TouchUpdateEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods, new_remaining) = ModifierInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = GroupInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (button_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
-        remaining = new_remaining;
-        let (valuator_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        remaining = new_remaining;
-        let (axisvalues, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root_x, remaining) = FP1616::try_parse(remaining)?;
+        let (root_y, remaining) = FP1616::try_parse(remaining)?;
+        let (event_x, remaining) = FP1616::try_parse(remaining)?;
+        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (buttons_len, remaining) = u16::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
+        let (group, remaining) = GroupInfo::try_parse(remaining)?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
         let result = TouchUpdateEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -15804,57 +14287,32 @@ pub struct TouchEndEvent {
     pub axisvalues: Vec<Fp3232>,
 }
 impl TouchEndEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (buttons_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mods, new_remaining) = ModifierInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (group, new_remaining) = GroupInfo::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (button_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
-        remaining = new_remaining;
-        let (valuator_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        remaining = new_remaining;
-        let (axisvalues, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root_x, remaining) = FP1616::try_parse(remaining)?;
+        let (root_y, remaining) = FP1616::try_parse(remaining)?;
+        let (event_x, remaining) = FP1616::try_parse(remaining)?;
+        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (buttons_len, remaining) = u16::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
+        let (group, remaining) = GroupInfo::try_parse(remaining)?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
         let result = TouchEndEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -15956,36 +14414,22 @@ pub struct TouchOwnershipEvent {
     pub flags: u32,
 }
 impl TouchOwnershipEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (touchid, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (child, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(8..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (touchid, remaining) = u32::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
         let result = TouchOwnershipEvent { response_type, extension, sequence, length, event_type, deviceid, time, touchid, root, event, child, sourceid, flags };
         Ok((result, remaining))
     }
@@ -16028,37 +14472,22 @@ pub struct RawTouchBeginEvent {
     pub axisvalues_raw: Vec<Fp3232>,
 }
 impl RawTouchBeginEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (valuator_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        remaining = new_remaining;
-        let (axisvalues, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
-        let (axisvalues_raw, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
         let result = RawTouchBeginEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -16101,37 +14530,22 @@ pub struct RawTouchUpdateEvent {
     pub axisvalues_raw: Vec<Fp3232>,
 }
 impl RawTouchUpdateEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (valuator_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        remaining = new_remaining;
-        let (axisvalues, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
-        let (axisvalues_raw, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
         let result = RawTouchUpdateEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -16174,37 +14588,22 @@ pub struct RawTouchEndEvent {
     pub axisvalues_raw: Vec<Fp3232>,
 }
 impl RawTouchEndEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valuators_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (valuator_mask, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        remaining = new_remaining;
-        let (axisvalues, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
-        let (axisvalues_raw, new_remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (detail, remaining) = u32::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (valuators_len, remaining) = u16::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
         let result = RawTouchEndEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -16315,45 +14714,26 @@ pub struct BarrierHitEvent {
     pub dy: Fp3232,
 }
 impl BarrierHitEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (eventid, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (barrier, new_remaining) = xfixes::BARRIER::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (dtime, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (root_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (dx, new_remaining) = Fp3232::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (dy, new_remaining) = Fp3232::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (eventid, remaining) = u32::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (barrier, remaining) = xfixes::BARRIER::try_parse(remaining)?;
+        let (dtime, remaining) = u32::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (root_x, remaining) = FP1616::try_parse(remaining)?;
+        let (root_y, remaining) = FP1616::try_parse(remaining)?;
+        let (dx, remaining) = Fp3232::try_parse(remaining)?;
+        let (dy, remaining) = Fp3232::try_parse(remaining)?;
         let result = BarrierHitEvent { response_type, extension, sequence, length, event_type, deviceid, time, eventid, root, event, barrier, dtime, flags, sourceid, root_x, root_y, dx, dy };
         Ok((result, remaining))
     }
@@ -16401,45 +14781,26 @@ pub struct BarrierLeaveEvent {
     pub dy: Fp3232,
 }
 impl BarrierLeaveEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (deviceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (time, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (eventid, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (barrier, new_remaining) = xfixes::BARRIER::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (dtime, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sourceid, new_remaining) = DeviceId::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (root_x, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root_y, new_remaining) = FP1616::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (dx, new_remaining) = Fp3232::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (dy, new_remaining) = Fp3232::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (eventid, remaining) = u32::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (barrier, remaining) = xfixes::BARRIER::try_parse(remaining)?;
+        let (dtime, remaining) = u32::try_parse(remaining)?;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (root_x, remaining) = FP1616::try_parse(remaining)?;
+        let (root_y, remaining) = FP1616::try_parse(remaining)?;
+        let (dx, remaining) = Fp3232::try_parse(remaining)?;
+        let (dy, remaining) = Fp3232::try_parse(remaining)?;
         let result = BarrierLeaveEvent { response_type, extension, sequence, length, event_type, deviceid, time, eventid, root, event, barrier, dtime, flags, sourceid, root_x, root_y, dx, dy };
         Ok((result, remaining))
     }
@@ -16467,128 +14828,128 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for BarrierLeaveEvent {
 pub struct EventForSend([u8; 32]);
 impl EventForSend {
     pub fn as_device_valuator(&self) -> DeviceValuatorEvent {
-        fn do_the_parse(value: &[u8]) -> Result<DeviceValuatorEvent, ParseError> {
-            let (event, remaining) = DeviceValuatorEvent::try_parse(value)?;
+        fn do_the_parse(remaining: &[u8]) -> Result<DeviceValuatorEvent, ParseError> {
+            let (event, remaining) = DeviceValuatorEvent::try_parse(remaining)?;
             let _ = remaining;
             Ok(event)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_device_key_press(&self) -> DeviceKeyPressEvent {
-        fn do_the_parse(value: &[u8]) -> Result<DeviceKeyPressEvent, ParseError> {
-            let (event, remaining) = DeviceKeyPressEvent::try_parse(value)?;
+        fn do_the_parse(remaining: &[u8]) -> Result<DeviceKeyPressEvent, ParseError> {
+            let (event, remaining) = DeviceKeyPressEvent::try_parse(remaining)?;
             let _ = remaining;
             Ok(event)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_device_key_release(&self) -> DeviceKeyReleaseEvent {
-        fn do_the_parse(value: &[u8]) -> Result<DeviceKeyReleaseEvent, ParseError> {
-            let (event, remaining) = DeviceKeyReleaseEvent::try_parse(value)?;
+        fn do_the_parse(remaining: &[u8]) -> Result<DeviceKeyReleaseEvent, ParseError> {
+            let (event, remaining) = DeviceKeyReleaseEvent::try_parse(remaining)?;
             let _ = remaining;
             Ok(event)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_device_button_press(&self) -> DeviceButtonPressEvent {
-        fn do_the_parse(value: &[u8]) -> Result<DeviceButtonPressEvent, ParseError> {
-            let (event, remaining) = DeviceButtonPressEvent::try_parse(value)?;
+        fn do_the_parse(remaining: &[u8]) -> Result<DeviceButtonPressEvent, ParseError> {
+            let (event, remaining) = DeviceButtonPressEvent::try_parse(remaining)?;
             let _ = remaining;
             Ok(event)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_device_button_release(&self) -> DeviceButtonReleaseEvent {
-        fn do_the_parse(value: &[u8]) -> Result<DeviceButtonReleaseEvent, ParseError> {
-            let (event, remaining) = DeviceButtonReleaseEvent::try_parse(value)?;
+        fn do_the_parse(remaining: &[u8]) -> Result<DeviceButtonReleaseEvent, ParseError> {
+            let (event, remaining) = DeviceButtonReleaseEvent::try_parse(remaining)?;
             let _ = remaining;
             Ok(event)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_device_motion_notify(&self) -> DeviceMotionNotifyEvent {
-        fn do_the_parse(value: &[u8]) -> Result<DeviceMotionNotifyEvent, ParseError> {
-            let (event, remaining) = DeviceMotionNotifyEvent::try_parse(value)?;
+        fn do_the_parse(remaining: &[u8]) -> Result<DeviceMotionNotifyEvent, ParseError> {
+            let (event, remaining) = DeviceMotionNotifyEvent::try_parse(remaining)?;
             let _ = remaining;
             Ok(event)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_device_focus_in(&self) -> DeviceFocusInEvent {
-        fn do_the_parse(value: &[u8]) -> Result<DeviceFocusInEvent, ParseError> {
-            let (event, remaining) = DeviceFocusInEvent::try_parse(value)?;
+        fn do_the_parse(remaining: &[u8]) -> Result<DeviceFocusInEvent, ParseError> {
+            let (event, remaining) = DeviceFocusInEvent::try_parse(remaining)?;
             let _ = remaining;
             Ok(event)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_device_focus_out(&self) -> DeviceFocusOutEvent {
-        fn do_the_parse(value: &[u8]) -> Result<DeviceFocusOutEvent, ParseError> {
-            let (event, remaining) = DeviceFocusOutEvent::try_parse(value)?;
+        fn do_the_parse(remaining: &[u8]) -> Result<DeviceFocusOutEvent, ParseError> {
+            let (event, remaining) = DeviceFocusOutEvent::try_parse(remaining)?;
             let _ = remaining;
             Ok(event)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_proximity_in(&self) -> ProximityInEvent {
-        fn do_the_parse(value: &[u8]) -> Result<ProximityInEvent, ParseError> {
-            let (event, remaining) = ProximityInEvent::try_parse(value)?;
+        fn do_the_parse(remaining: &[u8]) -> Result<ProximityInEvent, ParseError> {
+            let (event, remaining) = ProximityInEvent::try_parse(remaining)?;
             let _ = remaining;
             Ok(event)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_proximity_out(&self) -> ProximityOutEvent {
-        fn do_the_parse(value: &[u8]) -> Result<ProximityOutEvent, ParseError> {
-            let (event, remaining) = ProximityOutEvent::try_parse(value)?;
+        fn do_the_parse(remaining: &[u8]) -> Result<ProximityOutEvent, ParseError> {
+            let (event, remaining) = ProximityOutEvent::try_parse(remaining)?;
             let _ = remaining;
             Ok(event)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_device_state_notify(&self) -> DeviceStateNotifyEvent {
-        fn do_the_parse(value: &[u8]) -> Result<DeviceStateNotifyEvent, ParseError> {
-            let (event, remaining) = DeviceStateNotifyEvent::try_parse(value)?;
+        fn do_the_parse(remaining: &[u8]) -> Result<DeviceStateNotifyEvent, ParseError> {
+            let (event, remaining) = DeviceStateNotifyEvent::try_parse(remaining)?;
             let _ = remaining;
             Ok(event)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_device_mapping_notify(&self) -> DeviceMappingNotifyEvent {
-        fn do_the_parse(value: &[u8]) -> Result<DeviceMappingNotifyEvent, ParseError> {
-            let (event, remaining) = DeviceMappingNotifyEvent::try_parse(value)?;
+        fn do_the_parse(remaining: &[u8]) -> Result<DeviceMappingNotifyEvent, ParseError> {
+            let (event, remaining) = DeviceMappingNotifyEvent::try_parse(remaining)?;
             let _ = remaining;
             Ok(event)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_change_device_notify(&self) -> ChangeDeviceNotifyEvent {
-        fn do_the_parse(value: &[u8]) -> Result<ChangeDeviceNotifyEvent, ParseError> {
-            let (event, remaining) = ChangeDeviceNotifyEvent::try_parse(value)?;
+        fn do_the_parse(remaining: &[u8]) -> Result<ChangeDeviceNotifyEvent, ParseError> {
+            let (event, remaining) = ChangeDeviceNotifyEvent::try_parse(remaining)?;
             let _ = remaining;
             Ok(event)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_device_key_state_notify(&self) -> DeviceKeyStateNotifyEvent {
-        fn do_the_parse(value: &[u8]) -> Result<DeviceKeyStateNotifyEvent, ParseError> {
-            let (event, remaining) = DeviceKeyStateNotifyEvent::try_parse(value)?;
+        fn do_the_parse(remaining: &[u8]) -> Result<DeviceKeyStateNotifyEvent, ParseError> {
+            let (event, remaining) = DeviceKeyStateNotifyEvent::try_parse(remaining)?;
             let _ = remaining;
             Ok(event)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_device_button_state_notify(&self) -> DeviceButtonStateNotifyEvent {
-        fn do_the_parse(value: &[u8]) -> Result<DeviceButtonStateNotifyEvent, ParseError> {
-            let (event, remaining) = DeviceButtonStateNotifyEvent::try_parse(value)?;
+        fn do_the_parse(remaining: &[u8]) -> Result<DeviceButtonStateNotifyEvent, ParseError> {
+            let (event, remaining) = DeviceButtonStateNotifyEvent::try_parse(remaining)?;
             let _ = remaining;
             Ok(event)
         }
         do_the_parse(&self.0).unwrap()
     }
     pub fn as_device_presence_notify(&self) -> DevicePresenceNotifyEvent {
-        fn do_the_parse(value: &[u8]) -> Result<DevicePresenceNotifyEvent, ParseError> {
-            let (event, remaining) = DevicePresenceNotifyEvent::try_parse(value)?;
+        fn do_the_parse(remaining: &[u8]) -> Result<DevicePresenceNotifyEvent, ParseError> {
+            let (event, remaining) = DevicePresenceNotifyEvent::try_parse(remaining)?;
             let _ = remaining;
             Ok(event)
         }
@@ -16714,14 +15075,10 @@ pub struct DeviceError {
     pub sequence: u16,
 }
 impl DeviceError {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (error_code, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (error_code, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
         let result = DeviceError { response_type, error_code, sequence };
         Ok((result, remaining))
     }
@@ -16768,14 +15125,10 @@ pub struct EventError {
     pub sequence: u16,
 }
 impl EventError {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (error_code, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (error_code, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
         let result = EventError { response_type, error_code, sequence };
         Ok((result, remaining))
     }
@@ -16822,14 +15175,10 @@ pub struct ModeError {
     pub sequence: u16,
 }
 impl ModeError {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (error_code, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (error_code, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
         let result = ModeError { response_type, error_code, sequence };
         Ok((result, remaining))
     }
@@ -16876,14 +15225,10 @@ pub struct DeviceBusyError {
     pub sequence: u16,
 }
 impl DeviceBusyError {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (error_code, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (error_code, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
         let result = DeviceBusyError { response_type, error_code, sequence };
         Ok((result, remaining))
     }
@@ -16930,14 +15275,10 @@ pub struct ClassError {
     pub sequence: u16,
 }
 impl ClassError {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (error_code, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (error_code, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
         let result = ClassError { response_type, error_code, sequence };
         Ok((result, remaining))
     }

@@ -45,24 +45,20 @@ pub struct Printer {
     pub description: Vec<STRING8>,
 }
 impl TryParse for Printer {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (name_len, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (name, new_remaining) = crate::x11_utils::parse_list::<STRING8>(remaining, name_len as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let value = remaining;
+        let (name_len, remaining) = u32::try_parse(remaining)?;
+        let (name, remaining) = crate::x11_utils::parse_list::<STRING8>(remaining, name_len as usize)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let (desc_len, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (description, new_remaining) = crate::x11_utils::parse_list::<STRING8>(remaining, desc_len as usize)?;
-        remaining = new_remaining;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let (desc_len, remaining) = u32::try_parse(remaining)?;
+        let (description, remaining) = crate::x11_utils::parse_list::<STRING8>(remaining, desc_len as usize)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
         let result = Printer { name, description };
         Ok((result, remaining))
     }
@@ -402,19 +398,13 @@ pub struct PrintQueryVersionReply {
     pub minor_version: u16,
 }
 impl PrintQueryVersionReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (major_version, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (minor_version, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (major_version, remaining) = u16::try_parse(remaining)?;
+        let (minor_version, remaining) = u16::try_parse(remaining)?;
         let result = PrintQueryVersionReply { response_type, sequence, length, major_version, minor_version };
         Ok((result, remaining))
     }
@@ -469,20 +459,14 @@ pub struct PrintGetPrinterListReply {
     pub printers: Vec<Printer>,
 }
 impl PrintGetPrinterListReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (list_count, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (printers, new_remaining) = crate::x11_utils::parse_list::<Printer>(remaining, list_count as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (list_count, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let (printers, remaining) = crate::x11_utils::parse_list::<Printer>(remaining, list_count as usize)?;
         let result = PrintGetPrinterListReply { response_type, sequence, length, printers };
         Ok((result, remaining))
     }
@@ -607,17 +591,12 @@ pub struct PrintGetContextReply {
     pub context: u32,
 }
 impl PrintGetContextReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (context, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (context, remaining) = u32::try_parse(remaining)?;
         let result = PrintGetContextReply { response_type, sequence, length, context };
         Ok((result, remaining))
     }
@@ -681,17 +660,12 @@ pub struct PrintGetScreenOfContextReply {
     pub root: WINDOW,
 }
 impl PrintGetScreenOfContextReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (root, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (root, remaining) = WINDOW::try_parse(remaining)?;
         let result = PrintGetScreenOfContextReply { response_type, sequence, length, root };
         Ok((result, remaining))
     }
@@ -886,24 +860,16 @@ pub struct PrintGetDocumentDataReply {
     pub data: Vec<u8>,
 }
 impl PrintGetDocumentDataReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (status_code, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (finished_flag, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (data_len, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, data_len as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (status_code, remaining) = u32::try_parse(remaining)?;
+        let (finished_flag, remaining) = u32::try_parse(remaining)?;
+        let (data_len, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, data_len as usize)?;
         let result = PrintGetDocumentDataReply { response_type, sequence, length, status_code, finished_flag, data };
         Ok((result, remaining))
     }
@@ -1028,19 +994,13 @@ pub struct PrintInputSelectedReply {
     pub all_events_mask: u32,
 }
 impl PrintInputSelectedReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_mask, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (all_events_mask, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_mask, remaining) = u32::try_parse(remaining)?;
+        let (all_events_mask, remaining) = u32::try_parse(remaining)?;
         let result = PrintInputSelectedReply { response_type, sequence, length, event_mask, all_events_mask };
         Ok((result, remaining))
     }
@@ -1089,20 +1049,14 @@ pub struct PrintGetAttributesReply {
     pub attributes: Vec<STRING8>,
 }
 impl PrintGetAttributesReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (string_len, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (attributes, new_remaining) = crate::x11_utils::parse_list::<STRING8>(remaining, string_len as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (string_len, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let (attributes, remaining) = crate::x11_utils::parse_list::<STRING8>(remaining, string_len as usize)?;
         let result = PrintGetAttributesReply { response_type, sequence, length, attributes };
         Ok((result, remaining))
     }
@@ -1160,20 +1114,14 @@ pub struct PrintGetOneAttributesReply {
     pub value: Vec<STRING8>,
 }
 impl PrintGetOneAttributesReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (value_len, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (value, new_remaining) = crate::x11_utils::parse_list::<STRING8>(remaining, value_len as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (value_len, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let (value, remaining) = crate::x11_utils::parse_list::<STRING8>(remaining, value_len as usize)?;
         let result = PrintGetOneAttributesReply { response_type, sequence, length, value };
         Ok((result, remaining))
     }
@@ -1261,27 +1209,17 @@ pub struct PrintGetPageDimensionsReply {
     pub reproducible_height: u16,
 }
 impl PrintGetPageDimensionsReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (width, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (height, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (offset_x, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (offset_y, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (reproducible_width, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (reproducible_height, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (offset_x, remaining) = u16::try_parse(remaining)?;
+        let (offset_y, remaining) = u16::try_parse(remaining)?;
+        let (reproducible_width, remaining) = u16::try_parse(remaining)?;
+        let (reproducible_height, remaining) = u16::try_parse(remaining)?;
         let result = PrintGetPageDimensionsReply { response_type, sequence, length, width, height, offset_x, offset_y, reproducible_width, reproducible_height };
         Ok((result, remaining))
     }
@@ -1320,20 +1258,14 @@ pub struct PrintQueryScreensReply {
     pub roots: Vec<WINDOW>,
 }
 impl PrintQueryScreensReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (list_count, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (roots, new_remaining) = crate::x11_utils::parse_list::<WINDOW>(remaining, list_count as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (list_count, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let (roots, remaining) = crate::x11_utils::parse_list::<WINDOW>(remaining, list_count as usize)?;
         let result = PrintQueryScreensReply { response_type, sequence, length, roots };
         Ok((result, remaining))
     }
@@ -1383,18 +1315,12 @@ pub struct PrintSetImageResolutionReply {
     pub previous_resolutions: u16,
 }
 impl PrintSetImageResolutionReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (status, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (previous_resolutions, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (status, remaining) = bool::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (previous_resolutions, remaining) = u16::try_parse(remaining)?;
         let result = PrintSetImageResolutionReply { response_type, status, sequence, length, previous_resolutions };
         Ok((result, remaining))
     }
@@ -1438,17 +1364,12 @@ pub struct PrintGetImageResolutionReply {
     pub image_resolution: u16,
 }
 impl PrintGetImageResolutionReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (image_resolution, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (image_resolution, remaining) = u16::try_parse(remaining)?;
         let result = PrintGetImageResolutionReply { response_type, sequence, length, image_resolution };
         Ok((result, remaining))
     }
@@ -1471,18 +1392,12 @@ pub struct NotifyEvent {
     pub cancel: bool,
 }
 impl NotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (context, new_remaining) = PCONTEXT::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (cancel, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (context, remaining) = PCONTEXT::try_parse(remaining)?;
+        let (cancel, remaining) = bool::try_parse(remaining)?;
         let result = NotifyEvent { response_type, detail, sequence, context, cancel };
         Ok((result, remaining))
     }
@@ -1531,16 +1446,11 @@ pub struct AttributNotifyEvent {
     pub context: PCONTEXT,
 }
 impl AttributNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (detail, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (context, new_remaining) = PCONTEXT::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (detail, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (context, remaining) = PCONTEXT::try_parse(remaining)?;
         let result = AttributNotifyEvent { response_type, detail, sequence, context };
         Ok((result, remaining))
     }
@@ -1588,14 +1498,10 @@ pub struct BadContextError {
     pub sequence: u16,
 }
 impl BadContextError {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (error_code, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (error_code, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
         let result = BadContextError { response_type, error_code, sequence };
         Ok((result, remaining))
     }
@@ -1642,14 +1548,10 @@ pub struct BadSequenceError {
     pub sequence: u16,
 }
 impl BadSequenceError {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (error_code, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (error_code, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
         let result = BadSequenceError { response_type, error_code, sequence };
         Ok((result, remaining))
     }

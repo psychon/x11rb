@@ -319,12 +319,9 @@ pub struct Int64 {
     pub lo: u32,
 }
 impl TryParse for Int64 {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (hi, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (lo, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (hi, remaining) = i32::try_parse(remaining)?;
+        let (lo, remaining) = u32::try_parse(remaining)?;
         let result = Int64 { hi, lo };
         Ok((result, remaining))
     }
@@ -365,20 +362,16 @@ pub struct Systemcounter {
     pub name: Vec<u8>,
 }
 impl TryParse for Systemcounter {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (counter, new_remaining) = COUNTER::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (resolution, new_remaining) = Int64::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (name_len, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (name, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_len as usize)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let value = remaining;
+        let (counter, remaining) = COUNTER::try_parse(remaining)?;
+        let (resolution, remaining) = Int64::try_parse(remaining)?;
+        let (name_len, remaining) = u16::try_parse(remaining)?;
+        let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_len as usize)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
-        remaining = &remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
         let result = Systemcounter { counter, resolution, name };
         Ok((result, remaining))
     }
@@ -415,16 +408,11 @@ pub struct Trigger {
     pub test_type: u32,
 }
 impl TryParse for Trigger {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (counter, new_remaining) = COUNTER::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (wait_type, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (wait_value, new_remaining) = Int64::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (test_type, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (counter, remaining) = COUNTER::try_parse(remaining)?;
+        let (wait_type, remaining) = u32::try_parse(remaining)?;
+        let (wait_value, remaining) = Int64::try_parse(remaining)?;
+        let (test_type, remaining) = u32::try_parse(remaining)?;
         let result = Trigger { counter, wait_type, wait_value, test_type };
         Ok((result, remaining))
     }
@@ -480,12 +468,9 @@ pub struct Waitcondition {
     pub event_threshold: Int64,
 }
 impl TryParse for Waitcondition {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (trigger, new_remaining) = Trigger::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_threshold, new_remaining) = Int64::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (trigger, remaining) = Trigger::try_parse(remaining)?;
+        let (event_threshold, remaining) = Int64::try_parse(remaining)?;
         let result = Waitcondition { trigger, event_threshold };
         Ok((result, remaining))
     }
@@ -551,20 +536,13 @@ pub struct CounterError {
     pub major_opcode: u8,
 }
 impl CounterError {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (error_code, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bad_counter, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (minor_opcode, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (major_opcode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (error_code, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (bad_counter, remaining) = u32::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, remaining) = u8::try_parse(remaining)?;
         let result = CounterError { response_type, error_code, sequence, bad_counter, minor_opcode, major_opcode };
         Ok((result, remaining))
     }
@@ -616,20 +594,13 @@ pub struct AlarmError {
     pub major_opcode: u8,
 }
 impl AlarmError {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (error_code, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bad_alarm, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (minor_opcode, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (major_opcode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (error_code, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (bad_alarm, remaining) = u32::try_parse(remaining)?;
+        let (minor_opcode, remaining) = u16::try_parse(remaining)?;
+        let (major_opcode, remaining) = u8::try_parse(remaining)?;
         let result = AlarmError { response_type, error_code, sequence, bad_alarm, minor_opcode, major_opcode };
         Ok((result, remaining))
     }
@@ -703,20 +674,14 @@ pub struct InitializeReply {
     pub minor_version: u8,
 }
 impl InitializeReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (major_version, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (minor_version, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(22..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (major_version, remaining) = u8::try_parse(remaining)?;
+        let (minor_version, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let result = InitializeReply { response_type, sequence, length, major_version, minor_version };
         Ok((result, remaining))
     }
@@ -755,20 +720,14 @@ pub struct ListSystemCountersReply {
     pub counters: Vec<Systemcounter>,
 }
 impl ListSystemCountersReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (counters_len, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (counters, new_remaining) = crate::x11_utils::parse_list::<Systemcounter>(remaining, counters_len as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (counters_len, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
+        let (counters, remaining) = crate::x11_utils::parse_list::<Systemcounter>(remaining, counters_len as usize)?;
         let result = ListSystemCountersReply { response_type, sequence, length, counters };
         Ok((result, remaining))
     }
@@ -871,17 +830,12 @@ pub struct QueryCounterReply {
     pub counter_value: Int64,
 }
 impl QueryCounterReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (counter_value, new_remaining) = Int64::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (counter_value, remaining) = Int64::try_parse(remaining)?;
         let result = QueryCounterReply { response_type, sequence, length, counter_value };
         Ok((result, remaining))
     }
@@ -1307,24 +1261,16 @@ pub struct QueryAlarmReply {
     pub state: u8,
 }
 impl QueryAlarmReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (trigger, new_remaining) = Trigger::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (delta, new_remaining) = Int64::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (events, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (state, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (trigger, remaining) = Trigger::try_parse(remaining)?;
+        let (delta, remaining) = Int64::try_parse(remaining)?;
+        let (events, remaining) = bool::try_parse(remaining)?;
+        let (state, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let result = QueryAlarmReply { response_type, sequence, length, trigger, delta, events, state };
         Ok((result, remaining))
     }
@@ -1398,17 +1344,12 @@ pub struct GetPriorityReply {
     pub priority: i32,
 }
 impl GetPriorityReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (priority, new_remaining) = i32::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (priority, remaining) = i32::try_parse(remaining)?;
         let result = GetPriorityReply { response_type, sequence, length, priority };
         Ok((result, remaining))
     }
@@ -1562,18 +1503,13 @@ pub struct QueryFenceReply {
     pub triggered: bool,
 }
 impl QueryFenceReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (triggered, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(23..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (triggered, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
         let result = QueryFenceReply { response_type, sequence, length, triggered };
         Ok((result, remaining))
     }
@@ -1624,27 +1560,17 @@ pub struct CounterNotifyEvent {
     pub destroyed: bool,
 }
 impl CounterNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (kind, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (counter, new_remaining) = COUNTER::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (wait_value, new_remaining) = Int64::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (counter_value, new_remaining) = Int64::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (timestamp, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (count, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (destroyed, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (kind, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (counter, remaining) = COUNTER::try_parse(remaining)?;
+        let (wait_value, remaining) = Int64::try_parse(remaining)?;
+        let (counter_value, remaining) = Int64::try_parse(remaining)?;
+        let (timestamp, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (count, remaining) = u16::try_parse(remaining)?;
+        let (destroyed, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let result = CounterNotifyEvent { response_type, kind, sequence, counter, wait_value, counter_value, timestamp, count, destroyed };
         Ok((result, remaining))
     }
@@ -1701,25 +1627,16 @@ pub struct AlarmNotifyEvent {
     pub state: u8,
 }
 impl AlarmNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (kind, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (alarm, new_remaining) = ALARM::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (counter_value, new_remaining) = Int64::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (alarm_value, new_remaining) = Int64::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (timestamp, new_remaining) = TIMESTAMP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (state, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(3..).ok_or(ParseError::ParseError)?;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (kind, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (alarm, remaining) = ALARM::try_parse(remaining)?;
+        let (counter_value, remaining) = Int64::try_parse(remaining)?;
+        let (alarm_value, remaining) = Int64::try_parse(remaining)?;
+        let (timestamp, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (state, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let result = AlarmNotifyEvent { response_type, kind, sequence, alarm, counter_value, alarm_value, timestamp, state };
         Ok((result, remaining))
     }

@@ -464,12 +464,9 @@ pub struct Notify {
     pub serial: u32,
 }
 impl TryParse for Notify {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (window, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (serial, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (serial, remaining) = u32::try_parse(remaining)?;
         let result = Notify { window, serial };
         Ok((result, remaining))
     }
@@ -541,19 +538,13 @@ pub struct QueryVersionReply {
     pub minor_version: u32,
 }
 impl QueryVersionReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (major_version, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (minor_version, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (major_version, remaining) = u32::try_parse(remaining)?;
+        let (minor_version, remaining) = u32::try_parse(remaining)?;
         let result = QueryVersionReply { response_type, sequence, length, major_version, minor_version };
         Ok((result, remaining))
     }
@@ -801,17 +792,12 @@ pub struct QueryCapabilitiesReply {
     pub capabilities: u32,
 }
 impl QueryCapabilitiesReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (capabilities, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (capabilities, remaining) = u32::try_parse(remaining)?;
         let result = QueryCapabilitiesReply { response_type, sequence, length, capabilities };
         Ok((result, remaining))
     }
@@ -835,21 +821,14 @@ pub struct GenericEvent {
     pub event: EVENT,
 }
 impl GenericEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (evtype, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (event, new_remaining) = EVENT::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (evtype, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (event, remaining) = EVENT::try_parse(remaining)?;
         let result = GenericEvent { response_type, extension, sequence, length, evtype, event };
         Ok((result, remaining))
     }
@@ -912,41 +891,24 @@ pub struct ConfigureNotifyEvent {
     pub pixmap_flags: u32,
 }
 impl ConfigureNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (event, new_remaining) = EVENT::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (window, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (x, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (y, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (width, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (height, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (off_x, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (off_y, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (pixmap_width, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (pixmap_height, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (pixmap_flags, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (event, remaining) = EVENT::try_parse(remaining)?;
+        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (x, remaining) = i16::try_parse(remaining)?;
+        let (y, remaining) = i16::try_parse(remaining)?;
+        let (width, remaining) = u16::try_parse(remaining)?;
+        let (height, remaining) = u16::try_parse(remaining)?;
+        let (off_x, remaining) = i16::try_parse(remaining)?;
+        let (off_y, remaining) = i16::try_parse(remaining)?;
+        let (pixmap_width, remaining) = u16::try_parse(remaining)?;
+        let (pixmap_height, remaining) = u16::try_parse(remaining)?;
+        let (pixmap_flags, remaining) = u32::try_parse(remaining)?;
         let result = ConfigureNotifyEvent { response_type, extension, sequence, length, event_type, event, window, x, y, width, height, off_x, off_y, pixmap_width, pixmap_height, pixmap_flags };
         Ok((result, remaining))
     }
@@ -988,32 +950,19 @@ pub struct CompleteNotifyEvent {
     pub msc: u64,
 }
 impl CompleteNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (kind, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (mode, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event, new_remaining) = EVENT::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (window, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (serial, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (ust, new_remaining) = u64::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (msc, new_remaining) = u64::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (kind, remaining) = u8::try_parse(remaining)?;
+        let (mode, remaining) = u8::try_parse(remaining)?;
+        let (event, remaining) = EVENT::try_parse(remaining)?;
+        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (serial, remaining) = u32::try_parse(remaining)?;
+        let (ust, remaining) = u64::try_parse(remaining)?;
+        let (msc, remaining) = u64::try_parse(remaining)?;
         let result = CompleteNotifyEvent { response_type, extension, sequence, length, event_type, kind, mode, event, window, serial, ust, msc };
         Ok((result, remaining))
     }
@@ -1053,29 +1002,18 @@ pub struct IdleNotifyEvent {
     pub idle_fence: sync::FENCE,
 }
 impl IdleNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (event, new_remaining) = EVENT::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (window, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (serial, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (pixmap, new_remaining) = PIXMAP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (idle_fence, new_remaining) = sync::FENCE::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (event, remaining) = EVENT::try_parse(remaining)?;
+        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (serial, remaining) = u32::try_parse(remaining)?;
+        let (pixmap, remaining) = PIXMAP::try_parse(remaining)?;
+        let (idle_fence, remaining) = sync::FENCE::try_parse(remaining)?;
         let result = IdleNotifyEvent { response_type, extension, sequence, length, event_type, event, window, serial, pixmap, idle_fence };
         Ok((result, remaining))
     }
@@ -1130,58 +1068,34 @@ pub struct RedirectNotifyEvent {
     pub notifies: Vec<Notify>,
 }
 impl RedirectNotifyEvent {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (extension, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_type, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (update_window, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (event, new_remaining) = EVENT::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (event_window, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (window, new_remaining) = WINDOW::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (pixmap, new_remaining) = PIXMAP::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (serial, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valid_region, new_remaining) = xfixes::REGION::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (update_region, new_remaining) = xfixes::REGION::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (valid_rect, new_remaining) = Rectangle::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (update_rect, new_remaining) = Rectangle::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (x_off, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (y_off, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (target_crtc, new_remaining) = randr::CRTC::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (wait_fence, new_remaining) = sync::FENCE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (idle_fence, new_remaining) = sync::FENCE::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (options, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (target_msc, new_remaining) = u64::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (divisor, new_remaining) = u64::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (remainder, new_remaining) = u64::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let (extension, remaining) = u8::try_parse(remaining)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (event_type, remaining) = u16::try_parse(remaining)?;
+        let (update_window, remaining) = bool::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (event, remaining) = EVENT::try_parse(remaining)?;
+        let (event_window, remaining) = WINDOW::try_parse(remaining)?;
+        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (pixmap, remaining) = PIXMAP::try_parse(remaining)?;
+        let (serial, remaining) = u32::try_parse(remaining)?;
+        let (valid_region, remaining) = xfixes::REGION::try_parse(remaining)?;
+        let (update_region, remaining) = xfixes::REGION::try_parse(remaining)?;
+        let (valid_rect, remaining) = Rectangle::try_parse(remaining)?;
+        let (update_rect, remaining) = Rectangle::try_parse(remaining)?;
+        let (x_off, remaining) = i16::try_parse(remaining)?;
+        let (y_off, remaining) = i16::try_parse(remaining)?;
+        let (target_crtc, remaining) = randr::CRTC::try_parse(remaining)?;
+        let (wait_fence, remaining) = sync::FENCE::try_parse(remaining)?;
+        let (idle_fence, remaining) = sync::FENCE::try_parse(remaining)?;
+        let (options, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let (target_msc, remaining) = u64::try_parse(remaining)?;
+        let (divisor, remaining) = u64::try_parse(remaining)?;
+        let (remainder, remaining) = u64::try_parse(remaining)?;
+        let mut remaining = remaining;
         // Length is 'everything left in the input'
         let mut notifies = Vec::new();
         while !remaining.is_empty() {

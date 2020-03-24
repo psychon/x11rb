@@ -43,16 +43,11 @@ pub struct DrmClipRect {
     pub x3: i16,
 }
 impl TryParse for DrmClipRect {
-    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (x1, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (y1, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (x2, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (x3, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (x1, remaining) = i16::try_parse(remaining)?;
+        let (y1, remaining) = i16::try_parse(remaining)?;
+        let (x2, remaining) = i16::try_parse(remaining)?;
+        let (x3, remaining) = i16::try_parse(remaining)?;
         let result = DrmClipRect { x1, y1, x2, x3 };
         Ok((result, remaining))
     }
@@ -119,21 +114,14 @@ pub struct QueryVersionReply {
     pub dri_minor_patch: u32,
 }
 impl QueryVersionReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (dri_major_version, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (dri_minor_version, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (dri_minor_patch, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (dri_major_version, remaining) = u16::try_parse(remaining)?;
+        let (dri_minor_version, remaining) = u16::try_parse(remaining)?;
+        let (dri_minor_patch, remaining) = u32::try_parse(remaining)?;
         let result = QueryVersionReply { response_type, sequence, length, dri_major_version, dri_minor_version, dri_minor_patch };
         Ok((result, remaining))
     }
@@ -177,17 +165,12 @@ pub struct QueryDirectRenderingCapableReply {
     pub is_capable: bool,
 }
 impl QueryDirectRenderingCapableReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (is_capable, new_remaining) = bool::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (is_capable, remaining) = bool::try_parse(remaining)?;
         let result = QueryDirectRenderingCapableReply { response_type, sequence, length, is_capable };
         Ok((result, remaining))
     }
@@ -233,24 +216,16 @@ pub struct OpenConnectionReply {
     pub bus_id: Vec<u8>,
 }
 impl OpenConnectionReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sarea_handle_low, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (sarea_handle_high, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (bus_id_len, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (bus_id, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, bus_id_len as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (sarea_handle_low, remaining) = u32::try_parse(remaining)?;
+        let (sarea_handle_high, remaining) = u32::try_parse(remaining)?;
+        let (bus_id_len, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let (bus_id, remaining) = crate::x11_utils::parse_list::<u8>(remaining, bus_id_len as usize)?;
         let result = OpenConnectionReply { response_type, sequence, length, sarea_handle_low, sarea_handle_high, bus_id };
         Ok((result, remaining))
     }
@@ -322,26 +297,17 @@ pub struct GetClientDriverNameReply {
     pub client_driver_name: Vec<u8>,
 }
 impl GetClientDriverNameReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (client_driver_major_version, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (client_driver_minor_version, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (client_driver_patch_version, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (client_driver_name_len, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(8..).ok_or(ParseError::ParseError)?;
-        let (client_driver_name, new_remaining) = crate::x11_utils::parse_list::<u8>(remaining, client_driver_name_len as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (client_driver_major_version, remaining) = u32::try_parse(remaining)?;
+        let (client_driver_minor_version, remaining) = u32::try_parse(remaining)?;
+        let (client_driver_patch_version, remaining) = u32::try_parse(remaining)?;
+        let (client_driver_name_len, remaining) = u32::try_parse(remaining)?;
+        let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
+        let (client_driver_name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, client_driver_name_len as usize)?;
         let result = GetClientDriverNameReply { response_type, sequence, length, client_driver_major_version, client_driver_minor_version, client_driver_patch_version, client_driver_name };
         Ok((result, remaining))
     }
@@ -395,17 +361,12 @@ pub struct CreateContextReply {
     pub hw_context: u32,
 }
 impl CreateContextReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (hw_context, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (hw_context, remaining) = u32::try_parse(remaining)?;
         let result = CreateContextReply { response_type, sequence, length, hw_context };
         Ok((result, remaining))
     }
@@ -484,17 +445,12 @@ pub struct CreateDrawableReply {
     pub hw_drawable_handle: u32,
 }
 impl CreateDrawableReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (hw_drawable_handle, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (hw_drawable_handle, remaining) = u32::try_parse(remaining)?;
         let result = CreateDrawableReply { response_type, sequence, length, hw_drawable_handle };
         Ok((result, remaining))
     }
@@ -582,39 +538,23 @@ pub struct GetDrawableInfoReply {
     pub back_clip_rects: Vec<DrmClipRect>,
 }
 impl GetDrawableInfoReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (drawable_table_index, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (drawable_table_stamp, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (drawable_origin_x, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (drawable_origin_y, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (drawable_size_w, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (drawable_size_h, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_clip_rects, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (back_x, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (back_y, new_remaining) = i16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (num_back_clip_rects, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (clip_rects, new_remaining) = crate::x11_utils::parse_list::<DrmClipRect>(remaining, num_clip_rects as usize)?;
-        remaining = new_remaining;
-        let (back_clip_rects, new_remaining) = crate::x11_utils::parse_list::<DrmClipRect>(remaining, num_back_clip_rects as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (drawable_table_index, remaining) = u32::try_parse(remaining)?;
+        let (drawable_table_stamp, remaining) = u32::try_parse(remaining)?;
+        let (drawable_origin_x, remaining) = i16::try_parse(remaining)?;
+        let (drawable_origin_y, remaining) = i16::try_parse(remaining)?;
+        let (drawable_size_w, remaining) = i16::try_parse(remaining)?;
+        let (drawable_size_h, remaining) = i16::try_parse(remaining)?;
+        let (num_clip_rects, remaining) = u32::try_parse(remaining)?;
+        let (back_x, remaining) = i16::try_parse(remaining)?;
+        let (back_y, remaining) = i16::try_parse(remaining)?;
+        let (num_back_clip_rects, remaining) = u32::try_parse(remaining)?;
+        let (clip_rects, remaining) = crate::x11_utils::parse_list::<DrmClipRect>(remaining, num_clip_rects as usize)?;
+        let (back_clip_rects, remaining) = crate::x11_utils::parse_list::<DrmClipRect>(remaining, num_back_clip_rects as usize)?;
         let result = GetDrawableInfoReply { response_type, sequence, length, drawable_table_index, drawable_table_stamp, drawable_origin_x, drawable_origin_y, drawable_size_w, drawable_size_h, back_x, back_y, clip_rects, back_clip_rects };
         Ok((result, remaining))
     }
@@ -663,29 +603,18 @@ pub struct GetDeviceInfoReply {
     pub device_private: Vec<u32>,
 }
 impl GetDeviceInfoReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (framebuffer_handle_low, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (framebuffer_handle_high, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (framebuffer_origin_offset, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (framebuffer_size, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (framebuffer_stride, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_private_size, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (device_private, new_remaining) = crate::x11_utils::parse_list::<u32>(remaining, device_private_size as usize)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (framebuffer_handle_low, remaining) = u32::try_parse(remaining)?;
+        let (framebuffer_handle_high, remaining) = u32::try_parse(remaining)?;
+        let (framebuffer_origin_offset, remaining) = u32::try_parse(remaining)?;
+        let (framebuffer_size, remaining) = u32::try_parse(remaining)?;
+        let (framebuffer_stride, remaining) = u32::try_parse(remaining)?;
+        let (device_private_size, remaining) = u32::try_parse(remaining)?;
+        let (device_private, remaining) = crate::x11_utils::parse_list::<u32>(remaining, device_private_size as usize)?;
         let result = GetDeviceInfoReply { response_type, sequence, length, framebuffer_handle_low, framebuffer_handle_high, framebuffer_origin_offset, framebuffer_size, framebuffer_stride, device_private };
         Ok((result, remaining))
     }
@@ -734,17 +663,12 @@ pub struct AuthConnectionReply {
     pub authenticated: u32,
 }
 impl AuthConnectionReply {
-    pub(crate) fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let mut remaining = value;
-        let (response_type, new_remaining) = u8::try_parse(remaining)?;
-        remaining = new_remaining;
-        remaining = &remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (sequence, new_remaining) = u16::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (length, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
-        let (authenticated, new_remaining) = u32::try_parse(remaining)?;
-        remaining = new_remaining;
+    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (response_type, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let (sequence, remaining) = u16::try_parse(remaining)?;
+        let (length, remaining) = u32::try_parse(remaining)?;
+        let (authenticated, remaining) = u32::try_parse(remaining)?;
         let result = AuthConnectionReply { response_type, sequence, length, authenticated };
         Ok((result, remaining))
     }
