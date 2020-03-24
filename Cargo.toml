@@ -8,6 +8,12 @@ readme = "README.md"
 edition = "2018"
 license = "MIT OR Apache-2.0"
 keywords = ["xcb", "X11"]
+exclude = [
+    "/xcb-proto-1.14-1-g2b3559c",
+    "/Makefile",
+    "/rs_code_generator.py",
+    "/code_generator_helpers",
+]
 
 [dependencies]
 libc = { version = "0.2", optional = true }
