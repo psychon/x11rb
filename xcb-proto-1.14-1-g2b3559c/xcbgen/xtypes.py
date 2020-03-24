@@ -528,10 +528,10 @@ class ComplexType(Type):
     def resolve(self, module):
         if self.resolved:
             return
-        enum = None
 
         # Resolve all of our field datatypes.
         for child in list(self.elt):
+            enum = None
             if child.tag == 'pad':
                 field_name = 'pad' + str(module.pads)
                 fkey = 'CARD8'
