@@ -132,7 +132,6 @@ mod mock {
 
     #[repr(C)]
     struct ConnectionMock {
-        xcb_conn: xcb_connection_t,
         error: c_int,
         setup: Vec<u8>,
     }
@@ -171,18 +170,14 @@ mod mock {
         let setup = setup.serialize();
         assert_eq!(setup.len(), 4 * length_field as usize);
 
-        let mock = ConnectionMock {
-            xcb_conn: xcb_connection_t {
-                _unused: Default::default(),
-            },
-            error: 0,
-            setup,
-        };
+        let mock = ConnectionMock { error: 0, setup };
         Box::into_raw(Box::new(mock)) as _
     }
 
     pub(crate) unsafe fn xcb_disconnect(c: *mut xcb_connection_t) {
-        let _ = Box::from_raw(c);
+        // The pointer is suitable aligned since our xcb_connect() mock above created it
+        #[allow(clippy::cast_ptr_alignment)]
+        let _ = Box::from_raw(c as *mut ConnectionMock);
     }
 
     pub(crate) unsafe fn xcb_connection_has_error(c: *const xcb_connection_t) -> c_int {
