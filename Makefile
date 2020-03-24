@@ -1,4 +1,4 @@
-PROTO=xcbproto-1.13-6-ge79f6b0
+PROTO=xcb-proto-1.14-1-g2b3559c
 OUT=src/generated
 PYTHON=python
 
