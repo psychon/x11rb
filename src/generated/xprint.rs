@@ -1420,11 +1420,14 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for NotifyEvent {
 }
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let detail = input.detail.serialize();
         let sequence = input.sequence.serialize();
         let context = input.context.serialize();
+        let cancel = input.cancel.serialize();
         [
-            input.response_type, input.detail, sequence[0], sequence[1], context[0], context[1], context[2], context[3],
-            u8::from(input.cancel), /* trailing padding */ 0, 0, 0, 0, 0, 0, 0,
+            response_type[0], detail[0], sequence[0], sequence[1], context[0], context[1], context[2], context[3],
+            cancel[0], /* trailing padding */ 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -1473,10 +1476,12 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for AttributNotifyEvent {
 }
 impl From<&AttributNotifyEvent> for [u8; 32] {
     fn from(input: &AttributNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let detail = input.detail.serialize();
         let sequence = input.sequence.serialize();
         let context = input.context.serialize();
         [
-            input.response_type, input.detail, sequence[0], sequence[1], context[0], context[1], context[2], context[3],
+            response_type[0], detail[0], sequence[0], sequence[1], context[0], context[1], context[2], context[3],
             /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -1524,9 +1529,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadContextError {
 }
 impl From<&BadContextError> for [u8; 32] {
     fn from(input: &BadContextError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -1574,9 +1581,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadSequenceError {
 }
 impl From<&BadSequenceError> for [u8; 32] {
     fn from(input: &BadSequenceError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0

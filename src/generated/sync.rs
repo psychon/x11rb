@@ -403,9 +403,9 @@ impl Serialize for Systemcounter {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Trigger {
     pub counter: COUNTER,
-    pub wait_type: u32,
+    pub wait_type: VALUETYPE,
     pub wait_value: Int64,
-    pub test_type: u32,
+    pub test_type: TESTTYPE,
 }
 impl TryParse for Trigger {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -413,6 +413,8 @@ impl TryParse for Trigger {
         let (wait_type, remaining) = u32::try_parse(remaining)?;
         let (wait_value, remaining) = Int64::try_parse(remaining)?;
         let (test_type, remaining) = u32::try_parse(remaining)?;
+        let wait_type = wait_type.try_into()?;
+        let test_type = test_type.try_into()?;
         let result = Trigger { counter, wait_type, wait_value, test_type };
         Ok((result, remaining))
     }
@@ -427,9 +429,9 @@ impl Serialize for Trigger {
     type Bytes = [u8; 20];
     fn serialize(&self) -> Self::Bytes {
         let counter_bytes = self.counter.serialize();
-        let wait_type_bytes = self.wait_type.serialize();
+        let wait_type_bytes = Into::<u32>::into(self.wait_type).serialize();
         let wait_value_bytes = self.wait_value.serialize();
-        let test_type_bytes = self.test_type.serialize();
+        let test_type_bytes = Into::<u32>::into(self.test_type).serialize();
         [
             counter_bytes[0],
             counter_bytes[1],
@@ -456,9 +458,9 @@ impl Serialize for Trigger {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(20);
         self.counter.serialize_into(bytes);
-        self.wait_type.serialize_into(bytes);
+        Into::<u32>::into(self.wait_type).serialize_into(bytes);
         self.wait_value.serialize_into(bytes);
-        self.test_type.serialize_into(bytes);
+        Into::<u32>::into(self.test_type).serialize_into(bytes);
     }
 }
 
@@ -565,12 +567,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for CounterError {
 }
 impl From<&CounterError> for [u8; 32] {
     fn from(input: &CounterError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let bad_counter = input.bad_counter.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], bad_counter[0], bad_counter[1], bad_counter[2], bad_counter[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, /* trailing padding */ 0, 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], bad_counter[0], bad_counter[1], bad_counter[2], bad_counter[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], /* trailing padding */ 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -623,12 +628,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for AlarmError {
 }
 impl From<&AlarmError> for [u8; 32] {
     fn from(input: &AlarmError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let bad_alarm = input.bad_alarm.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], bad_alarm[0], bad_alarm[1], bad_alarm[2], bad_alarm[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, /* trailing padding */ 0, 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], bad_alarm[0], bad_alarm[1], bad_alarm[2], bad_alarm[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], /* trailing padding */ 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -1258,7 +1266,7 @@ pub struct QueryAlarmReply {
     pub trigger: Trigger,
     pub delta: Int64,
     pub events: bool,
-    pub state: u8,
+    pub state: ALARMSTATE,
 }
 impl QueryAlarmReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1271,6 +1279,7 @@ impl QueryAlarmReply {
         let (events, remaining) = bool::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let state = state.try_into()?;
         let result = QueryAlarmReply { response_type, sequence, length, trigger, delta, events, state };
         Ok((result, remaining))
     }
@@ -1593,17 +1602,20 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for CounterNotifyEvent {
 }
 impl From<&CounterNotifyEvent> for [u8; 32] {
     fn from(input: &CounterNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let kind = input.kind.serialize();
         let sequence = input.sequence.serialize();
         let counter = input.counter.serialize();
         let wait_value = input.wait_value.serialize();
         let counter_value = input.counter_value.serialize();
         let timestamp = input.timestamp.serialize();
         let count = input.count.serialize();
+        let destroyed = input.destroyed.serialize();
         [
-            input.response_type, input.kind, sequence[0], sequence[1], counter[0], counter[1], counter[2], counter[3],
+            response_type[0], kind[0], sequence[0], sequence[1], counter[0], counter[1], counter[2], counter[3],
             wait_value[0], wait_value[1], wait_value[2], wait_value[3], wait_value[4], wait_value[5], wait_value[6], wait_value[7],
             counter_value[0], counter_value[1], counter_value[2], counter_value[3], counter_value[4], counter_value[5], counter_value[6], counter_value[7],
-            timestamp[0], timestamp[1], timestamp[2], timestamp[3], count[0], count[1], u8::from(input.destroyed), 0
+            timestamp[0], timestamp[1], timestamp[2], timestamp[3], count[0], count[1], destroyed[0], 0
         ]
     }
 }
@@ -1624,7 +1636,7 @@ pub struct AlarmNotifyEvent {
     pub counter_value: Int64,
     pub alarm_value: Int64,
     pub timestamp: TIMESTAMP,
-    pub state: u8,
+    pub state: ALARMSTATE,
 }
 impl AlarmNotifyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1637,6 +1649,7 @@ impl AlarmNotifyEvent {
         let (timestamp, remaining) = TIMESTAMP::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let state = state.try_into()?;
         let result = AlarmNotifyEvent { response_type, kind, sequence, alarm, counter_value, alarm_value, timestamp, state };
         Ok((result, remaining))
     }
@@ -1659,16 +1672,19 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for AlarmNotifyEvent {
 }
 impl From<&AlarmNotifyEvent> for [u8; 32] {
     fn from(input: &AlarmNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let kind = input.kind.serialize();
         let sequence = input.sequence.serialize();
         let alarm = input.alarm.serialize();
         let counter_value = input.counter_value.serialize();
         let alarm_value = input.alarm_value.serialize();
         let timestamp = input.timestamp.serialize();
+        let state = Into::<u8>::into(input.state).serialize();
         [
-            input.response_type, input.kind, sequence[0], sequence[1], alarm[0], alarm[1], alarm[2], alarm[3],
+            response_type[0], kind[0], sequence[0], sequence[1], alarm[0], alarm[1], alarm[2], alarm[3],
             counter_value[0], counter_value[1], counter_value[2], counter_value[3], counter_value[4], counter_value[5], counter_value[6], counter_value[7],
             alarm_value[0], alarm_value[1], alarm_value[2], alarm_value[3], alarm_value[4], alarm_value[5], alarm_value[6], alarm_value[7],
-            timestamp[0], timestamp[1], timestamp[2], timestamp[3], input.state, 0, 0, 0
+            timestamp[0], timestamp[1], timestamp[2], timestamp[3], state[0], 0, 0, 0
         ]
     }
 }

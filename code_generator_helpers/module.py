@@ -421,7 +421,13 @@ class Module(object):
                         # the members individually and then assemble that into the output.
                         field_name_bytes = self._to_rust_variable(field.field_name + "_bytes")
                         # First serialize the value itself...
-                        self.out("let %s = self.%s.serialize();", field_name_bytes, field_name)
+                        if not hasattr(field, "has_enum_type"):
+                            self.out("let %s = self.%s.serialize();", field_name_bytes, field_name)
+                        else:
+                            # Turn the enum into the right on-the-wire-type
+                            wire_field_type = self._to_complex_owned_rust_type(field)
+                            self.out("let %s = Into::<%s>::into(self.%s).serialize();",
+                                     field_name_bytes, wire_field_type, field_name)
                         # ...then copy to the output.
                         for i in range(field.type.size):
                             result_bytes.append("%s[%d]" % (field_name_bytes, i))
@@ -441,7 +447,12 @@ class Module(object):
                         self.out("bytes.extend_from_slice(&[0; %s]);", field.type.nmemb)
                     else:
                         field_name = self._to_rust_variable(field.field_name)
-                        self.out("self.%s.serialize_into(bytes);", field_name)
+                        if not hasattr(field, "has_enum_type"):
+                            self.out("self.%s.serialize_into(bytes);", field_name)
+                        else:
+                            wire_field_type = self._to_complex_owned_rust_type(field)
+                            self.out("Into::<%s>::into(self.%s).serialize_into(bytes);",
+                                     wire_field_type, field_name)
             self.out("}")
         self.out("}")
 
@@ -507,7 +518,11 @@ class Module(object):
                             source = field_name
                         else:
                             # Get the value of this field from "self".
-                            source = "self.%s" % field_name
+                            if not hasattr(field, "has_enum_type"):
+                                source = "self.%s" % field_name
+                            else:
+                                wire_field_type = self._to_complex_owned_rust_type(field)
+                                source = "Into::<%s>::into(self.%s)" % (wire_field_type, field_name)
                         self.out("%s.serialize_into(bytes);", source)
             self.out("}")
         self.out("}")
@@ -718,13 +733,15 @@ class Module(object):
                                              field_name, i, field_name, i)
                                     for n in range(field.type.size):
                                         parts.append("%s_%d[%d]" % (field_name, i, n))
-                        elif field.type.size == 1:
-                            if is_bool(field.type):
-                                parts.append("u8::from(input.%s)" % field_name)
-                            else:
-                                parts.append("input.%s" % field_name)
                         else:
-                            self.out("let %s = input.%s.serialize();", field_name, field_name)
+                            if not hasattr(field, "has_enum_type"):
+                                self.out("let %s = input.%s.serialize();", field_name, field_name)
+                            else:
+                                # This field was interpreted as an enum. Turn it
+                                # back into something like u8.
+                                wire_field_type = self._to_complex_owned_rust_type(field)
+                                self.out("let %s = Into::<%s>::into(input.%s).serialize();",
+                                         field_name, wire_field_type, field_name)
                             for i in range(field.type.size):
                                 parts.append("%s[%d]" % (field_name, i))
 
@@ -839,6 +856,16 @@ class Module(object):
                 if not hasattr(field, 'is_length_field_for'):
                     parts.append(self._to_rust_variable(field.field_name))
 
+        # Handle turning things into enum instances where necessary. This needs
+        # to be down here, because the extra_try_parse_args handling above still
+        # needs the original wire type and not the enum.
+        # FIXME: Change the extra_try_parse_args handling so that this can be
+        # moved up into the above loop.
+        for field in fields:
+            if hasattr(field, "has_enum_type"):
+                field_name = self._to_rust_variable(field.field_name)
+                self.out("let %s = %s.try_into()?;", field_name, field_name)
+
         return parts
 
     def complex_type_struct(self, complex, name, parent_fields):
@@ -857,7 +884,24 @@ class Module(object):
             for field in complex.fields:
                 if field.visible or (not field.type.is_pad and not hasattr(field, "is_length_field_for")):
                     field_name = self._to_rust_variable(field.field_name)
-                    self.out("pub %s: %s,", field_name, self._to_complex_owned_rust_type(field))
+                    if field.enum is None:
+                        field_type = self._to_complex_owned_rust_type(field)
+                    else:
+                        enum = self.outer_module.get_type(field.enum)
+                        if enum.name != ('xcb', 'Gravity'):
+                            field_type = self._name(enum.name)
+                            field.has_enum_type = True
+                        else:
+                            # Cannot parse Gravity, because BitForget and
+                            # WinUnmap both have value 0. The context decides
+                            # which of the two types is meant. :-(
+                            # However, this only makes a difference for
+                            # GetWindowAttributesReply (fields bit_gravity and
+                            # win_gravity).
+                            # FIXME: Handle this as a special case so that the
+                            # enum can still be used.
+                            field_type = self._to_complex_owned_rust_type(field)
+                    self.out("pub %s: %s,", field_name, field_type)
         self.out("}")
 
     def complex_type(self, complex, name, impl_try_parse, parent_fields):

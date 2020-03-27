@@ -455,7 +455,7 @@ pub const SELECTION_NOTIFY_EVENT: u8 = 0;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SelectionNotifyEvent {
     pub response_type: u8,
-    pub subtype: u8,
+    pub subtype: SelectionEvent,
     pub sequence: u16,
     pub window: WINDOW,
     pub owner: WINDOW,
@@ -474,6 +474,7 @@ impl SelectionNotifyEvent {
         let (timestamp, remaining) = TIMESTAMP::try_parse(remaining)?;
         let (selection_timestamp, remaining) = TIMESTAMP::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
+        let subtype = subtype.try_into()?;
         let result = SelectionNotifyEvent { response_type, subtype, sequence, window, owner, selection, timestamp, selection_timestamp };
         Ok((result, remaining))
     }
@@ -496,6 +497,8 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for SelectionNotifyEvent {
 }
 impl From<&SelectionNotifyEvent> for [u8; 32] {
     fn from(input: &SelectionNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let subtype = Into::<u8>::into(input.subtype).serialize();
         let sequence = input.sequence.serialize();
         let window = input.window.serialize();
         let owner = input.owner.serialize();
@@ -503,7 +506,7 @@ impl From<&SelectionNotifyEvent> for [u8; 32] {
         let timestamp = input.timestamp.serialize();
         let selection_timestamp = input.selection_timestamp.serialize();
         [
-            input.response_type, input.subtype, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
+            response_type[0], subtype[0], sequence[0], sequence[1], window[0], window[1], window[2], window[3],
             owner[0], owner[1], owner[2], owner[3], selection[0], selection[1], selection[2], selection[3],
             timestamp[0], timestamp[1], timestamp[2], timestamp[3], selection_timestamp[0], selection_timestamp[1], selection_timestamp[2], selection_timestamp[3],
             0, 0, 0, 0, 0, 0, 0, 0
@@ -675,7 +678,7 @@ pub const CURSOR_NOTIFY_EVENT: u8 = 1;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CursorNotifyEvent {
     pub response_type: u8,
-    pub subtype: u8,
+    pub subtype: CursorNotify,
     pub sequence: u16,
     pub window: WINDOW,
     pub cursor_serial: u32,
@@ -692,6 +695,7 @@ impl CursorNotifyEvent {
         let (timestamp, remaining) = TIMESTAMP::try_parse(remaining)?;
         let (name, remaining) = ATOM::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
+        let subtype = subtype.try_into()?;
         let result = CursorNotifyEvent { response_type, subtype, sequence, window, cursor_serial, timestamp, name };
         Ok((result, remaining))
     }
@@ -714,13 +718,15 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for CursorNotifyEvent {
 }
 impl From<&CursorNotifyEvent> for [u8; 32] {
     fn from(input: &CursorNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let subtype = Into::<u8>::into(input.subtype).serialize();
         let sequence = input.sequence.serialize();
         let window = input.window.serialize();
         let cursor_serial = input.cursor_serial.serialize();
         let timestamp = input.timestamp.serialize();
         let name = input.name.serialize();
         [
-            input.response_type, input.subtype, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
+            response_type[0], subtype[0], sequence[0], sequence[1], window[0], window[1], window[2], window[3],
             cursor_serial[0], cursor_serial[1], cursor_serial[2], cursor_serial[3], timestamp[0], timestamp[1], timestamp[2], timestamp[3],
             name[0], name[1], name[2], name[3], 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -859,9 +865,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadRegionError {
 }
 impl From<&BadRegionError> for [u8; 32] {
     fn from(input: &BadRegionError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0

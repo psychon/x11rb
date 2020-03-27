@@ -63,7 +63,9 @@ mod fake_stream {
     use x11rb::connection::SequenceNumber;
     use x11rb::errors::ConnectError;
     use x11rb::rust_connection::RustConnection;
-    use x11rb::xproto::{Setup, CLIENT_MESSAGE_EVENT, GET_INPUT_FOCUS_REQUEST, SEND_EVENT_REQUEST};
+    use x11rb::xproto::{
+        ImageOrder, Setup, CLIENT_MESSAGE_EVENT, GET_INPUT_FOCUS_REQUEST, SEND_EVENT_REQUEST,
+    };
 
     /// Create a new `RustConnection` connected to a fake stream
     pub(crate) fn connect() -> Result<RustConnection<FakeStreamRead, FakeStreamWrite>, ConnectError>
@@ -78,8 +80,8 @@ mod fake_stream {
             resource_id_mask: 0xff,
             motion_buffer_size: 0,
             maximum_request_length: 0,
-            image_byte_order: 0,
-            bitmap_format_bit_order: 0,
+            image_byte_order: ImageOrder::LSBFirst,
+            bitmap_format_bit_order: ImageOrder::LSBFirst,
             bitmap_format_scanline_unit: 0,
             bitmap_format_scanline_pad: 0,
             min_keycode: 0,

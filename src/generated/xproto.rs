@@ -368,7 +368,7 @@ impl TryFrom<u32> for VisualClass {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Visualtype {
     pub visual_id: VISUALID,
-    pub class: u8,
+    pub class: VisualClass,
     pub bits_per_rgb_value: u8,
     pub colormap_entries: u16,
     pub red_mask: u32,
@@ -385,6 +385,7 @@ impl TryParse for Visualtype {
         let (green_mask, remaining) = u32::try_parse(remaining)?;
         let (blue_mask, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
+        let class = class.try_into()?;
         let result = Visualtype { visual_id, class, bits_per_rgb_value, colormap_entries, red_mask, green_mask, blue_mask };
         Ok((result, remaining))
     }
@@ -399,7 +400,7 @@ impl Serialize for Visualtype {
     type Bytes = [u8; 24];
     fn serialize(&self) -> Self::Bytes {
         let visual_id_bytes = self.visual_id.serialize();
-        let class_bytes = self.class.serialize();
+        let class_bytes = Into::<u8>::into(self.class).serialize();
         let bits_per_rgb_value_bytes = self.bits_per_rgb_value.serialize();
         let colormap_entries_bytes = self.colormap_entries.serialize();
         let red_mask_bytes = self.red_mask.serialize();
@@ -435,7 +436,7 @@ impl Serialize for Visualtype {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(24);
         self.visual_id.serialize_into(bytes);
-        self.class.serialize_into(bytes);
+        Into::<u8>::into(self.class).serialize_into(bytes);
         self.bits_per_rgb_value.serialize_into(bytes);
         self.colormap_entries.serialize_into(bytes);
         self.red_mask.serialize_into(bytes);
@@ -667,7 +668,7 @@ pub struct Screen {
     pub min_installed_maps: u16,
     pub max_installed_maps: u16,
     pub root_visual: VISUALID,
-    pub backing_stores: u8,
+    pub backing_stores: BackingStore,
     pub save_unders: bool,
     pub root_depth: u8,
     pub allowed_depths: Vec<Depth>,
@@ -691,6 +692,7 @@ impl TryParse for Screen {
         let (root_depth, remaining) = u8::try_parse(remaining)?;
         let (allowed_depths_len, remaining) = u8::try_parse(remaining)?;
         let (allowed_depths, remaining) = crate::x11_utils::parse_list::<Depth>(remaining, allowed_depths_len as usize)?;
+        let backing_stores = backing_stores.try_into()?;
         let result = Screen { root, default_colormap, white_pixel, black_pixel, current_input_masks, width_in_pixels, height_in_pixels, width_in_millimeters, height_in_millimeters, min_installed_maps, max_installed_maps, root_visual, backing_stores, save_unders, root_depth, allowed_depths };
         Ok((result, remaining))
     }
@@ -722,7 +724,7 @@ impl Serialize for Screen {
         self.min_installed_maps.serialize_into(bytes);
         self.max_installed_maps.serialize_into(bytes);
         self.root_visual.serialize_into(bytes);
-        self.backing_stores.serialize_into(bytes);
+        Into::<u8>::into(self.backing_stores).serialize_into(bytes);
         self.save_unders.serialize_into(bytes);
         self.root_depth.serialize_into(bytes);
         let allowed_depths_len = self.allowed_depths.len() as u8;
@@ -951,8 +953,8 @@ pub struct Setup {
     pub resource_id_mask: u32,
     pub motion_buffer_size: u32,
     pub maximum_request_length: u16,
-    pub image_byte_order: u8,
-    pub bitmap_format_bit_order: u8,
+    pub image_byte_order: ImageOrder,
+    pub bitmap_format_bit_order: ImageOrder,
     pub bitmap_format_scanline_unit: u8,
     pub bitmap_format_scanline_pad: u8,
     pub min_keycode: KEYCODE,
@@ -991,6 +993,8 @@ impl TryParse for Setup {
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
         let (pixmap_formats, remaining) = crate::x11_utils::parse_list::<Format>(remaining, pixmap_formats_len as usize)?;
         let (roots, remaining) = crate::x11_utils::parse_list::<Screen>(remaining, roots_len as usize)?;
+        let image_byte_order = image_byte_order.try_into()?;
+        let bitmap_format_bit_order = bitmap_format_bit_order.try_into()?;
         let result = Setup { status, protocol_major_version, protocol_minor_version, length, release_number, resource_id_base, resource_id_mask, motion_buffer_size, maximum_request_length, image_byte_order, bitmap_format_bit_order, bitmap_format_scanline_unit, bitmap_format_scanline_pad, min_keycode, max_keycode, vendor, pixmap_formats, roots };
         Ok((result, remaining))
     }
@@ -1026,8 +1030,8 @@ impl Serialize for Setup {
         roots_len.serialize_into(bytes);
         let pixmap_formats_len = self.pixmap_formats.len() as u8;
         pixmap_formats_len.serialize_into(bytes);
-        self.image_byte_order.serialize_into(bytes);
-        self.bitmap_format_bit_order.serialize_into(bytes);
+        Into::<u8>::into(self.image_byte_order).serialize_into(bytes);
+        Into::<u8>::into(self.bitmap_format_bit_order).serialize_into(bytes);
         self.bitmap_format_scanline_unit.serialize_into(bytes);
         self.bitmap_format_scanline_pad.serialize_into(bytes);
         self.min_keycode.serialize_into(bytes);
@@ -1328,6 +1332,8 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for KeyPressEvent {
 }
 impl From<&KeyPressEvent> for [u8; 32] {
     fn from(input: &KeyPressEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let detail = input.detail.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let root = input.root.serialize();
@@ -1338,11 +1344,12 @@ impl From<&KeyPressEvent> for [u8; 32] {
         let event_x = input.event_x.serialize();
         let event_y = input.event_y.serialize();
         let state = input.state.serialize();
+        let same_screen = input.same_screen.serialize();
         [
-            input.response_type, input.detail, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
             root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
             child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], u8::from(input.same_screen), 0
+            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], 0
         ]
     }
 }
@@ -1433,6 +1440,8 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for KeyReleaseEvent {
 }
 impl From<&KeyReleaseEvent> for [u8; 32] {
     fn from(input: &KeyReleaseEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let detail = input.detail.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let root = input.root.serialize();
@@ -1443,11 +1452,12 @@ impl From<&KeyReleaseEvent> for [u8; 32] {
         let event_x = input.event_x.serialize();
         let event_y = input.event_y.serialize();
         let state = input.state.serialize();
+        let same_screen = input.same_screen.serialize();
         [
-            input.response_type, input.detail, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
             root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
             child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], u8::from(input.same_screen), 0
+            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], 0
         ]
     }
 }
@@ -1597,6 +1607,8 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ButtonPressEvent {
 }
 impl From<&ButtonPressEvent> for [u8; 32] {
     fn from(input: &ButtonPressEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let detail = input.detail.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let root = input.root.serialize();
@@ -1607,11 +1619,12 @@ impl From<&ButtonPressEvent> for [u8; 32] {
         let event_x = input.event_x.serialize();
         let event_y = input.event_y.serialize();
         let state = input.state.serialize();
+        let same_screen = input.same_screen.serialize();
         [
-            input.response_type, input.detail, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
             root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
             child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], u8::from(input.same_screen), 0
+            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], 0
         ]
     }
 }
@@ -1702,6 +1715,8 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ButtonReleaseEvent {
 }
 impl From<&ButtonReleaseEvent> for [u8; 32] {
     fn from(input: &ButtonReleaseEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let detail = input.detail.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let root = input.root.serialize();
@@ -1712,11 +1727,12 @@ impl From<&ButtonReleaseEvent> for [u8; 32] {
         let event_x = input.event_x.serialize();
         let event_y = input.event_y.serialize();
         let state = input.state.serialize();
+        let same_screen = input.same_screen.serialize();
         [
-            input.response_type, input.detail, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
             root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
             child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], u8::from(input.same_screen), 0
+            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], 0
         ]
     }
 }
@@ -1818,7 +1834,7 @@ pub const MOTION_NOTIFY_EVENT: u8 = 6;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MotionNotifyEvent {
     pub response_type: u8,
-    pub detail: u8,
+    pub detail: Motion,
     pub sequence: u16,
     pub time: TIMESTAMP,
     pub root: WINDOW,
@@ -1847,6 +1863,7 @@ impl MotionNotifyEvent {
         let (state, remaining) = u16::try_parse(remaining)?;
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let detail = detail.try_into()?;
         let result = MotionNotifyEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, same_screen };
         Ok((result, remaining))
     }
@@ -1869,6 +1886,8 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for MotionNotifyEvent {
 }
 impl From<&MotionNotifyEvent> for [u8; 32] {
     fn from(input: &MotionNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let detail = Into::<u8>::into(input.detail).serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let root = input.root.serialize();
@@ -1879,11 +1898,12 @@ impl From<&MotionNotifyEvent> for [u8; 32] {
         let event_x = input.event_x.serialize();
         let event_y = input.event_y.serialize();
         let state = input.state.serialize();
+        let same_screen = input.same_screen.serialize();
         [
-            input.response_type, input.detail, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
             root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
             child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], u8::from(input.same_screen), 0
+            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], 0
         ]
     }
 }
@@ -2061,7 +2081,7 @@ pub const ENTER_NOTIFY_EVENT: u8 = 7;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EnterNotifyEvent {
     pub response_type: u8,
-    pub detail: u8,
+    pub detail: NotifyDetail,
     pub sequence: u16,
     pub time: TIMESTAMP,
     pub root: WINDOW,
@@ -2072,7 +2092,7 @@ pub struct EnterNotifyEvent {
     pub event_x: i16,
     pub event_y: i16,
     pub state: u16,
-    pub mode: u8,
+    pub mode: NotifyMode,
     pub same_screen_focus: u8,
 }
 impl EnterNotifyEvent {
@@ -2091,6 +2111,8 @@ impl EnterNotifyEvent {
         let (state, remaining) = u16::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (same_screen_focus, remaining) = u8::try_parse(remaining)?;
+        let detail = detail.try_into()?;
+        let mode = mode.try_into()?;
         let result = EnterNotifyEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, mode, same_screen_focus };
         Ok((result, remaining))
     }
@@ -2113,6 +2135,8 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for EnterNotifyEvent {
 }
 impl From<&EnterNotifyEvent> for [u8; 32] {
     fn from(input: &EnterNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let detail = Into::<u8>::into(input.detail).serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let root = input.root.serialize();
@@ -2123,11 +2147,13 @@ impl From<&EnterNotifyEvent> for [u8; 32] {
         let event_x = input.event_x.serialize();
         let event_y = input.event_y.serialize();
         let state = input.state.serialize();
+        let mode = Into::<u8>::into(input.mode).serialize();
+        let same_screen_focus = input.same_screen_focus.serialize();
         [
-            input.response_type, input.detail, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
             root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
             child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], input.mode, input.same_screen_focus
+            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], mode[0], same_screen_focus[0]
         ]
     }
 }
@@ -2157,7 +2183,7 @@ pub const LEAVE_NOTIFY_EVENT: u8 = 8;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LeaveNotifyEvent {
     pub response_type: u8,
-    pub detail: u8,
+    pub detail: NotifyDetail,
     pub sequence: u16,
     pub time: TIMESTAMP,
     pub root: WINDOW,
@@ -2168,7 +2194,7 @@ pub struct LeaveNotifyEvent {
     pub event_x: i16,
     pub event_y: i16,
     pub state: u16,
-    pub mode: u8,
+    pub mode: NotifyMode,
     pub same_screen_focus: u8,
 }
 impl LeaveNotifyEvent {
@@ -2187,6 +2213,8 @@ impl LeaveNotifyEvent {
         let (state, remaining) = u16::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (same_screen_focus, remaining) = u8::try_parse(remaining)?;
+        let detail = detail.try_into()?;
+        let mode = mode.try_into()?;
         let result = LeaveNotifyEvent { response_type, detail, sequence, time, root, event, child, root_x, root_y, event_x, event_y, state, mode, same_screen_focus };
         Ok((result, remaining))
     }
@@ -2209,6 +2237,8 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for LeaveNotifyEvent {
 }
 impl From<&LeaveNotifyEvent> for [u8; 32] {
     fn from(input: &LeaveNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let detail = Into::<u8>::into(input.detail).serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let root = input.root.serialize();
@@ -2219,11 +2249,13 @@ impl From<&LeaveNotifyEvent> for [u8; 32] {
         let event_x = input.event_x.serialize();
         let event_y = input.event_y.serialize();
         let state = input.state.serialize();
+        let mode = Into::<u8>::into(input.mode).serialize();
+        let same_screen_focus = input.same_screen_focus.serialize();
         [
-            input.response_type, input.detail, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
             root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
             child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], input.mode, input.same_screen_focus
+            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], mode[0], same_screen_focus[0]
         ]
     }
 }
@@ -2245,10 +2277,10 @@ pub const FOCUS_IN_EVENT: u8 = 9;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FocusInEvent {
     pub response_type: u8,
-    pub detail: u8,
+    pub detail: NotifyDetail,
     pub sequence: u16,
     pub event: WINDOW,
-    pub mode: u8,
+    pub mode: NotifyMode,
 }
 impl FocusInEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2258,6 +2290,8 @@ impl FocusInEvent {
         let (event, remaining) = WINDOW::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let detail = detail.try_into()?;
+        let mode = mode.try_into()?;
         let result = FocusInEvent { response_type, detail, sequence, event, mode };
         Ok((result, remaining))
     }
@@ -2280,11 +2314,14 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for FocusInEvent {
 }
 impl From<&FocusInEvent> for [u8; 32] {
     fn from(input: &FocusInEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let detail = Into::<u8>::into(input.detail).serialize();
         let sequence = input.sequence.serialize();
         let event = input.event.serialize();
+        let mode = Into::<u8>::into(input.mode).serialize();
         [
-            input.response_type, input.detail, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
-            input.mode, 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], detail[0], sequence[0], sequence[1], event[0], event[1], event[2], event[3],
+            mode[0], 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -2308,10 +2345,10 @@ pub const FOCUS_OUT_EVENT: u8 = 10;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FocusOutEvent {
     pub response_type: u8,
-    pub detail: u8,
+    pub detail: NotifyDetail,
     pub sequence: u16,
     pub event: WINDOW,
-    pub mode: u8,
+    pub mode: NotifyMode,
 }
 impl FocusOutEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2321,6 +2358,8 @@ impl FocusOutEvent {
         let (event, remaining) = WINDOW::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let detail = detail.try_into()?;
+        let mode = mode.try_into()?;
         let result = FocusOutEvent { response_type, detail, sequence, event, mode };
         Ok((result, remaining))
     }
@@ -2343,11 +2382,14 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for FocusOutEvent {
 }
 impl From<&FocusOutEvent> for [u8; 32] {
     fn from(input: &FocusOutEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let detail = Into::<u8>::into(input.detail).serialize();
         let sequence = input.sequence.serialize();
         let event = input.event.serialize();
+        let mode = Into::<u8>::into(input.mode).serialize();
         [
-            input.response_type, input.detail, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
-            input.mode, 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], detail[0], sequence[0], sequence[1], event[0], event[1], event[2], event[3],
+            mode[0], 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -2455,8 +2497,9 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for KeymapNotifyEvent {
 }
 impl From<&KeymapNotifyEvent> for [u8; 32] {
     fn from(input: &KeymapNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
         [
-            input.response_type, input.keys[0], input.keys[1], input.keys[2], input.keys[3], input.keys[4], input.keys[5], input.keys[6],
+            response_type[0], input.keys[0], input.keys[1], input.keys[2], input.keys[3], input.keys[4], input.keys[5], input.keys[6],
             input.keys[7], input.keys[8], input.keys[9], input.keys[10], input.keys[11], input.keys[12], input.keys[13], input.keys[14],
             input.keys[15], input.keys[16], input.keys[17], input.keys[18], input.keys[19], input.keys[20], input.keys[21], input.keys[22],
             input.keys[23], input.keys[24], input.keys[25], input.keys[26], input.keys[27], input.keys[28], input.keys[29], input.keys[30]
@@ -2532,6 +2575,7 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ExposeEvent {
 }
 impl From<&ExposeEvent> for [u8; 32] {
     fn from(input: &ExposeEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let window = input.window.serialize();
         let x = input.x.serialize();
@@ -2540,7 +2584,7 @@ impl From<&ExposeEvent> for [u8; 32] {
         let height = input.height.serialize();
         let count = input.count.serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
+            response_type[0], 0, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
             x[0], x[1], y[0], y[1], width[0], width[1], height[0], height[1],
             count[0], count[1], 0, 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -2604,6 +2648,7 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for GraphicsExposureEvent {
 }
 impl From<&GraphicsExposureEvent> for [u8; 32] {
     fn from(input: &GraphicsExposureEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let drawable = input.drawable.serialize();
         let x = input.x.serialize();
@@ -2612,10 +2657,11 @@ impl From<&GraphicsExposureEvent> for [u8; 32] {
         let height = input.height.serialize();
         let minor_opcode = input.minor_opcode.serialize();
         let count = input.count.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], drawable[0], drawable[1], drawable[2], drawable[3],
+            response_type[0], 0, sequence[0], sequence[1], drawable[0], drawable[1], drawable[2], drawable[3],
             x[0], x[1], y[0], y[1], width[0], width[1], height[0], height[1],
-            minor_opcode[0], minor_opcode[1], count[0], count[1], input.major_opcode, 0, 0, 0,
+            minor_opcode[0], minor_opcode[1], count[0], count[1], major_opcode[0], 0, 0, 0,
             /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0
         ]
     }
@@ -2667,12 +2713,14 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for NoExposureEvent {
 }
 impl From<&NoExposureEvent> for [u8; 32] {
     fn from(input: &NoExposureEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let drawable = input.drawable.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], drawable[0], drawable[1], drawable[2], drawable[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], 0, sequence[0], sequence[1], drawable[0], drawable[1], drawable[2], drawable[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -2756,7 +2804,7 @@ pub struct VisibilityNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
     pub window: WINDOW,
-    pub state: u8,
+    pub state: Visibility,
 }
 impl VisibilityNotifyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2766,6 +2814,7 @@ impl VisibilityNotifyEvent {
         let (window, remaining) = WINDOW::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let state = state.try_into()?;
         let result = VisibilityNotifyEvent { response_type, sequence, window, state };
         Ok((result, remaining))
     }
@@ -2788,11 +2837,13 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for VisibilityNotifyEvent {
 }
 impl From<&VisibilityNotifyEvent> for [u8; 32] {
     fn from(input: &VisibilityNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let window = input.window.serialize();
+        let state = Into::<u8>::into(input.state).serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
-            input.state, 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], 0, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
+            state[0], 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -2855,6 +2906,7 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for CreateNotifyEvent {
 }
 impl From<&CreateNotifyEvent> for [u8; 32] {
     fn from(input: &CreateNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let parent = input.parent.serialize();
         let window = input.window.serialize();
@@ -2863,10 +2915,11 @@ impl From<&CreateNotifyEvent> for [u8; 32] {
         let width = input.width.serialize();
         let height = input.height.serialize();
         let border_width = input.border_width.serialize();
+        let override_redirect = input.override_redirect.serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], parent[0], parent[1], parent[2], parent[3],
+            response_type[0], 0, sequence[0], sequence[1], parent[0], parent[1], parent[2], parent[3],
             window[0], window[1], window[2], window[3], x[0], x[1], y[0], y[1],
-            width[0], width[1], height[0], height[1], border_width[0], border_width[1], u8::from(input.override_redirect), 0,
+            width[0], width[1], height[0], height[1], border_width[0], border_width[1], override_redirect[0], 0,
             /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0
         ]
     }
@@ -2927,11 +2980,12 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for DestroyNotifyEvent {
 }
 impl From<&DestroyNotifyEvent> for [u8; 32] {
     fn from(input: &DestroyNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let event = input.event.serialize();
         let window = input.window.serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
+            response_type[0], 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
             window[0], window[1], window[2], window[3], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -2999,12 +3053,14 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for UnmapNotifyEvent {
 }
 impl From<&UnmapNotifyEvent> for [u8; 32] {
     fn from(input: &UnmapNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let event = input.event.serialize();
         let window = input.window.serialize();
+        let from_configure = input.from_configure.serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
-            window[0], window[1], window[2], window[3], u8::from(input.from_configure), 0, 0, 0,
+            response_type[0], 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
+            window[0], window[1], window[2], window[3], from_configure[0], 0, 0, 0,
             /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -3070,12 +3126,14 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for MapNotifyEvent {
 }
 impl From<&MapNotifyEvent> for [u8; 32] {
     fn from(input: &MapNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let event = input.event.serialize();
         let window = input.window.serialize();
+        let override_redirect = input.override_redirect.serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
-            window[0], window[1], window[2], window[3], u8::from(input.override_redirect), 0, 0, 0,
+            response_type[0], 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
+            window[0], window[1], window[2], window[3], override_redirect[0], 0, 0, 0,
             /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -3136,11 +3194,12 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for MapRequestEvent {
 }
 impl From<&MapRequestEvent> for [u8; 32] {
     fn from(input: &MapRequestEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let parent = input.parent.serialize();
         let window = input.window.serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], parent[0], parent[1], parent[2], parent[3],
+            response_type[0], 0, sequence[0], sequence[1], parent[0], parent[1], parent[2], parent[3],
             window[0], window[1], window[2], window[3], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -3200,16 +3259,18 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ReparentNotifyEvent {
 }
 impl From<&ReparentNotifyEvent> for [u8; 32] {
     fn from(input: &ReparentNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let event = input.event.serialize();
         let window = input.window.serialize();
         let parent = input.parent.serialize();
         let x = input.x.serialize();
         let y = input.y.serialize();
+        let override_redirect = input.override_redirect.serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
+            response_type[0], 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
             window[0], window[1], window[2], window[3], parent[0], parent[1], parent[2], parent[3],
-            x[0], x[1], y[0], y[1], u8::from(input.override_redirect), 0, 0, 0,
+            x[0], x[1], y[0], y[1], override_redirect[0], 0, 0, 0,
             /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0
         ]
     }
@@ -3296,6 +3357,7 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ConfigureNotifyEvent {
 }
 impl From<&ConfigureNotifyEvent> for [u8; 32] {
     fn from(input: &ConfigureNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let event = input.event.serialize();
         let window = input.window.serialize();
@@ -3305,11 +3367,12 @@ impl From<&ConfigureNotifyEvent> for [u8; 32] {
         let width = input.width.serialize();
         let height = input.height.serialize();
         let border_width = input.border_width.serialize();
+        let override_redirect = input.override_redirect.serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
+            response_type[0], 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
             window[0], window[1], window[2], window[3], above_sibling[0], above_sibling[1], above_sibling[2], above_sibling[3],
             x[0], x[1], y[0], y[1], width[0], width[1], height[0], height[1],
-            border_width[0], border_width[1], u8::from(input.override_redirect), 0, /* trailing padding */ 0, 0, 0, 0
+            border_width[0], border_width[1], override_redirect[0], 0, /* trailing padding */ 0, 0, 0, 0
         ]
     }
 }
@@ -3324,7 +3387,7 @@ pub const CONFIGURE_REQUEST_EVENT: u8 = 23;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ConfigureRequestEvent {
     pub response_type: u8,
-    pub stack_mode: u8,
+    pub stack_mode: StackMode,
     pub sequence: u16,
     pub parent: WINDOW,
     pub window: WINDOW,
@@ -3350,6 +3413,7 @@ impl ConfigureRequestEvent {
         let (height, remaining) = u16::try_parse(remaining)?;
         let (border_width, remaining) = u16::try_parse(remaining)?;
         let (value_mask, remaining) = u16::try_parse(remaining)?;
+        let stack_mode = stack_mode.try_into()?;
         let result = ConfigureRequestEvent { response_type, stack_mode, sequence, parent, window, sibling, x, y, width, height, border_width, value_mask };
         Ok((result, remaining))
     }
@@ -3372,6 +3436,8 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ConfigureRequestEvent {
 }
 impl From<&ConfigureRequestEvent> for [u8; 32] {
     fn from(input: &ConfigureRequestEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let stack_mode = Into::<u8>::into(input.stack_mode).serialize();
         let sequence = input.sequence.serialize();
         let parent = input.parent.serialize();
         let window = input.window.serialize();
@@ -3383,7 +3449,7 @@ impl From<&ConfigureRequestEvent> for [u8; 32] {
         let border_width = input.border_width.serialize();
         let value_mask = input.value_mask.serialize();
         [
-            input.response_type, input.stack_mode, sequence[0], sequence[1], parent[0], parent[1], parent[2], parent[3],
+            response_type[0], stack_mode[0], sequence[0], sequence[1], parent[0], parent[1], parent[2], parent[3],
             window[0], window[1], window[2], window[3], sibling[0], sibling[1], sibling[2], sibling[3],
             x[0], x[1], y[0], y[1], width[0], width[1], height[0], height[1],
             border_width[0], border_width[1], value_mask[0], value_mask[1], /* trailing padding */ 0, 0, 0, 0
@@ -3438,13 +3504,14 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for GravityNotifyEvent {
 }
 impl From<&GravityNotifyEvent> for [u8; 32] {
     fn from(input: &GravityNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let event = input.event.serialize();
         let window = input.window.serialize();
         let x = input.x.serialize();
         let y = input.y.serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
+            response_type[0], 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
             window[0], window[1], window[2], window[3], x[0], x[1], y[0], y[1],
             /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -3497,12 +3564,13 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ResizeRequestEvent {
 }
 impl From<&ResizeRequestEvent> for [u8; 32] {
     fn from(input: &ResizeRequestEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let window = input.window.serialize();
         let width = input.width.serialize();
         let height = input.height.serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
+            response_type[0], 0, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
             width[0], width[1], height[0], height[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -3604,7 +3672,7 @@ pub struct CirculateNotifyEvent {
     pub sequence: u16,
     pub event: WINDOW,
     pub window: WINDOW,
-    pub place: u8,
+    pub place: Place,
 }
 impl CirculateNotifyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3616,6 +3684,7 @@ impl CirculateNotifyEvent {
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (place, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let place = place.try_into()?;
         let result = CirculateNotifyEvent { response_type, sequence, event, window, place };
         Ok((result, remaining))
     }
@@ -3638,13 +3707,15 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for CirculateNotifyEvent {
 }
 impl From<&CirculateNotifyEvent> for [u8; 32] {
     fn from(input: &CirculateNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let event = input.event.serialize();
         let window = input.window.serialize();
+        let place = Into::<u8>::into(input.place).serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
+            response_type[0], 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
             window[0], window[1], window[2], window[3], 0, 0, 0, 0,
-            input.place, 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
+            place[0], 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
     }
@@ -3675,7 +3746,7 @@ pub struct CirculateRequestEvent {
     pub sequence: u16,
     pub event: WINDOW,
     pub window: WINDOW,
-    pub place: u8,
+    pub place: Place,
 }
 impl CirculateRequestEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3687,6 +3758,7 @@ impl CirculateRequestEvent {
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (place, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let place = place.try_into()?;
         let result = CirculateRequestEvent { response_type, sequence, event, window, place };
         Ok((result, remaining))
     }
@@ -3709,13 +3781,15 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for CirculateRequestEvent {
 }
 impl From<&CirculateRequestEvent> for [u8; 32] {
     fn from(input: &CirculateRequestEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let event = input.event.serialize();
         let window = input.window.serialize();
+        let place = Into::<u8>::into(input.place).serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
+            response_type[0], 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
             window[0], window[1], window[2], window[3], 0, 0, 0, 0,
-            input.place, 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
+            place[0], 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
     }
@@ -3809,7 +3883,7 @@ pub struct PropertyNotifyEvent {
     pub window: WINDOW,
     pub atom: ATOM,
     pub time: TIMESTAMP,
-    pub state: u8,
+    pub state: Property,
 }
 impl PropertyNotifyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3821,6 +3895,7 @@ impl PropertyNotifyEvent {
         let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let state = state.try_into()?;
         let result = PropertyNotifyEvent { response_type, sequence, window, atom, time, state };
         Ok((result, remaining))
     }
@@ -3843,14 +3918,16 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for PropertyNotifyEvent {
 }
 impl From<&PropertyNotifyEvent> for [u8; 32] {
     fn from(input: &PropertyNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let window = input.window.serialize();
         let atom = input.atom.serialize();
         let time = input.time.serialize();
+        let state = Into::<u8>::into(input.state).serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
+            response_type[0], 0, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
             atom[0], atom[1], atom[2], atom[3], time[0], time[1], time[2], time[3],
-            input.state, 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
+            state[0], 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
     }
@@ -3901,12 +3978,13 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for SelectionClearEvent {
 }
 impl From<&SelectionClearEvent> for [u8; 32] {
     fn from(input: &SelectionClearEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let owner = input.owner.serialize();
         let selection = input.selection.serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            response_type[0], 0, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
             owner[0], owner[1], owner[2], owner[3], selection[0], selection[1], selection[2], selection[3],
             /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -4200,6 +4278,7 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for SelectionRequestEvent {
 }
 impl From<&SelectionRequestEvent> for [u8; 32] {
     fn from(input: &SelectionRequestEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let owner = input.owner.serialize();
@@ -4208,7 +4287,7 @@ impl From<&SelectionRequestEvent> for [u8; 32] {
         let target = input.target.serialize();
         let property = input.property.serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            response_type[0], 0, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
             owner[0], owner[1], owner[2], owner[3], requestor[0], requestor[1], requestor[2], requestor[3],
             selection[0], selection[1], selection[2], selection[3], target[0], target[1], target[2], target[3],
             property[0], property[1], property[2], property[3], /* trailing padding */ 0, 0, 0, 0
@@ -4265,6 +4344,7 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for SelectionNotifyEvent {
 }
 impl From<&SelectionNotifyEvent> for [u8; 32] {
     fn from(input: &SelectionNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let requestor = input.requestor.serialize();
@@ -4272,7 +4352,7 @@ impl From<&SelectionNotifyEvent> for [u8; 32] {
         let target = input.target.serialize();
         let property = input.property.serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
+            response_type[0], 0, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
             requestor[0], requestor[1], requestor[2], requestor[3], selection[0], selection[1], selection[2], selection[3],
             target[0], target[1], target[2], target[3], property[0], property[1], property[2], property[3],
             /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0
@@ -4435,7 +4515,7 @@ pub struct ColormapNotifyEvent {
     pub window: WINDOW,
     pub colormap: COLORMAP,
     pub new: bool,
-    pub state: u8,
+    pub state: ColormapState,
 }
 impl ColormapNotifyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4447,6 +4527,7 @@ impl ColormapNotifyEvent {
         let (new, remaining) = bool::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let state = state.try_into()?;
         let result = ColormapNotifyEvent { response_type, sequence, window, colormap, new, state };
         Ok((result, remaining))
     }
@@ -4469,12 +4550,15 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ColormapNotifyEvent {
 }
 impl From<&ColormapNotifyEvent> for [u8; 32] {
     fn from(input: &ColormapNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let window = input.window.serialize();
         let colormap = input.colormap.serialize();
+        let new = input.new.serialize();
+        let state = Into::<u8>::into(input.state).serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
-            colormap[0], colormap[1], colormap[2], colormap[3], u8::from(input.new), input.state, 0, 0,
+            response_type[0], 0, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
+            colormap[0], colormap[1], colormap[2], colormap[3], new[0], state[0], 0, 0,
             /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -4739,12 +4823,14 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ClientMessageEvent {
 }
 impl From<&ClientMessageEvent> for [u8; 32] {
     fn from(input: &ClientMessageEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let format = input.format.serialize();
         let sequence = input.sequence.serialize();
         let window = input.window.serialize();
         let type_ = input.type_.serialize();
         let data = input.data.serialize();
         [
-            input.response_type, input.format, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
+            response_type[0], format[0], sequence[0], sequence[1], window[0], window[1], window[2], window[3],
             type_[0], type_[1], type_[2], type_[3], data[0], data[1], data[2], data[3],
             data[4], data[5], data[6], data[7], data[8], data[9], data[10], data[11],
             data[12], data[13], data[14], data[15], data[16], data[17], data[18], data[19]
@@ -4835,7 +4921,7 @@ pub const MAPPING_NOTIFY_EVENT: u8 = 34;
 pub struct MappingNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub request: u8,
+    pub request: Mapping,
     pub first_keycode: KEYCODE,
     pub count: u8,
 }
@@ -4848,6 +4934,7 @@ impl MappingNotifyEvent {
         let (first_keycode, remaining) = KEYCODE::try_parse(remaining)?;
         let (count, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
+        let request = request.try_into()?;
         let result = MappingNotifyEvent { response_type, sequence, request, first_keycode, count };
         Ok((result, remaining))
     }
@@ -4870,9 +4957,13 @@ impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for MappingNotifyEvent {
 }
 impl From<&MappingNotifyEvent> for [u8; 32] {
     fn from(input: &MappingNotifyEvent) -> Self {
+        let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
+        let request = Into::<u8>::into(input.request).serialize();
+        let first_keycode = input.first_keycode.serialize();
+        let count = input.count.serialize();
         [
-            input.response_type, 0, sequence[0], sequence[1], input.request, input.first_keycode, input.count, 0,
+            response_type[0], 0, sequence[0], sequence[1], request[0], first_keycode[0], count[0], 0,
             /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -4976,12 +5067,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for RequestError {
 }
 impl From<&RequestError> for [u8; 32] {
     fn from(input: &RequestError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let bad_value = input.bad_value.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -5035,12 +5129,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for ValueError {
 }
 impl From<&ValueError> for [u8; 32] {
     fn from(input: &ValueError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let bad_value = input.bad_value.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -5094,12 +5191,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for WindowError {
 }
 impl From<&WindowError> for [u8; 32] {
     fn from(input: &WindowError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let bad_value = input.bad_value.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -5153,12 +5253,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for PixmapError {
 }
 impl From<&PixmapError> for [u8; 32] {
     fn from(input: &PixmapError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let bad_value = input.bad_value.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -5212,12 +5315,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for AtomError {
 }
 impl From<&AtomError> for [u8; 32] {
     fn from(input: &AtomError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let bad_value = input.bad_value.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -5271,12 +5377,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for CursorError {
 }
 impl From<&CursorError> for [u8; 32] {
     fn from(input: &CursorError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let bad_value = input.bad_value.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -5330,12 +5439,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for FontError {
 }
 impl From<&FontError> for [u8; 32] {
     fn from(input: &FontError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let bad_value = input.bad_value.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -5389,12 +5501,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for MatchError {
 }
 impl From<&MatchError> for [u8; 32] {
     fn from(input: &MatchError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let bad_value = input.bad_value.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -5448,12 +5563,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for DrawableError {
 }
 impl From<&DrawableError> for [u8; 32] {
     fn from(input: &DrawableError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let bad_value = input.bad_value.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -5507,12 +5625,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for AccessError {
 }
 impl From<&AccessError> for [u8; 32] {
     fn from(input: &AccessError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let bad_value = input.bad_value.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -5566,12 +5687,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for AllocError {
 }
 impl From<&AllocError> for [u8; 32] {
     fn from(input: &AllocError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let bad_value = input.bad_value.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -5625,12 +5749,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for ColormapError {
 }
 impl From<&ColormapError> for [u8; 32] {
     fn from(input: &ColormapError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let bad_value = input.bad_value.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -5684,12 +5811,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for GContextError {
 }
 impl From<&GContextError> for [u8; 32] {
     fn from(input: &GContextError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let bad_value = input.bad_value.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -5743,12 +5873,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for IDChoiceError {
 }
 impl From<&IDChoiceError> for [u8; 32] {
     fn from(input: &IDChoiceError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let bad_value = input.bad_value.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -5802,12 +5935,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for NameError {
 }
 impl From<&NameError> for [u8; 32] {
     fn from(input: &NameError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let bad_value = input.bad_value.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -5861,12 +5997,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for LengthError {
 }
 impl From<&LengthError> for [u8; 32] {
     fn from(input: &LengthError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let bad_value = input.bad_value.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -5920,12 +6059,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for ImplementationError {
 }
 impl From<&ImplementationError> for [u8; 32] {
     fn from(input: &ImplementationError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         let bad_value = input.bad_value.serialize();
         let minor_opcode = input.minor_opcode.serialize();
+        let major_opcode = input.major_opcode.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], input.major_opcode, 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
+            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -6975,18 +7117,18 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetWindowAttributesReply {
     pub response_type: u8,
-    pub backing_store: u8,
+    pub backing_store: BackingStore,
     pub sequence: u16,
     pub length: u32,
     pub visual: VISUALID,
-    pub class: u16,
+    pub class: WindowClass,
     pub bit_gravity: u8,
     pub win_gravity: u8,
     pub backing_planes: u32,
     pub backing_pixel: u32,
     pub save_under: bool,
     pub map_is_installed: bool,
-    pub map_state: u8,
+    pub map_state: MapState,
     pub override_redirect: bool,
     pub colormap: COLORMAP,
     pub all_event_masks: u32,
@@ -7014,6 +7156,9 @@ impl GetWindowAttributesReply {
         let (your_event_mask, remaining) = u32::try_parse(remaining)?;
         let (do_not_propagate_mask, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let backing_store = backing_store.try_into()?;
+        let class = class.try_into()?;
+        let map_state = map_state.try_into()?;
         let result = GetWindowAttributesReply { response_type, backing_store, sequence, length, visual, class, bit_gravity, win_gravity, backing_planes, backing_pixel, save_under, map_is_installed, map_state, override_redirect, colormap, all_event_masks, your_event_mask, do_not_propagate_mask };
         Ok((result, remaining))
     }
@@ -9510,7 +9655,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabPointerReply {
     pub response_type: u8,
-    pub status: u8,
+    pub status: GrabStatus,
     pub sequence: u16,
     pub length: u32,
 }
@@ -9520,6 +9665,7 @@ impl GrabPointerReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
+        let status = status.try_into()?;
         let result = GrabPointerReply { response_type, status, sequence, length };
         Ok((result, remaining))
     }
@@ -9938,7 +10084,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabKeyboardReply {
     pub response_type: u8,
-    pub status: u8,
+    pub status: GrabStatus,
     pub sequence: u16,
     pub length: u32,
 }
@@ -9948,6 +10094,7 @@ impl GrabKeyboardReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
+        let status = status.try_into()?;
         let result = GrabKeyboardReply { response_type, status, sequence, length };
         Ok((result, remaining))
     }
@@ -10918,7 +11065,7 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetInputFocusReply {
     pub response_type: u8,
-    pub revert_to: u8,
+    pub revert_to: InputFocus,
     pub sequence: u16,
     pub length: u32,
     pub focus: WINDOW,
@@ -10930,6 +11077,7 @@ impl GetInputFocusReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (focus, remaining) = WINDOW::try_parse(remaining)?;
+        let revert_to = revert_to.try_into()?;
         let result = GetInputFocusReply { response_type, revert_to, sequence, length, focus };
         Ok((result, remaining))
     }
@@ -11342,7 +11490,7 @@ pub struct QueryFontReply {
     pub min_char_or_byte2: u16,
     pub max_char_or_byte2: u16,
     pub default_char: u16,
-    pub draw_direction: u8,
+    pub draw_direction: FontDraw,
     pub min_byte1: u8,
     pub max_byte1: u8,
     pub all_chars_exist: bool,
@@ -11374,6 +11522,7 @@ impl QueryFontReply {
         let (char_infos_len, remaining) = u32::try_parse(remaining)?;
         let (properties, remaining) = crate::x11_utils::parse_list::<Fontprop>(remaining, properties_len as usize)?;
         let (char_infos, remaining) = crate::x11_utils::parse_list::<Charinfo>(remaining, char_infos_len as usize)?;
+        let draw_direction = draw_direction.try_into()?;
         let result = QueryFontReply { response_type, sequence, length, min_bounds, max_bounds, min_char_or_byte2, max_char_or_byte2, default_char, draw_direction, min_byte1, max_byte1, all_chars_exist, font_ascent, font_descent, properties, char_infos };
         Ok((result, remaining))
     }
@@ -11453,7 +11602,7 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryTextExtentsReply {
     pub response_type: u8,
-    pub draw_direction: u8,
+    pub draw_direction: FontDraw,
     pub sequence: u16,
     pub length: u32,
     pub font_ascent: i16,
@@ -11477,6 +11626,7 @@ impl QueryTextExtentsReply {
         let (overall_width, remaining) = i32::try_parse(remaining)?;
         let (overall_left, remaining) = i32::try_parse(remaining)?;
         let (overall_right, remaining) = i32::try_parse(remaining)?;
+        let draw_direction = draw_direction.try_into()?;
         let result = QueryTextExtentsReply { response_type, draw_direction, sequence, length, font_ascent, font_descent, overall_ascent, overall_descent, overall_width, overall_left, overall_right };
         Ok((result, remaining))
     }
@@ -11662,7 +11812,7 @@ pub struct ListFontsWithInfoReply {
     pub min_char_or_byte2: u16,
     pub max_char_or_byte2: u16,
     pub default_char: u16,
-    pub draw_direction: u8,
+    pub draw_direction: FontDraw,
     pub min_byte1: u8,
     pub max_byte1: u8,
     pub all_chars_exist: bool,
@@ -11695,6 +11845,7 @@ impl ListFontsWithInfoReply {
         let (replies_hint, remaining) = u32::try_parse(remaining)?;
         let (properties, remaining) = crate::x11_utils::parse_list::<Fontprop>(remaining, properties_len as usize)?;
         let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_len as usize)?;
+        let draw_direction = draw_direction.try_into()?;
         let result = ListFontsWithInfoReply { response_type, sequence, length, min_bounds, max_bounds, min_char_or_byte2, max_char_or_byte2, default_char, draw_direction, min_byte1, max_byte1, all_chars_exist, font_ascent, font_descent, replies_hint, properties, name };
         Ok((result, remaining))
     }
@@ -16639,7 +16790,7 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetKeyboardControlReply {
     pub response_type: u8,
-    pub global_auto_repeat: u8,
+    pub global_auto_repeat: AutoRepeatMode,
     pub sequence: u16,
     pub length: u32,
     pub led_mask: u32,
@@ -16727,6 +16878,7 @@ impl GetKeyboardControlReply {
             auto_repeats_30,
             auto_repeats_31,
         ];
+        let global_auto_repeat = global_auto_repeat.try_into()?;
         let result = GetKeyboardControlReply { response_type, global_auto_repeat, sequence, length, led_mask, key_click_percent, bell_percent, bell_pitch, bell_duration, auto_repeats };
         Ok((result, remaining))
     }
@@ -17021,8 +17173,8 @@ pub struct GetScreenSaverReply {
     pub length: u32,
     pub timeout: u16,
     pub interval: u16,
-    pub prefer_blanking: u8,
-    pub allow_exposures: u8,
+    pub prefer_blanking: Blanking,
+    pub allow_exposures: Exposures,
 }
 impl GetScreenSaverReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -17035,6 +17187,8 @@ impl GetScreenSaverReply {
         let (prefer_blanking, remaining) = u8::try_parse(remaining)?;
         let (allow_exposures, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
+        let prefer_blanking = prefer_blanking.try_into()?;
+        let allow_exposures = allow_exposures.try_into()?;
         let result = GetScreenSaverReply { response_type, sequence, length, timeout, interval, prefer_blanking, allow_exposures };
         Ok((result, remaining))
     }
@@ -17212,7 +17366,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Host {
-    pub family: u8,
+    pub family: Family,
     pub address: Vec<u8>,
 }
 impl TryParse for Host {
@@ -17226,6 +17380,7 @@ impl TryParse for Host {
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
+        let family = family.try_into()?;
         let result = Host { family, address };
         Ok((result, remaining))
     }
@@ -17245,7 +17400,7 @@ impl Serialize for Host {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        self.family.serialize_into(bytes);
+        Into::<u8>::into(self.family).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         let address_len = self.address.len() as u16;
         address_len.serialize_into(bytes);
@@ -17274,7 +17429,7 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListHostsReply {
     pub response_type: u8,
-    pub mode: u8,
+    pub mode: AccessControl,
     pub sequence: u16,
     pub length: u32,
     pub hosts: Vec<Host>,
@@ -17288,6 +17443,7 @@ impl ListHostsReply {
         let (hosts_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
         let (hosts, remaining) = crate::x11_utils::parse_list::<Host>(remaining, hosts_len as usize)?;
+        let mode = mode.try_into()?;
         let result = ListHostsReply { response_type, mode, sequence, length, hosts };
         Ok((result, remaining))
     }
@@ -17773,7 +17929,7 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetPointerMappingReply {
     pub response_type: u8,
-    pub status: u8,
+    pub status: MappingStatus,
     pub sequence: u16,
     pub length: u32,
 }
@@ -17783,6 +17939,7 @@ impl SetPointerMappingReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
+        let status = status.try_into()?;
         let result = SetPointerMappingReply { response_type, status, sequence, length };
         Ok((result, remaining))
     }
@@ -17943,7 +18100,7 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetModifierMappingReply {
     pub response_type: u8,
-    pub status: u8,
+    pub status: MappingStatus,
     pub sequence: u16,
     pub length: u32,
 }
@@ -17953,6 +18110,7 @@ impl SetModifierMappingReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
+        let status = status.try_into()?;
         let result = SetModifierMappingReply { response_type, status, sequence, length };
         Ok((result, remaining))
     }

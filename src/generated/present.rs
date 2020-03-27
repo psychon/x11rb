@@ -851,12 +851,14 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericEvent<B>> for GenericEvent {
 }
 impl From<&GenericEvent> for [u8; 32] {
     fn from(input: &GenericEvent) -> Self {
+        let response_type = input.response_type.serialize();
+        let extension = input.extension.serialize();
         let sequence = input.sequence.serialize();
         let length = input.length.serialize();
         let evtype = input.evtype.serialize();
         let event = input.event.serialize();
         [
-            input.response_type, input.extension, sequence[0], sequence[1], length[0], length[1], length[2], length[3],
+            response_type[0], extension[0], sequence[0], sequence[1], length[0], length[1], length[2], length[3],
             evtype[0], evtype[1], 0, 0, event[0], event[1], event[2], event[3],
             /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -941,8 +943,8 @@ pub struct CompleteNotifyEvent {
     pub sequence: u16,
     pub length: u32,
     pub event_type: u16,
-    pub kind: u8,
-    pub mode: u8,
+    pub kind: CompleteKind,
+    pub mode: CompleteMode,
     pub event: EVENT,
     pub window: WINDOW,
     pub serial: u32,
@@ -963,6 +965,8 @@ impl CompleteNotifyEvent {
         let (serial, remaining) = u32::try_parse(remaining)?;
         let (ust, remaining) = u64::try_parse(remaining)?;
         let (msc, remaining) = u64::try_parse(remaining)?;
+        let kind = kind.try_into()?;
+        let mode = mode.try_into()?;
         let result = CompleteNotifyEvent { response_type, extension, sequence, length, event_type, kind, mode, event, window, serial, ust, msc };
         Ok((result, remaining))
     }

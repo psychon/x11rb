@@ -128,7 +128,7 @@ mod mock {
 
     use super::{iovec, xcb_connection_t, xcb_protocol_request_t, xcb_void_cookie_t};
     use crate::x11_utils::Serialize;
-    use crate::xproto::Setup;
+    use crate::xproto::{ImageOrder, Setup};
 
     #[repr(C)]
     struct ConnectionMock {
@@ -157,8 +157,8 @@ mod mock {
             resource_id_mask: 0,
             motion_buffer_size: 0,
             maximum_request_length: 0,
-            image_byte_order: 0,
-            bitmap_format_bit_order: 0,
+            image_byte_order: ImageOrder::LSBFirst,
+            bitmap_format_bit_order: ImageOrder::LSBFirst,
             bitmap_format_scanline_unit: 0,
             bitmap_format_scanline_pad: 0,
             min_keycode: 0,

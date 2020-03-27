@@ -764,9 +764,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for PictFormatError {
 }
 impl From<&PictFormatError> for [u8; 32] {
     fn from(input: &PictFormatError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -814,9 +816,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for PictureError {
 }
 impl From<&PictureError> for [u8; 32] {
     fn from(input: &PictureError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -864,9 +868,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for PictOpError {
 }
 impl From<&PictOpError> for [u8; 32] {
     fn from(input: &PictOpError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -914,9 +920,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for GlyphSetError {
 }
 impl From<&GlyphSetError> for [u8; 32] {
     fn from(input: &GlyphSetError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -964,9 +972,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for GlyphError {
 }
 impl From<&GlyphError> for [u8; 32] {
     fn from(input: &GlyphError) -> Self {
+        let response_type = input.response_type.serialize();
+        let error_code = input.error_code.serialize();
         let sequence = input.sequence.serialize();
         [
-            input.response_type, input.error_code, sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -1056,7 +1066,7 @@ impl Serialize for Directformat {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Pictforminfo {
     pub id: PICTFORMAT,
-    pub type_: u8,
+    pub type_: PictType,
     pub depth: u8,
     pub direct: Directformat,
     pub colormap: COLORMAP,
@@ -1069,6 +1079,7 @@ impl TryParse for Pictforminfo {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (direct, remaining) = Directformat::try_parse(remaining)?;
         let (colormap, remaining) = COLORMAP::try_parse(remaining)?;
+        let type_ = type_.try_into()?;
         let result = Pictforminfo { id, type_, depth, direct, colormap };
         Ok((result, remaining))
     }
@@ -1083,7 +1094,7 @@ impl Serialize for Pictforminfo {
     type Bytes = [u8; 28];
     fn serialize(&self) -> Self::Bytes {
         let id_bytes = self.id.serialize();
-        let type_bytes = self.type_.serialize();
+        let type_bytes = Into::<u8>::into(self.type_).serialize();
         let depth_bytes = self.depth.serialize();
         let direct_bytes = self.direct.serialize();
         let colormap_bytes = self.colormap.serialize();
@@ -1121,7 +1132,7 @@ impl Serialize for Pictforminfo {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(28);
         self.id.serialize_into(bytes);
-        self.type_.serialize_into(bytes);
+        Into::<u8>::into(self.type_).serialize_into(bytes);
         self.depth.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.direct.serialize_into(bytes);
