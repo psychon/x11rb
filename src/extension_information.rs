@@ -89,6 +89,21 @@ impl ExtensionInformation {
             CheckState::Error => Err(ConnectionError::UnknownError),
         }
     }
+
+    /// Create an iterator that allows to iterate over the known present extensions.
+    ///
+    /// This function returns an iterator that provides information about all the extensions that
+    /// were queried and found to be present. Extensions that were not queried or which are not
+    /// present are not returned.
+    pub fn known_present<'a>(&'a self) -> impl 'a + Iterator<Item=(&'static str, QueryExtensionReply)> {
+        self.0.iter()
+            .filter_map(|(name, state)|
+                        if let CheckState::Present(reply) = state {
+                            Some((*name, *reply))
+                        } else {
+                            None
+                        })
+    }
 }
 
 #[cfg(test)]
@@ -106,7 +121,7 @@ mod test {
     use crate::x11_utils::GenericError;
     use crate::xproto::QueryExtensionReply;
 
-    use super::ExtensionInformation;
+    use super::{ExtensionInformation, CheckState};
 
     struct FakeConnection(RefCell<SequenceNumber>);
 
@@ -226,5 +241,27 @@ mod test {
             Err(ConnectionError::UnknownError) => {}
             r => panic!("Unexpected result: {:?}", r),
         }
+    }
+
+    #[test]
+    fn test_iter() {
+        let reply = QueryExtensionReply {
+            response_type: 1,
+            sequence: 2,
+            length: 3,
+            present: true,
+            major_opcode: 4,
+            first_event: 5,
+            first_error: 6,
+        };
+
+        let mut ext_info = ExtensionInformation::default();
+        let _ = ext_info.0.insert("prefetched", CheckState::Prefetched(42));
+        let _ = ext_info.0.insert("present", CheckState::Present(reply));
+        let _ = ext_info.0.insert("missing", CheckState::Missing);
+        let _ = ext_info.0.insert("error", CheckState::Error);
+
+        let known = ext_info.known_present().collect::<Vec<_>>();
+        assert_eq!(known, [("present", reply)]);
     }
 }
