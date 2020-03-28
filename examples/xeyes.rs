@@ -6,9 +6,8 @@ use x11rb::connection::{Connection, RequestConnection as _};
 use x11rb::errors::{ConnectionError, ReplyOrIdError};
 use x11rb::shape::{self, ConnectionExt as _};
 use x11rb::wrapper::ConnectionExt as _;
-use x11rb::x11_utils::Event;
 use x11rb::xproto::*;
-use x11rb::COPY_DEPTH_FROM_PARENT;
+use x11rb::{COPY_DEPTH_FROM_PARENT, Event};
 
 const PUPIL_SIZE: i16 = 50;
 const EYE_SIZE: i16 = 50;
@@ -308,40 +307,36 @@ fn main() {
         let event = conn.wait_for_event().unwrap();
         let mut event_option = Some(event);
         while let Some(event) = event_option {
-            match event.response_type() {
-                EXPOSE_EVENT => {
-                    let event = ExposeEvent::from(event);
+            match conn.parse_event(event).unwrap() {
+                Event::XprotoExposeEvent(event) => {
                     if event.count == 0 {
                         need_repaint = true;
                     }
                 }
-                CONFIGURE_NOTIFY_EVENT => {
-                    let event = ConfigureNotifyEvent::from(event);
+                Event::XprotoConfigureNotifyEvent(event) => {
                     window_size = (event.width, event.height);
                     pixmap = create_pixmap_wrapper(conn, screen.root_depth, win_id, window_size)
                         .unwrap();
                     need_reshape = true;
                 }
-                MOTION_NOTIFY_EVENT => {
-                    let event = MotionNotifyEvent::from(event);
+                Event::XprotoMotionNotifyEvent(event) => {
                     mouse_position = (event.event_x, event.event_y);
                     need_repaint = true;
                 }
-                MAP_NOTIFY_EVENT => {
+                Event::XprotoMapNotifyEvent(_) => {
                     need_reshape = true;
                 }
-                CLIENT_MESSAGE_EVENT => {
-                    let event = ClientMessageEvent::from(event);
+                Event::XprotoClientMessageEvent(event) => {
                     let data = event.data.as_data32();
                     if event.format == 32 && event.window == win_id && data[0] == wm_delete_window {
                         println!("Window was asked to close");
                         return;
                     }
                 }
-                0 => {
-                    println!("Unknown error {:?}", event);
+                Event::Error(error) => {
+                    println!("Unknown error {:?}", error);
                 }
-                _ => {
+                event => {
                     println!("Unknown event {:?}", event);
                 }
             }

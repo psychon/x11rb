@@ -11,9 +11,8 @@ use std::time::Duration;
 
 use x11rb::connection::Connection;
 use x11rb::errors::{ReplyError, ReplyOrIdError};
-use x11rb::x11_utils::Event;
 use x11rb::xproto::*;
-use x11rb::COPY_DEPTH_FROM_PARENT;
+use x11rb::{COPY_DEPTH_FROM_PARENT, Event};
 
 /// Lag angle for the follow line
 const LAG: f64 = 0.3;
@@ -191,10 +190,9 @@ where
 
     loop {
         let event = conn.wait_for_event()?;
-
-        match event.response_type() {
-            EXPOSE_EVENT => {
-                let event = ExposeEvent::from(event);
+        let event = conn.parse_event(event)?;
+        match event {
+            Event::XprotoExposeEvent(event) => {
                 if let Some(state) = find_window_by_id(&windows, event.window) {
                     let state = state.lock().unwrap();
                     conn.copy_area(
@@ -215,8 +213,7 @@ where
                     eprintln!("Expose on unknown window!");
                 }
             }
-            BUTTON_RELEASE_EVENT => {
-                let event = ButtonReleaseEvent::from(event);
+            Event::XprotoButtonReleaseEvent(event) => {
                 if let Some(state) = find_window_by_id(&windows, event.event) {
                     let mut state = state.lock().unwrap();
                     // FIXME: Make this matching somehow nicer
@@ -231,18 +228,19 @@ where
                     eprintln!("ButtonRelease on unknown window!");
                 }
             }
-            MAP_NOTIFY_EVENT => {
+            Event::XprotoMapNotifyEvent(event) => {
                 if !first_window_mapped {
                     first_window_mapped = true;
-
-                    let event = MapNotifyEvent::from(event);
                     util::start_timeout_thread(conn_arc.clone(), event.window);
                 }
             }
-            CLIENT_MESSAGE_EVENT => {
+            Event::XprotoClientMessageEvent(_) => {
                 // We simply assume that this is a message to close. Since we are the main thread,
                 // everything closes when we exit.
                 return Ok(());
+            }
+            Event::Error(err) => {
+                eprintln!("Got an X11 error: {:?}", err);
             }
             _ => {}
         }

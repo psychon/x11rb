@@ -8,9 +8,9 @@ use std::process::exit;
 
 use x11rb::connection::Connection;
 use x11rb::errors::{ReplyError, ReplyOrIdError};
-use x11rb::x11_utils::{Event, GenericEvent};
+use x11rb::x11_utils::Event as _;
 use x11rb::xproto::*;
-use x11rb::COPY_DEPTH_FROM_PARENT;
+use x11rb::{COPY_DEPTH_FROM_PARENT, Event};
 
 const TITLEBAR_HEIGHT: u16 = 20;
 
@@ -226,15 +226,15 @@ impl<'a, C: Connection> WMState<'a, C> {
     }
 
     /// Handle the given event
-    fn handle_event(&mut self, event: GenericEvent<C::Buf>) -> Result<(), ReplyOrIdError<C::Buf>> {
+    fn handle_event(&mut self, event: Event<C::Buf>) -> Result<(), ReplyOrIdError<C::Buf>> {
         println!("Got event {:?}", event);
-        match event.response_type() {
-            UNMAP_NOTIFY_EVENT => self.handle_unmap_notify(event.into())?,
-            CONFIGURE_REQUEST_EVENT => self.handle_configure_request(event.into())?,
-            MAP_REQUEST_EVENT => self.handle_map_request(event.into())?,
-            EXPOSE_EVENT => self.handle_expose(event.into())?,
-            ENTER_NOTIFY_EVENT => self.handle_enter(event.into())?,
-            BUTTON_RELEASE_EVENT => self.handle_button_release(event.into())?,
+        match event {
+            Event::XprotoUnmapNotifyEvent(event) => self.handle_unmap_notify(event)?,
+            Event::XprotoConfigureRequestEvent(event) => self.handle_configure_request(event)?,
+            Event::XprotoMapRequestEvent(event) => self.handle_map_request(event)?,
+            Event::XprotoExposeEvent(event) => self.handle_expose(event)?,
+            Event::XprotoEnterNotifyEvent(event) => self.handle_enter(event)?,
+            Event::XprotoButtonReleaseEvent(event) => self.handle_button_release(event)?,
             _ => {}
         }
         Ok(())
@@ -367,6 +367,7 @@ fn main() {
                 return;
             }
 
+            let event = conn.parse_event(event).unwrap();
             wm_state.handle_event(event).unwrap();
             event_option = conn.poll_for_event().unwrap();
         }
