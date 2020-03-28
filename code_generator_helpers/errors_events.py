@@ -27,7 +27,7 @@ def _get_events_from_module(module):
 
 def _errors(out, modules):
     errors = [_get_errors_from_module(module) for module in modules]
-    xproto_index = next(filter(lambda m: not m[1].namespace.is_ext, enumerate(modules)))[0]
+    xproto_index = next(iter(filter(lambda m: not m[1].namespace.is_ext, enumerate(modules))))[0]
 
     out("/// Enumeration of all possible X11 errors.")
     out("#[derive(Debug, Clone)]")
@@ -97,7 +97,7 @@ def _errors(out, modules):
 
 def _events(out, modules):
     events = [_get_events_from_module(module) for module in modules]
-    xproto_index = next(filter(lambda m: not m[1].namespace.is_ext, enumerate(modules)))[0]
+    xproto_index = next(iter(filter(lambda m: not m[1].namespace.is_ext, enumerate(modules))))[0]
 
     out("/// Enumeration of all possible X11 events.")
     out("#[derive(Debug, Clone)]")
