@@ -6,7 +6,7 @@ use std::marker::PhantomData;
 use super::cookie::VoidCookie;
 use super::errors::{ConnectionError, ReplyError};
 use super::x11_utils::TryParse;
-use super::xproto::ConnectionExt as XProtoConnectionExt;
+use super::xproto::{ConnectionExt as XProtoConnectionExt, ATOM, WINDOW};
 
 /// Iterator implementation used by `GetPropertyReply`.
 ///
@@ -51,16 +51,18 @@ impl<T: TryParse> std::iter::FusedIterator for PropertyIterator<'_, T> {}
 /// Extension trait that simplifies API use
 pub trait ConnectionExt: XProtoConnectionExt {
     /// Change a property on a window with format 8.
-    fn change_property8<A>(
+    fn change_property8<A, B, C>(
         &self,
         mode: A,
-        window: u32,
-        property: u32,
-        type_: u32,
+        window: WINDOW,
+        property: B,
+        type_: C,
         data: &[u8],
     ) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
         A: Into<u8>,
+        B: Into<ATOM>,
+        C: Into<ATOM>,
     {
         self.change_property(
             mode,
@@ -74,16 +76,18 @@ pub trait ConnectionExt: XProtoConnectionExt {
     }
 
     /// Change a property on a window with format 16.
-    fn change_property16<A>(
+    fn change_property16<A, B, C>(
         &self,
         mode: A,
-        window: u32,
-        property: u32,
-        type_: u32,
+        window: WINDOW,
+        property: B,
+        type_: C,
         data: &[u16],
     ) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
         A: Into<u8>,
+        B: Into<ATOM>,
+        C: Into<ATOM>,
     {
         let mut data_u8 = Vec::with_capacity(data.len() * 2);
         for item in data {
@@ -101,16 +105,18 @@ pub trait ConnectionExt: XProtoConnectionExt {
     }
 
     /// Change a property on a window with format 32.
-    fn change_property32<A>(
+    fn change_property32<A, B, C>(
         &self,
         mode: A,
-        window: u32,
-        property: u32,
-        type_: u32,
+        window: WINDOW,
+        property: B,
+        type_: C,
         data: &[u32],
     ) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
         A: Into<u8>,
+        B: Into<ATOM>,
+        C: Into<ATOM>,
     {
         let mut data_u8 = Vec::with_capacity(data.len() * 4);
         for item in data {

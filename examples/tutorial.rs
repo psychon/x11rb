@@ -1587,17 +1587,44 @@ fn example8() -> Result<(), Box<dyn Error>> {
 //
 // To change the property of a window, we use one of the following functions:
 //
-//    fn change_property8<A>(&self, mode: A, window: u32, property: u32, type_: u32, data: &[u8])
-//    -> Result<SequenceNumber, ConnectionError>
-//    where A: Into<u8>
+//    fn change_property8<A, B, C>(
+//        &self,
+//        mode: A,
+//        window: WINDOW,
+//        property: B,
+//        type_: C,
+//        data: &[u8],
+//    ) -> Result<VoidCookie<'_, Self>, ConnectionError>
+//    where
+//        A: Into<u8>,
+//        B: Into<ATOM>,
+//        C: Into<ATOM>
 //
-//    fn change_property16<A>(&self, mode: A, window: u32, property: u32, type_: u32, data: &[u16])
-//    -> Result<SequenceNumber, ConnectionError>
-//    where A: Into<u8>
+//    fn change_property16<A, B, C>(
+//        &self,
+//        mode: A,
+//        window: WINDOW,
+//        property: B,
+//        type_: C,
+//        data: &[u16],
+//    ) -> Result<VoidCookie<'_, Self>, ConnectionError>
+//    where
+//        A: Into<u8>,
+//        B: Into<ATOM>,
+//        C: Into<ATOM>
 //
-//    fn change_property32<A>(&self, mode: A, window: u32, property: u32, type_: u32, data: &[u32])
-//    -> Result<SequenceNumber, ConnectionError>
-//    where A: Into<u8>
+//    fn change_property32<A, B, C>(
+//        &self,
+//        mode: A,
+//        window: WINDOW,
+//        property: B,
+//        type_: C,
+//        data: &[u32],
+//    ) -> Result<VoidCookie<'_, Self>, ConnectionError>
+//    where
+//        A: Into<u8>,
+//        B: Into<ATOM>,
+//        C: Into<ATOM>
 //
 // The `mode` parameter could be one of the following values (defined in enumeration
 // xcb_prop_mode_t in the xproto.h header file):
@@ -1649,8 +1676,8 @@ fn example9() -> Result<(), Box<dyn Error>> {
     conn.change_property8(
         PropMode::Replace,
         win,
-        Atom::WM_NAME.into(),
-        Atom::STRING.into(), // FIXME: Get rid of these ugly into()
+        Atom::WM_NAME,
+        Atom::STRING,
         title.as_bytes(),
     )?;
 
@@ -1659,8 +1686,8 @@ fn example9() -> Result<(), Box<dyn Error>> {
     conn.change_property8(
         PropMode::Replace,
         win,
-        Atom::WM_ICON_NAME.into(),
-        Atom::STRING.into(), // FIXME: Get rid of these ugly into()
+        Atom::WM_ICON_NAME,
+        Atom::STRING,
         title_icon.as_bytes(),
     )?;
 

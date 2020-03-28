@@ -236,8 +236,8 @@ fn setup_window<C: Connection>(
     conn.change_property8(
         PropMode::Replace,
         win_id,
-        Atom::WM_NAME.into(),
-        Atom::STRING.into(),
+        Atom::WM_NAME,
+        Atom::STRING,
         title.as_bytes(),
     )
     .unwrap();
@@ -245,7 +245,7 @@ fn setup_window<C: Connection>(
         PropMode::Replace,
         win_id,
         wm_protocols,
-        Atom::ATOM.into(),
+        Atom::ATOM,
         &[wm_delete_window],
     )
     .unwrap();

@@ -8488,15 +8488,17 @@ pub const CHANGE_PROPERTY_REQUEST: u8 = 18;
 ///     xcb_flush(conn);
 /// }
 /// ```
-pub fn change_property<'c, Conn, A>(conn: &'c Conn, mode: A, window: WINDOW, property: ATOM, type_: ATOM, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+pub fn change_property<'c, Conn, A, B, C>(conn: &'c Conn, mode: A, window: WINDOW, property: B, type_: C, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<ATOM>, C: Into<ATOM>
 {
     let length: usize = (24 + 1 * data.len() + 3) / 4;
     let mode = mode.into();
     let mode_bytes = mode.serialize();
     let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
+    let property = property.into();
     let property_bytes = property.serialize();
+    let type_ = type_.into();
     let type_bytes = type_.serialize();
     let format_bytes = format.serialize();
     let data_len_bytes = data_len.serialize();
@@ -18724,8 +18726,8 @@ pub trait ConnectionExt: RequestConnection {
     ///     xcb_flush(conn);
     /// }
     /// ```
-    fn change_property<'c, A>(&'c self, mode: A, window: WINDOW, property: ATOM, type_: ATOM, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    fn change_property<'c, A, B, C>(&'c self, mode: A, window: WINDOW, property: B, type_: C, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    where A: Into<u8>, B: Into<ATOM>, C: Into<ATOM>
     {
         change_property(self, mode, window, property, type_, format, data_len, data)
     }

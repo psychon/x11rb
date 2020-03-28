@@ -79,7 +79,8 @@ def collect_function_arguments(module, obj, name, aux_name):
             # - It is the "event" argument of SendEvent
             if (field.enum is not None and not field.type.is_list) or \
                     (field.isfd and not field.type.is_list) or \
-                    (name == ('xcb', 'SendEvent') and field.field_name == 'event'):
+                    (name == ('xcb', 'SendEvent') and field.field_name == 'event') or \
+                    (name == ('xcb', 'ChangeProperty') and field.field_type == ('xcb', 'ATOM')):
                 if name == ('xcb', 'SendEvent') and field.field_name == 'event':
                     # Turn &[u8; 32] into [u8; 32]
                     assert rust_type[0] == '&'
@@ -323,7 +324,8 @@ def request_implementation(module, obj, name, fds, fds_is_list):
                     # (Needed because this is not a function argument)
                     module.out("let %s: %s = %s.len().try_into()?;", rust_variable,
                                module._field_type(field), list_var_name)
-            if field.enum is not None and not hasattr(field, 'lenfield_for_switch'):
+            if (field.enum is not None and not hasattr(field, 'lenfield_for_switch')) or \
+                    (name == ('xcb', 'ChangeProperty') and field.field_type == ('xcb', 'ATOM')):
                 # This is a generic parameter, call Into::into
                 module.out("let %s = %s.into();", rust_variable, rust_variable)
             field_bytes = module._to_rust_variable(field_name + "_bytes")
