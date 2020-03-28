@@ -12,7 +12,7 @@ use std::time::Duration;
 use x11rb::connection::Connection;
 use x11rb::errors::{ReplyError, ReplyOrIdError};
 use x11rb::xproto::*;
-use x11rb::{COPY_DEPTH_FROM_PARENT, Event};
+use x11rb::{Event, COPY_DEPTH_FROM_PARENT};
 
 /// Lag angle for the follow line
 const LAG: f64 = 0.3;

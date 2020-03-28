@@ -126,7 +126,7 @@ fn main() {
                 }
             }
             Event::Error(_) => println!("Got an unexpected error"),
-            _ => println!("Got an unknown event")
+            _ => println!("Got an unknown event"),
         }
     }
 }

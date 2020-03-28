@@ -95,14 +95,16 @@ impl ExtensionInformation {
     /// This function returns an iterator that provides information about all the extensions that
     /// were queried and found to be present. Extensions that were not queried or which are not
     /// present are not returned.
-    pub fn known_present<'a>(&'a self) -> impl 'a + Iterator<Item=(&'static str, QueryExtensionReply)> {
-        self.0.iter()
-            .filter_map(|(name, state)|
-                        if let CheckState::Present(reply) = state {
-                            Some((*name, *reply))
-                        } else {
-                            None
-                        })
+    pub fn known_present<'a>(
+        &'a self,
+    ) -> impl 'a + Iterator<Item = (&'static str, QueryExtensionReply)> {
+        self.0.iter().filter_map(|(name, state)| {
+            if let CheckState::Present(reply) = state {
+                Some((*name, *reply))
+            } else {
+                None
+            }
+        })
     }
 }
 
@@ -121,7 +123,7 @@ mod test {
     use crate::x11_utils::GenericError;
     use crate::xproto::QueryExtensionReply;
 
-    use super::{ExtensionInformation, CheckState};
+    use super::{CheckState, ExtensionInformation};
 
     struct FakeConnection(RefCell<SequenceNumber>);
 

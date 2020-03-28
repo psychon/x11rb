@@ -5,16 +5,17 @@ use std::process::exit;
 
 use x11rb::connection::{Connection as _, RequestConnection as _};
 use x11rb::present;
-use x11rb::xproto::{
-    ConfigureWindowAux, ConnectionExt as _, CreateWindowAux, WindowClass,
-};
-use x11rb::{COPY_DEPTH_FROM_PARENT, Event};
+use x11rb::xproto::{ConfigureWindowAux, ConnectionExt as _, CreateWindowAux, WindowClass};
+use x11rb::{Event, COPY_DEPTH_FROM_PARENT};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (conn, screen_num) = x11rb::connect(None)?;
     let screen = &conn.setup().roots[screen_num];
 
-    if conn.extension_information(present::X11_EXTENSION_NAME)?.is_none() {
+    if conn
+        .extension_information(present::X11_EXTENSION_NAME)?
+        .is_none()
+    {
         eprintln!("Present extension is not supported");
         exit(1);
     }
@@ -56,7 +57,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let event = conn.parse_event(event)?;
     let event = match event {
         Event::PresentConfigureNotifyEvent(event) => event,
-        other => panic!("Unexpected event {:?}", other)
+        other => panic!("Unexpected event {:?}", other),
     };
     println!(
         "Got a Present ConfigureNotify event for event ID 0x{:x} and window 0x{:x}.",

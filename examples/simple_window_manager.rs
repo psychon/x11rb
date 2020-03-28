@@ -10,7 +10,7 @@ use x11rb::connection::Connection;
 use x11rb::errors::{ReplyError, ReplyOrIdError};
 use x11rb::x11_utils::Event as _;
 use x11rb::xproto::*;
-use x11rb::{COPY_DEPTH_FROM_PARENT, Event};
+use x11rb::{Event, COPY_DEPTH_FROM_PARENT};
 
 const TITLEBAR_HEIGHT: u16 = 20;
 
