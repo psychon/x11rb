@@ -3,6 +3,7 @@ import re
 from .output import Output, Indent, generated_code_header
 import code_generator_helpers.special_cases as special_cases
 from .request import generate_request_code as generate_request_code
+from . import camel_case_to_lower_snake, camel_case_to_upper_snake
 
 
 rust_type_mapping = {
@@ -1400,17 +1401,12 @@ class Module(object):
         """Convert a name tuple to a lowercase snake name. MonitorInfo is turned
         into monitor_info."""
 
-        name = self._name(name)
-        # Based on _cname_re from libxcb's c_client.py
-        pattern = re.compile('([A-Z][a-z0-9]+|[A-Z]+(?![a-z0-9])|[a-z0-9]+)')
-        split = pattern.finditer(name)
-        name_parts = [match.group(0) for match in split]
-        return '_'.join(name_parts).lower()
+        return camel_case_to_lower_snake(self._name(name))
 
     def _upper_snake_name(self, name):
         """Convert a name tuple to a uppercase snake name. MonitorInfo is turned
         into MONITOR_INFO."""
-        return self._lower_snake_name(name).upper()
+        return camel_case_to_upper_snake(self._name(name))
 
     def _aux_field_name(self, field):
         return self._lower_snake_name((field.field_name,))

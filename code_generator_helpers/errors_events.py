@@ -4,6 +4,7 @@ specific instance of the right event/error.
 """
 
 from .output import Indent
+from . import camel_case_to_upper_snake
 
 
 def _get_errors_from_module(module):
@@ -26,7 +27,6 @@ def _get_events_from_module(module):
 
 def _errors(out, modules):
     errors = [_get_errors_from_module(module) for module in modules]
-    opcodes = [[int(error.opcodes[name]) for name, error in mod_errors] for mod_errors in errors]
     xproto_index = next(filter(lambda m: not m[1].namespace.is_ext, enumerate(modules)))[0]
 
     out("/// Enumeration of all possible X11 errors.")
@@ -56,9 +56,10 @@ def _errors(out, modules):
 
             out("// Check if this is a core protocol error")
             out("match error_code {")
-            for (name, err), opcode in zip(errors[xproto_index], opcodes[xproto_index]):
+            for name, err in errors[xproto_index]:
+                opcode = camel_case_to_upper_snake(name[-1]) + "_ERROR"
                 err_name = name[-1] + "Error"
-                out.indent("%s => return Ok(Self::Xproto%s(xproto::%s::try_parse(bytes)?.0)),",
+                out.indent("xproto::%s => return Ok(Self::Xproto%s(xproto::%s::try_parse(bytes)?.0)),",
                            opcode, err_name, err_name)
             out.indent("_ => {}")
             out("}")
@@ -70,7 +71,7 @@ def _errors(out, modules):
             out.indent(".max_by_key(|&(_, first_error)| first_error);")
             out("match ext_info {")
             with Indent(out):
-                for module, mod_errors, mod_opcodes in zip(modules, errors, opcodes):
+                for module, mod_errors in zip(modules, errors):
                     if not mod_errors or not module.namespace.is_ext:
                         continue
                     mod_name = module.namespace.header
@@ -81,10 +82,11 @@ def _errors(out, modules):
                     out("Some((\"%s\", first_error)) => {", ext_xname)
                     with Indent(out):
                         out("match error_code - first_error {")
-                        for (name, error), opcode in zip(mod_errors, mod_opcodes):
+                        for name, error in mod_errors:
+                            opcode = camel_case_to_upper_snake(name[-1]) + "_ERROR"
                             err_name = name[-1] + "Error"
-                            out.indent("%s => Ok(Self::%s%s(%s::%s::try_parse(bytes)?.0)),",
-                                       opcode, variant, err_name, mod_name, err_name)
+                            out.indent("%s::%s => Ok(Self::%s%s(%s::%s::try_parse(bytes)?.0)),",
+                                       mod_name, opcode, variant, err_name, mod_name, err_name)
                         out.indent("_ => Ok(Self::Unknown(error))")
                         out("}")
                     out("}")
@@ -96,7 +98,6 @@ def _errors(out, modules):
 
 def _events(out, modules):
     events = [_get_events_from_module(module) for module in modules]
-    opcodes = [[int(event.opcodes[name]) for name, event in mod_events] for mod_events in events]
     xproto_index = next(filter(lambda m: not m[1].namespace.is_ext, enumerate(modules)))[0]
 
     out("/// Enumeration of all possible X11 events.")
@@ -128,12 +129,13 @@ def _events(out, modules):
             out("match event_type {")
             with Indent(out):
                 out("0 => return Ok(Self::Error(Error::parse(event.try_into()?, iter)?)),")
-                for (name, event), opcode in zip(events[xproto_index], opcodes[xproto_index]):
+                for name, event in events[xproto_index]:
                     if name == ('xcb', 'GeGeneric'):
                         # This does not really count and is parsed as an extension's event
                         continue
+                    opcode = camel_case_to_upper_snake(name[-1]) + "_EVENT"
                     event_name = name[-1] + "Event"
-                    out("%s => return Ok(Self::Xproto%s(xproto::%s::try_parse(bytes)?.0)),",
+                    out("xproto::%s => return Ok(Self::Xproto%s(xproto::%s::try_parse(bytes)?.0)),",
                         opcode, event_name, event_name)
                 out("xproto::GE_GENERIC_EVENT => return Self::from_generic_event(event, iter),")
                 out("_ => {}")
@@ -146,7 +148,7 @@ def _events(out, modules):
             out.indent(".max_by_key(|&(_, first_event)| first_event);")
             out("match ext_info {")
             with Indent(out):
-                for module, mod_events, mod_opcodes in zip(modules, events, opcodes):
+                for module, mod_events in zip(modules, events):
                     # XGE events are handled separately
                     has_normal_events = any(not e[1].is_ge_event for e in mod_events)
                     if not has_normal_events or not module.namespace.is_ext:
@@ -159,12 +161,13 @@ def _events(out, modules):
                     out("Some((\"%s\", first_event)) => {", ext_xname)
                     with Indent(out):
                         out("match event_type - first_event {")
-                        for (name, event), opcode in zip(mod_events, mod_opcodes):
+                        for name, event in mod_events:
                             if event.is_ge_event:
                                 continue
+                            opcode = camel_case_to_upper_snake(name[-1]) + "_EVENT"
                             event_name = name[-1] + "Event"
-                            out.indent("%s => Ok(Self::%s%s(%s::%s::try_parse(bytes)?.0)),",
-                                       opcode, variant, event_name, mod_name, event_name)
+                            out.indent("%s::%s => Ok(Self::%s%s(%s::%s::try_parse(bytes)?.0)),",
+                                       mod_name, opcode, variant, event_name, mod_name, event_name)
                         out.indent("_ => Ok(Self::Unknown(event))")
                         out("}")
                     out("}")

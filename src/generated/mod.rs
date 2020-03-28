@@ -190,23 +190,23 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
         let bytes = error.raw_bytes();
         // Check if this is a core protocol error
         match error_code {
-            10 => return Ok(Self::XprotoAccessError(xproto::AccessError::try_parse(bytes)?.0)),
-            11 => return Ok(Self::XprotoAllocError(xproto::AllocError::try_parse(bytes)?.0)),
-            5 => return Ok(Self::XprotoAtomError(xproto::AtomError::try_parse(bytes)?.0)),
-            12 => return Ok(Self::XprotoColormapError(xproto::ColormapError::try_parse(bytes)?.0)),
-            6 => return Ok(Self::XprotoCursorError(xproto::CursorError::try_parse(bytes)?.0)),
-            9 => return Ok(Self::XprotoDrawableError(xproto::DrawableError::try_parse(bytes)?.0)),
-            7 => return Ok(Self::XprotoFontError(xproto::FontError::try_parse(bytes)?.0)),
-            13 => return Ok(Self::XprotoGContextError(xproto::GContextError::try_parse(bytes)?.0)),
-            14 => return Ok(Self::XprotoIDChoiceError(xproto::IDChoiceError::try_parse(bytes)?.0)),
-            17 => return Ok(Self::XprotoImplementationError(xproto::ImplementationError::try_parse(bytes)?.0)),
-            16 => return Ok(Self::XprotoLengthError(xproto::LengthError::try_parse(bytes)?.0)),
-            8 => return Ok(Self::XprotoMatchError(xproto::MatchError::try_parse(bytes)?.0)),
-            15 => return Ok(Self::XprotoNameError(xproto::NameError::try_parse(bytes)?.0)),
-            4 => return Ok(Self::XprotoPixmapError(xproto::PixmapError::try_parse(bytes)?.0)),
-            1 => return Ok(Self::XprotoRequestError(xproto::RequestError::try_parse(bytes)?.0)),
-            2 => return Ok(Self::XprotoValueError(xproto::ValueError::try_parse(bytes)?.0)),
-            3 => return Ok(Self::XprotoWindowError(xproto::WindowError::try_parse(bytes)?.0)),
+            xproto::ACCESS_ERROR => return Ok(Self::XprotoAccessError(xproto::AccessError::try_parse(bytes)?.0)),
+            xproto::ALLOC_ERROR => return Ok(Self::XprotoAllocError(xproto::AllocError::try_parse(bytes)?.0)),
+            xproto::ATOM_ERROR => return Ok(Self::XprotoAtomError(xproto::AtomError::try_parse(bytes)?.0)),
+            xproto::COLORMAP_ERROR => return Ok(Self::XprotoColormapError(xproto::ColormapError::try_parse(bytes)?.0)),
+            xproto::CURSOR_ERROR => return Ok(Self::XprotoCursorError(xproto::CursorError::try_parse(bytes)?.0)),
+            xproto::DRAWABLE_ERROR => return Ok(Self::XprotoDrawableError(xproto::DrawableError::try_parse(bytes)?.0)),
+            xproto::FONT_ERROR => return Ok(Self::XprotoFontError(xproto::FontError::try_parse(bytes)?.0)),
+            xproto::G_CONTEXT_ERROR => return Ok(Self::XprotoGContextError(xproto::GContextError::try_parse(bytes)?.0)),
+            xproto::ID_CHOICE_ERROR => return Ok(Self::XprotoIDChoiceError(xproto::IDChoiceError::try_parse(bytes)?.0)),
+            xproto::IMPLEMENTATION_ERROR => return Ok(Self::XprotoImplementationError(xproto::ImplementationError::try_parse(bytes)?.0)),
+            xproto::LENGTH_ERROR => return Ok(Self::XprotoLengthError(xproto::LengthError::try_parse(bytes)?.0)),
+            xproto::MATCH_ERROR => return Ok(Self::XprotoMatchError(xproto::MatchError::try_parse(bytes)?.0)),
+            xproto::NAME_ERROR => return Ok(Self::XprotoNameError(xproto::NameError::try_parse(bytes)?.0)),
+            xproto::PIXMAP_ERROR => return Ok(Self::XprotoPixmapError(xproto::PixmapError::try_parse(bytes)?.0)),
+            xproto::REQUEST_ERROR => return Ok(Self::XprotoRequestError(xproto::RequestError::try_parse(bytes)?.0)),
+            xproto::VALUE_ERROR => return Ok(Self::XprotoValueError(xproto::ValueError::try_parse(bytes)?.0)),
+            xproto::WINDOW_ERROR => return Ok(Self::XprotoWindowError(xproto::WindowError::try_parse(bytes)?.0)),
             _ => {}
         }
         // Find the extension that this error could belong to
@@ -218,125 +218,125 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
             #[cfg(feature = "damage")]
             Some(("DAMAGE", first_error)) => {
                 match error_code - first_error {
-                    0 => Ok(Self::DamageBadDamageError(damage::BadDamageError::try_parse(bytes)?.0)),
+                    damage::BAD_DAMAGE_ERROR => Ok(Self::DamageBadDamageError(damage::BadDamageError::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "glx")]
             Some(("GLX", first_error)) => {
                 match error_code - first_error {
-                    0 => Ok(Self::GlxBadContextError(glx::BadContextError::try_parse(bytes)?.0)),
-                    1 => Ok(Self::GlxBadContextStateError(glx::BadContextStateError::try_parse(bytes)?.0)),
-                    4 => Ok(Self::GlxBadContextTagError(glx::BadContextTagError::try_parse(bytes)?.0)),
-                    11 => Ok(Self::GlxBadCurrentDrawableError(glx::BadCurrentDrawableError::try_parse(bytes)?.0)),
-                    5 => Ok(Self::GlxBadCurrentWindowError(glx::BadCurrentWindowError::try_parse(bytes)?.0)),
-                    2 => Ok(Self::GlxBadDrawableError(glx::BadDrawableError::try_parse(bytes)?.0)),
-                    9 => Ok(Self::GlxBadFBConfigError(glx::BadFBConfigError::try_parse(bytes)?.0)),
-                    7 => Ok(Self::GlxBadLargeRequestError(glx::BadLargeRequestError::try_parse(bytes)?.0)),
-                    10 => Ok(Self::GlxBadPbufferError(glx::BadPbufferError::try_parse(bytes)?.0)),
-                    3 => Ok(Self::GlxBadPixmapError(glx::BadPixmapError::try_parse(bytes)?.0)),
-                    6 => Ok(Self::GlxBadRenderRequestError(glx::BadRenderRequestError::try_parse(bytes)?.0)),
-                    12 => Ok(Self::GlxBadWindowError(glx::BadWindowError::try_parse(bytes)?.0)),
-                    13 => Ok(Self::GlxGLXBadProfileARBError(glx::GLXBadProfileARBError::try_parse(bytes)?.0)),
-                    8 => Ok(Self::GlxUnsupportedPrivateRequestError(glx::UnsupportedPrivateRequestError::try_parse(bytes)?.0)),
+                    glx::BAD_CONTEXT_ERROR => Ok(Self::GlxBadContextError(glx::BadContextError::try_parse(bytes)?.0)),
+                    glx::BAD_CONTEXT_STATE_ERROR => Ok(Self::GlxBadContextStateError(glx::BadContextStateError::try_parse(bytes)?.0)),
+                    glx::BAD_CONTEXT_TAG_ERROR => Ok(Self::GlxBadContextTagError(glx::BadContextTagError::try_parse(bytes)?.0)),
+                    glx::BAD_CURRENT_DRAWABLE_ERROR => Ok(Self::GlxBadCurrentDrawableError(glx::BadCurrentDrawableError::try_parse(bytes)?.0)),
+                    glx::BAD_CURRENT_WINDOW_ERROR => Ok(Self::GlxBadCurrentWindowError(glx::BadCurrentWindowError::try_parse(bytes)?.0)),
+                    glx::BAD_DRAWABLE_ERROR => Ok(Self::GlxBadDrawableError(glx::BadDrawableError::try_parse(bytes)?.0)),
+                    glx::BAD_FB_CONFIG_ERROR => Ok(Self::GlxBadFBConfigError(glx::BadFBConfigError::try_parse(bytes)?.0)),
+                    glx::BAD_LARGE_REQUEST_ERROR => Ok(Self::GlxBadLargeRequestError(glx::BadLargeRequestError::try_parse(bytes)?.0)),
+                    glx::BAD_PBUFFER_ERROR => Ok(Self::GlxBadPbufferError(glx::BadPbufferError::try_parse(bytes)?.0)),
+                    glx::BAD_PIXMAP_ERROR => Ok(Self::GlxBadPixmapError(glx::BadPixmapError::try_parse(bytes)?.0)),
+                    glx::BAD_RENDER_REQUEST_ERROR => Ok(Self::GlxBadRenderRequestError(glx::BadRenderRequestError::try_parse(bytes)?.0)),
+                    glx::BAD_WINDOW_ERROR => Ok(Self::GlxBadWindowError(glx::BadWindowError::try_parse(bytes)?.0)),
+                    glx::GLX_BAD_PROFILE_ARB_ERROR => Ok(Self::GlxGLXBadProfileARBError(glx::GLXBadProfileARBError::try_parse(bytes)?.0)),
+                    glx::UNSUPPORTED_PRIVATE_REQUEST_ERROR => Ok(Self::GlxUnsupportedPrivateRequestError(glx::UnsupportedPrivateRequestError::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "randr")]
             Some(("RANDR", first_error)) => {
                 match error_code - first_error {
-                    1 => Ok(Self::RandrBadCrtcError(randr::BadCrtcError::try_parse(bytes)?.0)),
-                    2 => Ok(Self::RandrBadModeError(randr::BadModeError::try_parse(bytes)?.0)),
-                    0 => Ok(Self::RandrBadOutputError(randr::BadOutputError::try_parse(bytes)?.0)),
-                    3 => Ok(Self::RandrBadProviderError(randr::BadProviderError::try_parse(bytes)?.0)),
+                    randr::BAD_CRTC_ERROR => Ok(Self::RandrBadCrtcError(randr::BadCrtcError::try_parse(bytes)?.0)),
+                    randr::BAD_MODE_ERROR => Ok(Self::RandrBadModeError(randr::BadModeError::try_parse(bytes)?.0)),
+                    randr::BAD_OUTPUT_ERROR => Ok(Self::RandrBadOutputError(randr::BadOutputError::try_parse(bytes)?.0)),
+                    randr::BAD_PROVIDER_ERROR => Ok(Self::RandrBadProviderError(randr::BadProviderError::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "record")]
             Some(("RECORD", first_error)) => {
                 match error_code - first_error {
-                    0 => Ok(Self::RecordBadContextError(record::BadContextError::try_parse(bytes)?.0)),
+                    record::BAD_CONTEXT_ERROR => Ok(Self::RecordBadContextError(record::BadContextError::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "render")]
             Some(("RENDER", first_error)) => {
                 match error_code - first_error {
-                    4 => Ok(Self::RenderGlyphError(render::GlyphError::try_parse(bytes)?.0)),
-                    3 => Ok(Self::RenderGlyphSetError(render::GlyphSetError::try_parse(bytes)?.0)),
-                    0 => Ok(Self::RenderPictFormatError(render::PictFormatError::try_parse(bytes)?.0)),
-                    2 => Ok(Self::RenderPictOpError(render::PictOpError::try_parse(bytes)?.0)),
-                    1 => Ok(Self::RenderPictureError(render::PictureError::try_parse(bytes)?.0)),
+                    render::GLYPH_ERROR => Ok(Self::RenderGlyphError(render::GlyphError::try_parse(bytes)?.0)),
+                    render::GLYPH_SET_ERROR => Ok(Self::RenderGlyphSetError(render::GlyphSetError::try_parse(bytes)?.0)),
+                    render::PICT_FORMAT_ERROR => Ok(Self::RenderPictFormatError(render::PictFormatError::try_parse(bytes)?.0)),
+                    render::PICT_OP_ERROR => Ok(Self::RenderPictOpError(render::PictOpError::try_parse(bytes)?.0)),
+                    render::PICTURE_ERROR => Ok(Self::RenderPictureError(render::PictureError::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "shm")]
             Some(("MIT-SHM", first_error)) => {
                 match error_code - first_error {
-                    0 => Ok(Self::ShmBadSegError(shm::BadSegError::try_parse(bytes)?.0)),
+                    shm::BAD_SEG_ERROR => Ok(Self::ShmBadSegError(shm::BadSegError::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "sync")]
             Some(("SYNC", first_error)) => {
                 match error_code - first_error {
-                    1 => Ok(Self::SyncAlarmError(sync::AlarmError::try_parse(bytes)?.0)),
-                    0 => Ok(Self::SyncCounterError(sync::CounterError::try_parse(bytes)?.0)),
+                    sync::ALARM_ERROR => Ok(Self::SyncAlarmError(sync::AlarmError::try_parse(bytes)?.0)),
+                    sync::COUNTER_ERROR => Ok(Self::SyncCounterError(sync::CounterError::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "xf86vidmode")]
             Some(("XFree86-VidModeExtension", first_error)) => {
                 match error_code - first_error {
-                    0 => Ok(Self::Xf86vidmodeBadClockError(xf86vidmode::BadClockError::try_parse(bytes)?.0)),
-                    1 => Ok(Self::Xf86vidmodeBadHTimingsError(xf86vidmode::BadHTimingsError::try_parse(bytes)?.0)),
-                    2 => Ok(Self::Xf86vidmodeBadVTimingsError(xf86vidmode::BadVTimingsError::try_parse(bytes)?.0)),
-                    5 => Ok(Self::Xf86vidmodeClientNotLocalError(xf86vidmode::ClientNotLocalError::try_parse(bytes)?.0)),
-                    4 => Ok(Self::Xf86vidmodeExtensionDisabledError(xf86vidmode::ExtensionDisabledError::try_parse(bytes)?.0)),
-                    3 => Ok(Self::Xf86vidmodeModeUnsuitableError(xf86vidmode::ModeUnsuitableError::try_parse(bytes)?.0)),
-                    6 => Ok(Self::Xf86vidmodeZoomLockedError(xf86vidmode::ZoomLockedError::try_parse(bytes)?.0)),
+                    xf86vidmode::BAD_CLOCK_ERROR => Ok(Self::Xf86vidmodeBadClockError(xf86vidmode::BadClockError::try_parse(bytes)?.0)),
+                    xf86vidmode::BAD_H_TIMINGS_ERROR => Ok(Self::Xf86vidmodeBadHTimingsError(xf86vidmode::BadHTimingsError::try_parse(bytes)?.0)),
+                    xf86vidmode::BAD_V_TIMINGS_ERROR => Ok(Self::Xf86vidmodeBadVTimingsError(xf86vidmode::BadVTimingsError::try_parse(bytes)?.0)),
+                    xf86vidmode::CLIENT_NOT_LOCAL_ERROR => Ok(Self::Xf86vidmodeClientNotLocalError(xf86vidmode::ClientNotLocalError::try_parse(bytes)?.0)),
+                    xf86vidmode::EXTENSION_DISABLED_ERROR => Ok(Self::Xf86vidmodeExtensionDisabledError(xf86vidmode::ExtensionDisabledError::try_parse(bytes)?.0)),
+                    xf86vidmode::MODE_UNSUITABLE_ERROR => Ok(Self::Xf86vidmodeModeUnsuitableError(xf86vidmode::ModeUnsuitableError::try_parse(bytes)?.0)),
+                    xf86vidmode::ZOOM_LOCKED_ERROR => Ok(Self::Xf86vidmodeZoomLockedError(xf86vidmode::ZoomLockedError::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "xfixes")]
             Some(("XFIXES", first_error)) => {
                 match error_code - first_error {
-                    0 => Ok(Self::XfixesBadRegionError(xfixes::BadRegionError::try_parse(bytes)?.0)),
+                    xfixes::BAD_REGION_ERROR => Ok(Self::XfixesBadRegionError(xfixes::BadRegionError::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "xinput")]
             Some(("XInputExtension", first_error)) => {
                 match error_code - first_error {
-                    4 => Ok(Self::XinputClassError(xinput::ClassError::try_parse(bytes)?.0)),
-                    0 => Ok(Self::XinputDeviceError(xinput::DeviceError::try_parse(bytes)?.0)),
-                    3 => Ok(Self::XinputDeviceBusyError(xinput::DeviceBusyError::try_parse(bytes)?.0)),
-                    1 => Ok(Self::XinputEventError(xinput::EventError::try_parse(bytes)?.0)),
-                    2 => Ok(Self::XinputModeError(xinput::ModeError::try_parse(bytes)?.0)),
+                    xinput::CLASS_ERROR => Ok(Self::XinputClassError(xinput::ClassError::try_parse(bytes)?.0)),
+                    xinput::DEVICE_ERROR => Ok(Self::XinputDeviceError(xinput::DeviceError::try_parse(bytes)?.0)),
+                    xinput::DEVICE_BUSY_ERROR => Ok(Self::XinputDeviceBusyError(xinput::DeviceBusyError::try_parse(bytes)?.0)),
+                    xinput::EVENT_ERROR => Ok(Self::XinputEventError(xinput::EventError::try_parse(bytes)?.0)),
+                    xinput::MODE_ERROR => Ok(Self::XinputModeError(xinput::ModeError::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "xkb")]
             Some(("XKEYBOARD", first_error)) => {
                 match error_code - first_error {
-                    0 => Ok(Self::XkbKeyboardError(xkb::KeyboardError::try_parse(bytes)?.0)),
+                    xkb::KEYBOARD_ERROR => Ok(Self::XkbKeyboardError(xkb::KeyboardError::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "xprint")]
             Some(("XpExtension", first_error)) => {
                 match error_code - first_error {
-                    0 => Ok(Self::XprintBadContextError(xprint::BadContextError::try_parse(bytes)?.0)),
-                    1 => Ok(Self::XprintBadSequenceError(xprint::BadSequenceError::try_parse(bytes)?.0)),
+                    xprint::BAD_CONTEXT_ERROR => Ok(Self::XprintBadContextError(xprint::BadContextError::try_parse(bytes)?.0)),
+                    xprint::BAD_SEQUENCE_ERROR => Ok(Self::XprintBadSequenceError(xprint::BadSequenceError::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "xv")]
             Some(("XVideo", first_error)) => {
                 match error_code - first_error {
-                    2 => Ok(Self::XvBadControlError(xv::BadControlError::try_parse(bytes)?.0)),
-                    1 => Ok(Self::XvBadEncodingError(xv::BadEncodingError::try_parse(bytes)?.0)),
-                    0 => Ok(Self::XvBadPortError(xv::BadPortError::try_parse(bytes)?.0)),
+                    xv::BAD_CONTROL_ERROR => Ok(Self::XvBadControlError(xv::BadControlError::try_parse(bytes)?.0)),
+                    xv::BAD_ENCODING_ERROR => Ok(Self::XvBadEncodingError(xv::BadEncodingError::try_parse(bytes)?.0)),
+                    xv::BAD_PORT_ERROR => Ok(Self::XvBadPortError(xv::BadPortError::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(error))
                 }
             }
@@ -551,39 +551,39 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
         // Check if this is a core protocol error or from the generic event extension
         match event_type {
             0 => return Ok(Self::Error(Error::parse(event.try_into()?, iter)?)),
-            4 => return Ok(Self::XprotoButtonPressEvent(xproto::ButtonPressEvent::try_parse(bytes)?.0)),
-            5 => return Ok(Self::XprotoButtonReleaseEvent(xproto::ButtonReleaseEvent::try_parse(bytes)?.0)),
-            26 => return Ok(Self::XprotoCirculateNotifyEvent(xproto::CirculateNotifyEvent::try_parse(bytes)?.0)),
-            27 => return Ok(Self::XprotoCirculateRequestEvent(xproto::CirculateRequestEvent::try_parse(bytes)?.0)),
-            33 => return Ok(Self::XprotoClientMessageEvent(xproto::ClientMessageEvent::try_parse(bytes)?.0)),
-            32 => return Ok(Self::XprotoColormapNotifyEvent(xproto::ColormapNotifyEvent::try_parse(bytes)?.0)),
-            22 => return Ok(Self::XprotoConfigureNotifyEvent(xproto::ConfigureNotifyEvent::try_parse(bytes)?.0)),
-            23 => return Ok(Self::XprotoConfigureRequestEvent(xproto::ConfigureRequestEvent::try_parse(bytes)?.0)),
-            16 => return Ok(Self::XprotoCreateNotifyEvent(xproto::CreateNotifyEvent::try_parse(bytes)?.0)),
-            17 => return Ok(Self::XprotoDestroyNotifyEvent(xproto::DestroyNotifyEvent::try_parse(bytes)?.0)),
-            7 => return Ok(Self::XprotoEnterNotifyEvent(xproto::EnterNotifyEvent::try_parse(bytes)?.0)),
-            12 => return Ok(Self::XprotoExposeEvent(xproto::ExposeEvent::try_parse(bytes)?.0)),
-            9 => return Ok(Self::XprotoFocusInEvent(xproto::FocusInEvent::try_parse(bytes)?.0)),
-            10 => return Ok(Self::XprotoFocusOutEvent(xproto::FocusOutEvent::try_parse(bytes)?.0)),
-            13 => return Ok(Self::XprotoGraphicsExposureEvent(xproto::GraphicsExposureEvent::try_parse(bytes)?.0)),
-            24 => return Ok(Self::XprotoGravityNotifyEvent(xproto::GravityNotifyEvent::try_parse(bytes)?.0)),
-            2 => return Ok(Self::XprotoKeyPressEvent(xproto::KeyPressEvent::try_parse(bytes)?.0)),
-            3 => return Ok(Self::XprotoKeyReleaseEvent(xproto::KeyReleaseEvent::try_parse(bytes)?.0)),
-            11 => return Ok(Self::XprotoKeymapNotifyEvent(xproto::KeymapNotifyEvent::try_parse(bytes)?.0)),
-            8 => return Ok(Self::XprotoLeaveNotifyEvent(xproto::LeaveNotifyEvent::try_parse(bytes)?.0)),
-            19 => return Ok(Self::XprotoMapNotifyEvent(xproto::MapNotifyEvent::try_parse(bytes)?.0)),
-            20 => return Ok(Self::XprotoMapRequestEvent(xproto::MapRequestEvent::try_parse(bytes)?.0)),
-            34 => return Ok(Self::XprotoMappingNotifyEvent(xproto::MappingNotifyEvent::try_parse(bytes)?.0)),
-            6 => return Ok(Self::XprotoMotionNotifyEvent(xproto::MotionNotifyEvent::try_parse(bytes)?.0)),
-            14 => return Ok(Self::XprotoNoExposureEvent(xproto::NoExposureEvent::try_parse(bytes)?.0)),
-            28 => return Ok(Self::XprotoPropertyNotifyEvent(xproto::PropertyNotifyEvent::try_parse(bytes)?.0)),
-            21 => return Ok(Self::XprotoReparentNotifyEvent(xproto::ReparentNotifyEvent::try_parse(bytes)?.0)),
-            25 => return Ok(Self::XprotoResizeRequestEvent(xproto::ResizeRequestEvent::try_parse(bytes)?.0)),
-            29 => return Ok(Self::XprotoSelectionClearEvent(xproto::SelectionClearEvent::try_parse(bytes)?.0)),
-            31 => return Ok(Self::XprotoSelectionNotifyEvent(xproto::SelectionNotifyEvent::try_parse(bytes)?.0)),
-            30 => return Ok(Self::XprotoSelectionRequestEvent(xproto::SelectionRequestEvent::try_parse(bytes)?.0)),
-            18 => return Ok(Self::XprotoUnmapNotifyEvent(xproto::UnmapNotifyEvent::try_parse(bytes)?.0)),
-            15 => return Ok(Self::XprotoVisibilityNotifyEvent(xproto::VisibilityNotifyEvent::try_parse(bytes)?.0)),
+            xproto::BUTTON_PRESS_EVENT => return Ok(Self::XprotoButtonPressEvent(xproto::ButtonPressEvent::try_parse(bytes)?.0)),
+            xproto::BUTTON_RELEASE_EVENT => return Ok(Self::XprotoButtonReleaseEvent(xproto::ButtonReleaseEvent::try_parse(bytes)?.0)),
+            xproto::CIRCULATE_NOTIFY_EVENT => return Ok(Self::XprotoCirculateNotifyEvent(xproto::CirculateNotifyEvent::try_parse(bytes)?.0)),
+            xproto::CIRCULATE_REQUEST_EVENT => return Ok(Self::XprotoCirculateRequestEvent(xproto::CirculateRequestEvent::try_parse(bytes)?.0)),
+            xproto::CLIENT_MESSAGE_EVENT => return Ok(Self::XprotoClientMessageEvent(xproto::ClientMessageEvent::try_parse(bytes)?.0)),
+            xproto::COLORMAP_NOTIFY_EVENT => return Ok(Self::XprotoColormapNotifyEvent(xproto::ColormapNotifyEvent::try_parse(bytes)?.0)),
+            xproto::CONFIGURE_NOTIFY_EVENT => return Ok(Self::XprotoConfigureNotifyEvent(xproto::ConfigureNotifyEvent::try_parse(bytes)?.0)),
+            xproto::CONFIGURE_REQUEST_EVENT => return Ok(Self::XprotoConfigureRequestEvent(xproto::ConfigureRequestEvent::try_parse(bytes)?.0)),
+            xproto::CREATE_NOTIFY_EVENT => return Ok(Self::XprotoCreateNotifyEvent(xproto::CreateNotifyEvent::try_parse(bytes)?.0)),
+            xproto::DESTROY_NOTIFY_EVENT => return Ok(Self::XprotoDestroyNotifyEvent(xproto::DestroyNotifyEvent::try_parse(bytes)?.0)),
+            xproto::ENTER_NOTIFY_EVENT => return Ok(Self::XprotoEnterNotifyEvent(xproto::EnterNotifyEvent::try_parse(bytes)?.0)),
+            xproto::EXPOSE_EVENT => return Ok(Self::XprotoExposeEvent(xproto::ExposeEvent::try_parse(bytes)?.0)),
+            xproto::FOCUS_IN_EVENT => return Ok(Self::XprotoFocusInEvent(xproto::FocusInEvent::try_parse(bytes)?.0)),
+            xproto::FOCUS_OUT_EVENT => return Ok(Self::XprotoFocusOutEvent(xproto::FocusOutEvent::try_parse(bytes)?.0)),
+            xproto::GRAPHICS_EXPOSURE_EVENT => return Ok(Self::XprotoGraphicsExposureEvent(xproto::GraphicsExposureEvent::try_parse(bytes)?.0)),
+            xproto::GRAVITY_NOTIFY_EVENT => return Ok(Self::XprotoGravityNotifyEvent(xproto::GravityNotifyEvent::try_parse(bytes)?.0)),
+            xproto::KEY_PRESS_EVENT => return Ok(Self::XprotoKeyPressEvent(xproto::KeyPressEvent::try_parse(bytes)?.0)),
+            xproto::KEY_RELEASE_EVENT => return Ok(Self::XprotoKeyReleaseEvent(xproto::KeyReleaseEvent::try_parse(bytes)?.0)),
+            xproto::KEYMAP_NOTIFY_EVENT => return Ok(Self::XprotoKeymapNotifyEvent(xproto::KeymapNotifyEvent::try_parse(bytes)?.0)),
+            xproto::LEAVE_NOTIFY_EVENT => return Ok(Self::XprotoLeaveNotifyEvent(xproto::LeaveNotifyEvent::try_parse(bytes)?.0)),
+            xproto::MAP_NOTIFY_EVENT => return Ok(Self::XprotoMapNotifyEvent(xproto::MapNotifyEvent::try_parse(bytes)?.0)),
+            xproto::MAP_REQUEST_EVENT => return Ok(Self::XprotoMapRequestEvent(xproto::MapRequestEvent::try_parse(bytes)?.0)),
+            xproto::MAPPING_NOTIFY_EVENT => return Ok(Self::XprotoMappingNotifyEvent(xproto::MappingNotifyEvent::try_parse(bytes)?.0)),
+            xproto::MOTION_NOTIFY_EVENT => return Ok(Self::XprotoMotionNotifyEvent(xproto::MotionNotifyEvent::try_parse(bytes)?.0)),
+            xproto::NO_EXPOSURE_EVENT => return Ok(Self::XprotoNoExposureEvent(xproto::NoExposureEvent::try_parse(bytes)?.0)),
+            xproto::PROPERTY_NOTIFY_EVENT => return Ok(Self::XprotoPropertyNotifyEvent(xproto::PropertyNotifyEvent::try_parse(bytes)?.0)),
+            xproto::REPARENT_NOTIFY_EVENT => return Ok(Self::XprotoReparentNotifyEvent(xproto::ReparentNotifyEvent::try_parse(bytes)?.0)),
+            xproto::RESIZE_REQUEST_EVENT => return Ok(Self::XprotoResizeRequestEvent(xproto::ResizeRequestEvent::try_parse(bytes)?.0)),
+            xproto::SELECTION_CLEAR_EVENT => return Ok(Self::XprotoSelectionClearEvent(xproto::SelectionClearEvent::try_parse(bytes)?.0)),
+            xproto::SELECTION_NOTIFY_EVENT => return Ok(Self::XprotoSelectionNotifyEvent(xproto::SelectionNotifyEvent::try_parse(bytes)?.0)),
+            xproto::SELECTION_REQUEST_EVENT => return Ok(Self::XprotoSelectionRequestEvent(xproto::SelectionRequestEvent::try_parse(bytes)?.0)),
+            xproto::UNMAP_NOTIFY_EVENT => return Ok(Self::XprotoUnmapNotifyEvent(xproto::UnmapNotifyEvent::try_parse(bytes)?.0)),
+            xproto::VISIBILITY_NOTIFY_EVENT => return Ok(Self::XprotoVisibilityNotifyEvent(xproto::VisibilityNotifyEvent::try_parse(bytes)?.0)),
             xproto::GE_GENERIC_EVENT => return Self::from_generic_event(event, iter),
             _ => {}
         }
@@ -596,132 +596,132 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
             #[cfg(feature = "damage")]
             Some(("DAMAGE", first_event)) => {
                 match event_type - first_event {
-                    0 => Ok(Self::DamageNotifyEvent(damage::NotifyEvent::try_parse(bytes)?.0)),
+                    damage::NOTIFY_EVENT => Ok(Self::DamageNotifyEvent(damage::NotifyEvent::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "dri2")]
             Some(("DRI2", first_event)) => {
                 match event_type - first_event {
-                    0 => Ok(Self::Dri2BufferSwapCompleteEvent(dri2::BufferSwapCompleteEvent::try_parse(bytes)?.0)),
-                    1 => Ok(Self::Dri2InvalidateBuffersEvent(dri2::InvalidateBuffersEvent::try_parse(bytes)?.0)),
+                    dri2::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::Dri2BufferSwapCompleteEvent(dri2::BufferSwapCompleteEvent::try_parse(bytes)?.0)),
+                    dri2::INVALIDATE_BUFFERS_EVENT => Ok(Self::Dri2InvalidateBuffersEvent(dri2::InvalidateBuffersEvent::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "glx")]
             Some(("GLX", first_event)) => {
                 match event_type - first_event {
-                    1 => Ok(Self::GlxBufferSwapCompleteEvent(glx::BufferSwapCompleteEvent::try_parse(bytes)?.0)),
-                    0 => Ok(Self::GlxPbufferClobberEvent(glx::PbufferClobberEvent::try_parse(bytes)?.0)),
+                    glx::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::GlxBufferSwapCompleteEvent(glx::BufferSwapCompleteEvent::try_parse(bytes)?.0)),
+                    glx::PBUFFER_CLOBBER_EVENT => Ok(Self::GlxPbufferClobberEvent(glx::PbufferClobberEvent::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "present")]
             Some(("Present", first_event)) => {
                 match event_type - first_event {
-                    0 => Ok(Self::PresentGenericEvent(present::GenericEvent::try_parse(bytes)?.0)),
+                    present::GENERIC_EVENT => Ok(Self::PresentGenericEvent(present::GenericEvent::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "randr")]
             Some(("RANDR", first_event)) => {
                 match event_type - first_event {
-                    1 => Ok(Self::RandrNotifyEvent(randr::NotifyEvent::try_parse(bytes)?.0)),
-                    0 => Ok(Self::RandrScreenChangeNotifyEvent(randr::ScreenChangeNotifyEvent::try_parse(bytes)?.0)),
+                    randr::NOTIFY_EVENT => Ok(Self::RandrNotifyEvent(randr::NotifyEvent::try_parse(bytes)?.0)),
+                    randr::SCREEN_CHANGE_NOTIFY_EVENT => Ok(Self::RandrScreenChangeNotifyEvent(randr::ScreenChangeNotifyEvent::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "screensaver")]
             Some(("MIT-SCREEN-SAVER", first_event)) => {
                 match event_type - first_event {
-                    0 => Ok(Self::ScreensaverNotifyEvent(screensaver::NotifyEvent::try_parse(bytes)?.0)),
+                    screensaver::NOTIFY_EVENT => Ok(Self::ScreensaverNotifyEvent(screensaver::NotifyEvent::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "shape")]
             Some(("SHAPE", first_event)) => {
                 match event_type - first_event {
-                    0 => Ok(Self::ShapeNotifyEvent(shape::NotifyEvent::try_parse(bytes)?.0)),
+                    shape::NOTIFY_EVENT => Ok(Self::ShapeNotifyEvent(shape::NotifyEvent::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "shm")]
             Some(("MIT-SHM", first_event)) => {
                 match event_type - first_event {
-                    0 => Ok(Self::ShmCompletionEvent(shm::CompletionEvent::try_parse(bytes)?.0)),
+                    shm::COMPLETION_EVENT => Ok(Self::ShmCompletionEvent(shm::CompletionEvent::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "sync")]
             Some(("SYNC", first_event)) => {
                 match event_type - first_event {
-                    1 => Ok(Self::SyncAlarmNotifyEvent(sync::AlarmNotifyEvent::try_parse(bytes)?.0)),
-                    0 => Ok(Self::SyncCounterNotifyEvent(sync::CounterNotifyEvent::try_parse(bytes)?.0)),
+                    sync::ALARM_NOTIFY_EVENT => Ok(Self::SyncAlarmNotifyEvent(sync::AlarmNotifyEvent::try_parse(bytes)?.0)),
+                    sync::COUNTER_NOTIFY_EVENT => Ok(Self::SyncCounterNotifyEvent(sync::CounterNotifyEvent::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "xfixes")]
             Some(("XFIXES", first_event)) => {
                 match event_type - first_event {
-                    1 => Ok(Self::XfixesCursorNotifyEvent(xfixes::CursorNotifyEvent::try_parse(bytes)?.0)),
-                    0 => Ok(Self::XfixesSelectionNotifyEvent(xfixes::SelectionNotifyEvent::try_parse(bytes)?.0)),
+                    xfixes::CURSOR_NOTIFY_EVENT => Ok(Self::XfixesCursorNotifyEvent(xfixes::CursorNotifyEvent::try_parse(bytes)?.0)),
+                    xfixes::SELECTION_NOTIFY_EVENT => Ok(Self::XfixesSelectionNotifyEvent(xfixes::SelectionNotifyEvent::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "xinput")]
             Some(("XInputExtension", first_event)) => {
                 match event_type - first_event {
-                    12 => Ok(Self::XinputChangeDeviceNotifyEvent(xinput::ChangeDeviceNotifyEvent::try_parse(bytes)?.0)),
-                    3 => Ok(Self::XinputDeviceButtonPressEvent(xinput::DeviceButtonPressEvent::try_parse(bytes)?.0)),
-                    4 => Ok(Self::XinputDeviceButtonReleaseEvent(xinput::DeviceButtonReleaseEvent::try_parse(bytes)?.0)),
-                    14 => Ok(Self::XinputDeviceButtonStateNotifyEvent(xinput::DeviceButtonStateNotifyEvent::try_parse(bytes)?.0)),
-                    6 => Ok(Self::XinputDeviceFocusInEvent(xinput::DeviceFocusInEvent::try_parse(bytes)?.0)),
-                    7 => Ok(Self::XinputDeviceFocusOutEvent(xinput::DeviceFocusOutEvent::try_parse(bytes)?.0)),
-                    1 => Ok(Self::XinputDeviceKeyPressEvent(xinput::DeviceKeyPressEvent::try_parse(bytes)?.0)),
-                    2 => Ok(Self::XinputDeviceKeyReleaseEvent(xinput::DeviceKeyReleaseEvent::try_parse(bytes)?.0)),
-                    13 => Ok(Self::XinputDeviceKeyStateNotifyEvent(xinput::DeviceKeyStateNotifyEvent::try_parse(bytes)?.0)),
-                    11 => Ok(Self::XinputDeviceMappingNotifyEvent(xinput::DeviceMappingNotifyEvent::try_parse(bytes)?.0)),
-                    5 => Ok(Self::XinputDeviceMotionNotifyEvent(xinput::DeviceMotionNotifyEvent::try_parse(bytes)?.0)),
-                    15 => Ok(Self::XinputDevicePresenceNotifyEvent(xinput::DevicePresenceNotifyEvent::try_parse(bytes)?.0)),
-                    16 => Ok(Self::XinputDevicePropertyNotifyEvent(xinput::DevicePropertyNotifyEvent::try_parse(bytes)?.0)),
-                    10 => Ok(Self::XinputDeviceStateNotifyEvent(xinput::DeviceStateNotifyEvent::try_parse(bytes)?.0)),
-                    0 => Ok(Self::XinputDeviceValuatorEvent(xinput::DeviceValuatorEvent::try_parse(bytes)?.0)),
-                    8 => Ok(Self::XinputProximityInEvent(xinput::ProximityInEvent::try_parse(bytes)?.0)),
-                    9 => Ok(Self::XinputProximityOutEvent(xinput::ProximityOutEvent::try_parse(bytes)?.0)),
+                    xinput::CHANGE_DEVICE_NOTIFY_EVENT => Ok(Self::XinputChangeDeviceNotifyEvent(xinput::ChangeDeviceNotifyEvent::try_parse(bytes)?.0)),
+                    xinput::DEVICE_BUTTON_PRESS_EVENT => Ok(Self::XinputDeviceButtonPressEvent(xinput::DeviceButtonPressEvent::try_parse(bytes)?.0)),
+                    xinput::DEVICE_BUTTON_RELEASE_EVENT => Ok(Self::XinputDeviceButtonReleaseEvent(xinput::DeviceButtonReleaseEvent::try_parse(bytes)?.0)),
+                    xinput::DEVICE_BUTTON_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceButtonStateNotifyEvent(xinput::DeviceButtonStateNotifyEvent::try_parse(bytes)?.0)),
+                    xinput::DEVICE_FOCUS_IN_EVENT => Ok(Self::XinputDeviceFocusInEvent(xinput::DeviceFocusInEvent::try_parse(bytes)?.0)),
+                    xinput::DEVICE_FOCUS_OUT_EVENT => Ok(Self::XinputDeviceFocusOutEvent(xinput::DeviceFocusOutEvent::try_parse(bytes)?.0)),
+                    xinput::DEVICE_KEY_PRESS_EVENT => Ok(Self::XinputDeviceKeyPressEvent(xinput::DeviceKeyPressEvent::try_parse(bytes)?.0)),
+                    xinput::DEVICE_KEY_RELEASE_EVENT => Ok(Self::XinputDeviceKeyReleaseEvent(xinput::DeviceKeyReleaseEvent::try_parse(bytes)?.0)),
+                    xinput::DEVICE_KEY_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceKeyStateNotifyEvent(xinput::DeviceKeyStateNotifyEvent::try_parse(bytes)?.0)),
+                    xinput::DEVICE_MAPPING_NOTIFY_EVENT => Ok(Self::XinputDeviceMappingNotifyEvent(xinput::DeviceMappingNotifyEvent::try_parse(bytes)?.0)),
+                    xinput::DEVICE_MOTION_NOTIFY_EVENT => Ok(Self::XinputDeviceMotionNotifyEvent(xinput::DeviceMotionNotifyEvent::try_parse(bytes)?.0)),
+                    xinput::DEVICE_PRESENCE_NOTIFY_EVENT => Ok(Self::XinputDevicePresenceNotifyEvent(xinput::DevicePresenceNotifyEvent::try_parse(bytes)?.0)),
+                    xinput::DEVICE_PROPERTY_NOTIFY_EVENT => Ok(Self::XinputDevicePropertyNotifyEvent(xinput::DevicePropertyNotifyEvent::try_parse(bytes)?.0)),
+                    xinput::DEVICE_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceStateNotifyEvent(xinput::DeviceStateNotifyEvent::try_parse(bytes)?.0)),
+                    xinput::DEVICE_VALUATOR_EVENT => Ok(Self::XinputDeviceValuatorEvent(xinput::DeviceValuatorEvent::try_parse(bytes)?.0)),
+                    xinput::PROXIMITY_IN_EVENT => Ok(Self::XinputProximityInEvent(xinput::ProximityInEvent::try_parse(bytes)?.0)),
+                    xinput::PROXIMITY_OUT_EVENT => Ok(Self::XinputProximityOutEvent(xinput::ProximityOutEvent::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "xkb")]
             Some(("XKEYBOARD", first_event)) => {
                 match event_type - first_event {
-                    10 => Ok(Self::XkbAccessXNotifyEvent(xkb::AccessXNotifyEvent::try_parse(bytes)?.0)),
-                    9 => Ok(Self::XkbActionMessageEvent(xkb::ActionMessageEvent::try_parse(bytes)?.0)),
-                    8 => Ok(Self::XkbBellNotifyEvent(xkb::BellNotifyEvent::try_parse(bytes)?.0)),
-                    7 => Ok(Self::XkbCompatMapNotifyEvent(xkb::CompatMapNotifyEvent::try_parse(bytes)?.0)),
-                    3 => Ok(Self::XkbControlsNotifyEvent(xkb::ControlsNotifyEvent::try_parse(bytes)?.0)),
-                    11 => Ok(Self::XkbExtensionDeviceNotifyEvent(xkb::ExtensionDeviceNotifyEvent::try_parse(bytes)?.0)),
-                    5 => Ok(Self::XkbIndicatorMapNotifyEvent(xkb::IndicatorMapNotifyEvent::try_parse(bytes)?.0)),
-                    4 => Ok(Self::XkbIndicatorStateNotifyEvent(xkb::IndicatorStateNotifyEvent::try_parse(bytes)?.0)),
-                    1 => Ok(Self::XkbMapNotifyEvent(xkb::MapNotifyEvent::try_parse(bytes)?.0)),
-                    6 => Ok(Self::XkbNamesNotifyEvent(xkb::NamesNotifyEvent::try_parse(bytes)?.0)),
-                    0 => Ok(Self::XkbNewKeyboardNotifyEvent(xkb::NewKeyboardNotifyEvent::try_parse(bytes)?.0)),
-                    2 => Ok(Self::XkbStateNotifyEvent(xkb::StateNotifyEvent::try_parse(bytes)?.0)),
+                    xkb::ACCESS_X_NOTIFY_EVENT => Ok(Self::XkbAccessXNotifyEvent(xkb::AccessXNotifyEvent::try_parse(bytes)?.0)),
+                    xkb::ACTION_MESSAGE_EVENT => Ok(Self::XkbActionMessageEvent(xkb::ActionMessageEvent::try_parse(bytes)?.0)),
+                    xkb::BELL_NOTIFY_EVENT => Ok(Self::XkbBellNotifyEvent(xkb::BellNotifyEvent::try_parse(bytes)?.0)),
+                    xkb::COMPAT_MAP_NOTIFY_EVENT => Ok(Self::XkbCompatMapNotifyEvent(xkb::CompatMapNotifyEvent::try_parse(bytes)?.0)),
+                    xkb::CONTROLS_NOTIFY_EVENT => Ok(Self::XkbControlsNotifyEvent(xkb::ControlsNotifyEvent::try_parse(bytes)?.0)),
+                    xkb::EXTENSION_DEVICE_NOTIFY_EVENT => Ok(Self::XkbExtensionDeviceNotifyEvent(xkb::ExtensionDeviceNotifyEvent::try_parse(bytes)?.0)),
+                    xkb::INDICATOR_MAP_NOTIFY_EVENT => Ok(Self::XkbIndicatorMapNotifyEvent(xkb::IndicatorMapNotifyEvent::try_parse(bytes)?.0)),
+                    xkb::INDICATOR_STATE_NOTIFY_EVENT => Ok(Self::XkbIndicatorStateNotifyEvent(xkb::IndicatorStateNotifyEvent::try_parse(bytes)?.0)),
+                    xkb::MAP_NOTIFY_EVENT => Ok(Self::XkbMapNotifyEvent(xkb::MapNotifyEvent::try_parse(bytes)?.0)),
+                    xkb::NAMES_NOTIFY_EVENT => Ok(Self::XkbNamesNotifyEvent(xkb::NamesNotifyEvent::try_parse(bytes)?.0)),
+                    xkb::NEW_KEYBOARD_NOTIFY_EVENT => Ok(Self::XkbNewKeyboardNotifyEvent(xkb::NewKeyboardNotifyEvent::try_parse(bytes)?.0)),
+                    xkb::STATE_NOTIFY_EVENT => Ok(Self::XkbStateNotifyEvent(xkb::StateNotifyEvent::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "xprint")]
             Some(("XpExtension", first_event)) => {
                 match event_type - first_event {
-                    1 => Ok(Self::XprintAttributNotifyEvent(xprint::AttributNotifyEvent::try_parse(bytes)?.0)),
-                    0 => Ok(Self::XprintNotifyEvent(xprint::NotifyEvent::try_parse(bytes)?.0)),
+                    xprint::ATTRIBUT_NOTIFY_EVENT => Ok(Self::XprintAttributNotifyEvent(xprint::AttributNotifyEvent::try_parse(bytes)?.0)),
+                    xprint::NOTIFY_EVENT => Ok(Self::XprintNotifyEvent(xprint::NotifyEvent::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "xv")]
             Some(("XVideo", first_event)) => {
                 match event_type - first_event {
-                    1 => Ok(Self::XvPortNotifyEvent(xv::PortNotifyEvent::try_parse(bytes)?.0)),
-                    0 => Ok(Self::XvVideoNotifyEvent(xv::VideoNotifyEvent::try_parse(bytes)?.0)),
+                    xv::PORT_NOTIFY_EVENT => Ok(Self::XvPortNotifyEvent(xv::PortNotifyEvent::try_parse(bytes)?.0)),
+                    xv::VIDEO_NOTIFY_EVENT => Ok(Self::XvVideoNotifyEvent(xv::VideoNotifyEvent::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(event))
                 }
             }
