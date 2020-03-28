@@ -160,7 +160,13 @@ def _events(out, modules):
                         out("#[cfg(feature = \"%s\")]", module.namespace.header)
                     out("Some((\"%s\", first_event)) => {", ext_xname)
                     with Indent(out):
-                        out("match event_type - first_event {")
+                        if module.namespace.header == 'xkb':
+                            out("if event_type != first_event {")
+                            out.indent("return Ok(Self::Unknown(event));")
+                            out("}")
+                            out("match event.raw_bytes()[1] {")
+                        else:
+                            out("match event_type - first_event {")
                         for name, event in mod_events:
                             if event.is_ge_event:
                                 continue

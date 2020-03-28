@@ -693,7 +693,10 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
             }
             #[cfg(feature = "xkb")]
             Some(("XKEYBOARD", first_event)) => {
-                match event_type - first_event {
+                if event_type != first_event {
+                    return Ok(Self::Unknown(event));
+                }
+                match event.raw_bytes()[1] {
                     xkb::ACCESS_X_NOTIFY_EVENT => Ok(Self::XkbAccessXNotifyEvent(xkb::AccessXNotifyEvent::try_parse(bytes)?.0)),
                     xkb::ACTION_MESSAGE_EVENT => Ok(Self::XkbActionMessageEvent(xkb::ActionMessageEvent::try_parse(bytes)?.0)),
                     xkb::BELL_NOTIFY_EVENT => Ok(Self::XkbBellNotifyEvent(xkb::BellNotifyEvent::try_parse(bytes)?.0)),
