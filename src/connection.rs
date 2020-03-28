@@ -48,6 +48,7 @@ use crate::errors::{ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::utils::RawFdContainer;
 use crate::x11_utils::{GenericError, GenericEvent};
 use crate::xproto::{QueryExtensionReply, Setup};
+use crate::{Error, Event};
 
 /// Number type used for referring to things that were sent to the server in responses from the
 /// server.
@@ -279,6 +280,12 @@ pub trait Connection: RequestConnection {
     fn poll_for_event_with_sequence(
         &self,
     ) -> Result<Option<EventAndSeqNumber<Self::Buf>>, ConnectionError>;
+
+    /// Parse a generic error.
+    fn parse_error(&self, error: GenericError<Self::Buf>) -> Result<Error<Self::Buf>, ParseError>;
+
+    /// Parse a generic event.
+    fn parse_event(&self, event: GenericEvent<Self::Buf>) -> Result<Event<Self::Buf>, ParseError>;
 
     /// Send all pending requests to the server.
     ///
