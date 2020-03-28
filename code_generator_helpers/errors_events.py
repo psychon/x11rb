@@ -187,6 +187,7 @@ def _events(out, modules):
         with Indent(out):
             out("let bytes = event.raw_bytes();")
             out("let ge_event = xproto::GeGenericEvent::try_from(bytes)?;")
+            out("#[allow(unused_variables)]")
             out("let (extension, event_type) = (ge_event.extension, ge_event.event_type);")
             out("let ext_name = iter")
             out.indent(".map(|(name, reply)| (name, reply.major_opcode))")

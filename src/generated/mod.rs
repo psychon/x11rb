@@ -736,6 +736,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
     ) -> Result<Self, ParseError> {
         let bytes = event.raw_bytes();
         let ge_event = xproto::GeGenericEvent::try_from(bytes)?;
+        #[allow(unused_variables)]
         let (extension, event_type) = (ge_event.extension, ge_event.event_type);
         let ext_name = iter
             .map(|(name, reply)| (name, reply.major_opcode))
