@@ -67,49 +67,93 @@ pub mod xvmc;
 #[derive(Debug, Clone)]
 pub enum Error<B: std::fmt::Debug + AsRef<[u8]>> {
     Unknown(GenericError<B>),
+    #[cfg(feature = "damage")]
     DamageBadDamageError(damage::BadDamageError),
+    #[cfg(feature = "glx")]
     GlxBadContextError(glx::BadContextError),
+    #[cfg(feature = "glx")]
     GlxBadContextStateError(glx::BadContextStateError),
+    #[cfg(feature = "glx")]
     GlxBadContextTagError(glx::BadContextTagError),
+    #[cfg(feature = "glx")]
     GlxBadCurrentDrawableError(glx::BadCurrentDrawableError),
+    #[cfg(feature = "glx")]
     GlxBadCurrentWindowError(glx::BadCurrentWindowError),
+    #[cfg(feature = "glx")]
     GlxBadDrawableError(glx::BadDrawableError),
+    #[cfg(feature = "glx")]
     GlxBadFBConfigError(glx::BadFBConfigError),
+    #[cfg(feature = "glx")]
     GlxBadLargeRequestError(glx::BadLargeRequestError),
+    #[cfg(feature = "glx")]
     GlxBadPbufferError(glx::BadPbufferError),
+    #[cfg(feature = "glx")]
     GlxBadPixmapError(glx::BadPixmapError),
+    #[cfg(feature = "glx")]
     GlxBadRenderRequestError(glx::BadRenderRequestError),
+    #[cfg(feature = "glx")]
     GlxBadWindowError(glx::BadWindowError),
+    #[cfg(feature = "glx")]
     GlxGLXBadProfileARBError(glx::GLXBadProfileARBError),
+    #[cfg(feature = "glx")]
     GlxUnsupportedPrivateRequestError(glx::UnsupportedPrivateRequestError),
+    #[cfg(feature = "randr")]
     RandrBadCrtcError(randr::BadCrtcError),
+    #[cfg(feature = "randr")]
     RandrBadModeError(randr::BadModeError),
+    #[cfg(feature = "randr")]
     RandrBadOutputError(randr::BadOutputError),
+    #[cfg(feature = "randr")]
     RandrBadProviderError(randr::BadProviderError),
+    #[cfg(feature = "record")]
     RecordBadContextError(record::BadContextError),
+    #[cfg(feature = "render")]
     RenderGlyphError(render::GlyphError),
+    #[cfg(feature = "render")]
     RenderGlyphSetError(render::GlyphSetError),
+    #[cfg(feature = "render")]
     RenderPictFormatError(render::PictFormatError),
+    #[cfg(feature = "render")]
     RenderPictOpError(render::PictOpError),
+    #[cfg(feature = "render")]
     RenderPictureError(render::PictureError),
+    #[cfg(feature = "shm")]
     ShmBadSegError(shm::BadSegError),
+    #[cfg(feature = "sync")]
     SyncAlarmError(sync::AlarmError),
+    #[cfg(feature = "sync")]
     SyncCounterError(sync::CounterError),
+    #[cfg(feature = "xf86vidmode")]
     Xf86vidmodeBadClockError(xf86vidmode::BadClockError),
+    #[cfg(feature = "xf86vidmode")]
     Xf86vidmodeBadHTimingsError(xf86vidmode::BadHTimingsError),
+    #[cfg(feature = "xf86vidmode")]
     Xf86vidmodeBadVTimingsError(xf86vidmode::BadVTimingsError),
+    #[cfg(feature = "xf86vidmode")]
     Xf86vidmodeClientNotLocalError(xf86vidmode::ClientNotLocalError),
+    #[cfg(feature = "xf86vidmode")]
     Xf86vidmodeExtensionDisabledError(xf86vidmode::ExtensionDisabledError),
+    #[cfg(feature = "xf86vidmode")]
     Xf86vidmodeModeUnsuitableError(xf86vidmode::ModeUnsuitableError),
+    #[cfg(feature = "xf86vidmode")]
     Xf86vidmodeZoomLockedError(xf86vidmode::ZoomLockedError),
+    #[cfg(feature = "xfixes")]
     XfixesBadRegionError(xfixes::BadRegionError),
+    #[cfg(feature = "xinput")]
     XinputClassError(xinput::ClassError),
+    #[cfg(feature = "xinput")]
     XinputDeviceError(xinput::DeviceError),
+    #[cfg(feature = "xinput")]
     XinputDeviceBusyError(xinput::DeviceBusyError),
+    #[cfg(feature = "xinput")]
     XinputEventError(xinput::EventError),
+    #[cfg(feature = "xinput")]
     XinputModeError(xinput::ModeError),
+    #[cfg(feature = "xkb")]
     XkbKeyboardError(xkb::KeyboardError),
+    #[cfg(feature = "xprint")]
     XprintBadContextError(xprint::BadContextError),
+    #[cfg(feature = "xprint")]
     XprintBadSequenceError(xprint::BadSequenceError),
     XprotoAccessError(xproto::AccessError),
     XprotoAllocError(xproto::AllocError),
@@ -128,8 +172,11 @@ pub enum Error<B: std::fmt::Debug + AsRef<[u8]>> {
     XprotoRequestError(xproto::RequestError),
     XprotoValueError(xproto::ValueError),
     XprotoWindowError(xproto::WindowError),
+    #[cfg(feature = "xv")]
     XvBadControlError(xv::BadControlError),
+    #[cfg(feature = "xv")]
     XvBadEncodingError(xv::BadEncodingError),
+    #[cfg(feature = "xv")]
     XvBadPortError(xv::BadPortError),
 }
 impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
@@ -138,7 +185,6 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
         error: GenericError<B>,
         iter: impl Iterator<Item=(&'static str, QueryExtensionReply)>,
     ) -> Result<Self, ParseError> {
-        // Find the extension that this error could belong to
         let error_code = error.error_code();
         let bytes = error.raw_bytes();
         // Check if this is a core protocol error
@@ -162,17 +208,20 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
             3 => return Ok(Self::XprotoWindowError(xproto::WindowError::try_parse(bytes)?.0)),
             _ => {}
         }
+        // Find the extension that this error could belong to
         let ext_info = iter
             .map(|(name, reply)| (name, reply.first_error))
             .filter(|&(_, first_error)| first_error <= error_code)
             .max_by_key(|&(_, first_error)| first_error);
         match ext_info {
+            #[cfg(feature = "damage")]
             Some(("DAMAGE", first_error)) => {
                 match error_code - first_error {
                     0 => Ok(Self::DamageBadDamageError(damage::BadDamageError::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(error))
                 }
             }
+            #[cfg(feature = "glx")]
             Some(("GLX", first_error)) => {
                 match error_code - first_error {
                     0 => Ok(Self::GlxBadContextError(glx::BadContextError::try_parse(bytes)?.0)),
@@ -192,6 +241,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
                     _ => Ok(Self::Unknown(error))
                 }
             }
+            #[cfg(feature = "randr")]
             Some(("RANDR", first_error)) => {
                 match error_code - first_error {
                     1 => Ok(Self::RandrBadCrtcError(randr::BadCrtcError::try_parse(bytes)?.0)),
@@ -201,12 +251,14 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
                     _ => Ok(Self::Unknown(error))
                 }
             }
+            #[cfg(feature = "record")]
             Some(("RECORD", first_error)) => {
                 match error_code - first_error {
                     0 => Ok(Self::RecordBadContextError(record::BadContextError::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(error))
                 }
             }
+            #[cfg(feature = "render")]
             Some(("RENDER", first_error)) => {
                 match error_code - first_error {
                     4 => Ok(Self::RenderGlyphError(render::GlyphError::try_parse(bytes)?.0)),
@@ -217,12 +269,14 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
                     _ => Ok(Self::Unknown(error))
                 }
             }
+            #[cfg(feature = "shm")]
             Some(("MIT-SHM", first_error)) => {
                 match error_code - first_error {
                     0 => Ok(Self::ShmBadSegError(shm::BadSegError::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(error))
                 }
             }
+            #[cfg(feature = "sync")]
             Some(("SYNC", first_error)) => {
                 match error_code - first_error {
                     1 => Ok(Self::SyncAlarmError(sync::AlarmError::try_parse(bytes)?.0)),
@@ -230,6 +284,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
                     _ => Ok(Self::Unknown(error))
                 }
             }
+            #[cfg(feature = "xf86vidmode")]
             Some(("XFree86-VidModeExtension", first_error)) => {
                 match error_code - first_error {
                     0 => Ok(Self::Xf86vidmodeBadClockError(xf86vidmode::BadClockError::try_parse(bytes)?.0)),
@@ -242,12 +297,14 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
                     _ => Ok(Self::Unknown(error))
                 }
             }
+            #[cfg(feature = "xfixes")]
             Some(("XFIXES", first_error)) => {
                 match error_code - first_error {
                     0 => Ok(Self::XfixesBadRegionError(xfixes::BadRegionError::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(error))
                 }
             }
+            #[cfg(feature = "xinput")]
             Some(("XInputExtension", first_error)) => {
                 match error_code - first_error {
                     4 => Ok(Self::XinputClassError(xinput::ClassError::try_parse(bytes)?.0)),
@@ -258,12 +315,14 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
                     _ => Ok(Self::Unknown(error))
                 }
             }
+            #[cfg(feature = "xkb")]
             Some(("XKEYBOARD", first_error)) => {
                 match error_code - first_error {
                     0 => Ok(Self::XkbKeyboardError(xkb::KeyboardError::try_parse(bytes)?.0)),
                     _ => Ok(Self::Unknown(error))
                 }
             }
+            #[cfg(feature = "xprint")]
             Some(("XpExtension", first_error)) => {
                 match error_code - first_error {
                     0 => Ok(Self::XprintBadContextError(xprint::BadContextError::try_parse(bytes)?.0)),
@@ -271,6 +330,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
                     _ => Ok(Self::Unknown(error))
                 }
             }
+            #[cfg(feature = "xv")]
             Some(("XVideo", first_error)) => {
                 match error_code - first_error {
                     2 => Ok(Self::XvBadControlError(xv::BadControlError::try_parse(bytes)?.0)),

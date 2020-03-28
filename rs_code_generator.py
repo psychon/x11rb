@@ -57,12 +57,14 @@ def rs_close(self):
     current_module.close(self)
     output_file = os.path.join(output_dir, "%s.rs" % self.namespace.header)
     current_module.out.write_file(output_file)
-    current_module = None
 
     WITHOUT_FEATURE = ["bigreq", "ge", "xc_misc", "xproto"]
-    if self.namespace.header not in WITHOUT_FEATURE:
+    current_module.has_feature = self.namespace.header not in WITHOUT_FEATURE
+    if current_module.has_feature:
         main_output_file("#[cfg(feature = \"%s\")]", self.namespace.header)
     main_output_file("pub mod %s;", self.namespace.header)
+
+    current_module = None
 
 
 def rs_enum(self, name):

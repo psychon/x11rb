@@ -30,6 +30,8 @@ def _errors(out, modules):
         variant = mod_name[0].upper() + mod_name[1:]
         for name, error in mod_errors:
             err_name = name[-1] + "Error"
+            if module.has_feature:
+                out.indent("#[cfg(feature = \"%s\")]", module.namespace.header)
             out.indent("%s%s(%s::%s),", variant, err_name, mod_name, err_name)
     out("}")
 
@@ -41,7 +43,6 @@ def _errors(out, modules):
         out.indent("iter: impl Iterator<Item=(&'static str, QueryExtensionReply)>,")
         out(") -> Result<Self, ParseError> {")
         with Indent(out):
-            out("// Find the extension that this error could belong to")
             out("let error_code = error.error_code();")
             out("let bytes = error.raw_bytes();")
 
@@ -54,6 +55,7 @@ def _errors(out, modules):
             out.indent("_ => {}")
             out("}")
 
+            out("// Find the extension that this error could belong to")
             out("let ext_info = iter")
             out.indent(".map(|(name, reply)| (name, reply.first_error))")
             out.indent(".filter(|&(_, first_error)| first_error <= error_code)")
@@ -66,6 +68,8 @@ def _errors(out, modules):
                     mod_name = module.namespace.header
                     ext_xname = module.namespace.ext_xname
                     variant = mod_name[0].upper() + mod_name[1:]
+                    if module.has_feature:
+                        out("#[cfg(feature = \"%s\")]", module.namespace.header)
                     out("Some((\"%s\", first_error)) => {", ext_xname)
                     with Indent(out):
                         out("match error_code - first_error {")
