@@ -1,7 +1,7 @@
 // This file contains generated code. Do not edit directly.
 // To regenerate this, run 'make'.
 
-use std::convert::TryInto;
+use std::convert::{TryFrom, TryInto};
 use crate::errors::ParseError;
 use crate::x11_utils::{Event as _, GenericError, GenericEvent};
 use xproto::QueryExtensionReply;
@@ -736,6 +736,57 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
         event: GenericEvent<B>,
         iter: impl Iterator<Item=(&'static str, QueryExtensionReply)>,
     ) -> Result<Self, ParseError> {
-        todo!()
+        let bytes = event.raw_bytes();
+        let ge_event = xproto::GeGenericEvent::try_from(bytes)?;
+        let (extension, event_type) = (ge_event.extension, ge_event.event_type);
+        let ext_name = iter
+            .map(|(name, reply)| (name, reply.major_opcode))
+            .find(|&(_, opcode)| extension == opcode)
+            .map(|(name, _)| name);
+        match ext_name {
+            #[cfg(feature = "present")]
+            Some("Present") => {
+                match event_type {
+                    present::COMPLETE_NOTIFY_EVENT => Ok(Self::PresentCompleteNotifyEvent(present::CompleteNotifyEvent::try_parse(bytes)?.0)),
+                    present::CONFIGURE_NOTIFY_EVENT => Ok(Self::PresentConfigureNotifyEvent(present::ConfigureNotifyEvent::try_parse(bytes)?.0)),
+                    present::IDLE_NOTIFY_EVENT => Ok(Self::PresentIdleNotifyEvent(present::IdleNotifyEvent::try_parse(bytes)?.0)),
+                    present::REDIRECT_NOTIFY_EVENT => Ok(Self::PresentRedirectNotifyEvent(present::RedirectNotifyEvent::try_parse(bytes)?.0)),
+                    _ => Ok(Self::Unknown(event))
+                }
+            }
+            #[cfg(feature = "xinput")]
+            Some("XInputExtension") => {
+                match event_type {
+                    xinput::BARRIER_HIT_EVENT => Ok(Self::XinputBarrierHitEvent(xinput::BarrierHitEvent::try_parse(bytes)?.0)),
+                    xinput::BARRIER_LEAVE_EVENT => Ok(Self::XinputBarrierLeaveEvent(xinput::BarrierLeaveEvent::try_parse(bytes)?.0)),
+                    xinput::BUTTON_PRESS_EVENT => Ok(Self::XinputButtonPressEvent(xinput::ButtonPressEvent::try_parse(bytes)?.0)),
+                    xinput::BUTTON_RELEASE_EVENT => Ok(Self::XinputButtonReleaseEvent(xinput::ButtonReleaseEvent::try_parse(bytes)?.0)),
+                    xinput::DEVICE_CHANGED_EVENT => Ok(Self::XinputDeviceChangedEvent(xinput::DeviceChangedEvent::try_parse(bytes)?.0)),
+                    xinput::ENTER_EVENT => Ok(Self::XinputEnterEvent(xinput::EnterEvent::try_parse(bytes)?.0)),
+                    xinput::FOCUS_IN_EVENT => Ok(Self::XinputFocusInEvent(xinput::FocusInEvent::try_parse(bytes)?.0)),
+                    xinput::FOCUS_OUT_EVENT => Ok(Self::XinputFocusOutEvent(xinput::FocusOutEvent::try_parse(bytes)?.0)),
+                    xinput::HIERARCHY_EVENT => Ok(Self::XinputHierarchyEvent(xinput::HierarchyEvent::try_parse(bytes)?.0)),
+                    xinput::KEY_PRESS_EVENT => Ok(Self::XinputKeyPressEvent(xinput::KeyPressEvent::try_parse(bytes)?.0)),
+                    xinput::KEY_RELEASE_EVENT => Ok(Self::XinputKeyReleaseEvent(xinput::KeyReleaseEvent::try_parse(bytes)?.0)),
+                    xinput::LEAVE_EVENT => Ok(Self::XinputLeaveEvent(xinput::LeaveEvent::try_parse(bytes)?.0)),
+                    xinput::MOTION_EVENT => Ok(Self::XinputMotionEvent(xinput::MotionEvent::try_parse(bytes)?.0)),
+                    xinput::PROPERTY_EVENT => Ok(Self::XinputPropertyEvent(xinput::PropertyEvent::try_parse(bytes)?.0)),
+                    xinput::RAW_BUTTON_PRESS_EVENT => Ok(Self::XinputRawButtonPressEvent(xinput::RawButtonPressEvent::try_parse(bytes)?.0)),
+                    xinput::RAW_BUTTON_RELEASE_EVENT => Ok(Self::XinputRawButtonReleaseEvent(xinput::RawButtonReleaseEvent::try_parse(bytes)?.0)),
+                    xinput::RAW_KEY_PRESS_EVENT => Ok(Self::XinputRawKeyPressEvent(xinput::RawKeyPressEvent::try_parse(bytes)?.0)),
+                    xinput::RAW_KEY_RELEASE_EVENT => Ok(Self::XinputRawKeyReleaseEvent(xinput::RawKeyReleaseEvent::try_parse(bytes)?.0)),
+                    xinput::RAW_MOTION_EVENT => Ok(Self::XinputRawMotionEvent(xinput::RawMotionEvent::try_parse(bytes)?.0)),
+                    xinput::RAW_TOUCH_BEGIN_EVENT => Ok(Self::XinputRawTouchBeginEvent(xinput::RawTouchBeginEvent::try_parse(bytes)?.0)),
+                    xinput::RAW_TOUCH_END_EVENT => Ok(Self::XinputRawTouchEndEvent(xinput::RawTouchEndEvent::try_parse(bytes)?.0)),
+                    xinput::RAW_TOUCH_UPDATE_EVENT => Ok(Self::XinputRawTouchUpdateEvent(xinput::RawTouchUpdateEvent::try_parse(bytes)?.0)),
+                    xinput::TOUCH_BEGIN_EVENT => Ok(Self::XinputTouchBeginEvent(xinput::TouchBeginEvent::try_parse(bytes)?.0)),
+                    xinput::TOUCH_END_EVENT => Ok(Self::XinputTouchEndEvent(xinput::TouchEndEvent::try_parse(bytes)?.0)),
+                    xinput::TOUCH_OWNERSHIP_EVENT => Ok(Self::XinputTouchOwnershipEvent(xinput::TouchOwnershipEvent::try_parse(bytes)?.0)),
+                    xinput::TOUCH_UPDATE_EVENT => Ok(Self::XinputTouchUpdateEvent(xinput::TouchUpdateEvent::try_parse(bytes)?.0)),
+                    _ => Ok(Self::Unknown(event))
+                }
+            }
+            _ => Ok(Self::Unknown(event))
+        }
     }
 }

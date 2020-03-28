@@ -187,7 +187,39 @@ def _events(out, modules):
         out.indent("iter: impl Iterator<Item=(&'static str, QueryExtensionReply)>,")
         out(") -> Result<Self, ParseError> {")
         with Indent(out):
-            out("todo!()")
+            out("let bytes = event.raw_bytes();")
+            out("let ge_event = xproto::GeGenericEvent::try_from(bytes)?;")
+            out("let (extension, event_type) = (ge_event.extension, ge_event.event_type);")
+            out("let ext_name = iter")
+            out.indent(".map(|(name, reply)| (name, reply.major_opcode))")
+            out.indent(".find(|&(_, opcode)| extension == opcode)")
+            out.indent(".map(|(name, _)| name);")
+            out("match ext_name {")
+            with Indent(out):
+                for module, mod_events in zip(modules, events):
+                    has_xge_events = any(e[1].is_ge_event for e in mod_events)
+                    if not has_xge_events or not module.namespace.is_ext:
+                        continue
+                    mod_name = module.namespace.header
+                    ext_xname = module.namespace.ext_xname
+                    variant = mod_name[0].upper() + mod_name[1:]
+                    if module.has_feature:
+                        out("#[cfg(feature = \"%s\")]", module.namespace.header)
+                    out("Some(\"%s\") => {", ext_xname)
+                    with Indent(out):
+                        out("match event_type {")
+                        for name, event in mod_events:
+                            if not event.is_ge_event:
+                                continue
+                            opcode = camel_case_to_upper_snake(name[-1]) + "_EVENT"
+                            event_name = name[-1] + "Event"
+                            out.indent("%s::%s => Ok(Self::%s%s(%s::%s::try_parse(bytes)?.0)),",
+                                       mod_name, opcode, variant, event_name, mod_name, event_name)
+                        out.indent("_ => Ok(Self::Unknown(event))")
+                        out("}")
+                    out("}")
+                out("_ => Ok(Self::Unknown(event))")
+            out("}")
         out("}")
     out("}")
 
