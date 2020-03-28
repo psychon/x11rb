@@ -4,7 +4,7 @@
 
 use std::convert::{TryFrom, TryInto};
 use std::ffi::CStr;
-use std::io::{Error, ErrorKind, IoSlice};
+use std::io::{Error as IOError, ErrorKind, IoSlice};
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, RawFd};
 use std::ptr::{null, null_mut, NonNull};
@@ -31,6 +31,8 @@ pub type GenericError = crate::x11_utils::GenericError<Buffer>;
 pub type GenericEvent = crate::x11_utils::GenericEvent<Buffer>;
 pub type EventAndSeqNumber = crate::connection::EventAndSeqNumber<Buffer>;
 pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
+pub type Error = crate::Error<Buffer>;
+pub type Event = crate::Event<Buffer>;
 
 /// A connection to an X11 server.
 ///
@@ -57,7 +59,7 @@ impl XCBConnection {
 
         assert_ne!(error, 0);
         match error {
-            ERROR => Error::new(ErrorKind::Other, ConnectionError::UnknownError).into(),
+            ERROR => IOError::new(ErrorKind::Other, ConnectionError::UnknownError).into(),
             EXT_NOTSUPPORTED => ConnectionError::UnsupportedExtension,
             MEM_INSUFFICIENT => ConnectionError::InsufficientMemory,
             REQ_LEN_EXCEED => ConnectionError::MaximumRequestLengthExceeded,
@@ -72,7 +74,7 @@ impl XCBConnection {
 
         assert_ne!(error, 0);
         match error {
-            ERROR => Error::new(ErrorKind::Other, ConnectionError::UnknownError).into(),
+            ERROR => IOError::new(ErrorKind::Other, ConnectionError::UnknownError).into(),
             MEM_INSUFFICIENT => ConnectError::InsufficientMemory,
             PARSE_ERR => ConnectError::DisplayParsingError,
             INVALID_SCREEN => ConnectError::InvalidScreen,
@@ -496,6 +498,16 @@ impl Connection for XCBConnection {
             }
             Ok(Some(Self::wrap_event(event as _)?))
         }
+    }
+
+    fn parse_error(&self, error: GenericError) -> Result<Error, ParseError> {
+        let ext_info = self.ext_info.lock().unwrap();
+        Error::parse(error, ext_info.known_present())
+    }
+
+    fn parse_event(&self, event: GenericEvent) -> Result<Event, ParseError> {
+        let ext_info = self.ext_info.lock().unwrap();
+        Event::parse(event, ext_info.known_present())
     }
 
     fn flush(&self) -> Result<(), ConnectionError> {

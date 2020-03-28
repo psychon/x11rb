@@ -1,29 +1,24 @@
 // This example tests support for generic events (XGE). It generates a window and uses the PRESENT
 // extension to cause an XGE event to be sent.
 
-use std::convert::TryFrom;
 use std::process::exit;
 
 use x11rb::connection::{Connection as _, RequestConnection as _};
 use x11rb::present;
-use x11rb::x11_utils::Event;
-use x11rb::xproto::{
-    ConfigureWindowAux, ConnectionExt as _, CreateWindowAux, GeGenericEvent, WindowClass,
-    GE_GENERIC_EVENT,
-};
-use x11rb::COPY_DEPTH_FROM_PARENT;
+use x11rb::xproto::{ConfigureWindowAux, ConnectionExt as _, CreateWindowAux, WindowClass};
+use x11rb::{Event, COPY_DEPTH_FROM_PARENT};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (conn, screen_num) = x11rb::connect(None)?;
     let screen = &conn.setup().roots[screen_num];
 
-    let present_info = match conn.extension_information(present::X11_EXTENSION_NAME)? {
-        Some(info) => info,
-        None => {
-            eprintln!("Present extension is not supported");
-            exit(1);
-        }
-    };
+    if conn
+        .extension_information(present::X11_EXTENSION_NAME)?
+        .is_none()
+    {
+        eprintln!("Present extension is not supported");
+        exit(1);
+    }
 
     // Create a window
     let win_id = conn.generate_id()?;
@@ -59,15 +54,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let event = conn.wait_for_event()?;
 
     // Now check that the event really is what we wanted to get
-    assert_eq!(event.response_type(), GE_GENERIC_EVENT);
-    let generic_event = GeGenericEvent::try_from(&event)?;
-    assert_eq!(generic_event.extension, present_info.major_opcode);
-    assert_eq!(
-        generic_event.event_type,
-        present::Event::ConfigureNotify.into()
-    );
-
-    let event = present::ConfigureNotifyEvent::try_from(event)?;
+    let event = conn.parse_event(event)?;
+    let event = match event {
+        Event::PresentConfigureNotifyEvent(event) => event,
+        other => panic!("Unexpected event {:?}", other),
+    };
     println!(
         "Got a Present ConfigureNotify event for event ID 0x{:x} and window 0x{:x}.",
         event.event, event.window

@@ -6,6 +6,7 @@ import glob
 import os
 import code_generator_helpers.output as output_helper
 import code_generator_helpers.module as module_helper
+import code_generator_helpers.errors_events as errors_events
 
 try:
     opts, args = getopt.getopt(sys.argv[1:], "p:o:i:")
@@ -28,17 +29,28 @@ if args:
 
 main_output_file = output_helper.Output()
 output_helper.generated_code_header(main_output_file)
+main_output_file("use std::convert::{TryFrom, TryInto};")
+main_output_file("use crate::errors::ParseError;")
+main_output_file("use crate::x11_utils::{Event as _, GenericError, GenericEvent};")
+main_output_file("use xproto::QueryExtensionReply;")
 
 
 # Now the real fun begins
 
 current_module = None
+all_modules = []
+
+
+def add_main_output():
+    main_output_file("")
+    errors_events.generate(main_output_file, all_modules)
 
 
 def rs_open(self):
     global current_module
     assert current_module is None
     current_module = module_helper.Module(self)
+    all_modules.append(current_module)
 
 
 def rs_close(self):
@@ -46,12 +58,14 @@ def rs_close(self):
     current_module.close(self)
     output_file = os.path.join(output_dir, "%s.rs" % self.namespace.header)
     current_module.out.write_file(output_file)
-    current_module = None
 
     WITHOUT_FEATURE = ["bigreq", "ge", "xc_misc", "xproto"]
-    if self.namespace.header not in WITHOUT_FEATURE:
+    current_module.has_feature = self.namespace.header not in WITHOUT_FEATURE
+    if current_module.has_feature:
         main_output_file("#[cfg(feature = \"%s\")]", self.namespace.header)
     main_output_file("pub mod %s;", self.namespace.header)
+
+    current_module = None
 
 
 def rs_enum(self, name):
@@ -111,6 +125,8 @@ for name in sorted(names):
     except Exception:
         sys.stderr.write('Error occurred while generating: %s\n' % module.namespace.header)
         raise
+
+add_main_output()
 
 output_file = os.path.join(output_dir, "mod.rs")
 main_output_file.write_file(output_file)

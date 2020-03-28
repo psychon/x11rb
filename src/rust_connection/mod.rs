@@ -29,6 +29,8 @@ pub type GenericError = crate::x11_utils::GenericError<Buffer>;
 pub type GenericEvent = crate::x11_utils::GenericEvent<Buffer>;
 pub type EventAndSeqNumber = crate::connection::EventAndSeqNumber<Buffer>;
 pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
+pub type Error = crate::Error<Buffer>;
+pub type Event = crate::Event<Buffer>;
 
 #[derive(Debug)]
 enum MaxRequestBytes {
@@ -409,6 +411,16 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
 
     fn poll_for_event_with_sequence(&self) -> Result<Option<EventAndSeqNumber>, ConnectionError> {
         Ok(self.inner.lock().unwrap().poll_for_event_with_sequence())
+    }
+
+    fn parse_error(&self, error: GenericError) -> Result<Error, ParseError> {
+        let ext_info = self.extension_information.lock().unwrap();
+        Error::parse(error, ext_info.known_present())
+    }
+
+    fn parse_event(&self, event: GenericEvent) -> Result<Event, ParseError> {
+        let ext_info = self.extension_information.lock().unwrap();
+        Event::parse(event, ext_info.known_present())
     }
 
     fn flush(&self) -> Result<(), ConnectionError> {

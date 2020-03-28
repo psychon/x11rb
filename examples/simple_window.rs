@@ -1,11 +1,9 @@
 extern crate x11rb;
 
-use std::convert::TryFrom;
-
 use x11rb::connection::Connection;
 use x11rb::wrapper::ConnectionExt as _;
-use x11rb::x11_utils::{Event, GenericError};
 use x11rb::xproto::*;
+use x11rb::Event;
 
 fn main() {
     let (conn, screen_num) = x11rb::connect(None).unwrap();
@@ -88,10 +86,10 @@ fn main() {
 
     loop {
         let event = conn.wait_for_event().unwrap();
-        match event.response_type() {
-            EXPOSE_EVENT => {
-                let event = ExposeEvent::from(event);
-                println!("{:?})", event);
+        let event = conn.parse_event(event).unwrap();
+        println!("{:?})", event);
+        match event {
+            Event::XprotoExposeEvent(event) => {
                 if event.count == 0 {
                     // We ought to clear the background before drawing something new, but...
                     // whatever
@@ -116,26 +114,19 @@ fn main() {
                     conn.flush().unwrap();
                 }
             }
-            CONFIGURE_NOTIFY_EVENT => {
-                let event = ConfigureNotifyEvent::from(event);
+            Event::XprotoConfigureNotifyEvent(event) => {
                 width = event.width;
                 height = event.height;
             }
-            CLIENT_MESSAGE_EVENT => {
-                let event = ClientMessageEvent::from(event);
-                println!("{:?})", event);
+            Event::XprotoClientMessageEvent(event) => {
                 let data = event.data.as_data32();
                 if event.format == 32 && event.window == win_id && data[0] == wm_delete_window {
                     println!("Window was asked to close");
                     return;
                 }
             }
-            0 => {
-                println!("Unknown error {:?}", GenericError::try_from(event));
-            }
-            _ => {
-                println!("Unknown event {:?}", event);
-            }
+            Event::Error(_) => println!("Got an unexpected error"),
+            _ => println!("Got an unknown event"),
         }
     }
 }
