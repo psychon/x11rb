@@ -187,26 +187,25 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
         iter: impl Iterator<Item=(&'static str, QueryExtensionReply)>,
     ) -> Result<Self, ParseError> {
         let error_code = error.error_code();
-        let bytes = error.raw_bytes();
         // Check if this is a core protocol error
         match error_code {
-            xproto::ACCESS_ERROR => return Ok(Self::XprotoAccessError(xproto::AccessError::try_parse(bytes)?.0)),
-            xproto::ALLOC_ERROR => return Ok(Self::XprotoAllocError(xproto::AllocError::try_parse(bytes)?.0)),
-            xproto::ATOM_ERROR => return Ok(Self::XprotoAtomError(xproto::AtomError::try_parse(bytes)?.0)),
-            xproto::COLORMAP_ERROR => return Ok(Self::XprotoColormapError(xproto::ColormapError::try_parse(bytes)?.0)),
-            xproto::CURSOR_ERROR => return Ok(Self::XprotoCursorError(xproto::CursorError::try_parse(bytes)?.0)),
-            xproto::DRAWABLE_ERROR => return Ok(Self::XprotoDrawableError(xproto::DrawableError::try_parse(bytes)?.0)),
-            xproto::FONT_ERROR => return Ok(Self::XprotoFontError(xproto::FontError::try_parse(bytes)?.0)),
-            xproto::G_CONTEXT_ERROR => return Ok(Self::XprotoGContextError(xproto::GContextError::try_parse(bytes)?.0)),
-            xproto::ID_CHOICE_ERROR => return Ok(Self::XprotoIDChoiceError(xproto::IDChoiceError::try_parse(bytes)?.0)),
-            xproto::IMPLEMENTATION_ERROR => return Ok(Self::XprotoImplementationError(xproto::ImplementationError::try_parse(bytes)?.0)),
-            xproto::LENGTH_ERROR => return Ok(Self::XprotoLengthError(xproto::LengthError::try_parse(bytes)?.0)),
-            xproto::MATCH_ERROR => return Ok(Self::XprotoMatchError(xproto::MatchError::try_parse(bytes)?.0)),
-            xproto::NAME_ERROR => return Ok(Self::XprotoNameError(xproto::NameError::try_parse(bytes)?.0)),
-            xproto::PIXMAP_ERROR => return Ok(Self::XprotoPixmapError(xproto::PixmapError::try_parse(bytes)?.0)),
-            xproto::REQUEST_ERROR => return Ok(Self::XprotoRequestError(xproto::RequestError::try_parse(bytes)?.0)),
-            xproto::VALUE_ERROR => return Ok(Self::XprotoValueError(xproto::ValueError::try_parse(bytes)?.0)),
-            xproto::WINDOW_ERROR => return Ok(Self::XprotoWindowError(xproto::WindowError::try_parse(bytes)?.0)),
+            xproto::ACCESS_ERROR => return Ok(Self::XprotoAccessError(error.into())),
+            xproto::ALLOC_ERROR => return Ok(Self::XprotoAllocError(error.into())),
+            xproto::ATOM_ERROR => return Ok(Self::XprotoAtomError(error.into())),
+            xproto::COLORMAP_ERROR => return Ok(Self::XprotoColormapError(error.into())),
+            xproto::CURSOR_ERROR => return Ok(Self::XprotoCursorError(error.into())),
+            xproto::DRAWABLE_ERROR => return Ok(Self::XprotoDrawableError(error.into())),
+            xproto::FONT_ERROR => return Ok(Self::XprotoFontError(error.into())),
+            xproto::G_CONTEXT_ERROR => return Ok(Self::XprotoGContextError(error.into())),
+            xproto::ID_CHOICE_ERROR => return Ok(Self::XprotoIDChoiceError(error.into())),
+            xproto::IMPLEMENTATION_ERROR => return Ok(Self::XprotoImplementationError(error.into())),
+            xproto::LENGTH_ERROR => return Ok(Self::XprotoLengthError(error.into())),
+            xproto::MATCH_ERROR => return Ok(Self::XprotoMatchError(error.into())),
+            xproto::NAME_ERROR => return Ok(Self::XprotoNameError(error.into())),
+            xproto::PIXMAP_ERROR => return Ok(Self::XprotoPixmapError(error.into())),
+            xproto::REQUEST_ERROR => return Ok(Self::XprotoRequestError(error.into())),
+            xproto::VALUE_ERROR => return Ok(Self::XprotoValueError(error.into())),
+            xproto::WINDOW_ERROR => return Ok(Self::XprotoWindowError(error.into())),
             _ => {}
         }
         // Find the extension that this error could belong to
@@ -218,125 +217,125 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
             #[cfg(feature = "damage")]
             Some(("DAMAGE", first_error)) => {
                 match error_code - first_error {
-                    damage::BAD_DAMAGE_ERROR => Ok(Self::DamageBadDamageError(damage::BadDamageError::try_parse(bytes)?.0)),
+                    damage::BAD_DAMAGE_ERROR => Ok(Self::DamageBadDamageError(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "glx")]
             Some(("GLX", first_error)) => {
                 match error_code - first_error {
-                    glx::BAD_CONTEXT_ERROR => Ok(Self::GlxBadContextError(glx::BadContextError::try_parse(bytes)?.0)),
-                    glx::BAD_CONTEXT_STATE_ERROR => Ok(Self::GlxBadContextStateError(glx::BadContextStateError::try_parse(bytes)?.0)),
-                    glx::BAD_CONTEXT_TAG_ERROR => Ok(Self::GlxBadContextTagError(glx::BadContextTagError::try_parse(bytes)?.0)),
-                    glx::BAD_CURRENT_DRAWABLE_ERROR => Ok(Self::GlxBadCurrentDrawableError(glx::BadCurrentDrawableError::try_parse(bytes)?.0)),
-                    glx::BAD_CURRENT_WINDOW_ERROR => Ok(Self::GlxBadCurrentWindowError(glx::BadCurrentWindowError::try_parse(bytes)?.0)),
-                    glx::BAD_DRAWABLE_ERROR => Ok(Self::GlxBadDrawableError(glx::BadDrawableError::try_parse(bytes)?.0)),
-                    glx::BAD_FB_CONFIG_ERROR => Ok(Self::GlxBadFBConfigError(glx::BadFBConfigError::try_parse(bytes)?.0)),
-                    glx::BAD_LARGE_REQUEST_ERROR => Ok(Self::GlxBadLargeRequestError(glx::BadLargeRequestError::try_parse(bytes)?.0)),
-                    glx::BAD_PBUFFER_ERROR => Ok(Self::GlxBadPbufferError(glx::BadPbufferError::try_parse(bytes)?.0)),
-                    glx::BAD_PIXMAP_ERROR => Ok(Self::GlxBadPixmapError(glx::BadPixmapError::try_parse(bytes)?.0)),
-                    glx::BAD_RENDER_REQUEST_ERROR => Ok(Self::GlxBadRenderRequestError(glx::BadRenderRequestError::try_parse(bytes)?.0)),
-                    glx::BAD_WINDOW_ERROR => Ok(Self::GlxBadWindowError(glx::BadWindowError::try_parse(bytes)?.0)),
-                    glx::GLX_BAD_PROFILE_ARB_ERROR => Ok(Self::GlxGLXBadProfileARBError(glx::GLXBadProfileARBError::try_parse(bytes)?.0)),
-                    glx::UNSUPPORTED_PRIVATE_REQUEST_ERROR => Ok(Self::GlxUnsupportedPrivateRequestError(glx::UnsupportedPrivateRequestError::try_parse(bytes)?.0)),
+                    glx::BAD_CONTEXT_ERROR => Ok(Self::GlxBadContextError(error.into())),
+                    glx::BAD_CONTEXT_STATE_ERROR => Ok(Self::GlxBadContextStateError(error.into())),
+                    glx::BAD_CONTEXT_TAG_ERROR => Ok(Self::GlxBadContextTagError(error.into())),
+                    glx::BAD_CURRENT_DRAWABLE_ERROR => Ok(Self::GlxBadCurrentDrawableError(error.into())),
+                    glx::BAD_CURRENT_WINDOW_ERROR => Ok(Self::GlxBadCurrentWindowError(error.into())),
+                    glx::BAD_DRAWABLE_ERROR => Ok(Self::GlxBadDrawableError(error.into())),
+                    glx::BAD_FB_CONFIG_ERROR => Ok(Self::GlxBadFBConfigError(error.into())),
+                    glx::BAD_LARGE_REQUEST_ERROR => Ok(Self::GlxBadLargeRequestError(error.into())),
+                    glx::BAD_PBUFFER_ERROR => Ok(Self::GlxBadPbufferError(error.into())),
+                    glx::BAD_PIXMAP_ERROR => Ok(Self::GlxBadPixmapError(error.into())),
+                    glx::BAD_RENDER_REQUEST_ERROR => Ok(Self::GlxBadRenderRequestError(error.into())),
+                    glx::BAD_WINDOW_ERROR => Ok(Self::GlxBadWindowError(error.into())),
+                    glx::GLX_BAD_PROFILE_ARB_ERROR => Ok(Self::GlxGLXBadProfileARBError(error.into())),
+                    glx::UNSUPPORTED_PRIVATE_REQUEST_ERROR => Ok(Self::GlxUnsupportedPrivateRequestError(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "randr")]
             Some(("RANDR", first_error)) => {
                 match error_code - first_error {
-                    randr::BAD_CRTC_ERROR => Ok(Self::RandrBadCrtcError(randr::BadCrtcError::try_parse(bytes)?.0)),
-                    randr::BAD_MODE_ERROR => Ok(Self::RandrBadModeError(randr::BadModeError::try_parse(bytes)?.0)),
-                    randr::BAD_OUTPUT_ERROR => Ok(Self::RandrBadOutputError(randr::BadOutputError::try_parse(bytes)?.0)),
-                    randr::BAD_PROVIDER_ERROR => Ok(Self::RandrBadProviderError(randr::BadProviderError::try_parse(bytes)?.0)),
+                    randr::BAD_CRTC_ERROR => Ok(Self::RandrBadCrtcError(error.into())),
+                    randr::BAD_MODE_ERROR => Ok(Self::RandrBadModeError(error.into())),
+                    randr::BAD_OUTPUT_ERROR => Ok(Self::RandrBadOutputError(error.into())),
+                    randr::BAD_PROVIDER_ERROR => Ok(Self::RandrBadProviderError(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "record")]
             Some(("RECORD", first_error)) => {
                 match error_code - first_error {
-                    record::BAD_CONTEXT_ERROR => Ok(Self::RecordBadContextError(record::BadContextError::try_parse(bytes)?.0)),
+                    record::BAD_CONTEXT_ERROR => Ok(Self::RecordBadContextError(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "render")]
             Some(("RENDER", first_error)) => {
                 match error_code - first_error {
-                    render::GLYPH_ERROR => Ok(Self::RenderGlyphError(render::GlyphError::try_parse(bytes)?.0)),
-                    render::GLYPH_SET_ERROR => Ok(Self::RenderGlyphSetError(render::GlyphSetError::try_parse(bytes)?.0)),
-                    render::PICT_FORMAT_ERROR => Ok(Self::RenderPictFormatError(render::PictFormatError::try_parse(bytes)?.0)),
-                    render::PICT_OP_ERROR => Ok(Self::RenderPictOpError(render::PictOpError::try_parse(bytes)?.0)),
-                    render::PICTURE_ERROR => Ok(Self::RenderPictureError(render::PictureError::try_parse(bytes)?.0)),
+                    render::GLYPH_ERROR => Ok(Self::RenderGlyphError(error.into())),
+                    render::GLYPH_SET_ERROR => Ok(Self::RenderGlyphSetError(error.into())),
+                    render::PICT_FORMAT_ERROR => Ok(Self::RenderPictFormatError(error.into())),
+                    render::PICT_OP_ERROR => Ok(Self::RenderPictOpError(error.into())),
+                    render::PICTURE_ERROR => Ok(Self::RenderPictureError(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "shm")]
             Some(("MIT-SHM", first_error)) => {
                 match error_code - first_error {
-                    shm::BAD_SEG_ERROR => Ok(Self::ShmBadSegError(shm::BadSegError::try_parse(bytes)?.0)),
+                    shm::BAD_SEG_ERROR => Ok(Self::ShmBadSegError(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "sync")]
             Some(("SYNC", first_error)) => {
                 match error_code - first_error {
-                    sync::ALARM_ERROR => Ok(Self::SyncAlarmError(sync::AlarmError::try_parse(bytes)?.0)),
-                    sync::COUNTER_ERROR => Ok(Self::SyncCounterError(sync::CounterError::try_parse(bytes)?.0)),
+                    sync::ALARM_ERROR => Ok(Self::SyncAlarmError(error.into())),
+                    sync::COUNTER_ERROR => Ok(Self::SyncCounterError(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "xf86vidmode")]
             Some(("XFree86-VidModeExtension", first_error)) => {
                 match error_code - first_error {
-                    xf86vidmode::BAD_CLOCK_ERROR => Ok(Self::Xf86vidmodeBadClockError(xf86vidmode::BadClockError::try_parse(bytes)?.0)),
-                    xf86vidmode::BAD_H_TIMINGS_ERROR => Ok(Self::Xf86vidmodeBadHTimingsError(xf86vidmode::BadHTimingsError::try_parse(bytes)?.0)),
-                    xf86vidmode::BAD_V_TIMINGS_ERROR => Ok(Self::Xf86vidmodeBadVTimingsError(xf86vidmode::BadVTimingsError::try_parse(bytes)?.0)),
-                    xf86vidmode::CLIENT_NOT_LOCAL_ERROR => Ok(Self::Xf86vidmodeClientNotLocalError(xf86vidmode::ClientNotLocalError::try_parse(bytes)?.0)),
-                    xf86vidmode::EXTENSION_DISABLED_ERROR => Ok(Self::Xf86vidmodeExtensionDisabledError(xf86vidmode::ExtensionDisabledError::try_parse(bytes)?.0)),
-                    xf86vidmode::MODE_UNSUITABLE_ERROR => Ok(Self::Xf86vidmodeModeUnsuitableError(xf86vidmode::ModeUnsuitableError::try_parse(bytes)?.0)),
-                    xf86vidmode::ZOOM_LOCKED_ERROR => Ok(Self::Xf86vidmodeZoomLockedError(xf86vidmode::ZoomLockedError::try_parse(bytes)?.0)),
+                    xf86vidmode::BAD_CLOCK_ERROR => Ok(Self::Xf86vidmodeBadClockError(error.into())),
+                    xf86vidmode::BAD_H_TIMINGS_ERROR => Ok(Self::Xf86vidmodeBadHTimingsError(error.into())),
+                    xf86vidmode::BAD_V_TIMINGS_ERROR => Ok(Self::Xf86vidmodeBadVTimingsError(error.into())),
+                    xf86vidmode::CLIENT_NOT_LOCAL_ERROR => Ok(Self::Xf86vidmodeClientNotLocalError(error.into())),
+                    xf86vidmode::EXTENSION_DISABLED_ERROR => Ok(Self::Xf86vidmodeExtensionDisabledError(error.into())),
+                    xf86vidmode::MODE_UNSUITABLE_ERROR => Ok(Self::Xf86vidmodeModeUnsuitableError(error.into())),
+                    xf86vidmode::ZOOM_LOCKED_ERROR => Ok(Self::Xf86vidmodeZoomLockedError(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "xfixes")]
             Some(("XFIXES", first_error)) => {
                 match error_code - first_error {
-                    xfixes::BAD_REGION_ERROR => Ok(Self::XfixesBadRegionError(xfixes::BadRegionError::try_parse(bytes)?.0)),
+                    xfixes::BAD_REGION_ERROR => Ok(Self::XfixesBadRegionError(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "xinput")]
             Some(("XInputExtension", first_error)) => {
                 match error_code - first_error {
-                    xinput::CLASS_ERROR => Ok(Self::XinputClassError(xinput::ClassError::try_parse(bytes)?.0)),
-                    xinput::DEVICE_ERROR => Ok(Self::XinputDeviceError(xinput::DeviceError::try_parse(bytes)?.0)),
-                    xinput::DEVICE_BUSY_ERROR => Ok(Self::XinputDeviceBusyError(xinput::DeviceBusyError::try_parse(bytes)?.0)),
-                    xinput::EVENT_ERROR => Ok(Self::XinputEventError(xinput::EventError::try_parse(bytes)?.0)),
-                    xinput::MODE_ERROR => Ok(Self::XinputModeError(xinput::ModeError::try_parse(bytes)?.0)),
+                    xinput::CLASS_ERROR => Ok(Self::XinputClassError(error.into())),
+                    xinput::DEVICE_ERROR => Ok(Self::XinputDeviceError(error.into())),
+                    xinput::DEVICE_BUSY_ERROR => Ok(Self::XinputDeviceBusyError(error.into())),
+                    xinput::EVENT_ERROR => Ok(Self::XinputEventError(error.into())),
+                    xinput::MODE_ERROR => Ok(Self::XinputModeError(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "xkb")]
             Some(("XKEYBOARD", first_error)) => {
                 match error_code - first_error {
-                    xkb::KEYBOARD_ERROR => Ok(Self::XkbKeyboardError(xkb::KeyboardError::try_parse(bytes)?.0)),
+                    xkb::KEYBOARD_ERROR => Ok(Self::XkbKeyboardError(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "xprint")]
             Some(("XpExtension", first_error)) => {
                 match error_code - first_error {
-                    xprint::BAD_CONTEXT_ERROR => Ok(Self::XprintBadContextError(xprint::BadContextError::try_parse(bytes)?.0)),
-                    xprint::BAD_SEQUENCE_ERROR => Ok(Self::XprintBadSequenceError(xprint::BadSequenceError::try_parse(bytes)?.0)),
+                    xprint::BAD_CONTEXT_ERROR => Ok(Self::XprintBadContextError(error.into())),
+                    xprint::BAD_SEQUENCE_ERROR => Ok(Self::XprintBadSequenceError(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "xv")]
             Some(("XVideo", first_error)) => {
                 match error_code - first_error {
-                    xv::BAD_CONTROL_ERROR => Ok(Self::XvBadControlError(xv::BadControlError::try_parse(bytes)?.0)),
-                    xv::BAD_ENCODING_ERROR => Ok(Self::XvBadEncodingError(xv::BadEncodingError::try_parse(bytes)?.0)),
-                    xv::BAD_PORT_ERROR => Ok(Self::XvBadPortError(xv::BadPortError::try_parse(bytes)?.0)),
+                    xv::BAD_CONTROL_ERROR => Ok(Self::XvBadControlError(error.into())),
+                    xv::BAD_ENCODING_ERROR => Ok(Self::XvBadEncodingError(error.into())),
+                    xv::BAD_PORT_ERROR => Ok(Self::XvBadPortError(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
@@ -547,43 +546,42 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
         iter: impl Iterator<Item=(&'static str, QueryExtensionReply)>,
     ) -> Result<Self, ParseError> {
         let event_type = event.response_type();
-        let bytes = event.raw_bytes();
         // Check if this is a core protocol error or from the generic event extension
         match event_type {
             0 => return Ok(Self::Error(Error::parse(event.try_into()?, iter)?)),
-            xproto::BUTTON_PRESS_EVENT => return Ok(Self::XprotoButtonPressEvent(xproto::ButtonPressEvent::try_parse(bytes)?.0)),
-            xproto::BUTTON_RELEASE_EVENT => return Ok(Self::XprotoButtonReleaseEvent(xproto::ButtonReleaseEvent::try_parse(bytes)?.0)),
-            xproto::CIRCULATE_NOTIFY_EVENT => return Ok(Self::XprotoCirculateNotifyEvent(xproto::CirculateNotifyEvent::try_parse(bytes)?.0)),
-            xproto::CIRCULATE_REQUEST_EVENT => return Ok(Self::XprotoCirculateRequestEvent(xproto::CirculateRequestEvent::try_parse(bytes)?.0)),
-            xproto::CLIENT_MESSAGE_EVENT => return Ok(Self::XprotoClientMessageEvent(xproto::ClientMessageEvent::try_parse(bytes)?.0)),
-            xproto::COLORMAP_NOTIFY_EVENT => return Ok(Self::XprotoColormapNotifyEvent(xproto::ColormapNotifyEvent::try_parse(bytes)?.0)),
-            xproto::CONFIGURE_NOTIFY_EVENT => return Ok(Self::XprotoConfigureNotifyEvent(xproto::ConfigureNotifyEvent::try_parse(bytes)?.0)),
-            xproto::CONFIGURE_REQUEST_EVENT => return Ok(Self::XprotoConfigureRequestEvent(xproto::ConfigureRequestEvent::try_parse(bytes)?.0)),
-            xproto::CREATE_NOTIFY_EVENT => return Ok(Self::XprotoCreateNotifyEvent(xproto::CreateNotifyEvent::try_parse(bytes)?.0)),
-            xproto::DESTROY_NOTIFY_EVENT => return Ok(Self::XprotoDestroyNotifyEvent(xproto::DestroyNotifyEvent::try_parse(bytes)?.0)),
-            xproto::ENTER_NOTIFY_EVENT => return Ok(Self::XprotoEnterNotifyEvent(xproto::EnterNotifyEvent::try_parse(bytes)?.0)),
-            xproto::EXPOSE_EVENT => return Ok(Self::XprotoExposeEvent(xproto::ExposeEvent::try_parse(bytes)?.0)),
-            xproto::FOCUS_IN_EVENT => return Ok(Self::XprotoFocusInEvent(xproto::FocusInEvent::try_parse(bytes)?.0)),
-            xproto::FOCUS_OUT_EVENT => return Ok(Self::XprotoFocusOutEvent(xproto::FocusOutEvent::try_parse(bytes)?.0)),
-            xproto::GRAPHICS_EXPOSURE_EVENT => return Ok(Self::XprotoGraphicsExposureEvent(xproto::GraphicsExposureEvent::try_parse(bytes)?.0)),
-            xproto::GRAVITY_NOTIFY_EVENT => return Ok(Self::XprotoGravityNotifyEvent(xproto::GravityNotifyEvent::try_parse(bytes)?.0)),
-            xproto::KEY_PRESS_EVENT => return Ok(Self::XprotoKeyPressEvent(xproto::KeyPressEvent::try_parse(bytes)?.0)),
-            xproto::KEY_RELEASE_EVENT => return Ok(Self::XprotoKeyReleaseEvent(xproto::KeyReleaseEvent::try_parse(bytes)?.0)),
-            xproto::KEYMAP_NOTIFY_EVENT => return Ok(Self::XprotoKeymapNotifyEvent(xproto::KeymapNotifyEvent::try_parse(bytes)?.0)),
-            xproto::LEAVE_NOTIFY_EVENT => return Ok(Self::XprotoLeaveNotifyEvent(xproto::LeaveNotifyEvent::try_parse(bytes)?.0)),
-            xproto::MAP_NOTIFY_EVENT => return Ok(Self::XprotoMapNotifyEvent(xproto::MapNotifyEvent::try_parse(bytes)?.0)),
-            xproto::MAP_REQUEST_EVENT => return Ok(Self::XprotoMapRequestEvent(xproto::MapRequestEvent::try_parse(bytes)?.0)),
-            xproto::MAPPING_NOTIFY_EVENT => return Ok(Self::XprotoMappingNotifyEvent(xproto::MappingNotifyEvent::try_parse(bytes)?.0)),
-            xproto::MOTION_NOTIFY_EVENT => return Ok(Self::XprotoMotionNotifyEvent(xproto::MotionNotifyEvent::try_parse(bytes)?.0)),
-            xproto::NO_EXPOSURE_EVENT => return Ok(Self::XprotoNoExposureEvent(xproto::NoExposureEvent::try_parse(bytes)?.0)),
-            xproto::PROPERTY_NOTIFY_EVENT => return Ok(Self::XprotoPropertyNotifyEvent(xproto::PropertyNotifyEvent::try_parse(bytes)?.0)),
-            xproto::REPARENT_NOTIFY_EVENT => return Ok(Self::XprotoReparentNotifyEvent(xproto::ReparentNotifyEvent::try_parse(bytes)?.0)),
-            xproto::RESIZE_REQUEST_EVENT => return Ok(Self::XprotoResizeRequestEvent(xproto::ResizeRequestEvent::try_parse(bytes)?.0)),
-            xproto::SELECTION_CLEAR_EVENT => return Ok(Self::XprotoSelectionClearEvent(xproto::SelectionClearEvent::try_parse(bytes)?.0)),
-            xproto::SELECTION_NOTIFY_EVENT => return Ok(Self::XprotoSelectionNotifyEvent(xproto::SelectionNotifyEvent::try_parse(bytes)?.0)),
-            xproto::SELECTION_REQUEST_EVENT => return Ok(Self::XprotoSelectionRequestEvent(xproto::SelectionRequestEvent::try_parse(bytes)?.0)),
-            xproto::UNMAP_NOTIFY_EVENT => return Ok(Self::XprotoUnmapNotifyEvent(xproto::UnmapNotifyEvent::try_parse(bytes)?.0)),
-            xproto::VISIBILITY_NOTIFY_EVENT => return Ok(Self::XprotoVisibilityNotifyEvent(xproto::VisibilityNotifyEvent::try_parse(bytes)?.0)),
+            xproto::BUTTON_PRESS_EVENT => return Ok(Self::XprotoButtonPressEvent(event.into())),
+            xproto::BUTTON_RELEASE_EVENT => return Ok(Self::XprotoButtonReleaseEvent(event.into())),
+            xproto::CIRCULATE_NOTIFY_EVENT => return Ok(Self::XprotoCirculateNotifyEvent(event.into())),
+            xproto::CIRCULATE_REQUEST_EVENT => return Ok(Self::XprotoCirculateRequestEvent(event.into())),
+            xproto::CLIENT_MESSAGE_EVENT => return Ok(Self::XprotoClientMessageEvent(event.into())),
+            xproto::COLORMAP_NOTIFY_EVENT => return Ok(Self::XprotoColormapNotifyEvent(event.into())),
+            xproto::CONFIGURE_NOTIFY_EVENT => return Ok(Self::XprotoConfigureNotifyEvent(event.into())),
+            xproto::CONFIGURE_REQUEST_EVENT => return Ok(Self::XprotoConfigureRequestEvent(event.into())),
+            xproto::CREATE_NOTIFY_EVENT => return Ok(Self::XprotoCreateNotifyEvent(event.into())),
+            xproto::DESTROY_NOTIFY_EVENT => return Ok(Self::XprotoDestroyNotifyEvent(event.into())),
+            xproto::ENTER_NOTIFY_EVENT => return Ok(Self::XprotoEnterNotifyEvent(event.into())),
+            xproto::EXPOSE_EVENT => return Ok(Self::XprotoExposeEvent(event.into())),
+            xproto::FOCUS_IN_EVENT => return Ok(Self::XprotoFocusInEvent(event.into())),
+            xproto::FOCUS_OUT_EVENT => return Ok(Self::XprotoFocusOutEvent(event.into())),
+            xproto::GRAPHICS_EXPOSURE_EVENT => return Ok(Self::XprotoGraphicsExposureEvent(event.into())),
+            xproto::GRAVITY_NOTIFY_EVENT => return Ok(Self::XprotoGravityNotifyEvent(event.into())),
+            xproto::KEY_PRESS_EVENT => return Ok(Self::XprotoKeyPressEvent(event.into())),
+            xproto::KEY_RELEASE_EVENT => return Ok(Self::XprotoKeyReleaseEvent(event.into())),
+            xproto::KEYMAP_NOTIFY_EVENT => return Ok(Self::XprotoKeymapNotifyEvent(event.into())),
+            xproto::LEAVE_NOTIFY_EVENT => return Ok(Self::XprotoLeaveNotifyEvent(event.into())),
+            xproto::MAP_NOTIFY_EVENT => return Ok(Self::XprotoMapNotifyEvent(event.into())),
+            xproto::MAP_REQUEST_EVENT => return Ok(Self::XprotoMapRequestEvent(event.into())),
+            xproto::MAPPING_NOTIFY_EVENT => return Ok(Self::XprotoMappingNotifyEvent(event.into())),
+            xproto::MOTION_NOTIFY_EVENT => return Ok(Self::XprotoMotionNotifyEvent(event.into())),
+            xproto::NO_EXPOSURE_EVENT => return Ok(Self::XprotoNoExposureEvent(event.into())),
+            xproto::PROPERTY_NOTIFY_EVENT => return Ok(Self::XprotoPropertyNotifyEvent(event.into())),
+            xproto::REPARENT_NOTIFY_EVENT => return Ok(Self::XprotoReparentNotifyEvent(event.into())),
+            xproto::RESIZE_REQUEST_EVENT => return Ok(Self::XprotoResizeRequestEvent(event.into())),
+            xproto::SELECTION_CLEAR_EVENT => return Ok(Self::XprotoSelectionClearEvent(event.into())),
+            xproto::SELECTION_NOTIFY_EVENT => return Ok(Self::XprotoSelectionNotifyEvent(event.into())),
+            xproto::SELECTION_REQUEST_EVENT => return Ok(Self::XprotoSelectionRequestEvent(event.into())),
+            xproto::UNMAP_NOTIFY_EVENT => return Ok(Self::XprotoUnmapNotifyEvent(event.into())),
+            xproto::VISIBILITY_NOTIFY_EVENT => return Ok(Self::XprotoVisibilityNotifyEvent(event.into())),
             xproto::GE_GENERIC_EVENT => return Self::from_generic_event(event, iter),
             _ => {}
         }
@@ -596,98 +594,98 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
             #[cfg(feature = "damage")]
             Some(("DAMAGE", first_event)) => {
                 match event_type - first_event {
-                    damage::NOTIFY_EVENT => Ok(Self::DamageNotifyEvent(damage::NotifyEvent::try_parse(bytes)?.0)),
+                    damage::NOTIFY_EVENT => Ok(Self::DamageNotifyEvent(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "dri2")]
             Some(("DRI2", first_event)) => {
                 match event_type - first_event {
-                    dri2::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::Dri2BufferSwapCompleteEvent(dri2::BufferSwapCompleteEvent::try_parse(bytes)?.0)),
-                    dri2::INVALIDATE_BUFFERS_EVENT => Ok(Self::Dri2InvalidateBuffersEvent(dri2::InvalidateBuffersEvent::try_parse(bytes)?.0)),
+                    dri2::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::Dri2BufferSwapCompleteEvent(event.into())),
+                    dri2::INVALIDATE_BUFFERS_EVENT => Ok(Self::Dri2InvalidateBuffersEvent(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "glx")]
             Some(("GLX", first_event)) => {
                 match event_type - first_event {
-                    glx::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::GlxBufferSwapCompleteEvent(glx::BufferSwapCompleteEvent::try_parse(bytes)?.0)),
-                    glx::PBUFFER_CLOBBER_EVENT => Ok(Self::GlxPbufferClobberEvent(glx::PbufferClobberEvent::try_parse(bytes)?.0)),
+                    glx::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::GlxBufferSwapCompleteEvent(event.into())),
+                    glx::PBUFFER_CLOBBER_EVENT => Ok(Self::GlxPbufferClobberEvent(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "present")]
             Some(("Present", first_event)) => {
                 match event_type - first_event {
-                    present::GENERIC_EVENT => Ok(Self::PresentGenericEvent(present::GenericEvent::try_parse(bytes)?.0)),
+                    present::GENERIC_EVENT => Ok(Self::PresentGenericEvent(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "randr")]
             Some(("RANDR", first_event)) => {
                 match event_type - first_event {
-                    randr::NOTIFY_EVENT => Ok(Self::RandrNotifyEvent(randr::NotifyEvent::try_parse(bytes)?.0)),
-                    randr::SCREEN_CHANGE_NOTIFY_EVENT => Ok(Self::RandrScreenChangeNotifyEvent(randr::ScreenChangeNotifyEvent::try_parse(bytes)?.0)),
+                    randr::NOTIFY_EVENT => Ok(Self::RandrNotifyEvent(event.into())),
+                    randr::SCREEN_CHANGE_NOTIFY_EVENT => Ok(Self::RandrScreenChangeNotifyEvent(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "screensaver")]
             Some(("MIT-SCREEN-SAVER", first_event)) => {
                 match event_type - first_event {
-                    screensaver::NOTIFY_EVENT => Ok(Self::ScreensaverNotifyEvent(screensaver::NotifyEvent::try_parse(bytes)?.0)),
+                    screensaver::NOTIFY_EVENT => Ok(Self::ScreensaverNotifyEvent(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "shape")]
             Some(("SHAPE", first_event)) => {
                 match event_type - first_event {
-                    shape::NOTIFY_EVENT => Ok(Self::ShapeNotifyEvent(shape::NotifyEvent::try_parse(bytes)?.0)),
+                    shape::NOTIFY_EVENT => Ok(Self::ShapeNotifyEvent(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "shm")]
             Some(("MIT-SHM", first_event)) => {
                 match event_type - first_event {
-                    shm::COMPLETION_EVENT => Ok(Self::ShmCompletionEvent(shm::CompletionEvent::try_parse(bytes)?.0)),
+                    shm::COMPLETION_EVENT => Ok(Self::ShmCompletionEvent(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "sync")]
             Some(("SYNC", first_event)) => {
                 match event_type - first_event {
-                    sync::ALARM_NOTIFY_EVENT => Ok(Self::SyncAlarmNotifyEvent(sync::AlarmNotifyEvent::try_parse(bytes)?.0)),
-                    sync::COUNTER_NOTIFY_EVENT => Ok(Self::SyncCounterNotifyEvent(sync::CounterNotifyEvent::try_parse(bytes)?.0)),
+                    sync::ALARM_NOTIFY_EVENT => Ok(Self::SyncAlarmNotifyEvent(event.into())),
+                    sync::COUNTER_NOTIFY_EVENT => Ok(Self::SyncCounterNotifyEvent(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "xfixes")]
             Some(("XFIXES", first_event)) => {
                 match event_type - first_event {
-                    xfixes::CURSOR_NOTIFY_EVENT => Ok(Self::XfixesCursorNotifyEvent(xfixes::CursorNotifyEvent::try_parse(bytes)?.0)),
-                    xfixes::SELECTION_NOTIFY_EVENT => Ok(Self::XfixesSelectionNotifyEvent(xfixes::SelectionNotifyEvent::try_parse(bytes)?.0)),
+                    xfixes::CURSOR_NOTIFY_EVENT => Ok(Self::XfixesCursorNotifyEvent(event.into())),
+                    xfixes::SELECTION_NOTIFY_EVENT => Ok(Self::XfixesSelectionNotifyEvent(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "xinput")]
             Some(("XInputExtension", first_event)) => {
                 match event_type - first_event {
-                    xinput::CHANGE_DEVICE_NOTIFY_EVENT => Ok(Self::XinputChangeDeviceNotifyEvent(xinput::ChangeDeviceNotifyEvent::try_parse(bytes)?.0)),
-                    xinput::DEVICE_BUTTON_PRESS_EVENT => Ok(Self::XinputDeviceButtonPressEvent(xinput::DeviceButtonPressEvent::try_parse(bytes)?.0)),
-                    xinput::DEVICE_BUTTON_RELEASE_EVENT => Ok(Self::XinputDeviceButtonReleaseEvent(xinput::DeviceButtonReleaseEvent::try_parse(bytes)?.0)),
-                    xinput::DEVICE_BUTTON_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceButtonStateNotifyEvent(xinput::DeviceButtonStateNotifyEvent::try_parse(bytes)?.0)),
-                    xinput::DEVICE_FOCUS_IN_EVENT => Ok(Self::XinputDeviceFocusInEvent(xinput::DeviceFocusInEvent::try_parse(bytes)?.0)),
-                    xinput::DEVICE_FOCUS_OUT_EVENT => Ok(Self::XinputDeviceFocusOutEvent(xinput::DeviceFocusOutEvent::try_parse(bytes)?.0)),
-                    xinput::DEVICE_KEY_PRESS_EVENT => Ok(Self::XinputDeviceKeyPressEvent(xinput::DeviceKeyPressEvent::try_parse(bytes)?.0)),
-                    xinput::DEVICE_KEY_RELEASE_EVENT => Ok(Self::XinputDeviceKeyReleaseEvent(xinput::DeviceKeyReleaseEvent::try_parse(bytes)?.0)),
-                    xinput::DEVICE_KEY_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceKeyStateNotifyEvent(xinput::DeviceKeyStateNotifyEvent::try_parse(bytes)?.0)),
-                    xinput::DEVICE_MAPPING_NOTIFY_EVENT => Ok(Self::XinputDeviceMappingNotifyEvent(xinput::DeviceMappingNotifyEvent::try_parse(bytes)?.0)),
-                    xinput::DEVICE_MOTION_NOTIFY_EVENT => Ok(Self::XinputDeviceMotionNotifyEvent(xinput::DeviceMotionNotifyEvent::try_parse(bytes)?.0)),
-                    xinput::DEVICE_PRESENCE_NOTIFY_EVENT => Ok(Self::XinputDevicePresenceNotifyEvent(xinput::DevicePresenceNotifyEvent::try_parse(bytes)?.0)),
-                    xinput::DEVICE_PROPERTY_NOTIFY_EVENT => Ok(Self::XinputDevicePropertyNotifyEvent(xinput::DevicePropertyNotifyEvent::try_parse(bytes)?.0)),
-                    xinput::DEVICE_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceStateNotifyEvent(xinput::DeviceStateNotifyEvent::try_parse(bytes)?.0)),
-                    xinput::DEVICE_VALUATOR_EVENT => Ok(Self::XinputDeviceValuatorEvent(xinput::DeviceValuatorEvent::try_parse(bytes)?.0)),
-                    xinput::PROXIMITY_IN_EVENT => Ok(Self::XinputProximityInEvent(xinput::ProximityInEvent::try_parse(bytes)?.0)),
-                    xinput::PROXIMITY_OUT_EVENT => Ok(Self::XinputProximityOutEvent(xinput::ProximityOutEvent::try_parse(bytes)?.0)),
+                    xinput::CHANGE_DEVICE_NOTIFY_EVENT => Ok(Self::XinputChangeDeviceNotifyEvent(event.into())),
+                    xinput::DEVICE_BUTTON_PRESS_EVENT => Ok(Self::XinputDeviceButtonPressEvent(event.into())),
+                    xinput::DEVICE_BUTTON_RELEASE_EVENT => Ok(Self::XinputDeviceButtonReleaseEvent(event.into())),
+                    xinput::DEVICE_BUTTON_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceButtonStateNotifyEvent(event.into())),
+                    xinput::DEVICE_FOCUS_IN_EVENT => Ok(Self::XinputDeviceFocusInEvent(event.into())),
+                    xinput::DEVICE_FOCUS_OUT_EVENT => Ok(Self::XinputDeviceFocusOutEvent(event.into())),
+                    xinput::DEVICE_KEY_PRESS_EVENT => Ok(Self::XinputDeviceKeyPressEvent(event.into())),
+                    xinput::DEVICE_KEY_RELEASE_EVENT => Ok(Self::XinputDeviceKeyReleaseEvent(event.into())),
+                    xinput::DEVICE_KEY_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceKeyStateNotifyEvent(event.into())),
+                    xinput::DEVICE_MAPPING_NOTIFY_EVENT => Ok(Self::XinputDeviceMappingNotifyEvent(event.into())),
+                    xinput::DEVICE_MOTION_NOTIFY_EVENT => Ok(Self::XinputDeviceMotionNotifyEvent(event.into())),
+                    xinput::DEVICE_PRESENCE_NOTIFY_EVENT => Ok(Self::XinputDevicePresenceNotifyEvent(event.into())),
+                    xinput::DEVICE_PROPERTY_NOTIFY_EVENT => Ok(Self::XinputDevicePropertyNotifyEvent(event.into())),
+                    xinput::DEVICE_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceStateNotifyEvent(event.into())),
+                    xinput::DEVICE_VALUATOR_EVENT => Ok(Self::XinputDeviceValuatorEvent(event.into())),
+                    xinput::PROXIMITY_IN_EVENT => Ok(Self::XinputProximityInEvent(event.into())),
+                    xinput::PROXIMITY_OUT_EVENT => Ok(Self::XinputProximityOutEvent(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
@@ -697,34 +695,34 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
                     return Ok(Self::Unknown(event));
                 }
                 match event.raw_bytes()[1] {
-                    xkb::ACCESS_X_NOTIFY_EVENT => Ok(Self::XkbAccessXNotifyEvent(xkb::AccessXNotifyEvent::try_parse(bytes)?.0)),
-                    xkb::ACTION_MESSAGE_EVENT => Ok(Self::XkbActionMessageEvent(xkb::ActionMessageEvent::try_parse(bytes)?.0)),
-                    xkb::BELL_NOTIFY_EVENT => Ok(Self::XkbBellNotifyEvent(xkb::BellNotifyEvent::try_parse(bytes)?.0)),
-                    xkb::COMPAT_MAP_NOTIFY_EVENT => Ok(Self::XkbCompatMapNotifyEvent(xkb::CompatMapNotifyEvent::try_parse(bytes)?.0)),
-                    xkb::CONTROLS_NOTIFY_EVENT => Ok(Self::XkbControlsNotifyEvent(xkb::ControlsNotifyEvent::try_parse(bytes)?.0)),
-                    xkb::EXTENSION_DEVICE_NOTIFY_EVENT => Ok(Self::XkbExtensionDeviceNotifyEvent(xkb::ExtensionDeviceNotifyEvent::try_parse(bytes)?.0)),
-                    xkb::INDICATOR_MAP_NOTIFY_EVENT => Ok(Self::XkbIndicatorMapNotifyEvent(xkb::IndicatorMapNotifyEvent::try_parse(bytes)?.0)),
-                    xkb::INDICATOR_STATE_NOTIFY_EVENT => Ok(Self::XkbIndicatorStateNotifyEvent(xkb::IndicatorStateNotifyEvent::try_parse(bytes)?.0)),
-                    xkb::MAP_NOTIFY_EVENT => Ok(Self::XkbMapNotifyEvent(xkb::MapNotifyEvent::try_parse(bytes)?.0)),
-                    xkb::NAMES_NOTIFY_EVENT => Ok(Self::XkbNamesNotifyEvent(xkb::NamesNotifyEvent::try_parse(bytes)?.0)),
-                    xkb::NEW_KEYBOARD_NOTIFY_EVENT => Ok(Self::XkbNewKeyboardNotifyEvent(xkb::NewKeyboardNotifyEvent::try_parse(bytes)?.0)),
-                    xkb::STATE_NOTIFY_EVENT => Ok(Self::XkbStateNotifyEvent(xkb::StateNotifyEvent::try_parse(bytes)?.0)),
+                    xkb::ACCESS_X_NOTIFY_EVENT => Ok(Self::XkbAccessXNotifyEvent(event.into())),
+                    xkb::ACTION_MESSAGE_EVENT => Ok(Self::XkbActionMessageEvent(event.into())),
+                    xkb::BELL_NOTIFY_EVENT => Ok(Self::XkbBellNotifyEvent(event.into())),
+                    xkb::COMPAT_MAP_NOTIFY_EVENT => Ok(Self::XkbCompatMapNotifyEvent(event.into())),
+                    xkb::CONTROLS_NOTIFY_EVENT => Ok(Self::XkbControlsNotifyEvent(event.into())),
+                    xkb::EXTENSION_DEVICE_NOTIFY_EVENT => Ok(Self::XkbExtensionDeviceNotifyEvent(event.into())),
+                    xkb::INDICATOR_MAP_NOTIFY_EVENT => Ok(Self::XkbIndicatorMapNotifyEvent(event.into())),
+                    xkb::INDICATOR_STATE_NOTIFY_EVENT => Ok(Self::XkbIndicatorStateNotifyEvent(event.into())),
+                    xkb::MAP_NOTIFY_EVENT => Ok(Self::XkbMapNotifyEvent(event.into())),
+                    xkb::NAMES_NOTIFY_EVENT => Ok(Self::XkbNamesNotifyEvent(event.into())),
+                    xkb::NEW_KEYBOARD_NOTIFY_EVENT => Ok(Self::XkbNewKeyboardNotifyEvent(event.into())),
+                    xkb::STATE_NOTIFY_EVENT => Ok(Self::XkbStateNotifyEvent(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "xprint")]
             Some(("XpExtension", first_event)) => {
                 match event_type - first_event {
-                    xprint::ATTRIBUT_NOTIFY_EVENT => Ok(Self::XprintAttributNotifyEvent(xprint::AttributNotifyEvent::try_parse(bytes)?.0)),
-                    xprint::NOTIFY_EVENT => Ok(Self::XprintNotifyEvent(xprint::NotifyEvent::try_parse(bytes)?.0)),
+                    xprint::ATTRIBUT_NOTIFY_EVENT => Ok(Self::XprintAttributNotifyEvent(event.into())),
+                    xprint::NOTIFY_EVENT => Ok(Self::XprintNotifyEvent(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "xv")]
             Some(("XVideo", first_event)) => {
                 match event_type - first_event {
-                    xv::PORT_NOTIFY_EVENT => Ok(Self::XvPortNotifyEvent(xv::PortNotifyEvent::try_parse(bytes)?.0)),
-                    xv::VIDEO_NOTIFY_EVENT => Ok(Self::XvVideoNotifyEvent(xv::VideoNotifyEvent::try_parse(bytes)?.0)),
+                    xv::PORT_NOTIFY_EVENT => Ok(Self::XvPortNotifyEvent(event.into())),
+                    xv::VIDEO_NOTIFY_EVENT => Ok(Self::XvVideoNotifyEvent(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
@@ -747,42 +745,42 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
             #[cfg(feature = "present")]
             Some("Present") => {
                 match event_type {
-                    present::COMPLETE_NOTIFY_EVENT => Ok(Self::PresentCompleteNotifyEvent(present::CompleteNotifyEvent::try_parse(bytes)?.0)),
-                    present::CONFIGURE_NOTIFY_EVENT => Ok(Self::PresentConfigureNotifyEvent(present::ConfigureNotifyEvent::try_parse(bytes)?.0)),
-                    present::IDLE_NOTIFY_EVENT => Ok(Self::PresentIdleNotifyEvent(present::IdleNotifyEvent::try_parse(bytes)?.0)),
-                    present::REDIRECT_NOTIFY_EVENT => Ok(Self::PresentRedirectNotifyEvent(present::RedirectNotifyEvent::try_parse(bytes)?.0)),
+                    present::COMPLETE_NOTIFY_EVENT => Ok(Self::PresentCompleteNotifyEvent(event.try_into()?)),
+                    present::CONFIGURE_NOTIFY_EVENT => Ok(Self::PresentConfigureNotifyEvent(event.try_into()?)),
+                    present::IDLE_NOTIFY_EVENT => Ok(Self::PresentIdleNotifyEvent(event.try_into()?)),
+                    present::REDIRECT_NOTIFY_EVENT => Ok(Self::PresentRedirectNotifyEvent(event.try_into()?)),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "xinput")]
             Some("XInputExtension") => {
                 match event_type {
-                    xinput::BARRIER_HIT_EVENT => Ok(Self::XinputBarrierHitEvent(xinput::BarrierHitEvent::try_parse(bytes)?.0)),
-                    xinput::BARRIER_LEAVE_EVENT => Ok(Self::XinputBarrierLeaveEvent(xinput::BarrierLeaveEvent::try_parse(bytes)?.0)),
-                    xinput::BUTTON_PRESS_EVENT => Ok(Self::XinputButtonPressEvent(xinput::ButtonPressEvent::try_parse(bytes)?.0)),
-                    xinput::BUTTON_RELEASE_EVENT => Ok(Self::XinputButtonReleaseEvent(xinput::ButtonReleaseEvent::try_parse(bytes)?.0)),
-                    xinput::DEVICE_CHANGED_EVENT => Ok(Self::XinputDeviceChangedEvent(xinput::DeviceChangedEvent::try_parse(bytes)?.0)),
-                    xinput::ENTER_EVENT => Ok(Self::XinputEnterEvent(xinput::EnterEvent::try_parse(bytes)?.0)),
-                    xinput::FOCUS_IN_EVENT => Ok(Self::XinputFocusInEvent(xinput::FocusInEvent::try_parse(bytes)?.0)),
-                    xinput::FOCUS_OUT_EVENT => Ok(Self::XinputFocusOutEvent(xinput::FocusOutEvent::try_parse(bytes)?.0)),
-                    xinput::HIERARCHY_EVENT => Ok(Self::XinputHierarchyEvent(xinput::HierarchyEvent::try_parse(bytes)?.0)),
-                    xinput::KEY_PRESS_EVENT => Ok(Self::XinputKeyPressEvent(xinput::KeyPressEvent::try_parse(bytes)?.0)),
-                    xinput::KEY_RELEASE_EVENT => Ok(Self::XinputKeyReleaseEvent(xinput::KeyReleaseEvent::try_parse(bytes)?.0)),
-                    xinput::LEAVE_EVENT => Ok(Self::XinputLeaveEvent(xinput::LeaveEvent::try_parse(bytes)?.0)),
-                    xinput::MOTION_EVENT => Ok(Self::XinputMotionEvent(xinput::MotionEvent::try_parse(bytes)?.0)),
-                    xinput::PROPERTY_EVENT => Ok(Self::XinputPropertyEvent(xinput::PropertyEvent::try_parse(bytes)?.0)),
-                    xinput::RAW_BUTTON_PRESS_EVENT => Ok(Self::XinputRawButtonPressEvent(xinput::RawButtonPressEvent::try_parse(bytes)?.0)),
-                    xinput::RAW_BUTTON_RELEASE_EVENT => Ok(Self::XinputRawButtonReleaseEvent(xinput::RawButtonReleaseEvent::try_parse(bytes)?.0)),
-                    xinput::RAW_KEY_PRESS_EVENT => Ok(Self::XinputRawKeyPressEvent(xinput::RawKeyPressEvent::try_parse(bytes)?.0)),
-                    xinput::RAW_KEY_RELEASE_EVENT => Ok(Self::XinputRawKeyReleaseEvent(xinput::RawKeyReleaseEvent::try_parse(bytes)?.0)),
-                    xinput::RAW_MOTION_EVENT => Ok(Self::XinputRawMotionEvent(xinput::RawMotionEvent::try_parse(bytes)?.0)),
-                    xinput::RAW_TOUCH_BEGIN_EVENT => Ok(Self::XinputRawTouchBeginEvent(xinput::RawTouchBeginEvent::try_parse(bytes)?.0)),
-                    xinput::RAW_TOUCH_END_EVENT => Ok(Self::XinputRawTouchEndEvent(xinput::RawTouchEndEvent::try_parse(bytes)?.0)),
-                    xinput::RAW_TOUCH_UPDATE_EVENT => Ok(Self::XinputRawTouchUpdateEvent(xinput::RawTouchUpdateEvent::try_parse(bytes)?.0)),
-                    xinput::TOUCH_BEGIN_EVENT => Ok(Self::XinputTouchBeginEvent(xinput::TouchBeginEvent::try_parse(bytes)?.0)),
-                    xinput::TOUCH_END_EVENT => Ok(Self::XinputTouchEndEvent(xinput::TouchEndEvent::try_parse(bytes)?.0)),
-                    xinput::TOUCH_OWNERSHIP_EVENT => Ok(Self::XinputTouchOwnershipEvent(xinput::TouchOwnershipEvent::try_parse(bytes)?.0)),
-                    xinput::TOUCH_UPDATE_EVENT => Ok(Self::XinputTouchUpdateEvent(xinput::TouchUpdateEvent::try_parse(bytes)?.0)),
+                    xinput::BARRIER_HIT_EVENT => Ok(Self::XinputBarrierHitEvent(event.try_into()?)),
+                    xinput::BARRIER_LEAVE_EVENT => Ok(Self::XinputBarrierLeaveEvent(event.try_into()?)),
+                    xinput::BUTTON_PRESS_EVENT => Ok(Self::XinputButtonPressEvent(event.try_into()?)),
+                    xinput::BUTTON_RELEASE_EVENT => Ok(Self::XinputButtonReleaseEvent(event.try_into()?)),
+                    xinput::DEVICE_CHANGED_EVENT => Ok(Self::XinputDeviceChangedEvent(event.try_into()?)),
+                    xinput::ENTER_EVENT => Ok(Self::XinputEnterEvent(event.try_into()?)),
+                    xinput::FOCUS_IN_EVENT => Ok(Self::XinputFocusInEvent(event.try_into()?)),
+                    xinput::FOCUS_OUT_EVENT => Ok(Self::XinputFocusOutEvent(event.try_into()?)),
+                    xinput::HIERARCHY_EVENT => Ok(Self::XinputHierarchyEvent(event.try_into()?)),
+                    xinput::KEY_PRESS_EVENT => Ok(Self::XinputKeyPressEvent(event.try_into()?)),
+                    xinput::KEY_RELEASE_EVENT => Ok(Self::XinputKeyReleaseEvent(event.try_into()?)),
+                    xinput::LEAVE_EVENT => Ok(Self::XinputLeaveEvent(event.try_into()?)),
+                    xinput::MOTION_EVENT => Ok(Self::XinputMotionEvent(event.try_into()?)),
+                    xinput::PROPERTY_EVENT => Ok(Self::XinputPropertyEvent(event.try_into()?)),
+                    xinput::RAW_BUTTON_PRESS_EVENT => Ok(Self::XinputRawButtonPressEvent(event.try_into()?)),
+                    xinput::RAW_BUTTON_RELEASE_EVENT => Ok(Self::XinputRawButtonReleaseEvent(event.try_into()?)),
+                    xinput::RAW_KEY_PRESS_EVENT => Ok(Self::XinputRawKeyPressEvent(event.try_into()?)),
+                    xinput::RAW_KEY_RELEASE_EVENT => Ok(Self::XinputRawKeyReleaseEvent(event.try_into()?)),
+                    xinput::RAW_MOTION_EVENT => Ok(Self::XinputRawMotionEvent(event.try_into()?)),
+                    xinput::RAW_TOUCH_BEGIN_EVENT => Ok(Self::XinputRawTouchBeginEvent(event.try_into()?)),
+                    xinput::RAW_TOUCH_END_EVENT => Ok(Self::XinputRawTouchEndEvent(event.try_into()?)),
+                    xinput::RAW_TOUCH_UPDATE_EVENT => Ok(Self::XinputRawTouchUpdateEvent(event.try_into()?)),
+                    xinput::TOUCH_BEGIN_EVENT => Ok(Self::XinputTouchBeginEvent(event.try_into()?)),
+                    xinput::TOUCH_END_EVENT => Ok(Self::XinputTouchEndEvent(event.try_into()?)),
+                    xinput::TOUCH_OWNERSHIP_EVENT => Ok(Self::XinputTouchOwnershipEvent(event.try_into()?)),
+                    xinput::TOUCH_UPDATE_EVENT => Ok(Self::XinputTouchUpdateEvent(event.try_into()?)),
                     _ => Ok(Self::Unknown(event))
                 }
             }

@@ -52,15 +52,14 @@ def _errors(out, modules):
         out(") -> Result<Self, ParseError> {")
         with Indent(out):
             out("let error_code = error.error_code();")
-            out("let bytes = error.raw_bytes();")
 
             out("// Check if this is a core protocol error")
             out("match error_code {")
             for name, err in errors[xproto_index]:
                 opcode = camel_case_to_upper_snake(name[-1]) + "_ERROR"
                 err_name = name[-1] + "Error"
-                out.indent("xproto::%s => return Ok(Self::Xproto%s(xproto::%s::try_parse(bytes)?.0)),",
-                           opcode, err_name, err_name)
+                out.indent("xproto::%s => return Ok(Self::Xproto%s(error.into())),",
+                           opcode, err_name)
             out.indent("_ => {}")
             out("}")
 
@@ -85,8 +84,8 @@ def _errors(out, modules):
                         for name, error in mod_errors:
                             opcode = camel_case_to_upper_snake(name[-1]) + "_ERROR"
                             err_name = name[-1] + "Error"
-                            out.indent("%s::%s => Ok(Self::%s%s(%s::%s::try_parse(bytes)?.0)),",
-                                       mod_name, opcode, variant, err_name, mod_name, err_name)
+                            out.indent("%s::%s => Ok(Self::%s%s(error.into())),",
+                                       mod_name, opcode, variant, err_name)
                         out.indent("_ => Ok(Self::Unknown(error))")
                         out("}")
                     out("}")
@@ -124,7 +123,6 @@ def _events(out, modules):
         out(") -> Result<Self, ParseError> {")
         with Indent(out):
             out("let event_type = event.response_type();")
-            out("let bytes = event.raw_bytes();")
             out("// Check if this is a core protocol error or from the generic event extension")
             out("match event_type {")
             with Indent(out):
@@ -135,8 +133,8 @@ def _events(out, modules):
                         continue
                     opcode = camel_case_to_upper_snake(name[-1]) + "_EVENT"
                     event_name = name[-1] + "Event"
-                    out("xproto::%s => return Ok(Self::Xproto%s(xproto::%s::try_parse(bytes)?.0)),",
-                        opcode, event_name, event_name)
+                    out("xproto::%s => return Ok(Self::Xproto%s(event.into())),",
+                        opcode, event_name)
                 out("xproto::GE_GENERIC_EVENT => return Self::from_generic_event(event, iter),")
                 out("_ => {}")
             out("}")
@@ -172,8 +170,8 @@ def _events(out, modules):
                                 continue
                             opcode = camel_case_to_upper_snake(name[-1]) + "_EVENT"
                             event_name = name[-1] + "Event"
-                            out.indent("%s::%s => Ok(Self::%s%s(%s::%s::try_parse(bytes)?.0)),",
-                                       mod_name, opcode, variant, event_name, mod_name, event_name)
+                            out.indent("%s::%s => Ok(Self::%s%s(event.into())),",
+                                       mod_name, opcode, variant, event_name)
                         out.indent("_ => Ok(Self::Unknown(event))")
                         out("}")
                     out("}")
@@ -213,8 +211,8 @@ def _events(out, modules):
                                 continue
                             opcode = camel_case_to_upper_snake(name[-1]) + "_EVENT"
                             event_name = name[-1] + "Event"
-                            out.indent("%s::%s => Ok(Self::%s%s(%s::%s::try_parse(bytes)?.0)),",
-                                       mod_name, opcode, variant, event_name, mod_name, event_name)
+                            out.indent("%s::%s => Ok(Self::%s%s(event.try_into()?)),",
+                                       mod_name, opcode, variant, event_name)
                         out.indent("_ => Ok(Self::Unknown(event))")
                         out("}")
                     out("}")
