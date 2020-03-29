@@ -37,10 +37,10 @@ def _errors(out, modules):
         mod_name = module.namespace.header
         variant = mod_name[0].upper() + mod_name[1:]
         for name, error in mod_errors:
-            err_name = name[-1] + "Error"
+            err_name = name[-1]
             if module.has_feature:
                 out.indent("#[cfg(feature = \"%s\")]", module.namespace.header)
-            out.indent("%s%s(%s::%s),", variant, err_name, mod_name, err_name)
+            out.indent("%s%s(%s::%sError),", variant, err_name, mod_name, err_name)
     out("}")
 
     out("impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {")
@@ -57,7 +57,7 @@ def _errors(out, modules):
             out("match error_code {")
             for name, err in errors[xproto_index]:
                 opcode = camel_case_to_upper_snake(name[-1]) + "_ERROR"
-                err_name = name[-1] + "Error"
+                err_name = name[-1]
                 out.indent("xproto::%s => return Ok(Self::Xproto%s(error.into())),",
                            opcode, err_name)
             out.indent("_ => {}")
@@ -83,7 +83,7 @@ def _errors(out, modules):
                         out("match error_code - first_error {")
                         for name, error in mod_errors:
                             opcode = camel_case_to_upper_snake(name[-1]) + "_ERROR"
-                            err_name = name[-1] + "Error"
+                            err_name = name[-1]
                             out.indent("%s::%s => Ok(Self::%s%s(error.into())),",
                                        mod_name, opcode, variant, err_name)
                         out.indent("_ => Ok(Self::Unknown(error))")
@@ -108,10 +108,10 @@ def _events(out, modules):
         mod_name = module.namespace.header
         variant = mod_name[0].upper() + mod_name[1:]
         for name, event in mod_events:
-            err_name = name[-1] + "Event"
+            err_name = name[-1]
             if module.has_feature:
                 out.indent("#[cfg(feature = \"%s\")]", module.namespace.header)
-            out.indent("%s%s(%s::%s),", variant, err_name, mod_name, err_name)
+            out.indent("%s%s(%s::%sEvent),", variant, err_name, mod_name, err_name)
     out("}")
 
     out("impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {")
@@ -132,7 +132,7 @@ def _events(out, modules):
                         # This does not really count and is parsed as an extension's event
                         continue
                     opcode = camel_case_to_upper_snake(name[-1]) + "_EVENT"
-                    event_name = name[-1] + "Event"
+                    event_name = name[-1]
                     out("xproto::%s => return Ok(Self::Xproto%s(event.into())),",
                         opcode, event_name)
                 out("xproto::GE_GENERIC_EVENT => return Self::from_generic_event(event, iter),")
@@ -169,7 +169,7 @@ def _events(out, modules):
                             if event.is_ge_event:
                                 continue
                             opcode = camel_case_to_upper_snake(name[-1]) + "_EVENT"
-                            event_name = name[-1] + "Event"
+                            event_name = name[-1]
                             out.indent("%s::%s => Ok(Self::%s%s(event.into())),",
                                        mod_name, opcode, variant, event_name)
                         out.indent("_ => Ok(Self::Unknown(event))")
@@ -211,7 +211,7 @@ def _events(out, modules):
                             if not event.is_ge_event:
                                 continue
                             opcode = camel_case_to_upper_snake(name[-1]) + "_EVENT"
-                            event_name = name[-1] + "Event"
+                            event_name = name[-1]
                             out.indent("%s::%s => Ok(Self::%s%s(event.try_into()?)),",
                                        mod_name, opcode, variant, event_name)
                         out.indent("_ => Ok(Self::Unknown(event))")

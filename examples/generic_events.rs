@@ -56,7 +56,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Now check that the event really is what we wanted to get
     let event = conn.parse_event(event)?;
     let event = match event {
-        Event::PresentConfigureNotifyEvent(event) => event,
+        Event::PresentConfigureNotify(event) => event,
         other => panic!("Unexpected event {:?}", other),
     };
     println!(
