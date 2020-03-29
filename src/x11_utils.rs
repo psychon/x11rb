@@ -330,15 +330,15 @@ macro_rules! bitmask_binop {
 ///
 /// If we need to use multiple atoms, one would normally write code such as
 /// ```
-/// # use x11rb::xproto::{ATOM, ConnectionExt, InternAtomReply};
+/// # use x11rb::xproto::{Atom, ConnectionExt, InternAtomReply};
 /// # use x11rb::errors::{ConnectionError, ReplyError};
 /// # use x11rb::cookie::Cookie;
 /// #[allow(non_snake_case)]
 /// pub struct AtomCollection {
-///     pub _NET_WM_NAME: ATOM,
-///     pub _NET_WM_ICON: ATOM,
-///     pub ATOM_WITH_SPACES: ATOM,
-///     pub WHATEVER: ATOM,
+///     pub _NET_WM_NAME: Atom,
+///     pub _NET_WM_ICON: Atom,
+///     pub ATOM_WITH_SPACES: Atom,
+///     pub WHATEVER: Atom,
 /// }
 ///
 /// #[allow(non_snake_case)]
@@ -408,7 +408,7 @@ macro_rules! atom_manager {
         #[derive(Debug, Clone, Copy)]
         $vis struct $struct_name {
             $(
-                $vis $field_name: $crate::xproto::ATOM,
+                $vis $field_name: $crate::xproto::Atom,
             )*
         }
 

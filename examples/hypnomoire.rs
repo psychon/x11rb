@@ -24,9 +24,9 @@ const FRAME_RATE: u64 = 10;
 const WINS: usize = 3;
 
 #[derive(Default)]
-struct Window {
-    window: WINDOW,
-    pixmap: PIXMAP,
+struct WindowState {
+    window: Window,
+    pixmap: Pixmap,
     angle_velocity: f64,
 }
 
@@ -56,7 +56,7 @@ fn main() {
     .unwrap();
 
     let windows: Vec<_> = (0..WINS)
-        .map(|_| Arc::new(Mutex::new(Window::default())))
+        .map(|_| Arc::new(Mutex::new(WindowState::default())))
         .collect();
 
     for win in windows.iter() {
@@ -70,10 +70,10 @@ fn main() {
 
 fn run<C: Connection>(
     conn: Arc<C>,
-    window_state: Arc<Mutex<Window>>,
+    window_state: Arc<Mutex<WindowState>>,
     screen_num: usize,
-    white: GCONTEXT,
-    black: GCONTEXT,
+    white: Gcontext,
+    black: Gcontext,
 ) -> Result<(), ReplyOrIdError<C::Buf>> {
     let screen = &conn.setup().roots[screen_num];
     let default_size = 300;
@@ -178,8 +178,8 @@ fn run<C: Connection>(
 
 fn event_thread<C>(
     conn_arc: Arc<C>,
-    windows: Vec<Arc<Mutex<Window>>>,
-    white: GCONTEXT,
+    windows: Vec<Arc<Mutex<WindowState>>>,
+    white: Gcontext,
 ) -> Result<(), ReplyError<C::Buf>>
 where
     C: Connection + Send + Sync + 'static,
@@ -248,9 +248,9 @@ where
 }
 
 fn find_window_by_id(
-    windows: &[Arc<Mutex<Window>>],
-    window: WINDOW,
-) -> Option<&Arc<Mutex<Window>>> {
+    windows: &[Arc<Mutex<WindowState>>],
+    window: Window,
+) -> Option<&Arc<Mutex<WindowState>>> {
     windows.iter().find(|state| {
         state
             .lock()

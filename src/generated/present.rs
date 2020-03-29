@@ -47,66 +47,66 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 2);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-pub enum Event {
+pub enum EventEnum {
     ConfigureNotify = 0,
     CompleteNotify = 1,
     IdleNotify = 2,
     RedirectNotify = 3,
 }
-impl From<Event> for u8 {
-    fn from(input: Event) -> Self {
+impl From<EventEnum> for u8 {
+    fn from(input: EventEnum) -> Self {
         match input {
-            Event::ConfigureNotify => 0,
-            Event::CompleteNotify => 1,
-            Event::IdleNotify => 2,
-            Event::RedirectNotify => 3,
+            EventEnum::ConfigureNotify => 0,
+            EventEnum::CompleteNotify => 1,
+            EventEnum::IdleNotify => 2,
+            EventEnum::RedirectNotify => 3,
         }
     }
 }
-impl From<Event> for std::option::Option<u8> {
-    fn from(input: Event) -> Self {
+impl From<EventEnum> for std::option::Option<u8> {
+    fn from(input: EventEnum) -> Self {
         Some(u8::from(input))
     }
 }
-impl From<Event> for u16 {
-    fn from(input: Event) -> Self {
+impl From<EventEnum> for u16 {
+    fn from(input: EventEnum) -> Self {
         Self::from(u8::from(input))
     }
 }
-impl From<Event> for std::option::Option<u16> {
-    fn from(input: Event) -> Self {
+impl From<EventEnum> for std::option::Option<u16> {
+    fn from(input: EventEnum) -> Self {
         Some(u16::from(input))
     }
 }
-impl From<Event> for u32 {
-    fn from(input: Event) -> Self {
+impl From<EventEnum> for u32 {
+    fn from(input: EventEnum) -> Self {
         Self::from(u8::from(input))
     }
 }
-impl From<Event> for std::option::Option<u32> {
-    fn from(input: Event) -> Self {
+impl From<EventEnum> for std::option::Option<u32> {
+    fn from(input: EventEnum) -> Self {
         Some(u32::from(input))
     }
 }
-impl TryFrom<u8> for Event {
+impl TryFrom<u8> for EventEnum {
     type Error = ParseError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(Event::ConfigureNotify),
-            1 => Ok(Event::CompleteNotify),
-            2 => Ok(Event::IdleNotify),
-            3 => Ok(Event::RedirectNotify),
+            0 => Ok(EventEnum::ConfigureNotify),
+            1 => Ok(EventEnum::CompleteNotify),
+            2 => Ok(EventEnum::IdleNotify),
+            3 => Ok(EventEnum::RedirectNotify),
             _ => Err(ParseError::ParseError)
         }
     }
 }
-impl TryFrom<u16> for Event {
+impl TryFrom<u16> for EventEnum {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
         Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
     }
 }
-impl TryFrom<u32> for Event {
+impl TryFrom<u32> for EventEnum {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
@@ -460,12 +460,12 @@ impl TryFrom<u32> for CompleteMode {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Notify {
-    pub window: WINDOW,
+    pub window: Window,
     pub serial: u32,
 }
 impl TryParse for Notify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
         let (serial, remaining) = u32::try_parse(remaining)?;
         let result = Notify { window, serial };
         Ok((result, remaining))
@@ -558,7 +558,7 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 /// Opcode for the Pixmap request
 pub const PIXMAP_REQUEST: u8 = 1;
-pub fn pixmap<'c, Conn>(conn: &'c Conn, window: WINDOW, pixmap: PIXMAP, serial: u32, valid: xfixes::REGION, update: xfixes::REGION, x_off: i16, y_off: i16, target_crtc: randr::CRTC, wait_fence: sync::FENCE, idle_fence: sync::FENCE, options: u32, target_msc: u64, divisor: u64, remainder: u64, notifies: &[Notify]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn pixmap<'c, Conn>(conn: &'c Conn, window: Window, pixmap: Pixmap, serial: u32, valid: xfixes::Region, update: xfixes::Region, x_off: i16, y_off: i16, target_crtc: randr::Crtc, wait_fence: sync::Fence, idle_fence: sync::Fence, options: u32, target_msc: u64, divisor: u64, remainder: u64, notifies: &[Notify]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -664,7 +664,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the NotifyMSC request
 pub const NOTIFY_MSC_REQUEST: u8 = 2;
-pub fn notify_msc<Conn>(conn: &Conn, window: WINDOW, serial: u32, target_msc: u64, divisor: u64, remainder: u64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn notify_msc<Conn>(conn: &Conn, window: Window, serial: u32, target_msc: u64, divisor: u64, remainder: u64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -723,11 +723,11 @@ where Conn: RequestConnection + ?Sized
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
-pub type EVENT = u32;
+pub type Event = u32;
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 3;
-pub fn select_input<Conn>(conn: &Conn, eid: EVENT, window: WINDOW, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn select_input<Conn>(conn: &Conn, eid: Event, window: Window, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -818,7 +818,7 @@ pub struct GenericEvent {
     pub sequence: u16,
     pub length: u32,
     pub evtype: u16,
-    pub event: EVENT,
+    pub event: Event,
 }
 impl GenericEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -828,7 +828,7 @@ impl GenericEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (evtype, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (event, remaining) = EVENT::try_parse(remaining)?;
+        let (event, remaining) = Event::try_parse(remaining)?;
         let result = GenericEvent { response_type, extension, sequence, length, evtype, event };
         Ok((result, remaining))
     }
@@ -880,8 +880,8 @@ pub struct ConfigureNotifyEvent {
     pub sequence: u16,
     pub length: u32,
     pub event_type: u16,
-    pub event: EVENT,
-    pub window: WINDOW,
+    pub event: Event,
+    pub window: Window,
     pub x: i16,
     pub y: i16,
     pub width: u16,
@@ -900,8 +900,8 @@ impl ConfigureNotifyEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (event, remaining) = EVENT::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = Event::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
@@ -945,8 +945,8 @@ pub struct CompleteNotifyEvent {
     pub event_type: u16,
     pub kind: CompleteKind,
     pub mode: CompleteMode,
-    pub event: EVENT,
-    pub window: WINDOW,
+    pub event: Event,
+    pub window: Window,
     pub serial: u32,
     pub ust: u64,
     pub msc: u64,
@@ -960,8 +960,8 @@ impl CompleteNotifyEvent {
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (kind, remaining) = u8::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
-        let (event, remaining) = EVENT::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = Event::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
         let (serial, remaining) = u32::try_parse(remaining)?;
         let (ust, remaining) = u64::try_parse(remaining)?;
         let (msc, remaining) = u64::try_parse(remaining)?;
@@ -999,11 +999,11 @@ pub struct IdleNotifyEvent {
     pub sequence: u16,
     pub length: u32,
     pub event_type: u16,
-    pub event: EVENT,
-    pub window: WINDOW,
+    pub event: Event,
+    pub window: Window,
     pub serial: u32,
-    pub pixmap: PIXMAP,
-    pub idle_fence: sync::FENCE,
+    pub pixmap: Pixmap,
+    pub idle_fence: sync::Fence,
 }
 impl IdleNotifyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1013,11 +1013,11 @@ impl IdleNotifyEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (event, remaining) = EVENT::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = Event::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
         let (serial, remaining) = u32::try_parse(remaining)?;
-        let (pixmap, remaining) = PIXMAP::try_parse(remaining)?;
-        let (idle_fence, remaining) = sync::FENCE::try_parse(remaining)?;
+        let (pixmap, remaining) = Pixmap::try_parse(remaining)?;
+        let (idle_fence, remaining) = sync::Fence::try_parse(remaining)?;
         let result = IdleNotifyEvent { response_type, extension, sequence, length, event_type, event, window, serial, pixmap, idle_fence };
         Ok((result, remaining))
     }
@@ -1051,20 +1051,20 @@ pub struct RedirectNotifyEvent {
     pub length: u32,
     pub event_type: u16,
     pub update_window: bool,
-    pub event: EVENT,
-    pub event_window: WINDOW,
-    pub window: WINDOW,
-    pub pixmap: PIXMAP,
+    pub event: Event,
+    pub event_window: Window,
+    pub window: Window,
+    pub pixmap: Pixmap,
     pub serial: u32,
-    pub valid_region: xfixes::REGION,
-    pub update_region: xfixes::REGION,
+    pub valid_region: xfixes::Region,
+    pub update_region: xfixes::Region,
     pub valid_rect: Rectangle,
     pub update_rect: Rectangle,
     pub x_off: i16,
     pub y_off: i16,
-    pub target_crtc: randr::CRTC,
-    pub wait_fence: sync::FENCE,
-    pub idle_fence: sync::FENCE,
+    pub target_crtc: randr::Crtc,
+    pub wait_fence: sync::Fence,
+    pub idle_fence: sync::Fence,
     pub options: u32,
     pub target_msc: u64,
     pub divisor: u64,
@@ -1080,20 +1080,20 @@ impl RedirectNotifyEvent {
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (update_window, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (event, remaining) = EVENT::try_parse(remaining)?;
-        let (event_window, remaining) = WINDOW::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
-        let (pixmap, remaining) = PIXMAP::try_parse(remaining)?;
+        let (event, remaining) = Event::try_parse(remaining)?;
+        let (event_window, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (pixmap, remaining) = Pixmap::try_parse(remaining)?;
         let (serial, remaining) = u32::try_parse(remaining)?;
-        let (valid_region, remaining) = xfixes::REGION::try_parse(remaining)?;
-        let (update_region, remaining) = xfixes::REGION::try_parse(remaining)?;
+        let (valid_region, remaining) = xfixes::Region::try_parse(remaining)?;
+        let (update_region, remaining) = xfixes::Region::try_parse(remaining)?;
         let (valid_rect, remaining) = Rectangle::try_parse(remaining)?;
         let (update_rect, remaining) = Rectangle::try_parse(remaining)?;
         let (x_off, remaining) = i16::try_parse(remaining)?;
         let (y_off, remaining) = i16::try_parse(remaining)?;
-        let (target_crtc, remaining) = randr::CRTC::try_parse(remaining)?;
-        let (wait_fence, remaining) = sync::FENCE::try_parse(remaining)?;
-        let (idle_fence, remaining) = sync::FENCE::try_parse(remaining)?;
+        let (target_crtc, remaining) = randr::Crtc::try_parse(remaining)?;
+        let (wait_fence, remaining) = sync::Fence::try_parse(remaining)?;
+        let (idle_fence, remaining) = sync::Fence::try_parse(remaining)?;
         let (options, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (target_msc, remaining) = u64::try_parse(remaining)?;
@@ -1137,17 +1137,17 @@ pub trait ConnectionExt: RequestConnection {
         query_version(self, major_version, minor_version)
     }
 
-    fn present_pixmap<'c>(&'c self, window: WINDOW, pixmap: PIXMAP, serial: u32, valid: xfixes::REGION, update: xfixes::REGION, x_off: i16, y_off: i16, target_crtc: randr::CRTC, wait_fence: sync::FENCE, idle_fence: sync::FENCE, options: u32, target_msc: u64, divisor: u64, remainder: u64, notifies: &[Notify]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn present_pixmap<'c>(&'c self, window: Window, pixmap: Pixmap, serial: u32, valid: xfixes::Region, update: xfixes::Region, x_off: i16, y_off: i16, target_crtc: randr::Crtc, wait_fence: sync::Fence, idle_fence: sync::Fence, options: u32, target_msc: u64, divisor: u64, remainder: u64, notifies: &[Notify]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         self::pixmap(self, window, pixmap, serial, valid, update, x_off, y_off, target_crtc, wait_fence, idle_fence, options, target_msc, divisor, remainder, notifies)
     }
 
-    fn present_notify_msc(&self, window: WINDOW, serial: u32, target_msc: u64, divisor: u64, remainder: u64) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn present_notify_msc(&self, window: Window, serial: u32, target_msc: u64, divisor: u64, remainder: u64) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         notify_msc(self, window, serial, target_msc, divisor, remainder)
     }
 
-    fn present_select_input(&self, eid: EVENT, window: WINDOW, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn present_select_input(&self, eid: Event, window: Window, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_input(self, eid, window, event_mask)
     }

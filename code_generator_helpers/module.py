@@ -178,6 +178,20 @@ class Module(object):
         self.namespace = outer_module.namespace
         self.outer_module = outer_module
 
+        # Collect a list of <typedef> and <xidtype>
+        simples = []
+        for (name, item) in outer_module.all:
+            if item.is_simple and item.__class__.__name__ != "Enum":
+                simples.append(self._to_rust_identifier(self._name(name)))
+        # Now check for name collisions with <enum>s
+        for (name, item) in outer_module.all:
+            rust_name = self._name(name)
+            if item.__class__.__name__ == "Enum":
+                if rust_name in simples:
+                    item.rust_name = rust_name + "Enum"
+                else:
+                    item.rust_name = rust_name
+
         generated_code_header(self.out)
 
         self.out("#![allow(clippy::unreadable_literal)]")
@@ -268,7 +282,7 @@ class Module(object):
             to_type = "u32"
             larger_types = []
 
-        rust_name = self._name(name)
+        rust_name = enum.rust_name
         emit_doc(self.out, enum.doc)
         self.out("#[derive(Debug, Clone, Copy, PartialEq, Eq)]")
         # Is any of the variants all upper-case?
@@ -367,10 +381,7 @@ class Module(object):
 
     def simple(self, simple, name):
         assert not hasattr(simple, "doc")
-        # FIXME: Figure out what to do with names. _to_rust_identifier() does the
-        # right thing here, but then we get both 'pub type Window = u32;' and 'enum
-        # Window', which the compiler does not like.
-        name = self._name(name)
+        name = self._to_rust_identifier(self._name(name))
         self.out("pub type %s = %s;", name, self._name(simple.name))
         self.out("")
 
@@ -1358,7 +1369,13 @@ class Module(object):
     def _field_type(self, field):
         if is_bool(field.type):
             return 'bool'
-        return self._name(field.field_type)
+        name = self._name(field.field_type)
+
+        field_type = field.type.member if field.type.is_list else field.type
+        if field_type.is_simple and field_type.__class__.__name__ != "Enum":
+            # This is a typedef or an xidtype
+            name = self._to_rust_identifier(name)
+        return name
 
     def _name(self, name):
         """Get the name as a string. xcbgen represents names as tuples like

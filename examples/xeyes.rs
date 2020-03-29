@@ -15,9 +15,9 @@ const EYE_SIZE: i16 = 50;
 // Draw the big background of the eyes
 fn draw_eyes<C: Connection>(
     conn: &C,
-    win_id: WINDOW,
-    black: GCONTEXT,
-    white: GCONTEXT,
+    win_id: Window,
+    black: Gcontext,
+    white: Gcontext,
     window_size: (u16, u16),
 ) -> Result<(), ConnectionError> {
     // Draw the black outlines
@@ -48,8 +48,8 @@ fn draw_eyes<C: Connection>(
 // Draw the pupils inside the eye
 fn draw_pupils<C: Connection>(
     conn: &C,
-    win_id: WINDOW,
-    gc: GCONTEXT,
+    win_id: Window,
+    gc: Gcontext,
     ((x1, y1), (x2, y2)): ((i16, i16), (i16, i16)),
 ) -> Result<(), ConnectionError> {
     // Transform center to top left corner
@@ -152,13 +152,13 @@ fn compute_pupils(window_size: (u16, u16), mouse_position: (i16, i16)) -> ((i16,
     )
 }
 
-struct FreePixmap<'c, C: Connection>(&'c C, PIXMAP);
+struct FreePixmap<'c, C: Connection>(&'c C, Pixmap);
 impl<C: Connection> Drop for FreePixmap<'_, C> {
     fn drop(&mut self) {
         self.0.free_pixmap(self.1).unwrap();
     }
 }
-struct FreeGC<'c, C: Connection>(&'c C, GCONTEXT);
+struct FreeGC<'c, C: Connection>(&'c C, Gcontext);
 impl<C: Connection> Drop for FreeGC<'_, C> {
     fn drop(&mut self) {
         self.0.free_gc(self.1).unwrap();
@@ -168,7 +168,7 @@ impl<C: Connection> Drop for FreeGC<'_, C> {
 fn create_pixmap_wrapper<C: Connection>(
     conn: &C,
     depth: u8,
-    drawable: DRAWABLE,
+    drawable: Drawable,
     size: (u16, u16),
 ) -> Result<FreePixmap<C>, ReplyOrIdError<C::Buf>> {
     let pixmap = conn.generate_id()?;
@@ -178,7 +178,7 @@ fn create_pixmap_wrapper<C: Connection>(
 
 fn shape_window<C: Connection>(
     conn: &C,
-    win_id: WINDOW,
+    win_id: Window,
     window_size: (u16, u16),
 ) -> Result<(), ReplyOrIdError<C::Buf>> {
     // Create a pixmap for the shape
@@ -210,9 +210,9 @@ fn setup_window<C: Connection>(
     conn: &C,
     screen: &Screen,
     window_size: (u16, u16),
-    wm_protocols: ATOM,
-    wm_delete_window: ATOM,
-) -> Result<WINDOW, ReplyOrIdError<C::Buf>> {
+    wm_protocols: Atom,
+    wm_delete_window: Atom,
+) -> Result<Window, ReplyOrIdError<C::Buf>> {
     let win_id = conn.generate_id()?;
     let win_aux = CreateWindowAux::new()
         .event_mask(EventMask::Exposure | EventMask::StructureNotify | EventMask::PointerMotion)
@@ -236,8 +236,8 @@ fn setup_window<C: Connection>(
     conn.change_property8(
         PropMode::Replace,
         win_id,
-        Atom::WM_NAME,
-        Atom::STRING,
+        AtomEnum::WM_NAME,
+        AtomEnum::STRING,
         title.as_bytes(),
     )
     .unwrap();
@@ -245,7 +245,7 @@ fn setup_window<C: Connection>(
         PropMode::Replace,
         win_id,
         wm_protocols,
-        Atom::ATOM,
+        AtomEnum::ATOM,
         &[wm_delete_window],
     )
     .unwrap();
@@ -257,9 +257,9 @@ fn setup_window<C: Connection>(
 
 fn create_gc_with_foreground<C: Connection>(
     conn: &C,
-    win_id: WINDOW,
+    win_id: Window,
     foreground: u32,
-) -> Result<GCONTEXT, ReplyOrIdError<C::Buf>> {
+) -> Result<Gcontext, ReplyOrIdError<C::Buf>> {
     let gc = conn.generate_id()?;
     let gc_aux = CreateGCAux::new()
         .graphics_exposures(0)

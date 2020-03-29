@@ -49,7 +49,7 @@ pub type KeyCode = u8;
 
 pub type DeviceId = u16;
 
-pub type FP1616 = i32;
+pub type Fp1616 = i32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Fp3232 {
@@ -364,14 +364,14 @@ impl TryFrom<u32> for ValuatorMode {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeviceInfo {
-    pub device_type: ATOM,
+    pub device_type: Atom,
     pub device_id: u8,
     pub num_class_info: u8,
     pub device_use: DeviceUse,
 }
 impl TryParse for DeviceInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (device_type, remaining) = ATOM::try_parse(remaining)?;
+        let (device_type, remaining) = Atom::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (num_class_info, remaining) = u8::try_parse(remaining)?;
         let (device_use, remaining) = u8::try_parse(remaining)?;
@@ -1070,7 +1070,7 @@ impl TryFrom<&[u8]> for SetDeviceModeReply {
 
 /// Opcode for the SelectExtensionEvent request
 pub const SELECT_EXTENSION_EVENT_REQUEST: u8 = 6;
-pub fn select_extension_event<'c, Conn>(conn: &'c Conn, window: WINDOW, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn select_extension_event<'c, Conn>(conn: &'c Conn, window: Window, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1105,7 +1105,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetSelectedExtensionEvents request
 pub const GET_SELECTED_EXTENSION_EVENTS_REQUEST: u8 = 7;
-pub fn get_selected_extension_events<Conn>(conn: &Conn, window: WINDOW) -> Result<Cookie<'_, Conn, GetSelectedExtensionEventsReply>, ConnectionError>
+pub fn get_selected_extension_events<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, GetSelectedExtensionEventsReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1222,7 +1222,7 @@ impl TryFrom<u32> for PropagateMode {
 
 /// Opcode for the ChangeDeviceDontPropagateList request
 pub const CHANGE_DEVICE_DONT_PROPAGATE_LIST_REQUEST: u8 = 8;
-pub fn change_device_dont_propagate_list<'c, Conn, A>(conn: &'c Conn, window: WINDOW, mode: A, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_device_dont_propagate_list<'c, Conn, A>(conn: &'c Conn, window: Window, mode: A, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1259,7 +1259,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the GetDeviceDontPropagateList request
 pub const GET_DEVICE_DONT_PROPAGATE_LIST_REQUEST: u8 = 9;
-pub fn get_device_dont_propagate_list<Conn>(conn: &Conn, window: WINDOW) -> Result<Cookie<'_, Conn, GetDeviceDontPropagateListReply>, ConnectionError>
+pub fn get_device_dont_propagate_list<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, GetDeviceDontPropagateListReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1311,12 +1311,12 @@ impl TryFrom<&[u8]> for GetDeviceDontPropagateListReply {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DeviceTimeCoord {
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub axisvalues: Vec<i32>,
 }
 impl DeviceTimeCoord {
     pub fn try_parse(remaining: &[u8], num_axes: u8) -> Result<(Self, &[u8]), ParseError> {
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (axisvalues, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_axes as usize)?;
         let result = DeviceTimeCoord { time, axisvalues };
         Ok((result, remaining))
@@ -1341,7 +1341,7 @@ impl Serialize for DeviceTimeCoord {
 
 /// Opcode for the GetDeviceMotionEvents request
 pub const GET_DEVICE_MOTION_EVENTS_REQUEST: u8 = 10;
-pub fn get_device_motion_events<Conn>(conn: &Conn, start: TIMESTAMP, stop: TIMESTAMP, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceMotionEventsReply>, ConnectionError>
+pub fn get_device_motion_events<Conn>(conn: &Conn, start: Timestamp, stop: Timestamp, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceMotionEventsReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1521,7 +1521,7 @@ impl TryFrom<&[u8]> for ChangePointerDeviceReply {
 
 /// Opcode for the GrabDevice request
 pub const GRAB_DEVICE_REQUEST: u8 = 13;
-pub fn grab_device<'c, Conn, A, B>(conn: &'c Conn, grab_window: WINDOW, time: TIMESTAMP, this_device_mode: A, other_device_mode: B, owner_events: bool, device_id: u8, classes: &[EventClass]) -> Result<Cookie<'c, Conn, GrabDeviceReply>, ConnectionError>
+pub fn grab_device<'c, Conn, A, B>(conn: &'c Conn, grab_window: Window, time: Timestamp, this_device_mode: A, other_device_mode: B, owner_events: bool, device_id: u8, classes: &[EventClass]) -> Result<Cookie<'c, Conn, GrabDeviceReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1598,7 +1598,7 @@ impl TryFrom<&[u8]> for GrabDeviceReply {
 
 /// Opcode for the UngrabDevice request
 pub const UNGRAB_DEVICE_REQUEST: u8 = 14;
-pub fn ungrab_device<Conn>(conn: &Conn, time: TIMESTAMP, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn ungrab_device<Conn>(conn: &Conn, time: Timestamp, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1687,7 +1687,7 @@ impl TryFrom<u32> for ModifierDevice {
 
 /// Opcode for the GrabDeviceKey request
 pub const GRAB_DEVICE_KEY_REQUEST: u8 = 15;
-pub fn grab_device_key<'c, Conn, A, B>(conn: &'c Conn, grab_window: WINDOW, modifiers: u16, modifier_device: u8, grabbed_device: u8, key: u8, this_device_mode: A, other_device_mode: B, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn grab_device_key<'c, Conn, A, B>(conn: &'c Conn, grab_window: Window, modifiers: u16, modifier_device: u8, grabbed_device: u8, key: u8, this_device_mode: A, other_device_mode: B, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1739,7 +1739,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 
 /// Opcode for the UngrabDeviceKey request
 pub const UNGRAB_DEVICE_KEY_REQUEST: u8 = 16;
-pub fn ungrab_device_key<Conn>(conn: &Conn, grab_window: WINDOW, modifiers: u16, modifier_device: u8, key: u8, grabbed_device: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn ungrab_device_key<Conn>(conn: &Conn, grab_window: Window, modifiers: u16, modifier_device: u8, key: u8, grabbed_device: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1776,7 +1776,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GrabDeviceButton request
 pub const GRAB_DEVICE_BUTTON_REQUEST: u8 = 17;
-pub fn grab_device_button<'c, Conn, A, B>(conn: &'c Conn, grab_window: WINDOW, grabbed_device: u8, modifier_device: u8, modifiers: u16, this_device_mode: A, other_device_mode: B, button: u8, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn grab_device_button<'c, Conn, A, B>(conn: &'c Conn, grab_window: Window, grabbed_device: u8, modifier_device: u8, modifiers: u16, this_device_mode: A, other_device_mode: B, button: u8, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1828,7 +1828,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 
 /// Opcode for the UngrabDeviceButton request
 pub const UNGRAB_DEVICE_BUTTON_REQUEST: u8 = 18;
-pub fn ungrab_device_button<Conn>(conn: &Conn, grab_window: WINDOW, modifiers: u16, modifier_device: u8, button: u8, grabbed_device: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn ungrab_device_button<Conn>(conn: &Conn, grab_window: Window, modifiers: u16, modifier_device: u8, button: u8, grabbed_device: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1939,7 +1939,7 @@ impl TryFrom<u32> for DeviceInputMode {
 
 /// Opcode for the AllowDeviceEvents request
 pub const ALLOW_DEVICE_EVENTS_REQUEST: u8 = 19;
-pub fn allow_device_events<Conn, A>(conn: &Conn, time: TIMESTAMP, mode: A, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn allow_device_events<Conn, A>(conn: &Conn, time: Timestamp, mode: A, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1999,8 +1999,8 @@ pub struct GetDeviceFocusReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub focus: WINDOW,
-    pub time: TIMESTAMP,
+    pub focus: Window,
+    pub time: Timestamp,
     pub revert_to: InputFocus,
 }
 impl GetDeviceFocusReply {
@@ -2009,8 +2009,8 @@ impl GetDeviceFocusReply {
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (focus, remaining) = WINDOW::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (focus, remaining) = Window::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (revert_to, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(15..).ok_or(ParseError::ParseError)?;
         let revert_to = revert_to.try_into()?;
@@ -2027,7 +2027,7 @@ impl TryFrom<&[u8]> for GetDeviceFocusReply {
 
 /// Opcode for the SetDeviceFocus request
 pub const SET_DEVICE_FOCUS_REQUEST: u8 = 21;
-pub fn set_device_focus<Conn, A>(conn: &Conn, focus: WINDOW, time: TIMESTAMP, revert_to: A, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_device_focus<Conn, A>(conn: &Conn, focus: Window, time: Timestamp, revert_to: A, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2463,7 +2463,7 @@ pub struct StringFeedbackState {
     pub feedback_id: u8,
     pub len: u16,
     pub max_symbols: u16,
-    pub keysyms: Vec<KEYSYM>,
+    pub keysyms: Vec<Keysym>,
 }
 impl TryParse for StringFeedbackState {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2472,7 +2472,7 @@ impl TryParse for StringFeedbackState {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (max_symbols, remaining) = u16::try_parse(remaining)?;
         let (num_keysyms, remaining) = u16::try_parse(remaining)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<KEYSYM>(remaining, num_keysyms as usize)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, num_keysyms as usize)?;
         let class_id = class_id.try_into()?;
         let result = StringFeedbackState { class_id, feedback_id, len, max_symbols, keysyms };
         Ok((result, remaining))
@@ -2848,13 +2848,13 @@ impl Serialize for FeedbackStateDataPointer {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FeedbackStateDataString {
     pub max_symbols: u16,
-    pub keysyms: Vec<KEYSYM>,
+    pub keysyms: Vec<Keysym>,
 }
 impl TryParse for FeedbackStateDataString {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (max_symbols, remaining) = u16::try_parse(remaining)?;
         let (num_keysyms, remaining) = u16::try_parse(remaining)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<KEYSYM>(remaining, num_keysyms as usize)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, num_keysyms as usize)?;
         let result = FeedbackStateDataString { max_symbols, keysyms };
         Ok((result, remaining))
     }
@@ -3435,7 +3435,7 @@ pub struct StringFeedbackCtl {
     pub class_id: FeedbackClass,
     pub feedback_id: u8,
     pub len: u16,
-    pub keysyms: Vec<KEYSYM>,
+    pub keysyms: Vec<Keysym>,
 }
 impl TryParse for StringFeedbackCtl {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3444,7 +3444,7 @@ impl TryParse for StringFeedbackCtl {
         let (len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (num_keysyms, remaining) = u16::try_parse(remaining)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<KEYSYM>(remaining, num_keysyms as usize)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, num_keysyms as usize)?;
         let class_id = class_id.try_into()?;
         let result = StringFeedbackCtl { class_id, feedback_id, len, keysyms };
         Ok((result, remaining))
@@ -3721,13 +3721,13 @@ impl Serialize for FeedbackCtlDataPointer {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FeedbackCtlDataString {
-    pub keysyms: Vec<KEYSYM>,
+    pub keysyms: Vec<Keysym>,
 }
 impl TryParse for FeedbackCtlDataString {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (num_keysyms, remaining) = u16::try_parse(remaining)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<KEYSYM>(remaining, num_keysyms as usize)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, num_keysyms as usize)?;
         let result = FeedbackCtlDataString { keysyms };
         Ok((result, remaining))
     }
@@ -4125,7 +4125,7 @@ pub struct GetDeviceKeyMappingReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
     pub keysyms_per_keycode: u8,
-    pub keysyms: Vec<KEYSYM>,
+    pub keysyms: Vec<Keysym>,
 }
 impl GetDeviceKeyMappingReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4135,7 +4135,7 @@ impl GetDeviceKeyMappingReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (keysyms_per_keycode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<KEYSYM>(remaining, length as usize)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, length as usize)?;
         let result = GetDeviceKeyMappingReply { response_type, xi_reply_type, sequence, keysyms_per_keycode, keysyms };
         Ok((result, remaining))
     }
@@ -4149,7 +4149,7 @@ impl TryFrom<&[u8]> for GetDeviceKeyMappingReply {
 
 /// Opcode for the ChangeDeviceKeyMapping request
 pub const CHANGE_DEVICE_KEY_MAPPING_REQUEST: u8 = 25;
-pub fn change_device_key_mapping<'c, Conn>(conn: &'c Conn, device_id: u8, first_keycode: KeyCode, keysyms_per_keycode: u8, keycode_count: u8, keysyms: &[KEYSYM]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_device_key_mapping<'c, Conn>(conn: &'c Conn, device_id: u8, first_keycode: KeyCode, keysyms_per_keycode: u8, keycode_count: u8, keysyms: &[Keysym]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -6946,7 +6946,7 @@ pub struct ListDevicePropertiesReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub atoms: Vec<ATOM>,
+    pub atoms: Vec<Atom>,
 }
 impl ListDevicePropertiesReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6956,7 +6956,7 @@ impl ListDevicePropertiesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_atoms, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (atoms, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, num_atoms as usize)?;
+        let (atoms, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, num_atoms as usize)?;
         let result = ListDevicePropertiesReply { response_type, xi_reply_type, sequence, length, atoms };
         Ok((result, remaining))
     }
@@ -7067,7 +7067,7 @@ impl ChangeDevicePropertyAux {
         }
     }
 }
-pub fn change_device_property<'c, Conn, A>(conn: &'c Conn, property: ATOM, type_: ATOM, device_id: u8, mode: A, num_items: u32, items: &ChangeDevicePropertyAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_device_property<'c, Conn, A>(conn: &'c Conn, property: Atom, type_: Atom, device_id: u8, mode: A, num_items: u32, items: &ChangeDevicePropertyAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -7115,7 +7115,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the DeleteDeviceProperty request
 pub const DELETE_DEVICE_PROPERTY_REQUEST: u8 = 38;
-pub fn delete_device_property<Conn>(conn: &Conn, property: ATOM, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn delete_device_property<Conn>(conn: &Conn, property: Atom, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -7145,7 +7145,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetDeviceProperty request
 pub const GET_DEVICE_PROPERTY_REQUEST: u8 = 39;
-pub fn get_device_property<Conn>(conn: &Conn, property: ATOM, type_: ATOM, offset: u32, len: u32, device_id: u8, delete: bool) -> Result<Cookie<'_, Conn, GetDevicePropertyReply>, ConnectionError>
+pub fn get_device_property<Conn>(conn: &Conn, property: Atom, type_: Atom, offset: u32, len: u32, device_id: u8, delete: bool) -> Result<Cookie<'_, Conn, GetDevicePropertyReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -7276,7 +7276,7 @@ pub struct GetDevicePropertyReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub type_: ATOM,
+    pub type_: Atom,
     pub bytes_after: u32,
     pub num_items: u32,
     pub format: PropertyFormat,
@@ -7289,7 +7289,7 @@ impl GetDevicePropertyReply {
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (type_, remaining) = ATOM::try_parse(remaining)?;
+        let (type_, remaining) = Atom::try_parse(remaining)?;
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let (format, remaining) = u8::try_parse(remaining)?;
@@ -7476,7 +7476,7 @@ impl Serialize for ModifierInfo {
 
 /// Opcode for the XIQueryPointer request
 pub const XI_QUERY_POINTER_REQUEST: u8 = 40;
-pub fn xi_query_pointer<Conn>(conn: &Conn, window: WINDOW, deviceid: DeviceId) -> Result<Cookie<'_, Conn, XIQueryPointerReply>, ConnectionError>
+pub fn xi_query_pointer<Conn>(conn: &Conn, window: Window, deviceid: DeviceId) -> Result<Cookie<'_, Conn, XIQueryPointerReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -7508,12 +7508,12 @@ pub struct XIQueryPointerReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub root: WINDOW,
-    pub child: WINDOW,
-    pub root_x: FP1616,
-    pub root_y: FP1616,
-    pub win_x: FP1616,
-    pub win_y: FP1616,
+    pub root: Window,
+    pub child: Window,
+    pub root_x: Fp1616,
+    pub root_y: Fp1616,
+    pub win_x: Fp1616,
+    pub win_y: Fp1616,
     pub same_screen: bool,
     pub mods: ModifierInfo,
     pub group: GroupInfo,
@@ -7525,12 +7525,12 @@ impl XIQueryPointerReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
-        let (root_x, remaining) = FP1616::try_parse(remaining)?;
-        let (root_y, remaining) = FP1616::try_parse(remaining)?;
-        let (win_x, remaining) = FP1616::try_parse(remaining)?;
-        let (win_y, remaining) = FP1616::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (win_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (win_y, remaining) = Fp1616::try_parse(remaining)?;
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
@@ -7550,7 +7550,7 @@ impl TryFrom<&[u8]> for XIQueryPointerReply {
 
 /// Opcode for the XIWarpPointer request
 pub const XI_WARP_POINTER_REQUEST: u8 = 41;
-pub fn xi_warp_pointer<Conn>(conn: &Conn, src_win: WINDOW, dst_win: WINDOW, src_x: FP1616, src_y: FP1616, src_width: u16, src_height: u16, dst_x: FP1616, dst_y: FP1616, deviceid: DeviceId) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn xi_warp_pointer<Conn>(conn: &Conn, src_win: Window, dst_win: Window, src_x: Fp1616, src_y: Fp1616, src_width: u16, src_height: u16, dst_x: Fp1616, dst_y: Fp1616, deviceid: DeviceId) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -7611,7 +7611,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the XIChangeCursor request
 pub const XI_CHANGE_CURSOR_REQUEST: u8 = 42;
-pub fn xi_change_cursor<Conn>(conn: &Conn, window: WINDOW, cursor: CURSOR, deviceid: DeviceId) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn xi_change_cursor<Conn>(conn: &Conn, window: Window, cursor: Cursor, deviceid: DeviceId) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -8280,7 +8280,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the XISetClientPointer request
 pub const XI_SET_CLIENT_POINTER_REQUEST: u8 = 44;
-pub fn xi_set_client_pointer<Conn>(conn: &Conn, window: WINDOW, deviceid: DeviceId) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn xi_set_client_pointer<Conn>(conn: &Conn, window: Window, deviceid: DeviceId) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -8310,7 +8310,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the XIGetClientPointer request
 pub const XI_GET_CLIENT_POINTER_REQUEST: u8 = 45;
-pub fn xi_get_client_pointer<Conn>(conn: &Conn, window: WINDOW) -> Result<Cookie<'_, Conn, XIGetClientPointerReply>, ConnectionError>
+pub fn xi_get_client_pointer<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, XIGetClientPointerReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -8502,7 +8502,7 @@ impl Serialize for EventMask {
 
 /// Opcode for the XISelectEvents request
 pub const XI_SELECT_EVENTS_REQUEST: u8 = 46;
-pub fn xi_select_events<'c, Conn>(conn: &'c Conn, window: WINDOW, masks: &[EventMask]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn xi_select_events<'c, Conn>(conn: &'c Conn, window: Window, masks: &[EventMask]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -8924,7 +8924,7 @@ pub struct ButtonClass {
     pub sourceid: DeviceId,
     pub num_buttons: u16,
     pub state: Vec<u32>,
-    pub labels: Vec<ATOM>,
+    pub labels: Vec<Atom>,
 }
 impl TryParse for ButtonClass {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -8933,7 +8933,7 @@ impl TryParse for ButtonClass {
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (num_buttons, remaining) = u16::try_parse(remaining)?;
         let (state, remaining) = crate::x11_utils::parse_list::<u32>(remaining, ((num_buttons as usize) + (31)) / (32))?;
-        let (labels, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, num_buttons as usize)?;
+        let (labels, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, num_buttons as usize)?;
         let type_ = type_.try_into()?;
         let result = ButtonClass { type_, len, sourceid, num_buttons, state, labels };
         Ok((result, remaining))
@@ -9150,7 +9150,7 @@ pub struct ValuatorClass {
     pub len: u16,
     pub sourceid: DeviceId,
     pub number: u16,
-    pub label: ATOM,
+    pub label: Atom,
     pub min: Fp3232,
     pub max: Fp3232,
     pub value: Fp3232,
@@ -9163,7 +9163,7 @@ impl TryParse for ValuatorClass {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (number, remaining) = u16::try_parse(remaining)?;
-        let (label, remaining) = ATOM::try_parse(remaining)?;
+        let (label, remaining) = Atom::try_parse(remaining)?;
         let (min, remaining) = Fp3232::try_parse(remaining)?;
         let (max, remaining) = Fp3232::try_parse(remaining)?;
         let (value, remaining) = Fp3232::try_parse(remaining)?;
@@ -9294,13 +9294,13 @@ impl Serialize for DeviceClassDataKey {
 pub struct DeviceClassDataButton {
     pub num_buttons: u16,
     pub state: Vec<u32>,
-    pub labels: Vec<ATOM>,
+    pub labels: Vec<Atom>,
 }
 impl TryParse for DeviceClassDataButton {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_buttons, remaining) = u16::try_parse(remaining)?;
         let (state, remaining) = crate::x11_utils::parse_list::<u32>(remaining, ((num_buttons as usize) + (31)) / (32))?;
-        let (labels, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, num_buttons as usize)?;
+        let (labels, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, num_buttons as usize)?;
         let result = DeviceClassDataButton { num_buttons, state, labels };
         Ok((result, remaining))
     }
@@ -9328,7 +9328,7 @@ impl Serialize for DeviceClassDataButton {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeviceClassDataValuator {
     pub number: u16,
-    pub label: ATOM,
+    pub label: Atom,
     pub min: Fp3232,
     pub max: Fp3232,
     pub value: Fp3232,
@@ -9338,7 +9338,7 @@ pub struct DeviceClassDataValuator {
 impl TryParse for DeviceClassDataValuator {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (number, remaining) = u16::try_parse(remaining)?;
-        let (label, remaining) = ATOM::try_parse(remaining)?;
+        let (label, remaining) = Atom::try_parse(remaining)?;
         let (min, remaining) = Fp3232::try_parse(remaining)?;
         let (max, remaining) = Fp3232::try_parse(remaining)?;
         let (value, remaining) = Fp3232::try_parse(remaining)?;
@@ -9769,7 +9769,7 @@ impl TryFrom<&[u8]> for XIQueryDeviceReply {
 
 /// Opcode for the XISetFocus request
 pub const XI_SET_FOCUS_REQUEST: u8 = 49;
-pub fn xi_set_focus<Conn>(conn: &Conn, window: WINDOW, time: TIMESTAMP, deviceid: DeviceId) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn xi_set_focus<Conn>(conn: &Conn, window: Window, time: Timestamp, deviceid: DeviceId) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -9831,7 +9831,7 @@ pub struct XIGetFocusReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub focus: WINDOW,
+    pub focus: Window,
 }
 impl XIGetFocusReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -9839,7 +9839,7 @@ impl XIGetFocusReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (focus, remaining) = WINDOW::try_parse(remaining)?;
+        let (focus, remaining) = Window::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let result = XIGetFocusReply { response_type, sequence, length, focus };
         Ok((result, remaining))
@@ -9916,7 +9916,7 @@ impl TryFrom<u32> for GrabOwner {
 
 /// Opcode for the XIGrabDevice request
 pub const XI_GRAB_DEVICE_REQUEST: u8 = 51;
-pub fn xi_grab_device<'c, Conn, A, B, C>(conn: &'c Conn, window: WINDOW, time: TIMESTAMP, cursor: CURSOR, deviceid: DeviceId, mode: A, paired_device_mode: B, owner_events: C, mask: &[u32]) -> Result<Cookie<'c, Conn, XIGrabDeviceReply>, ConnectionError>
+pub fn xi_grab_device<'c, Conn, A, B, C>(conn: &'c Conn, window: Window, time: Timestamp, cursor: Cursor, deviceid: DeviceId, mode: A, paired_device_mode: B, owner_events: C, mask: &[u32]) -> Result<Cookie<'c, Conn, XIGrabDeviceReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>, C: Into<bool>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -9998,7 +9998,7 @@ impl TryFrom<&[u8]> for XIGrabDeviceReply {
 
 /// Opcode for the XIUngrabDevice request
 pub const XI_UNGRAB_DEVICE_REQUEST: u8 = 52;
-pub fn xi_ungrab_device<Conn>(conn: &Conn, time: TIMESTAMP, deviceid: DeviceId) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn xi_ungrab_device<Conn>(conn: &Conn, time: Timestamp, deviceid: DeviceId) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -10108,7 +10108,7 @@ impl TryFrom<u32> for EventMode {
 
 /// Opcode for the XIAllowEvents request
 pub const XI_ALLOW_EVENTS_REQUEST: u8 = 53;
-pub fn xi_allow_events<Conn, A>(conn: &Conn, time: TIMESTAMP, deviceid: DeviceId, event_mode: A, touchid: u32, grab_window: WINDOW) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn xi_allow_events<Conn, A>(conn: &Conn, time: Timestamp, deviceid: DeviceId, event_mode: A, touchid: u32, grab_window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -10359,7 +10359,7 @@ impl Serialize for GrabModifierInfo {
 
 /// Opcode for the XIPassiveGrabDevice request
 pub const XI_PASSIVE_GRAB_DEVICE_REQUEST: u8 = 54;
-pub fn xi_passive_grab_device<'c, Conn, A, B, C, D>(conn: &'c Conn, time: TIMESTAMP, grab_window: WINDOW, cursor: CURSOR, detail: u32, deviceid: DeviceId, grab_type: A, grab_mode: B, paired_device_mode: C, owner_events: D, mask: &[u32], modifiers: &[u32]) -> Result<Cookie<'c, Conn, XIPassiveGrabDeviceReply>, ConnectionError>
+pub fn xi_passive_grab_device<'c, Conn, A, B, C, D>(conn: &'c Conn, time: Timestamp, grab_window: Window, cursor: Cursor, detail: u32, deviceid: DeviceId, grab_type: A, grab_mode: B, paired_device_mode: C, owner_events: D, mask: &[u32], modifiers: &[u32]) -> Result<Cookie<'c, Conn, XIPassiveGrabDeviceReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>, C: Into<u8>, D: Into<bool>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -10456,7 +10456,7 @@ impl TryFrom<&[u8]> for XIPassiveGrabDeviceReply {
 
 /// Opcode for the XIPassiveUngrabDevice request
 pub const XI_PASSIVE_UNGRAB_DEVICE_REQUEST: u8 = 55;
-pub fn xi_passive_ungrab_device<'c, Conn, A>(conn: &'c Conn, grab_window: WINDOW, detail: u32, deviceid: DeviceId, grab_type: A, modifiers: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn xi_passive_ungrab_device<'c, Conn, A>(conn: &'c Conn, grab_window: Window, detail: u32, deviceid: DeviceId, grab_type: A, modifiers: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -10530,7 +10530,7 @@ pub struct XIListPropertiesReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub properties: Vec<ATOM>,
+    pub properties: Vec<Atom>,
 }
 impl XIListPropertiesReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -10540,7 +10540,7 @@ impl XIListPropertiesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_properties, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (properties, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, num_properties as usize)?;
+        let (properties, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, num_properties as usize)?;
         let result = XIListPropertiesReply { response_type, sequence, length, properties };
         Ok((result, remaining))
     }
@@ -10586,7 +10586,7 @@ impl XIChangePropertyAux {
         }
     }
 }
-pub fn xi_change_property<'c, Conn, A>(conn: &'c Conn, deviceid: DeviceId, mode: A, property: ATOM, type_: ATOM, num_items: u32, items: &XIChangePropertyAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn xi_change_property<'c, Conn, A>(conn: &'c Conn, deviceid: DeviceId, mode: A, property: Atom, type_: Atom, num_items: u32, items: &XIChangePropertyAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -10634,7 +10634,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the XIDeleteProperty request
 pub const XI_DELETE_PROPERTY_REQUEST: u8 = 58;
-pub fn xi_delete_property<Conn>(conn: &Conn, deviceid: DeviceId, property: ATOM) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn xi_delete_property<Conn>(conn: &Conn, deviceid: DeviceId, property: Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -10664,7 +10664,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the XIGetProperty request
 pub const XI_GET_PROPERTY_REQUEST: u8 = 59;
-pub fn xi_get_property<Conn>(conn: &Conn, deviceid: DeviceId, delete: bool, property: ATOM, type_: ATOM, offset: u32, len: u32) -> Result<Cookie<'_, Conn, XIGetPropertyReply>, ConnectionError>
+pub fn xi_get_property<Conn>(conn: &Conn, deviceid: DeviceId, delete: bool, property: Atom, type_: Atom, offset: u32, len: u32) -> Result<Cookie<'_, Conn, XIGetPropertyReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -10794,7 +10794,7 @@ pub struct XIGetPropertyReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub type_: ATOM,
+    pub type_: Atom,
     pub bytes_after: u32,
     pub num_items: u32,
     pub format: PropertyFormat,
@@ -10806,7 +10806,7 @@ impl XIGetPropertyReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (type_, remaining) = ATOM::try_parse(remaining)?;
+        let (type_, remaining) = Atom::try_parse(remaining)?;
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let (format, remaining) = u8::try_parse(remaining)?;
@@ -10826,7 +10826,7 @@ impl TryFrom<&[u8]> for XIGetPropertyReply {
 
 /// Opcode for the XIGetSelectedEvents request
 pub const XI_GET_SELECTED_EVENTS_REQUEST: u8 = 60;
-pub fn xi_get_selected_events<Conn>(conn: &Conn, window: WINDOW) -> Result<Cookie<'_, Conn, XIGetSelectedEventsReply>, ConnectionError>
+pub fn xi_get_selected_events<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, XIGetSelectedEventsReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -10878,14 +10878,14 @@ impl TryFrom<&[u8]> for XIGetSelectedEventsReply {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct BarrierReleasePointerInfo {
     pub deviceid: DeviceId,
-    pub barrier: xfixes::BARRIER,
+    pub barrier: xfixes::Barrier,
     pub eventid: u32,
 }
 impl TryParse for BarrierReleasePointerInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (barrier, remaining) = xfixes::BARRIER::try_parse(remaining)?;
+        let (barrier, remaining) = xfixes::Barrier::try_parse(remaining)?;
         let (eventid, remaining) = u32::try_parse(remaining)?;
         let result = BarrierReleasePointerInfo { deviceid, barrier, eventid };
         Ok((result, remaining))
@@ -11106,10 +11106,10 @@ pub struct DeviceKeyPressEvent {
     pub response_type: u8,
     pub detail: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
+    pub time: Timestamp,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
     pub root_x: i16,
     pub root_y: i16,
     pub event_x: i16,
@@ -11123,10 +11123,10 @@ impl DeviceKeyPressEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
         let (root_x, remaining) = i16::try_parse(remaining)?;
         let (root_y, remaining) = i16::try_parse(remaining)?;
         let (event_x, remaining) = i16::try_parse(remaining)?;
@@ -11191,10 +11191,10 @@ pub struct DeviceKeyReleaseEvent {
     pub response_type: u8,
     pub detail: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
+    pub time: Timestamp,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
     pub root_x: i16,
     pub root_y: i16,
     pub event_x: i16,
@@ -11208,10 +11208,10 @@ impl DeviceKeyReleaseEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
         let (root_x, remaining) = i16::try_parse(remaining)?;
         let (root_y, remaining) = i16::try_parse(remaining)?;
         let (event_x, remaining) = i16::try_parse(remaining)?;
@@ -11276,10 +11276,10 @@ pub struct DeviceButtonPressEvent {
     pub response_type: u8,
     pub detail: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
+    pub time: Timestamp,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
     pub root_x: i16,
     pub root_y: i16,
     pub event_x: i16,
@@ -11293,10 +11293,10 @@ impl DeviceButtonPressEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
         let (root_x, remaining) = i16::try_parse(remaining)?;
         let (root_y, remaining) = i16::try_parse(remaining)?;
         let (event_x, remaining) = i16::try_parse(remaining)?;
@@ -11361,10 +11361,10 @@ pub struct DeviceButtonReleaseEvent {
     pub response_type: u8,
     pub detail: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
+    pub time: Timestamp,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
     pub root_x: i16,
     pub root_y: i16,
     pub event_x: i16,
@@ -11378,10 +11378,10 @@ impl DeviceButtonReleaseEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
         let (root_x, remaining) = i16::try_parse(remaining)?;
         let (root_y, remaining) = i16::try_parse(remaining)?;
         let (event_x, remaining) = i16::try_parse(remaining)?;
@@ -11446,10 +11446,10 @@ pub struct DeviceMotionNotifyEvent {
     pub response_type: u8,
     pub detail: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
+    pub time: Timestamp,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
     pub root_x: i16,
     pub root_y: i16,
     pub event_x: i16,
@@ -11463,10 +11463,10 @@ impl DeviceMotionNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
         let (root_x, remaining) = i16::try_parse(remaining)?;
         let (root_y, remaining) = i16::try_parse(remaining)?;
         let (event_x, remaining) = i16::try_parse(remaining)?;
@@ -11531,8 +11531,8 @@ pub struct DeviceFocusInEvent {
     pub response_type: u8,
     pub detail: NotifyDetail,
     pub sequence: u16,
-    pub time: TIMESTAMP,
-    pub window: WINDOW,
+    pub time: Timestamp,
+    pub window: Window,
     pub mode: NotifyMode,
     pub device_id: u8,
 }
@@ -11541,8 +11541,8 @@ impl DeviceFocusInEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
@@ -11598,8 +11598,8 @@ pub struct DeviceFocusOutEvent {
     pub response_type: u8,
     pub detail: NotifyDetail,
     pub sequence: u16,
-    pub time: TIMESTAMP,
-    pub window: WINDOW,
+    pub time: Timestamp,
+    pub window: Window,
     pub mode: NotifyMode,
     pub device_id: u8,
 }
@@ -11608,8 +11608,8 @@ impl DeviceFocusOutEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
@@ -11665,10 +11665,10 @@ pub struct ProximityInEvent {
     pub response_type: u8,
     pub detail: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
+    pub time: Timestamp,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
     pub root_x: i16,
     pub root_y: i16,
     pub event_x: i16,
@@ -11682,10 +11682,10 @@ impl ProximityInEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
         let (root_x, remaining) = i16::try_parse(remaining)?;
         let (root_y, remaining) = i16::try_parse(remaining)?;
         let (event_x, remaining) = i16::try_parse(remaining)?;
@@ -11750,10 +11750,10 @@ pub struct ProximityOutEvent {
     pub response_type: u8,
     pub detail: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
+    pub time: Timestamp,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
     pub root_x: i16,
     pub root_y: i16,
     pub event_x: i16,
@@ -11767,10 +11767,10 @@ impl ProximityOutEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
         let (root_x, remaining) = i16::try_parse(remaining)?;
         let (root_y, remaining) = i16::try_parse(remaining)?;
         let (event_x, remaining) = i16::try_parse(remaining)?;
@@ -11907,7 +11907,7 @@ pub struct DeviceStateNotifyEvent {
     pub response_type: u8,
     pub device_id: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub num_keys: u8,
     pub num_buttons: u8,
     pub num_valuators: u8,
@@ -11921,7 +11921,7 @@ impl DeviceStateNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (num_keys, remaining) = u8::try_parse(remaining)?;
         let (num_buttons, remaining) = u8::try_parse(remaining)?;
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
@@ -12011,7 +12011,7 @@ pub struct DeviceMappingNotifyEvent {
     pub request: Mapping,
     pub first_keycode: KeyCode,
     pub count: u8,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
 }
 impl DeviceMappingNotifyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -12022,7 +12022,7 @@ impl DeviceMappingNotifyEvent {
         let (first_keycode, remaining) = KeyCode::try_parse(remaining)?;
         let (count, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let request = request.try_into()?;
         let result = DeviceMappingNotifyEvent { response_type, device_id, sequence, request, first_keycode, count, time };
@@ -12137,7 +12137,7 @@ pub struct ChangeDeviceNotifyEvent {
     pub response_type: u8,
     pub device_id: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub request: ChangeDevice,
 }
 impl ChangeDeviceNotifyEvent {
@@ -12145,7 +12145,7 @@ impl ChangeDeviceNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (request, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
         let request = request.try_into()?;
@@ -12492,7 +12492,7 @@ pub const DEVICE_PRESENCE_NOTIFY_EVENT: u8 = 15;
 pub struct DevicePresenceNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub devchange: DeviceChange,
     pub device_id: u8,
     pub control: u16,
@@ -12502,7 +12502,7 @@ impl DevicePresenceNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (devchange, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (control, remaining) = u16::try_parse(remaining)?;
@@ -12557,8 +12557,8 @@ pub struct DevicePropertyNotifyEvent {
     pub response_type: u8,
     pub state: Property,
     pub sequence: u16,
-    pub time: TIMESTAMP,
-    pub property: ATOM,
+    pub time: Timestamp,
+    pub property: Atom,
     pub device_id: u8,
 }
 impl DevicePropertyNotifyEvent {
@@ -12566,8 +12566,8 @@ impl DevicePropertyNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (property, remaining) = ATOM::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (property, remaining) = Atom::try_parse(remaining)?;
         let remaining = remaining.get(19..).ok_or(ParseError::ParseError)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let state = state.try_into()?;
@@ -12685,7 +12685,7 @@ pub struct DeviceChangedEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub sourceid: DeviceId,
     pub reason: ChangeReason,
     pub classes: Vec<DeviceClass>,
@@ -12698,7 +12698,7 @@ impl DeviceChangedEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (num_classes, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (reason, remaining) = u8::try_parse(remaining)?;
@@ -12766,15 +12766,15 @@ pub struct KeyPressEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub detail: u32,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
-    pub root_x: FP1616,
-    pub root_y: FP1616,
-    pub event_x: FP1616,
-    pub event_y: FP1616,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
+    pub root_x: Fp1616,
+    pub root_y: Fp1616,
+    pub event_x: Fp1616,
+    pub event_y: Fp1616,
     pub sourceid: DeviceId,
     pub flags: u32,
     pub mods: ModifierInfo,
@@ -12791,15 +12791,15 @@ impl KeyPressEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (detail, remaining) = u32::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
-        let (root_x, remaining) = FP1616::try_parse(remaining)?;
-        let (root_y, remaining) = FP1616::try_parse(remaining)?;
-        let (event_x, remaining) = FP1616::try_parse(remaining)?;
-        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_y, remaining) = Fp1616::try_parse(remaining)?;
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -12843,15 +12843,15 @@ pub struct KeyReleaseEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub detail: u32,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
-    pub root_x: FP1616,
-    pub root_y: FP1616,
-    pub event_x: FP1616,
-    pub event_y: FP1616,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
+    pub root_x: Fp1616,
+    pub root_y: Fp1616,
+    pub event_x: Fp1616,
+    pub event_y: Fp1616,
     pub sourceid: DeviceId,
     pub flags: u32,
     pub mods: ModifierInfo,
@@ -12868,15 +12868,15 @@ impl KeyReleaseEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (detail, remaining) = u32::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
-        let (root_x, remaining) = FP1616::try_parse(remaining)?;
-        let (root_y, remaining) = FP1616::try_parse(remaining)?;
-        let (event_x, remaining) = FP1616::try_parse(remaining)?;
-        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_y, remaining) = Fp1616::try_parse(remaining)?;
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -12948,15 +12948,15 @@ pub struct ButtonPressEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub detail: u32,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
-    pub root_x: FP1616,
-    pub root_y: FP1616,
-    pub event_x: FP1616,
-    pub event_y: FP1616,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
+    pub root_x: Fp1616,
+    pub root_y: Fp1616,
+    pub event_x: Fp1616,
+    pub event_y: Fp1616,
     pub sourceid: DeviceId,
     pub flags: u32,
     pub mods: ModifierInfo,
@@ -12973,15 +12973,15 @@ impl ButtonPressEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (detail, remaining) = u32::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
-        let (root_x, remaining) = FP1616::try_parse(remaining)?;
-        let (root_y, remaining) = FP1616::try_parse(remaining)?;
-        let (event_x, remaining) = FP1616::try_parse(remaining)?;
-        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_y, remaining) = Fp1616::try_parse(remaining)?;
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -13025,15 +13025,15 @@ pub struct ButtonReleaseEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub detail: u32,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
-    pub root_x: FP1616,
-    pub root_y: FP1616,
-    pub event_x: FP1616,
-    pub event_y: FP1616,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
+    pub root_x: Fp1616,
+    pub root_y: Fp1616,
+    pub event_x: Fp1616,
+    pub event_y: Fp1616,
     pub sourceid: DeviceId,
     pub flags: u32,
     pub mods: ModifierInfo,
@@ -13050,15 +13050,15 @@ impl ButtonReleaseEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (detail, remaining) = u32::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
-        let (root_x, remaining) = FP1616::try_parse(remaining)?;
-        let (root_y, remaining) = FP1616::try_parse(remaining)?;
-        let (event_x, remaining) = FP1616::try_parse(remaining)?;
-        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_y, remaining) = Fp1616::try_parse(remaining)?;
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -13102,15 +13102,15 @@ pub struct MotionEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub detail: u32,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
-    pub root_x: FP1616,
-    pub root_y: FP1616,
-    pub event_x: FP1616,
-    pub event_y: FP1616,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
+    pub root_x: Fp1616,
+    pub root_y: Fp1616,
+    pub event_x: Fp1616,
+    pub event_y: Fp1616,
     pub sourceid: DeviceId,
     pub flags: u32,
     pub mods: ModifierInfo,
@@ -13127,15 +13127,15 @@ impl MotionEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (detail, remaining) = u32::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
-        let (root_x, remaining) = FP1616::try_parse(remaining)?;
-        let (root_y, remaining) = FP1616::try_parse(remaining)?;
-        let (event_x, remaining) = FP1616::try_parse(remaining)?;
-        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_y, remaining) = Fp1616::try_parse(remaining)?;
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -13333,17 +13333,17 @@ pub struct EnterEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub sourceid: DeviceId,
     pub mode: NotifyMode,
     pub detail: NotifyDetail,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
-    pub root_x: FP1616,
-    pub root_y: FP1616,
-    pub event_x: FP1616,
-    pub event_y: FP1616,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
+    pub root_x: Fp1616,
+    pub root_y: Fp1616,
+    pub event_x: Fp1616,
+    pub event_y: Fp1616,
     pub same_screen: bool,
     pub focus: bool,
     pub mods: ModifierInfo,
@@ -13358,17 +13358,17 @@ impl EnterEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
-        let (root_x, remaining) = FP1616::try_parse(remaining)?;
-        let (root_y, remaining) = FP1616::try_parse(remaining)?;
-        let (event_x, remaining) = FP1616::try_parse(remaining)?;
-        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_y, remaining) = Fp1616::try_parse(remaining)?;
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let (focus, remaining) = bool::try_parse(remaining)?;
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
@@ -13410,17 +13410,17 @@ pub struct LeaveEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub sourceid: DeviceId,
     pub mode: NotifyMode,
     pub detail: NotifyDetail,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
-    pub root_x: FP1616,
-    pub root_y: FP1616,
-    pub event_x: FP1616,
-    pub event_y: FP1616,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
+    pub root_x: Fp1616,
+    pub root_y: Fp1616,
+    pub event_x: Fp1616,
+    pub event_y: Fp1616,
     pub same_screen: bool,
     pub focus: bool,
     pub mods: ModifierInfo,
@@ -13435,17 +13435,17 @@ impl LeaveEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
-        let (root_x, remaining) = FP1616::try_parse(remaining)?;
-        let (root_y, remaining) = FP1616::try_parse(remaining)?;
-        let (event_x, remaining) = FP1616::try_parse(remaining)?;
-        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_y, remaining) = Fp1616::try_parse(remaining)?;
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let (focus, remaining) = bool::try_parse(remaining)?;
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
@@ -13487,17 +13487,17 @@ pub struct FocusInEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub sourceid: DeviceId,
     pub mode: NotifyMode,
     pub detail: NotifyDetail,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
-    pub root_x: FP1616,
-    pub root_y: FP1616,
-    pub event_x: FP1616,
-    pub event_y: FP1616,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
+    pub root_x: Fp1616,
+    pub root_y: Fp1616,
+    pub event_x: Fp1616,
+    pub event_y: Fp1616,
     pub same_screen: bool,
     pub focus: bool,
     pub mods: ModifierInfo,
@@ -13512,17 +13512,17 @@ impl FocusInEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
-        let (root_x, remaining) = FP1616::try_parse(remaining)?;
-        let (root_y, remaining) = FP1616::try_parse(remaining)?;
-        let (event_x, remaining) = FP1616::try_parse(remaining)?;
-        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_y, remaining) = Fp1616::try_parse(remaining)?;
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let (focus, remaining) = bool::try_parse(remaining)?;
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
@@ -13564,17 +13564,17 @@ pub struct FocusOutEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub sourceid: DeviceId,
     pub mode: NotifyMode,
     pub detail: NotifyDetail,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
-    pub root_x: FP1616,
-    pub root_y: FP1616,
-    pub event_x: FP1616,
-    pub event_y: FP1616,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
+    pub root_x: Fp1616,
+    pub root_y: Fp1616,
+    pub event_x: Fp1616,
+    pub event_y: Fp1616,
     pub same_screen: bool,
     pub focus: bool,
     pub mods: ModifierInfo,
@@ -13589,17 +13589,17 @@ impl FocusOutEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
-        let (root_x, remaining) = FP1616::try_parse(remaining)?;
-        let (root_y, remaining) = FP1616::try_parse(remaining)?;
-        let (event_x, remaining) = FP1616::try_parse(remaining)?;
-        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_y, remaining) = Fp1616::try_parse(remaining)?;
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let (focus, remaining) = bool::try_parse(remaining)?;
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
@@ -13783,7 +13783,7 @@ pub struct HierarchyEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub flags: u32,
     pub infos: Vec<HierarchyInfo>,
 }
@@ -13795,7 +13795,7 @@ impl HierarchyEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (num_infos, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(10..).ok_or(ParseError::ParseError)?;
@@ -13898,8 +13898,8 @@ pub struct PropertyEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
-    pub property: ATOM,
+    pub time: Timestamp,
+    pub property: Atom,
     pub what: PropertyFlag,
 }
 impl PropertyEvent {
@@ -13910,8 +13910,8 @@ impl PropertyEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (property, remaining) = ATOM::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (property, remaining) = Atom::try_parse(remaining)?;
         let (what, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
         let what = what.try_into()?;
@@ -13948,7 +13948,7 @@ pub struct RawKeyPressEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub detail: u32,
     pub sourceid: DeviceId,
     pub flags: u32,
@@ -13964,7 +13964,7 @@ impl RawKeyPressEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (detail, remaining) = u32::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
@@ -14006,7 +14006,7 @@ pub struct RawKeyReleaseEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub detail: u32,
     pub sourceid: DeviceId,
     pub flags: u32,
@@ -14022,7 +14022,7 @@ impl RawKeyReleaseEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (detail, remaining) = u32::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
@@ -14064,7 +14064,7 @@ pub struct RawButtonPressEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub detail: u32,
     pub sourceid: DeviceId,
     pub flags: u32,
@@ -14080,7 +14080,7 @@ impl RawButtonPressEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (detail, remaining) = u32::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
@@ -14122,7 +14122,7 @@ pub struct RawButtonReleaseEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub detail: u32,
     pub sourceid: DeviceId,
     pub flags: u32,
@@ -14138,7 +14138,7 @@ impl RawButtonReleaseEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (detail, remaining) = u32::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
@@ -14180,7 +14180,7 @@ pub struct RawMotionEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub detail: u32,
     pub sourceid: DeviceId,
     pub flags: u32,
@@ -14196,7 +14196,7 @@ impl RawMotionEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (detail, remaining) = u32::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
@@ -14269,15 +14269,15 @@ pub struct TouchBeginEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub detail: u32,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
-    pub root_x: FP1616,
-    pub root_y: FP1616,
-    pub event_x: FP1616,
-    pub event_y: FP1616,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
+    pub root_x: Fp1616,
+    pub root_y: Fp1616,
+    pub event_x: Fp1616,
+    pub event_y: Fp1616,
     pub sourceid: DeviceId,
     pub flags: u32,
     pub mods: ModifierInfo,
@@ -14294,15 +14294,15 @@ impl TouchBeginEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (detail, remaining) = u32::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
-        let (root_x, remaining) = FP1616::try_parse(remaining)?;
-        let (root_y, remaining) = FP1616::try_parse(remaining)?;
-        let (event_x, remaining) = FP1616::try_parse(remaining)?;
-        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_y, remaining) = Fp1616::try_parse(remaining)?;
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -14346,15 +14346,15 @@ pub struct TouchUpdateEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub detail: u32,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
-    pub root_x: FP1616,
-    pub root_y: FP1616,
-    pub event_x: FP1616,
-    pub event_y: FP1616,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
+    pub root_x: Fp1616,
+    pub root_y: Fp1616,
+    pub event_x: Fp1616,
+    pub event_y: Fp1616,
     pub sourceid: DeviceId,
     pub flags: u32,
     pub mods: ModifierInfo,
@@ -14371,15 +14371,15 @@ impl TouchUpdateEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (detail, remaining) = u32::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
-        let (root_x, remaining) = FP1616::try_parse(remaining)?;
-        let (root_y, remaining) = FP1616::try_parse(remaining)?;
-        let (event_x, remaining) = FP1616::try_parse(remaining)?;
-        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_y, remaining) = Fp1616::try_parse(remaining)?;
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -14423,15 +14423,15 @@ pub struct TouchEndEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub detail: u32,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
-    pub root_x: FP1616,
-    pub root_y: FP1616,
-    pub event_x: FP1616,
-    pub event_y: FP1616,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
+    pub root_x: Fp1616,
+    pub root_y: Fp1616,
+    pub event_x: Fp1616,
+    pub event_y: Fp1616,
     pub sourceid: DeviceId,
     pub flags: u32,
     pub mods: ModifierInfo,
@@ -14448,15 +14448,15 @@ impl TouchEndEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (detail, remaining) = u32::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
-        let (root_x, remaining) = FP1616::try_parse(remaining)?;
-        let (root_y, remaining) = FP1616::try_parse(remaining)?;
-        let (event_x, remaining) = FP1616::try_parse(remaining)?;
-        let (event_y, remaining) = FP1616::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (event_y, remaining) = Fp1616::try_parse(remaining)?;
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
@@ -14559,11 +14559,11 @@ pub struct TouchOwnershipEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub touchid: u32,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
     pub sourceid: DeviceId,
     pub flags: TouchOwnershipFlags,
 }
@@ -14575,11 +14575,11 @@ impl TouchOwnershipEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (touchid, remaining) = u32::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
@@ -14618,7 +14618,7 @@ pub struct RawTouchBeginEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub detail: u32,
     pub sourceid: DeviceId,
     pub flags: u32,
@@ -14634,7 +14634,7 @@ impl RawTouchBeginEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (detail, remaining) = u32::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
@@ -14676,7 +14676,7 @@ pub struct RawTouchUpdateEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub detail: u32,
     pub sourceid: DeviceId,
     pub flags: u32,
@@ -14692,7 +14692,7 @@ impl RawTouchUpdateEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (detail, remaining) = u32::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
@@ -14734,7 +14734,7 @@ pub struct RawTouchEndEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub detail: u32,
     pub sourceid: DeviceId,
     pub flags: u32,
@@ -14750,7 +14750,7 @@ impl RawTouchEndEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (detail, remaining) = u32::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
@@ -14855,16 +14855,16 @@ pub struct BarrierHitEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub eventid: u32,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub barrier: xfixes::BARRIER,
+    pub root: Window,
+    pub event: Window,
+    pub barrier: xfixes::Barrier,
     pub dtime: u32,
     pub flags: u32,
     pub sourceid: DeviceId,
-    pub root_x: FP1616,
-    pub root_y: FP1616,
+    pub root_x: Fp1616,
+    pub root_y: Fp1616,
     pub dx: Fp3232,
     pub dy: Fp3232,
 }
@@ -14876,17 +14876,17 @@ impl BarrierHitEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (eventid, remaining) = u32::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (barrier, remaining) = xfixes::BARRIER::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (barrier, remaining) = xfixes::Barrier::try_parse(remaining)?;
         let (dtime, remaining) = u32::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (root_x, remaining) = FP1616::try_parse(remaining)?;
-        let (root_y, remaining) = FP1616::try_parse(remaining)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
         let (dx, remaining) = Fp3232::try_parse(remaining)?;
         let (dy, remaining) = Fp3232::try_parse(remaining)?;
         let result = BarrierHitEvent { response_type, extension, sequence, length, event_type, deviceid, time, eventid, root, event, barrier, dtime, flags, sourceid, root_x, root_y, dx, dy };
@@ -14922,16 +14922,16 @@ pub struct BarrierLeaveEvent {
     pub length: u32,
     pub event_type: u16,
     pub deviceid: DeviceId,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub eventid: u32,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub barrier: xfixes::BARRIER,
+    pub root: Window,
+    pub event: Window,
+    pub barrier: xfixes::Barrier,
     pub dtime: u32,
     pub flags: u32,
     pub sourceid: DeviceId,
-    pub root_x: FP1616,
-    pub root_y: FP1616,
+    pub root_x: Fp1616,
+    pub root_y: Fp1616,
     pub dx: Fp3232,
     pub dy: Fp3232,
 }
@@ -14943,17 +14943,17 @@ impl BarrierLeaveEvent {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (eventid, remaining) = u32::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (barrier, remaining) = xfixes::BARRIER::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (barrier, remaining) = xfixes::Barrier::try_parse(remaining)?;
         let (dtime, remaining) = u32::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (root_x, remaining) = FP1616::try_parse(remaining)?;
-        let (root_y, remaining) = FP1616::try_parse(remaining)?;
+        let (root_x, remaining) = Fp1616::try_parse(remaining)?;
+        let (root_y, remaining) = Fp1616::try_parse(remaining)?;
         let (dx, remaining) = Fp3232::try_parse(remaining)?;
         let (dy, remaining) = Fp3232::try_parse(remaining)?;
         let result = BarrierLeaveEvent { response_type, extension, sequence, length, event_type, deviceid, time, eventid, root, event, barrier, dtime, flags, sourceid, root_x, root_y, dx, dy };
@@ -15178,7 +15178,7 @@ impl From<DevicePresenceNotifyEvent> for EventForSend {
 
 /// Opcode for the SendExtensionEvent request
 pub const SEND_EXTENSION_EVENT_REQUEST: u8 = 31;
-pub fn send_extension_event<'c, Conn>(conn: &'c Conn, destination: WINDOW, device_id: u8, propagate: bool, events: &[EventForSend], classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn send_extension_event<'c, Conn>(conn: &'c Conn, destination: Window, device_id: u8, propagate: bool, events: &[EventForSend], classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -15509,28 +15509,28 @@ pub trait ConnectionExt: RequestConnection {
         set_device_mode(self, device_id, mode)
     }
 
-    fn xinput_select_extension_event<'c>(&'c self, window: WINDOW, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xinput_select_extension_event<'c>(&'c self, window: Window, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         select_extension_event(self, window, classes)
     }
 
-    fn xinput_get_selected_extension_events(&self, window: WINDOW) -> Result<Cookie<'_, Self, GetSelectedExtensionEventsReply>, ConnectionError>
+    fn xinput_get_selected_extension_events(&self, window: Window) -> Result<Cookie<'_, Self, GetSelectedExtensionEventsReply>, ConnectionError>
     {
         get_selected_extension_events(self, window)
     }
 
-    fn xinput_change_device_dont_propagate_list<'c, A>(&'c self, window: WINDOW, mode: A, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xinput_change_device_dont_propagate_list<'c, A>(&'c self, window: Window, mode: A, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>
     {
         change_device_dont_propagate_list(self, window, mode, classes)
     }
 
-    fn xinput_get_device_dont_propagate_list(&self, window: WINDOW) -> Result<Cookie<'_, Self, GetDeviceDontPropagateListReply>, ConnectionError>
+    fn xinput_get_device_dont_propagate_list(&self, window: Window) -> Result<Cookie<'_, Self, GetDeviceDontPropagateListReply>, ConnectionError>
     {
         get_device_dont_propagate_list(self, window)
     }
 
-    fn xinput_get_device_motion_events(&self, start: TIMESTAMP, stop: TIMESTAMP, device_id: u8) -> Result<Cookie<'_, Self, GetDeviceMotionEventsReply>, ConnectionError>
+    fn xinput_get_device_motion_events(&self, start: Timestamp, stop: Timestamp, device_id: u8) -> Result<Cookie<'_, Self, GetDeviceMotionEventsReply>, ConnectionError>
     {
         get_device_motion_events(self, start, stop, device_id)
     }
@@ -15545,40 +15545,40 @@ pub trait ConnectionExt: RequestConnection {
         change_pointer_device(self, x_axis, y_axis, device_id)
     }
 
-    fn xinput_grab_device<'c, A, B>(&'c self, grab_window: WINDOW, time: TIMESTAMP, this_device_mode: A, other_device_mode: B, owner_events: bool, device_id: u8, classes: &[EventClass]) -> Result<Cookie<'c, Self, GrabDeviceReply>, ConnectionError>
+    fn xinput_grab_device<'c, A, B>(&'c self, grab_window: Window, time: Timestamp, this_device_mode: A, other_device_mode: B, owner_events: bool, device_id: u8, classes: &[EventClass]) -> Result<Cookie<'c, Self, GrabDeviceReply>, ConnectionError>
     where A: Into<u8>, B: Into<u8>
     {
         grab_device(self, grab_window, time, this_device_mode, other_device_mode, owner_events, device_id, classes)
     }
 
-    fn xinput_ungrab_device(&self, time: TIMESTAMP, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xinput_ungrab_device(&self, time: Timestamp, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_device(self, time, device_id)
     }
 
-    fn xinput_grab_device_key<'c, A, B>(&'c self, grab_window: WINDOW, modifiers: u16, modifier_device: u8, grabbed_device: u8, key: u8, this_device_mode: A, other_device_mode: B, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xinput_grab_device_key<'c, A, B>(&'c self, grab_window: Window, modifiers: u16, modifier_device: u8, grabbed_device: u8, key: u8, this_device_mode: A, other_device_mode: B, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>, B: Into<u8>
     {
         grab_device_key(self, grab_window, modifiers, modifier_device, grabbed_device, key, this_device_mode, other_device_mode, owner_events, classes)
     }
 
-    fn xinput_ungrab_device_key(&self, grab_window: WINDOW, modifiers: u16, modifier_device: u8, key: u8, grabbed_device: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xinput_ungrab_device_key(&self, grab_window: Window, modifiers: u16, modifier_device: u8, key: u8, grabbed_device: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_device_key(self, grab_window, modifiers, modifier_device, key, grabbed_device)
     }
 
-    fn xinput_grab_device_button<'c, A, B>(&'c self, grab_window: WINDOW, grabbed_device: u8, modifier_device: u8, modifiers: u16, this_device_mode: A, other_device_mode: B, button: u8, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xinput_grab_device_button<'c, A, B>(&'c self, grab_window: Window, grabbed_device: u8, modifier_device: u8, modifiers: u16, this_device_mode: A, other_device_mode: B, button: u8, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>, B: Into<u8>
     {
         grab_device_button(self, grab_window, grabbed_device, modifier_device, modifiers, this_device_mode, other_device_mode, button, owner_events, classes)
     }
 
-    fn xinput_ungrab_device_button(&self, grab_window: WINDOW, modifiers: u16, modifier_device: u8, button: u8, grabbed_device: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xinput_ungrab_device_button(&self, grab_window: Window, modifiers: u16, modifier_device: u8, button: u8, grabbed_device: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_device_button(self, grab_window, modifiers, modifier_device, button, grabbed_device)
     }
 
-    fn xinput_allow_device_events<A>(&self, time: TIMESTAMP, mode: A, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xinput_allow_device_events<A>(&self, time: Timestamp, mode: A, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<u8>
     {
         allow_device_events(self, time, mode, device_id)
@@ -15589,7 +15589,7 @@ pub trait ConnectionExt: RequestConnection {
         get_device_focus(self, device_id)
     }
 
-    fn xinput_set_device_focus<A>(&self, focus: WINDOW, time: TIMESTAMP, revert_to: A, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xinput_set_device_focus<A>(&self, focus: Window, time: Timestamp, revert_to: A, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<u8>
     {
         set_device_focus(self, focus, time, revert_to, device_id)
@@ -15610,7 +15610,7 @@ pub trait ConnectionExt: RequestConnection {
         get_device_key_mapping(self, device_id, first_keycode, count)
     }
 
-    fn xinput_change_device_key_mapping<'c>(&'c self, device_id: u8, first_keycode: KeyCode, keysyms_per_keycode: u8, keycode_count: u8, keysyms: &[KEYSYM]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xinput_change_device_key_mapping<'c>(&'c self, device_id: u8, first_keycode: KeyCode, keysyms_per_keycode: u8, keycode_count: u8, keysyms: &[Keysym]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_device_key_mapping(self, device_id, first_keycode, keysyms_per_keycode, keycode_count, keysyms)
     }
@@ -15667,33 +15667,33 @@ pub trait ConnectionExt: RequestConnection {
         list_device_properties(self, device_id)
     }
 
-    fn xinput_change_device_property<'c, A>(&'c self, property: ATOM, type_: ATOM, device_id: u8, mode: A, num_items: u32, items: &ChangeDevicePropertyAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xinput_change_device_property<'c, A>(&'c self, property: Atom, type_: Atom, device_id: u8, mode: A, num_items: u32, items: &ChangeDevicePropertyAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>
     {
         change_device_property(self, property, type_, device_id, mode, num_items, items)
     }
 
-    fn xinput_delete_device_property(&self, property: ATOM, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xinput_delete_device_property(&self, property: Atom, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_device_property(self, property, device_id)
     }
 
-    fn xinput_get_device_property(&self, property: ATOM, type_: ATOM, offset: u32, len: u32, device_id: u8, delete: bool) -> Result<Cookie<'_, Self, GetDevicePropertyReply>, ConnectionError>
+    fn xinput_get_device_property(&self, property: Atom, type_: Atom, offset: u32, len: u32, device_id: u8, delete: bool) -> Result<Cookie<'_, Self, GetDevicePropertyReply>, ConnectionError>
     {
         get_device_property(self, property, type_, offset, len, device_id, delete)
     }
 
-    fn xinput_xi_query_pointer(&self, window: WINDOW, deviceid: DeviceId) -> Result<Cookie<'_, Self, XIQueryPointerReply>, ConnectionError>
+    fn xinput_xi_query_pointer(&self, window: Window, deviceid: DeviceId) -> Result<Cookie<'_, Self, XIQueryPointerReply>, ConnectionError>
     {
         xi_query_pointer(self, window, deviceid)
     }
 
-    fn xinput_xi_warp_pointer(&self, src_win: WINDOW, dst_win: WINDOW, src_x: FP1616, src_y: FP1616, src_width: u16, src_height: u16, dst_x: FP1616, dst_y: FP1616, deviceid: DeviceId) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xinput_xi_warp_pointer(&self, src_win: Window, dst_win: Window, src_x: Fp1616, src_y: Fp1616, src_width: u16, src_height: u16, dst_x: Fp1616, dst_y: Fp1616, deviceid: DeviceId) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         xi_warp_pointer(self, src_win, dst_win, src_x, src_y, src_width, src_height, dst_x, dst_y, deviceid)
     }
 
-    fn xinput_xi_change_cursor(&self, window: WINDOW, cursor: CURSOR, deviceid: DeviceId) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xinput_xi_change_cursor(&self, window: Window, cursor: Cursor, deviceid: DeviceId) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         xi_change_cursor(self, window, cursor, deviceid)
     }
@@ -15703,17 +15703,17 @@ pub trait ConnectionExt: RequestConnection {
         xi_change_hierarchy(self, changes)
     }
 
-    fn xinput_xi_set_client_pointer(&self, window: WINDOW, deviceid: DeviceId) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xinput_xi_set_client_pointer(&self, window: Window, deviceid: DeviceId) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         xi_set_client_pointer(self, window, deviceid)
     }
 
-    fn xinput_xi_get_client_pointer(&self, window: WINDOW) -> Result<Cookie<'_, Self, XIGetClientPointerReply>, ConnectionError>
+    fn xinput_xi_get_client_pointer(&self, window: Window) -> Result<Cookie<'_, Self, XIGetClientPointerReply>, ConnectionError>
     {
         xi_get_client_pointer(self, window)
     }
 
-    fn xinput_xi_select_events<'c>(&'c self, window: WINDOW, masks: &[EventMask]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xinput_xi_select_events<'c>(&'c self, window: Window, masks: &[EventMask]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         xi_select_events(self, window, masks)
     }
@@ -15728,7 +15728,7 @@ pub trait ConnectionExt: RequestConnection {
         xi_query_device(self, deviceid)
     }
 
-    fn xinput_xi_set_focus(&self, window: WINDOW, time: TIMESTAMP, deviceid: DeviceId) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xinput_xi_set_focus(&self, window: Window, time: Timestamp, deviceid: DeviceId) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         xi_set_focus(self, window, time, deviceid)
     }
@@ -15738,30 +15738,30 @@ pub trait ConnectionExt: RequestConnection {
         xi_get_focus(self, deviceid)
     }
 
-    fn xinput_xi_grab_device<'c, A, B, C>(&'c self, window: WINDOW, time: TIMESTAMP, cursor: CURSOR, deviceid: DeviceId, mode: A, paired_device_mode: B, owner_events: C, mask: &[u32]) -> Result<Cookie<'c, Self, XIGrabDeviceReply>, ConnectionError>
+    fn xinput_xi_grab_device<'c, A, B, C>(&'c self, window: Window, time: Timestamp, cursor: Cursor, deviceid: DeviceId, mode: A, paired_device_mode: B, owner_events: C, mask: &[u32]) -> Result<Cookie<'c, Self, XIGrabDeviceReply>, ConnectionError>
     where A: Into<u8>, B: Into<u8>, C: Into<bool>
     {
         xi_grab_device(self, window, time, cursor, deviceid, mode, paired_device_mode, owner_events, mask)
     }
 
-    fn xinput_xi_ungrab_device(&self, time: TIMESTAMP, deviceid: DeviceId) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xinput_xi_ungrab_device(&self, time: Timestamp, deviceid: DeviceId) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         xi_ungrab_device(self, time, deviceid)
     }
 
-    fn xinput_xi_allow_events<A>(&self, time: TIMESTAMP, deviceid: DeviceId, event_mode: A, touchid: u32, grab_window: WINDOW) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xinput_xi_allow_events<A>(&self, time: Timestamp, deviceid: DeviceId, event_mode: A, touchid: u32, grab_window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<u8>
     {
         xi_allow_events(self, time, deviceid, event_mode, touchid, grab_window)
     }
 
-    fn xinput_xi_passive_grab_device<'c, A, B, C, D>(&'c self, time: TIMESTAMP, grab_window: WINDOW, cursor: CURSOR, detail: u32, deviceid: DeviceId, grab_type: A, grab_mode: B, paired_device_mode: C, owner_events: D, mask: &[u32], modifiers: &[u32]) -> Result<Cookie<'c, Self, XIPassiveGrabDeviceReply>, ConnectionError>
+    fn xinput_xi_passive_grab_device<'c, A, B, C, D>(&'c self, time: Timestamp, grab_window: Window, cursor: Cursor, detail: u32, deviceid: DeviceId, grab_type: A, grab_mode: B, paired_device_mode: C, owner_events: D, mask: &[u32], modifiers: &[u32]) -> Result<Cookie<'c, Self, XIPassiveGrabDeviceReply>, ConnectionError>
     where A: Into<u8>, B: Into<u8>, C: Into<u8>, D: Into<bool>
     {
         xi_passive_grab_device(self, time, grab_window, cursor, detail, deviceid, grab_type, grab_mode, paired_device_mode, owner_events, mask, modifiers)
     }
 
-    fn xinput_xi_passive_ungrab_device<'c, A>(&'c self, grab_window: WINDOW, detail: u32, deviceid: DeviceId, grab_type: A, modifiers: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xinput_xi_passive_ungrab_device<'c, A>(&'c self, grab_window: Window, detail: u32, deviceid: DeviceId, grab_type: A, modifiers: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>
     {
         xi_passive_ungrab_device(self, grab_window, detail, deviceid, grab_type, modifiers)
@@ -15772,23 +15772,23 @@ pub trait ConnectionExt: RequestConnection {
         xi_list_properties(self, deviceid)
     }
 
-    fn xinput_xi_change_property<'c, A>(&'c self, deviceid: DeviceId, mode: A, property: ATOM, type_: ATOM, num_items: u32, items: &XIChangePropertyAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xinput_xi_change_property<'c, A>(&'c self, deviceid: DeviceId, mode: A, property: Atom, type_: Atom, num_items: u32, items: &XIChangePropertyAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>
     {
         xi_change_property(self, deviceid, mode, property, type_, num_items, items)
     }
 
-    fn xinput_xi_delete_property(&self, deviceid: DeviceId, property: ATOM) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xinput_xi_delete_property(&self, deviceid: DeviceId, property: Atom) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         xi_delete_property(self, deviceid, property)
     }
 
-    fn xinput_xi_get_property(&self, deviceid: DeviceId, delete: bool, property: ATOM, type_: ATOM, offset: u32, len: u32) -> Result<Cookie<'_, Self, XIGetPropertyReply>, ConnectionError>
+    fn xinput_xi_get_property(&self, deviceid: DeviceId, delete: bool, property: Atom, type_: Atom, offset: u32, len: u32) -> Result<Cookie<'_, Self, XIGetPropertyReply>, ConnectionError>
     {
         xi_get_property(self, deviceid, delete, property, type_, offset, len)
     }
 
-    fn xinput_xi_get_selected_events(&self, window: WINDOW) -> Result<Cookie<'_, Self, XIGetSelectedEventsReply>, ConnectionError>
+    fn xinput_xi_get_selected_events(&self, window: Window) -> Result<Cookie<'_, Self, XIGetSelectedEventsReply>, ConnectionError>
     {
         xi_get_selected_events(self, window)
     }
@@ -15798,7 +15798,7 @@ pub trait ConnectionExt: RequestConnection {
         xi_barrier_release_pointer(self, barriers)
     }
 
-    fn xinput_send_extension_event<'c>(&'c self, destination: WINDOW, device_id: u8, propagate: bool, events: &[EventForSend], classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xinput_send_extension_event<'c>(&'c self, destination: Window, device_id: u8, propagate: bool, events: &[EventForSend], classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         send_extension_event(self, destination, device_id, propagate, events, classes)
     }

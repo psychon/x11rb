@@ -43,7 +43,7 @@ pub const X11_EXTENSION_NAME: &str = "DAMAGE";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (1, 1);
 
-pub type DAMAGE = u32;
+pub type Damage = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -224,7 +224,7 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 /// Opcode for the Create request
 pub const CREATE_REQUEST: u8 = 1;
-pub fn create<Conn, A>(conn: &Conn, damage: DAMAGE, drawable: DRAWABLE, level: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create<Conn, A>(conn: &Conn, damage: Damage, drawable: Drawable, level: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -260,7 +260,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the Destroy request
 pub const DESTROY_REQUEST: u8 = 2;
-pub fn destroy<Conn>(conn: &Conn, damage: DAMAGE) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn destroy<Conn>(conn: &Conn, damage: Damage) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -285,7 +285,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the Subtract request
 pub const SUBTRACT_REQUEST: u8 = 3;
-pub fn subtract<Conn>(conn: &Conn, damage: DAMAGE, repair: xfixes::REGION, parts: xfixes::REGION) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn subtract<Conn>(conn: &Conn, damage: Damage, repair: xfixes::Region, parts: xfixes::Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -320,7 +320,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the Add request
 pub const ADD_REQUEST: u8 = 4;
-pub fn add<Conn>(conn: &Conn, drawable: DRAWABLE, region: xfixes::REGION) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn add<Conn>(conn: &Conn, drawable: Drawable, region: xfixes::Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -355,9 +355,9 @@ pub struct NotifyEvent {
     pub response_type: u8,
     pub level: ReportLevel,
     pub sequence: u16,
-    pub drawable: DRAWABLE,
-    pub damage: DAMAGE,
-    pub timestamp: TIMESTAMP,
+    pub drawable: Drawable,
+    pub damage: Damage,
+    pub timestamp: Timestamp,
     pub area: Rectangle,
     pub geometry: Rectangle,
 }
@@ -366,9 +366,9 @@ impl NotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (level, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (drawable, remaining) = DRAWABLE::try_parse(remaining)?;
-        let (damage, remaining) = DAMAGE::try_parse(remaining)?;
-        let (timestamp, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (drawable, remaining) = Drawable::try_parse(remaining)?;
+        let (damage, remaining) = Damage::try_parse(remaining)?;
+        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
         let (area, remaining) = Rectangle::try_parse(remaining)?;
         let (geometry, remaining) = Rectangle::try_parse(remaining)?;
         let level = level.try_into()?;
@@ -423,23 +423,23 @@ pub trait ConnectionExt: RequestConnection {
         query_version(self, client_major_version, client_minor_version)
     }
 
-    fn damage_create<A>(&self, damage: DAMAGE, drawable: DRAWABLE, level: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn damage_create<A>(&self, damage: Damage, drawable: Drawable, level: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<u8>
     {
         create(self, damage, drawable, level)
     }
 
-    fn damage_destroy(&self, damage: DAMAGE) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn damage_destroy(&self, damage: Damage) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy(self, damage)
     }
 
-    fn damage_subtract(&self, damage: DAMAGE, repair: xfixes::REGION, parts: xfixes::REGION) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn damage_subtract(&self, damage: Damage, repair: xfixes::Region, parts: xfixes::Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         subtract(self, damage, repair, parts)
     }
 
-    fn damage_add(&self, drawable: DRAWABLE, region: xfixes::REGION) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn damage_add(&self, drawable: Drawable, region: xfixes::Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         add(self, drawable, region)
     }

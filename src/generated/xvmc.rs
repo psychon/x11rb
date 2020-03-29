@@ -41,15 +41,15 @@ pub const X11_EXTENSION_NAME: &str = "XVideo-MotionCompensation";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (1, 1);
 
-pub type CONTEXT = u32;
+pub type Context = u32;
 
-pub type SURFACE = u32;
+pub type Surface = u32;
 
-pub type SUBPICTURE = u32;
+pub type Subpicture = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SurfaceInfo {
-    pub id: SURFACE,
+    pub id: Surface,
     pub chroma_format: u16,
     pub pad0: u16,
     pub max_width: u16,
@@ -61,7 +61,7 @@ pub struct SurfaceInfo {
 }
 impl TryParse for SurfaceInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (id, remaining) = SURFACE::try_parse(remaining)?;
+        let (id, remaining) = Surface::try_parse(remaining)?;
         let (chroma_format, remaining) = u16::try_parse(remaining)?;
         let (pad0, remaining) = u16::try_parse(remaining)?;
         let (max_width, remaining) = u16::try_parse(remaining)?;
@@ -181,7 +181,7 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 /// Opcode for the ListSurfaceTypes request
 pub const LIST_SURFACE_TYPES_REQUEST: u8 = 1;
-pub fn list_surface_types<Conn>(conn: &Conn, port_id: xv::PORT) -> Result<Cookie<'_, Conn, ListSurfaceTypesReply>, ConnectionError>
+pub fn list_surface_types<Conn>(conn: &Conn, port_id: xv::Port) -> Result<Cookie<'_, Conn, ListSurfaceTypesReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -232,7 +232,7 @@ impl TryFrom<&[u8]> for ListSurfaceTypesReply {
 
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 2;
-pub fn create_context<Conn>(conn: &Conn, context_id: CONTEXT, port_id: xv::PORT, surface_id: SURFACE, width: u16, height: u16, flags: u32) -> Result<Cookie<'_, Conn, CreateContextReply>, ConnectionError>
+pub fn create_context<Conn>(conn: &Conn, context_id: Context, port_id: xv::Port, surface_id: Surface, width: u16, height: u16, flags: u32) -> Result<Cookie<'_, Conn, CreateContextReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -308,7 +308,7 @@ impl TryFrom<&[u8]> for CreateContextReply {
 
 /// Opcode for the DestroyContext request
 pub const DESTROY_CONTEXT_REQUEST: u8 = 3;
-pub fn destroy_context<Conn>(conn: &Conn, context_id: CONTEXT) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn destroy_context<Conn>(conn: &Conn, context_id: Context) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -333,7 +333,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CreateSurface request
 pub const CREATE_SURFACE_REQUEST: u8 = 4;
-pub fn create_surface<Conn>(conn: &Conn, surface_id: SURFACE, context_id: CONTEXT) -> Result<Cookie<'_, Conn, CreateSurfaceReply>, ConnectionError>
+pub fn create_surface<Conn>(conn: &Conn, surface_id: Surface, context_id: Context) -> Result<Cookie<'_, Conn, CreateSurfaceReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -387,7 +387,7 @@ impl TryFrom<&[u8]> for CreateSurfaceReply {
 
 /// Opcode for the DestroySurface request
 pub const DESTROY_SURFACE_REQUEST: u8 = 5;
-pub fn destroy_surface<Conn>(conn: &Conn, surface_id: SURFACE) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn destroy_surface<Conn>(conn: &Conn, surface_id: Surface) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -412,7 +412,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CreateSubpicture request
 pub const CREATE_SUBPICTURE_REQUEST: u8 = 6;
-pub fn create_subpicture<Conn>(conn: &Conn, subpicture_id: SUBPICTURE, context: CONTEXT, xvimage_id: u32, width: u16, height: u16) -> Result<Cookie<'_, Conn, CreateSubpictureReply>, ConnectionError>
+pub fn create_subpicture<Conn>(conn: &Conn, subpicture_id: Subpicture, context: Context, xvimage_id: u32, width: u16, height: u16) -> Result<Cookie<'_, Conn, CreateSubpictureReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -496,7 +496,7 @@ impl TryFrom<&[u8]> for CreateSubpictureReply {
 
 /// Opcode for the DestroySubpicture request
 pub const DESTROY_SUBPICTURE_REQUEST: u8 = 7;
-pub fn destroy_subpicture<Conn>(conn: &Conn, subpicture_id: SUBPICTURE) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn destroy_subpicture<Conn>(conn: &Conn, subpicture_id: Subpicture) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -521,7 +521,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the ListSubpictureTypes request
 pub const LIST_SUBPICTURE_TYPES_REQUEST: u8 = 8;
-pub fn list_subpicture_types<Conn>(conn: &Conn, port_id: xv::PORT, surface_id: SURFACE) -> Result<Cookie<'_, Conn, ListSubpictureTypesReply>, ConnectionError>
+pub fn list_subpicture_types<Conn>(conn: &Conn, port_id: xv::Port, surface_id: Surface) -> Result<Cookie<'_, Conn, ListSubpictureTypesReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -582,42 +582,42 @@ pub trait ConnectionExt: RequestConnection {
         query_version(self)
     }
 
-    fn xvmc_list_surface_types(&self, port_id: xv::PORT) -> Result<Cookie<'_, Self, ListSurfaceTypesReply>, ConnectionError>
+    fn xvmc_list_surface_types(&self, port_id: xv::Port) -> Result<Cookie<'_, Self, ListSurfaceTypesReply>, ConnectionError>
     {
         list_surface_types(self, port_id)
     }
 
-    fn xvmc_create_context(&self, context_id: CONTEXT, port_id: xv::PORT, surface_id: SURFACE, width: u16, height: u16, flags: u32) -> Result<Cookie<'_, Self, CreateContextReply>, ConnectionError>
+    fn xvmc_create_context(&self, context_id: Context, port_id: xv::Port, surface_id: Surface, width: u16, height: u16, flags: u32) -> Result<Cookie<'_, Self, CreateContextReply>, ConnectionError>
     {
         create_context(self, context_id, port_id, surface_id, width, height, flags)
     }
 
-    fn xvmc_destroy_context(&self, context_id: CONTEXT) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xvmc_destroy_context(&self, context_id: Context) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_context(self, context_id)
     }
 
-    fn xvmc_create_surface(&self, surface_id: SURFACE, context_id: CONTEXT) -> Result<Cookie<'_, Self, CreateSurfaceReply>, ConnectionError>
+    fn xvmc_create_surface(&self, surface_id: Surface, context_id: Context) -> Result<Cookie<'_, Self, CreateSurfaceReply>, ConnectionError>
     {
         create_surface(self, surface_id, context_id)
     }
 
-    fn xvmc_destroy_surface(&self, surface_id: SURFACE) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xvmc_destroy_surface(&self, surface_id: Surface) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_surface(self, surface_id)
     }
 
-    fn xvmc_create_subpicture(&self, subpicture_id: SUBPICTURE, context: CONTEXT, xvimage_id: u32, width: u16, height: u16) -> Result<Cookie<'_, Self, CreateSubpictureReply>, ConnectionError>
+    fn xvmc_create_subpicture(&self, subpicture_id: Subpicture, context: Context, xvimage_id: u32, width: u16, height: u16) -> Result<Cookie<'_, Self, CreateSubpictureReply>, ConnectionError>
     {
         create_subpicture(self, subpicture_id, context, xvimage_id, width, height)
     }
 
-    fn xvmc_destroy_subpicture(&self, subpicture_id: SUBPICTURE) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xvmc_destroy_subpicture(&self, subpicture_id: Subpicture) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_subpicture(self, subpicture_id)
     }
 
-    fn xvmc_list_subpicture_types(&self, port_id: xv::PORT, surface_id: SURFACE) -> Result<Cookie<'_, Self, ListSubpictureTypesReply>, ConnectionError>
+    fn xvmc_list_subpicture_types(&self, port_id: xv::Port, surface_id: Surface) -> Result<Cookie<'_, Self, ListSubpictureTypesReply>, ConnectionError>
     {
         list_subpicture_types(self, port_id, surface_id)
     }

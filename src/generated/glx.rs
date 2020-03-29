@@ -35,23 +35,23 @@ pub const X11_EXTENSION_NAME: &str = "GLX";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (1, 4);
 
-pub type PIXMAP = u32;
+pub type Pixmap = u32;
 
-pub type CONTEXT = u32;
+pub type Context = u32;
 
-pub type PBUFFER = u32;
+pub type Pbuffer = u32;
 
-pub type WINDOW = u32;
+pub type Window = u32;
 
-pub type FBCONFIG = u32;
+pub type Fbconfig = u32;
 
-pub type DRAWABLE = u32;
+pub type Drawable = u32;
 
-pub type FLOAT32 = f32;
+pub type Float32 = f32;
 
-pub type FLOAT64 = f64;
+pub type Float64 = f64;
 
-pub type BOOL32 = u32;
+pub type Bool32 = u32;
 
 pub type ContextTag = u32;
 
@@ -991,7 +991,7 @@ pub struct PbufferClobberEvent {
     pub sequence: u16,
     pub event_type: u16,
     pub draw_type: u16,
-    pub drawable: DRAWABLE,
+    pub drawable: Drawable,
     pub b_mask: u32,
     pub aux_buffer: u16,
     pub x: u16,
@@ -1007,7 +1007,7 @@ impl PbufferClobberEvent {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let (draw_type, remaining) = u16::try_parse(remaining)?;
-        let (drawable, remaining) = DRAWABLE::try_parse(remaining)?;
+        let (drawable, remaining) = Drawable::try_parse(remaining)?;
         let (b_mask, remaining) = u32::try_parse(remaining)?;
         let (aux_buffer, remaining) = u16::try_parse(remaining)?;
         let (x, remaining) = u16::try_parse(remaining)?;
@@ -1071,7 +1071,7 @@ pub struct BufferSwapCompleteEvent {
     pub response_type: u8,
     pub sequence: u16,
     pub event_type: u16,
-    pub drawable: DRAWABLE,
+    pub drawable: Drawable,
     pub ust_hi: u32,
     pub ust_lo: u32,
     pub msc_hi: u32,
@@ -1085,7 +1085,7 @@ impl BufferSwapCompleteEvent {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (drawable, remaining) = DRAWABLE::try_parse(remaining)?;
+        let (drawable, remaining) = Drawable::try_parse(remaining)?;
         let (ust_hi, remaining) = u32::try_parse(remaining)?;
         let (ust_lo, remaining) = u32::try_parse(remaining)?;
         let (msc_hi, remaining) = u32::try_parse(remaining)?;
@@ -1298,7 +1298,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 3;
-pub fn create_context<Conn>(conn: &Conn, context: CONTEXT, visual: VISUALID, screen: u32, share_list: CONTEXT, is_direct: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_context<Conn>(conn: &Conn, context: Context, visual: Visualid, screen: u32, share_list: Context, is_direct: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1343,7 +1343,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the DestroyContext request
 pub const DESTROY_CONTEXT_REQUEST: u8 = 4;
-pub fn destroy_context<Conn>(conn: &Conn, context: CONTEXT) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn destroy_context<Conn>(conn: &Conn, context: Context) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1368,7 +1368,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the MakeCurrent request
 pub const MAKE_CURRENT_REQUEST: u8 = 5;
-pub fn make_current<Conn>(conn: &Conn, drawable: DRAWABLE, context: CONTEXT, old_context_tag: ContextTag) -> Result<Cookie<'_, Conn, MakeCurrentReply>, ConnectionError>
+pub fn make_current<Conn>(conn: &Conn, drawable: Drawable, context: Context, old_context_tag: ContextTag) -> Result<Cookie<'_, Conn, MakeCurrentReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1428,7 +1428,7 @@ impl TryFrom<&[u8]> for MakeCurrentReply {
 
 /// Opcode for the IsDirect request
 pub const IS_DIRECT_REQUEST: u8 = 6;
-pub fn is_direct<Conn>(conn: &Conn, context: CONTEXT) -> Result<Cookie<'_, Conn, IsDirectReply>, ConnectionError>
+pub fn is_direct<Conn>(conn: &Conn, context: Context) -> Result<Cookie<'_, Conn, IsDirectReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1585,7 +1585,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CopyContext request
 pub const COPY_CONTEXT_REQUEST: u8 = 10;
-pub fn copy_context<Conn>(conn: &Conn, src: CONTEXT, dest: CONTEXT, mask: u32, src_context_tag: ContextTag) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn copy_context<Conn>(conn: &Conn, src: Context, dest: Context, mask: u32, src_context_tag: ContextTag) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1713,7 +1713,7 @@ impl TryFrom<u32> for GC {
 
 /// Opcode for the SwapBuffers request
 pub const SWAP_BUFFERS_REQUEST: u8 = 11;
-pub fn swap_buffers<Conn>(conn: &Conn, context_tag: ContextTag, drawable: DRAWABLE) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn swap_buffers<Conn>(conn: &Conn, context_tag: ContextTag, drawable: Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1743,7 +1743,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the UseXFont request
 pub const USE_X_FONT_REQUEST: u8 = 12;
-pub fn use_x_font<Conn>(conn: &Conn, context_tag: ContextTag, font: FONT, first: u32, count: u32, list_base: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn use_x_font<Conn>(conn: &Conn, context_tag: ContextTag, font: Font, first: u32, count: u32, list_base: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1788,7 +1788,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CreateGLXPixmap request
 pub const CREATE_GLX_PIXMAP_REQUEST: u8 = 13;
-pub fn create_glx_pixmap<Conn>(conn: &Conn, screen: u32, visual: VISUALID, pixmap: PIXMAP, glx_pixmap: PIXMAP) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_glx_pixmap<Conn>(conn: &Conn, screen: u32, visual: Visualid, pixmap: Pixmap, glx_pixmap: Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1881,7 +1881,7 @@ impl TryFrom<&[u8]> for GetVisualConfigsReply {
 
 /// Opcode for the DestroyGLXPixmap request
 pub const DESTROY_GLX_PIXMAP_REQUEST: u8 = 15;
-pub fn destroy_glx_pixmap<Conn>(conn: &Conn, glx_pixmap: PIXMAP) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn destroy_glx_pixmap<Conn>(conn: &Conn, glx_pixmap: Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2248,7 +2248,7 @@ impl TryFrom<&[u8]> for GetFBConfigsReply {
 
 /// Opcode for the CreatePixmap request
 pub const CREATE_PIXMAP_REQUEST: u8 = 22;
-pub fn create_pixmap<'c, Conn>(conn: &'c Conn, screen: u32, fbconfig: FBCONFIG, pixmap: PIXMAP, glx_pixmap: PIXMAP, attribs: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_pixmap<'c, Conn>(conn: &'c Conn, screen: u32, fbconfig: Fbconfig, pixmap: Pixmap, glx_pixmap: Pixmap, attribs: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2299,7 +2299,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the DestroyPixmap request
 pub const DESTROY_PIXMAP_REQUEST: u8 = 23;
-pub fn destroy_pixmap<Conn>(conn: &Conn, glx_pixmap: PIXMAP) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn destroy_pixmap<Conn>(conn: &Conn, glx_pixmap: Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2324,7 +2324,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CreateNewContext request
 pub const CREATE_NEW_CONTEXT_REQUEST: u8 = 24;
-pub fn create_new_context<Conn>(conn: &Conn, context: CONTEXT, fbconfig: FBCONFIG, screen: u32, render_type: u32, share_list: CONTEXT, is_direct: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_new_context<Conn>(conn: &Conn, context: Context, fbconfig: Fbconfig, screen: u32, render_type: u32, share_list: Context, is_direct: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2374,7 +2374,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the QueryContext request
 pub const QUERY_CONTEXT_REQUEST: u8 = 25;
-pub fn query_context<Conn>(conn: &Conn, context: CONTEXT) -> Result<Cookie<'_, Conn, QueryContextReply>, ConnectionError>
+pub fn query_context<Conn>(conn: &Conn, context: Context) -> Result<Cookie<'_, Conn, QueryContextReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2425,7 +2425,7 @@ impl TryFrom<&[u8]> for QueryContextReply {
 
 /// Opcode for the MakeContextCurrent request
 pub const MAKE_CONTEXT_CURRENT_REQUEST: u8 = 26;
-pub fn make_context_current<Conn>(conn: &Conn, old_context_tag: ContextTag, drawable: DRAWABLE, read_drawable: DRAWABLE, context: CONTEXT) -> Result<Cookie<'_, Conn, MakeContextCurrentReply>, ConnectionError>
+pub fn make_context_current<Conn>(conn: &Conn, old_context_tag: ContextTag, drawable: Drawable, read_drawable: Drawable, context: Context) -> Result<Cookie<'_, Conn, MakeContextCurrentReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2490,7 +2490,7 @@ impl TryFrom<&[u8]> for MakeContextCurrentReply {
 
 /// Opcode for the CreatePbuffer request
 pub const CREATE_PBUFFER_REQUEST: u8 = 27;
-pub fn create_pbuffer<'c, Conn>(conn: &'c Conn, screen: u32, fbconfig: FBCONFIG, pbuffer: PBUFFER, attribs: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_pbuffer<'c, Conn>(conn: &'c Conn, screen: u32, fbconfig: Fbconfig, pbuffer: Pbuffer, attribs: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2536,7 +2536,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the DestroyPbuffer request
 pub const DESTROY_PBUFFER_REQUEST: u8 = 28;
-pub fn destroy_pbuffer<Conn>(conn: &Conn, pbuffer: PBUFFER) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn destroy_pbuffer<Conn>(conn: &Conn, pbuffer: Pbuffer) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2561,7 +2561,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetDrawableAttributes request
 pub const GET_DRAWABLE_ATTRIBUTES_REQUEST: u8 = 29;
-pub fn get_drawable_attributes<Conn>(conn: &Conn, drawable: DRAWABLE) -> Result<Cookie<'_, Conn, GetDrawableAttributesReply>, ConnectionError>
+pub fn get_drawable_attributes<Conn>(conn: &Conn, drawable: Drawable) -> Result<Cookie<'_, Conn, GetDrawableAttributesReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2612,7 +2612,7 @@ impl TryFrom<&[u8]> for GetDrawableAttributesReply {
 
 /// Opcode for the ChangeDrawableAttributes request
 pub const CHANGE_DRAWABLE_ATTRIBUTES_REQUEST: u8 = 30;
-pub fn change_drawable_attributes<'c, Conn>(conn: &'c Conn, drawable: DRAWABLE, attribs: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_drawable_attributes<'c, Conn>(conn: &'c Conn, drawable: Drawable, attribs: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2648,7 +2648,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CreateWindow request
 pub const CREATE_WINDOW_REQUEST: u8 = 31;
-pub fn create_window<'c, Conn>(conn: &'c Conn, screen: u32, fbconfig: FBCONFIG, window: WINDOW, glx_window: WINDOW, attribs: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_window<'c, Conn>(conn: &'c Conn, screen: u32, fbconfig: Fbconfig, window: Window, glx_window: Window, attribs: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2699,7 +2699,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the DeleteWindow request
 pub const DELETE_WINDOW_REQUEST: u8 = 32;
-pub fn delete_window<Conn>(conn: &Conn, glxwindow: WINDOW) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn delete_window<Conn>(conn: &Conn, glxwindow: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2779,7 +2779,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CreateContextAttribsARB request
 pub const CREATE_CONTEXT_ATTRIBS_ARB_REQUEST: u8 = 34;
-pub fn create_context_attribs_arb<'c, Conn>(conn: &'c Conn, context: CONTEXT, fbconfig: FBCONFIG, screen: u32, share_list: CONTEXT, is_direct: bool, attribs: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_context_attribs_arb<'c, Conn>(conn: &'c Conn, context: Context, fbconfig: Fbconfig, screen: u32, share_list: Context, is_direct: bool, attribs: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -3261,7 +3261,7 @@ impl TryFrom<&[u8]> for FinishReply {
 
 /// Opcode for the PixelStoref request
 pub const PIXEL_STOREF_REQUEST: u8 = 109;
-pub fn pixel_storef<Conn>(conn: &Conn, context_tag: ContextTag, pname: u32, datum: FLOAT32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn pixel_storef<Conn>(conn: &Conn, context_tag: ContextTag, pname: u32, datum: Float32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -3506,7 +3506,7 @@ where Conn: RequestConnection + ?Sized
 pub struct GetClipPlaneReply {
     pub response_type: u8,
     pub sequence: u16,
-    pub data: Vec<FLOAT64>,
+    pub data: Vec<Float64>,
 }
 impl GetClipPlaneReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3515,7 +3515,7 @@ impl GetClipPlaneReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<FLOAT64>(remaining, (length as usize) / (2))?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float64>(remaining, (length as usize) / (2))?;
         let result = GetClipPlaneReply { response_type, sequence, data };
         Ok((result, remaining))
     }
@@ -3561,8 +3561,8 @@ pub struct GetDoublevReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub datum: FLOAT64,
-    pub data: Vec<FLOAT64>,
+    pub datum: Float64,
+    pub data: Vec<Float64>,
 }
 impl GetDoublevReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3572,9 +3572,9 @@ impl GetDoublevReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (n, remaining) = u32::try_parse(remaining)?;
-        let (datum, remaining) = FLOAT64::try_parse(remaining)?;
+        let (datum, remaining) = Float64::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<FLOAT64>(remaining, n as usize)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float64>(remaining, n as usize)?;
         let result = GetDoublevReply { response_type, sequence, length, datum, data };
         Ok((result, remaining))
     }
@@ -3669,8 +3669,8 @@ pub struct GetFloatvReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub datum: FLOAT32,
-    pub data: Vec<FLOAT32>,
+    pub datum: Float32,
+    pub data: Vec<Float32>,
 }
 impl GetFloatvReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3680,9 +3680,9 @@ impl GetFloatvReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (n, remaining) = u32::try_parse(remaining)?;
-        let (datum, remaining) = FLOAT32::try_parse(remaining)?;
+        let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<FLOAT32>(remaining, n as usize)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n as usize)?;
         let result = GetFloatvReply { response_type, sequence, length, datum, data };
         Ok((result, remaining))
     }
@@ -3792,8 +3792,8 @@ pub struct GetLightfvReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub datum: FLOAT32,
-    pub data: Vec<FLOAT32>,
+    pub datum: Float32,
+    pub data: Vec<Float32>,
 }
 impl GetLightfvReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3803,9 +3803,9 @@ impl GetLightfvReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (n, remaining) = u32::try_parse(remaining)?;
-        let (datum, remaining) = FLOAT32::try_parse(remaining)?;
+        let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<FLOAT32>(remaining, n as usize)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n as usize)?;
         let result = GetLightfvReply { response_type, sequence, length, datum, data };
         Ok((result, remaining))
     }
@@ -3920,8 +3920,8 @@ pub struct GetMapdvReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub datum: FLOAT64,
-    pub data: Vec<FLOAT64>,
+    pub datum: Float64,
+    pub data: Vec<Float64>,
 }
 impl GetMapdvReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3931,9 +3931,9 @@ impl GetMapdvReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (n, remaining) = u32::try_parse(remaining)?;
-        let (datum, remaining) = FLOAT64::try_parse(remaining)?;
+        let (datum, remaining) = Float64::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<FLOAT64>(remaining, n as usize)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float64>(remaining, n as usize)?;
         let result = GetMapdvReply { response_type, sequence, length, datum, data };
         Ok((result, remaining))
     }
@@ -3984,8 +3984,8 @@ pub struct GetMapfvReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub datum: FLOAT32,
-    pub data: Vec<FLOAT32>,
+    pub datum: Float32,
+    pub data: Vec<Float32>,
 }
 impl GetMapfvReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3995,9 +3995,9 @@ impl GetMapfvReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (n, remaining) = u32::try_parse(remaining)?;
-        let (datum, remaining) = FLOAT32::try_parse(remaining)?;
+        let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<FLOAT32>(remaining, n as usize)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n as usize)?;
         let result = GetMapfvReply { response_type, sequence, length, datum, data };
         Ok((result, remaining))
     }
@@ -4112,8 +4112,8 @@ pub struct GetMaterialfvReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub datum: FLOAT32,
-    pub data: Vec<FLOAT32>,
+    pub datum: Float32,
+    pub data: Vec<Float32>,
 }
 impl GetMaterialfvReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4123,9 +4123,9 @@ impl GetMaterialfvReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (n, remaining) = u32::try_parse(remaining)?;
-        let (datum, remaining) = FLOAT32::try_parse(remaining)?;
+        let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<FLOAT32>(remaining, n as usize)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n as usize)?;
         let result = GetMaterialfvReply { response_type, sequence, length, datum, data };
         Ok((result, remaining))
     }
@@ -4235,8 +4235,8 @@ pub struct GetPixelMapfvReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub datum: FLOAT32,
-    pub data: Vec<FLOAT32>,
+    pub datum: Float32,
+    pub data: Vec<Float32>,
 }
 impl GetPixelMapfvReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4246,9 +4246,9 @@ impl GetPixelMapfvReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (n, remaining) = u32::try_parse(remaining)?;
-        let (datum, remaining) = FLOAT32::try_parse(remaining)?;
+        let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<FLOAT32>(remaining, n as usize)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n as usize)?;
         let result = GetPixelMapfvReply { response_type, sequence, length, datum, data };
         Ok((result, remaining))
     }
@@ -4528,8 +4528,8 @@ pub struct GetTexEnvfvReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub datum: FLOAT32,
-    pub data: Vec<FLOAT32>,
+    pub datum: Float32,
+    pub data: Vec<Float32>,
 }
 impl GetTexEnvfvReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4539,9 +4539,9 @@ impl GetTexEnvfvReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (n, remaining) = u32::try_parse(remaining)?;
-        let (datum, remaining) = FLOAT32::try_parse(remaining)?;
+        let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<FLOAT32>(remaining, n as usize)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n as usize)?;
         let result = GetTexEnvfvReply { response_type, sequence, length, datum, data };
         Ok((result, remaining))
     }
@@ -4656,8 +4656,8 @@ pub struct GetTexGendvReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub datum: FLOAT64,
-    pub data: Vec<FLOAT64>,
+    pub datum: Float64,
+    pub data: Vec<Float64>,
 }
 impl GetTexGendvReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4667,9 +4667,9 @@ impl GetTexGendvReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (n, remaining) = u32::try_parse(remaining)?;
-        let (datum, remaining) = FLOAT64::try_parse(remaining)?;
+        let (datum, remaining) = Float64::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<FLOAT64>(remaining, n as usize)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float64>(remaining, n as usize)?;
         let result = GetTexGendvReply { response_type, sequence, length, datum, data };
         Ok((result, remaining))
     }
@@ -4720,8 +4720,8 @@ pub struct GetTexGenfvReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub datum: FLOAT32,
-    pub data: Vec<FLOAT32>,
+    pub datum: Float32,
+    pub data: Vec<Float32>,
 }
 impl GetTexGenfvReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4731,9 +4731,9 @@ impl GetTexGenfvReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (n, remaining) = u32::try_parse(remaining)?;
-        let (datum, remaining) = FLOAT32::try_parse(remaining)?;
+        let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<FLOAT32>(remaining, n as usize)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n as usize)?;
         let result = GetTexGenfvReply { response_type, sequence, length, datum, data };
         Ok((result, remaining))
     }
@@ -4929,8 +4929,8 @@ pub struct GetTexParameterfvReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub datum: FLOAT32,
-    pub data: Vec<FLOAT32>,
+    pub datum: Float32,
+    pub data: Vec<Float32>,
 }
 impl GetTexParameterfvReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4940,9 +4940,9 @@ impl GetTexParameterfvReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (n, remaining) = u32::try_parse(remaining)?;
-        let (datum, remaining) = FLOAT32::try_parse(remaining)?;
+        let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<FLOAT32>(remaining, n as usize)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n as usize)?;
         let result = GetTexParameterfvReply { response_type, sequence, length, datum, data };
         Ok((result, remaining))
     }
@@ -5062,8 +5062,8 @@ pub struct GetTexLevelParameterfvReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub datum: FLOAT32,
-    pub data: Vec<FLOAT32>,
+    pub datum: Float32,
+    pub data: Vec<Float32>,
 }
 impl GetTexLevelParameterfvReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5073,9 +5073,9 @@ impl GetTexLevelParameterfvReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (n, remaining) = u32::try_parse(remaining)?;
-        let (datum, remaining) = FLOAT32::try_parse(remaining)?;
+        let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<FLOAT32>(remaining, n as usize)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n as usize)?;
         let result = GetTexLevelParameterfvReply { response_type, sequence, length, datum, data };
         Ok((result, remaining))
     }
@@ -5190,7 +5190,7 @@ pub struct IsEnabledReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub ret_val: BOOL32,
+    pub ret_val: Bool32,
 }
 impl IsEnabledReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5198,7 +5198,7 @@ impl IsEnabledReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (ret_val, remaining) = BOOL32::try_parse(remaining)?;
+        let (ret_val, remaining) = Bool32::try_parse(remaining)?;
         let result = IsEnabledReply { response_type, sequence, length, ret_val };
         Ok((result, remaining))
     }
@@ -5244,7 +5244,7 @@ pub struct IsListReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub ret_val: BOOL32,
+    pub ret_val: Bool32,
 }
 impl IsListReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5252,7 +5252,7 @@ impl IsListReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (ret_val, remaining) = BOOL32::try_parse(remaining)?;
+        let (ret_val, remaining) = Bool32::try_parse(remaining)?;
         let result = IsListReply { response_type, sequence, length, ret_val };
         Ok((result, remaining))
     }
@@ -5327,7 +5327,7 @@ where Conn: RequestConnection + ?Sized
 pub struct AreTexturesResidentReply {
     pub response_type: u8,
     pub sequence: u16,
-    pub ret_val: BOOL32,
+    pub ret_val: Bool32,
     pub data: Vec<u8>,
 }
 impl AreTexturesResidentReply {
@@ -5336,7 +5336,7 @@ impl AreTexturesResidentReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (ret_val, remaining) = BOOL32::try_parse(remaining)?;
+        let (ret_val, remaining) = Bool32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * (4))?;
         let result = AreTexturesResidentReply { response_type, sequence, ret_val, data };
@@ -5473,7 +5473,7 @@ pub struct IsTextureReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub ret_val: BOOL32,
+    pub ret_val: Bool32,
 }
 impl IsTextureReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5481,7 +5481,7 @@ impl IsTextureReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (ret_val, remaining) = BOOL32::try_parse(remaining)?;
+        let (ret_val, remaining) = Bool32::try_parse(remaining)?;
         let result = IsTextureReply { response_type, sequence, length, ret_val };
         Ok((result, remaining))
     }
@@ -5604,8 +5604,8 @@ pub struct GetColorTableParameterfvReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub datum: FLOAT32,
-    pub data: Vec<FLOAT32>,
+    pub datum: Float32,
+    pub data: Vec<Float32>,
 }
 impl GetColorTableParameterfvReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5615,9 +5615,9 @@ impl GetColorTableParameterfvReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (n, remaining) = u32::try_parse(remaining)?;
-        let (datum, remaining) = FLOAT32::try_parse(remaining)?;
+        let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<FLOAT32>(remaining, n as usize)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n as usize)?;
         let result = GetColorTableParameterfvReply { response_type, sequence, length, datum, data };
         Ok((result, remaining))
     }
@@ -5806,8 +5806,8 @@ pub struct GetConvolutionParameterfvReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub datum: FLOAT32,
-    pub data: Vec<FLOAT32>,
+    pub datum: Float32,
+    pub data: Vec<Float32>,
 }
 impl GetConvolutionParameterfvReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -5817,9 +5817,9 @@ impl GetConvolutionParameterfvReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (n, remaining) = u32::try_parse(remaining)?;
-        let (datum, remaining) = FLOAT32::try_parse(remaining)?;
+        let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<FLOAT32>(remaining, n as usize)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n as usize)?;
         let result = GetConvolutionParameterfvReply { response_type, sequence, length, datum, data };
         Ok((result, remaining))
     }
@@ -6081,8 +6081,8 @@ pub struct GetHistogramParameterfvReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub datum: FLOAT32,
-    pub data: Vec<FLOAT32>,
+    pub datum: Float32,
+    pub data: Vec<Float32>,
 }
 impl GetHistogramParameterfvReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6092,9 +6092,9 @@ impl GetHistogramParameterfvReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (n, remaining) = u32::try_parse(remaining)?;
-        let (datum, remaining) = FLOAT32::try_parse(remaining)?;
+        let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<FLOAT32>(remaining, n as usize)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n as usize)?;
         let result = GetHistogramParameterfvReply { response_type, sequence, length, datum, data };
         Ok((result, remaining))
     }
@@ -6279,8 +6279,8 @@ pub struct GetMinmaxParameterfvReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub datum: FLOAT32,
-    pub data: Vec<FLOAT32>,
+    pub datum: Float32,
+    pub data: Vec<Float32>,
 }
 impl GetMinmaxParameterfvReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6290,9 +6290,9 @@ impl GetMinmaxParameterfvReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (n, remaining) = u32::try_parse(remaining)?;
-        let (datum, remaining) = FLOAT32::try_parse(remaining)?;
+        let (datum, remaining) = Float32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<FLOAT32>(remaining, n as usize)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float32>(remaining, n as usize)?;
         let result = GetMinmaxParameterfvReply { response_type, sequence, length, datum, data };
         Ok((result, remaining))
     }
@@ -6553,7 +6553,7 @@ pub struct IsQueryARBReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub ret_val: BOOL32,
+    pub ret_val: Bool32,
 }
 impl IsQueryARBReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6561,7 +6561,7 @@ impl IsQueryARBReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (ret_val, remaining) = BOOL32::try_parse(remaining)?;
+        let (ret_val, remaining) = Bool32::try_parse(remaining)?;
         let result = IsQueryARBReply { response_type, sequence, length, ret_val };
         Ok((result, remaining))
     }
@@ -6777,22 +6777,22 @@ pub trait ConnectionExt: RequestConnection {
         render_large(self, context_tag, request_num, request_total, data)
     }
 
-    fn glx_create_context(&self, context: CONTEXT, visual: VISUALID, screen: u32, share_list: CONTEXT, is_direct: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn glx_create_context(&self, context: Context, visual: Visualid, screen: u32, share_list: Context, is_direct: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_context(self, context, visual, screen, share_list, is_direct)
     }
 
-    fn glx_destroy_context(&self, context: CONTEXT) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn glx_destroy_context(&self, context: Context) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_context(self, context)
     }
 
-    fn glx_make_current(&self, drawable: DRAWABLE, context: CONTEXT, old_context_tag: ContextTag) -> Result<Cookie<'_, Self, MakeCurrentReply>, ConnectionError>
+    fn glx_make_current(&self, drawable: Drawable, context: Context, old_context_tag: ContextTag) -> Result<Cookie<'_, Self, MakeCurrentReply>, ConnectionError>
     {
         make_current(self, drawable, context, old_context_tag)
     }
 
-    fn glx_is_direct(&self, context: CONTEXT) -> Result<Cookie<'_, Self, IsDirectReply>, ConnectionError>
+    fn glx_is_direct(&self, context: Context) -> Result<Cookie<'_, Self, IsDirectReply>, ConnectionError>
     {
         is_direct(self, context)
     }
@@ -6812,22 +6812,22 @@ pub trait ConnectionExt: RequestConnection {
         wait_x(self, context_tag)
     }
 
-    fn glx_copy_context(&self, src: CONTEXT, dest: CONTEXT, mask: u32, src_context_tag: ContextTag) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn glx_copy_context(&self, src: Context, dest: Context, mask: u32, src_context_tag: ContextTag) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         copy_context(self, src, dest, mask, src_context_tag)
     }
 
-    fn glx_swap_buffers(&self, context_tag: ContextTag, drawable: DRAWABLE) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn glx_swap_buffers(&self, context_tag: ContextTag, drawable: Drawable) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         swap_buffers(self, context_tag, drawable)
     }
 
-    fn glx_use_x_font(&self, context_tag: ContextTag, font: FONT, first: u32, count: u32, list_base: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn glx_use_x_font(&self, context_tag: ContextTag, font: Font, first: u32, count: u32, list_base: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         use_x_font(self, context_tag, font, first, count, list_base)
     }
 
-    fn glx_create_glx_pixmap(&self, screen: u32, visual: VISUALID, pixmap: PIXMAP, glx_pixmap: PIXMAP) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn glx_create_glx_pixmap(&self, screen: u32, visual: Visualid, pixmap: Pixmap, glx_pixmap: Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_glx_pixmap(self, screen, visual, pixmap, glx_pixmap)
     }
@@ -6837,7 +6837,7 @@ pub trait ConnectionExt: RequestConnection {
         get_visual_configs(self, screen)
     }
 
-    fn glx_destroy_glx_pixmap(&self, glx_pixmap: PIXMAP) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn glx_destroy_glx_pixmap(&self, glx_pixmap: Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_glx_pixmap(self, glx_pixmap)
     }
@@ -6872,57 +6872,57 @@ pub trait ConnectionExt: RequestConnection {
         get_fb_configs(self, screen)
     }
 
-    fn glx_create_pixmap<'c>(&'c self, screen: u32, fbconfig: FBCONFIG, pixmap: PIXMAP, glx_pixmap: PIXMAP, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn glx_create_pixmap<'c>(&'c self, screen: u32, fbconfig: Fbconfig, pixmap: Pixmap, glx_pixmap: Pixmap, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_pixmap(self, screen, fbconfig, pixmap, glx_pixmap, attribs)
     }
 
-    fn glx_destroy_pixmap(&self, glx_pixmap: PIXMAP) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn glx_destroy_pixmap(&self, glx_pixmap: Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_pixmap(self, glx_pixmap)
     }
 
-    fn glx_create_new_context(&self, context: CONTEXT, fbconfig: FBCONFIG, screen: u32, render_type: u32, share_list: CONTEXT, is_direct: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn glx_create_new_context(&self, context: Context, fbconfig: Fbconfig, screen: u32, render_type: u32, share_list: Context, is_direct: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_new_context(self, context, fbconfig, screen, render_type, share_list, is_direct)
     }
 
-    fn glx_query_context(&self, context: CONTEXT) -> Result<Cookie<'_, Self, QueryContextReply>, ConnectionError>
+    fn glx_query_context(&self, context: Context) -> Result<Cookie<'_, Self, QueryContextReply>, ConnectionError>
     {
         query_context(self, context)
     }
 
-    fn glx_make_context_current(&self, old_context_tag: ContextTag, drawable: DRAWABLE, read_drawable: DRAWABLE, context: CONTEXT) -> Result<Cookie<'_, Self, MakeContextCurrentReply>, ConnectionError>
+    fn glx_make_context_current(&self, old_context_tag: ContextTag, drawable: Drawable, read_drawable: Drawable, context: Context) -> Result<Cookie<'_, Self, MakeContextCurrentReply>, ConnectionError>
     {
         make_context_current(self, old_context_tag, drawable, read_drawable, context)
     }
 
-    fn glx_create_pbuffer<'c>(&'c self, screen: u32, fbconfig: FBCONFIG, pbuffer: PBUFFER, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn glx_create_pbuffer<'c>(&'c self, screen: u32, fbconfig: Fbconfig, pbuffer: Pbuffer, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_pbuffer(self, screen, fbconfig, pbuffer, attribs)
     }
 
-    fn glx_destroy_pbuffer(&self, pbuffer: PBUFFER) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn glx_destroy_pbuffer(&self, pbuffer: Pbuffer) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_pbuffer(self, pbuffer)
     }
 
-    fn glx_get_drawable_attributes(&self, drawable: DRAWABLE) -> Result<Cookie<'_, Self, GetDrawableAttributesReply>, ConnectionError>
+    fn glx_get_drawable_attributes(&self, drawable: Drawable) -> Result<Cookie<'_, Self, GetDrawableAttributesReply>, ConnectionError>
     {
         get_drawable_attributes(self, drawable)
     }
 
-    fn glx_change_drawable_attributes<'c>(&'c self, drawable: DRAWABLE, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn glx_change_drawable_attributes<'c>(&'c self, drawable: Drawable, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_drawable_attributes(self, drawable, attribs)
     }
 
-    fn glx_create_window<'c>(&'c self, screen: u32, fbconfig: FBCONFIG, window: WINDOW, glx_window: WINDOW, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn glx_create_window<'c>(&'c self, screen: u32, fbconfig: Fbconfig, window: Window, glx_window: Window, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_window(self, screen, fbconfig, window, glx_window, attribs)
     }
 
-    fn glx_delete_window(&self, glxwindow: WINDOW) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn glx_delete_window(&self, glxwindow: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_window(self, glxwindow)
     }
@@ -6932,7 +6932,7 @@ pub trait ConnectionExt: RequestConnection {
         set_client_info_arb(self, major_version, minor_version, gl_versions, gl_extension_string, glx_extension_string)
     }
 
-    fn glx_create_context_attribs_arb<'c>(&'c self, context: CONTEXT, fbconfig: FBCONFIG, screen: u32, share_list: CONTEXT, is_direct: bool, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn glx_create_context_attribs_arb<'c>(&'c self, context: Context, fbconfig: Fbconfig, screen: u32, share_list: Context, is_direct: bool, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_context_attribs_arb(self, context, fbconfig, screen, share_list, is_direct, attribs)
     }
@@ -6982,7 +6982,7 @@ pub trait ConnectionExt: RequestConnection {
         finish(self, context_tag)
     }
 
-    fn glx_pixel_storef(&self, context_tag: ContextTag, pname: u32, datum: FLOAT32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn glx_pixel_storef(&self, context_tag: ContextTag, pname: u32, datum: Float32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         pixel_storef(self, context_tag, pname, datum)
     }

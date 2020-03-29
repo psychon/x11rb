@@ -61,37 +61,37 @@ impl Serialize for Char2b {
     }
 }
 
-pub type WINDOW = u32;
+pub type Window = u32;
 
-pub type PIXMAP = u32;
+pub type Pixmap = u32;
 
-pub type CURSOR = u32;
+pub type Cursor = u32;
 
-pub type FONT = u32;
+pub type Font = u32;
 
-pub type GCONTEXT = u32;
+pub type Gcontext = u32;
 
-pub type COLORMAP = u32;
+pub type Colormap = u32;
 
-pub type ATOM = u32;
+pub type Atom = u32;
 
-pub type DRAWABLE = u32;
+pub type Drawable = u32;
 
-pub type FONTABLE = u32;
+pub type Fontable = u32;
 
-pub type BOOL32 = u32;
+pub type Bool32 = u32;
 
-pub type VISUALID = u32;
+pub type Visualid = u32;
 
-pub type TIMESTAMP = u32;
+pub type Timestamp = u32;
 
-pub type KEYSYM = u32;
+pub type Keysym = u32;
 
-pub type KEYCODE = u8;
+pub type Keycode = u8;
 
-pub type KEYCODE32 = u32;
+pub type Keycode32 = u32;
 
-pub type BUTTON = u8;
+pub type Button = u8;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Point {
@@ -367,7 +367,7 @@ impl TryFrom<u32> for VisualClass {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Visualtype {
-    pub visual_id: VISUALID,
+    pub visual_id: Visualid,
     pub class: VisualClass,
     pub bits_per_rgb_value: u8,
     pub colormap_entries: u16,
@@ -377,7 +377,7 @@ pub struct Visualtype {
 }
 impl TryParse for Visualtype {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (visual_id, remaining) = VISUALID::try_parse(remaining)?;
+        let (visual_id, remaining) = Visualid::try_parse(remaining)?;
         let (class, remaining) = u8::try_parse(remaining)?;
         let (bits_per_rgb_value, remaining) = u8::try_parse(remaining)?;
         let (colormap_entries, remaining) = u16::try_parse(remaining)?;
@@ -656,8 +656,8 @@ impl TryFrom<u32> for BackingStore {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Screen {
-    pub root: WINDOW,
-    pub default_colormap: COLORMAP,
+    pub root: Window,
+    pub default_colormap: Colormap,
     pub white_pixel: u32,
     pub black_pixel: u32,
     pub current_input_masks: u32,
@@ -667,7 +667,7 @@ pub struct Screen {
     pub height_in_millimeters: u16,
     pub min_installed_maps: u16,
     pub max_installed_maps: u16,
-    pub root_visual: VISUALID,
+    pub root_visual: Visualid,
     pub backing_stores: BackingStore,
     pub save_unders: bool,
     pub root_depth: u8,
@@ -675,8 +675,8 @@ pub struct Screen {
 }
 impl TryParse for Screen {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (default_colormap, remaining) = COLORMAP::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (default_colormap, remaining) = Colormap::try_parse(remaining)?;
         let (white_pixel, remaining) = u32::try_parse(remaining)?;
         let (black_pixel, remaining) = u32::try_parse(remaining)?;
         let (current_input_masks, remaining) = u32::try_parse(remaining)?;
@@ -686,7 +686,7 @@ impl TryParse for Screen {
         let (height_in_millimeters, remaining) = u16::try_parse(remaining)?;
         let (min_installed_maps, remaining) = u16::try_parse(remaining)?;
         let (max_installed_maps, remaining) = u16::try_parse(remaining)?;
-        let (root_visual, remaining) = VISUALID::try_parse(remaining)?;
+        let (root_visual, remaining) = Visualid::try_parse(remaining)?;
         let (backing_stores, remaining) = u8::try_parse(remaining)?;
         let (save_unders, remaining) = bool::try_parse(remaining)?;
         let (root_depth, remaining) = u8::try_parse(remaining)?;
@@ -957,8 +957,8 @@ pub struct Setup {
     pub bitmap_format_bit_order: ImageOrder,
     pub bitmap_format_scanline_unit: u8,
     pub bitmap_format_scanline_pad: u8,
-    pub min_keycode: KEYCODE,
-    pub max_keycode: KEYCODE,
+    pub min_keycode: Keycode,
+    pub max_keycode: Keycode,
     pub vendor: Vec<u8>,
     pub pixmap_formats: Vec<Format>,
     pub roots: Vec<Screen>,
@@ -983,8 +983,8 @@ impl TryParse for Setup {
         let (bitmap_format_bit_order, remaining) = u8::try_parse(remaining)?;
         let (bitmap_format_scanline_unit, remaining) = u8::try_parse(remaining)?;
         let (bitmap_format_scanline_pad, remaining) = u8::try_parse(remaining)?;
-        let (min_keycode, remaining) = KEYCODE::try_parse(remaining)?;
-        let (max_keycode, remaining) = KEYCODE::try_parse(remaining)?;
+        let (min_keycode, remaining) = Keycode::try_parse(remaining)?;
+        let (max_keycode, remaining) = Keycode::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (vendor, remaining) = crate::x11_utils::parse_list::<u8>(remaining, vendor_len as usize)?;
         // Align offset to multiple of 4
@@ -1194,57 +1194,57 @@ bitmask_binop!(KeyButMask, u16);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-pub enum Window {
+pub enum WindowEnum {
     None = 0,
 }
-impl From<Window> for u8 {
-    fn from(input: Window) -> Self {
+impl From<WindowEnum> for u8 {
+    fn from(input: WindowEnum) -> Self {
         match input {
-            Window::None => 0,
+            WindowEnum::None => 0,
         }
     }
 }
-impl From<Window> for Option<u8> {
-    fn from(input: Window) -> Self {
+impl From<WindowEnum> for Option<u8> {
+    fn from(input: WindowEnum) -> Self {
         Some(u8::from(input))
     }
 }
-impl From<Window> for u16 {
-    fn from(input: Window) -> Self {
+impl From<WindowEnum> for u16 {
+    fn from(input: WindowEnum) -> Self {
         Self::from(u8::from(input))
     }
 }
-impl From<Window> for Option<u16> {
-    fn from(input: Window) -> Self {
+impl From<WindowEnum> for Option<u16> {
+    fn from(input: WindowEnum) -> Self {
         Some(u16::from(input))
     }
 }
-impl From<Window> for u32 {
-    fn from(input: Window) -> Self {
+impl From<WindowEnum> for u32 {
+    fn from(input: WindowEnum) -> Self {
         Self::from(u8::from(input))
     }
 }
-impl From<Window> for Option<u32> {
-    fn from(input: Window) -> Self {
+impl From<WindowEnum> for Option<u32> {
+    fn from(input: WindowEnum) -> Self {
         Some(u32::from(input))
     }
 }
-impl TryFrom<u8> for Window {
+impl TryFrom<u8> for WindowEnum {
     type Error = ParseError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(Window::None),
+            0 => Ok(WindowEnum::None),
             _ => Err(ParseError::ParseError)
         }
     }
 }
-impl TryFrom<u16> for Window {
+impl TryFrom<u16> for WindowEnum {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
         Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
     }
 }
-impl TryFrom<u32> for Window {
+impl TryFrom<u32> for WindowEnum {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
@@ -1281,12 +1281,12 @@ pub const KEY_PRESS_EVENT: u8 = 2;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct KeyPressEvent {
     pub response_type: u8,
-    pub detail: KEYCODE,
+    pub detail: Keycode,
     pub sequence: u16,
-    pub time: TIMESTAMP,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
+    pub time: Timestamp,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
     pub root_x: i16,
     pub root_y: i16,
     pub event_x: i16,
@@ -1297,12 +1297,12 @@ pub struct KeyPressEvent {
 impl KeyPressEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let (detail, remaining) = KEYCODE::try_parse(remaining)?;
+        let (detail, remaining) = Keycode::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
         let (root_x, remaining) = i16::try_parse(remaining)?;
         let (root_y, remaining) = i16::try_parse(remaining)?;
         let (event_x, remaining) = i16::try_parse(remaining)?;
@@ -1389,12 +1389,12 @@ pub const KEY_RELEASE_EVENT: u8 = 3;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct KeyReleaseEvent {
     pub response_type: u8,
-    pub detail: KEYCODE,
+    pub detail: Keycode,
     pub sequence: u16,
-    pub time: TIMESTAMP,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
+    pub time: Timestamp,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
     pub root_x: i16,
     pub root_y: i16,
     pub event_x: i16,
@@ -1405,12 +1405,12 @@ pub struct KeyReleaseEvent {
 impl KeyReleaseEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let (detail, remaining) = KEYCODE::try_parse(remaining)?;
+        let (detail, remaining) = Keycode::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
         let (root_x, remaining) = i16::try_parse(remaining)?;
         let (root_y, remaining) = i16::try_parse(remaining)?;
         let (event_x, remaining) = i16::try_parse(remaining)?;
@@ -1556,12 +1556,12 @@ pub const BUTTON_PRESS_EVENT: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ButtonPressEvent {
     pub response_type: u8,
-    pub detail: BUTTON,
+    pub detail: Button,
     pub sequence: u16,
-    pub time: TIMESTAMP,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
+    pub time: Timestamp,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
     pub root_x: i16,
     pub root_y: i16,
     pub event_x: i16,
@@ -1572,12 +1572,12 @@ pub struct ButtonPressEvent {
 impl ButtonPressEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let (detail, remaining) = BUTTON::try_parse(remaining)?;
+        let (detail, remaining) = Button::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
         let (root_x, remaining) = i16::try_parse(remaining)?;
         let (root_y, remaining) = i16::try_parse(remaining)?;
         let (event_x, remaining) = i16::try_parse(remaining)?;
@@ -1664,12 +1664,12 @@ pub const BUTTON_RELEASE_EVENT: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ButtonReleaseEvent {
     pub response_type: u8,
-    pub detail: BUTTON,
+    pub detail: Button,
     pub sequence: u16,
-    pub time: TIMESTAMP,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
+    pub time: Timestamp,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
     pub root_x: i16,
     pub root_y: i16,
     pub event_x: i16,
@@ -1680,12 +1680,12 @@ pub struct ButtonReleaseEvent {
 impl ButtonReleaseEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let (detail, remaining) = BUTTON::try_parse(remaining)?;
+        let (detail, remaining) = Button::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
         let (root_x, remaining) = i16::try_parse(remaining)?;
         let (root_y, remaining) = i16::try_parse(remaining)?;
         let (event_x, remaining) = i16::try_parse(remaining)?;
@@ -1836,10 +1836,10 @@ pub struct MotionNotifyEvent {
     pub response_type: u8,
     pub detail: Motion,
     pub sequence: u16,
-    pub time: TIMESTAMP,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
+    pub time: Timestamp,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
     pub root_x: i16,
     pub root_y: i16,
     pub event_x: i16,
@@ -1852,10 +1852,10 @@ impl MotionNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
         let (root_x, remaining) = i16::try_parse(remaining)?;
         let (root_y, remaining) = i16::try_parse(remaining)?;
         let (event_x, remaining) = i16::try_parse(remaining)?;
@@ -2083,10 +2083,10 @@ pub struct EnterNotifyEvent {
     pub response_type: u8,
     pub detail: NotifyDetail,
     pub sequence: u16,
-    pub time: TIMESTAMP,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
+    pub time: Timestamp,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
     pub root_x: i16,
     pub root_y: i16,
     pub event_x: i16,
@@ -2100,10 +2100,10 @@ impl EnterNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
         let (root_x, remaining) = i16::try_parse(remaining)?;
         let (root_y, remaining) = i16::try_parse(remaining)?;
         let (event_x, remaining) = i16::try_parse(remaining)?;
@@ -2185,10 +2185,10 @@ pub struct LeaveNotifyEvent {
     pub response_type: u8,
     pub detail: NotifyDetail,
     pub sequence: u16,
-    pub time: TIMESTAMP,
-    pub root: WINDOW,
-    pub event: WINDOW,
-    pub child: WINDOW,
+    pub time: Timestamp,
+    pub root: Window,
+    pub event: Window,
+    pub child: Window,
     pub root_x: i16,
     pub root_y: i16,
     pub event_x: i16,
@@ -2202,10 +2202,10 @@ impl LeaveNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
         let (root_x, remaining) = i16::try_parse(remaining)?;
         let (root_y, remaining) = i16::try_parse(remaining)?;
         let (event_x, remaining) = i16::try_parse(remaining)?;
@@ -2279,7 +2279,7 @@ pub struct FocusInEvent {
     pub response_type: u8,
     pub detail: NotifyDetail,
     pub sequence: u16,
-    pub event: WINDOW,
+    pub event: Window,
     pub mode: NotifyMode,
 }
 impl FocusInEvent {
@@ -2287,7 +2287,7 @@ impl FocusInEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let detail = detail.try_into()?;
@@ -2347,7 +2347,7 @@ pub struct FocusOutEvent {
     pub response_type: u8,
     pub detail: NotifyDetail,
     pub sequence: u16,
-    pub event: WINDOW,
+    pub event: Window,
     pub mode: NotifyMode,
 }
 impl FocusOutEvent {
@@ -2355,7 +2355,7 @@ impl FocusOutEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let detail = detail.try_into()?;
@@ -2534,7 +2534,7 @@ pub const EXPOSE_EVENT: u8 = 12;
 pub struct ExposeEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub window: WINDOW,
+    pub window: Window,
     pub x: u16,
     pub y: u16,
     pub width: u16,
@@ -2546,7 +2546,7 @@ impl ExposeEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
         let (x, remaining) = u16::try_parse(remaining)?;
         let (y, remaining) = u16::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
@@ -2603,7 +2603,7 @@ pub const GRAPHICS_EXPOSURE_EVENT: u8 = 13;
 pub struct GraphicsExposureEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub drawable: DRAWABLE,
+    pub drawable: Drawable,
     pub x: u16,
     pub y: u16,
     pub width: u16,
@@ -2617,7 +2617,7 @@ impl GraphicsExposureEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (drawable, remaining) = DRAWABLE::try_parse(remaining)?;
+        let (drawable, remaining) = Drawable::try_parse(remaining)?;
         let (x, remaining) = u16::try_parse(remaining)?;
         let (y, remaining) = u16::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
@@ -2678,7 +2678,7 @@ pub const NO_EXPOSURE_EVENT: u8 = 14;
 pub struct NoExposureEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub drawable: DRAWABLE,
+    pub drawable: Drawable,
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
@@ -2687,7 +2687,7 @@ impl NoExposureEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (drawable, remaining) = DRAWABLE::try_parse(remaining)?;
+        let (drawable, remaining) = Drawable::try_parse(remaining)?;
         let (minor_opcode, remaining) = u16::try_parse(remaining)?;
         let (major_opcode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
@@ -2803,7 +2803,7 @@ pub const VISIBILITY_NOTIFY_EVENT: u8 = 15;
 pub struct VisibilityNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub window: WINDOW,
+    pub window: Window,
     pub state: Visibility,
 }
 impl VisibilityNotifyEvent {
@@ -2811,7 +2811,7 @@ impl VisibilityNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let state = state.try_into()?;
@@ -2861,8 +2861,8 @@ pub const CREATE_NOTIFY_EVENT: u8 = 16;
 pub struct CreateNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub parent: WINDOW,
-    pub window: WINDOW,
+    pub parent: Window,
+    pub window: Window,
     pub x: i16,
     pub y: i16,
     pub width: u16,
@@ -2875,8 +2875,8 @@ impl CreateNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (parent, remaining) = WINDOW::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (parent, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
@@ -2948,16 +2948,16 @@ pub const DESTROY_NOTIFY_EVENT: u8 = 17;
 pub struct DestroyNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub event: WINDOW,
-    pub window: WINDOW,
+    pub event: Window,
+    pub window: Window,
 }
 impl DestroyNotifyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
         let result = DestroyNotifyEvent { response_type, sequence, event, window };
         Ok((result, remaining))
     }
@@ -3018,8 +3018,8 @@ pub const UNMAP_NOTIFY_EVENT: u8 = 18;
 pub struct UnmapNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub event: WINDOW,
-    pub window: WINDOW,
+    pub event: Window,
+    pub window: Window,
     pub from_configure: bool,
 }
 impl UnmapNotifyEvent {
@@ -3027,8 +3027,8 @@ impl UnmapNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
         let (from_configure, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let result = UnmapNotifyEvent { response_type, sequence, event, window, from_configure };
@@ -3091,8 +3091,8 @@ pub const MAP_NOTIFY_EVENT: u8 = 19;
 pub struct MapNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub event: WINDOW,
-    pub window: WINDOW,
+    pub event: Window,
+    pub window: Window,
     pub override_redirect: bool,
 }
 impl MapNotifyEvent {
@@ -3100,8 +3100,8 @@ impl MapNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
         let (override_redirect, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let result = MapNotifyEvent { response_type, sequence, event, window, override_redirect };
@@ -3162,16 +3162,16 @@ pub const MAP_REQUEST_EVENT: u8 = 20;
 pub struct MapRequestEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub parent: WINDOW,
-    pub window: WINDOW,
+    pub parent: Window,
+    pub window: Window,
 }
 impl MapRequestEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (parent, remaining) = WINDOW::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (parent, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
         let result = MapRequestEvent { response_type, sequence, parent, window };
         Ok((result, remaining))
     }
@@ -3218,9 +3218,9 @@ pub const REPARENT_NOTIFY_EVENT: u8 = 21;
 pub struct ReparentNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub event: WINDOW,
-    pub window: WINDOW,
-    pub parent: WINDOW,
+    pub event: Window,
+    pub window: Window,
+    pub parent: Window,
     pub x: i16,
     pub y: i16,
     pub override_redirect: bool,
@@ -3230,9 +3230,9 @@ impl ReparentNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
-        let (parent, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (parent, remaining) = Window::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
         let (override_redirect, remaining) = bool::try_parse(remaining)?;
@@ -3310,9 +3310,9 @@ pub const CONFIGURE_NOTIFY_EVENT: u8 = 22;
 pub struct ConfigureNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub event: WINDOW,
-    pub window: WINDOW,
-    pub above_sibling: WINDOW,
+    pub event: Window,
+    pub window: Window,
+    pub above_sibling: Window,
     pub x: i16,
     pub y: i16,
     pub width: u16,
@@ -3325,9 +3325,9 @@ impl ConfigureNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
-        let (above_sibling, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (above_sibling, remaining) = Window::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
@@ -3389,9 +3389,9 @@ pub struct ConfigureRequestEvent {
     pub response_type: u8,
     pub stack_mode: StackMode,
     pub sequence: u16,
-    pub parent: WINDOW,
-    pub window: WINDOW,
-    pub sibling: WINDOW,
+    pub parent: Window,
+    pub window: Window,
+    pub sibling: Window,
     pub x: i16,
     pub y: i16,
     pub width: u16,
@@ -3404,9 +3404,9 @@ impl ConfigureRequestEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (stack_mode, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (parent, remaining) = WINDOW::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
-        let (sibling, remaining) = WINDOW::try_parse(remaining)?;
+        let (parent, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (sibling, remaining) = Window::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
@@ -3468,8 +3468,8 @@ pub const GRAVITY_NOTIFY_EVENT: u8 = 24;
 pub struct GravityNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub event: WINDOW,
-    pub window: WINDOW,
+    pub event: Window,
+    pub window: Window,
     pub x: i16,
     pub y: i16,
 }
@@ -3478,8 +3478,8 @@ impl GravityNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
         let result = GravityNotifyEvent { response_type, sequence, event, window, x, y };
@@ -3530,7 +3530,7 @@ pub const RESIZE_REQUEST_EVENT: u8 = 25;
 pub struct ResizeRequestEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub window: WINDOW,
+    pub window: Window,
     pub width: u16,
     pub height: u16,
 }
@@ -3539,7 +3539,7 @@ impl ResizeRequestEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
         let (height, remaining) = u16::try_parse(remaining)?;
         let result = ResizeRequestEvent { response_type, sequence, window, width, height };
@@ -3670,8 +3670,8 @@ pub const CIRCULATE_NOTIFY_EVENT: u8 = 26;
 pub struct CirculateNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub event: WINDOW,
-    pub window: WINDOW,
+    pub event: Window,
+    pub window: Window,
     pub place: Place,
 }
 impl CirculateNotifyEvent {
@@ -3679,8 +3679,8 @@ impl CirculateNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (place, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -3744,8 +3744,8 @@ pub const CIRCULATE_REQUEST_EVENT: u8 = 27;
 pub struct CirculateRequestEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub event: WINDOW,
-    pub window: WINDOW,
+    pub event: Window,
+    pub window: Window,
     pub place: Place,
 }
 impl CirculateRequestEvent {
@@ -3753,8 +3753,8 @@ impl CirculateRequestEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (event, remaining) = WINDOW::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (event, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (place, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -3880,9 +3880,9 @@ pub const PROPERTY_NOTIFY_EVENT: u8 = 28;
 pub struct PropertyNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub window: WINDOW,
-    pub atom: ATOM,
-    pub time: TIMESTAMP,
+    pub window: Window,
+    pub atom: Atom,
+    pub time: Timestamp,
     pub state: Property,
 }
 impl PropertyNotifyEvent {
@@ -3890,9 +3890,9 @@ impl PropertyNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
-        let (atom, remaining) = ATOM::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (atom, remaining) = Atom::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let state = state.try_into()?;
@@ -3944,18 +3944,18 @@ pub const SELECTION_CLEAR_EVENT: u8 = 29;
 pub struct SelectionClearEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
-    pub owner: WINDOW,
-    pub selection: ATOM,
+    pub time: Timestamp,
+    pub owner: Window,
+    pub selection: Atom,
 }
 impl SelectionClearEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (owner, remaining) = WINDOW::try_parse(remaining)?;
-        let (selection, remaining) = ATOM::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (owner, remaining) = Window::try_parse(remaining)?;
+        let (selection, remaining) = Atom::try_parse(remaining)?;
         let result = SelectionClearEvent { response_type, sequence, time, owner, selection };
         Ok((result, remaining))
     }
@@ -4058,7 +4058,7 @@ impl TryFrom<u32> for Time {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[allow(non_camel_case_types)]
-pub enum Atom {
+pub enum AtomEnum {
     None,
     Any,
     PRIMARY,
@@ -4130,104 +4130,104 @@ pub enum Atom {
     WM_CLASS,
     WM_TRANSIENT_FOR,
 }
-impl From<Atom> for u8 {
-    fn from(input: Atom) -> Self {
+impl From<AtomEnum> for u8 {
+    fn from(input: AtomEnum) -> Self {
         match input {
-            Atom::None => 0,
-            Atom::Any => 0,
-            Atom::PRIMARY => 1,
-            Atom::SECONDARY => 2,
-            Atom::ARC => 3,
-            Atom::ATOM => 4,
-            Atom::BITMAP => 5,
-            Atom::CARDINAL => 6,
-            Atom::COLORMAP => 7,
-            Atom::CURSOR => 8,
-            Atom::CUT_BUFFER0 => 9,
-            Atom::CUT_BUFFER1 => 10,
-            Atom::CUT_BUFFER2 => 11,
-            Atom::CUT_BUFFER3 => 12,
-            Atom::CUT_BUFFER4 => 13,
-            Atom::CUT_BUFFER5 => 14,
-            Atom::CUT_BUFFER6 => 15,
-            Atom::CUT_BUFFER7 => 16,
-            Atom::DRAWABLE => 17,
-            Atom::FONT => 18,
-            Atom::INTEGER => 19,
-            Atom::PIXMAP => 20,
-            Atom::POINT => 21,
-            Atom::RECTANGLE => 22,
-            Atom::RESOURCE_MANAGER => 23,
-            Atom::RGB_COLOR_MAP => 24,
-            Atom::RGB_BEST_MAP => 25,
-            Atom::RGB_BLUE_MAP => 26,
-            Atom::RGB_DEFAULT_MAP => 27,
-            Atom::RGB_GRAY_MAP => 28,
-            Atom::RGB_GREEN_MAP => 29,
-            Atom::RGB_RED_MAP => 30,
-            Atom::STRING => 31,
-            Atom::VISUALID => 32,
-            Atom::WINDOW => 33,
-            Atom::WM_COMMAND => 34,
-            Atom::WM_HINTS => 35,
-            Atom::WM_CLIENT_MACHINE => 36,
-            Atom::WM_ICON_NAME => 37,
-            Atom::WM_ICON_SIZE => 38,
-            Atom::WM_NAME => 39,
-            Atom::WM_NORMAL_HINTS => 40,
-            Atom::WM_SIZE_HINTS => 41,
-            Atom::WM_ZOOM_HINTS => 42,
-            Atom::MIN_SPACE => 43,
-            Atom::NORM_SPACE => 44,
-            Atom::MAX_SPACE => 45,
-            Atom::END_SPACE => 46,
-            Atom::SUPERSCRIPT_X => 47,
-            Atom::SUPERSCRIPT_Y => 48,
-            Atom::SUBSCRIPT_X => 49,
-            Atom::SUBSCRIPT_Y => 50,
-            Atom::UNDERLINE_POSITION => 51,
-            Atom::UNDERLINE_THICKNESS => 52,
-            Atom::STRIKEOUT_ASCENT => 53,
-            Atom::STRIKEOUT_DESCENT => 54,
-            Atom::ITALIC_ANGLE => 55,
-            Atom::X_HEIGHT => 56,
-            Atom::QUAD_WIDTH => 57,
-            Atom::WEIGHT => 58,
-            Atom::POINT_SIZE => 59,
-            Atom::RESOLUTION => 60,
-            Atom::COPYRIGHT => 61,
-            Atom::NOTICE => 62,
-            Atom::FONT_NAME => 63,
-            Atom::FAMILY_NAME => 64,
-            Atom::FULL_NAME => 65,
-            Atom::CAP_HEIGHT => 66,
-            Atom::WM_CLASS => 67,
-            Atom::WM_TRANSIENT_FOR => 68,
+            AtomEnum::None => 0,
+            AtomEnum::Any => 0,
+            AtomEnum::PRIMARY => 1,
+            AtomEnum::SECONDARY => 2,
+            AtomEnum::ARC => 3,
+            AtomEnum::ATOM => 4,
+            AtomEnum::BITMAP => 5,
+            AtomEnum::CARDINAL => 6,
+            AtomEnum::COLORMAP => 7,
+            AtomEnum::CURSOR => 8,
+            AtomEnum::CUT_BUFFER0 => 9,
+            AtomEnum::CUT_BUFFER1 => 10,
+            AtomEnum::CUT_BUFFER2 => 11,
+            AtomEnum::CUT_BUFFER3 => 12,
+            AtomEnum::CUT_BUFFER4 => 13,
+            AtomEnum::CUT_BUFFER5 => 14,
+            AtomEnum::CUT_BUFFER6 => 15,
+            AtomEnum::CUT_BUFFER7 => 16,
+            AtomEnum::DRAWABLE => 17,
+            AtomEnum::FONT => 18,
+            AtomEnum::INTEGER => 19,
+            AtomEnum::PIXMAP => 20,
+            AtomEnum::POINT => 21,
+            AtomEnum::RECTANGLE => 22,
+            AtomEnum::RESOURCE_MANAGER => 23,
+            AtomEnum::RGB_COLOR_MAP => 24,
+            AtomEnum::RGB_BEST_MAP => 25,
+            AtomEnum::RGB_BLUE_MAP => 26,
+            AtomEnum::RGB_DEFAULT_MAP => 27,
+            AtomEnum::RGB_GRAY_MAP => 28,
+            AtomEnum::RGB_GREEN_MAP => 29,
+            AtomEnum::RGB_RED_MAP => 30,
+            AtomEnum::STRING => 31,
+            AtomEnum::VISUALID => 32,
+            AtomEnum::WINDOW => 33,
+            AtomEnum::WM_COMMAND => 34,
+            AtomEnum::WM_HINTS => 35,
+            AtomEnum::WM_CLIENT_MACHINE => 36,
+            AtomEnum::WM_ICON_NAME => 37,
+            AtomEnum::WM_ICON_SIZE => 38,
+            AtomEnum::WM_NAME => 39,
+            AtomEnum::WM_NORMAL_HINTS => 40,
+            AtomEnum::WM_SIZE_HINTS => 41,
+            AtomEnum::WM_ZOOM_HINTS => 42,
+            AtomEnum::MIN_SPACE => 43,
+            AtomEnum::NORM_SPACE => 44,
+            AtomEnum::MAX_SPACE => 45,
+            AtomEnum::END_SPACE => 46,
+            AtomEnum::SUPERSCRIPT_X => 47,
+            AtomEnum::SUPERSCRIPT_Y => 48,
+            AtomEnum::SUBSCRIPT_X => 49,
+            AtomEnum::SUBSCRIPT_Y => 50,
+            AtomEnum::UNDERLINE_POSITION => 51,
+            AtomEnum::UNDERLINE_THICKNESS => 52,
+            AtomEnum::STRIKEOUT_ASCENT => 53,
+            AtomEnum::STRIKEOUT_DESCENT => 54,
+            AtomEnum::ITALIC_ANGLE => 55,
+            AtomEnum::X_HEIGHT => 56,
+            AtomEnum::QUAD_WIDTH => 57,
+            AtomEnum::WEIGHT => 58,
+            AtomEnum::POINT_SIZE => 59,
+            AtomEnum::RESOLUTION => 60,
+            AtomEnum::COPYRIGHT => 61,
+            AtomEnum::NOTICE => 62,
+            AtomEnum::FONT_NAME => 63,
+            AtomEnum::FAMILY_NAME => 64,
+            AtomEnum::FULL_NAME => 65,
+            AtomEnum::CAP_HEIGHT => 66,
+            AtomEnum::WM_CLASS => 67,
+            AtomEnum::WM_TRANSIENT_FOR => 68,
         }
     }
 }
-impl From<Atom> for Option<u8> {
-    fn from(input: Atom) -> Self {
+impl From<AtomEnum> for Option<u8> {
+    fn from(input: AtomEnum) -> Self {
         Some(u8::from(input))
     }
 }
-impl From<Atom> for u16 {
-    fn from(input: Atom) -> Self {
+impl From<AtomEnum> for u16 {
+    fn from(input: AtomEnum) -> Self {
         Self::from(u8::from(input))
     }
 }
-impl From<Atom> for Option<u16> {
-    fn from(input: Atom) -> Self {
+impl From<AtomEnum> for Option<u16> {
+    fn from(input: AtomEnum) -> Self {
         Some(u16::from(input))
     }
 }
-impl From<Atom> for u32 {
-    fn from(input: Atom) -> Self {
+impl From<AtomEnum> for u32 {
+    fn from(input: AtomEnum) -> Self {
         Self::from(u8::from(input))
     }
 }
-impl From<Atom> for Option<u32> {
-    fn from(input: Atom) -> Self {
+impl From<AtomEnum> for Option<u32> {
+    fn from(input: AtomEnum) -> Self {
         Some(u32::from(input))
     }
 }
@@ -4238,24 +4238,24 @@ pub const SELECTION_REQUEST_EVENT: u8 = 30;
 pub struct SelectionRequestEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
-    pub owner: WINDOW,
-    pub requestor: WINDOW,
-    pub selection: ATOM,
-    pub target: ATOM,
-    pub property: ATOM,
+    pub time: Timestamp,
+    pub owner: Window,
+    pub requestor: Window,
+    pub selection: Atom,
+    pub target: Atom,
+    pub property: Atom,
 }
 impl SelectionRequestEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (owner, remaining) = WINDOW::try_parse(remaining)?;
-        let (requestor, remaining) = WINDOW::try_parse(remaining)?;
-        let (selection, remaining) = ATOM::try_parse(remaining)?;
-        let (target, remaining) = ATOM::try_parse(remaining)?;
-        let (property, remaining) = ATOM::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (owner, remaining) = Window::try_parse(remaining)?;
+        let (requestor, remaining) = Window::try_parse(remaining)?;
+        let (selection, remaining) = Atom::try_parse(remaining)?;
+        let (target, remaining) = Atom::try_parse(remaining)?;
+        let (property, remaining) = Atom::try_parse(remaining)?;
         let result = SelectionRequestEvent { response_type, sequence, time, owner, requestor, selection, target, property };
         Ok((result, remaining))
     }
@@ -4306,22 +4306,22 @@ pub const SELECTION_NOTIFY_EVENT: u8 = 31;
 pub struct SelectionNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
-    pub requestor: WINDOW,
-    pub selection: ATOM,
-    pub target: ATOM,
-    pub property: ATOM,
+    pub time: Timestamp,
+    pub requestor: Window,
+    pub selection: Atom,
+    pub target: Atom,
+    pub property: Atom,
 }
 impl SelectionNotifyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (requestor, remaining) = WINDOW::try_parse(remaining)?;
-        let (selection, remaining) = ATOM::try_parse(remaining)?;
-        let (target, remaining) = ATOM::try_parse(remaining)?;
-        let (property, remaining) = ATOM::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (requestor, remaining) = Window::try_parse(remaining)?;
+        let (selection, remaining) = Atom::try_parse(remaining)?;
+        let (target, remaining) = Atom::try_parse(remaining)?;
+        let (property, remaining) = Atom::try_parse(remaining)?;
         let result = SelectionNotifyEvent { response_type, sequence, time, requestor, selection, target, property };
         Ok((result, remaining))
     }
@@ -4436,57 +4436,57 @@ impl TryFrom<u32> for ColormapState {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-pub enum Colormap {
+pub enum ColormapEnum {
     None = 0,
 }
-impl From<Colormap> for u8 {
-    fn from(input: Colormap) -> Self {
+impl From<ColormapEnum> for u8 {
+    fn from(input: ColormapEnum) -> Self {
         match input {
-            Colormap::None => 0,
+            ColormapEnum::None => 0,
         }
     }
 }
-impl From<Colormap> for Option<u8> {
-    fn from(input: Colormap) -> Self {
+impl From<ColormapEnum> for Option<u8> {
+    fn from(input: ColormapEnum) -> Self {
         Some(u8::from(input))
     }
 }
-impl From<Colormap> for u16 {
-    fn from(input: Colormap) -> Self {
+impl From<ColormapEnum> for u16 {
+    fn from(input: ColormapEnum) -> Self {
         Self::from(u8::from(input))
     }
 }
-impl From<Colormap> for Option<u16> {
-    fn from(input: Colormap) -> Self {
+impl From<ColormapEnum> for Option<u16> {
+    fn from(input: ColormapEnum) -> Self {
         Some(u16::from(input))
     }
 }
-impl From<Colormap> for u32 {
-    fn from(input: Colormap) -> Self {
+impl From<ColormapEnum> for u32 {
+    fn from(input: ColormapEnum) -> Self {
         Self::from(u8::from(input))
     }
 }
-impl From<Colormap> for Option<u32> {
-    fn from(input: Colormap) -> Self {
+impl From<ColormapEnum> for Option<u32> {
+    fn from(input: ColormapEnum) -> Self {
         Some(u32::from(input))
     }
 }
-impl TryFrom<u8> for Colormap {
+impl TryFrom<u8> for ColormapEnum {
     type Error = ParseError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(Colormap::None),
+            0 => Ok(ColormapEnum::None),
             _ => Err(ParseError::ParseError)
         }
     }
 }
-impl TryFrom<u16> for Colormap {
+impl TryFrom<u16> for ColormapEnum {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
         Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
     }
 }
-impl TryFrom<u32> for Colormap {
+impl TryFrom<u32> for ColormapEnum {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
@@ -4512,8 +4512,8 @@ pub const COLORMAP_NOTIFY_EVENT: u8 = 32;
 pub struct ColormapNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub window: WINDOW,
-    pub colormap: COLORMAP,
+    pub window: Window,
+    pub colormap: Colormap,
     pub new: bool,
     pub state: ColormapState,
 }
@@ -4522,8 +4522,8 @@ impl ColormapNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
-        let (colormap, remaining) = COLORMAP::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (colormap, remaining) = Colormap::try_parse(remaining)?;
         let (new, remaining) = bool::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
@@ -4789,8 +4789,8 @@ pub struct ClientMessageEvent {
     pub response_type: u8,
     pub format: u8,
     pub sequence: u16,
-    pub window: WINDOW,
-    pub type_: ATOM,
+    pub window: Window,
+    pub type_: Atom,
     pub data: ClientMessageData,
 }
 impl ClientMessageEvent {
@@ -4798,8 +4798,8 @@ impl ClientMessageEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (format, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
-        let (type_, remaining) = ATOM::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (type_, remaining) = Atom::try_parse(remaining)?;
         let (data, remaining) = ClientMessageData::try_parse(remaining)?;
         let result = ClientMessageEvent { response_type, format, sequence, window, type_, data };
         Ok((result, remaining))
@@ -4922,7 +4922,7 @@ pub struct MappingNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
     pub request: Mapping,
-    pub first_keycode: KEYCODE,
+    pub first_keycode: Keycode,
     pub count: u8,
 }
 impl MappingNotifyEvent {
@@ -4931,7 +4931,7 @@ impl MappingNotifyEvent {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (request, remaining) = u8::try_parse(remaining)?;
-        let (first_keycode, remaining) = KEYCODE::try_parse(remaining)?;
+        let (first_keycode, remaining) = Keycode::try_parse(remaining)?;
         let (count, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let request = request.try_into()?;
@@ -6429,21 +6429,21 @@ pub const CREATE_WINDOW_REQUEST: u8 = 1;
 /// Auxiliary and optional information for the create_window function.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct CreateWindowAux {
-    pub background_pixmap: Option<PIXMAP>,
+    pub background_pixmap: Option<Pixmap>,
     pub background_pixel: Option<u32>,
-    pub border_pixmap: Option<PIXMAP>,
+    pub border_pixmap: Option<Pixmap>,
     pub border_pixel: Option<u32>,
     pub bit_gravity: Option<u32>,
     pub win_gravity: Option<u32>,
     pub backing_store: Option<u32>,
     pub backing_planes: Option<u32>,
     pub backing_pixel: Option<u32>,
-    pub override_redirect: Option<BOOL32>,
-    pub save_under: Option<BOOL32>,
+    pub override_redirect: Option<Bool32>,
+    pub save_under: Option<Bool32>,
     pub event_mask: Option<u32>,
     pub do_not_propogate_mask: Option<u32>,
-    pub colormap: Option<COLORMAP>,
-    pub cursor: Option<CURSOR>,
+    pub colormap: Option<Colormap>,
+    pub cursor: Option<Cursor>,
 }
 impl CreateWindowAux {
     /// Create a new instance with all fields unset / not present.
@@ -6500,7 +6500,7 @@ impl CreateWindowAux {
         mask
     }
     /// Set the background_pixmap field of this structure.
-    pub fn background_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<PIXMAP>> {
+    pub fn background_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.background_pixmap = value.into();
         self
     }
@@ -6510,7 +6510,7 @@ impl CreateWindowAux {
         self
     }
     /// Set the border_pixmap field of this structure.
-    pub fn border_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<PIXMAP>> {
+    pub fn border_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.border_pixmap = value.into();
         self
     }
@@ -6545,12 +6545,12 @@ impl CreateWindowAux {
         self
     }
     /// Set the override_redirect field of this structure.
-    pub fn override_redirect<I>(mut self, value: I) -> Self where I: Into<Option<BOOL32>> {
+    pub fn override_redirect<I>(mut self, value: I) -> Self where I: Into<Option<Bool32>> {
         self.override_redirect = value.into();
         self
     }
     /// Set the save_under field of this structure.
-    pub fn save_under<I>(mut self, value: I) -> Self where I: Into<Option<BOOL32>> {
+    pub fn save_under<I>(mut self, value: I) -> Self where I: Into<Option<Bool32>> {
         self.save_under = value.into();
         self
     }
@@ -6565,12 +6565,12 @@ impl CreateWindowAux {
         self
     }
     /// Set the colormap field of this structure.
-    pub fn colormap<I>(mut self, value: I) -> Self where I: Into<Option<COLORMAP>> {
+    pub fn colormap<I>(mut self, value: I) -> Self where I: Into<Option<Colormap>> {
         self.colormap = value.into();
         self
     }
     /// Set the cursor field of this structure.
-    pub fn cursor<I>(mut self, value: I) -> Self where I: Into<Option<CURSOR>> {
+    pub fn cursor<I>(mut self, value: I) -> Self where I: Into<Option<Cursor>> {
         self.cursor = value.into();
         self
     }
@@ -6683,7 +6683,7 @@ impl Serialize for CreateWindowAux {
 /// * CreateNotify: event
 /// * MapWindow: request
 /// * xcb_generate_id: function
-pub fn create_window<'c, Conn, A>(conn: &'c Conn, depth: u8, wid: WINDOW, parent: WINDOW, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, visual: VISUALID, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_window<'c, Conn, A>(conn: &'c Conn, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, visual: Visualid, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u16>
 {
     let value_mask = value_list.value_mask();
@@ -6749,21 +6749,21 @@ pub const CHANGE_WINDOW_ATTRIBUTES_REQUEST: u8 = 2;
 /// Auxiliary and optional information for the change_window_attributes function.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ChangeWindowAttributesAux {
-    pub background_pixmap: Option<PIXMAP>,
+    pub background_pixmap: Option<Pixmap>,
     pub background_pixel: Option<u32>,
-    pub border_pixmap: Option<PIXMAP>,
+    pub border_pixmap: Option<Pixmap>,
     pub border_pixel: Option<u32>,
     pub bit_gravity: Option<u32>,
     pub win_gravity: Option<u32>,
     pub backing_store: Option<u32>,
     pub backing_planes: Option<u32>,
     pub backing_pixel: Option<u32>,
-    pub override_redirect: Option<BOOL32>,
-    pub save_under: Option<BOOL32>,
+    pub override_redirect: Option<Bool32>,
+    pub save_under: Option<Bool32>,
     pub event_mask: Option<u32>,
     pub do_not_propogate_mask: Option<u32>,
-    pub colormap: Option<COLORMAP>,
-    pub cursor: Option<CURSOR>,
+    pub colormap: Option<Colormap>,
+    pub cursor: Option<Cursor>,
 }
 impl ChangeWindowAttributesAux {
     /// Create a new instance with all fields unset / not present.
@@ -6820,7 +6820,7 @@ impl ChangeWindowAttributesAux {
         mask
     }
     /// Set the background_pixmap field of this structure.
-    pub fn background_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<PIXMAP>> {
+    pub fn background_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.background_pixmap = value.into();
         self
     }
@@ -6830,7 +6830,7 @@ impl ChangeWindowAttributesAux {
         self
     }
     /// Set the border_pixmap field of this structure.
-    pub fn border_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<PIXMAP>> {
+    pub fn border_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.border_pixmap = value.into();
         self
     }
@@ -6865,12 +6865,12 @@ impl ChangeWindowAttributesAux {
         self
     }
     /// Set the override_redirect field of this structure.
-    pub fn override_redirect<I>(mut self, value: I) -> Self where I: Into<Option<BOOL32>> {
+    pub fn override_redirect<I>(mut self, value: I) -> Self where I: Into<Option<Bool32>> {
         self.override_redirect = value.into();
         self
     }
     /// Set the save_under field of this structure.
-    pub fn save_under<I>(mut self, value: I) -> Self where I: Into<Option<BOOL32>> {
+    pub fn save_under<I>(mut self, value: I) -> Self where I: Into<Option<Bool32>> {
         self.save_under = value.into();
         self
     }
@@ -6885,12 +6885,12 @@ impl ChangeWindowAttributesAux {
         self
     }
     /// Set the colormap field of this structure.
-    pub fn colormap<I>(mut self, value: I) -> Self where I: Into<Option<COLORMAP>> {
+    pub fn colormap<I>(mut self, value: I) -> Self where I: Into<Option<Colormap>> {
         self.colormap = value.into();
         self
     }
     /// Set the cursor field of this structure.
-    pub fn cursor<I>(mut self, value: I) -> Self where I: Into<Option<CURSOR>> {
+    pub fn cursor<I>(mut self, value: I) -> Self where I: Into<Option<Cursor>> {
         self.cursor = value.into();
         self
     }
@@ -6970,7 +6970,7 @@ impl Serialize for ChangeWindowAttributesAux {
 /// * `Pixmap` - TODO: reasons?
 /// * `Value` - TODO: reasons?
 /// * `Window` - The specified `window` does not exist.
-pub fn change_window_attributes<'c, Conn>(conn: &'c Conn, window: WINDOW, value_list: &ChangeWindowAttributesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_window_attributes<'c, Conn>(conn: &'c Conn, window: Window, value_list: &ChangeWindowAttributesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let value_mask = value_list.value_mask();
@@ -7080,7 +7080,7 @@ pub const GET_WINDOW_ATTRIBUTES_REQUEST: u8 = 3;
 ///
 /// * `Drawable` - TODO: reasons?
 /// * `Window` - The specified `window` does not exist.
-pub fn get_window_attributes<Conn>(conn: &Conn, window: WINDOW) -> Result<Cookie<'_, Conn, GetWindowAttributesReply>, ConnectionError>
+pub fn get_window_attributes<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, GetWindowAttributesReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -7120,7 +7120,7 @@ pub struct GetWindowAttributesReply {
     pub backing_store: BackingStore,
     pub sequence: u16,
     pub length: u32,
-    pub visual: VISUALID,
+    pub visual: Visualid,
     pub class: WindowClass,
     pub bit_gravity: u8,
     pub win_gravity: u8,
@@ -7130,7 +7130,7 @@ pub struct GetWindowAttributesReply {
     pub map_is_installed: bool,
     pub map_state: MapState,
     pub override_redirect: bool,
-    pub colormap: COLORMAP,
+    pub colormap: Colormap,
     pub all_event_masks: u32,
     pub your_event_mask: u32,
     pub do_not_propagate_mask: u16,
@@ -7141,7 +7141,7 @@ impl GetWindowAttributesReply {
         let (backing_store, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (visual, remaining) = VISUALID::try_parse(remaining)?;
+        let (visual, remaining) = Visualid::try_parse(remaining)?;
         let (class, remaining) = u16::try_parse(remaining)?;
         let (bit_gravity, remaining) = u8::try_parse(remaining)?;
         let (win_gravity, remaining) = u8::try_parse(remaining)?;
@@ -7151,7 +7151,7 @@ impl GetWindowAttributesReply {
         let (map_is_installed, remaining) = bool::try_parse(remaining)?;
         let (map_state, remaining) = u8::try_parse(remaining)?;
         let (override_redirect, remaining) = bool::try_parse(remaining)?;
-        let (colormap, remaining) = COLORMAP::try_parse(remaining)?;
+        let (colormap, remaining) = Colormap::try_parse(remaining)?;
         let (all_event_masks, remaining) = u32::try_parse(remaining)?;
         let (your_event_mask, remaining) = u32::try_parse(remaining)?;
         let (do_not_propagate_mask, remaining) = u16::try_parse(remaining)?;
@@ -7194,7 +7194,7 @@ pub const DESTROY_WINDOW_REQUEST: u8 = 4;
 /// * DestroyNotify: event
 /// * MapWindow: request
 /// * UnmapWindow: request
-pub fn destroy_window<Conn>(conn: &Conn, window: WINDOW) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn destroy_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -7217,7 +7217,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the DestroySubwindows request
 pub const DESTROY_SUBWINDOWS_REQUEST: u8 = 5;
-pub fn destroy_subwindows<Conn>(conn: &Conn, window: WINDOW) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn destroy_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -7324,7 +7324,7 @@ pub const CHANGE_SAVE_SET_REQUEST: u8 = 6;
 /// # See
 ///
 /// * ReparentWindow: request
-pub fn change_save_set<Conn, A>(conn: &Conn, mode: A, window: WINDOW) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn change_save_set<Conn, A>(conn: &Conn, mode: A, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let length: usize = (8) / 4;
@@ -7381,7 +7381,7 @@ pub const REPARENT_WINDOW_REQUEST: u8 = 7;
 /// * MapWindow: request
 /// * ReparentNotify: event
 /// * UnmapWindow: request
-pub fn reparent_window<Conn>(conn: &Conn, window: WINDOW, parent: WINDOW, x: i16, y: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn reparent_window<Conn>(conn: &Conn, window: Window, parent: Window, x: i16, y: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16) / 4;
@@ -7450,7 +7450,7 @@ pub const MAP_WINDOW_REQUEST: u8 = 8;
 /// * Expose: event
 /// * MapNotify: event
 /// * UnmapWindow: request
-pub fn map_window<Conn>(conn: &Conn, window: WINDOW) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn map_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -7473,7 +7473,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the MapSubwindows request
 pub const MAP_SUBWINDOWS_REQUEST: u8 = 9;
-pub fn map_subwindows<Conn>(conn: &Conn, window: WINDOW) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn map_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -7517,7 +7517,7 @@ pub const UNMAP_WINDOW_REQUEST: u8 = 10;
 /// * Expose: event
 /// * MapWindow: request
 /// * UnmapNotify: event
-pub fn unmap_window<Conn>(conn: &Conn, window: WINDOW) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn unmap_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -7540,7 +7540,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the UnmapSubwindows request
 pub const UNMAP_SUBWINDOWS_REQUEST: u8 = 11;
-pub fn unmap_subwindows<Conn>(conn: &Conn, window: WINDOW) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn unmap_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -7720,7 +7720,7 @@ pub struct ConfigureWindowAux {
     pub width: Option<u32>,
     pub height: Option<u32>,
     pub border_width: Option<u32>,
-    pub sibling: Option<WINDOW>,
+    pub sibling: Option<Window>,
     pub stack_mode: Option<u32>,
 }
 impl ConfigureWindowAux {
@@ -7779,7 +7779,7 @@ impl ConfigureWindowAux {
         self
     }
     /// Set the sibling field of this structure.
-    pub fn sibling<I>(mut self, value: I) -> Self where I: Into<Option<WINDOW>> {
+    pub fn sibling<I>(mut self, value: I) -> Self where I: Into<Option<Window>> {
         self.sibling = value.into();
         self
     }
@@ -7870,7 +7870,7 @@ impl Serialize for ConfigureWindowAux {
 ///     xcb_flush(c);
 /// }
 /// ```
-pub fn configure_window<'c, Conn>(conn: &'c Conn, window: WINDOW, value_list: &ConfigureWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn configure_window<'c, Conn>(conn: &'c Conn, window: Window, value_list: &ConfigureWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let value_mask = value_list.value_mask();
@@ -7981,7 +7981,7 @@ pub const CIRCULATE_WINDOW_REQUEST: u8 = 13;
 ///
 /// * `Value` - The specified `direction` is invalid.
 /// * `Window` - The specified `window` does not exist.
-pub fn circulate_window<Conn, A>(conn: &Conn, direction: A, window: WINDOW) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn circulate_window<Conn, A>(conn: &Conn, direction: A, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let length: usize = (8) / 4;
@@ -8042,7 +8042,7 @@ pub const GET_GEOMETRY_REQUEST: u8 = 14;
 ///     free(reply);
 /// }
 /// ```
-pub fn get_geometry<Conn>(conn: &Conn, drawable: DRAWABLE) -> Result<Cookie<'_, Conn, GetGeometryReply>, ConnectionError>
+pub fn get_geometry<Conn>(conn: &Conn, drawable: Drawable) -> Result<Cookie<'_, Conn, GetGeometryReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -8084,7 +8084,7 @@ pub struct GetGeometryReply {
     pub depth: u8,
     pub sequence: u16,
     pub length: u32,
-    pub root: WINDOW,
+    pub root: Window,
     pub x: i16,
     pub y: i16,
     pub width: u16,
@@ -8097,7 +8097,7 @@ impl GetGeometryReply {
         let (depth, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
@@ -8154,7 +8154,7 @@ pub const QUERY_TREE_REQUEST: u8 = 15;
 ///     }
 /// }
 /// ```
-pub fn query_tree<Conn>(conn: &Conn, window: WINDOW) -> Result<Cookie<'_, Conn, QueryTreeReply>, ConnectionError>
+pub fn query_tree<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, QueryTreeReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -8187,9 +8187,9 @@ pub struct QueryTreeReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub root: WINDOW,
-    pub parent: WINDOW,
-    pub children: Vec<WINDOW>,
+    pub root: Window,
+    pub parent: Window,
+    pub children: Vec<Window>,
 }
 impl QueryTreeReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -8197,11 +8197,11 @@ impl QueryTreeReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (parent, remaining) = WINDOW::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (parent, remaining) = Window::try_parse(remaining)?;
         let (children_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(14..).ok_or(ParseError::ParseError)?;
-        let (children, remaining) = crate::x11_utils::parse_list::<WINDOW>(remaining, children_len as usize)?;
+        let (children, remaining) = crate::x11_utils::parse_list::<Window>(remaining, children_len as usize)?;
         let result = QueryTreeReply { response_type, sequence, length, root, parent, children };
         Ok((result, remaining))
     }
@@ -8290,7 +8290,7 @@ pub struct InternAtomReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub atom: ATOM,
+    pub atom: Atom,
 }
 impl InternAtomReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -8298,7 +8298,7 @@ impl InternAtomReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (atom, remaining) = ATOM::try_parse(remaining)?;
+        let (atom, remaining) = Atom::try_parse(remaining)?;
         let result = InternAtomReply { response_type, sequence, length, atom };
         Ok((result, remaining))
     }
@@ -8312,7 +8312,7 @@ impl TryFrom<&[u8]> for InternAtomReply {
 
 /// Opcode for the GetAtomName request
 pub const GET_ATOM_NAME_REQUEST: u8 = 17;
-pub fn get_atom_name<Conn>(conn: &Conn, atom: ATOM) -> Result<Cookie<'_, Conn, GetAtomNameReply>, ConnectionError>
+pub fn get_atom_name<Conn>(conn: &Conn, atom: Atom) -> Result<Cookie<'_, Conn, GetAtomNameReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -8488,8 +8488,8 @@ pub const CHANGE_PROPERTY_REQUEST: u8 = 18;
 ///     xcb_flush(conn);
 /// }
 /// ```
-pub fn change_property<'c, Conn, A, B, C>(conn: &'c Conn, mode: A, window: WINDOW, property: B, type_: C, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<ATOM>, C: Into<ATOM>
+pub fn change_property<'c, Conn, A, B, C>(conn: &'c Conn, mode: A, window: Window, property: B, type_: C, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<Atom>, C: Into<Atom>
 {
     let length: usize = (24 + 1 * data.len() + 3) / 4;
     let mode = mode.into();
@@ -8539,7 +8539,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<ATOM>, C: Into<ATOM
 
 /// Opcode for the DeleteProperty request
 pub const DELETE_PROPERTY_REQUEST: u8 = 19;
-pub fn delete_property<Conn>(conn: &Conn, window: WINDOW, property: ATOM) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn delete_property<Conn>(conn: &Conn, window: Window, property: Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12) / 4;
@@ -8859,7 +8859,7 @@ impl GetPropertyReply {
 ///     free(reply);
 /// }
 /// ```
-pub fn get_property<Conn>(conn: &Conn, delete: bool, window: WINDOW, property: ATOM, type_: ATOM, long_offset: u32, long_length: u32) -> Result<Cookie<'_, Conn, GetPropertyReply>, ConnectionError>
+pub fn get_property<Conn>(conn: &Conn, delete: bool, window: Window, property: Atom, type_: Atom, long_offset: u32, long_length: u32) -> Result<Cookie<'_, Conn, GetPropertyReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (24) / 4;
@@ -8919,7 +8919,7 @@ pub struct GetPropertyReply {
     pub format: u8,
     pub sequence: u16,
     pub length: u32,
-    pub type_: ATOM,
+    pub type_: Atom,
     pub bytes_after: u32,
     pub value_len: u32,
     pub value: Vec<u8>,
@@ -8930,7 +8930,7 @@ impl GetPropertyReply {
         let (format, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (type_, remaining) = ATOM::try_parse(remaining)?;
+        let (type_, remaining) = Atom::try_parse(remaining)?;
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (value_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
@@ -8948,7 +8948,7 @@ impl TryFrom<&[u8]> for GetPropertyReply {
 
 /// Opcode for the ListProperties request
 pub const LIST_PROPERTIES_REQUEST: u8 = 21;
-pub fn list_properties<Conn>(conn: &Conn, window: WINDOW) -> Result<Cookie<'_, Conn, ListPropertiesReply>, ConnectionError>
+pub fn list_properties<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, ListPropertiesReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -8973,7 +8973,7 @@ pub struct ListPropertiesReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub atoms: Vec<ATOM>,
+    pub atoms: Vec<Atom>,
 }
 impl ListPropertiesReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -8983,7 +8983,7 @@ impl ListPropertiesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (atoms_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (atoms, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, atoms_len as usize)?;
+        let (atoms, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, atoms_len as usize)?;
         let result = ListPropertiesReply { response_type, sequence, length, atoms };
         Ok((result, remaining))
     }
@@ -9026,7 +9026,7 @@ pub const SET_SELECTION_OWNER_REQUEST: u8 = 22;
 /// # See
 ///
 /// * SetSelectionOwner: request
-pub fn set_selection_owner<Conn>(conn: &Conn, owner: WINDOW, selection: ATOM, time: TIMESTAMP) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_selection_owner<Conn>(conn: &Conn, owner: Window, selection: Atom, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16) / 4;
@@ -9076,7 +9076,7 @@ pub const GET_SELECTION_OWNER_REQUEST: u8 = 23;
 /// # See
 ///
 /// * SetSelectionOwner: request
-pub fn get_selection_owner<Conn>(conn: &Conn, selection: ATOM) -> Result<Cookie<'_, Conn, GetSelectionOwnerReply>, ConnectionError>
+pub fn get_selection_owner<Conn>(conn: &Conn, selection: Atom) -> Result<Cookie<'_, Conn, GetSelectionOwnerReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -9107,7 +9107,7 @@ pub struct GetSelectionOwnerReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub owner: WINDOW,
+    pub owner: Window,
 }
 impl GetSelectionOwnerReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -9115,7 +9115,7 @@ impl GetSelectionOwnerReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (owner, remaining) = WINDOW::try_parse(remaining)?;
+        let (owner, remaining) = Window::try_parse(remaining)?;
         let result = GetSelectionOwnerReply { response_type, sequence, length, owner };
         Ok((result, remaining))
     }
@@ -9129,7 +9129,7 @@ impl TryFrom<&[u8]> for GetSelectionOwnerReply {
 
 /// Opcode for the ConvertSelection request
 pub const CONVERT_SELECTION_REQUEST: u8 = 24;
-pub fn convert_selection<Conn>(conn: &Conn, requestor: WINDOW, selection: ATOM, target: ATOM, property: ATOM, time: TIMESTAMP) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn convert_selection<Conn>(conn: &Conn, requestor: Window, selection: Atom, target: Atom, property: Atom, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (24) / 4;
@@ -9307,7 +9307,7 @@ pub const SEND_EVENT_REQUEST: u8 = 25;
 ///     free(event);
 /// }
 /// ```
-pub fn send_event<Conn, A>(conn: &Conn, propagate: bool, destination: WINDOW, event_mask: u32, event: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn send_event<Conn, A>(conn: &Conn, propagate: bool, destination: Window, event_mask: u32, event: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<[u8; 32]>
 {
     let length: usize = (44) / 4;
@@ -9481,57 +9481,57 @@ impl TryFrom<u32> for GrabStatus {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-pub enum Cursor {
+pub enum CursorEnum {
     None = 0,
 }
-impl From<Cursor> for u8 {
-    fn from(input: Cursor) -> Self {
+impl From<CursorEnum> for u8 {
+    fn from(input: CursorEnum) -> Self {
         match input {
-            Cursor::None => 0,
+            CursorEnum::None => 0,
         }
     }
 }
-impl From<Cursor> for Option<u8> {
-    fn from(input: Cursor) -> Self {
+impl From<CursorEnum> for Option<u8> {
+    fn from(input: CursorEnum) -> Self {
         Some(u8::from(input))
     }
 }
-impl From<Cursor> for u16 {
-    fn from(input: Cursor) -> Self {
+impl From<CursorEnum> for u16 {
+    fn from(input: CursorEnum) -> Self {
         Self::from(u8::from(input))
     }
 }
-impl From<Cursor> for Option<u16> {
-    fn from(input: Cursor) -> Self {
+impl From<CursorEnum> for Option<u16> {
+    fn from(input: CursorEnum) -> Self {
         Some(u16::from(input))
     }
 }
-impl From<Cursor> for u32 {
-    fn from(input: Cursor) -> Self {
+impl From<CursorEnum> for u32 {
+    fn from(input: CursorEnum) -> Self {
         Self::from(u8::from(input))
     }
 }
-impl From<Cursor> for Option<u32> {
-    fn from(input: Cursor) -> Self {
+impl From<CursorEnum> for Option<u32> {
+    fn from(input: CursorEnum) -> Self {
         Some(u32::from(input))
     }
 }
-impl TryFrom<u8> for Cursor {
+impl TryFrom<u8> for CursorEnum {
     type Error = ParseError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(Cursor::None),
+            0 => Ok(CursorEnum::None),
             _ => Err(ParseError::ParseError)
         }
     }
 }
-impl TryFrom<u16> for Cursor {
+impl TryFrom<u16> for CursorEnum {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
         Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
     }
 }
-impl TryFrom<u32> for Cursor {
+impl TryFrom<u32> for CursorEnum {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
@@ -9609,7 +9609,7 @@ pub const GRAB_POINTER_REQUEST: u8 = 26;
 ///     }
 /// }
 /// ```
-pub fn grab_pointer<Conn, A, B>(conn: &Conn, owner_events: bool, grab_window: WINDOW, event_mask: u16, pointer_mode: A, keyboard_mode: B, confine_to: WINDOW, cursor: CURSOR, time: TIMESTAMP) -> Result<Cookie<'_, Conn, GrabPointerReply>, ConnectionError>
+pub fn grab_pointer<Conn, A, B>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: A, keyboard_mode: B, confine_to: Window, cursor: Cursor, time: Timestamp) -> Result<Cookie<'_, Conn, GrabPointerReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 {
     let length: usize = (24) / 4;
@@ -9704,7 +9704,7 @@ pub const UNGRAB_POINTER_REQUEST: u8 = 27;
 /// * GrabButton: request
 /// * GrabPointer: request
 /// * LeaveNotify: event
-pub fn ungrab_pointer<Conn>(conn: &Conn, time: TIMESTAMP) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn ungrab_pointer<Conn>(conn: &Conn, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -9876,7 +9876,7 @@ pub const GRAB_BUTTON_REQUEST: u8 = 28;
 /// * `Cursor` - The specified `cursor` does not exist.
 /// * `Value` - TODO: reasons?
 /// * `Window` - The specified `window` does not exist.
-pub fn grab_button<Conn, A, B, C>(conn: &Conn, owner_events: bool, grab_window: WINDOW, event_mask: u16, pointer_mode: A, keyboard_mode: B, confine_to: WINDOW, cursor: CURSOR, button: C, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn grab_button<Conn, A, B, C>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: A, keyboard_mode: B, confine_to: Window, cursor: Cursor, button: C, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>, C: Into<u8>
 {
     let length: usize = (24) / 4;
@@ -9926,7 +9926,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>, C: Into<u8>
 
 /// Opcode for the UngrabButton request
 pub const UNGRAB_BUTTON_REQUEST: u8 = 29;
-pub fn ungrab_button<Conn, A>(conn: &Conn, button: A, grab_window: WINDOW, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn ungrab_button<Conn, A>(conn: &Conn, button: A, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let length: usize = (12) / 4;
@@ -9956,7 +9956,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the ChangeActivePointerGrab request
 pub const CHANGE_ACTIVE_POINTER_GRAB_REQUEST: u8 = 30;
-pub fn change_active_pointer_grab<Conn>(conn: &Conn, cursor: CURSOR, time: TIMESTAMP, event_mask: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn change_active_pointer_grab<Conn>(conn: &Conn, cursor: Cursor, time: Timestamp, event_mask: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16) / 4;
@@ -10049,7 +10049,7 @@ pub const GRAB_KEYBOARD_REQUEST: u8 = 31;
 ///     }
 /// }
 /// ```
-pub fn grab_keyboard<Conn, A, B>(conn: &Conn, owner_events: bool, grab_window: WINDOW, time: TIMESTAMP, pointer_mode: A, keyboard_mode: B) -> Result<Cookie<'_, Conn, GrabKeyboardReply>, ConnectionError>
+pub fn grab_keyboard<Conn, A, B>(conn: &Conn, owner_events: bool, grab_window: Window, time: Timestamp, pointer_mode: A, keyboard_mode: B) -> Result<Cookie<'_, Conn, GrabKeyboardReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 {
     let length: usize = (16) / 4;
@@ -10110,7 +10110,7 @@ impl TryFrom<&[u8]> for GrabKeyboardReply {
 
 /// Opcode for the UngrabKeyboard request
 pub const UNGRAB_KEYBOARD_REQUEST: u8 = 32;
-pub fn ungrab_keyboard<Conn>(conn: &Conn, time: TIMESTAMP) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn ungrab_keyboard<Conn>(conn: &Conn, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -10250,7 +10250,7 @@ pub const GRAB_KEY_REQUEST: u8 = 33;
 /// # See
 ///
 /// * GrabKeyboard: request
-pub fn grab_key<Conn, A, B>(conn: &Conn, owner_events: bool, grab_window: WINDOW, modifiers: u16, key: KEYCODE, pointer_mode: A, keyboard_mode: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn grab_key<Conn, A, B>(conn: &Conn, owner_events: bool, grab_window: Window, modifiers: u16, key: Keycode, pointer_mode: A, keyboard_mode: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 {
     let length: usize = (16) / 4;
@@ -10313,7 +10313,7 @@ pub const UNGRAB_KEY_REQUEST: u8 = 34;
 ///
 /// * GrabKey: request
 /// * xev: program
-pub fn ungrab_key<Conn>(conn: &Conn, key: KEYCODE, grab_window: WINDOW, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn ungrab_key<Conn>(conn: &Conn, key: Keycode, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12) / 4;
@@ -10501,7 +10501,7 @@ pub const ALLOW_EVENTS_REQUEST: u8 = 35;
 /// # Errors
 ///
 /// * `Value` - You specified an invalid `mode`.
-pub fn allow_events<Conn, A>(conn: &Conn, mode: A, time: TIMESTAMP) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn allow_events<Conn, A>(conn: &Conn, mode: A, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let length: usize = (8) / 4;
@@ -10575,7 +10575,7 @@ pub const QUERY_POINTER_REQUEST: u8 = 38;
 /// # Errors
 ///
 /// * `Window` - The specified `window` does not exist.
-pub fn query_pointer<Conn>(conn: &Conn, window: WINDOW) -> Result<Cookie<'_, Conn, QueryPointerReply>, ConnectionError>
+pub fn query_pointer<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, QueryPointerReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -10623,8 +10623,8 @@ pub struct QueryPointerReply {
     pub same_screen: bool,
     pub sequence: u16,
     pub length: u32,
-    pub root: WINDOW,
-    pub child: WINDOW,
+    pub root: Window,
+    pub child: Window,
     pub root_x: i16,
     pub root_y: i16,
     pub win_x: i16,
@@ -10637,8 +10637,8 @@ impl QueryPointerReply {
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
         let (root_x, remaining) = i16::try_parse(remaining)?;
         let (root_y, remaining) = i16::try_parse(remaining)?;
         let (win_x, remaining) = i16::try_parse(remaining)?;
@@ -10658,13 +10658,13 @@ impl TryFrom<&[u8]> for QueryPointerReply {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Timecoord {
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub x: i16,
     pub y: i16,
 }
 impl TryParse for Timecoord {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
         let result = Timecoord { time, x, y };
@@ -10704,7 +10704,7 @@ impl Serialize for Timecoord {
 
 /// Opcode for the GetMotionEvents request
 pub const GET_MOTION_EVENTS_REQUEST: u8 = 39;
-pub fn get_motion_events<Conn>(conn: &Conn, window: WINDOW, start: TIMESTAMP, stop: TIMESTAMP) -> Result<Cookie<'_, Conn, GetMotionEventsReply>, ConnectionError>
+pub fn get_motion_events<Conn>(conn: &Conn, window: Window, start: Timestamp, stop: Timestamp) -> Result<Cookie<'_, Conn, GetMotionEventsReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16) / 4;
@@ -10763,7 +10763,7 @@ impl TryFrom<&[u8]> for GetMotionEventsReply {
 
 /// Opcode for the TranslateCoordinates request
 pub const TRANSLATE_COORDINATES_REQUEST: u8 = 40;
-pub fn translate_coordinates<Conn>(conn: &Conn, src_window: WINDOW, dst_window: WINDOW, src_x: i16, src_y: i16) -> Result<Cookie<'_, Conn, TranslateCoordinatesReply>, ConnectionError>
+pub fn translate_coordinates<Conn>(conn: &Conn, src_window: Window, dst_window: Window, src_x: i16, src_y: i16) -> Result<Cookie<'_, Conn, TranslateCoordinatesReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16) / 4;
@@ -10800,7 +10800,7 @@ pub struct TranslateCoordinatesReply {
     pub same_screen: bool,
     pub sequence: u16,
     pub length: u32,
-    pub child: WINDOW,
+    pub child: Window,
     pub dst_x: i16,
     pub dst_y: i16,
 }
@@ -10810,7 +10810,7 @@ impl TranslateCoordinatesReply {
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (child, remaining) = WINDOW::try_parse(remaining)?;
+        let (child, remaining) = Window::try_parse(remaining)?;
         let (dst_x, remaining) = i16::try_parse(remaining)?;
         let (dst_y, remaining) = i16::try_parse(remaining)?;
         let result = TranslateCoordinatesReply { response_type, same_screen, sequence, length, child, dst_x, dst_y };
@@ -10858,7 +10858,7 @@ pub const WARP_POINTER_REQUEST: u8 = 41;
 /// # See
 ///
 /// * SetInputFocus: request
-pub fn warp_pointer<Conn>(conn: &Conn, src_window: WINDOW, dst_window: WINDOW, src_x: i16, src_y: i16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn warp_pointer<Conn>(conn: &Conn, src_window: Window, dst_window: Window, src_x: i16, src_y: i16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (24) / 4;
@@ -11019,7 +11019,7 @@ pub const SET_INPUT_FOCUS_REQUEST: u8 = 42;
 ///
 /// * FocusIn: event
 /// * FocusOut: event
-pub fn set_input_focus<Conn, A>(conn: &Conn, revert_to: A, focus: WINDOW, time: TIMESTAMP) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_input_focus<Conn, A>(conn: &Conn, revert_to: A, focus: Window, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let length: usize = (12) / 4;
@@ -11070,7 +11070,7 @@ pub struct GetInputFocusReply {
     pub revert_to: InputFocus,
     pub sequence: u16,
     pub length: u32,
-    pub focus: WINDOW,
+    pub focus: Window,
 }
 impl GetInputFocusReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -11078,7 +11078,7 @@ impl GetInputFocusReply {
         let (revert_to, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (focus, remaining) = WINDOW::try_parse(remaining)?;
+        let (focus, remaining) = Window::try_parse(remaining)?;
         let revert_to = revert_to.try_into()?;
         let result = GetInputFocusReply { response_type, revert_to, sequence, length, focus };
         Ok((result, remaining))
@@ -11220,7 +11220,7 @@ pub const OPEN_FONT_REQUEST: u8 = 45;
 /// # See
 ///
 /// * xcb_generate_id: function
-pub fn open_font<'c, Conn>(conn: &'c Conn, fid: FONT, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn open_font<'c, Conn>(conn: &'c Conn, fid: Font, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 1 * name.len() + 3) / 4;
@@ -11252,7 +11252,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CloseFont request
 pub const CLOSE_FONT_REQUEST: u8 = 46;
-pub fn close_font<Conn>(conn: &Conn, font: FONT) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn close_font<Conn>(conn: &Conn, font: Font) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -11337,12 +11337,12 @@ impl TryFrom<u32> for FontDraw {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Fontprop {
-    pub name: ATOM,
+    pub name: Atom,
     pub value: u32,
 }
 impl TryParse for Fontprop {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (name, remaining) = ATOM::try_parse(remaining)?;
+        let (name, remaining) = Atom::try_parse(remaining)?;
         let (value, remaining) = u32::try_parse(remaining)?;
         let result = Fontprop { name, value };
         Ok((result, remaining))
@@ -11448,7 +11448,7 @@ pub const QUERY_FONT_REQUEST: u8 = 47;
 /// # Fields
 ///
 /// * `font` - The fontable (Font or Graphics Context) to query.
-pub fn query_font<Conn>(conn: &Conn, font: FONTABLE) -> Result<Cookie<'_, Conn, QueryFontReply>, ConnectionError>
+pub fn query_font<Conn>(conn: &Conn, font: Fontable) -> Result<Cookie<'_, Conn, QueryFontReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -11572,7 +11572,7 @@ pub const QUERY_TEXT_EXTENTS_REQUEST: u8 = 48;
 ///
 /// * `Font` - The specified `font` does not exist.
 /// * `GContext` - The specified graphics context does not exist.
-pub fn query_text_extents<'c, Conn>(conn: &'c Conn, font: FONTABLE, string: &[Char2b]) -> Result<Cookie<'c, Conn, QueryTextExtentsReply>, ConnectionError>
+pub fn query_text_extents<'c, Conn>(conn: &'c Conn, font: Fontable, string: &[Char2b]) -> Result<Cookie<'c, Conn, QueryTextExtentsReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8 + 2 * string.len() + 3) / 4;
@@ -11956,7 +11956,7 @@ pub const CREATE_PIXMAP_REQUEST: u8 = 53;
 /// # See
 ///
 /// * xcb_generate_id: function
-pub fn create_pixmap<Conn>(conn: &Conn, depth: u8, pid: PIXMAP, drawable: DRAWABLE, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_pixmap<Conn>(conn: &Conn, depth: u8, pid: Pixmap, drawable: Drawable, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16) / 4;
@@ -12003,7 +12003,7 @@ pub const FREE_PIXMAP_REQUEST: u8 = 54;
 /// # Errors
 ///
 /// * `Pixmap` - The specified pixmap does not exist.
-pub fn free_pixmap<Conn>(conn: &Conn, pixmap: PIXMAP) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn free_pixmap<Conn>(conn: &Conn, pixmap: Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -12793,16 +12793,16 @@ pub struct CreateGCAux {
     pub join_style: Option<u32>,
     pub fill_style: Option<u32>,
     pub fill_rule: Option<u32>,
-    pub tile: Option<PIXMAP>,
-    pub stipple: Option<PIXMAP>,
+    pub tile: Option<Pixmap>,
+    pub stipple: Option<Pixmap>,
     pub tile_stipple_x_origin: Option<i32>,
     pub tile_stipple_y_origin: Option<i32>,
-    pub font: Option<FONT>,
+    pub font: Option<Font>,
     pub subwindow_mode: Option<u32>,
-    pub graphics_exposures: Option<BOOL32>,
+    pub graphics_exposures: Option<Bool32>,
     pub clip_x_origin: Option<i32>,
     pub clip_y_origin: Option<i32>,
-    pub clip_mask: Option<PIXMAP>,
+    pub clip_mask: Option<Pixmap>,
     pub dash_offset: Option<u32>,
     pub dashes: Option<u32>,
     pub arc_mode: Option<u32>,
@@ -12936,12 +12936,12 @@ impl CreateGCAux {
         self
     }
     /// Set the tile field of this structure.
-    pub fn tile<I>(mut self, value: I) -> Self where I: Into<Option<PIXMAP>> {
+    pub fn tile<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.tile = value.into();
         self
     }
     /// Set the stipple field of this structure.
-    pub fn stipple<I>(mut self, value: I) -> Self where I: Into<Option<PIXMAP>> {
+    pub fn stipple<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.stipple = value.into();
         self
     }
@@ -12956,7 +12956,7 @@ impl CreateGCAux {
         self
     }
     /// Set the font field of this structure.
-    pub fn font<I>(mut self, value: I) -> Self where I: Into<Option<FONT>> {
+    pub fn font<I>(mut self, value: I) -> Self where I: Into<Option<Font>> {
         self.font = value.into();
         self
     }
@@ -12966,7 +12966,7 @@ impl CreateGCAux {
         self
     }
     /// Set the graphics_exposures field of this structure.
-    pub fn graphics_exposures<I>(mut self, value: I) -> Self where I: Into<Option<BOOL32>> {
+    pub fn graphics_exposures<I>(mut self, value: I) -> Self where I: Into<Option<Bool32>> {
         self.graphics_exposures = value.into();
         self
     }
@@ -12981,7 +12981,7 @@ impl CreateGCAux {
         self
     }
     /// Set the clip_mask field of this structure.
-    pub fn clip_mask<I>(mut self, value: I) -> Self where I: Into<Option<PIXMAP>> {
+    pub fn clip_mask<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.clip_mask = value.into();
         self
     }
@@ -13103,7 +13103,7 @@ impl Serialize for CreateGCAux {
 /// # See
 ///
 /// * xcb_generate_id: function
-pub fn create_gc<'c, Conn>(conn: &'c Conn, cid: GCONTEXT, drawable: DRAWABLE, value_list: &CreateGCAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_gc<'c, Conn>(conn: &'c Conn, cid: Gcontext, drawable: Drawable, value_list: &CreateGCAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let value_mask = value_list.value_mask();
@@ -13154,16 +13154,16 @@ pub struct ChangeGCAux {
     pub join_style: Option<u32>,
     pub fill_style: Option<u32>,
     pub fill_rule: Option<u32>,
-    pub tile: Option<PIXMAP>,
-    pub stipple: Option<PIXMAP>,
+    pub tile: Option<Pixmap>,
+    pub stipple: Option<Pixmap>,
     pub tile_stipple_x_origin: Option<i32>,
     pub tile_stipple_y_origin: Option<i32>,
-    pub font: Option<FONT>,
+    pub font: Option<Font>,
     pub subwindow_mode: Option<u32>,
-    pub graphics_exposures: Option<BOOL32>,
+    pub graphics_exposures: Option<Bool32>,
     pub clip_x_origin: Option<i32>,
     pub clip_y_origin: Option<i32>,
-    pub clip_mask: Option<PIXMAP>,
+    pub clip_mask: Option<Pixmap>,
     pub dash_offset: Option<u32>,
     pub dashes: Option<u32>,
     pub arc_mode: Option<u32>,
@@ -13297,12 +13297,12 @@ impl ChangeGCAux {
         self
     }
     /// Set the tile field of this structure.
-    pub fn tile<I>(mut self, value: I) -> Self where I: Into<Option<PIXMAP>> {
+    pub fn tile<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.tile = value.into();
         self
     }
     /// Set the stipple field of this structure.
-    pub fn stipple<I>(mut self, value: I) -> Self where I: Into<Option<PIXMAP>> {
+    pub fn stipple<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.stipple = value.into();
         self
     }
@@ -13317,7 +13317,7 @@ impl ChangeGCAux {
         self
     }
     /// Set the font field of this structure.
-    pub fn font<I>(mut self, value: I) -> Self where I: Into<Option<FONT>> {
+    pub fn font<I>(mut self, value: I) -> Self where I: Into<Option<Font>> {
         self.font = value.into();
         self
     }
@@ -13327,7 +13327,7 @@ impl ChangeGCAux {
         self
     }
     /// Set the graphics_exposures field of this structure.
-    pub fn graphics_exposures<I>(mut self, value: I) -> Self where I: Into<Option<BOOL32>> {
+    pub fn graphics_exposures<I>(mut self, value: I) -> Self where I: Into<Option<Bool32>> {
         self.graphics_exposures = value.into();
         self
     }
@@ -13342,7 +13342,7 @@ impl ChangeGCAux {
         self
     }
     /// Set the clip_mask field of this structure.
-    pub fn clip_mask<I>(mut self, value: I) -> Self where I: Into<Option<PIXMAP>> {
+    pub fn clip_mask<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.clip_mask = value.into();
         self
     }
@@ -13485,7 +13485,7 @@ impl Serialize for ChangeGCAux {
 ///     xcb_flush(conn);
 /// }
 /// ```
-pub fn change_gc<'c, Conn>(conn: &'c Conn, gc: GCONTEXT, value_list: &ChangeGCAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_gc<'c, Conn>(conn: &'c Conn, gc: Gcontext, value_list: &ChangeGCAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let value_mask = value_list.value_mask();
@@ -13518,7 +13518,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CopyGC request
 pub const COPY_GC_REQUEST: u8 = 57;
-pub fn copy_gc<Conn>(conn: &Conn, src_gc: GCONTEXT, dst_gc: GCONTEXT, value_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn copy_gc<Conn>(conn: &Conn, src_gc: Gcontext, dst_gc: Gcontext, value_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16) / 4;
@@ -13551,7 +13551,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the SetDashes request
 pub const SET_DASHES_REQUEST: u8 = 58;
-pub fn set_dashes<'c, Conn>(conn: &'c Conn, gc: GCONTEXT, dash_offset: u16, dashes: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_dashes<'c, Conn>(conn: &'c Conn, gc: Gcontext, dash_offset: u16, dashes: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 1 * dashes.len() + 3) / 4;
@@ -13652,7 +13652,7 @@ impl TryFrom<u32> for ClipOrdering {
 
 /// Opcode for the SetClipRectangles request
 pub const SET_CLIP_RECTANGLES_REQUEST: u8 = 59;
-pub fn set_clip_rectangles<'c, Conn, A>(conn: &'c Conn, ordering: A, gc: GCONTEXT, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_clip_rectangles<'c, Conn, A>(conn: &'c Conn, ordering: A, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let length: usize = (12 + 8 * rectangles.len() + 3) / 4;
@@ -13698,7 +13698,7 @@ pub const FREE_GC_REQUEST: u8 = 60;
 /// # Errors
 ///
 /// * `GContext` - The specified graphics context does not exist.
-pub fn free_gc<Conn>(conn: &Conn, gc: GCONTEXT) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn free_gc<Conn>(conn: &Conn, gc: Gcontext) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -13721,7 +13721,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the ClearArea request
 pub const CLEAR_AREA_REQUEST: u8 = 61;
-pub fn clear_area<Conn>(conn: &Conn, exposures: bool, window: WINDOW, x: i16, y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn clear_area<Conn>(conn: &Conn, exposures: bool, window: Window, x: i16, y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16) / 4;
@@ -13778,7 +13778,7 @@ pub const COPY_AREA_REQUEST: u8 = 62;
 /// * `Drawable` - The specified `drawable` (Window or Pixmap) does not exist.
 /// * `GContext` - The specified graphics context does not exist.
 /// * `Match` - `src_drawable` has a different root or depth than `dst_drawable`.
-pub fn copy_area<Conn>(conn: &Conn, src_drawable: DRAWABLE, dst_drawable: DRAWABLE, gc: GCONTEXT, src_x: i16, src_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn copy_area<Conn>(conn: &Conn, src_drawable: Drawable, dst_drawable: Drawable, gc: Gcontext, src_x: i16, src_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (28) / 4;
@@ -13829,7 +13829,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CopyPlane request
 pub const COPY_PLANE_REQUEST: u8 = 63;
-pub fn copy_plane<Conn>(conn: &Conn, src_drawable: DRAWABLE, dst_drawable: DRAWABLE, gc: GCONTEXT, src_x: i16, src_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16, bit_plane: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn copy_plane<Conn>(conn: &Conn, src_drawable: Drawable, dst_drawable: Drawable, gc: Gcontext, src_x: i16, src_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16, bit_plane: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (32) / 4;
@@ -13954,7 +13954,7 @@ impl TryFrom<u32> for CoordMode {
 
 /// Opcode for the PolyPoint request
 pub const POLY_POINT_REQUEST: u8 = 64;
-pub fn poly_point<'c, Conn, A>(conn: &'c Conn, coordinate_mode: A, drawable: DRAWABLE, gc: GCONTEXT, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_point<'c, Conn, A>(conn: &'c Conn, coordinate_mode: A, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let length: usize = (12 + 4 * points.len() + 3) / 4;
@@ -14026,7 +14026,7 @@ pub const POLY_LINE_REQUEST: u8 = 65;
 ///     xcb_flush(conn);
 /// }
 /// ```
-pub fn poly_line<'c, Conn, A>(conn: &'c Conn, coordinate_mode: A, drawable: DRAWABLE, gc: GCONTEXT, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_line<'c, Conn, A>(conn: &'c Conn, coordinate_mode: A, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let length: usize = (12 + 4 * points.len() + 3) / 4;
@@ -14136,7 +14136,7 @@ pub const POLY_SEGMENT_REQUEST: u8 = 66;
 /// * `Drawable` - The specified `drawable` does not exist.
 /// * `GContext` - The specified `gc` does not exist.
 /// * `Match` - TODO: reasons?
-pub fn poly_segment<'c, Conn>(conn: &'c Conn, drawable: DRAWABLE, gc: GCONTEXT, segments: &[Segment]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_segment<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, segments: &[Segment]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 8 * segments.len() + 3) / 4;
@@ -14168,7 +14168,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the PolyRectangle request
 pub const POLY_RECTANGLE_REQUEST: u8 = 67;
-pub fn poly_rectangle<'c, Conn>(conn: &'c Conn, drawable: DRAWABLE, gc: GCONTEXT, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_rectangle<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 8 * rectangles.len() + 3) / 4;
@@ -14200,7 +14200,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the PolyArc request
 pub const POLY_ARC_REQUEST: u8 = 68;
-pub fn poly_arc<'c, Conn>(conn: &'c Conn, drawable: DRAWABLE, gc: GCONTEXT, arcs: &[Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_arc<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs: &[Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 12 * arcs.len() + 3) / 4;
@@ -14297,7 +14297,7 @@ impl TryFrom<u32> for PolyShape {
 
 /// Opcode for the FillPoly request
 pub const FILL_POLY_REQUEST: u8 = 69;
-pub fn fill_poly<'c, Conn, A, B>(conn: &'c Conn, drawable: DRAWABLE, gc: GCONTEXT, shape: A, coordinate_mode: B, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn fill_poly<'c, Conn, A, B>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, shape: A, coordinate_mode: B, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 {
     let length: usize = (16 + 4 * points.len() + 3) / 4;
@@ -14362,7 +14362,7 @@ pub const POLY_FILL_RECTANGLE_REQUEST: u8 = 70;
 /// * `Drawable` - The specified `drawable` (Window or Pixmap) does not exist.
 /// * `GContext` - The specified graphics context does not exist.
 /// * `Match` - TODO: reasons?
-pub fn poly_fill_rectangle<'c, Conn>(conn: &'c Conn, drawable: DRAWABLE, gc: GCONTEXT, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_fill_rectangle<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 8 * rectangles.len() + 3) / 4;
@@ -14394,7 +14394,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the PolyFillArc request
 pub const POLY_FILL_ARC_REQUEST: u8 = 71;
-pub fn poly_fill_arc<'c, Conn>(conn: &'c Conn, drawable: DRAWABLE, gc: GCONTEXT, arcs: &[Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_fill_arc<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs: &[Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 12 * arcs.len() + 3) / 4;
@@ -14491,7 +14491,7 @@ impl TryFrom<u32> for ImageFormat {
 
 /// Opcode for the PutImage request
 pub const PUT_IMAGE_REQUEST: u8 = 72;
-pub fn put_image<'c, Conn, A>(conn: &'c Conn, format: A, drawable: DRAWABLE, gc: GCONTEXT, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn put_image<'c, Conn, A>(conn: &'c Conn, format: A, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let length: usize = (24 + 1 * data.len() + 3) / 4;
@@ -14542,7 +14542,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the GetImage request
 pub const GET_IMAGE_REQUEST: u8 = 73;
-pub fn get_image<Conn, A>(conn: &Conn, format: A, drawable: DRAWABLE, x: i16, y: i16, width: u16, height: u16, plane_mask: u32) -> Result<Cookie<'_, Conn, GetImageReply>, ConnectionError>
+pub fn get_image<Conn, A>(conn: &Conn, format: A, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32) -> Result<Cookie<'_, Conn, GetImageReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let length: usize = (20) / 4;
@@ -14586,7 +14586,7 @@ pub struct GetImageReply {
     pub response_type: u8,
     pub depth: u8,
     pub sequence: u16,
-    pub visual: VISUALID,
+    pub visual: Visualid,
     pub data: Vec<u8>,
 }
 impl GetImageReply {
@@ -14595,7 +14595,7 @@ impl GetImageReply {
         let (depth, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (visual, remaining) = VISUALID::try_parse(remaining)?;
+        let (visual, remaining) = Visualid::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * (4))?;
         let result = GetImageReply { response_type, depth, sequence, visual, data };
@@ -14611,7 +14611,7 @@ impl TryFrom<&[u8]> for GetImageReply {
 
 /// Opcode for the PolyText8 request
 pub const POLY_TEXT8_REQUEST: u8 = 74;
-pub fn poly_text8<'c, Conn>(conn: &'c Conn, drawable: DRAWABLE, gc: GCONTEXT, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_text8<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16 + 1 * items.len() + 3) / 4;
@@ -14648,7 +14648,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the PolyText16 request
 pub const POLY_TEXT16_REQUEST: u8 = 75;
-pub fn poly_text16<'c, Conn>(conn: &'c Conn, drawable: DRAWABLE, gc: GCONTEXT, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_text16<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16 + 1 * items.len() + 3) / 4;
@@ -14719,7 +14719,7 @@ pub const IMAGE_TEXT8_REQUEST: u8 = 76;
 /// # See
 ///
 /// * ImageText16: request
-pub fn image_text8<'c, Conn>(conn: &'c Conn, drawable: DRAWABLE, gc: GCONTEXT, x: i16, y: i16, string: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn image_text8<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16 + 1 * string.len() + 3) / 4;
@@ -14793,7 +14793,7 @@ pub const IMAGE_TEXT16_REQUEST: u8 = 77;
 /// # See
 ///
 /// * ImageText8: request
-pub fn image_text16<'c, Conn>(conn: &'c Conn, drawable: DRAWABLE, gc: GCONTEXT, x: i16, y: i16, string: &[Char2b]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn image_text16<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[Char2b]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16 + 2 * string.len() + 3) / 4;
@@ -14895,7 +14895,7 @@ impl TryFrom<u32> for ColormapAlloc {
 
 /// Opcode for the CreateColormap request
 pub const CREATE_COLORMAP_REQUEST: u8 = 78;
-pub fn create_colormap<Conn, A>(conn: &Conn, alloc: A, mid: COLORMAP, window: WINDOW, visual: VISUALID) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_colormap<Conn, A>(conn: &Conn, alloc: A, mid: Colormap, window: Window, visual: Visualid) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let length: usize = (16) / 4;
@@ -14930,7 +14930,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the FreeColormap request
 pub const FREE_COLORMAP_REQUEST: u8 = 79;
-pub fn free_colormap<Conn>(conn: &Conn, cmap: COLORMAP) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn free_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -14953,7 +14953,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CopyColormapAndFree request
 pub const COPY_COLORMAP_AND_FREE_REQUEST: u8 = 80;
-pub fn copy_colormap_and_free<Conn>(conn: &Conn, mid: COLORMAP, src_cmap: COLORMAP) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn copy_colormap_and_free<Conn>(conn: &Conn, mid: Colormap, src_cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12) / 4;
@@ -14981,7 +14981,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the InstallColormap request
 pub const INSTALL_COLORMAP_REQUEST: u8 = 81;
-pub fn install_colormap<Conn>(conn: &Conn, cmap: COLORMAP) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn install_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -15004,7 +15004,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the UninstallColormap request
 pub const UNINSTALL_COLORMAP_REQUEST: u8 = 82;
-pub fn uninstall_colormap<Conn>(conn: &Conn, cmap: COLORMAP) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn uninstall_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -15027,7 +15027,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the ListInstalledColormaps request
 pub const LIST_INSTALLED_COLORMAPS_REQUEST: u8 = 83;
-pub fn list_installed_colormaps<Conn>(conn: &Conn, window: WINDOW) -> Result<Cookie<'_, Conn, ListInstalledColormapsReply>, ConnectionError>
+pub fn list_installed_colormaps<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, ListInstalledColormapsReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -15052,7 +15052,7 @@ pub struct ListInstalledColormapsReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub cmaps: Vec<COLORMAP>,
+    pub cmaps: Vec<Colormap>,
 }
 impl ListInstalledColormapsReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -15062,7 +15062,7 @@ impl ListInstalledColormapsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (cmaps_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (cmaps, remaining) = crate::x11_utils::parse_list::<COLORMAP>(remaining, cmaps_len as usize)?;
+        let (cmaps, remaining) = crate::x11_utils::parse_list::<Colormap>(remaining, cmaps_len as usize)?;
         let result = ListInstalledColormapsReply { response_type, sequence, length, cmaps };
         Ok((result, remaining))
     }
@@ -15094,7 +15094,7 @@ pub const ALLOC_COLOR_REQUEST: u8 = 84;
 /// # Errors
 ///
 /// * `Colormap` - The specified colormap `cmap` does not exist.
-pub fn alloc_color<Conn>(conn: &Conn, cmap: COLORMAP, red: u16, green: u16, blue: u16) -> Result<Cookie<'_, Conn, AllocColorReply>, ConnectionError>
+pub fn alloc_color<Conn>(conn: &Conn, cmap: Colormap, red: u16, green: u16, blue: u16) -> Result<Cookie<'_, Conn, AllocColorReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16) / 4;
@@ -15159,7 +15159,7 @@ impl TryFrom<&[u8]> for AllocColorReply {
 
 /// Opcode for the AllocNamedColor request
 pub const ALLOC_NAMED_COLOR_REQUEST: u8 = 85;
-pub fn alloc_named_color<'c, Conn>(conn: &'c Conn, cmap: COLORMAP, name: &[u8]) -> Result<Cookie<'c, Conn, AllocNamedColorReply>, ConnectionError>
+pub fn alloc_named_color<'c, Conn>(conn: &'c Conn, cmap: Colormap, name: &[u8]) -> Result<Cookie<'c, Conn, AllocNamedColorReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 1 * name.len() + 3) / 4;
@@ -15227,7 +15227,7 @@ impl TryFrom<&[u8]> for AllocNamedColorReply {
 
 /// Opcode for the AllocColorCells request
 pub const ALLOC_COLOR_CELLS_REQUEST: u8 = 86;
-pub fn alloc_color_cells<Conn>(conn: &Conn, contiguous: bool, cmap: COLORMAP, colors: u16, planes: u16) -> Result<Cookie<'_, Conn, AllocColorCellsReply>, ConnectionError>
+pub fn alloc_color_cells<Conn>(conn: &Conn, contiguous: bool, cmap: Colormap, colors: u16, planes: u16) -> Result<Cookie<'_, Conn, AllocColorCellsReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12) / 4;
@@ -15286,7 +15286,7 @@ impl TryFrom<&[u8]> for AllocColorCellsReply {
 
 /// Opcode for the AllocColorPlanes request
 pub const ALLOC_COLOR_PLANES_REQUEST: u8 = 87;
-pub fn alloc_color_planes<Conn>(conn: &Conn, contiguous: bool, cmap: COLORMAP, colors: u16, reds: u16, greens: u16, blues: u16) -> Result<Cookie<'_, Conn, AllocColorPlanesReply>, ConnectionError>
+pub fn alloc_color_planes<Conn>(conn: &Conn, contiguous: bool, cmap: Colormap, colors: u16, reds: u16, greens: u16, blues: u16) -> Result<Cookie<'_, Conn, AllocColorPlanesReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16) / 4;
@@ -15355,7 +15355,7 @@ impl TryFrom<&[u8]> for AllocColorPlanesReply {
 
 /// Opcode for the FreeColors request
 pub const FREE_COLORS_REQUEST: u8 = 88;
-pub fn free_colors<'c, Conn>(conn: &'c Conn, cmap: COLORMAP, plane_mask: u32, pixels: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn free_colors<'c, Conn>(conn: &'c Conn, cmap: Colormap, plane_mask: u32, pixels: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 4 * pixels.len() + 3) / 4;
@@ -15513,7 +15513,7 @@ impl Serialize for Coloritem {
 
 /// Opcode for the StoreColors request
 pub const STORE_COLORS_REQUEST: u8 = 89;
-pub fn store_colors<'c, Conn>(conn: &'c Conn, cmap: COLORMAP, items: &[Coloritem]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn store_colors<'c, Conn>(conn: &'c Conn, cmap: Colormap, items: &[Coloritem]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8 + 12 * items.len() + 3) / 4;
@@ -15540,7 +15540,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the StoreNamedColor request
 pub const STORE_NAMED_COLOR_REQUEST: u8 = 90;
-pub fn store_named_color<'c, Conn>(conn: &'c Conn, flags: u8, cmap: COLORMAP, pixel: u32, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn store_named_color<'c, Conn>(conn: &'c Conn, flags: u8, cmap: Colormap, pixel: u32, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16 + 1 * name.len() + 3) / 4;
@@ -15626,7 +15626,7 @@ impl Serialize for Rgb {
 
 /// Opcode for the QueryColors request
 pub const QUERY_COLORS_REQUEST: u8 = 91;
-pub fn query_colors<'c, Conn>(conn: &'c Conn, cmap: COLORMAP, pixels: &[u32]) -> Result<Cookie<'c, Conn, QueryColorsReply>, ConnectionError>
+pub fn query_colors<'c, Conn>(conn: &'c Conn, cmap: Colormap, pixels: &[u32]) -> Result<Cookie<'c, Conn, QueryColorsReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8 + 4 * pixels.len() + 3) / 4;
@@ -15679,7 +15679,7 @@ impl TryFrom<&[u8]> for QueryColorsReply {
 
 /// Opcode for the LookupColor request
 pub const LOOKUP_COLOR_REQUEST: u8 = 92;
-pub fn lookup_color<'c, Conn>(conn: &'c Conn, cmap: COLORMAP, name: &[u8]) -> Result<Cookie<'c, Conn, LookupColorReply>, ConnectionError>
+pub fn lookup_color<'c, Conn>(conn: &'c Conn, cmap: Colormap, name: &[u8]) -> Result<Cookie<'c, Conn, LookupColorReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 1 * name.len() + 3) / 4;
@@ -15745,57 +15745,57 @@ impl TryFrom<&[u8]> for LookupColorReply {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-pub enum Pixmap {
+pub enum PixmapEnum {
     None = 0,
 }
-impl From<Pixmap> for u8 {
-    fn from(input: Pixmap) -> Self {
+impl From<PixmapEnum> for u8 {
+    fn from(input: PixmapEnum) -> Self {
         match input {
-            Pixmap::None => 0,
+            PixmapEnum::None => 0,
         }
     }
 }
-impl From<Pixmap> for Option<u8> {
-    fn from(input: Pixmap) -> Self {
+impl From<PixmapEnum> for Option<u8> {
+    fn from(input: PixmapEnum) -> Self {
         Some(u8::from(input))
     }
 }
-impl From<Pixmap> for u16 {
-    fn from(input: Pixmap) -> Self {
+impl From<PixmapEnum> for u16 {
+    fn from(input: PixmapEnum) -> Self {
         Self::from(u8::from(input))
     }
 }
-impl From<Pixmap> for Option<u16> {
-    fn from(input: Pixmap) -> Self {
+impl From<PixmapEnum> for Option<u16> {
+    fn from(input: PixmapEnum) -> Self {
         Some(u16::from(input))
     }
 }
-impl From<Pixmap> for u32 {
-    fn from(input: Pixmap) -> Self {
+impl From<PixmapEnum> for u32 {
+    fn from(input: PixmapEnum) -> Self {
         Self::from(u8::from(input))
     }
 }
-impl From<Pixmap> for Option<u32> {
-    fn from(input: Pixmap) -> Self {
+impl From<PixmapEnum> for Option<u32> {
+    fn from(input: PixmapEnum) -> Self {
         Some(u32::from(input))
     }
 }
-impl TryFrom<u8> for Pixmap {
+impl TryFrom<u8> for PixmapEnum {
     type Error = ParseError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(Pixmap::None),
+            0 => Ok(PixmapEnum::None),
             _ => Err(ParseError::ParseError)
         }
     }
 }
-impl TryFrom<u16> for Pixmap {
+impl TryFrom<u16> for PixmapEnum {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
         Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
     }
 }
-impl TryFrom<u32> for Pixmap {
+impl TryFrom<u32> for PixmapEnum {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
@@ -15804,7 +15804,7 @@ impl TryFrom<u32> for Pixmap {
 
 /// Opcode for the CreateCursor request
 pub const CREATE_CURSOR_REQUEST: u8 = 93;
-pub fn create_cursor<Conn>(conn: &Conn, cid: CURSOR, source: PIXMAP, mask: PIXMAP, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_cursor<Conn>(conn: &Conn, cid: Cursor, source: Pixmap, mask: Pixmap, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (32) / 4;
@@ -15861,57 +15861,57 @@ where Conn: RequestConnection + ?Sized
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-pub enum Font {
+pub enum FontEnum {
     None = 0,
 }
-impl From<Font> for u8 {
-    fn from(input: Font) -> Self {
+impl From<FontEnum> for u8 {
+    fn from(input: FontEnum) -> Self {
         match input {
-            Font::None => 0,
+            FontEnum::None => 0,
         }
     }
 }
-impl From<Font> for Option<u8> {
-    fn from(input: Font) -> Self {
+impl From<FontEnum> for Option<u8> {
+    fn from(input: FontEnum) -> Self {
         Some(u8::from(input))
     }
 }
-impl From<Font> for u16 {
-    fn from(input: Font) -> Self {
+impl From<FontEnum> for u16 {
+    fn from(input: FontEnum) -> Self {
         Self::from(u8::from(input))
     }
 }
-impl From<Font> for Option<u16> {
-    fn from(input: Font) -> Self {
+impl From<FontEnum> for Option<u16> {
+    fn from(input: FontEnum) -> Self {
         Some(u16::from(input))
     }
 }
-impl From<Font> for u32 {
-    fn from(input: Font) -> Self {
+impl From<FontEnum> for u32 {
+    fn from(input: FontEnum) -> Self {
         Self::from(u8::from(input))
     }
 }
-impl From<Font> for Option<u32> {
-    fn from(input: Font) -> Self {
+impl From<FontEnum> for Option<u32> {
+    fn from(input: FontEnum) -> Self {
         Some(u32::from(input))
     }
 }
-impl TryFrom<u8> for Font {
+impl TryFrom<u8> for FontEnum {
     type Error = ParseError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(Font::None),
+            0 => Ok(FontEnum::None),
             _ => Err(ParseError::ParseError)
         }
     }
 }
-impl TryFrom<u16> for Font {
+impl TryFrom<u16> for FontEnum {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
         Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
     }
 }
-impl TryFrom<u32> for Font {
+impl TryFrom<u32> for FontEnum {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
@@ -15953,7 +15953,7 @@ pub const CREATE_GLYPH_CURSOR_REQUEST: u8 = 94;
 /// * `Alloc` - The X server could not allocate the requested resources (no memory?).
 /// * `Font` - The specified `source_font` or `mask_font` does not exist.
 /// * `Value` - Either `source_char` or `mask_char` are not defined in `source_font` or `mask_font`, respectively.
-pub fn create_glyph_cursor<Conn>(conn: &Conn, cid: CURSOR, source_font: FONT, mask_font: FONT, source_char: u16, mask_char: u16, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_glyph_cursor<Conn>(conn: &Conn, cid: Cursor, source_font: Font, mask_font: Font, source_char: u16, mask_char: u16, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (32) / 4;
@@ -16022,7 +16022,7 @@ pub const FREE_CURSOR_REQUEST: u8 = 95;
 /// # Errors
 ///
 /// * `Cursor` - The specified cursor does not exist.
-pub fn free_cursor<Conn>(conn: &Conn, cursor: CURSOR) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn free_cursor<Conn>(conn: &Conn, cursor: Cursor) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -16045,7 +16045,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the RecolorCursor request
 pub const RECOLOR_CURSOR_REQUEST: u8 = 96;
-pub fn recolor_cursor<Conn>(conn: &Conn, cursor: CURSOR, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn recolor_cursor<Conn>(conn: &Conn, cursor: Cursor, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (20) / 4;
@@ -16151,7 +16151,7 @@ impl TryFrom<u32> for QueryShapeOf {
 
 /// Opcode for the QueryBestSize request
 pub const QUERY_BEST_SIZE_REQUEST: u8 = 97;
-pub fn query_best_size<Conn, A>(conn: &Conn, class: A, drawable: DRAWABLE, width: u16, height: u16) -> Result<Cookie<'_, Conn, QueryBestSizeReply>, ConnectionError>
+pub fn query_best_size<Conn, A>(conn: &Conn, class: A, drawable: Drawable, width: u16, height: u16) -> Result<Cookie<'_, Conn, QueryBestSizeReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let length: usize = (12) / 4;
@@ -16339,7 +16339,7 @@ impl TryFrom<&[u8]> for ListExtensionsReply {
 
 /// Opcode for the ChangeKeyboardMapping request
 pub const CHANGE_KEYBOARD_MAPPING_REQUEST: u8 = 100;
-pub fn change_keyboard_mapping<'c, Conn>(conn: &'c Conn, keycode_count: u8, first_keycode: KEYCODE, keysyms_per_keycode: u8, keysyms: &[KEYSYM]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_keyboard_mapping<'c, Conn>(conn: &'c Conn, keycode_count: u8, first_keycode: Keycode, keysyms_per_keycode: u8, keysyms: &[Keysym]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8 + 4 * keysyms.len() + 3) / 4;
@@ -16369,7 +16369,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetKeyboardMapping request
 pub const GET_KEYBOARD_MAPPING_REQUEST: u8 = 101;
-pub fn get_keyboard_mapping<Conn>(conn: &Conn, first_keycode: KEYCODE, count: u8) -> Result<Cookie<'_, Conn, GetKeyboardMappingReply>, ConnectionError>
+pub fn get_keyboard_mapping<Conn>(conn: &Conn, first_keycode: Keycode, count: u8) -> Result<Cookie<'_, Conn, GetKeyboardMappingReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
@@ -16395,7 +16395,7 @@ pub struct GetKeyboardMappingReply {
     pub response_type: u8,
     pub keysyms_per_keycode: u8,
     pub sequence: u16,
-    pub keysyms: Vec<KEYSYM>,
+    pub keysyms: Vec<Keysym>,
 }
 impl GetKeyboardMappingReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -16404,7 +16404,7 @@ impl GetKeyboardMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<KEYSYM>(remaining, length as usize)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, length as usize)?;
         let result = GetKeyboardMappingReply { response_type, keysyms_per_keycode, sequence, keysyms };
         Ok((result, remaining))
     }
@@ -16635,7 +16635,7 @@ pub struct ChangeKeyboardControlAux {
     pub bell_duration: Option<i32>,
     pub led: Option<u32>,
     pub led_mode: Option<u32>,
-    pub key: Option<KEYCODE32>,
+    pub key: Option<Keycode32>,
     pub auto_repeat_mode: Option<u32>,
 }
 impl ChangeKeyboardControlAux {
@@ -16702,7 +16702,7 @@ impl ChangeKeyboardControlAux {
         self
     }
     /// Set the key field of this structure.
-    pub fn key<I>(mut self, value: I) -> Self where I: Into<Option<KEYCODE32>> {
+    pub fn key<I>(mut self, value: I) -> Self where I: Into<Option<Keycode32>> {
         self.key = value.into();
         self
     }
@@ -17727,7 +17727,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the RotateProperties request
 pub const ROTATE_PROPERTIES_REQUEST: u8 = 114;
-pub fn rotate_properties<'c, Conn>(conn: &'c Conn, window: WINDOW, delta: i16, atoms: &[ATOM]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn rotate_properties<'c, Conn>(conn: &'c Conn, window: Window, delta: i16, atoms: &[Atom]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 4 * atoms.len() + 3) / 4;
@@ -18078,7 +18078,7 @@ impl TryFrom<u32> for MapIndex {
 
 /// Opcode for the SetModifierMapping request
 pub const SET_MODIFIER_MAPPING_REQUEST: u8 = 118;
-pub fn set_modifier_mapping<'c, Conn>(conn: &'c Conn, keycodes: &[KEYCODE]) -> Result<Cookie<'c, Conn, SetModifierMappingReply>, ConnectionError>
+pub fn set_modifier_mapping<'c, Conn>(conn: &'c Conn, keycodes: &[Keycode]) -> Result<Cookie<'c, Conn, SetModifierMappingReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (4 + 1 * keycodes.len() + 3) / 4;
@@ -18146,7 +18146,7 @@ pub struct GetModifierMappingReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub keycodes: Vec<KEYCODE>,
+    pub keycodes: Vec<Keycode>,
 }
 impl GetModifierMappingReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -18155,7 +18155,7 @@ impl GetModifierMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let (keycodes, remaining) = crate::x11_utils::parse_list::<KEYCODE>(remaining, (keycodes_per_modifier as usize) * (8))?;
+        let (keycodes, remaining) = crate::x11_utils::parse_list::<Keycode>(remaining, (keycodes_per_modifier as usize) * (8))?;
         let result = GetModifierMappingReply { response_type, sequence, length, keycodes };
         Ok((result, remaining))
     }
@@ -18240,7 +18240,7 @@ pub trait ConnectionExt: RequestConnection {
     /// * CreateNotify: event
     /// * MapWindow: request
     /// * xcb_generate_id: function
-    fn create_window<'c, A>(&'c self, depth: u8, wid: WINDOW, parent: WINDOW, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, visual: VISUALID, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn create_window<'c, A>(&'c self, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, visual: Visualid, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u16>
     {
         create_window(self, depth, wid, parent, x, y, width, height, border_width, class, visual, value_list)
@@ -18266,7 +18266,7 @@ pub trait ConnectionExt: RequestConnection {
     /// * `Pixmap` - TODO: reasons?
     /// * `Value` - TODO: reasons?
     /// * `Window` - The specified `window` does not exist.
-    fn change_window_attributes<'c>(&'c self, window: WINDOW, value_list: &ChangeWindowAttributesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn change_window_attributes<'c>(&'c self, window: Window, value_list: &ChangeWindowAttributesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_window_attributes(self, window, value_list)
     }
@@ -18283,7 +18283,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `Drawable` - TODO: reasons?
     /// * `Window` - The specified `window` does not exist.
-    fn get_window_attributes(&self, window: WINDOW) -> Result<Cookie<'_, Self, GetWindowAttributesReply>, ConnectionError>
+    fn get_window_attributes(&self, window: Window) -> Result<Cookie<'_, Self, GetWindowAttributesReply>, ConnectionError>
     {
         get_window_attributes(self, window)
     }
@@ -18310,12 +18310,12 @@ pub trait ConnectionExt: RequestConnection {
     /// * DestroyNotify: event
     /// * MapWindow: request
     /// * UnmapWindow: request
-    fn destroy_window(&self, window: WINDOW) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn destroy_window(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_window(self, window)
     }
 
-    fn destroy_subwindows(&self, window: WINDOW) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn destroy_subwindows(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_subwindows(self, window)
     }
@@ -18342,7 +18342,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * ReparentWindow: request
-    fn change_save_set<A>(&self, mode: A, window: WINDOW) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn change_save_set<A>(&self, mode: A, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<u8>
     {
         change_save_set(self, mode, window)
@@ -18380,7 +18380,7 @@ pub trait ConnectionExt: RequestConnection {
     /// * MapWindow: request
     /// * ReparentNotify: event
     /// * UnmapWindow: request
-    fn reparent_window(&self, window: WINDOW, parent: WINDOW, x: i16, y: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn reparent_window(&self, window: Window, parent: Window, x: i16, y: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         reparent_window(self, window, parent, x, y)
     }
@@ -18420,12 +18420,12 @@ pub trait ConnectionExt: RequestConnection {
     /// * Expose: event
     /// * MapNotify: event
     /// * UnmapWindow: request
-    fn map_window(&self, window: WINDOW) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn map_window(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         map_window(self, window)
     }
 
-    fn map_subwindows(&self, window: WINDOW) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn map_subwindows(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         map_subwindows(self, window)
     }
@@ -18451,12 +18451,12 @@ pub trait ConnectionExt: RequestConnection {
     /// * Expose: event
     /// * MapWindow: request
     /// * UnmapNotify: event
-    fn unmap_window(&self, window: WINDOW) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn unmap_window(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         unmap_window(self, window)
     }
 
-    fn unmap_subwindows(&self, window: WINDOW) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn unmap_subwindows(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         unmap_subwindows(self, window)
     }
@@ -18511,7 +18511,7 @@ pub trait ConnectionExt: RequestConnection {
     ///     xcb_flush(c);
     /// }
     /// ```
-    fn configure_window<'c>(&'c self, window: WINDOW, value_list: &ConfigureWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn configure_window<'c>(&'c self, window: Window, value_list: &ConfigureWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         configure_window(self, window, value_list)
     }
@@ -18532,7 +18532,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `Value` - The specified `direction` is invalid.
     /// * `Window` - The specified `window` does not exist.
-    fn circulate_window<A>(&self, direction: A, window: WINDOW) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn circulate_window<A>(&self, direction: A, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<u8>
     {
         circulate_window(self, direction, window)
@@ -18574,7 +18574,7 @@ pub trait ConnectionExt: RequestConnection {
     ///     free(reply);
     /// }
     /// ```
-    fn get_geometry(&self, drawable: DRAWABLE) -> Result<Cookie<'_, Self, GetGeometryReply>, ConnectionError>
+    fn get_geometry(&self, drawable: Drawable) -> Result<Cookie<'_, Self, GetGeometryReply>, ConnectionError>
     {
         get_geometry(self, drawable)
     }
@@ -18616,7 +18616,7 @@ pub trait ConnectionExt: RequestConnection {
     ///     }
     /// }
     /// ```
-    fn query_tree(&self, window: WINDOW) -> Result<Cookie<'_, Self, QueryTreeReply>, ConnectionError>
+    fn query_tree(&self, window: Window) -> Result<Cookie<'_, Self, QueryTreeReply>, ConnectionError>
     {
         query_tree(self, window)
     }
@@ -18671,7 +18671,7 @@ pub trait ConnectionExt: RequestConnection {
         intern_atom(self, only_if_exists, name)
     }
 
-    fn get_atom_name(&self, atom: ATOM) -> Result<Cookie<'_, Self, GetAtomNameReply>, ConnectionError>
+    fn get_atom_name(&self, atom: Atom) -> Result<Cookie<'_, Self, GetAtomNameReply>, ConnectionError>
     {
         get_atom_name(self, atom)
     }
@@ -18726,13 +18726,13 @@ pub trait ConnectionExt: RequestConnection {
     ///     xcb_flush(conn);
     /// }
     /// ```
-    fn change_property<'c, A, B, C>(&'c self, mode: A, window: WINDOW, property: B, type_: C, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>, B: Into<ATOM>, C: Into<ATOM>
+    fn change_property<'c, A, B, C>(&'c self, mode: A, window: Window, property: B, type_: C, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    where A: Into<u8>, B: Into<Atom>, C: Into<Atom>
     {
         change_property(self, mode, window, property, type_, format, data_len, data)
     }
 
-    fn delete_property(&self, window: WINDOW, property: ATOM) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn delete_property(&self, window: Window, property: Atom) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_property(self, window, property)
     }
@@ -18805,12 +18805,12 @@ pub trait ConnectionExt: RequestConnection {
     ///     free(reply);
     /// }
     /// ```
-    fn get_property(&self, delete: bool, window: WINDOW, property: ATOM, type_: ATOM, long_offset: u32, long_length: u32) -> Result<Cookie<'_, Self, GetPropertyReply>, ConnectionError>
+    fn get_property(&self, delete: bool, window: Window, property: Atom, type_: Atom, long_offset: u32, long_length: u32) -> Result<Cookie<'_, Self, GetPropertyReply>, ConnectionError>
     {
         get_property(self, delete, window, property, type_, long_offset, long_length)
     }
 
-    fn list_properties(&self, window: WINDOW) -> Result<Cookie<'_, Self, ListPropertiesReply>, ConnectionError>
+    fn list_properties(&self, window: Window) -> Result<Cookie<'_, Self, ListPropertiesReply>, ConnectionError>
     {
         list_properties(self, window)
     }
@@ -18844,7 +18844,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * SetSelectionOwner: request
-    fn set_selection_owner(&self, owner: WINDOW, selection: ATOM, time: TIMESTAMP) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn set_selection_owner(&self, owner: Window, selection: Atom, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_selection_owner(self, owner, selection, time)
     }
@@ -18866,12 +18866,12 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * SetSelectionOwner: request
-    fn get_selection_owner(&self, selection: ATOM) -> Result<Cookie<'_, Self, GetSelectionOwnerReply>, ConnectionError>
+    fn get_selection_owner(&self, selection: Atom) -> Result<Cookie<'_, Self, GetSelectionOwnerReply>, ConnectionError>
     {
         get_selection_owner(self, selection)
     }
 
-    fn convert_selection(&self, requestor: WINDOW, selection: ATOM, target: ATOM, property: ATOM, time: TIMESTAMP) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn convert_selection(&self, requestor: Window, selection: Atom, target: Atom, property: Atom, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         convert_selection(self, requestor, selection, target, property, time)
     }
@@ -18949,7 +18949,7 @@ pub trait ConnectionExt: RequestConnection {
     ///     free(event);
     /// }
     /// ```
-    fn send_event<A>(&self, propagate: bool, destination: WINDOW, event_mask: u32, event: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn send_event<A>(&self, propagate: bool, destination: Window, event_mask: u32, event: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<[u8; 32]>
     {
         send_event(self, propagate, destination, event_mask, event)
@@ -19024,7 +19024,7 @@ pub trait ConnectionExt: RequestConnection {
     ///     }
     /// }
     /// ```
-    fn grab_pointer<A, B>(&self, owner_events: bool, grab_window: WINDOW, event_mask: u16, pointer_mode: A, keyboard_mode: B, confine_to: WINDOW, cursor: CURSOR, time: TIMESTAMP) -> Result<Cookie<'_, Self, GrabPointerReply>, ConnectionError>
+    fn grab_pointer<A, B>(&self, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: A, keyboard_mode: B, confine_to: Window, cursor: Cursor, time: Timestamp) -> Result<Cookie<'_, Self, GrabPointerReply>, ConnectionError>
     where A: Into<u8>, B: Into<u8>
     {
         grab_pointer(self, owner_events, grab_window, event_mask, pointer_mode, keyboard_mode, confine_to, cursor, time)
@@ -19053,7 +19053,7 @@ pub trait ConnectionExt: RequestConnection {
     /// * GrabButton: request
     /// * GrabPointer: request
     /// * LeaveNotify: event
-    fn ungrab_pointer(&self, time: TIMESTAMP) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn ungrab_pointer(&self, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_pointer(self, time)
     }
@@ -19122,19 +19122,19 @@ pub trait ConnectionExt: RequestConnection {
     /// * `Cursor` - The specified `cursor` does not exist.
     /// * `Value` - TODO: reasons?
     /// * `Window` - The specified `window` does not exist.
-    fn grab_button<A, B, C>(&self, owner_events: bool, grab_window: WINDOW, event_mask: u16, pointer_mode: A, keyboard_mode: B, confine_to: WINDOW, cursor: CURSOR, button: C, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn grab_button<A, B, C>(&self, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: A, keyboard_mode: B, confine_to: Window, cursor: Cursor, button: C, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<u8>, B: Into<u8>, C: Into<u8>
     {
         grab_button(self, owner_events, grab_window, event_mask, pointer_mode, keyboard_mode, confine_to, cursor, button, modifiers)
     }
 
-    fn ungrab_button<A>(&self, button: A, grab_window: WINDOW, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn ungrab_button<A>(&self, button: A, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<u8>
     {
         ungrab_button(self, button, grab_window, modifiers)
     }
 
-    fn change_active_pointer_grab(&self, cursor: CURSOR, time: TIMESTAMP, event_mask: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn change_active_pointer_grab(&self, cursor: Cursor, time: Timestamp, event_mask: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         change_active_pointer_grab(self, cursor, time, event_mask)
     }
@@ -19199,13 +19199,13 @@ pub trait ConnectionExt: RequestConnection {
     ///     }
     /// }
     /// ```
-    fn grab_keyboard<A, B>(&self, owner_events: bool, grab_window: WINDOW, time: TIMESTAMP, pointer_mode: A, keyboard_mode: B) -> Result<Cookie<'_, Self, GrabKeyboardReply>, ConnectionError>
+    fn grab_keyboard<A, B>(&self, owner_events: bool, grab_window: Window, time: Timestamp, pointer_mode: A, keyboard_mode: B) -> Result<Cookie<'_, Self, GrabKeyboardReply>, ConnectionError>
     where A: Into<u8>, B: Into<u8>
     {
         grab_keyboard(self, owner_events, grab_window, time, pointer_mode, keyboard_mode)
     }
 
-    fn ungrab_keyboard(&self, time: TIMESTAMP) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn ungrab_keyboard(&self, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_keyboard(self, time)
     }
@@ -19268,7 +19268,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * GrabKeyboard: request
-    fn grab_key<A, B>(&self, owner_events: bool, grab_window: WINDOW, modifiers: u16, key: KEYCODE, pointer_mode: A, keyboard_mode: B) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn grab_key<A, B>(&self, owner_events: bool, grab_window: Window, modifiers: u16, key: Keycode, pointer_mode: A, keyboard_mode: B) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<u8>, B: Into<u8>
     {
         grab_key(self, owner_events, grab_window, modifiers, key, pointer_mode, keyboard_mode)
@@ -19299,7 +19299,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * GrabKey: request
     /// * xev: program
-    fn ungrab_key(&self, key: KEYCODE, grab_window: WINDOW, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn ungrab_key(&self, key: Keycode, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_key(self, key, grab_window, modifiers)
     }
@@ -19321,7 +19321,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # Errors
     ///
     /// * `Value` - You specified an invalid `mode`.
-    fn allow_events<A>(&self, mode: A, time: TIMESTAMP) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn allow_events<A>(&self, mode: A, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<u8>
     {
         allow_events(self, mode, time)
@@ -19350,17 +19350,17 @@ pub trait ConnectionExt: RequestConnection {
     /// # Errors
     ///
     /// * `Window` - The specified `window` does not exist.
-    fn query_pointer(&self, window: WINDOW) -> Result<Cookie<'_, Self, QueryPointerReply>, ConnectionError>
+    fn query_pointer(&self, window: Window) -> Result<Cookie<'_, Self, QueryPointerReply>, ConnectionError>
     {
         query_pointer(self, window)
     }
 
-    fn get_motion_events(&self, window: WINDOW, start: TIMESTAMP, stop: TIMESTAMP) -> Result<Cookie<'_, Self, GetMotionEventsReply>, ConnectionError>
+    fn get_motion_events(&self, window: Window, start: Timestamp, stop: Timestamp) -> Result<Cookie<'_, Self, GetMotionEventsReply>, ConnectionError>
     {
         get_motion_events(self, window, start, stop)
     }
 
-    fn translate_coordinates(&self, src_window: WINDOW, dst_window: WINDOW, src_x: i16, src_y: i16) -> Result<Cookie<'_, Self, TranslateCoordinatesReply>, ConnectionError>
+    fn translate_coordinates(&self, src_window: Window, dst_window: Window, src_x: i16, src_y: i16) -> Result<Cookie<'_, Self, TranslateCoordinatesReply>, ConnectionError>
     {
         translate_coordinates(self, src_window, dst_window, src_x, src_y)
     }
@@ -19397,7 +19397,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * SetInputFocus: request
-    fn warp_pointer(&self, src_window: WINDOW, dst_window: WINDOW, src_x: i16, src_y: i16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn warp_pointer(&self, src_window: Window, dst_window: Window, src_x: i16, src_y: i16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         warp_pointer(self, src_window, dst_window, src_x, src_y, src_width, src_height, dst_x, dst_y)
     }
@@ -19437,7 +19437,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * FocusIn: event
     /// * FocusOut: event
-    fn set_input_focus<A>(&self, revert_to: A, focus: WINDOW, time: TIMESTAMP) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn set_input_focus<A>(&self, revert_to: A, focus: Window, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<u8>
     {
         set_input_focus(self, revert_to, focus, time)
@@ -19473,12 +19473,12 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * xcb_generate_id: function
-    fn open_font<'c>(&'c self, fid: FONT, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn open_font<'c>(&'c self, fid: Font, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         open_font(self, fid, name)
     }
 
-    fn close_font(&self, font: FONT) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn close_font(&self, font: Font) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         close_font(self, font)
     }
@@ -19490,7 +19490,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # Fields
     ///
     /// * `font` - The fontable (Font or Graphics Context) to query.
-    fn query_font(&self, font: FONTABLE) -> Result<Cookie<'_, Self, QueryFontReply>, ConnectionError>
+    fn query_font(&self, font: Fontable) -> Result<Cookie<'_, Self, QueryFontReply>, ConnectionError>
     {
         query_font(self, font)
     }
@@ -19529,7 +19529,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `Font` - The specified `font` does not exist.
     /// * `GContext` - The specified graphics context does not exist.
-    fn query_text_extents<'c>(&'c self, font: FONTABLE, string: &[Char2b]) -> Result<Cookie<'c, Self, QueryTextExtentsReply>, ConnectionError>
+    fn query_text_extents<'c>(&'c self, font: Fontable, string: &[Char2b]) -> Result<Cookie<'c, Self, QueryTextExtentsReply>, ConnectionError>
     {
         query_text_extents(self, font, string)
     }
@@ -19603,7 +19603,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * xcb_generate_id: function
-    fn create_pixmap(&self, depth: u8, pid: PIXMAP, drawable: DRAWABLE, width: u16, height: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn create_pixmap(&self, depth: u8, pid: Pixmap, drawable: Drawable, width: u16, height: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_pixmap(self, depth, pid, drawable, width, height)
     }
@@ -19620,7 +19620,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # Errors
     ///
     /// * `Pixmap` - The specified pixmap does not exist.
-    fn free_pixmap(&self, pixmap: PIXMAP) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn free_pixmap(&self, pixmap: Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         free_pixmap(self, pixmap)
     }
@@ -19648,7 +19648,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * xcb_generate_id: function
-    fn create_gc<'c>(&'c self, cid: GCONTEXT, drawable: DRAWABLE, value_list: &CreateGCAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn create_gc<'c>(&'c self, cid: Gcontext, drawable: Drawable, value_list: &CreateGCAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_gc(self, cid, drawable, value_list)
     }
@@ -19697,22 +19697,22 @@ pub trait ConnectionExt: RequestConnection {
     ///     xcb_flush(conn);
     /// }
     /// ```
-    fn change_gc<'c>(&'c self, gc: GCONTEXT, value_list: &ChangeGCAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn change_gc<'c>(&'c self, gc: Gcontext, value_list: &ChangeGCAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_gc(self, gc, value_list)
     }
 
-    fn copy_gc(&self, src_gc: GCONTEXT, dst_gc: GCONTEXT, value_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn copy_gc(&self, src_gc: Gcontext, dst_gc: Gcontext, value_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         copy_gc(self, src_gc, dst_gc, value_mask)
     }
 
-    fn set_dashes<'c>(&'c self, gc: GCONTEXT, dash_offset: u16, dashes: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn set_dashes<'c>(&'c self, gc: Gcontext, dash_offset: u16, dashes: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_dashes(self, gc, dash_offset, dashes)
     }
 
-    fn set_clip_rectangles<'c, A>(&'c self, ordering: A, gc: GCONTEXT, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn set_clip_rectangles<'c, A>(&'c self, ordering: A, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>
     {
         set_clip_rectangles(self, ordering, gc, clip_x_origin, clip_y_origin, rectangles)
@@ -19729,12 +19729,12 @@ pub trait ConnectionExt: RequestConnection {
     /// # Errors
     ///
     /// * `GContext` - The specified graphics context does not exist.
-    fn free_gc(&self, gc: GCONTEXT) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn free_gc(&self, gc: Gcontext) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         free_gc(self, gc)
     }
 
-    fn clear_area(&self, exposures: bool, window: WINDOW, x: i16, y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn clear_area(&self, exposures: bool, window: Window, x: i16, y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         clear_area(self, exposures, window, x, y, width, height)
     }
@@ -19760,17 +19760,17 @@ pub trait ConnectionExt: RequestConnection {
     /// * `Drawable` - The specified `drawable` (Window or Pixmap) does not exist.
     /// * `GContext` - The specified graphics context does not exist.
     /// * `Match` - `src_drawable` has a different root or depth than `dst_drawable`.
-    fn copy_area(&self, src_drawable: DRAWABLE, dst_drawable: DRAWABLE, gc: GCONTEXT, src_x: i16, src_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn copy_area(&self, src_drawable: Drawable, dst_drawable: Drawable, gc: Gcontext, src_x: i16, src_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         copy_area(self, src_drawable, dst_drawable, gc, src_x, src_y, dst_x, dst_y, width, height)
     }
 
-    fn copy_plane(&self, src_drawable: DRAWABLE, dst_drawable: DRAWABLE, gc: GCONTEXT, src_x: i16, src_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16, bit_plane: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn copy_plane(&self, src_drawable: Drawable, dst_drawable: Drawable, gc: Gcontext, src_x: i16, src_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16, bit_plane: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         copy_plane(self, src_drawable, dst_drawable, gc, src_x, src_y, dst_x, dst_y, width, height, bit_plane)
     }
 
-    fn poly_point<'c, A>(&'c self, coordinate_mode: A, drawable: DRAWABLE, gc: GCONTEXT, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_point<'c, A>(&'c self, coordinate_mode: A, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>
     {
         poly_point(self, coordinate_mode, drawable, gc, points)
@@ -19814,7 +19814,7 @@ pub trait ConnectionExt: RequestConnection {
     ///     xcb_flush(conn);
     /// }
     /// ```
-    fn poly_line<'c, A>(&'c self, coordinate_mode: A, drawable: DRAWABLE, gc: GCONTEXT, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_line<'c, A>(&'c self, coordinate_mode: A, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>
     {
         poly_line(self, coordinate_mode, drawable, gc, points)
@@ -19846,22 +19846,22 @@ pub trait ConnectionExt: RequestConnection {
     /// * `Drawable` - The specified `drawable` does not exist.
     /// * `GContext` - The specified `gc` does not exist.
     /// * `Match` - TODO: reasons?
-    fn poly_segment<'c>(&'c self, drawable: DRAWABLE, gc: GCONTEXT, segments: &[Segment]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_segment<'c>(&'c self, drawable: Drawable, gc: Gcontext, segments: &[Segment]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_segment(self, drawable, gc, segments)
     }
 
-    fn poly_rectangle<'c>(&'c self, drawable: DRAWABLE, gc: GCONTEXT, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_rectangle<'c>(&'c self, drawable: Drawable, gc: Gcontext, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_rectangle(self, drawable, gc, rectangles)
     }
 
-    fn poly_arc<'c>(&'c self, drawable: DRAWABLE, gc: GCONTEXT, arcs: &[Arc]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_arc<'c>(&'c self, drawable: Drawable, gc: Gcontext, arcs: &[Arc]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_arc(self, drawable, gc, arcs)
     }
 
-    fn fill_poly<'c, A, B>(&'c self, drawable: DRAWABLE, gc: GCONTEXT, shape: A, coordinate_mode: B, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn fill_poly<'c, A, B>(&'c self, drawable: Drawable, gc: Gcontext, shape: A, coordinate_mode: B, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>, B: Into<u8>
     {
         fill_poly(self, drawable, gc, shape, coordinate_mode, points)
@@ -19892,34 +19892,34 @@ pub trait ConnectionExt: RequestConnection {
     /// * `Drawable` - The specified `drawable` (Window or Pixmap) does not exist.
     /// * `GContext` - The specified graphics context does not exist.
     /// * `Match` - TODO: reasons?
-    fn poly_fill_rectangle<'c>(&'c self, drawable: DRAWABLE, gc: GCONTEXT, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_fill_rectangle<'c>(&'c self, drawable: Drawable, gc: Gcontext, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_fill_rectangle(self, drawable, gc, rectangles)
     }
 
-    fn poly_fill_arc<'c>(&'c self, drawable: DRAWABLE, gc: GCONTEXT, arcs: &[Arc]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_fill_arc<'c>(&'c self, drawable: Drawable, gc: Gcontext, arcs: &[Arc]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_fill_arc(self, drawable, gc, arcs)
     }
 
-    fn put_image<'c, A>(&'c self, format: A, drawable: DRAWABLE, gc: GCONTEXT, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn put_image<'c, A>(&'c self, format: A, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>
     {
         put_image(self, format, drawable, gc, width, height, dst_x, dst_y, left_pad, depth, data)
     }
 
-    fn get_image<A>(&self, format: A, drawable: DRAWABLE, x: i16, y: i16, width: u16, height: u16, plane_mask: u32) -> Result<Cookie<'_, Self, GetImageReply>, ConnectionError>
+    fn get_image<A>(&self, format: A, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32) -> Result<Cookie<'_, Self, GetImageReply>, ConnectionError>
     where A: Into<u8>
     {
         get_image(self, format, drawable, x, y, width, height, plane_mask)
     }
 
-    fn poly_text8<'c>(&'c self, drawable: DRAWABLE, gc: GCONTEXT, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_text8<'c>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_text8(self, drawable, gc, x, y, items)
     }
 
-    fn poly_text16<'c>(&'c self, drawable: DRAWABLE, gc: GCONTEXT, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_text16<'c>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_text16(self, drawable, gc, x, y, items)
     }
@@ -19958,7 +19958,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * ImageText16: request
-    fn image_text8<'c>(&'c self, drawable: DRAWABLE, gc: GCONTEXT, x: i16, y: i16, string: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn image_text8<'c>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         image_text8(self, drawable, gc, x, y, string)
     }
@@ -19998,38 +19998,38 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * ImageText8: request
-    fn image_text16<'c>(&'c self, drawable: DRAWABLE, gc: GCONTEXT, x: i16, y: i16, string: &[Char2b]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn image_text16<'c>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[Char2b]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         image_text16(self, drawable, gc, x, y, string)
     }
 
-    fn create_colormap<A>(&self, alloc: A, mid: COLORMAP, window: WINDOW, visual: VISUALID) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn create_colormap<A>(&self, alloc: A, mid: Colormap, window: Window, visual: Visualid) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<u8>
     {
         create_colormap(self, alloc, mid, window, visual)
     }
 
-    fn free_colormap(&self, cmap: COLORMAP) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn free_colormap(&self, cmap: Colormap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         free_colormap(self, cmap)
     }
 
-    fn copy_colormap_and_free(&self, mid: COLORMAP, src_cmap: COLORMAP) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn copy_colormap_and_free(&self, mid: Colormap, src_cmap: Colormap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         copy_colormap_and_free(self, mid, src_cmap)
     }
 
-    fn install_colormap(&self, cmap: COLORMAP) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn install_colormap(&self, cmap: Colormap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         install_colormap(self, cmap)
     }
 
-    fn uninstall_colormap(&self, cmap: COLORMAP) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn uninstall_colormap(&self, cmap: Colormap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         uninstall_colormap(self, cmap)
     }
 
-    fn list_installed_colormaps(&self, window: WINDOW) -> Result<Cookie<'_, Self, ListInstalledColormapsReply>, ConnectionError>
+    fn list_installed_colormaps(&self, window: Window) -> Result<Cookie<'_, Self, ListInstalledColormapsReply>, ConnectionError>
     {
         list_installed_colormaps(self, window)
     }
@@ -20052,52 +20052,52 @@ pub trait ConnectionExt: RequestConnection {
     /// # Errors
     ///
     /// * `Colormap` - The specified colormap `cmap` does not exist.
-    fn alloc_color(&self, cmap: COLORMAP, red: u16, green: u16, blue: u16) -> Result<Cookie<'_, Self, AllocColorReply>, ConnectionError>
+    fn alloc_color(&self, cmap: Colormap, red: u16, green: u16, blue: u16) -> Result<Cookie<'_, Self, AllocColorReply>, ConnectionError>
     {
         alloc_color(self, cmap, red, green, blue)
     }
 
-    fn alloc_named_color<'c>(&'c self, cmap: COLORMAP, name: &[u8]) -> Result<Cookie<'c, Self, AllocNamedColorReply>, ConnectionError>
+    fn alloc_named_color<'c>(&'c self, cmap: Colormap, name: &[u8]) -> Result<Cookie<'c, Self, AllocNamedColorReply>, ConnectionError>
     {
         alloc_named_color(self, cmap, name)
     }
 
-    fn alloc_color_cells(&self, contiguous: bool, cmap: COLORMAP, colors: u16, planes: u16) -> Result<Cookie<'_, Self, AllocColorCellsReply>, ConnectionError>
+    fn alloc_color_cells(&self, contiguous: bool, cmap: Colormap, colors: u16, planes: u16) -> Result<Cookie<'_, Self, AllocColorCellsReply>, ConnectionError>
     {
         alloc_color_cells(self, contiguous, cmap, colors, planes)
     }
 
-    fn alloc_color_planes(&self, contiguous: bool, cmap: COLORMAP, colors: u16, reds: u16, greens: u16, blues: u16) -> Result<Cookie<'_, Self, AllocColorPlanesReply>, ConnectionError>
+    fn alloc_color_planes(&self, contiguous: bool, cmap: Colormap, colors: u16, reds: u16, greens: u16, blues: u16) -> Result<Cookie<'_, Self, AllocColorPlanesReply>, ConnectionError>
     {
         alloc_color_planes(self, contiguous, cmap, colors, reds, greens, blues)
     }
 
-    fn free_colors<'c>(&'c self, cmap: COLORMAP, plane_mask: u32, pixels: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn free_colors<'c>(&'c self, cmap: Colormap, plane_mask: u32, pixels: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         free_colors(self, cmap, plane_mask, pixels)
     }
 
-    fn store_colors<'c>(&'c self, cmap: COLORMAP, items: &[Coloritem]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn store_colors<'c>(&'c self, cmap: Colormap, items: &[Coloritem]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         store_colors(self, cmap, items)
     }
 
-    fn store_named_color<'c>(&'c self, flags: u8, cmap: COLORMAP, pixel: u32, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn store_named_color<'c>(&'c self, flags: u8, cmap: Colormap, pixel: u32, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         store_named_color(self, flags, cmap, pixel, name)
     }
 
-    fn query_colors<'c>(&'c self, cmap: COLORMAP, pixels: &[u32]) -> Result<Cookie<'c, Self, QueryColorsReply>, ConnectionError>
+    fn query_colors<'c>(&'c self, cmap: Colormap, pixels: &[u32]) -> Result<Cookie<'c, Self, QueryColorsReply>, ConnectionError>
     {
         query_colors(self, cmap, pixels)
     }
 
-    fn lookup_color<'c>(&'c self, cmap: COLORMAP, name: &[u8]) -> Result<Cookie<'c, Self, LookupColorReply>, ConnectionError>
+    fn lookup_color<'c>(&'c self, cmap: Colormap, name: &[u8]) -> Result<Cookie<'c, Self, LookupColorReply>, ConnectionError>
     {
         lookup_color(self, cmap, name)
     }
 
-    fn create_cursor(&self, cid: CURSOR, source: PIXMAP, mask: PIXMAP, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn create_cursor(&self, cid: Cursor, source: Pixmap, mask: Pixmap, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_cursor(self, cid, source, mask, fore_red, fore_green, fore_blue, back_red, back_green, back_blue, x, y)
     }
@@ -20135,7 +20135,7 @@ pub trait ConnectionExt: RequestConnection {
     /// * `Alloc` - The X server could not allocate the requested resources (no memory?).
     /// * `Font` - The specified `source_font` or `mask_font` does not exist.
     /// * `Value` - Either `source_char` or `mask_char` are not defined in `source_font` or `mask_font`, respectively.
-    fn create_glyph_cursor(&self, cid: CURSOR, source_font: FONT, mask_font: FONT, source_char: u16, mask_char: u16, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn create_glyph_cursor(&self, cid: Cursor, source_font: Font, mask_font: Font, source_char: u16, mask_char: u16, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_glyph_cursor(self, cid, source_font, mask_font, source_char, mask_char, fore_red, fore_green, fore_blue, back_red, back_green, back_blue)
     }
@@ -20152,17 +20152,17 @@ pub trait ConnectionExt: RequestConnection {
     /// # Errors
     ///
     /// * `Cursor` - The specified cursor does not exist.
-    fn free_cursor(&self, cursor: CURSOR) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn free_cursor(&self, cursor: Cursor) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         free_cursor(self, cursor)
     }
 
-    fn recolor_cursor(&self, cursor: CURSOR, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn recolor_cursor(&self, cursor: Cursor, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         recolor_cursor(self, cursor, fore_red, fore_green, fore_blue, back_red, back_green, back_blue)
     }
 
-    fn query_best_size<A>(&self, class: A, drawable: DRAWABLE, width: u16, height: u16) -> Result<Cookie<'_, Self, QueryBestSizeReply>, ConnectionError>
+    fn query_best_size<A>(&self, class: A, drawable: Drawable, width: u16, height: u16) -> Result<Cookie<'_, Self, QueryBestSizeReply>, ConnectionError>
     where A: Into<u8>
     {
         query_best_size(self, class, drawable, width, height)
@@ -20200,12 +20200,12 @@ pub trait ConnectionExt: RequestConnection {
         list_extensions(self)
     }
 
-    fn change_keyboard_mapping<'c>(&'c self, keycode_count: u8, first_keycode: KEYCODE, keysyms_per_keycode: u8, keysyms: &[KEYSYM]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn change_keyboard_mapping<'c>(&'c self, keycode_count: u8, first_keycode: Keycode, keysyms_per_keycode: u8, keysyms: &[Keysym]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_keyboard_mapping(self, keycode_count, first_keycode, keysyms_per_keycode, keysyms)
     }
 
-    fn get_keyboard_mapping(&self, first_keycode: KEYCODE, count: u8) -> Result<Cookie<'_, Self, GetKeyboardMappingReply>, ConnectionError>
+    fn get_keyboard_mapping(&self, first_keycode: Keycode, count: u8) -> Result<Cookie<'_, Self, GetKeyboardMappingReply>, ConnectionError>
     {
         get_keyboard_mapping(self, first_keycode, count)
     }
@@ -20293,7 +20293,7 @@ pub trait ConnectionExt: RequestConnection {
         kill_client(self, resource)
     }
 
-    fn rotate_properties<'c>(&'c self, window: WINDOW, delta: i16, atoms: &[ATOM]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn rotate_properties<'c>(&'c self, window: Window, delta: i16, atoms: &[Atom]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         rotate_properties(self, window, delta, atoms)
     }
@@ -20314,7 +20314,7 @@ pub trait ConnectionExt: RequestConnection {
         get_pointer_mapping(self)
     }
 
-    fn set_modifier_mapping<'c>(&'c self, keycodes: &[KEYCODE]) -> Result<Cookie<'c, Self, SetModifierMappingReply>, ConnectionError>
+    fn set_modifier_mapping<'c>(&'c self, keycodes: &[Keycode]) -> Result<Cookie<'c, Self, SetModifierMappingReply>, ConnectionError>
     {
         set_modifier_mapping(self, keycodes)
     }

@@ -51,8 +51,8 @@ fn main() {
     conn.change_property8(
         PropMode::Replace,
         win_id,
-        Atom::WM_NAME,
-        Atom::STRING,
+        AtomEnum::WM_NAME,
+        AtomEnum::STRING,
         title.as_bytes(),
     )
     .unwrap();
@@ -60,7 +60,7 @@ fn main() {
         PropMode::Replace,
         win_id,
         wm_protocols,
-        Atom::ATOM,
+        AtomEnum::ATOM,
         &[wm_delete_window],
     )
     .unwrap();
@@ -69,8 +69,8 @@ fn main() {
         .get_property(
             false,
             win_id,
-            Atom::WM_NAME.into(),
-            Atom::STRING.into(),
+            AtomEnum::WM_NAME.into(),
+            AtomEnum::STRING.into(),
             0,
             1024,
         )

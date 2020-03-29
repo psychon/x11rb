@@ -326,7 +326,7 @@ impl TryFrom<&[u8]> for GetWindowCreateContextReply {
 
 /// Opcode for the GetWindowContext request
 pub const GET_WINDOW_CONTEXT_REQUEST: u8 = 7;
-pub fn get_window_context<Conn>(conn: &Conn, window: WINDOW) -> Result<Cookie<'_, Conn, GetWindowContextReply>, ConnectionError>
+pub fn get_window_context<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, GetWindowContextReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -377,14 +377,14 @@ impl TryFrom<&[u8]> for GetWindowContextReply {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListItem {
-    pub name: ATOM,
+    pub name: Atom,
     pub object_context: Vec<u8>,
     pub data_context: Vec<u8>,
 }
 impl TryParse for ListItem {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
-        let (name, remaining) = ATOM::try_parse(remaining)?;
+        let (name, remaining) = Atom::try_parse(remaining)?;
         let (object_context_len, remaining) = u32::try_parse(remaining)?;
         let (data_context_len, remaining) = u32::try_parse(remaining)?;
         let (object_context, remaining) = crate::x11_utils::parse_list::<u8>(remaining, object_context_len as usize)?;
@@ -580,7 +580,7 @@ impl TryFrom<&[u8]> for GetPropertyUseContextReply {
 
 /// Opcode for the GetPropertyContext request
 pub const GET_PROPERTY_CONTEXT_REQUEST: u8 = 12;
-pub fn get_property_context<Conn>(conn: &Conn, window: WINDOW, property: ATOM) -> Result<Cookie<'_, Conn, GetPropertyContextReply>, ConnectionError>
+pub fn get_property_context<Conn>(conn: &Conn, window: Window, property: Atom) -> Result<Cookie<'_, Conn, GetPropertyContextReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -636,7 +636,7 @@ impl TryFrom<&[u8]> for GetPropertyContextReply {
 
 /// Opcode for the GetPropertyDataContext request
 pub const GET_PROPERTY_DATA_CONTEXT_REQUEST: u8 = 13;
-pub fn get_property_data_context<Conn>(conn: &Conn, window: WINDOW, property: ATOM) -> Result<Cookie<'_, Conn, GetPropertyDataContextReply>, ConnectionError>
+pub fn get_property_data_context<Conn>(conn: &Conn, window: Window, property: Atom) -> Result<Cookie<'_, Conn, GetPropertyDataContextReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -692,7 +692,7 @@ impl TryFrom<&[u8]> for GetPropertyDataContextReply {
 
 /// Opcode for the ListProperties request
 pub const LIST_PROPERTIES_REQUEST: u8 = 14;
-pub fn list_properties<Conn>(conn: &Conn, window: WINDOW) -> Result<Cookie<'_, Conn, ListPropertiesReply>, ConnectionError>
+pub fn list_properties<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, ListPropertiesReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -893,7 +893,7 @@ impl TryFrom<&[u8]> for GetSelectionUseContextReply {
 
 /// Opcode for the GetSelectionContext request
 pub const GET_SELECTION_CONTEXT_REQUEST: u8 = 19;
-pub fn get_selection_context<Conn>(conn: &Conn, selection: ATOM) -> Result<Cookie<'_, Conn, GetSelectionContextReply>, ConnectionError>
+pub fn get_selection_context<Conn>(conn: &Conn, selection: Atom) -> Result<Cookie<'_, Conn, GetSelectionContextReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -944,7 +944,7 @@ impl TryFrom<&[u8]> for GetSelectionContextReply {
 
 /// Opcode for the GetSelectionDataContext request
 pub const GET_SELECTION_DATA_CONTEXT_REQUEST: u8 = 20;
-pub fn get_selection_data_context<Conn>(conn: &Conn, selection: ATOM) -> Result<Cookie<'_, Conn, GetSelectionDataContextReply>, ConnectionError>
+pub fn get_selection_data_context<Conn>(conn: &Conn, selection: Atom) -> Result<Cookie<'_, Conn, GetSelectionDataContextReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1127,7 +1127,7 @@ pub trait ConnectionExt: RequestConnection {
         get_window_create_context(self)
     }
 
-    fn xselinux_get_window_context(&self, window: WINDOW) -> Result<Cookie<'_, Self, GetWindowContextReply>, ConnectionError>
+    fn xselinux_get_window_context(&self, window: Window) -> Result<Cookie<'_, Self, GetWindowContextReply>, ConnectionError>
     {
         get_window_context(self, window)
     }
@@ -1152,17 +1152,17 @@ pub trait ConnectionExt: RequestConnection {
         get_property_use_context(self)
     }
 
-    fn xselinux_get_property_context(&self, window: WINDOW, property: ATOM) -> Result<Cookie<'_, Self, GetPropertyContextReply>, ConnectionError>
+    fn xselinux_get_property_context(&self, window: Window, property: Atom) -> Result<Cookie<'_, Self, GetPropertyContextReply>, ConnectionError>
     {
         get_property_context(self, window, property)
     }
 
-    fn xselinux_get_property_data_context(&self, window: WINDOW, property: ATOM) -> Result<Cookie<'_, Self, GetPropertyDataContextReply>, ConnectionError>
+    fn xselinux_get_property_data_context(&self, window: Window, property: Atom) -> Result<Cookie<'_, Self, GetPropertyDataContextReply>, ConnectionError>
     {
         get_property_data_context(self, window, property)
     }
 
-    fn xselinux_list_properties(&self, window: WINDOW) -> Result<Cookie<'_, Self, ListPropertiesReply>, ConnectionError>
+    fn xselinux_list_properties(&self, window: Window) -> Result<Cookie<'_, Self, ListPropertiesReply>, ConnectionError>
     {
         list_properties(self, window)
     }
@@ -1187,12 +1187,12 @@ pub trait ConnectionExt: RequestConnection {
         get_selection_use_context(self)
     }
 
-    fn xselinux_get_selection_context(&self, selection: ATOM) -> Result<Cookie<'_, Self, GetSelectionContextReply>, ConnectionError>
+    fn xselinux_get_selection_context(&self, selection: Atom) -> Result<Cookie<'_, Self, GetSelectionContextReply>, ConnectionError>
     {
         get_selection_context(self, selection)
     }
 
-    fn xselinux_get_selection_data_context(&self, selection: ATOM) -> Result<Cookie<'_, Self, GetSelectionDataContextReply>, ConnectionError>
+    fn xselinux_get_selection_data_context(&self, selection: Atom) -> Result<Cookie<'_, Self, GetSelectionDataContextReply>, ConnectionError>
     {
         get_selection_data_context(self, selection)
     }

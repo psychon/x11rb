@@ -37,24 +37,24 @@ pub const X11_EXTENSION_NAME: &str = "XpExtension";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (1, 0);
 
-pub type STRING8 = u8;
+pub type String8 = u8;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Printer {
-    pub name: Vec<STRING8>,
-    pub description: Vec<STRING8>,
+    pub name: Vec<String8>,
+    pub description: Vec<String8>,
 }
 impl TryParse for Printer {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
         let (name_len, remaining) = u32::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_list::<STRING8>(remaining, name_len as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_list::<String8>(remaining, name_len as usize)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
         let (desc_len, remaining) = u32::try_parse(remaining)?;
-        let (description, remaining) = crate::x11_utils::parse_list::<STRING8>(remaining, desc_len as usize)?;
+        let (description, remaining) = crate::x11_utils::parse_list::<String8>(remaining, desc_len as usize)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
@@ -89,7 +89,7 @@ impl Serialize for Printer {
     }
 }
 
-pub type PCONTEXT = u32;
+pub type Pcontext = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -418,7 +418,7 @@ impl TryFrom<&[u8]> for PrintQueryVersionReply {
 
 /// Opcode for the PrintGetPrinterList request
 pub const PRINT_GET_PRINTER_LIST_REQUEST: u8 = 1;
-pub fn print_get_printer_list<'c, Conn>(conn: &'c Conn, printer_name: &[STRING8], locale: &[STRING8]) -> Result<Cookie<'c, Conn, PrintGetPrinterListReply>, ConnectionError>
+pub fn print_get_printer_list<'c, Conn>(conn: &'c Conn, printer_name: &[String8], locale: &[String8]) -> Result<Cookie<'c, Conn, PrintGetPrinterListReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -500,7 +500,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 2;
-pub fn create_context<'c, Conn>(conn: &'c Conn, context_id: u32, printer_name: &[STRING8], locale: &[STRING8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_context<'c, Conn>(conn: &'c Conn, context_id: u32, printer_name: &[String8], locale: &[String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -657,7 +657,7 @@ pub struct PrintGetScreenOfContextReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub root: WINDOW,
+    pub root: Window,
 }
 impl PrintGetScreenOfContextReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -665,7 +665,7 @@ impl PrintGetScreenOfContextReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (root, remaining) = WINDOW::try_parse(remaining)?;
+        let (root, remaining) = Window::try_parse(remaining)?;
         let result = PrintGetScreenOfContextReply { response_type, sequence, length, root };
         Ok((result, remaining))
     }
@@ -779,7 +779,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the PrintPutDocumentData request
 pub const PRINT_PUT_DOCUMENT_DATA_REQUEST: u8 = 11;
-pub fn print_put_document_data<'c, Conn>(conn: &'c Conn, drawable: DRAWABLE, data: &[u8], doc_format: &[STRING8], options: &[STRING8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn print_put_document_data<'c, Conn>(conn: &'c Conn, drawable: Drawable, data: &[u8], doc_format: &[String8], options: &[String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -823,7 +823,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the PrintGetDocumentData request
 pub const PRINT_GET_DOCUMENT_DATA_REQUEST: u8 = 12;
-pub fn print_get_document_data<Conn>(conn: &Conn, context: PCONTEXT, max_bytes: u32) -> Result<Cookie<'_, Conn, PrintGetDocumentDataReply>, ConnectionError>
+pub fn print_get_document_data<Conn>(conn: &Conn, context: Pcontext, max_bytes: u32) -> Result<Cookie<'_, Conn, PrintGetDocumentDataReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -883,7 +883,7 @@ impl TryFrom<&[u8]> for PrintGetDocumentDataReply {
 
 /// Opcode for the PrintStartPage request
 pub const PRINT_START_PAGE_REQUEST: u8 = 13;
-pub fn print_start_page<Conn>(conn: &Conn, window: WINDOW) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn print_start_page<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -933,7 +933,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the PrintSelectInput request
 pub const PRINT_SELECT_INPUT_REQUEST: u8 = 15;
-pub fn print_select_input<Conn>(conn: &Conn, context: PCONTEXT, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn print_select_input<Conn>(conn: &Conn, context: Pcontext, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -963,7 +963,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the PrintInputSelected request
 pub const PRINT_INPUT_SELECTED_REQUEST: u8 = 16;
-pub fn print_input_selected<Conn>(conn: &Conn, context: PCONTEXT) -> Result<Cookie<'_, Conn, PrintInputSelectedReply>, ConnectionError>
+pub fn print_input_selected<Conn>(conn: &Conn, context: Pcontext) -> Result<Cookie<'_, Conn, PrintInputSelectedReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1014,7 +1014,7 @@ impl TryFrom<&[u8]> for PrintInputSelectedReply {
 
 /// Opcode for the PrintGetAttributes request
 pub const PRINT_GET_ATTRIBUTES_REQUEST: u8 = 17;
-pub fn print_get_attributes<Conn>(conn: &Conn, context: PCONTEXT, pool: u8) -> Result<Cookie<'_, Conn, PrintGetAttributesReply>, ConnectionError>
+pub fn print_get_attributes<Conn>(conn: &Conn, context: Pcontext, pool: u8) -> Result<Cookie<'_, Conn, PrintGetAttributesReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1046,7 +1046,7 @@ pub struct PrintGetAttributesReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub attributes: Vec<STRING8>,
+    pub attributes: Vec<String8>,
 }
 impl PrintGetAttributesReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1056,7 +1056,7 @@ impl PrintGetAttributesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (string_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (attributes, remaining) = crate::x11_utils::parse_list::<STRING8>(remaining, string_len as usize)?;
+        let (attributes, remaining) = crate::x11_utils::parse_list::<String8>(remaining, string_len as usize)?;
         let result = PrintGetAttributesReply { response_type, sequence, length, attributes };
         Ok((result, remaining))
     }
@@ -1070,7 +1070,7 @@ impl TryFrom<&[u8]> for PrintGetAttributesReply {
 
 /// Opcode for the PrintGetOneAttributes request
 pub const PRINT_GET_ONE_ATTRIBUTES_REQUEST: u8 = 19;
-pub fn print_get_one_attributes<'c, Conn>(conn: &'c Conn, context: PCONTEXT, pool: u8, name: &[STRING8]) -> Result<Cookie<'c, Conn, PrintGetOneAttributesReply>, ConnectionError>
+pub fn print_get_one_attributes<'c, Conn>(conn: &'c Conn, context: Pcontext, pool: u8, name: &[String8]) -> Result<Cookie<'c, Conn, PrintGetOneAttributesReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1111,7 +1111,7 @@ pub struct PrintGetOneAttributesReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub value: Vec<STRING8>,
+    pub value: Vec<String8>,
 }
 impl PrintGetOneAttributesReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1121,7 +1121,7 @@ impl PrintGetOneAttributesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (value_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (value, remaining) = crate::x11_utils::parse_list::<STRING8>(remaining, value_len as usize)?;
+        let (value, remaining) = crate::x11_utils::parse_list::<String8>(remaining, value_len as usize)?;
         let result = PrintGetOneAttributesReply { response_type, sequence, length, value };
         Ok((result, remaining))
     }
@@ -1135,7 +1135,7 @@ impl TryFrom<&[u8]> for PrintGetOneAttributesReply {
 
 /// Opcode for the PrintSetAttributes request
 pub const PRINT_SET_ATTRIBUTES_REQUEST: u8 = 18;
-pub fn print_set_attributes<'c, Conn>(conn: &'c Conn, context: PCONTEXT, string_len: u32, pool: u8, rule: u8, attributes: &[STRING8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn print_set_attributes<'c, Conn>(conn: &'c Conn, context: Pcontext, string_len: u32, pool: u8, rule: u8, attributes: &[String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1174,7 +1174,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the PrintGetPageDimensions request
 pub const PRINT_GET_PAGE_DIMENSIONS_REQUEST: u8 = 21;
-pub fn print_get_page_dimensions<Conn>(conn: &Conn, context: PCONTEXT) -> Result<Cookie<'_, Conn, PrintGetPageDimensionsReply>, ConnectionError>
+pub fn print_get_page_dimensions<Conn>(conn: &Conn, context: Pcontext) -> Result<Cookie<'_, Conn, PrintGetPageDimensionsReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1255,7 +1255,7 @@ pub struct PrintQueryScreensReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub roots: Vec<WINDOW>,
+    pub roots: Vec<Window>,
 }
 impl PrintQueryScreensReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1265,7 +1265,7 @@ impl PrintQueryScreensReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (list_count, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (roots, remaining) = crate::x11_utils::parse_list::<WINDOW>(remaining, list_count as usize)?;
+        let (roots, remaining) = crate::x11_utils::parse_list::<Window>(remaining, list_count as usize)?;
         let result = PrintQueryScreensReply { response_type, sequence, length, roots };
         Ok((result, remaining))
     }
@@ -1279,7 +1279,7 @@ impl TryFrom<&[u8]> for PrintQueryScreensReply {
 
 /// Opcode for the PrintSetImageResolution request
 pub const PRINT_SET_IMAGE_RESOLUTION_REQUEST: u8 = 23;
-pub fn print_set_image_resolution<Conn>(conn: &Conn, context: PCONTEXT, image_resolution: u16) -> Result<Cookie<'_, Conn, PrintSetImageResolutionReply>, ConnectionError>
+pub fn print_set_image_resolution<Conn>(conn: &Conn, context: Pcontext, image_resolution: u16) -> Result<Cookie<'_, Conn, PrintSetImageResolutionReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1334,7 +1334,7 @@ impl TryFrom<&[u8]> for PrintSetImageResolutionReply {
 
 /// Opcode for the PrintGetImageResolution request
 pub const PRINT_GET_IMAGE_RESOLUTION_REQUEST: u8 = 24;
-pub fn print_get_image_resolution<Conn>(conn: &Conn, context: PCONTEXT) -> Result<Cookie<'_, Conn, PrintGetImageResolutionReply>, ConnectionError>
+pub fn print_get_image_resolution<Conn>(conn: &Conn, context: Pcontext) -> Result<Cookie<'_, Conn, PrintGetImageResolutionReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1388,7 +1388,7 @@ pub struct NotifyEvent {
     pub response_type: u8,
     pub detail: u8,
     pub sequence: u16,
-    pub context: PCONTEXT,
+    pub context: Pcontext,
     pub cancel: bool,
 }
 impl NotifyEvent {
@@ -1396,7 +1396,7 @@ impl NotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (context, remaining) = PCONTEXT::try_parse(remaining)?;
+        let (context, remaining) = Pcontext::try_parse(remaining)?;
         let (cancel, remaining) = bool::try_parse(remaining)?;
         let result = NotifyEvent { response_type, detail, sequence, context, cancel };
         Ok((result, remaining))
@@ -1446,14 +1446,14 @@ pub struct AttributNotifyEvent {
     pub response_type: u8,
     pub detail: u8,
     pub sequence: u16,
-    pub context: PCONTEXT,
+    pub context: Pcontext,
 }
 impl AttributNotifyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (context, remaining) = PCONTEXT::try_parse(remaining)?;
+        let (context, remaining) = Pcontext::try_parse(remaining)?;
         let result = AttributNotifyEvent { response_type, detail, sequence, context };
         Ok((result, remaining))
     }
@@ -1605,7 +1605,7 @@ pub trait ConnectionExt: RequestConnection {
         print_query_version(self)
     }
 
-    fn xprint_print_get_printer_list<'c>(&'c self, printer_name: &[STRING8], locale: &[STRING8]) -> Result<Cookie<'c, Self, PrintGetPrinterListReply>, ConnectionError>
+    fn xprint_print_get_printer_list<'c>(&'c self, printer_name: &[String8], locale: &[String8]) -> Result<Cookie<'c, Self, PrintGetPrinterListReply>, ConnectionError>
     {
         print_get_printer_list(self, printer_name, locale)
     }
@@ -1615,7 +1615,7 @@ pub trait ConnectionExt: RequestConnection {
         print_rehash_printer_list(self)
     }
 
-    fn xprint_create_context<'c>(&'c self, context_id: u32, printer_name: &[STRING8], locale: &[STRING8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xprint_create_context<'c>(&'c self, context_id: u32, printer_name: &[String8], locale: &[String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_context(self, context_id, printer_name, locale)
     }
@@ -1660,17 +1660,17 @@ pub trait ConnectionExt: RequestConnection {
         print_end_doc(self, cancel)
     }
 
-    fn xprint_print_put_document_data<'c>(&'c self, drawable: DRAWABLE, data: &[u8], doc_format: &[STRING8], options: &[STRING8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xprint_print_put_document_data<'c>(&'c self, drawable: Drawable, data: &[u8], doc_format: &[String8], options: &[String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         print_put_document_data(self, drawable, data, doc_format, options)
     }
 
-    fn xprint_print_get_document_data(&self, context: PCONTEXT, max_bytes: u32) -> Result<Cookie<'_, Self, PrintGetDocumentDataReply>, ConnectionError>
+    fn xprint_print_get_document_data(&self, context: Pcontext, max_bytes: u32) -> Result<Cookie<'_, Self, PrintGetDocumentDataReply>, ConnectionError>
     {
         print_get_document_data(self, context, max_bytes)
     }
 
-    fn xprint_print_start_page(&self, window: WINDOW) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xprint_print_start_page(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_start_page(self, window)
     }
@@ -1680,32 +1680,32 @@ pub trait ConnectionExt: RequestConnection {
         print_end_page(self, cancel)
     }
 
-    fn xprint_print_select_input(&self, context: PCONTEXT, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xprint_print_select_input(&self, context: Pcontext, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_select_input(self, context, event_mask)
     }
 
-    fn xprint_print_input_selected(&self, context: PCONTEXT) -> Result<Cookie<'_, Self, PrintInputSelectedReply>, ConnectionError>
+    fn xprint_print_input_selected(&self, context: Pcontext) -> Result<Cookie<'_, Self, PrintInputSelectedReply>, ConnectionError>
     {
         print_input_selected(self, context)
     }
 
-    fn xprint_print_get_attributes(&self, context: PCONTEXT, pool: u8) -> Result<Cookie<'_, Self, PrintGetAttributesReply>, ConnectionError>
+    fn xprint_print_get_attributes(&self, context: Pcontext, pool: u8) -> Result<Cookie<'_, Self, PrintGetAttributesReply>, ConnectionError>
     {
         print_get_attributes(self, context, pool)
     }
 
-    fn xprint_print_get_one_attributes<'c>(&'c self, context: PCONTEXT, pool: u8, name: &[STRING8]) -> Result<Cookie<'c, Self, PrintGetOneAttributesReply>, ConnectionError>
+    fn xprint_print_get_one_attributes<'c>(&'c self, context: Pcontext, pool: u8, name: &[String8]) -> Result<Cookie<'c, Self, PrintGetOneAttributesReply>, ConnectionError>
     {
         print_get_one_attributes(self, context, pool, name)
     }
 
-    fn xprint_print_set_attributes<'c>(&'c self, context: PCONTEXT, string_len: u32, pool: u8, rule: u8, attributes: &[STRING8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xprint_print_set_attributes<'c>(&'c self, context: Pcontext, string_len: u32, pool: u8, rule: u8, attributes: &[String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         print_set_attributes(self, context, string_len, pool, rule, attributes)
     }
 
-    fn xprint_print_get_page_dimensions(&self, context: PCONTEXT) -> Result<Cookie<'_, Self, PrintGetPageDimensionsReply>, ConnectionError>
+    fn xprint_print_get_page_dimensions(&self, context: Pcontext) -> Result<Cookie<'_, Self, PrintGetPageDimensionsReply>, ConnectionError>
     {
         print_get_page_dimensions(self, context)
     }
@@ -1715,12 +1715,12 @@ pub trait ConnectionExt: RequestConnection {
         print_query_screens(self)
     }
 
-    fn xprint_print_set_image_resolution(&self, context: PCONTEXT, image_resolution: u16) -> Result<Cookie<'_, Self, PrintSetImageResolutionReply>, ConnectionError>
+    fn xprint_print_set_image_resolution(&self, context: Pcontext, image_resolution: u16) -> Result<Cookie<'_, Self, PrintSetImageResolutionReply>, ConnectionError>
     {
         print_set_image_resolution(self, context, image_resolution)
     }
 
-    fn xprint_print_get_image_resolution(&self, context: PCONTEXT) -> Result<Cookie<'_, Self, PrintGetImageResolutionReply>, ConnectionError>
+    fn xprint_print_get_image_resolution(&self, context: Pcontext) -> Result<Cookie<'_, Self, PrintGetImageResolutionReply>, ConnectionError>
     {
         print_get_image_resolution(self, context)
     }
