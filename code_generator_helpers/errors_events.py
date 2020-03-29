@@ -34,23 +34,29 @@ def _get_module_name_prefix(module):
         return ""
 
 
+def _emit_type(out, modules, objects, enum_name, kind, extra_cb=None):
+    out("/// Enumeration of all possible X11 %ss.", kind)
+    out("#[derive(Debug, Clone)]")
+    out("pub enum %s<B: std::fmt::Debug + AsRef<[u8]>> {", enum_name)
+    out.indent("Unknown(Generic%s<B>),", enum_name)
+    if extra_cb:
+        extra_cb()
+    for module, mod_objects in zip(modules, objects):
+        mod_name = module.namespace.header
+        variant = _get_module_name_prefix(module)
+        for name, object in mod_objects:
+            err_name = name[-1]
+            if module.has_feature:
+                out.indent("#[cfg(feature = \"%s\")]", module.namespace.header)
+            out.indent("%s%s(%s::%s%s),", variant, err_name, mod_name, err_name, enum_name)
+    out("}")
+
+
 def _errors(out, modules):
     errors = [_get_errors_from_module(module) for module in modules]
     xproto_index = next(iter(filter(lambda m: not m[1].namespace.is_ext, enumerate(modules))))[0]
 
-    out("/// Enumeration of all possible X11 errors.")
-    out("#[derive(Debug, Clone)]")
-    out("pub enum Error<B: std::fmt::Debug + AsRef<[u8]>> {")
-    out.indent("Unknown(GenericError<B>),")
-    for module, mod_errors in zip(modules, errors):
-        mod_name = module.namespace.header
-        variant = _get_module_name_prefix(module)
-        for name, error in mod_errors:
-            err_name = name[-1]
-            if module.has_feature:
-                out.indent("#[cfg(feature = \"%s\")]", module.namespace.header)
-            out.indent("%s%s(%s::%sError),", variant, err_name, mod_name, err_name)
-    out("}")
+    _emit_type(out, modules, errors, "Error", "error")
 
     out("impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {")
     with Indent(out):
@@ -108,20 +114,7 @@ def _events(out, modules):
     events = [_get_events_from_module(module) for module in modules]
     xproto_index = next(iter(filter(lambda m: not m[1].namespace.is_ext, enumerate(modules))))[0]
 
-    out("/// Enumeration of all possible X11 events.")
-    out("#[derive(Debug, Clone)]")
-    out("pub enum Event<B: std::fmt::Debug + AsRef<[u8]>> {")
-    out.indent("Unknown(GenericEvent<B>),")
-    out.indent("Error(Error<B>),")
-    for module, mod_events in zip(modules, events):
-        mod_name = module.namespace.header
-        variant = _get_module_name_prefix(module)
-        for name, event in mod_events:
-            event_name = name[-1]
-            if module.has_feature:
-                out.indent("#[cfg(feature = \"%s\")]", module.namespace.header)
-            out.indent("%s%s(%s::%sEvent),", variant, event_name, mod_name, event_name)
-    out("}")
+    _emit_type(out, modules, events, "Event", "event", lambda: out.indent("Error(Error<B>),"))
 
     out("impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {")
     with Indent(out):
