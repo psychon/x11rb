@@ -108,10 +108,10 @@ def _events(out, modules):
         mod_name = module.namespace.header
         variant = mod_name[0].upper() + mod_name[1:]
         for name, event in mod_events:
-            err_name = name[-1]
+            event_name = name[-1]
             if module.has_feature:
                 out.indent("#[cfg(feature = \"%s\")]", module.namespace.header)
-            out.indent("%s%s(%s::%sEvent),", variant, err_name, mod_name, err_name)
+            out.indent("%s%s(%s::%sEvent),", variant, event_name, mod_name, event_name)
     out("}")
 
     out("impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {")
