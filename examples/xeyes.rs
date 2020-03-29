@@ -308,25 +308,25 @@ fn main() {
         let mut event_option = Some(event);
         while let Some(event) = event_option {
             match conn.parse_event(event).unwrap() {
-                Event::XprotoExpose(event) => {
+                Event::Expose(event) => {
                     if event.count == 0 {
                         need_repaint = true;
                     }
                 }
-                Event::XprotoConfigureNotify(event) => {
+                Event::ConfigureNotify(event) => {
                     window_size = (event.width, event.height);
                     pixmap = create_pixmap_wrapper(conn, screen.root_depth, win_id, window_size)
                         .unwrap();
                     need_reshape = true;
                 }
-                Event::XprotoMotionNotify(event) => {
+                Event::MotionNotify(event) => {
                     mouse_position = (event.event_x, event.event_y);
                     need_repaint = true;
                 }
-                Event::XprotoMapNotify(_) => {
+                Event::MapNotify(_) => {
                     need_reshape = true;
                 }
-                Event::XprotoClientMessage(event) => {
+                Event::ClientMessage(event) => {
                     let data = event.data.as_data32();
                     if event.format == 32 && event.window == win_id && data[0] == wm_delete_window {
                         println!("Window was asked to close");
