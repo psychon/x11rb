@@ -25,23 +25,38 @@ def _get_events_from_module(module):
     return sorted(events)
 
 
+def _get_module_name_prefix(module):
+    """Get the prefix that should be used for enum variants from this module."""
+    if module.namespace.is_ext:
+        mod_name = module.namespace.header
+        return mod_name[0].upper() + mod_name[1:]
+    else:
+        return ""
+
+
+def _emit_type(out, modules, objects, enum_name, kind, extra_cb=None):
+    out("/// Enumeration of all possible X11 %ss.", kind)
+    out("#[derive(Debug, Clone)]")
+    out("pub enum %s<B: std::fmt::Debug + AsRef<[u8]>> {", enum_name)
+    out.indent("Unknown(Generic%s<B>),", enum_name)
+    if extra_cb:
+        extra_cb()
+    for module, mod_objects in zip(modules, objects):
+        mod_name = module.namespace.header
+        variant = _get_module_name_prefix(module)
+        for name, object in mod_objects:
+            err_name = name[-1]
+            if module.has_feature:
+                out.indent("#[cfg(feature = \"%s\")]", module.namespace.header)
+            out.indent("%s%s(%s::%s%s),", variant, err_name, mod_name, err_name, enum_name)
+    out("}")
+
+
 def _errors(out, modules):
     errors = [_get_errors_from_module(module) for module in modules]
     xproto_index = next(iter(filter(lambda m: not m[1].namespace.is_ext, enumerate(modules))))[0]
 
-    out("/// Enumeration of all possible X11 errors.")
-    out("#[derive(Debug, Clone)]")
-    out("pub enum Error<B: std::fmt::Debug + AsRef<[u8]>> {")
-    out.indent("Unknown(GenericError<B>),")
-    for module, mod_errors in zip(modules, errors):
-        mod_name = module.namespace.header
-        variant = mod_name[0].upper() + mod_name[1:]
-        for name, error in mod_errors:
-            err_name = name[-1] + "Error"
-            if module.has_feature:
-                out.indent("#[cfg(feature = \"%s\")]", module.namespace.header)
-            out.indent("%s%s(%s::%s),", variant, err_name, mod_name, err_name)
-    out("}")
+    _emit_type(out, modules, errors, "Error", "error")
 
     out("impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {")
     with Indent(out):
@@ -57,8 +72,8 @@ def _errors(out, modules):
             out("match error_code {")
             for name, err in errors[xproto_index]:
                 opcode = camel_case_to_upper_snake(name[-1]) + "_ERROR"
-                err_name = name[-1] + "Error"
-                out.indent("xproto::%s => return Ok(Self::Xproto%s(error.into())),",
+                err_name = name[-1]
+                out.indent("xproto::%s => return Ok(Self::%s(error.into())),",
                            opcode, err_name)
             out.indent("_ => {}")
             out("}")
@@ -75,7 +90,7 @@ def _errors(out, modules):
                         continue
                     mod_name = module.namespace.header
                     ext_xname = module.namespace.ext_xname
-                    variant = mod_name[0].upper() + mod_name[1:]
+                    variant = _get_module_name_prefix(module)
                     if module.has_feature:
                         out("#[cfg(feature = \"%s\")]", module.namespace.header)
                     out("Some((\"%s\", first_error)) => {", ext_xname)
@@ -83,7 +98,7 @@ def _errors(out, modules):
                         out("match error_code - first_error {")
                         for name, error in mod_errors:
                             opcode = camel_case_to_upper_snake(name[-1]) + "_ERROR"
-                            err_name = name[-1] + "Error"
+                            err_name = name[-1]
                             out.indent("%s::%s => Ok(Self::%s%s(error.into())),",
                                        mod_name, opcode, variant, err_name)
                         out.indent("_ => Ok(Self::Unknown(error))")
@@ -99,20 +114,7 @@ def _events(out, modules):
     events = [_get_events_from_module(module) for module in modules]
     xproto_index = next(iter(filter(lambda m: not m[1].namespace.is_ext, enumerate(modules))))[0]
 
-    out("/// Enumeration of all possible X11 events.")
-    out("#[derive(Debug, Clone)]")
-    out("pub enum Event<B: std::fmt::Debug + AsRef<[u8]>> {")
-    out.indent("Unknown(GenericEvent<B>),")
-    out.indent("Error(Error<B>),")
-    for module, mod_events in zip(modules, events):
-        mod_name = module.namespace.header
-        variant = mod_name[0].upper() + mod_name[1:]
-        for name, event in mod_events:
-            err_name = name[-1] + "Event"
-            if module.has_feature:
-                out.indent("#[cfg(feature = \"%s\")]", module.namespace.header)
-            out.indent("%s%s(%s::%s),", variant, err_name, mod_name, err_name)
-    out("}")
+    _emit_type(out, modules, events, "Event", "event", lambda: out.indent("Error(Error<B>),"))
 
     out("impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {")
     with Indent(out):
@@ -132,8 +134,8 @@ def _events(out, modules):
                         # This does not really count and is parsed as an extension's event
                         continue
                     opcode = camel_case_to_upper_snake(name[-1]) + "_EVENT"
-                    event_name = name[-1] + "Event"
-                    out("xproto::%s => return Ok(Self::Xproto%s(event.into())),",
+                    event_name = name[-1]
+                    out("xproto::%s => return Ok(Self::%s(event.into())),",
                         opcode, event_name)
                 out("xproto::GE_GENERIC_EVENT => return Self::from_generic_event(event, iter),")
                 out("_ => {}")
@@ -153,7 +155,7 @@ def _events(out, modules):
                         continue
                     mod_name = module.namespace.header
                     ext_xname = module.namespace.ext_xname
-                    variant = mod_name[0].upper() + mod_name[1:]
+                    variant = _get_module_name_prefix(module)
                     if module.has_feature:
                         out("#[cfg(feature = \"%s\")]", module.namespace.header)
                     out("Some((\"%s\", first_event)) => {", ext_xname)
@@ -169,7 +171,7 @@ def _events(out, modules):
                             if event.is_ge_event:
                                 continue
                             opcode = camel_case_to_upper_snake(name[-1]) + "_EVENT"
-                            event_name = name[-1] + "Event"
+                            event_name = name[-1]
                             out.indent("%s::%s => Ok(Self::%s%s(event.into())),",
                                        mod_name, opcode, variant, event_name)
                         out.indent("_ => Ok(Self::Unknown(event))")
@@ -201,7 +203,7 @@ def _events(out, modules):
                         continue
                     mod_name = module.namespace.header
                     ext_xname = module.namespace.ext_xname
-                    variant = mod_name[0].upper() + mod_name[1:]
+                    variant = _get_module_name_prefix(module)
                     if module.has_feature:
                         out("#[cfg(feature = \"%s\")]", module.namespace.header)
                     out("Some(\"%s\") => {", ext_xname)
@@ -211,7 +213,7 @@ def _events(out, modules):
                             if not event.is_ge_event:
                                 continue
                             opcode = camel_case_to_upper_snake(name[-1]) + "_EVENT"
-                            event_name = name[-1] + "Event"
+                            event_name = name[-1]
                             out.indent("%s::%s => Ok(Self::%s%s(event.try_into()?)),",
                                        mod_name, opcode, variant, event_name)
                         out.indent("_ => Ok(Self::Unknown(event))")

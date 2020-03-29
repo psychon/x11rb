@@ -229,12 +229,12 @@ impl<'a, C: Connection> WMState<'a, C> {
     fn handle_event(&mut self, event: Event<C::Buf>) -> Result<(), ReplyOrIdError<C::Buf>> {
         println!("Got event {:?}", event);
         match event {
-            Event::XprotoUnmapNotifyEvent(event) => self.handle_unmap_notify(event)?,
-            Event::XprotoConfigureRequestEvent(event) => self.handle_configure_request(event)?,
-            Event::XprotoMapRequestEvent(event) => self.handle_map_request(event)?,
-            Event::XprotoExposeEvent(event) => self.handle_expose(event)?,
-            Event::XprotoEnterNotifyEvent(event) => self.handle_enter(event)?,
-            Event::XprotoButtonReleaseEvent(event) => self.handle_button_release(event)?,
+            Event::UnmapNotify(event) => self.handle_unmap_notify(event)?,
+            Event::ConfigureRequest(event) => self.handle_configure_request(event)?,
+            Event::MapRequest(event) => self.handle_map_request(event)?,
+            Event::Expose(event) => self.handle_expose(event)?,
+            Event::EnterNotify(event) => self.handle_enter(event)?,
+            Event::ButtonRelease(event) => self.handle_button_release(event)?,
             _ => {}
         }
         Ok(())

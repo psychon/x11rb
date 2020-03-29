@@ -89,7 +89,7 @@ fn main() {
         let event = conn.parse_event(event).unwrap();
         println!("{:?})", event);
         match event {
-            Event::XprotoExposeEvent(event) => {
+            Event::Expose(event) => {
                 if event.count == 0 {
                     // We ought to clear the background before drawing something new, but...
                     // whatever
@@ -114,11 +114,11 @@ fn main() {
                     conn.flush().unwrap();
                 }
             }
-            Event::XprotoConfigureNotifyEvent(event) => {
+            Event::ConfigureNotify(event) => {
                 width = event.width;
                 height = event.height;
             }
-            Event::XprotoClientMessageEvent(event) => {
+            Event::ClientMessage(event) => {
                 let data = event.data.as_data32();
                 if event.format == 32 && event.window == win_id && data[0] == wm_delete_window {
                     println!("Window was asked to close");

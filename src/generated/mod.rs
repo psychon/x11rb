@@ -69,116 +69,116 @@ pub mod xvmc;
 pub enum Error<B: std::fmt::Debug + AsRef<[u8]>> {
     Unknown(GenericError<B>),
     #[cfg(feature = "damage")]
-    DamageBadDamageError(damage::BadDamageError),
+    DamageBadDamage(damage::BadDamageError),
     #[cfg(feature = "glx")]
-    GlxBadContextError(glx::BadContextError),
+    GlxBadContext(glx::BadContextError),
     #[cfg(feature = "glx")]
-    GlxBadContextStateError(glx::BadContextStateError),
+    GlxBadContextState(glx::BadContextStateError),
     #[cfg(feature = "glx")]
-    GlxBadContextTagError(glx::BadContextTagError),
+    GlxBadContextTag(glx::BadContextTagError),
     #[cfg(feature = "glx")]
-    GlxBadCurrentDrawableError(glx::BadCurrentDrawableError),
+    GlxBadCurrentDrawable(glx::BadCurrentDrawableError),
     #[cfg(feature = "glx")]
-    GlxBadCurrentWindowError(glx::BadCurrentWindowError),
+    GlxBadCurrentWindow(glx::BadCurrentWindowError),
     #[cfg(feature = "glx")]
-    GlxBadDrawableError(glx::BadDrawableError),
+    GlxBadDrawable(glx::BadDrawableError),
     #[cfg(feature = "glx")]
-    GlxBadFBConfigError(glx::BadFBConfigError),
+    GlxBadFBConfig(glx::BadFBConfigError),
     #[cfg(feature = "glx")]
-    GlxBadLargeRequestError(glx::BadLargeRequestError),
+    GlxBadLargeRequest(glx::BadLargeRequestError),
     #[cfg(feature = "glx")]
-    GlxBadPbufferError(glx::BadPbufferError),
+    GlxBadPbuffer(glx::BadPbufferError),
     #[cfg(feature = "glx")]
-    GlxBadPixmapError(glx::BadPixmapError),
+    GlxBadPixmap(glx::BadPixmapError),
     #[cfg(feature = "glx")]
-    GlxBadRenderRequestError(glx::BadRenderRequestError),
+    GlxBadRenderRequest(glx::BadRenderRequestError),
     #[cfg(feature = "glx")]
-    GlxBadWindowError(glx::BadWindowError),
+    GlxBadWindow(glx::BadWindowError),
     #[cfg(feature = "glx")]
-    GlxGLXBadProfileARBError(glx::GLXBadProfileARBError),
+    GlxGLXBadProfileARB(glx::GLXBadProfileARBError),
     #[cfg(feature = "glx")]
-    GlxUnsupportedPrivateRequestError(glx::UnsupportedPrivateRequestError),
+    GlxUnsupportedPrivateRequest(glx::UnsupportedPrivateRequestError),
     #[cfg(feature = "randr")]
-    RandrBadCrtcError(randr::BadCrtcError),
+    RandrBadCrtc(randr::BadCrtcError),
     #[cfg(feature = "randr")]
-    RandrBadModeError(randr::BadModeError),
+    RandrBadMode(randr::BadModeError),
     #[cfg(feature = "randr")]
-    RandrBadOutputError(randr::BadOutputError),
+    RandrBadOutput(randr::BadOutputError),
     #[cfg(feature = "randr")]
-    RandrBadProviderError(randr::BadProviderError),
+    RandrBadProvider(randr::BadProviderError),
     #[cfg(feature = "record")]
-    RecordBadContextError(record::BadContextError),
+    RecordBadContext(record::BadContextError),
     #[cfg(feature = "render")]
-    RenderGlyphError(render::GlyphError),
+    RenderGlyph(render::GlyphError),
     #[cfg(feature = "render")]
-    RenderGlyphSetError(render::GlyphSetError),
+    RenderGlyphSet(render::GlyphSetError),
     #[cfg(feature = "render")]
-    RenderPictFormatError(render::PictFormatError),
+    RenderPictFormat(render::PictFormatError),
     #[cfg(feature = "render")]
-    RenderPictOpError(render::PictOpError),
+    RenderPictOp(render::PictOpError),
     #[cfg(feature = "render")]
-    RenderPictureError(render::PictureError),
+    RenderPicture(render::PictureError),
     #[cfg(feature = "shm")]
-    ShmBadSegError(shm::BadSegError),
+    ShmBadSeg(shm::BadSegError),
     #[cfg(feature = "sync")]
-    SyncAlarmError(sync::AlarmError),
+    SyncAlarm(sync::AlarmError),
     #[cfg(feature = "sync")]
-    SyncCounterError(sync::CounterError),
+    SyncCounter(sync::CounterError),
     #[cfg(feature = "xf86vidmode")]
-    Xf86vidmodeBadClockError(xf86vidmode::BadClockError),
+    Xf86vidmodeBadClock(xf86vidmode::BadClockError),
     #[cfg(feature = "xf86vidmode")]
-    Xf86vidmodeBadHTimingsError(xf86vidmode::BadHTimingsError),
+    Xf86vidmodeBadHTimings(xf86vidmode::BadHTimingsError),
     #[cfg(feature = "xf86vidmode")]
-    Xf86vidmodeBadVTimingsError(xf86vidmode::BadVTimingsError),
+    Xf86vidmodeBadVTimings(xf86vidmode::BadVTimingsError),
     #[cfg(feature = "xf86vidmode")]
-    Xf86vidmodeClientNotLocalError(xf86vidmode::ClientNotLocalError),
+    Xf86vidmodeClientNotLocal(xf86vidmode::ClientNotLocalError),
     #[cfg(feature = "xf86vidmode")]
-    Xf86vidmodeExtensionDisabledError(xf86vidmode::ExtensionDisabledError),
+    Xf86vidmodeExtensionDisabled(xf86vidmode::ExtensionDisabledError),
     #[cfg(feature = "xf86vidmode")]
-    Xf86vidmodeModeUnsuitableError(xf86vidmode::ModeUnsuitableError),
+    Xf86vidmodeModeUnsuitable(xf86vidmode::ModeUnsuitableError),
     #[cfg(feature = "xf86vidmode")]
-    Xf86vidmodeZoomLockedError(xf86vidmode::ZoomLockedError),
+    Xf86vidmodeZoomLocked(xf86vidmode::ZoomLockedError),
     #[cfg(feature = "xfixes")]
-    XfixesBadRegionError(xfixes::BadRegionError),
+    XfixesBadRegion(xfixes::BadRegionError),
     #[cfg(feature = "xinput")]
-    XinputClassError(xinput::ClassError),
+    XinputClass(xinput::ClassError),
     #[cfg(feature = "xinput")]
-    XinputDeviceError(xinput::DeviceError),
+    XinputDevice(xinput::DeviceError),
     #[cfg(feature = "xinput")]
-    XinputDeviceBusyError(xinput::DeviceBusyError),
+    XinputDeviceBusy(xinput::DeviceBusyError),
     #[cfg(feature = "xinput")]
-    XinputEventError(xinput::EventError),
+    XinputEvent(xinput::EventError),
     #[cfg(feature = "xinput")]
-    XinputModeError(xinput::ModeError),
+    XinputMode(xinput::ModeError),
     #[cfg(feature = "xkb")]
-    XkbKeyboardError(xkb::KeyboardError),
+    XkbKeyboard(xkb::KeyboardError),
     #[cfg(feature = "xprint")]
-    XprintBadContextError(xprint::BadContextError),
+    XprintBadContext(xprint::BadContextError),
     #[cfg(feature = "xprint")]
-    XprintBadSequenceError(xprint::BadSequenceError),
-    XprotoAccessError(xproto::AccessError),
-    XprotoAllocError(xproto::AllocError),
-    XprotoAtomError(xproto::AtomError),
-    XprotoColormapError(xproto::ColormapError),
-    XprotoCursorError(xproto::CursorError),
-    XprotoDrawableError(xproto::DrawableError),
-    XprotoFontError(xproto::FontError),
-    XprotoGContextError(xproto::GContextError),
-    XprotoIDChoiceError(xproto::IDChoiceError),
-    XprotoImplementationError(xproto::ImplementationError),
-    XprotoLengthError(xproto::LengthError),
-    XprotoMatchError(xproto::MatchError),
-    XprotoNameError(xproto::NameError),
-    XprotoPixmapError(xproto::PixmapError),
-    XprotoRequestError(xproto::RequestError),
-    XprotoValueError(xproto::ValueError),
-    XprotoWindowError(xproto::WindowError),
+    XprintBadSequence(xprint::BadSequenceError),
+    Access(xproto::AccessError),
+    Alloc(xproto::AllocError),
+    Atom(xproto::AtomError),
+    Colormap(xproto::ColormapError),
+    Cursor(xproto::CursorError),
+    Drawable(xproto::DrawableError),
+    Font(xproto::FontError),
+    GContext(xproto::GContextError),
+    IDChoice(xproto::IDChoiceError),
+    Implementation(xproto::ImplementationError),
+    Length(xproto::LengthError),
+    Match(xproto::MatchError),
+    Name(xproto::NameError),
+    Pixmap(xproto::PixmapError),
+    Request(xproto::RequestError),
+    Value(xproto::ValueError),
+    Window(xproto::WindowError),
     #[cfg(feature = "xv")]
-    XvBadControlError(xv::BadControlError),
+    XvBadControl(xv::BadControlError),
     #[cfg(feature = "xv")]
-    XvBadEncodingError(xv::BadEncodingError),
+    XvBadEncoding(xv::BadEncodingError),
     #[cfg(feature = "xv")]
-    XvBadPortError(xv::BadPortError),
+    XvBadPort(xv::BadPortError),
 }
 impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
     /// Parse a generic X11 error into a concrete error type.
@@ -189,23 +189,23 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
         let error_code = error.error_code();
         // Check if this is a core protocol error
         match error_code {
-            xproto::ACCESS_ERROR => return Ok(Self::XprotoAccessError(error.into())),
-            xproto::ALLOC_ERROR => return Ok(Self::XprotoAllocError(error.into())),
-            xproto::ATOM_ERROR => return Ok(Self::XprotoAtomError(error.into())),
-            xproto::COLORMAP_ERROR => return Ok(Self::XprotoColormapError(error.into())),
-            xproto::CURSOR_ERROR => return Ok(Self::XprotoCursorError(error.into())),
-            xproto::DRAWABLE_ERROR => return Ok(Self::XprotoDrawableError(error.into())),
-            xproto::FONT_ERROR => return Ok(Self::XprotoFontError(error.into())),
-            xproto::G_CONTEXT_ERROR => return Ok(Self::XprotoGContextError(error.into())),
-            xproto::ID_CHOICE_ERROR => return Ok(Self::XprotoIDChoiceError(error.into())),
-            xproto::IMPLEMENTATION_ERROR => return Ok(Self::XprotoImplementationError(error.into())),
-            xproto::LENGTH_ERROR => return Ok(Self::XprotoLengthError(error.into())),
-            xproto::MATCH_ERROR => return Ok(Self::XprotoMatchError(error.into())),
-            xproto::NAME_ERROR => return Ok(Self::XprotoNameError(error.into())),
-            xproto::PIXMAP_ERROR => return Ok(Self::XprotoPixmapError(error.into())),
-            xproto::REQUEST_ERROR => return Ok(Self::XprotoRequestError(error.into())),
-            xproto::VALUE_ERROR => return Ok(Self::XprotoValueError(error.into())),
-            xproto::WINDOW_ERROR => return Ok(Self::XprotoWindowError(error.into())),
+            xproto::ACCESS_ERROR => return Ok(Self::Access(error.into())),
+            xproto::ALLOC_ERROR => return Ok(Self::Alloc(error.into())),
+            xproto::ATOM_ERROR => return Ok(Self::Atom(error.into())),
+            xproto::COLORMAP_ERROR => return Ok(Self::Colormap(error.into())),
+            xproto::CURSOR_ERROR => return Ok(Self::Cursor(error.into())),
+            xproto::DRAWABLE_ERROR => return Ok(Self::Drawable(error.into())),
+            xproto::FONT_ERROR => return Ok(Self::Font(error.into())),
+            xproto::G_CONTEXT_ERROR => return Ok(Self::GContext(error.into())),
+            xproto::ID_CHOICE_ERROR => return Ok(Self::IDChoice(error.into())),
+            xproto::IMPLEMENTATION_ERROR => return Ok(Self::Implementation(error.into())),
+            xproto::LENGTH_ERROR => return Ok(Self::Length(error.into())),
+            xproto::MATCH_ERROR => return Ok(Self::Match(error.into())),
+            xproto::NAME_ERROR => return Ok(Self::Name(error.into())),
+            xproto::PIXMAP_ERROR => return Ok(Self::Pixmap(error.into())),
+            xproto::REQUEST_ERROR => return Ok(Self::Request(error.into())),
+            xproto::VALUE_ERROR => return Ok(Self::Value(error.into())),
+            xproto::WINDOW_ERROR => return Ok(Self::Window(error.into())),
             _ => {}
         }
         // Find the extension that this error could belong to
@@ -217,125 +217,125 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
             #[cfg(feature = "damage")]
             Some(("DAMAGE", first_error)) => {
                 match error_code - first_error {
-                    damage::BAD_DAMAGE_ERROR => Ok(Self::DamageBadDamageError(error.into())),
+                    damage::BAD_DAMAGE_ERROR => Ok(Self::DamageBadDamage(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "glx")]
             Some(("GLX", first_error)) => {
                 match error_code - first_error {
-                    glx::BAD_CONTEXT_ERROR => Ok(Self::GlxBadContextError(error.into())),
-                    glx::BAD_CONTEXT_STATE_ERROR => Ok(Self::GlxBadContextStateError(error.into())),
-                    glx::BAD_CONTEXT_TAG_ERROR => Ok(Self::GlxBadContextTagError(error.into())),
-                    glx::BAD_CURRENT_DRAWABLE_ERROR => Ok(Self::GlxBadCurrentDrawableError(error.into())),
-                    glx::BAD_CURRENT_WINDOW_ERROR => Ok(Self::GlxBadCurrentWindowError(error.into())),
-                    glx::BAD_DRAWABLE_ERROR => Ok(Self::GlxBadDrawableError(error.into())),
-                    glx::BAD_FB_CONFIG_ERROR => Ok(Self::GlxBadFBConfigError(error.into())),
-                    glx::BAD_LARGE_REQUEST_ERROR => Ok(Self::GlxBadLargeRequestError(error.into())),
-                    glx::BAD_PBUFFER_ERROR => Ok(Self::GlxBadPbufferError(error.into())),
-                    glx::BAD_PIXMAP_ERROR => Ok(Self::GlxBadPixmapError(error.into())),
-                    glx::BAD_RENDER_REQUEST_ERROR => Ok(Self::GlxBadRenderRequestError(error.into())),
-                    glx::BAD_WINDOW_ERROR => Ok(Self::GlxBadWindowError(error.into())),
-                    glx::GLX_BAD_PROFILE_ARB_ERROR => Ok(Self::GlxGLXBadProfileARBError(error.into())),
-                    glx::UNSUPPORTED_PRIVATE_REQUEST_ERROR => Ok(Self::GlxUnsupportedPrivateRequestError(error.into())),
+                    glx::BAD_CONTEXT_ERROR => Ok(Self::GlxBadContext(error.into())),
+                    glx::BAD_CONTEXT_STATE_ERROR => Ok(Self::GlxBadContextState(error.into())),
+                    glx::BAD_CONTEXT_TAG_ERROR => Ok(Self::GlxBadContextTag(error.into())),
+                    glx::BAD_CURRENT_DRAWABLE_ERROR => Ok(Self::GlxBadCurrentDrawable(error.into())),
+                    glx::BAD_CURRENT_WINDOW_ERROR => Ok(Self::GlxBadCurrentWindow(error.into())),
+                    glx::BAD_DRAWABLE_ERROR => Ok(Self::GlxBadDrawable(error.into())),
+                    glx::BAD_FB_CONFIG_ERROR => Ok(Self::GlxBadFBConfig(error.into())),
+                    glx::BAD_LARGE_REQUEST_ERROR => Ok(Self::GlxBadLargeRequest(error.into())),
+                    glx::BAD_PBUFFER_ERROR => Ok(Self::GlxBadPbuffer(error.into())),
+                    glx::BAD_PIXMAP_ERROR => Ok(Self::GlxBadPixmap(error.into())),
+                    glx::BAD_RENDER_REQUEST_ERROR => Ok(Self::GlxBadRenderRequest(error.into())),
+                    glx::BAD_WINDOW_ERROR => Ok(Self::GlxBadWindow(error.into())),
+                    glx::GLX_BAD_PROFILE_ARB_ERROR => Ok(Self::GlxGLXBadProfileARB(error.into())),
+                    glx::UNSUPPORTED_PRIVATE_REQUEST_ERROR => Ok(Self::GlxUnsupportedPrivateRequest(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "randr")]
             Some(("RANDR", first_error)) => {
                 match error_code - first_error {
-                    randr::BAD_CRTC_ERROR => Ok(Self::RandrBadCrtcError(error.into())),
-                    randr::BAD_MODE_ERROR => Ok(Self::RandrBadModeError(error.into())),
-                    randr::BAD_OUTPUT_ERROR => Ok(Self::RandrBadOutputError(error.into())),
-                    randr::BAD_PROVIDER_ERROR => Ok(Self::RandrBadProviderError(error.into())),
+                    randr::BAD_CRTC_ERROR => Ok(Self::RandrBadCrtc(error.into())),
+                    randr::BAD_MODE_ERROR => Ok(Self::RandrBadMode(error.into())),
+                    randr::BAD_OUTPUT_ERROR => Ok(Self::RandrBadOutput(error.into())),
+                    randr::BAD_PROVIDER_ERROR => Ok(Self::RandrBadProvider(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "record")]
             Some(("RECORD", first_error)) => {
                 match error_code - first_error {
-                    record::BAD_CONTEXT_ERROR => Ok(Self::RecordBadContextError(error.into())),
+                    record::BAD_CONTEXT_ERROR => Ok(Self::RecordBadContext(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "render")]
             Some(("RENDER", first_error)) => {
                 match error_code - first_error {
-                    render::GLYPH_ERROR => Ok(Self::RenderGlyphError(error.into())),
-                    render::GLYPH_SET_ERROR => Ok(Self::RenderGlyphSetError(error.into())),
-                    render::PICT_FORMAT_ERROR => Ok(Self::RenderPictFormatError(error.into())),
-                    render::PICT_OP_ERROR => Ok(Self::RenderPictOpError(error.into())),
-                    render::PICTURE_ERROR => Ok(Self::RenderPictureError(error.into())),
+                    render::GLYPH_ERROR => Ok(Self::RenderGlyph(error.into())),
+                    render::GLYPH_SET_ERROR => Ok(Self::RenderGlyphSet(error.into())),
+                    render::PICT_FORMAT_ERROR => Ok(Self::RenderPictFormat(error.into())),
+                    render::PICT_OP_ERROR => Ok(Self::RenderPictOp(error.into())),
+                    render::PICTURE_ERROR => Ok(Self::RenderPicture(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "shm")]
             Some(("MIT-SHM", first_error)) => {
                 match error_code - first_error {
-                    shm::BAD_SEG_ERROR => Ok(Self::ShmBadSegError(error.into())),
+                    shm::BAD_SEG_ERROR => Ok(Self::ShmBadSeg(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "sync")]
             Some(("SYNC", first_error)) => {
                 match error_code - first_error {
-                    sync::ALARM_ERROR => Ok(Self::SyncAlarmError(error.into())),
-                    sync::COUNTER_ERROR => Ok(Self::SyncCounterError(error.into())),
+                    sync::ALARM_ERROR => Ok(Self::SyncAlarm(error.into())),
+                    sync::COUNTER_ERROR => Ok(Self::SyncCounter(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "xf86vidmode")]
             Some(("XFree86-VidModeExtension", first_error)) => {
                 match error_code - first_error {
-                    xf86vidmode::BAD_CLOCK_ERROR => Ok(Self::Xf86vidmodeBadClockError(error.into())),
-                    xf86vidmode::BAD_H_TIMINGS_ERROR => Ok(Self::Xf86vidmodeBadHTimingsError(error.into())),
-                    xf86vidmode::BAD_V_TIMINGS_ERROR => Ok(Self::Xf86vidmodeBadVTimingsError(error.into())),
-                    xf86vidmode::CLIENT_NOT_LOCAL_ERROR => Ok(Self::Xf86vidmodeClientNotLocalError(error.into())),
-                    xf86vidmode::EXTENSION_DISABLED_ERROR => Ok(Self::Xf86vidmodeExtensionDisabledError(error.into())),
-                    xf86vidmode::MODE_UNSUITABLE_ERROR => Ok(Self::Xf86vidmodeModeUnsuitableError(error.into())),
-                    xf86vidmode::ZOOM_LOCKED_ERROR => Ok(Self::Xf86vidmodeZoomLockedError(error.into())),
+                    xf86vidmode::BAD_CLOCK_ERROR => Ok(Self::Xf86vidmodeBadClock(error.into())),
+                    xf86vidmode::BAD_H_TIMINGS_ERROR => Ok(Self::Xf86vidmodeBadHTimings(error.into())),
+                    xf86vidmode::BAD_V_TIMINGS_ERROR => Ok(Self::Xf86vidmodeBadVTimings(error.into())),
+                    xf86vidmode::CLIENT_NOT_LOCAL_ERROR => Ok(Self::Xf86vidmodeClientNotLocal(error.into())),
+                    xf86vidmode::EXTENSION_DISABLED_ERROR => Ok(Self::Xf86vidmodeExtensionDisabled(error.into())),
+                    xf86vidmode::MODE_UNSUITABLE_ERROR => Ok(Self::Xf86vidmodeModeUnsuitable(error.into())),
+                    xf86vidmode::ZOOM_LOCKED_ERROR => Ok(Self::Xf86vidmodeZoomLocked(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "xfixes")]
             Some(("XFIXES", first_error)) => {
                 match error_code - first_error {
-                    xfixes::BAD_REGION_ERROR => Ok(Self::XfixesBadRegionError(error.into())),
+                    xfixes::BAD_REGION_ERROR => Ok(Self::XfixesBadRegion(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "xinput")]
             Some(("XInputExtension", first_error)) => {
                 match error_code - first_error {
-                    xinput::CLASS_ERROR => Ok(Self::XinputClassError(error.into())),
-                    xinput::DEVICE_ERROR => Ok(Self::XinputDeviceError(error.into())),
-                    xinput::DEVICE_BUSY_ERROR => Ok(Self::XinputDeviceBusyError(error.into())),
-                    xinput::EVENT_ERROR => Ok(Self::XinputEventError(error.into())),
-                    xinput::MODE_ERROR => Ok(Self::XinputModeError(error.into())),
+                    xinput::CLASS_ERROR => Ok(Self::XinputClass(error.into())),
+                    xinput::DEVICE_ERROR => Ok(Self::XinputDevice(error.into())),
+                    xinput::DEVICE_BUSY_ERROR => Ok(Self::XinputDeviceBusy(error.into())),
+                    xinput::EVENT_ERROR => Ok(Self::XinputEvent(error.into())),
+                    xinput::MODE_ERROR => Ok(Self::XinputMode(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "xkb")]
             Some(("XKEYBOARD", first_error)) => {
                 match error_code - first_error {
-                    xkb::KEYBOARD_ERROR => Ok(Self::XkbKeyboardError(error.into())),
+                    xkb::KEYBOARD_ERROR => Ok(Self::XkbKeyboard(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "xprint")]
             Some(("XpExtension", first_error)) => {
                 match error_code - first_error {
-                    xprint::BAD_CONTEXT_ERROR => Ok(Self::XprintBadContextError(error.into())),
-                    xprint::BAD_SEQUENCE_ERROR => Ok(Self::XprintBadSequenceError(error.into())),
+                    xprint::BAD_CONTEXT_ERROR => Ok(Self::XprintBadContext(error.into())),
+                    xprint::BAD_SEQUENCE_ERROR => Ok(Self::XprintBadSequence(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "xv")]
             Some(("XVideo", first_error)) => {
                 match error_code - first_error {
-                    xv::BAD_CONTROL_ERROR => Ok(Self::XvBadControlError(error.into())),
-                    xv::BAD_ENCODING_ERROR => Ok(Self::XvBadEncodingError(error.into())),
-                    xv::BAD_PORT_ERROR => Ok(Self::XvBadPortError(error.into())),
+                    xv::BAD_CONTROL_ERROR => Ok(Self::XvBadControl(error.into())),
+                    xv::BAD_ENCODING_ERROR => Ok(Self::XvBadEncoding(error.into())),
+                    xv::BAD_PORT_ERROR => Ok(Self::XvBadPort(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
@@ -349,195 +349,195 @@ pub enum Event<B: std::fmt::Debug + AsRef<[u8]>> {
     Unknown(GenericEvent<B>),
     Error(Error<B>),
     #[cfg(feature = "damage")]
-    DamageNotifyEvent(damage::NotifyEvent),
+    DamageNotify(damage::NotifyEvent),
     #[cfg(feature = "dri2")]
-    Dri2BufferSwapCompleteEvent(dri2::BufferSwapCompleteEvent),
+    Dri2BufferSwapComplete(dri2::BufferSwapCompleteEvent),
     #[cfg(feature = "dri2")]
-    Dri2InvalidateBuffersEvent(dri2::InvalidateBuffersEvent),
+    Dri2InvalidateBuffers(dri2::InvalidateBuffersEvent),
     #[cfg(feature = "glx")]
-    GlxBufferSwapCompleteEvent(glx::BufferSwapCompleteEvent),
+    GlxBufferSwapComplete(glx::BufferSwapCompleteEvent),
     #[cfg(feature = "glx")]
-    GlxPbufferClobberEvent(glx::PbufferClobberEvent),
+    GlxPbufferClobber(glx::PbufferClobberEvent),
     #[cfg(feature = "present")]
-    PresentCompleteNotifyEvent(present::CompleteNotifyEvent),
+    PresentCompleteNotify(present::CompleteNotifyEvent),
     #[cfg(feature = "present")]
-    PresentConfigureNotifyEvent(present::ConfigureNotifyEvent),
+    PresentConfigureNotify(present::ConfigureNotifyEvent),
     #[cfg(feature = "present")]
-    PresentGenericEvent(present::GenericEvent),
+    PresentGeneric(present::GenericEvent),
     #[cfg(feature = "present")]
-    PresentIdleNotifyEvent(present::IdleNotifyEvent),
+    PresentIdleNotify(present::IdleNotifyEvent),
     #[cfg(feature = "present")]
-    PresentRedirectNotifyEvent(present::RedirectNotifyEvent),
+    PresentRedirectNotify(present::RedirectNotifyEvent),
     #[cfg(feature = "randr")]
-    RandrNotifyEvent(randr::NotifyEvent),
+    RandrNotify(randr::NotifyEvent),
     #[cfg(feature = "randr")]
-    RandrScreenChangeNotifyEvent(randr::ScreenChangeNotifyEvent),
+    RandrScreenChangeNotify(randr::ScreenChangeNotifyEvent),
     #[cfg(feature = "screensaver")]
-    ScreensaverNotifyEvent(screensaver::NotifyEvent),
+    ScreensaverNotify(screensaver::NotifyEvent),
     #[cfg(feature = "shape")]
-    ShapeNotifyEvent(shape::NotifyEvent),
+    ShapeNotify(shape::NotifyEvent),
     #[cfg(feature = "shm")]
-    ShmCompletionEvent(shm::CompletionEvent),
+    ShmCompletion(shm::CompletionEvent),
     #[cfg(feature = "sync")]
-    SyncAlarmNotifyEvent(sync::AlarmNotifyEvent),
+    SyncAlarmNotify(sync::AlarmNotifyEvent),
     #[cfg(feature = "sync")]
-    SyncCounterNotifyEvent(sync::CounterNotifyEvent),
+    SyncCounterNotify(sync::CounterNotifyEvent),
     #[cfg(feature = "xfixes")]
-    XfixesCursorNotifyEvent(xfixes::CursorNotifyEvent),
+    XfixesCursorNotify(xfixes::CursorNotifyEvent),
     #[cfg(feature = "xfixes")]
-    XfixesSelectionNotifyEvent(xfixes::SelectionNotifyEvent),
+    XfixesSelectionNotify(xfixes::SelectionNotifyEvent),
     #[cfg(feature = "xinput")]
-    XinputBarrierHitEvent(xinput::BarrierHitEvent),
+    XinputBarrierHit(xinput::BarrierHitEvent),
     #[cfg(feature = "xinput")]
-    XinputBarrierLeaveEvent(xinput::BarrierLeaveEvent),
+    XinputBarrierLeave(xinput::BarrierLeaveEvent),
     #[cfg(feature = "xinput")]
-    XinputButtonPressEvent(xinput::ButtonPressEvent),
+    XinputButtonPress(xinput::ButtonPressEvent),
     #[cfg(feature = "xinput")]
-    XinputButtonReleaseEvent(xinput::ButtonReleaseEvent),
+    XinputButtonRelease(xinput::ButtonReleaseEvent),
     #[cfg(feature = "xinput")]
-    XinputChangeDeviceNotifyEvent(xinput::ChangeDeviceNotifyEvent),
+    XinputChangeDeviceNotify(xinput::ChangeDeviceNotifyEvent),
     #[cfg(feature = "xinput")]
-    XinputDeviceButtonPressEvent(xinput::DeviceButtonPressEvent),
+    XinputDeviceButtonPress(xinput::DeviceButtonPressEvent),
     #[cfg(feature = "xinput")]
-    XinputDeviceButtonReleaseEvent(xinput::DeviceButtonReleaseEvent),
+    XinputDeviceButtonRelease(xinput::DeviceButtonReleaseEvent),
     #[cfg(feature = "xinput")]
-    XinputDeviceButtonStateNotifyEvent(xinput::DeviceButtonStateNotifyEvent),
+    XinputDeviceButtonStateNotify(xinput::DeviceButtonStateNotifyEvent),
     #[cfg(feature = "xinput")]
-    XinputDeviceChangedEvent(xinput::DeviceChangedEvent),
+    XinputDeviceChanged(xinput::DeviceChangedEvent),
     #[cfg(feature = "xinput")]
-    XinputDeviceFocusInEvent(xinput::DeviceFocusInEvent),
+    XinputDeviceFocusIn(xinput::DeviceFocusInEvent),
     #[cfg(feature = "xinput")]
-    XinputDeviceFocusOutEvent(xinput::DeviceFocusOutEvent),
+    XinputDeviceFocusOut(xinput::DeviceFocusOutEvent),
     #[cfg(feature = "xinput")]
-    XinputDeviceKeyPressEvent(xinput::DeviceKeyPressEvent),
+    XinputDeviceKeyPress(xinput::DeviceKeyPressEvent),
     #[cfg(feature = "xinput")]
-    XinputDeviceKeyReleaseEvent(xinput::DeviceKeyReleaseEvent),
+    XinputDeviceKeyRelease(xinput::DeviceKeyReleaseEvent),
     #[cfg(feature = "xinput")]
-    XinputDeviceKeyStateNotifyEvent(xinput::DeviceKeyStateNotifyEvent),
+    XinputDeviceKeyStateNotify(xinput::DeviceKeyStateNotifyEvent),
     #[cfg(feature = "xinput")]
-    XinputDeviceMappingNotifyEvent(xinput::DeviceMappingNotifyEvent),
+    XinputDeviceMappingNotify(xinput::DeviceMappingNotifyEvent),
     #[cfg(feature = "xinput")]
-    XinputDeviceMotionNotifyEvent(xinput::DeviceMotionNotifyEvent),
+    XinputDeviceMotionNotify(xinput::DeviceMotionNotifyEvent),
     #[cfg(feature = "xinput")]
-    XinputDevicePresenceNotifyEvent(xinput::DevicePresenceNotifyEvent),
+    XinputDevicePresenceNotify(xinput::DevicePresenceNotifyEvent),
     #[cfg(feature = "xinput")]
-    XinputDevicePropertyNotifyEvent(xinput::DevicePropertyNotifyEvent),
+    XinputDevicePropertyNotify(xinput::DevicePropertyNotifyEvent),
     #[cfg(feature = "xinput")]
-    XinputDeviceStateNotifyEvent(xinput::DeviceStateNotifyEvent),
+    XinputDeviceStateNotify(xinput::DeviceStateNotifyEvent),
     #[cfg(feature = "xinput")]
-    XinputDeviceValuatorEvent(xinput::DeviceValuatorEvent),
+    XinputDeviceValuator(xinput::DeviceValuatorEvent),
     #[cfg(feature = "xinput")]
-    XinputEnterEvent(xinput::EnterEvent),
+    XinputEnter(xinput::EnterEvent),
     #[cfg(feature = "xinput")]
-    XinputFocusInEvent(xinput::FocusInEvent),
+    XinputFocusIn(xinput::FocusInEvent),
     #[cfg(feature = "xinput")]
-    XinputFocusOutEvent(xinput::FocusOutEvent),
+    XinputFocusOut(xinput::FocusOutEvent),
     #[cfg(feature = "xinput")]
-    XinputHierarchyEvent(xinput::HierarchyEvent),
+    XinputHierarchy(xinput::HierarchyEvent),
     #[cfg(feature = "xinput")]
-    XinputKeyPressEvent(xinput::KeyPressEvent),
+    XinputKeyPress(xinput::KeyPressEvent),
     #[cfg(feature = "xinput")]
-    XinputKeyReleaseEvent(xinput::KeyReleaseEvent),
+    XinputKeyRelease(xinput::KeyReleaseEvent),
     #[cfg(feature = "xinput")]
-    XinputLeaveEvent(xinput::LeaveEvent),
+    XinputLeave(xinput::LeaveEvent),
     #[cfg(feature = "xinput")]
-    XinputMotionEvent(xinput::MotionEvent),
+    XinputMotion(xinput::MotionEvent),
     #[cfg(feature = "xinput")]
-    XinputPropertyEvent(xinput::PropertyEvent),
+    XinputProperty(xinput::PropertyEvent),
     #[cfg(feature = "xinput")]
-    XinputProximityInEvent(xinput::ProximityInEvent),
+    XinputProximityIn(xinput::ProximityInEvent),
     #[cfg(feature = "xinput")]
-    XinputProximityOutEvent(xinput::ProximityOutEvent),
+    XinputProximityOut(xinput::ProximityOutEvent),
     #[cfg(feature = "xinput")]
-    XinputRawButtonPressEvent(xinput::RawButtonPressEvent),
+    XinputRawButtonPress(xinput::RawButtonPressEvent),
     #[cfg(feature = "xinput")]
-    XinputRawButtonReleaseEvent(xinput::RawButtonReleaseEvent),
+    XinputRawButtonRelease(xinput::RawButtonReleaseEvent),
     #[cfg(feature = "xinput")]
-    XinputRawKeyPressEvent(xinput::RawKeyPressEvent),
+    XinputRawKeyPress(xinput::RawKeyPressEvent),
     #[cfg(feature = "xinput")]
-    XinputRawKeyReleaseEvent(xinput::RawKeyReleaseEvent),
+    XinputRawKeyRelease(xinput::RawKeyReleaseEvent),
     #[cfg(feature = "xinput")]
-    XinputRawMotionEvent(xinput::RawMotionEvent),
+    XinputRawMotion(xinput::RawMotionEvent),
     #[cfg(feature = "xinput")]
-    XinputRawTouchBeginEvent(xinput::RawTouchBeginEvent),
+    XinputRawTouchBegin(xinput::RawTouchBeginEvent),
     #[cfg(feature = "xinput")]
-    XinputRawTouchEndEvent(xinput::RawTouchEndEvent),
+    XinputRawTouchEnd(xinput::RawTouchEndEvent),
     #[cfg(feature = "xinput")]
-    XinputRawTouchUpdateEvent(xinput::RawTouchUpdateEvent),
+    XinputRawTouchUpdate(xinput::RawTouchUpdateEvent),
     #[cfg(feature = "xinput")]
-    XinputTouchBeginEvent(xinput::TouchBeginEvent),
+    XinputTouchBegin(xinput::TouchBeginEvent),
     #[cfg(feature = "xinput")]
-    XinputTouchEndEvent(xinput::TouchEndEvent),
+    XinputTouchEnd(xinput::TouchEndEvent),
     #[cfg(feature = "xinput")]
-    XinputTouchOwnershipEvent(xinput::TouchOwnershipEvent),
+    XinputTouchOwnership(xinput::TouchOwnershipEvent),
     #[cfg(feature = "xinput")]
-    XinputTouchUpdateEvent(xinput::TouchUpdateEvent),
+    XinputTouchUpdate(xinput::TouchUpdateEvent),
     #[cfg(feature = "xkb")]
-    XkbAccessXNotifyEvent(xkb::AccessXNotifyEvent),
+    XkbAccessXNotify(xkb::AccessXNotifyEvent),
     #[cfg(feature = "xkb")]
-    XkbActionMessageEvent(xkb::ActionMessageEvent),
+    XkbActionMessage(xkb::ActionMessageEvent),
     #[cfg(feature = "xkb")]
-    XkbBellNotifyEvent(xkb::BellNotifyEvent),
+    XkbBellNotify(xkb::BellNotifyEvent),
     #[cfg(feature = "xkb")]
-    XkbCompatMapNotifyEvent(xkb::CompatMapNotifyEvent),
+    XkbCompatMapNotify(xkb::CompatMapNotifyEvent),
     #[cfg(feature = "xkb")]
-    XkbControlsNotifyEvent(xkb::ControlsNotifyEvent),
+    XkbControlsNotify(xkb::ControlsNotifyEvent),
     #[cfg(feature = "xkb")]
-    XkbExtensionDeviceNotifyEvent(xkb::ExtensionDeviceNotifyEvent),
+    XkbExtensionDeviceNotify(xkb::ExtensionDeviceNotifyEvent),
     #[cfg(feature = "xkb")]
-    XkbIndicatorMapNotifyEvent(xkb::IndicatorMapNotifyEvent),
+    XkbIndicatorMapNotify(xkb::IndicatorMapNotifyEvent),
     #[cfg(feature = "xkb")]
-    XkbIndicatorStateNotifyEvent(xkb::IndicatorStateNotifyEvent),
+    XkbIndicatorStateNotify(xkb::IndicatorStateNotifyEvent),
     #[cfg(feature = "xkb")]
-    XkbMapNotifyEvent(xkb::MapNotifyEvent),
+    XkbMapNotify(xkb::MapNotifyEvent),
     #[cfg(feature = "xkb")]
-    XkbNamesNotifyEvent(xkb::NamesNotifyEvent),
+    XkbNamesNotify(xkb::NamesNotifyEvent),
     #[cfg(feature = "xkb")]
-    XkbNewKeyboardNotifyEvent(xkb::NewKeyboardNotifyEvent),
+    XkbNewKeyboardNotify(xkb::NewKeyboardNotifyEvent),
     #[cfg(feature = "xkb")]
-    XkbStateNotifyEvent(xkb::StateNotifyEvent),
+    XkbStateNotify(xkb::StateNotifyEvent),
     #[cfg(feature = "xprint")]
-    XprintAttributNotifyEvent(xprint::AttributNotifyEvent),
+    XprintAttributNotify(xprint::AttributNotifyEvent),
     #[cfg(feature = "xprint")]
-    XprintNotifyEvent(xprint::NotifyEvent),
-    XprotoButtonPressEvent(xproto::ButtonPressEvent),
-    XprotoButtonReleaseEvent(xproto::ButtonReleaseEvent),
-    XprotoCirculateNotifyEvent(xproto::CirculateNotifyEvent),
-    XprotoCirculateRequestEvent(xproto::CirculateRequestEvent),
-    XprotoClientMessageEvent(xproto::ClientMessageEvent),
-    XprotoColormapNotifyEvent(xproto::ColormapNotifyEvent),
-    XprotoConfigureNotifyEvent(xproto::ConfigureNotifyEvent),
-    XprotoConfigureRequestEvent(xproto::ConfigureRequestEvent),
-    XprotoCreateNotifyEvent(xproto::CreateNotifyEvent),
-    XprotoDestroyNotifyEvent(xproto::DestroyNotifyEvent),
-    XprotoEnterNotifyEvent(xproto::EnterNotifyEvent),
-    XprotoExposeEvent(xproto::ExposeEvent),
-    XprotoFocusInEvent(xproto::FocusInEvent),
-    XprotoFocusOutEvent(xproto::FocusOutEvent),
-    XprotoGeGenericEvent(xproto::GeGenericEvent),
-    XprotoGraphicsExposureEvent(xproto::GraphicsExposureEvent),
-    XprotoGravityNotifyEvent(xproto::GravityNotifyEvent),
-    XprotoKeyPressEvent(xproto::KeyPressEvent),
-    XprotoKeyReleaseEvent(xproto::KeyReleaseEvent),
-    XprotoKeymapNotifyEvent(xproto::KeymapNotifyEvent),
-    XprotoLeaveNotifyEvent(xproto::LeaveNotifyEvent),
-    XprotoMapNotifyEvent(xproto::MapNotifyEvent),
-    XprotoMapRequestEvent(xproto::MapRequestEvent),
-    XprotoMappingNotifyEvent(xproto::MappingNotifyEvent),
-    XprotoMotionNotifyEvent(xproto::MotionNotifyEvent),
-    XprotoNoExposureEvent(xproto::NoExposureEvent),
-    XprotoPropertyNotifyEvent(xproto::PropertyNotifyEvent),
-    XprotoReparentNotifyEvent(xproto::ReparentNotifyEvent),
-    XprotoResizeRequestEvent(xproto::ResizeRequestEvent),
-    XprotoSelectionClearEvent(xproto::SelectionClearEvent),
-    XprotoSelectionNotifyEvent(xproto::SelectionNotifyEvent),
-    XprotoSelectionRequestEvent(xproto::SelectionRequestEvent),
-    XprotoUnmapNotifyEvent(xproto::UnmapNotifyEvent),
-    XprotoVisibilityNotifyEvent(xproto::VisibilityNotifyEvent),
+    XprintNotify(xprint::NotifyEvent),
+    ButtonPress(xproto::ButtonPressEvent),
+    ButtonRelease(xproto::ButtonReleaseEvent),
+    CirculateNotify(xproto::CirculateNotifyEvent),
+    CirculateRequest(xproto::CirculateRequestEvent),
+    ClientMessage(xproto::ClientMessageEvent),
+    ColormapNotify(xproto::ColormapNotifyEvent),
+    ConfigureNotify(xproto::ConfigureNotifyEvent),
+    ConfigureRequest(xproto::ConfigureRequestEvent),
+    CreateNotify(xproto::CreateNotifyEvent),
+    DestroyNotify(xproto::DestroyNotifyEvent),
+    EnterNotify(xproto::EnterNotifyEvent),
+    Expose(xproto::ExposeEvent),
+    FocusIn(xproto::FocusInEvent),
+    FocusOut(xproto::FocusOutEvent),
+    GeGeneric(xproto::GeGenericEvent),
+    GraphicsExposure(xproto::GraphicsExposureEvent),
+    GravityNotify(xproto::GravityNotifyEvent),
+    KeyPress(xproto::KeyPressEvent),
+    KeyRelease(xproto::KeyReleaseEvent),
+    KeymapNotify(xproto::KeymapNotifyEvent),
+    LeaveNotify(xproto::LeaveNotifyEvent),
+    MapNotify(xproto::MapNotifyEvent),
+    MapRequest(xproto::MapRequestEvent),
+    MappingNotify(xproto::MappingNotifyEvent),
+    MotionNotify(xproto::MotionNotifyEvent),
+    NoExposure(xproto::NoExposureEvent),
+    PropertyNotify(xproto::PropertyNotifyEvent),
+    ReparentNotify(xproto::ReparentNotifyEvent),
+    ResizeRequest(xproto::ResizeRequestEvent),
+    SelectionClear(xproto::SelectionClearEvent),
+    SelectionNotify(xproto::SelectionNotifyEvent),
+    SelectionRequest(xproto::SelectionRequestEvent),
+    UnmapNotify(xproto::UnmapNotifyEvent),
+    VisibilityNotify(xproto::VisibilityNotifyEvent),
     #[cfg(feature = "xv")]
-    XvPortNotifyEvent(xv::PortNotifyEvent),
+    XvPortNotify(xv::PortNotifyEvent),
     #[cfg(feature = "xv")]
-    XvVideoNotifyEvent(xv::VideoNotifyEvent),
+    XvVideoNotify(xv::VideoNotifyEvent),
 }
 impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
     /// Parse a generic X11 event into a concrete event type.
@@ -549,39 +549,39 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
         // Check if this is a core protocol error or from the generic event extension
         match event_type {
             0 => return Ok(Self::Error(Error::parse(event.try_into()?, iter)?)),
-            xproto::BUTTON_PRESS_EVENT => return Ok(Self::XprotoButtonPressEvent(event.into())),
-            xproto::BUTTON_RELEASE_EVENT => return Ok(Self::XprotoButtonReleaseEvent(event.into())),
-            xproto::CIRCULATE_NOTIFY_EVENT => return Ok(Self::XprotoCirculateNotifyEvent(event.into())),
-            xproto::CIRCULATE_REQUEST_EVENT => return Ok(Self::XprotoCirculateRequestEvent(event.into())),
-            xproto::CLIENT_MESSAGE_EVENT => return Ok(Self::XprotoClientMessageEvent(event.into())),
-            xproto::COLORMAP_NOTIFY_EVENT => return Ok(Self::XprotoColormapNotifyEvent(event.into())),
-            xproto::CONFIGURE_NOTIFY_EVENT => return Ok(Self::XprotoConfigureNotifyEvent(event.into())),
-            xproto::CONFIGURE_REQUEST_EVENT => return Ok(Self::XprotoConfigureRequestEvent(event.into())),
-            xproto::CREATE_NOTIFY_EVENT => return Ok(Self::XprotoCreateNotifyEvent(event.into())),
-            xproto::DESTROY_NOTIFY_EVENT => return Ok(Self::XprotoDestroyNotifyEvent(event.into())),
-            xproto::ENTER_NOTIFY_EVENT => return Ok(Self::XprotoEnterNotifyEvent(event.into())),
-            xproto::EXPOSE_EVENT => return Ok(Self::XprotoExposeEvent(event.into())),
-            xproto::FOCUS_IN_EVENT => return Ok(Self::XprotoFocusInEvent(event.into())),
-            xproto::FOCUS_OUT_EVENT => return Ok(Self::XprotoFocusOutEvent(event.into())),
-            xproto::GRAPHICS_EXPOSURE_EVENT => return Ok(Self::XprotoGraphicsExposureEvent(event.into())),
-            xproto::GRAVITY_NOTIFY_EVENT => return Ok(Self::XprotoGravityNotifyEvent(event.into())),
-            xproto::KEY_PRESS_EVENT => return Ok(Self::XprotoKeyPressEvent(event.into())),
-            xproto::KEY_RELEASE_EVENT => return Ok(Self::XprotoKeyReleaseEvent(event.into())),
-            xproto::KEYMAP_NOTIFY_EVENT => return Ok(Self::XprotoKeymapNotifyEvent(event.into())),
-            xproto::LEAVE_NOTIFY_EVENT => return Ok(Self::XprotoLeaveNotifyEvent(event.into())),
-            xproto::MAP_NOTIFY_EVENT => return Ok(Self::XprotoMapNotifyEvent(event.into())),
-            xproto::MAP_REQUEST_EVENT => return Ok(Self::XprotoMapRequestEvent(event.into())),
-            xproto::MAPPING_NOTIFY_EVENT => return Ok(Self::XprotoMappingNotifyEvent(event.into())),
-            xproto::MOTION_NOTIFY_EVENT => return Ok(Self::XprotoMotionNotifyEvent(event.into())),
-            xproto::NO_EXPOSURE_EVENT => return Ok(Self::XprotoNoExposureEvent(event.into())),
-            xproto::PROPERTY_NOTIFY_EVENT => return Ok(Self::XprotoPropertyNotifyEvent(event.into())),
-            xproto::REPARENT_NOTIFY_EVENT => return Ok(Self::XprotoReparentNotifyEvent(event.into())),
-            xproto::RESIZE_REQUEST_EVENT => return Ok(Self::XprotoResizeRequestEvent(event.into())),
-            xproto::SELECTION_CLEAR_EVENT => return Ok(Self::XprotoSelectionClearEvent(event.into())),
-            xproto::SELECTION_NOTIFY_EVENT => return Ok(Self::XprotoSelectionNotifyEvent(event.into())),
-            xproto::SELECTION_REQUEST_EVENT => return Ok(Self::XprotoSelectionRequestEvent(event.into())),
-            xproto::UNMAP_NOTIFY_EVENT => return Ok(Self::XprotoUnmapNotifyEvent(event.into())),
-            xproto::VISIBILITY_NOTIFY_EVENT => return Ok(Self::XprotoVisibilityNotifyEvent(event.into())),
+            xproto::BUTTON_PRESS_EVENT => return Ok(Self::ButtonPress(event.into())),
+            xproto::BUTTON_RELEASE_EVENT => return Ok(Self::ButtonRelease(event.into())),
+            xproto::CIRCULATE_NOTIFY_EVENT => return Ok(Self::CirculateNotify(event.into())),
+            xproto::CIRCULATE_REQUEST_EVENT => return Ok(Self::CirculateRequest(event.into())),
+            xproto::CLIENT_MESSAGE_EVENT => return Ok(Self::ClientMessage(event.into())),
+            xproto::COLORMAP_NOTIFY_EVENT => return Ok(Self::ColormapNotify(event.into())),
+            xproto::CONFIGURE_NOTIFY_EVENT => return Ok(Self::ConfigureNotify(event.into())),
+            xproto::CONFIGURE_REQUEST_EVENT => return Ok(Self::ConfigureRequest(event.into())),
+            xproto::CREATE_NOTIFY_EVENT => return Ok(Self::CreateNotify(event.into())),
+            xproto::DESTROY_NOTIFY_EVENT => return Ok(Self::DestroyNotify(event.into())),
+            xproto::ENTER_NOTIFY_EVENT => return Ok(Self::EnterNotify(event.into())),
+            xproto::EXPOSE_EVENT => return Ok(Self::Expose(event.into())),
+            xproto::FOCUS_IN_EVENT => return Ok(Self::FocusIn(event.into())),
+            xproto::FOCUS_OUT_EVENT => return Ok(Self::FocusOut(event.into())),
+            xproto::GRAPHICS_EXPOSURE_EVENT => return Ok(Self::GraphicsExposure(event.into())),
+            xproto::GRAVITY_NOTIFY_EVENT => return Ok(Self::GravityNotify(event.into())),
+            xproto::KEY_PRESS_EVENT => return Ok(Self::KeyPress(event.into())),
+            xproto::KEY_RELEASE_EVENT => return Ok(Self::KeyRelease(event.into())),
+            xproto::KEYMAP_NOTIFY_EVENT => return Ok(Self::KeymapNotify(event.into())),
+            xproto::LEAVE_NOTIFY_EVENT => return Ok(Self::LeaveNotify(event.into())),
+            xproto::MAP_NOTIFY_EVENT => return Ok(Self::MapNotify(event.into())),
+            xproto::MAP_REQUEST_EVENT => return Ok(Self::MapRequest(event.into())),
+            xproto::MAPPING_NOTIFY_EVENT => return Ok(Self::MappingNotify(event.into())),
+            xproto::MOTION_NOTIFY_EVENT => return Ok(Self::MotionNotify(event.into())),
+            xproto::NO_EXPOSURE_EVENT => return Ok(Self::NoExposure(event.into())),
+            xproto::PROPERTY_NOTIFY_EVENT => return Ok(Self::PropertyNotify(event.into())),
+            xproto::REPARENT_NOTIFY_EVENT => return Ok(Self::ReparentNotify(event.into())),
+            xproto::RESIZE_REQUEST_EVENT => return Ok(Self::ResizeRequest(event.into())),
+            xproto::SELECTION_CLEAR_EVENT => return Ok(Self::SelectionClear(event.into())),
+            xproto::SELECTION_NOTIFY_EVENT => return Ok(Self::SelectionNotify(event.into())),
+            xproto::SELECTION_REQUEST_EVENT => return Ok(Self::SelectionRequest(event.into())),
+            xproto::UNMAP_NOTIFY_EVENT => return Ok(Self::UnmapNotify(event.into())),
+            xproto::VISIBILITY_NOTIFY_EVENT => return Ok(Self::VisibilityNotify(event.into())),
             xproto::GE_GENERIC_EVENT => return Self::from_generic_event(event, iter),
             _ => {}
         }
@@ -594,98 +594,98 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
             #[cfg(feature = "damage")]
             Some(("DAMAGE", first_event)) => {
                 match event_type - first_event {
-                    damage::NOTIFY_EVENT => Ok(Self::DamageNotifyEvent(event.into())),
+                    damage::NOTIFY_EVENT => Ok(Self::DamageNotify(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "dri2")]
             Some(("DRI2", first_event)) => {
                 match event_type - first_event {
-                    dri2::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::Dri2BufferSwapCompleteEvent(event.into())),
-                    dri2::INVALIDATE_BUFFERS_EVENT => Ok(Self::Dri2InvalidateBuffersEvent(event.into())),
+                    dri2::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::Dri2BufferSwapComplete(event.into())),
+                    dri2::INVALIDATE_BUFFERS_EVENT => Ok(Self::Dri2InvalidateBuffers(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "glx")]
             Some(("GLX", first_event)) => {
                 match event_type - first_event {
-                    glx::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::GlxBufferSwapCompleteEvent(event.into())),
-                    glx::PBUFFER_CLOBBER_EVENT => Ok(Self::GlxPbufferClobberEvent(event.into())),
+                    glx::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::GlxBufferSwapComplete(event.into())),
+                    glx::PBUFFER_CLOBBER_EVENT => Ok(Self::GlxPbufferClobber(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "present")]
             Some(("Present", first_event)) => {
                 match event_type - first_event {
-                    present::GENERIC_EVENT => Ok(Self::PresentGenericEvent(event.into())),
+                    present::GENERIC_EVENT => Ok(Self::PresentGeneric(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "randr")]
             Some(("RANDR", first_event)) => {
                 match event_type - first_event {
-                    randr::NOTIFY_EVENT => Ok(Self::RandrNotifyEvent(event.into())),
-                    randr::SCREEN_CHANGE_NOTIFY_EVENT => Ok(Self::RandrScreenChangeNotifyEvent(event.into())),
+                    randr::NOTIFY_EVENT => Ok(Self::RandrNotify(event.into())),
+                    randr::SCREEN_CHANGE_NOTIFY_EVENT => Ok(Self::RandrScreenChangeNotify(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "screensaver")]
             Some(("MIT-SCREEN-SAVER", first_event)) => {
                 match event_type - first_event {
-                    screensaver::NOTIFY_EVENT => Ok(Self::ScreensaverNotifyEvent(event.into())),
+                    screensaver::NOTIFY_EVENT => Ok(Self::ScreensaverNotify(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "shape")]
             Some(("SHAPE", first_event)) => {
                 match event_type - first_event {
-                    shape::NOTIFY_EVENT => Ok(Self::ShapeNotifyEvent(event.into())),
+                    shape::NOTIFY_EVENT => Ok(Self::ShapeNotify(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "shm")]
             Some(("MIT-SHM", first_event)) => {
                 match event_type - first_event {
-                    shm::COMPLETION_EVENT => Ok(Self::ShmCompletionEvent(event.into())),
+                    shm::COMPLETION_EVENT => Ok(Self::ShmCompletion(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "sync")]
             Some(("SYNC", first_event)) => {
                 match event_type - first_event {
-                    sync::ALARM_NOTIFY_EVENT => Ok(Self::SyncAlarmNotifyEvent(event.into())),
-                    sync::COUNTER_NOTIFY_EVENT => Ok(Self::SyncCounterNotifyEvent(event.into())),
+                    sync::ALARM_NOTIFY_EVENT => Ok(Self::SyncAlarmNotify(event.into())),
+                    sync::COUNTER_NOTIFY_EVENT => Ok(Self::SyncCounterNotify(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "xfixes")]
             Some(("XFIXES", first_event)) => {
                 match event_type - first_event {
-                    xfixes::CURSOR_NOTIFY_EVENT => Ok(Self::XfixesCursorNotifyEvent(event.into())),
-                    xfixes::SELECTION_NOTIFY_EVENT => Ok(Self::XfixesSelectionNotifyEvent(event.into())),
+                    xfixes::CURSOR_NOTIFY_EVENT => Ok(Self::XfixesCursorNotify(event.into())),
+                    xfixes::SELECTION_NOTIFY_EVENT => Ok(Self::XfixesSelectionNotify(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "xinput")]
             Some(("XInputExtension", first_event)) => {
                 match event_type - first_event {
-                    xinput::CHANGE_DEVICE_NOTIFY_EVENT => Ok(Self::XinputChangeDeviceNotifyEvent(event.into())),
-                    xinput::DEVICE_BUTTON_PRESS_EVENT => Ok(Self::XinputDeviceButtonPressEvent(event.into())),
-                    xinput::DEVICE_BUTTON_RELEASE_EVENT => Ok(Self::XinputDeviceButtonReleaseEvent(event.into())),
-                    xinput::DEVICE_BUTTON_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceButtonStateNotifyEvent(event.into())),
-                    xinput::DEVICE_FOCUS_IN_EVENT => Ok(Self::XinputDeviceFocusInEvent(event.into())),
-                    xinput::DEVICE_FOCUS_OUT_EVENT => Ok(Self::XinputDeviceFocusOutEvent(event.into())),
-                    xinput::DEVICE_KEY_PRESS_EVENT => Ok(Self::XinputDeviceKeyPressEvent(event.into())),
-                    xinput::DEVICE_KEY_RELEASE_EVENT => Ok(Self::XinputDeviceKeyReleaseEvent(event.into())),
-                    xinput::DEVICE_KEY_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceKeyStateNotifyEvent(event.into())),
-                    xinput::DEVICE_MAPPING_NOTIFY_EVENT => Ok(Self::XinputDeviceMappingNotifyEvent(event.into())),
-                    xinput::DEVICE_MOTION_NOTIFY_EVENT => Ok(Self::XinputDeviceMotionNotifyEvent(event.into())),
-                    xinput::DEVICE_PRESENCE_NOTIFY_EVENT => Ok(Self::XinputDevicePresenceNotifyEvent(event.into())),
-                    xinput::DEVICE_PROPERTY_NOTIFY_EVENT => Ok(Self::XinputDevicePropertyNotifyEvent(event.into())),
-                    xinput::DEVICE_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceStateNotifyEvent(event.into())),
-                    xinput::DEVICE_VALUATOR_EVENT => Ok(Self::XinputDeviceValuatorEvent(event.into())),
-                    xinput::PROXIMITY_IN_EVENT => Ok(Self::XinputProximityInEvent(event.into())),
-                    xinput::PROXIMITY_OUT_EVENT => Ok(Self::XinputProximityOutEvent(event.into())),
+                    xinput::CHANGE_DEVICE_NOTIFY_EVENT => Ok(Self::XinputChangeDeviceNotify(event.into())),
+                    xinput::DEVICE_BUTTON_PRESS_EVENT => Ok(Self::XinputDeviceButtonPress(event.into())),
+                    xinput::DEVICE_BUTTON_RELEASE_EVENT => Ok(Self::XinputDeviceButtonRelease(event.into())),
+                    xinput::DEVICE_BUTTON_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceButtonStateNotify(event.into())),
+                    xinput::DEVICE_FOCUS_IN_EVENT => Ok(Self::XinputDeviceFocusIn(event.into())),
+                    xinput::DEVICE_FOCUS_OUT_EVENT => Ok(Self::XinputDeviceFocusOut(event.into())),
+                    xinput::DEVICE_KEY_PRESS_EVENT => Ok(Self::XinputDeviceKeyPress(event.into())),
+                    xinput::DEVICE_KEY_RELEASE_EVENT => Ok(Self::XinputDeviceKeyRelease(event.into())),
+                    xinput::DEVICE_KEY_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceKeyStateNotify(event.into())),
+                    xinput::DEVICE_MAPPING_NOTIFY_EVENT => Ok(Self::XinputDeviceMappingNotify(event.into())),
+                    xinput::DEVICE_MOTION_NOTIFY_EVENT => Ok(Self::XinputDeviceMotionNotify(event.into())),
+                    xinput::DEVICE_PRESENCE_NOTIFY_EVENT => Ok(Self::XinputDevicePresenceNotify(event.into())),
+                    xinput::DEVICE_PROPERTY_NOTIFY_EVENT => Ok(Self::XinputDevicePropertyNotify(event.into())),
+                    xinput::DEVICE_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceStateNotify(event.into())),
+                    xinput::DEVICE_VALUATOR_EVENT => Ok(Self::XinputDeviceValuator(event.into())),
+                    xinput::PROXIMITY_IN_EVENT => Ok(Self::XinputProximityIn(event.into())),
+                    xinput::PROXIMITY_OUT_EVENT => Ok(Self::XinputProximityOut(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
@@ -695,34 +695,34 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
                     return Ok(Self::Unknown(event));
                 }
                 match event.raw_bytes()[1] {
-                    xkb::ACCESS_X_NOTIFY_EVENT => Ok(Self::XkbAccessXNotifyEvent(event.into())),
-                    xkb::ACTION_MESSAGE_EVENT => Ok(Self::XkbActionMessageEvent(event.into())),
-                    xkb::BELL_NOTIFY_EVENT => Ok(Self::XkbBellNotifyEvent(event.into())),
-                    xkb::COMPAT_MAP_NOTIFY_EVENT => Ok(Self::XkbCompatMapNotifyEvent(event.into())),
-                    xkb::CONTROLS_NOTIFY_EVENT => Ok(Self::XkbControlsNotifyEvent(event.into())),
-                    xkb::EXTENSION_DEVICE_NOTIFY_EVENT => Ok(Self::XkbExtensionDeviceNotifyEvent(event.into())),
-                    xkb::INDICATOR_MAP_NOTIFY_EVENT => Ok(Self::XkbIndicatorMapNotifyEvent(event.into())),
-                    xkb::INDICATOR_STATE_NOTIFY_EVENT => Ok(Self::XkbIndicatorStateNotifyEvent(event.into())),
-                    xkb::MAP_NOTIFY_EVENT => Ok(Self::XkbMapNotifyEvent(event.into())),
-                    xkb::NAMES_NOTIFY_EVENT => Ok(Self::XkbNamesNotifyEvent(event.into())),
-                    xkb::NEW_KEYBOARD_NOTIFY_EVENT => Ok(Self::XkbNewKeyboardNotifyEvent(event.into())),
-                    xkb::STATE_NOTIFY_EVENT => Ok(Self::XkbStateNotifyEvent(event.into())),
+                    xkb::ACCESS_X_NOTIFY_EVENT => Ok(Self::XkbAccessXNotify(event.into())),
+                    xkb::ACTION_MESSAGE_EVENT => Ok(Self::XkbActionMessage(event.into())),
+                    xkb::BELL_NOTIFY_EVENT => Ok(Self::XkbBellNotify(event.into())),
+                    xkb::COMPAT_MAP_NOTIFY_EVENT => Ok(Self::XkbCompatMapNotify(event.into())),
+                    xkb::CONTROLS_NOTIFY_EVENT => Ok(Self::XkbControlsNotify(event.into())),
+                    xkb::EXTENSION_DEVICE_NOTIFY_EVENT => Ok(Self::XkbExtensionDeviceNotify(event.into())),
+                    xkb::INDICATOR_MAP_NOTIFY_EVENT => Ok(Self::XkbIndicatorMapNotify(event.into())),
+                    xkb::INDICATOR_STATE_NOTIFY_EVENT => Ok(Self::XkbIndicatorStateNotify(event.into())),
+                    xkb::MAP_NOTIFY_EVENT => Ok(Self::XkbMapNotify(event.into())),
+                    xkb::NAMES_NOTIFY_EVENT => Ok(Self::XkbNamesNotify(event.into())),
+                    xkb::NEW_KEYBOARD_NOTIFY_EVENT => Ok(Self::XkbNewKeyboardNotify(event.into())),
+                    xkb::STATE_NOTIFY_EVENT => Ok(Self::XkbStateNotify(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "xprint")]
             Some(("XpExtension", first_event)) => {
                 match event_type - first_event {
-                    xprint::ATTRIBUT_NOTIFY_EVENT => Ok(Self::XprintAttributNotifyEvent(event.into())),
-                    xprint::NOTIFY_EVENT => Ok(Self::XprintNotifyEvent(event.into())),
+                    xprint::ATTRIBUT_NOTIFY_EVENT => Ok(Self::XprintAttributNotify(event.into())),
+                    xprint::NOTIFY_EVENT => Ok(Self::XprintNotify(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "xv")]
             Some(("XVideo", first_event)) => {
                 match event_type - first_event {
-                    xv::PORT_NOTIFY_EVENT => Ok(Self::XvPortNotifyEvent(event.into())),
-                    xv::VIDEO_NOTIFY_EVENT => Ok(Self::XvVideoNotifyEvent(event.into())),
+                    xv::PORT_NOTIFY_EVENT => Ok(Self::XvPortNotify(event.into())),
+                    xv::VIDEO_NOTIFY_EVENT => Ok(Self::XvVideoNotify(event.into())),
                     _ => Ok(Self::Unknown(event))
                 }
             }
@@ -746,42 +746,42 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
             #[cfg(feature = "present")]
             Some("Present") => {
                 match event_type {
-                    present::COMPLETE_NOTIFY_EVENT => Ok(Self::PresentCompleteNotifyEvent(event.try_into()?)),
-                    present::CONFIGURE_NOTIFY_EVENT => Ok(Self::PresentConfigureNotifyEvent(event.try_into()?)),
-                    present::IDLE_NOTIFY_EVENT => Ok(Self::PresentIdleNotifyEvent(event.try_into()?)),
-                    present::REDIRECT_NOTIFY_EVENT => Ok(Self::PresentRedirectNotifyEvent(event.try_into()?)),
+                    present::COMPLETE_NOTIFY_EVENT => Ok(Self::PresentCompleteNotify(event.try_into()?)),
+                    present::CONFIGURE_NOTIFY_EVENT => Ok(Self::PresentConfigureNotify(event.try_into()?)),
+                    present::IDLE_NOTIFY_EVENT => Ok(Self::PresentIdleNotify(event.try_into()?)),
+                    present::REDIRECT_NOTIFY_EVENT => Ok(Self::PresentRedirectNotify(event.try_into()?)),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "xinput")]
             Some("XInputExtension") => {
                 match event_type {
-                    xinput::BARRIER_HIT_EVENT => Ok(Self::XinputBarrierHitEvent(event.try_into()?)),
-                    xinput::BARRIER_LEAVE_EVENT => Ok(Self::XinputBarrierLeaveEvent(event.try_into()?)),
-                    xinput::BUTTON_PRESS_EVENT => Ok(Self::XinputButtonPressEvent(event.try_into()?)),
-                    xinput::BUTTON_RELEASE_EVENT => Ok(Self::XinputButtonReleaseEvent(event.try_into()?)),
-                    xinput::DEVICE_CHANGED_EVENT => Ok(Self::XinputDeviceChangedEvent(event.try_into()?)),
-                    xinput::ENTER_EVENT => Ok(Self::XinputEnterEvent(event.try_into()?)),
-                    xinput::FOCUS_IN_EVENT => Ok(Self::XinputFocusInEvent(event.try_into()?)),
-                    xinput::FOCUS_OUT_EVENT => Ok(Self::XinputFocusOutEvent(event.try_into()?)),
-                    xinput::HIERARCHY_EVENT => Ok(Self::XinputHierarchyEvent(event.try_into()?)),
-                    xinput::KEY_PRESS_EVENT => Ok(Self::XinputKeyPressEvent(event.try_into()?)),
-                    xinput::KEY_RELEASE_EVENT => Ok(Self::XinputKeyReleaseEvent(event.try_into()?)),
-                    xinput::LEAVE_EVENT => Ok(Self::XinputLeaveEvent(event.try_into()?)),
-                    xinput::MOTION_EVENT => Ok(Self::XinputMotionEvent(event.try_into()?)),
-                    xinput::PROPERTY_EVENT => Ok(Self::XinputPropertyEvent(event.try_into()?)),
-                    xinput::RAW_BUTTON_PRESS_EVENT => Ok(Self::XinputRawButtonPressEvent(event.try_into()?)),
-                    xinput::RAW_BUTTON_RELEASE_EVENT => Ok(Self::XinputRawButtonReleaseEvent(event.try_into()?)),
-                    xinput::RAW_KEY_PRESS_EVENT => Ok(Self::XinputRawKeyPressEvent(event.try_into()?)),
-                    xinput::RAW_KEY_RELEASE_EVENT => Ok(Self::XinputRawKeyReleaseEvent(event.try_into()?)),
-                    xinput::RAW_MOTION_EVENT => Ok(Self::XinputRawMotionEvent(event.try_into()?)),
-                    xinput::RAW_TOUCH_BEGIN_EVENT => Ok(Self::XinputRawTouchBeginEvent(event.try_into()?)),
-                    xinput::RAW_TOUCH_END_EVENT => Ok(Self::XinputRawTouchEndEvent(event.try_into()?)),
-                    xinput::RAW_TOUCH_UPDATE_EVENT => Ok(Self::XinputRawTouchUpdateEvent(event.try_into()?)),
-                    xinput::TOUCH_BEGIN_EVENT => Ok(Self::XinputTouchBeginEvent(event.try_into()?)),
-                    xinput::TOUCH_END_EVENT => Ok(Self::XinputTouchEndEvent(event.try_into()?)),
-                    xinput::TOUCH_OWNERSHIP_EVENT => Ok(Self::XinputTouchOwnershipEvent(event.try_into()?)),
-                    xinput::TOUCH_UPDATE_EVENT => Ok(Self::XinputTouchUpdateEvent(event.try_into()?)),
+                    xinput::BARRIER_HIT_EVENT => Ok(Self::XinputBarrierHit(event.try_into()?)),
+                    xinput::BARRIER_LEAVE_EVENT => Ok(Self::XinputBarrierLeave(event.try_into()?)),
+                    xinput::BUTTON_PRESS_EVENT => Ok(Self::XinputButtonPress(event.try_into()?)),
+                    xinput::BUTTON_RELEASE_EVENT => Ok(Self::XinputButtonRelease(event.try_into()?)),
+                    xinput::DEVICE_CHANGED_EVENT => Ok(Self::XinputDeviceChanged(event.try_into()?)),
+                    xinput::ENTER_EVENT => Ok(Self::XinputEnter(event.try_into()?)),
+                    xinput::FOCUS_IN_EVENT => Ok(Self::XinputFocusIn(event.try_into()?)),
+                    xinput::FOCUS_OUT_EVENT => Ok(Self::XinputFocusOut(event.try_into()?)),
+                    xinput::HIERARCHY_EVENT => Ok(Self::XinputHierarchy(event.try_into()?)),
+                    xinput::KEY_PRESS_EVENT => Ok(Self::XinputKeyPress(event.try_into()?)),
+                    xinput::KEY_RELEASE_EVENT => Ok(Self::XinputKeyRelease(event.try_into()?)),
+                    xinput::LEAVE_EVENT => Ok(Self::XinputLeave(event.try_into()?)),
+                    xinput::MOTION_EVENT => Ok(Self::XinputMotion(event.try_into()?)),
+                    xinput::PROPERTY_EVENT => Ok(Self::XinputProperty(event.try_into()?)),
+                    xinput::RAW_BUTTON_PRESS_EVENT => Ok(Self::XinputRawButtonPress(event.try_into()?)),
+                    xinput::RAW_BUTTON_RELEASE_EVENT => Ok(Self::XinputRawButtonRelease(event.try_into()?)),
+                    xinput::RAW_KEY_PRESS_EVENT => Ok(Self::XinputRawKeyPress(event.try_into()?)),
+                    xinput::RAW_KEY_RELEASE_EVENT => Ok(Self::XinputRawKeyRelease(event.try_into()?)),
+                    xinput::RAW_MOTION_EVENT => Ok(Self::XinputRawMotion(event.try_into()?)),
+                    xinput::RAW_TOUCH_BEGIN_EVENT => Ok(Self::XinputRawTouchBegin(event.try_into()?)),
+                    xinput::RAW_TOUCH_END_EVENT => Ok(Self::XinputRawTouchEnd(event.try_into()?)),
+                    xinput::RAW_TOUCH_UPDATE_EVENT => Ok(Self::XinputRawTouchUpdate(event.try_into()?)),
+                    xinput::TOUCH_BEGIN_EVENT => Ok(Self::XinputTouchBegin(event.try_into()?)),
+                    xinput::TOUCH_END_EVENT => Ok(Self::XinputTouchEnd(event.try_into()?)),
+                    xinput::TOUCH_OWNERSHIP_EVENT => Ok(Self::XinputTouchOwnership(event.try_into()?)),
+                    xinput::TOUCH_UPDATE_EVENT => Ok(Self::XinputTouchUpdate(event.try_into()?)),
                     _ => Ok(Self::Unknown(event))
                 }
             }

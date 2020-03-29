@@ -192,7 +192,7 @@ where
         let event = conn.wait_for_event()?;
         let event = conn.parse_event(event)?;
         match event {
-            Event::XprotoExposeEvent(event) => {
+            Event::Expose(event) => {
                 if let Some(state) = find_window_by_id(&windows, event.window) {
                     let state = state.lock().unwrap();
                     conn.copy_area(
@@ -213,7 +213,7 @@ where
                     eprintln!("Expose on unknown window!");
                 }
             }
-            Event::XprotoButtonReleaseEvent(event) => {
+            Event::ButtonRelease(event) => {
                 if let Some(state) = find_window_by_id(&windows, event.event) {
                     let mut state = state.lock().unwrap();
                     // FIXME: Make this matching somehow nicer
@@ -228,13 +228,13 @@ where
                     eprintln!("ButtonRelease on unknown window!");
                 }
             }
-            Event::XprotoMapNotifyEvent(event) => {
+            Event::MapNotify(event) => {
                 if !first_window_mapped {
                     first_window_mapped = true;
                     util::start_timeout_thread(conn_arc.clone(), event.window);
                 }
             }
-            Event::XprotoClientMessageEvent(_) => {
+            Event::ClientMessage(_) => {
                 // We simply assume that this is a message to close. Since we are the main thread,
                 // everything closes when we exit.
                 return Ok(());
