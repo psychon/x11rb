@@ -1,7 +1,6 @@
 // This file contains generated code. Do not edit directly.
 // To regenerate this, run 'make'.
 
-#![allow(clippy::unreadable_literal)]
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::identity_op)]
 #![allow(clippy::trivially_copy_pass_by_ref)]
@@ -8448,16 +8447,16 @@ impl TryFrom<u32> for XIEventMask {
             16384 => Ok(XIEventMask::RawKeyRelease),
             32768 => Ok(XIEventMask::RawButtonPress),
             65536 => Ok(XIEventMask::RawButtonRelease),
-            131072 => Ok(XIEventMask::RawMotion),
-            262144 => Ok(XIEventMask::TouchBegin),
-            524288 => Ok(XIEventMask::TouchUpdate),
-            1048576 => Ok(XIEventMask::TouchEnd),
-            2097152 => Ok(XIEventMask::TouchOwnership),
-            4194304 => Ok(XIEventMask::RawTouchBegin),
-            8388608 => Ok(XIEventMask::RawTouchUpdate),
-            16777216 => Ok(XIEventMask::RawTouchEnd),
-            33554432 => Ok(XIEventMask::BarrierHit),
-            67108864 => Ok(XIEventMask::BarrierLeave),
+            131_072 => Ok(XIEventMask::RawMotion),
+            262_144 => Ok(XIEventMask::TouchBegin),
+            524_288 => Ok(XIEventMask::TouchUpdate),
+            1_048_576 => Ok(XIEventMask::TouchEnd),
+            2_097_152 => Ok(XIEventMask::TouchOwnership),
+            4_194_304 => Ok(XIEventMask::RawTouchBegin),
+            8_388_608 => Ok(XIEventMask::RawTouchUpdate),
+            16_777_216 => Ok(XIEventMask::RawTouchEnd),
+            33_554_432 => Ok(XIEventMask::BarrierHit),
+            67_108_864 => Ok(XIEventMask::BarrierLeave),
             _ => Err(ParseError::ParseError)
         }
     }
@@ -10305,7 +10304,7 @@ impl TryFrom<u32> for ModifierMask {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
-            2147483648 => Ok(ModifierMask::Any),
+            2_147_483_648 => Ok(ModifierMask::Any),
             _ => Err(ParseError::ParseError)
         }
     }
@@ -14252,7 +14251,7 @@ impl TryFrom<u32> for TouchEventFlags {
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
             65536 => Ok(TouchEventFlags::TouchPendingEnd),
-            131072 => Ok(TouchEventFlags::TouchEmulatingPointer),
+            131_072 => Ok(TouchEventFlags::TouchEmulatingPointer),
             _ => Err(ParseError::ParseError)
         }
     }

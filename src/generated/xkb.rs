@@ -1,7 +1,6 @@
 // This file contains generated code. Do not edit directly.
 // To regenerate this, run 'make'.
 
-#![allow(clippy::unreadable_literal)]
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::identity_op)]
 #![allow(clippy::trivially_copy_pass_by_ref)]
@@ -659,11 +658,11 @@ impl TryFrom<u32> for Control {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
-            134217728 => Ok(Control::GroupsWrap),
-            268435456 => Ok(Control::InternalMods),
-            536870912 => Ok(Control::IgnoreLockMods),
-            1073741824 => Ok(Control::PerKeyRepeat),
-            2147483648 => Ok(Control::ControlsEnabled),
+            134_217_728 => Ok(Control::GroupsWrap),
+            268_435_456 => Ok(Control::InternalMods),
+            536_870_912 => Ok(Control::IgnoreLockMods),
+            1_073_741_824 => Ok(Control::PerKeyRepeat),
+            2_147_483_648 => Ok(Control::ControlsEnabled),
             _ => Err(ParseError::ParseError)
         }
     }
