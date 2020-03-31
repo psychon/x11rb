@@ -32,6 +32,34 @@ rust_type_mapping = {
 }
 
 
+def _format_literal(value):
+    value = str(value)
+    if len(value) <= 5:
+        return value
+    offset = len(value) % 3
+    result = [value[index:index+3] for index in range(len(value) % 3, len(value), 3)]
+    if offset:
+        result.insert(0, value[:offset])
+    return "_".join(result)
+
+
+# When this code grows up, it wants to be a unit test
+for value, result in [
+        ("", ""),
+        ("1", "1"),
+        ("12", "12"),
+        ("123", "123"),
+        ("1234", "1234"),
+        ("12345", "12345"),
+        ("123456", "123_456"),
+        ("1234567", "1_234_567"),
+        ("12345678", "12_345_678"),
+        ("123456789", "123_456_789"),
+        ]:
+    actual = _format_literal(value)
+    assert actual == result, (value, actual, result)
+
+
 def get_references(expr):
     if expr.op is not None:
         if expr.op in ['calculate_len', 'sumof']:
@@ -180,7 +208,6 @@ class Module(object):
 
         generated_code_header(self.out)
 
-        self.out("#![allow(clippy::unreadable_literal)]")
         self.out("#![allow(clippy::too_many_arguments)]")
         self.out("#![allow(clippy::identity_op)]")
         self.out("#![allow(clippy::trivially_copy_pass_by_ref)]")
@@ -287,6 +314,8 @@ class Module(object):
                 bit = next(iter(filter(lambda x: x[0] == ename, enum.bits)), None)
                 if bit is not None:
                     value = "1 << %s" % bit[1]
+                else:
+                    value = _format_literal(value)
                 self.out.indent("%s = %s,", ename_to_rust(ename), value)
         self.out("}")
 
@@ -299,7 +328,7 @@ class Module(object):
                     bits = [ename for (ename, bit) in enum.bits]
                     for (ename, value) in enum.values:
                         if ename not in bits:
-                            self.out("%s::%s => %s,", rust_name, ename_to_rust(ename), value)
+                            self.out("%s::%s => %s,", rust_name, ename_to_rust(ename), _format_literal(value))
                     for (ename, bit) in enum.bits:
                         self.out("%s::%s => 1 << %s,", rust_name, ename_to_rust(ename), bit)
                 self.out("}")
@@ -338,7 +367,7 @@ class Module(object):
                 with Indent(self.out):
                     self.out("match value {")
                     for (ename, value) in enum.values:
-                        self.out.indent("%s => Ok(%s::%s),", value,
+                        self.out.indent("%s => Ok(%s::%s),", _format_literal(value),
                                         rust_name, ename_to_rust(ename))
                     self.out.indent("_ => Err(ParseError::ParseError)")
                     self.out("}")

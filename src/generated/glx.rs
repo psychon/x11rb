@@ -1,7 +1,6 @@
 // This file contains generated code. Do not edit directly.
 // To regenerate this, run 'make'.
 
-#![allow(clippy::unreadable_literal)]
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::identity_op)]
 #![allow(clippy::trivially_copy_pass_by_ref)]
@@ -1647,12 +1646,12 @@ pub enum GC {
     GL_LIST_BIT = 1 << 17,
     GL_TEXTURE_BIT = 1 << 18,
     GL_SCISSOR_BIT = 1 << 19,
-    GL_ALL_ATTRIB_BITS = 16777215,
+    GL_ALL_ATTRIB_BITS = 16_777_215,
 }
 impl From<GC> for u32 {
     fn from(input: GC) -> Self {
         match input {
-            GC::GL_ALL_ATTRIB_BITS => 16777215,
+            GC::GL_ALL_ATTRIB_BITS => 16_777_215,
             GC::GL_CURRENT_BIT => 1 << 0,
             GC::GL_POINT_BIT => 1 << 1,
             GC::GL_LINE_BIT => 1 << 2,
@@ -1702,10 +1701,10 @@ impl TryFrom<u32> for GC {
             16384 => Ok(GC::GL_COLOR_BUFFER_BIT),
             32768 => Ok(GC::GL_HINT_BIT),
             65536 => Ok(GC::GL_EVAL_BIT),
-            131072 => Ok(GC::GL_LIST_BIT),
-            262144 => Ok(GC::GL_TEXTURE_BIT),
-            524288 => Ok(GC::GL_SCISSOR_BIT),
-            16777215 => Ok(GC::GL_ALL_ATTRIB_BITS),
+            131_072 => Ok(GC::GL_LIST_BIT),
+            262_144 => Ok(GC::GL_TEXTURE_BIT),
+            524_288 => Ok(GC::GL_SCISSOR_BIT),
+            16_777_215 => Ok(GC::GL_ALL_ATTRIB_BITS),
             _ => Err(ParseError::ParseError)
         }
     }

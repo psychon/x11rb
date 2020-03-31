@@ -1,7 +1,6 @@
 // This file contains generated code. Do not edit directly.
 // To regenerate this, run 'make'.
 
-#![allow(clippy::unreadable_literal)]
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::identity_op)]
 #![allow(clippy::trivially_copy_pass_by_ref)]
@@ -575,14 +574,14 @@ impl TryFrom<u32> for EventMask {
             16384 => Ok(EventMask::KeymapState),
             32768 => Ok(EventMask::Exposure),
             65536 => Ok(EventMask::VisibilityChange),
-            131072 => Ok(EventMask::StructureNotify),
-            262144 => Ok(EventMask::ResizeRedirect),
-            524288 => Ok(EventMask::SubstructureNotify),
-            1048576 => Ok(EventMask::SubstructureRedirect),
-            2097152 => Ok(EventMask::FocusChange),
-            4194304 => Ok(EventMask::PropertyChange),
-            8388608 => Ok(EventMask::ColorMapChange),
-            16777216 => Ok(EventMask::OwnerGrabButton),
+            131_072 => Ok(EventMask::StructureNotify),
+            262_144 => Ok(EventMask::ResizeRedirect),
+            524_288 => Ok(EventMask::SubstructureNotify),
+            1_048_576 => Ok(EventMask::SubstructureRedirect),
+            2_097_152 => Ok(EventMask::FocusChange),
+            4_194_304 => Ok(EventMask::PropertyChange),
+            8_388_608 => Ok(EventMask::ColorMapChange),
+            16_777_216 => Ok(EventMask::OwnerGrabButton),
             _ => Err(ParseError::ParseError)
         }
     }
@@ -12210,12 +12209,12 @@ impl TryFrom<u32> for GC {
             16384 => Ok(GC::Font),
             32768 => Ok(GC::SubwindowMode),
             65536 => Ok(GC::GraphicsExposures),
-            131072 => Ok(GC::ClipOriginX),
-            262144 => Ok(GC::ClipOriginY),
-            524288 => Ok(GC::ClipMask),
-            1048576 => Ok(GC::DashOffset),
-            2097152 => Ok(GC::DashList),
-            4194304 => Ok(GC::ArcMode),
+            131_072 => Ok(GC::ClipOriginX),
+            262_144 => Ok(GC::ClipOriginY),
+            524_288 => Ok(GC::ClipMask),
+            1_048_576 => Ok(GC::DashOffset),
+            2_097_152 => Ok(GC::DashList),
+            4_194_304 => Ok(GC::ArcMode),
             _ => Err(ParseError::ParseError)
         }
     }
