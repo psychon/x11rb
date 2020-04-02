@@ -178,15 +178,18 @@ class Module(object):
         self.namespace = outer_module.namespace
         self.outer_module = outer_module
 
+        # Can only import xcbgen after it was added to sys.path
+        from xcbgen.xtypes import Enum
+
         # Collect a list of <typedef> and <xidtype>
         simples = []
         for (name, item) in outer_module.all:
-            if item.is_simple and item.__class__.__name__ != "Enum":
+            if item.is_simple and not isinstance(item, Enum):
                 simples.append(self._to_rust_identifier(self._name(name)))
         # Now check for name collisions with <enum>s
         for (name, item) in outer_module.all:
             rust_name = self._name(name)
-            if item.__class__.__name__ == "Enum":
+            if isinstance(item, Enum):
                 if rust_name in simples:
                     item.rust_name = rust_name + "Enum"
                 else:
@@ -1371,8 +1374,11 @@ class Module(object):
             return 'bool'
         name = self._name(field.field_type)
 
+        # Can only import xcbgen after it was added to sys.path
+        from xcbgen.xtypes import Enum
+
         field_type = field.type.member if field.type.is_list else field.type
-        if field_type.is_simple and field_type.__class__.__name__ != "Enum":
+        if field_type.is_simple and not isinstance(field_type, Enum):
             # This is a typedef or an xidtype
             name = self._to_rust_identifier(name)
         return name
