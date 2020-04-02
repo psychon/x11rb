@@ -34,7 +34,7 @@ pub const X11_EXTENSION_NAME: &str = "RECORD";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (1, 13);
 
-pub type CONTEXT = u32;
+pub type Context = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Range8 {
@@ -516,7 +516,7 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 1;
-pub fn create_context<'c, Conn>(conn: &'c Conn, context: CONTEXT, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_context<'c, Conn>(conn: &'c Conn, context: Context, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -564,7 +564,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the RegisterClients request
 pub const REGISTER_CLIENTS_REQUEST: u8 = 2;
-pub fn register_clients<'c, Conn>(conn: &'c Conn, context: CONTEXT, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn register_clients<'c, Conn>(conn: &'c Conn, context: Context, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -612,7 +612,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the UnregisterClients request
 pub const UNREGISTER_CLIENTS_REQUEST: u8 = 3;
-pub fn unregister_clients<'c, Conn>(conn: &'c Conn, context: CONTEXT, client_specs: &[ClientSpec]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn unregister_clients<'c, Conn>(conn: &'c Conn, context: Context, client_specs: &[ClientSpec]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -647,7 +647,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetContext request
 pub const GET_CONTEXT_REQUEST: u8 = 4;
-pub fn get_context<Conn>(conn: &Conn, context: CONTEXT) -> Result<Cookie<'_, Conn, GetContextReply>, ConnectionError>
+pub fn get_context<Conn>(conn: &Conn, context: Context) -> Result<Cookie<'_, Conn, GetContextReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -702,7 +702,7 @@ impl TryFrom<&[u8]> for GetContextReply {
 
 /// Opcode for the EnableContext request
 pub const ENABLE_CONTEXT_REQUEST: u8 = 5;
-pub fn enable_context<Conn>(conn: &Conn, context: CONTEXT) -> Result<Cookie<'_, Conn, EnableContextReply>, ConnectionError>
+pub fn enable_context<Conn>(conn: &Conn, context: Context) -> Result<Cookie<'_, Conn, EnableContextReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -763,7 +763,7 @@ impl TryFrom<&[u8]> for EnableContextReply {
 
 /// Opcode for the DisableContext request
 pub const DISABLE_CONTEXT_REQUEST: u8 = 6;
-pub fn disable_context<Conn>(conn: &Conn, context: CONTEXT) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn disable_context<Conn>(conn: &Conn, context: Context) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -788,7 +788,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the FreeContext request
 pub const FREE_CONTEXT_REQUEST: u8 = 7;
-pub fn free_context<Conn>(conn: &Conn, context: CONTEXT) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn free_context<Conn>(conn: &Conn, context: Context) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -818,37 +818,37 @@ pub trait ConnectionExt: RequestConnection {
         query_version(self, major_version, minor_version)
     }
 
-    fn record_create_context<'c>(&'c self, context: CONTEXT, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn record_create_context<'c>(&'c self, context: Context, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_context(self, context, element_header, client_specs, ranges)
     }
 
-    fn record_register_clients<'c>(&'c self, context: CONTEXT, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn record_register_clients<'c>(&'c self, context: Context, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         register_clients(self, context, element_header, client_specs, ranges)
     }
 
-    fn record_unregister_clients<'c>(&'c self, context: CONTEXT, client_specs: &[ClientSpec]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn record_unregister_clients<'c>(&'c self, context: Context, client_specs: &[ClientSpec]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         unregister_clients(self, context, client_specs)
     }
 
-    fn record_get_context(&self, context: CONTEXT) -> Result<Cookie<'_, Self, GetContextReply>, ConnectionError>
+    fn record_get_context(&self, context: Context) -> Result<Cookie<'_, Self, GetContextReply>, ConnectionError>
     {
         get_context(self, context)
     }
 
-    fn record_enable_context(&self, context: CONTEXT) -> Result<Cookie<'_, Self, EnableContextReply>, ConnectionError>
+    fn record_enable_context(&self, context: Context) -> Result<Cookie<'_, Self, EnableContextReply>, ConnectionError>
     {
         enable_context(self, context)
     }
 
-    fn record_disable_context(&self, context: CONTEXT) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn record_disable_context(&self, context: Context) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         disable_context(self, context)
     }
 
-    fn record_free_context(&self, context: CONTEXT) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn record_free_context(&self, context: Context) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         free_context(self, context)
     }

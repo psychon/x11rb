@@ -17,8 +17,8 @@ const TITLEBAR_HEIGHT: u16 = 20;
 /// The state of a single window that we manage
 #[derive(Debug)]
 struct WindowState {
-    window: WINDOW,
-    frame_window: WINDOW,
+    window: Window,
+    frame_window: Window,
     x: i16,
     y: i16,
     width: u16,
@@ -26,7 +26,7 @@ struct WindowState {
 }
 
 impl WindowState {
-    fn new(window: WINDOW, frame_window: WINDOW, geom: &GetGeometryReply) -> WindowState {
+    fn new(window: Window, frame_window: Window, geom: &GetGeometryReply) -> WindowState {
         WindowState {
             window,
             frame_window,
@@ -47,11 +47,11 @@ impl WindowState {
 struct WMState<'a, C: Connection> {
     conn: &'a C,
     screen_num: usize,
-    black_gc: GCONTEXT,
+    black_gc: Gcontext,
     windows: Vec<WindowState>,
-    pending_expose: HashSet<WINDOW>,
-    wm_protocols: ATOM,
-    wm_delete_window: ATOM,
+    pending_expose: HashSet<Window>,
+    wm_protocols: Atom,
+    wm_delete_window: Atom,
 }
 
 impl<'a, C: Connection> WMState<'a, C> {
@@ -115,7 +115,7 @@ impl<'a, C: Connection> WMState<'a, C> {
     /// Add a new window that should be managed by the WM
     fn manage_window(
         &mut self,
-        win: WINDOW,
+        win: Window,
         geom: &GetGeometryReply,
     ) -> Result<(), ReplyOrIdError<C::Buf>> {
         println!("Managing window {:?}", win);
@@ -186,8 +186,8 @@ impl<'a, C: Connection> WMState<'a, C> {
             .get_property(
                 false,
                 state.window,
-                Atom::WM_NAME.into(),
-                Atom::STRING.into(),
+                AtomEnum::WM_NAME.into(),
+                AtomEnum::STRING.into(),
                 0,
                 std::u32::MAX,
             )?
@@ -213,13 +213,13 @@ impl<'a, C: Connection> WMState<'a, C> {
         Ok(())
     }
 
-    fn find_window_by_id(&self, win: WINDOW) -> Option<&WindowState> {
+    fn find_window_by_id(&self, win: Window) -> Option<&WindowState> {
         self.windows
             .iter()
             .find(|state| state.window == win || state.frame_window == win)
     }
 
-    fn find_window_by_id_mut(&mut self, win: WINDOW) -> Option<&mut WindowState> {
+    fn find_window_by_id_mut(&mut self, win: Window) -> Option<&mut WindowState> {
         self.windows
             .iter_mut()
             .find(|state| state.window == win || state.frame_window == win)

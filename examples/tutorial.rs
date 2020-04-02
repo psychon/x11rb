@@ -204,7 +204,7 @@ fn example1() -> Result<(), Box<dyn Error>> {
 
     let (conn, _) = x11rb::connect(None)?;
     const COUNT: usize = 500;
-    let mut atoms = [Into::<u32>::into(Atom::None); COUNT];
+    let mut atoms = [Into::<u32>::into(AtomEnum::None); COUNT];
 
     // Init names
     let names = (0..COUNT).map(|i| format!("NAME{}", i)).collect::<Vec<_>>();
@@ -349,7 +349,7 @@ fn example3() -> Result<(), Box<dyn Error>> {
 //
 
 #[allow(unused)]
-pub type WINDOW = u32;
+pub type Window = u32;
 
 //  We first ask for a new Id for our window, with this function:
 //
@@ -467,7 +467,7 @@ fn example4() -> Result<(), Box<dyn Error>> {
 // with a single window, in order to draw in multiple styles (different colors, different line
 // widths, etc). In XCB, a Graphics Context is, as a window, characterized by an Id:
 //
-//      pub type GCONTEXT = u32;
+//      pub type Gcontext = u32;
 //
 // We first ask the X server to attribute an Id to our graphic context with this function:
 //
@@ -919,7 +919,7 @@ fn example_or<C: Connection>(conn: &C, depth: u8, screen: &Screen) -> Result<(),
 // `Expose` and `ButtonPress` events:
 
 #[allow(unused)]
-fn example_change_event_mask<C: Connection>(conn: &C, win: WINDOW) -> Result<(), Box<dyn Error>> {
+fn example_change_event_mask<C: Connection>(conn: &C, win: Window) -> Result<(), Box<dyn Error>> {
     let values = ChangeWindowAttributesAux::default()
         .event_mask(EventMask::Exposure | EventMask::ButtonPress);
     conn.change_window_attributes(win, &values)?;
@@ -1395,7 +1395,7 @@ fn example7() -> Result<(), Box<dyn Error>> {
 //
 // In order to support flexible fonts, a font type is defined. You know what ? It's an Id:
 //
-//   pub type FONT = u32;
+//   pub type Font = u32;
 //
 // It is used to contain information about a font, and is passed to several functions that handle
 // fonts selection and text drawing. We ask the X server to attribute an Id to our font with the
@@ -1429,8 +1429,8 @@ fn example7() -> Result<(), Box<dyn Error>> {
 fn example_assign_font<C: Connection>(
     conn: &C,
     screen: &Screen,
-    window: WINDOW,
-    font: FONT,
+    window: Window,
+    font: Font,
 ) -> Result<(), Box<dyn Error>> {
     let gc = conn.generate_id()?;
     let values = CreateGCAux::default()
@@ -1469,7 +1469,7 @@ fn example_assign_font<C: Connection>(
 fn text_draw<C: Connection>(
     conn: &C,
     screen: &Screen,
-    window: WINDOW,
+    window: Window,
     x1: i16,
     y1: i16,
     label: &str,
@@ -1485,9 +1485,9 @@ fn text_draw<C: Connection>(
 fn gc_font_get<C: Connection>(
     conn: &C,
     screen: &Screen,
-    window: WINDOW,
+    window: Window,
     font_name: &str,
-) -> Result<GCONTEXT, ReplyOrIdError<C::Buf>> {
+) -> Result<Gcontext, ReplyOrIdError<C::Buf>> {
     let font = conn.generate_id()?;
 
     conn.open_font(font, font_name.as_bytes())?;
@@ -1590,7 +1590,7 @@ fn example8() -> Result<(), Box<dyn Error>> {
 //    fn change_property8<A, B, C>(
 //        &self,
 //        mode: A,
-//        window: WINDOW,
+//        window: Window,
 //        property: B,
 //        type_: C,
 //        data: &[u8],
@@ -1603,7 +1603,7 @@ fn example8() -> Result<(), Box<dyn Error>> {
 //    fn change_property16<A, B, C>(
 //        &self,
 //        mode: A,
-//        window: WINDOW,
+//        window: Window,
 //        property: B,
 //        type_: C,
 //        data: &[u16],
@@ -1616,7 +1616,7 @@ fn example8() -> Result<(), Box<dyn Error>> {
 //    fn change_property32<A, B, C>(
 //        &self,
 //        mode: A,
-//        window: WINDOW,
+//        window: Window,
 //        property: B,
 //        type_: C,
 //        data: &[u32],
@@ -1676,8 +1676,8 @@ fn example9() -> Result<(), Box<dyn Error>> {
     conn.change_property8(
         PropMode::Replace,
         win,
-        Atom::WM_NAME,
-        Atom::STRING,
+        AtomEnum::WM_NAME,
+        AtomEnum::STRING,
         title.as_bytes(),
     )?;
 
@@ -1686,8 +1686,8 @@ fn example9() -> Result<(), Box<dyn Error>> {
     conn.change_property8(
         PropMode::Replace,
         win,
-        Atom::WM_ICON_NAME,
-        Atom::STRING,
+        AtomEnum::WM_ICON_NAME,
+        AtomEnum::STRING,
         title_icon.as_bytes(),
     )?;
 
@@ -1768,7 +1768,7 @@ fn example9() -> Result<(), Box<dyn Error>> {
 // be done like this:
 
 #[allow(unused)]
-fn example_move<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ReplyError<C::Buf>> {
+fn example_move<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError<C::Buf>> {
     // Move the window to coordinates x = 10 and y = 20
     let values = ConfigureWindowAux::default().x(10).y(20);
     conn.configure_window(win, &values)?;
@@ -1786,7 +1786,7 @@ fn example_move<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ReplyError<C
 // following code:
 
 #[allow(unused)]
-fn example_resize<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ReplyError<C::Buf>> {
+fn example_resize<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError<C::Buf>> {
     // Move the window to coordinates width = 10 and height = 20
     let values = ConfigureWindowAux::default().width(10).height(20);
     conn.configure_window(win, &values)?;
@@ -1797,7 +1797,7 @@ fn example_resize<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ReplyError
 // `xcb_configure_window_t`:
 
 #[allow(unused)]
-fn example_move_resize<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ReplyError<C::Buf>> {
+fn example_move_resize<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError<C::Buf>> {
     // Move the window to coordinates x = 10 and y = 20
     // and resize the window to width = 200 and height = 300
     let values = ConfigureWindowAux::default()
@@ -1819,7 +1819,7 @@ fn example_move_resize<C: Connection>(conn: &C, win: WINDOW) -> Result<(), Reply
 // manipulate our windows stack order:
 
 #[allow(unused)]
-fn example_stack_above<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ReplyError<C::Buf>> {
+fn example_stack_above<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError<C::Buf>> {
     // Move the window on the top of the stack
     let values = ConfigureWindowAux::default().stack_mode(StackMode::Above);
     conn.configure_window(win, &values)?;
@@ -1827,7 +1827,7 @@ fn example_stack_above<C: Connection>(conn: &C, win: WINDOW) -> Result<(), Reply
 }
 
 #[allow(unused)]
-fn example_stack_below<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ReplyError<C::Buf>> {
+fn example_stack_below<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError<C::Buf>> {
     // Move the window to the bottom of the stack
     let values = ConfigureWindowAux::default().stack_mode(StackMode::Below);
     conn.configure_window(win, &values)?;
@@ -1861,7 +1861,7 @@ pub struct RenamedGetGeometryReply {
 // You use them as follows:
 
 #[allow(unused)]
-fn example_get_geometry<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ReplyError<C::Buf>> {
+fn example_get_geometry<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError<C::Buf>> {
     let geom = conn.get_geometry(win)?.reply()?;
 
     // Do something with the fields of geom
@@ -1913,7 +1913,7 @@ fn example_get_geometry<C: Connection>(conn: &C, win: WINDOW) -> Result<(), Repl
 // We use them as follows:
 
 #[allow(unused)]
-fn example_get_and_query<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ReplyError<C::Buf>> {
+fn example_get_and_query<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError<C::Buf>> {
     let geom = conn.get_geometry(win)?;
     let tree = conn.query_tree(win)?;
     let geom = geom.reply()?;
@@ -1960,7 +1960,7 @@ fn example_get_and_query<C: Connection>(conn: &C, win: WINDOW) -> Result<(), Rep
 // You use them as follows:
 
 #[allow(unused)]
-fn example_get_attributes<C: Connection>(conn: &C, win: WINDOW) -> Result<(), ReplyError<C::Buf>> {
+fn example_get_attributes<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError<C::Buf>> {
     let geom = conn.get_window_attributes(win)?.reply()?;
 
     // Do something with the fields of attr
@@ -2052,7 +2052,7 @@ fn example_get_colormap<C: Connection>(conn: &C) {
 #[allow(unused)]
 fn example_create_colormap<C: Connection>(
     conn: &C,
-    win: WINDOW,
+    win: Window,
     screen: &Screen,
 ) -> Result<(), ReplyOrIdError<C::Buf>> {
     let cmap = conn.generate_id()?;
@@ -2094,7 +2094,7 @@ fn example_create_colormap<C: Connection>(
 #[allow(unused)]
 fn example_fill_colormap<C: Connection>(
     conn: &C,
-    win: WINDOW,
+    win: Window,
     screen: &Screen,
 ) -> Result<(), ReplyOrIdError<C::Buf>> {
     let cmap = conn.generate_id()?;
@@ -2247,7 +2247,7 @@ fn example_fill_colormap<C: Connection>(
 #[allow(unused)]
 fn example_create_glyph_cursor<C: Connection>(
     conn: &C,
-    win: WINDOW,
+    win: Window,
     screen: &Screen,
 ) -> Result<(), ReplyOrIdError<C::Buf>> {
     let font = conn.generate_id()?;
@@ -2283,8 +2283,8 @@ fn example_create_glyph_cursor<C: Connection>(
 #[allow(unused)]
 fn example_change_window_cursor<C: Connection>(
     conn: &C,
-    win: WINDOW,
-    cursor: CURSOR,
+    win: Window,
+    cursor: Cursor,
 ) -> Result<(), ReplyError<C::Buf>> {
     let values = ChangeWindowAttributesAux::default().cursor(cursor);
     conn.change_window_attributes(win, &values)?;
@@ -2306,7 +2306,7 @@ fn example_change_window_cursor<C: Connection>(
 fn button_draw<C: Connection>(
     conn: &C,
     screen: &Screen,
-    window: WINDOW,
+    window: Window,
     x1: i16,
     y1: i16,
     label: &str,
@@ -2345,7 +2345,7 @@ fn button_draw<C: Connection>(
 fn cursor_set<C: Connection>(
     conn: &C,
     screen: &Screen,
-    window: WINDOW,
+    window: Window,
     cursor_id: u16,
 ) -> Result<(), ReplyOrIdError<C::Buf>> {
     let font = conn.generate_id()?;
@@ -2663,7 +2663,7 @@ fn example_get_screen2<C: Connection>(conn: &C, index: usize) {
 // Just use the .root member of `Screen`.
 
 #[allow(unused)]
-fn example_get_root<C: Connection>(conn: &C, index: usize) -> WINDOW {
+fn example_get_root<C: Connection>(conn: &C, index: usize) -> Window {
     // Open the connection to the X server. Use the DISPLAY environment variable.
     let (conn, screen_num) = x11rb::connect(None).unwrap();
     let default_screen = &conn.setup().roots[screen_num];
@@ -2719,7 +2719,7 @@ fn example_get_visual2<C: Connection>(conn: &C, screen_num: usize) {
 fn example_create_default_gc<C: Connection>(
     conn: &C,
     screen_num: usize,
-) -> Result<GCONTEXT, ReplyOrIdError<C::Buf>> {
+) -> Result<Gcontext, ReplyOrIdError<C::Buf>> {
     let screen = &conn.setup().roots[screen_num];
     let values = CreateGCAux::default()
         .foreground(screen.black_pixel)

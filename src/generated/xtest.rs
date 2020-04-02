@@ -151,7 +151,7 @@ impl TryFrom<u32> for Cursor {
 
 /// Opcode for the CompareCursor request
 pub const COMPARE_CURSOR_REQUEST: u8 = 1;
-pub fn compare_cursor<Conn>(conn: &Conn, window: WINDOW, cursor: CURSOR) -> Result<Cookie<'_, Conn, CompareCursorReply>, ConnectionError>
+pub fn compare_cursor<Conn>(conn: &Conn, window: Window, cursor: super::xproto::Cursor) -> Result<Cookie<'_, Conn, CompareCursorReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -204,7 +204,7 @@ impl TryFrom<&[u8]> for CompareCursorReply {
 
 /// Opcode for the FakeInput request
 pub const FAKE_INPUT_REQUEST: u8 = 2;
-pub fn fake_input<Conn>(conn: &Conn, type_: u8, detail: u8, time: u32, root: WINDOW, root_x: i16, root_y: i16, deviceid: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn fake_input<Conn>(conn: &Conn, type_: u8, detail: u8, time: u32, root: Window, root_x: i16, root_y: i16, deviceid: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -293,12 +293,12 @@ pub trait ConnectionExt: RequestConnection {
         get_version(self, major_version, minor_version)
     }
 
-    fn xtest_compare_cursor(&self, window: WINDOW, cursor: CURSOR) -> Result<Cookie<'_, Self, CompareCursorReply>, ConnectionError>
+    fn xtest_compare_cursor(&self, window: Window, cursor: super::xproto::Cursor) -> Result<Cookie<'_, Self, CompareCursorReply>, ConnectionError>
     {
         compare_cursor(self, window, cursor)
     }
 
-    fn xtest_fake_input(&self, type_: u8, detail: u8, time: u32, root: WINDOW, root_x: i16, root_y: i16, deviceid: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xtest_fake_input(&self, type_: u8, detail: u8, time: u32, root: Window, root_x: i16, root_y: i16, deviceid: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         fake_input(self, type_, detail, time, root, root_x, root_y, deviceid)
     }

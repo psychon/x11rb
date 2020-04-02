@@ -34,9 +34,9 @@ pub const X11_EXTENSION_NAME: &str = "XFree86-VidModeExtension";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (2, 2);
 
-pub type SYNCRANGE = u32;
+pub type Syncrange = u32;
 
-pub type DOTCLOCK = u32;
+pub type Dotclock = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
@@ -243,7 +243,7 @@ bitmask_binop!(Permission, u8);
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ModeInfo {
-    pub dotclock: DOTCLOCK,
+    pub dotclock: Dotclock,
     pub hdisplay: u16,
     pub hsyncstart: u16,
     pub hsyncend: u16,
@@ -258,7 +258,7 @@ pub struct ModeInfo {
 }
 impl TryParse for ModeInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (dotclock, remaining) = DOTCLOCK::try_parse(remaining)?;
+        let (dotclock, remaining) = Dotclock::try_parse(remaining)?;
         let (hdisplay, remaining) = u16::try_parse(remaining)?;
         let (hsyncstart, remaining) = u16::try_parse(remaining)?;
         let (hsyncend, remaining) = u16::try_parse(remaining)?;
@@ -442,7 +442,7 @@ pub struct GetModeLineReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub dotclock: DOTCLOCK,
+    pub dotclock: Dotclock,
     pub hdisplay: u16,
     pub hsyncstart: u16,
     pub hsyncend: u16,
@@ -461,7 +461,7 @@ impl GetModeLineReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (dotclock, remaining) = DOTCLOCK::try_parse(remaining)?;
+        let (dotclock, remaining) = Dotclock::try_parse(remaining)?;
         let (hdisplay, remaining) = u16::try_parse(remaining)?;
         let (hsyncstart, remaining) = u16::try_parse(remaining)?;
         let (hsyncend, remaining) = u16::try_parse(remaining)?;
@@ -622,8 +622,8 @@ pub struct GetMonitorReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub hsync: Vec<SYNCRANGE>,
-    pub vsync: Vec<SYNCRANGE>,
+    pub hsync: Vec<Syncrange>,
+    pub vsync: Vec<Syncrange>,
     pub vendor: Vec<u8>,
     pub alignment_pad: Vec<u8>,
     pub model: Vec<u8>,
@@ -639,8 +639,8 @@ impl GetMonitorReply {
         let (num_hsync, remaining) = u8::try_parse(remaining)?;
         let (num_vsync, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (hsync, remaining) = crate::x11_utils::parse_list::<SYNCRANGE>(remaining, num_hsync as usize)?;
-        let (vsync, remaining) = crate::x11_utils::parse_list::<SYNCRANGE>(remaining, num_vsync as usize)?;
+        let (hsync, remaining) = crate::x11_utils::parse_list::<Syncrange>(remaining, num_hsync as usize)?;
+        let (vsync, remaining) = crate::x11_utils::parse_list::<Syncrange>(remaining, num_vsync as usize)?;
         let (vendor, remaining) = crate::x11_utils::parse_list::<u8>(remaining, vendor_length as usize)?;
         let (alignment_pad, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (((vendor_length as usize) + (3)) & (!(3))) - (vendor_length as usize))?;
         let (model, remaining) = crate::x11_utils::parse_list::<u8>(remaining, model_length as usize)?;
@@ -734,7 +734,7 @@ impl TryFrom<&[u8]> for GetAllModeLinesReply {
 
 /// Opcode for the AddModeLine request
 pub const ADD_MODE_LINE_REQUEST: u8 = 7;
-pub fn add_mode_line<'c, Conn>(conn: &'c Conn, screen: u32, dotclock: DOTCLOCK, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, after_dotclock: DOTCLOCK, after_hdisplay: u16, after_hsyncstart: u16, after_hsyncend: u16, after_htotal: u16, after_hskew: u16, after_vdisplay: u16, after_vsyncstart: u16, after_vsyncend: u16, after_vtotal: u16, after_flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn add_mode_line<'c, Conn>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, after_dotclock: Dotclock, after_hdisplay: u16, after_hsyncstart: u16, after_hsyncend: u16, after_htotal: u16, after_hskew: u16, after_vdisplay: u16, after_vsyncstart: u16, after_vsyncend: u16, after_vtotal: u16, after_flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -870,7 +870,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the DeleteModeLine request
 pub const DELETE_MODE_LINE_REQUEST: u8 = 8;
-pub fn delete_mode_line<'c, Conn>(conn: &'c Conn, screen: u32, dotclock: DOTCLOCK, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn delete_mode_line<'c, Conn>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -955,7 +955,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the ValidateModeLine request
 pub const VALIDATE_MODE_LINE_REQUEST: u8 = 9;
-pub fn validate_mode_line<'c, Conn>(conn: &'c Conn, screen: u32, dotclock: DOTCLOCK, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<Cookie<'c, Conn, ValidateModeLineReply>, ConnectionError>
+pub fn validate_mode_line<'c, Conn>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<Cookie<'c, Conn, ValidateModeLineReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1065,7 +1065,7 @@ impl TryFrom<&[u8]> for ValidateModeLineReply {
 
 /// Opcode for the SwitchToMode request
 pub const SWITCH_TO_MODE_REQUEST: u8 = 10;
-pub fn switch_to_mode<'c, Conn>(conn: &'c Conn, screen: u32, dotclock: DOTCLOCK, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn switch_to_mode<'c, Conn>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2042,22 +2042,22 @@ pub trait ConnectionExt: RequestConnection {
         get_all_mode_lines(self, screen)
     }
 
-    fn xf86vidmode_add_mode_line<'c>(&'c self, screen: u32, dotclock: DOTCLOCK, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, after_dotclock: DOTCLOCK, after_hdisplay: u16, after_hsyncstart: u16, after_hsyncend: u16, after_htotal: u16, after_hskew: u16, after_vdisplay: u16, after_vsyncstart: u16, after_vsyncend: u16, after_vtotal: u16, after_flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xf86vidmode_add_mode_line<'c>(&'c self, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, after_dotclock: Dotclock, after_hdisplay: u16, after_hsyncstart: u16, after_hsyncend: u16, after_htotal: u16, after_hskew: u16, after_vdisplay: u16, after_vsyncstart: u16, after_vsyncend: u16, after_vtotal: u16, after_flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         add_mode_line(self, screen, dotclock, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, after_dotclock, after_hdisplay, after_hsyncstart, after_hsyncend, after_htotal, after_hskew, after_vdisplay, after_vsyncstart, after_vsyncend, after_vtotal, after_flags, private)
     }
 
-    fn xf86vidmode_delete_mode_line<'c>(&'c self, screen: u32, dotclock: DOTCLOCK, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xf86vidmode_delete_mode_line<'c>(&'c self, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         delete_mode_line(self, screen, dotclock, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, private)
     }
 
-    fn xf86vidmode_validate_mode_line<'c>(&'c self, screen: u32, dotclock: DOTCLOCK, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<Cookie<'c, Self, ValidateModeLineReply>, ConnectionError>
+    fn xf86vidmode_validate_mode_line<'c>(&'c self, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<Cookie<'c, Self, ValidateModeLineReply>, ConnectionError>
     {
         validate_mode_line(self, screen, dotclock, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, private)
     }
 
-    fn xf86vidmode_switch_to_mode<'c>(&'c self, screen: u32, dotclock: DOTCLOCK, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xf86vidmode_switch_to_mode<'c>(&'c self, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         switch_to_mode(self, screen, dotclock, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, private)
     }

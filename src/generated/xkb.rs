@@ -2777,7 +2777,7 @@ pub struct KeySymMap {
     pub kt_index: [u8; 4],
     pub group_info: u8,
     pub width: u8,
-    pub syms: Vec<KEYSYM>,
+    pub syms: Vec<Keysym>,
 }
 impl TryParse for KeySymMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2794,7 +2794,7 @@ impl TryParse for KeySymMap {
         let (group_info, remaining) = u8::try_parse(remaining)?;
         let (width, remaining) = u8::try_parse(remaining)?;
         let (n_syms, remaining) = u16::try_parse(remaining)?;
-        let (syms, remaining) = crate::x11_utils::parse_list::<KEYSYM>(remaining, n_syms as usize)?;
+        let (syms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, n_syms as usize)?;
         let result = KeySymMap { kt_index, group_info, width, syms };
         Ok((result, remaining))
     }
@@ -2966,12 +2966,12 @@ impl Serialize for RadioGroupBehavior {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct OverlayBehavior {
     pub type_: u8,
-    pub key: KEYCODE,
+    pub key: Keycode,
 }
 impl TryParse for OverlayBehavior {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
-        let (key, remaining) = KEYCODE::try_parse(remaining)?;
+        let (key, remaining) = Keycode::try_parse(remaining)?;
         let result = OverlayBehavior { type_, key };
         Ok((result, remaining))
     }
@@ -3072,12 +3072,12 @@ impl Serialize for PermamentRadioGroupBehavior {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PermamentOverlayBehavior {
     pub type_: u8,
-    pub key: KEYCODE,
+    pub key: Keycode,
 }
 impl TryParse for PermamentOverlayBehavior {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
-        let (key, remaining) = KEYCODE::try_parse(remaining)?;
+        let (key, remaining) = Keycode::try_parse(remaining)?;
         let result = PermamentOverlayBehavior { type_, key };
         Ok((result, remaining))
     }
@@ -3331,12 +3331,12 @@ impl TryFrom<u32> for BehaviorType {
 
 #[derive(Debug, Clone, Copy)]
 pub struct SetBehavior {
-    pub keycode: KEYCODE,
+    pub keycode: Keycode,
     pub behavior: Behavior,
 }
 impl TryParse for SetBehavior {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (keycode, remaining) = KEYCODE::try_parse(remaining)?;
+        let (keycode, remaining) = Keycode::try_parse(remaining)?;
         let (behavior, remaining) = Behavior::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let result = SetBehavior { keycode, behavior };
@@ -3371,12 +3371,12 @@ impl Serialize for SetBehavior {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetExplicit {
-    pub keycode: KEYCODE,
+    pub keycode: Keycode,
     pub explicit: u8,
 }
 impl TryParse for SetExplicit {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (keycode, remaining) = KEYCODE::try_parse(remaining)?;
+        let (keycode, remaining) = Keycode::try_parse(remaining)?;
         let (explicit, remaining) = u8::try_parse(remaining)?;
         let result = SetExplicit { keycode, explicit };
         Ok((result, remaining))
@@ -3407,12 +3407,12 @@ impl Serialize for SetExplicit {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct KeyModMap {
-    pub keycode: KEYCODE,
+    pub keycode: Keycode,
     pub mods: u8,
 }
 impl TryParse for KeyModMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (keycode, remaining) = KEYCODE::try_parse(remaining)?;
+        let (keycode, remaining) = Keycode::try_parse(remaining)?;
         let (mods, remaining) = u8::try_parse(remaining)?;
         let result = KeyModMap { keycode, mods };
         Ok((result, remaining))
@@ -3443,12 +3443,12 @@ impl Serialize for KeyModMap {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct KeyVModMap {
-    pub keycode: KEYCODE,
+    pub keycode: Keycode,
     pub vmods: u16,
 }
 impl TryParse for KeyVModMap {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (keycode, remaining) = KEYCODE::try_parse(remaining)?;
+        let (keycode, remaining) = Keycode::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (vmods, remaining) = u16::try_parse(remaining)?;
         let result = KeyVModMap { keycode, vmods };
@@ -3576,7 +3576,7 @@ impl Serialize for SetKeyType {
     }
 }
 
-pub type STRING8 = u8;
+pub type String8 = u8;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Outline {
@@ -3618,14 +3618,14 @@ impl Serialize for Outline {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Shape {
-    pub name: ATOM,
+    pub name: Atom,
     pub primary_ndx: u8,
     pub approx_ndx: u8,
     pub outlines: Vec<Outline>,
 }
 impl TryParse for Shape {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (name, remaining) = ATOM::try_parse(remaining)?;
+        let (name, remaining) = Atom::try_parse(remaining)?;
         let (n_outlines, remaining) = u8::try_parse(remaining)?;
         let (primary_ndx, remaining) = u8::try_parse(remaining)?;
         let (approx_ndx, remaining) = u8::try_parse(remaining)?;
@@ -3662,17 +3662,17 @@ impl Serialize for Shape {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Key {
-    pub name: [STRING8; 4],
+    pub name: [String8; 4],
     pub gap: i16,
     pub shape_ndx: u8,
     pub color_ndx: u8,
 }
 impl TryParse for Key {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (name_0, remaining) = STRING8::try_parse(remaining)?;
-        let (name_1, remaining) = STRING8::try_parse(remaining)?;
-        let (name_2, remaining) = STRING8::try_parse(remaining)?;
-        let (name_3, remaining) = STRING8::try_parse(remaining)?;
+        let (name_0, remaining) = String8::try_parse(remaining)?;
+        let (name_1, remaining) = String8::try_parse(remaining)?;
+        let (name_2, remaining) = String8::try_parse(remaining)?;
+        let (name_3, remaining) = String8::try_parse(remaining)?;
         let name = [
             name_0,
             name_1,
@@ -3720,25 +3720,25 @@ impl Serialize for Key {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct OverlayKey {
-    pub over: [STRING8; 4],
-    pub under: [STRING8; 4],
+    pub over: [String8; 4],
+    pub under: [String8; 4],
 }
 impl TryParse for OverlayKey {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (over_0, remaining) = STRING8::try_parse(remaining)?;
-        let (over_1, remaining) = STRING8::try_parse(remaining)?;
-        let (over_2, remaining) = STRING8::try_parse(remaining)?;
-        let (over_3, remaining) = STRING8::try_parse(remaining)?;
+        let (over_0, remaining) = String8::try_parse(remaining)?;
+        let (over_1, remaining) = String8::try_parse(remaining)?;
+        let (over_2, remaining) = String8::try_parse(remaining)?;
+        let (over_3, remaining) = String8::try_parse(remaining)?;
         let over = [
             over_0,
             over_1,
             over_2,
             over_3,
         ];
-        let (under_0, remaining) = STRING8::try_parse(remaining)?;
-        let (under_1, remaining) = STRING8::try_parse(remaining)?;
-        let (under_2, remaining) = STRING8::try_parse(remaining)?;
-        let (under_3, remaining) = STRING8::try_parse(remaining)?;
+        let (under_0, remaining) = String8::try_parse(remaining)?;
+        let (under_1, remaining) = String8::try_parse(remaining)?;
+        let (under_2, remaining) = String8::try_parse(remaining)?;
+        let (under_3, remaining) = String8::try_parse(remaining)?;
         let under = [
             under_0,
             under_1,
@@ -3816,12 +3816,12 @@ impl Serialize for OverlayRow {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Overlay {
-    pub name: ATOM,
+    pub name: Atom,
     pub rows: Vec<OverlayRow>,
 }
 impl TryParse for Overlay {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (name, remaining) = ATOM::try_parse(remaining)?;
+        let (name, remaining) = Atom::try_parse(remaining)?;
         let (n_rows, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (rows, remaining) = crate::x11_utils::parse_list::<OverlayRow>(remaining, n_rows as usize)?;
@@ -3970,14 +3970,14 @@ impl TryFrom<u32> for DoodadType {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Listing {
     pub flags: u16,
-    pub string: Vec<STRING8>,
+    pub string: Vec<String8>,
 }
 impl TryParse for Listing {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
         let (flags, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u16::try_parse(remaining)?;
-        let (string, remaining) = crate::x11_utils::parse_list::<STRING8>(remaining, length as usize)?;
+        let (string, remaining) = crate::x11_utils::parse_list::<String8>(remaining, length as usize)?;
         // Align offset to multiple of 2
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (2 - (offset % 2)) % 2;
@@ -4017,7 +4017,7 @@ pub struct DeviceLedInfo {
     pub maps_present: u32,
     pub phys_indicators: u32,
     pub state: u32,
-    pub names: Vec<ATOM>,
+    pub names: Vec<Atom>,
     pub maps: Vec<IndicatorMap>,
 }
 impl TryParse for DeviceLedInfo {
@@ -4028,7 +4028,7 @@ impl TryParse for DeviceLedInfo {
         let (maps_present, remaining) = u32::try_parse(remaining)?;
         let (phys_indicators, remaining) = u32::try_parse(remaining)?;
         let (state, remaining) = u32::try_parse(remaining)?;
-        let (names, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, TryInto::<usize>::try_into(names_present.count_ones()).unwrap())?;
+        let (names, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, TryInto::<usize>::try_into(names_present.count_ones()).unwrap())?;
         let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, TryInto::<usize>::try_into(maps_present.count_ones()).unwrap())?;
         let led_class = led_class.try_into()?;
         let result = DeviceLedInfo { led_class, led_id, names_present, maps_present, phys_indicators, state, names, maps };
@@ -5787,7 +5787,7 @@ impl Serialize for SAActionMessage {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SARedirectKey {
     pub type_: SAType,
-    pub newkey: KEYCODE,
+    pub newkey: Keycode,
     pub mask: u8,
     pub real_modifiers: u8,
     pub vmods_mask_high: u8,
@@ -5798,7 +5798,7 @@ pub struct SARedirectKey {
 impl TryParse for SARedirectKey {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (type_, remaining) = u8::try_parse(remaining)?;
-        let (newkey, remaining) = KEYCODE::try_parse(remaining)?;
+        let (newkey, remaining) = Keycode::try_parse(remaining)?;
         let (mask, remaining) = u8::try_parse(remaining)?;
         let (real_modifiers, remaining) = u8::try_parse(remaining)?;
         let (vmods_mask_high, remaining) = u8::try_parse(remaining)?;
@@ -6228,7 +6228,7 @@ impl Serialize for SIAction {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SymInterpret {
-    pub sym: KEYSYM,
+    pub sym: Keysym,
     pub mods: u8,
     pub match_: u8,
     pub virtual_mod: u8,
@@ -6237,7 +6237,7 @@ pub struct SymInterpret {
 }
 impl TryParse for SymInterpret {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (sym, remaining) = KEYSYM::try_parse(remaining)?;
+        let (sym, remaining) = Keysym::try_parse(remaining)?;
         let (mods, remaining) = u8::try_parse(remaining)?;
         let (match_, remaining) = u8::try_parse(remaining)?;
         let (virtual_mod, remaining) = u8::try_parse(remaining)?;
@@ -7096,7 +7096,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the Bell request
 pub const BELL_REQUEST: u8 = 3;
-pub fn bell<Conn>(conn: &Conn, device_spec: DeviceSpec, bell_class: BellClassSpec, bell_id: IDSpec, percent: i8, force_sound: bool, event_only: bool, pitch: i16, duration: i16, name: ATOM, window: WINDOW) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn bell<Conn>(conn: &Conn, device_spec: DeviceSpec, bell_class: BellClassSpec, bell_id: IDSpec, percent: i8, force_sound: bool, event_only: bool, pitch: i16, duration: i16, name: Atom, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -7552,7 +7552,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetMap request
 pub const GET_MAP_REQUEST: u8 = 8;
-pub fn get_map<Conn>(conn: &Conn, device_spec: DeviceSpec, full: u16, partial: u16, first_type: u8, n_types: u8, first_key_sym: KEYCODE, n_key_syms: u8, first_key_action: KEYCODE, n_key_actions: u8, first_key_behavior: KEYCODE, n_key_behaviors: u8, virtual_mods: u16, first_key_explicit: KEYCODE, n_key_explicit: u8, first_mod_map_key: KEYCODE, n_mod_map_keys: u8, first_v_mod_map_key: KEYCODE, n_v_mod_map_keys: u8) -> Result<Cookie<'_, Conn, GetMapReply>, ConnectionError>
+pub fn get_map<Conn>(conn: &Conn, device_spec: DeviceSpec, full: u16, partial: u16, first_type: u8, n_types: u8, first_key_sym: Keycode, n_key_syms: u8, first_key_action: Keycode, n_key_actions: u8, first_key_behavior: Keycode, n_key_behaviors: u8, virtual_mods: u16, first_key_explicit: Keycode, n_key_explicit: u8, first_mod_map_key: Keycode, n_mod_map_keys: u8, first_v_mod_map_key: Keycode, n_v_mod_map_keys: u8) -> Result<Cookie<'_, Conn, GetMapReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -7746,28 +7746,28 @@ pub struct GetMapReply {
     pub device_id: u8,
     pub sequence: u16,
     pub length: u32,
-    pub min_key_code: KEYCODE,
-    pub max_key_code: KEYCODE,
+    pub min_key_code: Keycode,
+    pub max_key_code: Keycode,
     pub present: u16,
     pub first_type: u8,
     pub n_types: u8,
     pub total_types: u8,
-    pub first_key_sym: KEYCODE,
+    pub first_key_sym: Keycode,
     pub total_syms: u16,
     pub n_key_syms: u8,
-    pub first_key_action: KEYCODE,
+    pub first_key_action: Keycode,
     pub total_actions: u16,
     pub n_key_actions: u8,
-    pub first_key_behavior: KEYCODE,
+    pub first_key_behavior: Keycode,
     pub n_key_behaviors: u8,
     pub total_key_behaviors: u8,
-    pub first_key_explicit: KEYCODE,
+    pub first_key_explicit: Keycode,
     pub n_key_explicit: u8,
     pub total_key_explicit: u8,
-    pub first_mod_map_key: KEYCODE,
+    pub first_mod_map_key: Keycode,
     pub n_mod_map_keys: u8,
     pub total_mod_map_keys: u8,
-    pub first_v_mod_map_key: KEYCODE,
+    pub first_v_mod_map_key: Keycode,
     pub n_v_mod_map_keys: u8,
     pub total_v_mod_map_keys: u8,
     pub virtual_mods: u16,
@@ -7780,28 +7780,28 @@ impl GetMapReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (min_key_code, remaining) = KEYCODE::try_parse(remaining)?;
-        let (max_key_code, remaining) = KEYCODE::try_parse(remaining)?;
+        let (min_key_code, remaining) = Keycode::try_parse(remaining)?;
+        let (max_key_code, remaining) = Keycode::try_parse(remaining)?;
         let (present, remaining) = u16::try_parse(remaining)?;
         let (first_type, remaining) = u8::try_parse(remaining)?;
         let (n_types, remaining) = u8::try_parse(remaining)?;
         let (total_types, remaining) = u8::try_parse(remaining)?;
-        let (first_key_sym, remaining) = KEYCODE::try_parse(remaining)?;
+        let (first_key_sym, remaining) = Keycode::try_parse(remaining)?;
         let (total_syms, remaining) = u16::try_parse(remaining)?;
         let (n_key_syms, remaining) = u8::try_parse(remaining)?;
-        let (first_key_action, remaining) = KEYCODE::try_parse(remaining)?;
+        let (first_key_action, remaining) = Keycode::try_parse(remaining)?;
         let (total_actions, remaining) = u16::try_parse(remaining)?;
         let (n_key_actions, remaining) = u8::try_parse(remaining)?;
-        let (first_key_behavior, remaining) = KEYCODE::try_parse(remaining)?;
+        let (first_key_behavior, remaining) = Keycode::try_parse(remaining)?;
         let (n_key_behaviors, remaining) = u8::try_parse(remaining)?;
         let (total_key_behaviors, remaining) = u8::try_parse(remaining)?;
-        let (first_key_explicit, remaining) = KEYCODE::try_parse(remaining)?;
+        let (first_key_explicit, remaining) = Keycode::try_parse(remaining)?;
         let (n_key_explicit, remaining) = u8::try_parse(remaining)?;
         let (total_key_explicit, remaining) = u8::try_parse(remaining)?;
-        let (first_mod_map_key, remaining) = KEYCODE::try_parse(remaining)?;
+        let (first_mod_map_key, remaining) = Keycode::try_parse(remaining)?;
         let (n_mod_map_keys, remaining) = u8::try_parse(remaining)?;
         let (total_mod_map_keys, remaining) = u8::try_parse(remaining)?;
-        let (first_v_mod_map_key, remaining) = KEYCODE::try_parse(remaining)?;
+        let (first_v_mod_map_key, remaining) = Keycode::try_parse(remaining)?;
         let (n_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
         let (total_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
@@ -7959,7 +7959,7 @@ impl Serialize for SetMapAux {
         }
     }
 }
-pub fn set_map<'c, Conn>(conn: &'c Conn, device_spec: DeviceSpec, flags: u16, min_key_code: KEYCODE, max_key_code: KEYCODE, first_type: u8, n_types: u8, first_key_sym: KEYCODE, n_key_syms: u8, total_syms: u16, first_key_action: KEYCODE, n_key_actions: u8, total_actions: u16, first_key_behavior: KEYCODE, n_key_behaviors: u8, total_key_behaviors: u8, first_key_explicit: KEYCODE, n_key_explicit: u8, total_key_explicit: u8, first_mod_map_key: KEYCODE, n_mod_map_keys: u8, total_mod_map_keys: u8, first_v_mod_map_key: KEYCODE, n_v_mod_map_keys: u8, total_v_mod_map_keys: u8, virtual_mods: u16, values: &SetMapAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_map<'c, Conn>(conn: &'c Conn, device_spec: DeviceSpec, flags: u16, min_key_code: Keycode, max_key_code: Keycode, first_type: u8, n_types: u8, first_key_sym: Keycode, n_key_syms: u8, total_syms: u16, first_key_action: Keycode, n_key_actions: u8, total_actions: u16, first_key_behavior: Keycode, n_key_behaviors: u8, total_key_behaviors: u8, first_key_explicit: Keycode, n_key_explicit: u8, total_key_explicit: u8, first_mod_map_key: Keycode, n_mod_map_keys: u8, total_mod_map_keys: u8, first_v_mod_map_key: Keycode, n_v_mod_map_keys: u8, total_v_mod_map_keys: u8, virtual_mods: u16, values: &SetMapAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -8305,7 +8305,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetNamedIndicator request
 pub const GET_NAMED_INDICATOR_REQUEST: u8 = 15;
-pub fn get_named_indicator<Conn, A>(conn: &Conn, device_spec: DeviceSpec, led_class: A, led_id: IDSpec, indicator: ATOM) -> Result<Cookie<'_, Conn, GetNamedIndicatorReply>, ConnectionError>
+pub fn get_named_indicator<Conn, A>(conn: &Conn, device_spec: DeviceSpec, led_class: A, led_id: IDSpec, indicator: Atom) -> Result<Cookie<'_, Conn, GetNamedIndicatorReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<LedClassSpec>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -8345,7 +8345,7 @@ pub struct GetNamedIndicatorReply {
     pub device_id: u8,
     pub sequence: u16,
     pub length: u32,
-    pub indicator: ATOM,
+    pub indicator: Atom,
     pub found: bool,
     pub on: bool,
     pub real_indicator: bool,
@@ -8366,7 +8366,7 @@ impl GetNamedIndicatorReply {
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (indicator, remaining) = ATOM::try_parse(remaining)?;
+        let (indicator, remaining) = Atom::try_parse(remaining)?;
         let (found, remaining) = bool::try_parse(remaining)?;
         let (on, remaining) = bool::try_parse(remaining)?;
         let (real_indicator, remaining) = bool::try_parse(remaining)?;
@@ -8394,7 +8394,7 @@ impl TryFrom<&[u8]> for GetNamedIndicatorReply {
 
 /// Opcode for the SetNamedIndicator request
 pub const SET_NAMED_INDICATOR_REQUEST: u8 = 16;
-pub fn set_named_indicator<Conn, A>(conn: &Conn, device_spec: DeviceSpec, led_class: A, led_id: IDSpec, indicator: ATOM, set_state: bool, on: bool, set_map: bool, create_map: bool, map_flags: u8, map_which_groups: u8, map_groups: u8, map_which_mods: u8, map_real_mods: u8, map_vmods: u16, map_ctrls: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_named_indicator<Conn, A>(conn: &Conn, device_spec: DeviceSpec, led_class: A, led_id: IDSpec, indicator: Atom, set_state: bool, on: bool, set_map: bool, create_map: bool, map_flags: u8, map_which_groups: u8, map_groups: u8, map_which_mods: u8, map_real_mods: u8, map_vmods: u16, map_ctrls: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<LedClassSpec>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -8488,7 +8488,7 @@ where Conn: RequestConnection + ?Sized
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetNamesValueListBitcase8 {
     pub n_levels_per_type: Vec<u8>,
-    pub kt_level_names: Vec<ATOM>,
+    pub kt_level_names: Vec<Atom>,
 }
 impl GetNamesValueListBitcase8 {
     pub fn try_parse(remaining: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
@@ -8498,7 +8498,7 @@ impl GetNamesValueListBitcase8 {
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let (kt_level_names, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, n_levels_per_type.iter().map(|x| TryInto::<usize>::try_into(*x).unwrap()).sum())?;
+        let (kt_level_names, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, n_levels_per_type.iter().map(|x| TryInto::<usize>::try_into(*x).unwrap()).sum())?;
         let result = GetNamesValueListBitcase8 { n_levels_per_type, kt_level_names };
         Ok((result, remaining))
     }
@@ -8520,27 +8520,27 @@ impl Serialize for GetNamesValueListBitcase8 {
 }
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct GetNamesValueList {
-    pub keycodes_name: Option<ATOM>,
-    pub geometry_name: Option<ATOM>,
-    pub symbols_name: Option<ATOM>,
-    pub phys_symbols_name: Option<ATOM>,
-    pub types_name: Option<ATOM>,
-    pub compat_name: Option<ATOM>,
-    pub type_names: Option<Vec<ATOM>>,
+    pub keycodes_name: Option<Atom>,
+    pub geometry_name: Option<Atom>,
+    pub symbols_name: Option<Atom>,
+    pub phys_symbols_name: Option<Atom>,
+    pub types_name: Option<Atom>,
+    pub compat_name: Option<Atom>,
+    pub type_names: Option<Vec<Atom>>,
     pub bitcase8: Option<GetNamesValueListBitcase8>,
-    pub indicator_names: Option<Vec<ATOM>>,
-    pub virtual_mod_names: Option<Vec<ATOM>>,
-    pub groups: Option<Vec<ATOM>>,
+    pub indicator_names: Option<Vec<Atom>>,
+    pub virtual_mod_names: Option<Vec<Atom>>,
+    pub groups: Option<Vec<Atom>>,
     pub key_names: Option<Vec<KeyName>>,
     pub key_aliases: Option<Vec<KeyAlias>>,
-    pub radio_group_names: Option<Vec<ATOM>>,
+    pub radio_group_names: Option<Vec<Atom>>,
 }
 impl GetNamesValueList {
     fn try_parse(value: &[u8], which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Result<(Self, &[u8]), ParseError> {
         let mut outer_remaining = value;
         let keycodes_name = if which & Into::<u32>::into(NameDetail::Keycodes) != 0 {
             let remaining = outer_remaining;
-            let (keycodes_name, remaining) = ATOM::try_parse(remaining)?;
+            let (keycodes_name, remaining) = Atom::try_parse(remaining)?;
             outer_remaining = remaining;
             Some(keycodes_name)
         } else {
@@ -8548,7 +8548,7 @@ impl GetNamesValueList {
         };
         let geometry_name = if which & Into::<u32>::into(NameDetail::Geometry) != 0 {
             let remaining = outer_remaining;
-            let (geometry_name, remaining) = ATOM::try_parse(remaining)?;
+            let (geometry_name, remaining) = Atom::try_parse(remaining)?;
             outer_remaining = remaining;
             Some(geometry_name)
         } else {
@@ -8556,7 +8556,7 @@ impl GetNamesValueList {
         };
         let symbols_name = if which & Into::<u32>::into(NameDetail::Symbols) != 0 {
             let remaining = outer_remaining;
-            let (symbols_name, remaining) = ATOM::try_parse(remaining)?;
+            let (symbols_name, remaining) = Atom::try_parse(remaining)?;
             outer_remaining = remaining;
             Some(symbols_name)
         } else {
@@ -8564,7 +8564,7 @@ impl GetNamesValueList {
         };
         let phys_symbols_name = if which & Into::<u32>::into(NameDetail::PhysSymbols) != 0 {
             let remaining = outer_remaining;
-            let (phys_symbols_name, remaining) = ATOM::try_parse(remaining)?;
+            let (phys_symbols_name, remaining) = Atom::try_parse(remaining)?;
             outer_remaining = remaining;
             Some(phys_symbols_name)
         } else {
@@ -8572,7 +8572,7 @@ impl GetNamesValueList {
         };
         let types_name = if which & Into::<u32>::into(NameDetail::Types) != 0 {
             let remaining = outer_remaining;
-            let (types_name, remaining) = ATOM::try_parse(remaining)?;
+            let (types_name, remaining) = Atom::try_parse(remaining)?;
             outer_remaining = remaining;
             Some(types_name)
         } else {
@@ -8580,7 +8580,7 @@ impl GetNamesValueList {
         };
         let compat_name = if which & Into::<u32>::into(NameDetail::Compat) != 0 {
             let remaining = outer_remaining;
-            let (compat_name, remaining) = ATOM::try_parse(remaining)?;
+            let (compat_name, remaining) = Atom::try_parse(remaining)?;
             outer_remaining = remaining;
             Some(compat_name)
         } else {
@@ -8588,7 +8588,7 @@ impl GetNamesValueList {
         };
         let type_names = if which & Into::<u32>::into(NameDetail::KeyTypeNames) != 0 {
             let remaining = outer_remaining;
-            let (type_names, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, n_types as usize)?;
+            let (type_names, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, n_types as usize)?;
             outer_remaining = remaining;
             Some(type_names)
         } else {
@@ -8603,7 +8603,7 @@ impl GetNamesValueList {
         };
         let indicator_names = if which & Into::<u32>::into(NameDetail::IndicatorNames) != 0 {
             let remaining = outer_remaining;
-            let (indicator_names, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, TryInto::<usize>::try_into(indicators.count_ones()).unwrap())?;
+            let (indicator_names, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, TryInto::<usize>::try_into(indicators.count_ones()).unwrap())?;
             outer_remaining = remaining;
             Some(indicator_names)
         } else {
@@ -8611,7 +8611,7 @@ impl GetNamesValueList {
         };
         let virtual_mod_names = if which & Into::<u32>::into(NameDetail::VirtualModNames) != 0 {
             let remaining = outer_remaining;
-            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, TryInto::<usize>::try_into(virtual_mods.count_ones()).unwrap())?;
+            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, TryInto::<usize>::try_into(virtual_mods.count_ones()).unwrap())?;
             outer_remaining = remaining;
             Some(virtual_mod_names)
         } else {
@@ -8619,7 +8619,7 @@ impl GetNamesValueList {
         };
         let groups = if which & Into::<u32>::into(NameDetail::GroupNames) != 0 {
             let remaining = outer_remaining;
-            let (groups, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, TryInto::<usize>::try_into(group_names.count_ones()).unwrap())?;
+            let (groups, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, TryInto::<usize>::try_into(group_names.count_ones()).unwrap())?;
             outer_remaining = remaining;
             Some(groups)
         } else {
@@ -8643,7 +8643,7 @@ impl GetNamesValueList {
         };
         let radio_group_names = if which & Into::<u32>::into(NameDetail::RGNames) != 0 {
             let remaining = outer_remaining;
-            let (radio_group_names, remaining) = crate::x11_utils::parse_list::<ATOM>(remaining, n_radio_groups as usize)?;
+            let (radio_group_names, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, n_radio_groups as usize)?;
             outer_remaining = remaining;
             Some(radio_group_names)
         } else {
@@ -8660,12 +8660,12 @@ pub struct GetNamesReply {
     pub sequence: u16,
     pub length: u32,
     pub which: u32,
-    pub min_key_code: KEYCODE,
-    pub max_key_code: KEYCODE,
+    pub min_key_code: Keycode,
+    pub max_key_code: Keycode,
     pub n_types: u8,
     pub group_names: u8,
     pub virtual_mods: u16,
-    pub first_key: KEYCODE,
+    pub first_key: Keycode,
     pub n_keys: u8,
     pub indicators: u32,
     pub n_radio_groups: u8,
@@ -8680,12 +8680,12 @@ impl GetNamesReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (which, remaining) = u32::try_parse(remaining)?;
-        let (min_key_code, remaining) = KEYCODE::try_parse(remaining)?;
-        let (max_key_code, remaining) = KEYCODE::try_parse(remaining)?;
+        let (min_key_code, remaining) = Keycode::try_parse(remaining)?;
+        let (max_key_code, remaining) = Keycode::try_parse(remaining)?;
         let (n_types, remaining) = u8::try_parse(remaining)?;
         let (group_names, remaining) = u8::try_parse(remaining)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
-        let (first_key, remaining) = KEYCODE::try_parse(remaining)?;
+        let (first_key, remaining) = Keycode::try_parse(remaining)?;
         let (n_keys, remaining) = u8::try_parse(remaining)?;
         let (indicators, remaining) = u32::try_parse(remaining)?;
         let (n_radio_groups, remaining) = u8::try_parse(remaining)?;
@@ -8709,7 +8709,7 @@ pub const SET_NAMES_REQUEST: u8 = 18;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetNamesAuxBitcase8 {
     pub n_levels_per_type: Vec<u8>,
-    pub kt_level_names: Vec<ATOM>,
+    pub kt_level_names: Vec<Atom>,
 }
 impl Serialize for SetNamesAuxBitcase8 {
     type Bytes = Vec<u8>;
@@ -8728,20 +8728,20 @@ impl Serialize for SetNamesAuxBitcase8 {
 /// Auxiliary and optional information for the set_names function.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct SetNamesAux {
-    pub keycodes_name: Option<ATOM>,
-    pub geometry_name: Option<ATOM>,
-    pub symbols_name: Option<ATOM>,
-    pub phys_symbols_name: Option<ATOM>,
-    pub types_name: Option<ATOM>,
-    pub compat_name: Option<ATOM>,
-    pub type_names: Option<Vec<ATOM>>,
+    pub keycodes_name: Option<Atom>,
+    pub geometry_name: Option<Atom>,
+    pub symbols_name: Option<Atom>,
+    pub phys_symbols_name: Option<Atom>,
+    pub types_name: Option<Atom>,
+    pub compat_name: Option<Atom>,
+    pub type_names: Option<Vec<Atom>>,
     pub bitcase8: Option<SetNamesAuxBitcase8>,
-    pub indicator_names: Option<Vec<ATOM>>,
-    pub virtual_mod_names: Option<Vec<ATOM>>,
-    pub groups: Option<Vec<ATOM>>,
+    pub indicator_names: Option<Vec<Atom>>,
+    pub virtual_mod_names: Option<Vec<Atom>>,
+    pub groups: Option<Vec<Atom>>,
     pub key_names: Option<Vec<KeyName>>,
     pub key_aliases: Option<Vec<KeyAlias>>,
-    pub radio_group_names: Option<Vec<ATOM>>,
+    pub radio_group_names: Option<Vec<Atom>>,
 }
 impl SetNamesAux {
     /// Create a new instance with all fields unset / not present.
@@ -8795,37 +8795,37 @@ impl SetNamesAux {
         mask
     }
     /// Set the keycodesName field of this structure.
-    pub fn keycodes_name<I>(mut self, value: I) -> Self where I: Into<Option<ATOM>> {
+    pub fn keycodes_name<I>(mut self, value: I) -> Self where I: Into<Option<Atom>> {
         self.keycodes_name = value.into();
         self
     }
     /// Set the geometryName field of this structure.
-    pub fn geometry_name<I>(mut self, value: I) -> Self where I: Into<Option<ATOM>> {
+    pub fn geometry_name<I>(mut self, value: I) -> Self where I: Into<Option<Atom>> {
         self.geometry_name = value.into();
         self
     }
     /// Set the symbolsName field of this structure.
-    pub fn symbols_name<I>(mut self, value: I) -> Self where I: Into<Option<ATOM>> {
+    pub fn symbols_name<I>(mut self, value: I) -> Self where I: Into<Option<Atom>> {
         self.symbols_name = value.into();
         self
     }
     /// Set the physSymbolsName field of this structure.
-    pub fn phys_symbols_name<I>(mut self, value: I) -> Self where I: Into<Option<ATOM>> {
+    pub fn phys_symbols_name<I>(mut self, value: I) -> Self where I: Into<Option<Atom>> {
         self.phys_symbols_name = value.into();
         self
     }
     /// Set the typesName field of this structure.
-    pub fn types_name<I>(mut self, value: I) -> Self where I: Into<Option<ATOM>> {
+    pub fn types_name<I>(mut self, value: I) -> Self where I: Into<Option<Atom>> {
         self.types_name = value.into();
         self
     }
     /// Set the compatName field of this structure.
-    pub fn compat_name<I>(mut self, value: I) -> Self where I: Into<Option<ATOM>> {
+    pub fn compat_name<I>(mut self, value: I) -> Self where I: Into<Option<Atom>> {
         self.compat_name = value.into();
         self
     }
     /// Set the typeNames field of this structure.
-    pub fn type_names<I>(mut self, value: I) -> Self where I: Into<Option<Vec<ATOM>>> {
+    pub fn type_names<I>(mut self, value: I) -> Self where I: Into<Option<Vec<Atom>>> {
         self.type_names = value.into();
         self
     }
@@ -8835,17 +8835,17 @@ impl SetNamesAux {
         self
     }
     /// Set the indicatorNames field of this structure.
-    pub fn indicator_names<I>(mut self, value: I) -> Self where I: Into<Option<Vec<ATOM>>> {
+    pub fn indicator_names<I>(mut self, value: I) -> Self where I: Into<Option<Vec<Atom>>> {
         self.indicator_names = value.into();
         self
     }
     /// Set the virtualModNames field of this structure.
-    pub fn virtual_mod_names<I>(mut self, value: I) -> Self where I: Into<Option<Vec<ATOM>>> {
+    pub fn virtual_mod_names<I>(mut self, value: I) -> Self where I: Into<Option<Vec<Atom>>> {
         self.virtual_mod_names = value.into();
         self
     }
     /// Set the groups field of this structure.
-    pub fn groups<I>(mut self, value: I) -> Self where I: Into<Option<Vec<ATOM>>> {
+    pub fn groups<I>(mut self, value: I) -> Self where I: Into<Option<Vec<Atom>>> {
         self.groups = value.into();
         self
     }
@@ -8860,7 +8860,7 @@ impl SetNamesAux {
         self
     }
     /// Set the radioGroupNames field of this structure.
-    pub fn radio_group_names<I>(mut self, value: I) -> Self where I: Into<Option<Vec<ATOM>>> {
+    pub fn radio_group_names<I>(mut self, value: I) -> Self where I: Into<Option<Vec<Atom>>> {
         self.radio_group_names = value.into();
         self
     }
@@ -8917,7 +8917,7 @@ impl Serialize for SetNamesAux {
         }
     }
 }
-pub fn set_names<'c, Conn>(conn: &'c Conn, device_spec: DeviceSpec, virtual_mods: u16, first_type: u8, n_types: u8, first_kt_levelt: u8, n_kt_levels: u8, indicators: u32, group_names: u8, n_radio_groups: u8, first_key: KEYCODE, n_keys: u8, n_key_aliases: u8, total_kt_level_names: u16, values: &SetNamesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_names<'c, Conn>(conn: &'c Conn, device_spec: DeviceSpec, virtual_mods: u16, first_type: u8, n_types: u8, first_kt_levelt: u8, n_kt_levels: u8, indicators: u32, group_names: u8, n_radio_groups: u8, first_key: Keycode, n_keys: u8, n_key_aliases: u8, total_kt_level_names: u16, values: &SetNamesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -9189,8 +9189,8 @@ pub struct GetDeviceInfoReply {
     pub has_own_state: bool,
     pub dflt_kbd_fb: u16,
     pub dflt_led_fb: u16,
-    pub dev_type: ATOM,
-    pub name: Vec<STRING8>,
+    pub dev_type: Atom,
+    pub name: Vec<String8>,
     pub btn_actions: Vec<Action>,
     pub leds: Vec<DeviceLedInfo>,
 }
@@ -9214,9 +9214,9 @@ impl GetDeviceInfoReply {
         let (dflt_kbd_fb, remaining) = u16::try_parse(remaining)?;
         let (dflt_led_fb, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (dev_type, remaining) = ATOM::try_parse(remaining)?;
+        let (dev_type, remaining) = Atom::try_parse(remaining)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_list::<STRING8>(remaining, name_len as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_list::<String8>(remaining, name_len as usize)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
@@ -9277,7 +9277,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the SetDebuggingFlags request
 pub const SET_DEBUGGING_FLAGS_REQUEST: u8 = 101;
-pub fn set_debugging_flags<'c, Conn>(conn: &'c Conn, affect_flags: u32, flags: u32, affect_ctrls: u32, ctrls: u32, message: &[STRING8]) -> Result<Cookie<'c, Conn, SetDebuggingFlagsReply>, ConnectionError>
+pub fn set_debugging_flags<'c, Conn>(conn: &'c Conn, affect_flags: u32, flags: u32, affect_ctrls: u32, ctrls: u32, message: &[String8]) -> Result<Cookie<'c, Conn, SetDebuggingFlagsReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -9362,13 +9362,13 @@ pub struct NewKeyboardNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub device_id: u8,
     pub old_device_id: u8,
-    pub min_key_code: KEYCODE,
-    pub max_key_code: KEYCODE,
-    pub old_min_key_code: KEYCODE,
-    pub old_max_key_code: KEYCODE,
+    pub min_key_code: Keycode,
+    pub max_key_code: Keycode,
+    pub old_min_key_code: Keycode,
+    pub old_max_key_code: Keycode,
     pub request_major: u8,
     pub request_minor: u8,
     pub changed: u16,
@@ -9378,13 +9378,13 @@ impl NewKeyboardNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (old_device_id, remaining) = u8::try_parse(remaining)?;
-        let (min_key_code, remaining) = KEYCODE::try_parse(remaining)?;
-        let (max_key_code, remaining) = KEYCODE::try_parse(remaining)?;
-        let (old_min_key_code, remaining) = KEYCODE::try_parse(remaining)?;
-        let (old_max_key_code, remaining) = KEYCODE::try_parse(remaining)?;
+        let (min_key_code, remaining) = Keycode::try_parse(remaining)?;
+        let (max_key_code, remaining) = Keycode::try_parse(remaining)?;
+        let (old_min_key_code, remaining) = Keycode::try_parse(remaining)?;
+        let (old_max_key_code, remaining) = Keycode::try_parse(remaining)?;
         let (request_major, remaining) = u8::try_parse(remaining)?;
         let (request_minor, remaining) = u8::try_parse(remaining)?;
         let (changed, remaining) = u16::try_parse(remaining)?;
@@ -9445,25 +9445,25 @@ pub struct MapNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub device_id: u8,
     pub ptr_btn_actions: u8,
     pub changed: u16,
-    pub min_key_code: KEYCODE,
-    pub max_key_code: KEYCODE,
+    pub min_key_code: Keycode,
+    pub max_key_code: Keycode,
     pub first_type: u8,
     pub n_types: u8,
-    pub first_key_sym: KEYCODE,
+    pub first_key_sym: Keycode,
     pub n_key_syms: u8,
-    pub first_key_act: KEYCODE,
+    pub first_key_act: Keycode,
     pub n_key_acts: u8,
-    pub first_key_behavior: KEYCODE,
+    pub first_key_behavior: Keycode,
     pub n_key_behavior: u8,
-    pub first_key_explicit: KEYCODE,
+    pub first_key_explicit: Keycode,
     pub n_key_explicit: u8,
-    pub first_mod_map_key: KEYCODE,
+    pub first_mod_map_key: Keycode,
     pub n_mod_map_keys: u8,
-    pub first_v_mod_map_key: KEYCODE,
+    pub first_v_mod_map_key: Keycode,
     pub n_v_mod_map_keys: u8,
     pub virtual_mods: u16,
 }
@@ -9472,25 +9472,25 @@ impl MapNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (ptr_btn_actions, remaining) = u8::try_parse(remaining)?;
         let (changed, remaining) = u16::try_parse(remaining)?;
-        let (min_key_code, remaining) = KEYCODE::try_parse(remaining)?;
-        let (max_key_code, remaining) = KEYCODE::try_parse(remaining)?;
+        let (min_key_code, remaining) = Keycode::try_parse(remaining)?;
+        let (max_key_code, remaining) = Keycode::try_parse(remaining)?;
         let (first_type, remaining) = u8::try_parse(remaining)?;
         let (n_types, remaining) = u8::try_parse(remaining)?;
-        let (first_key_sym, remaining) = KEYCODE::try_parse(remaining)?;
+        let (first_key_sym, remaining) = Keycode::try_parse(remaining)?;
         let (n_key_syms, remaining) = u8::try_parse(remaining)?;
-        let (first_key_act, remaining) = KEYCODE::try_parse(remaining)?;
+        let (first_key_act, remaining) = Keycode::try_parse(remaining)?;
         let (n_key_acts, remaining) = u8::try_parse(remaining)?;
-        let (first_key_behavior, remaining) = KEYCODE::try_parse(remaining)?;
+        let (first_key_behavior, remaining) = Keycode::try_parse(remaining)?;
         let (n_key_behavior, remaining) = u8::try_parse(remaining)?;
-        let (first_key_explicit, remaining) = KEYCODE::try_parse(remaining)?;
+        let (first_key_explicit, remaining) = Keycode::try_parse(remaining)?;
         let (n_key_explicit, remaining) = u8::try_parse(remaining)?;
-        let (first_mod_map_key, remaining) = KEYCODE::try_parse(remaining)?;
+        let (first_mod_map_key, remaining) = Keycode::try_parse(remaining)?;
         let (n_mod_map_keys, remaining) = u8::try_parse(remaining)?;
-        let (first_v_mod_map_key, remaining) = KEYCODE::try_parse(remaining)?;
+        let (first_v_mod_map_key, remaining) = Keycode::try_parse(remaining)?;
         let (n_v_mod_map_keys, remaining) = u8::try_parse(remaining)?;
         let (virtual_mods, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
@@ -9561,7 +9561,7 @@ pub struct StateNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub device_id: u8,
     pub mods: u8,
     pub base_mods: u8,
@@ -9578,7 +9578,7 @@ pub struct StateNotifyEvent {
     pub compat_loockup_mods: u8,
     pub ptr_btn_state: u16,
     pub changed: u16,
-    pub keycode: KEYCODE,
+    pub keycode: Keycode,
     pub event_type: u8,
     pub request_major: u8,
     pub request_minor: u8,
@@ -9588,7 +9588,7 @@ impl StateNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (mods, remaining) = u8::try_parse(remaining)?;
         let (base_mods, remaining) = u8::try_parse(remaining)?;
@@ -9605,7 +9605,7 @@ impl StateNotifyEvent {
         let (compat_loockup_mods, remaining) = u8::try_parse(remaining)?;
         let (ptr_btn_state, remaining) = u16::try_parse(remaining)?;
         let (changed, remaining) = u16::try_parse(remaining)?;
-        let (keycode, remaining) = KEYCODE::try_parse(remaining)?;
+        let (keycode, remaining) = Keycode::try_parse(remaining)?;
         let (event_type, remaining) = u8::try_parse(remaining)?;
         let (request_major, remaining) = u8::try_parse(remaining)?;
         let (request_minor, remaining) = u8::try_parse(remaining)?;
@@ -9678,13 +9678,13 @@ pub struct ControlsNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub device_id: u8,
     pub num_groups: u8,
     pub changed_controls: u32,
     pub enabled_controls: u32,
     pub enabled_control_changes: u32,
-    pub keycode: KEYCODE,
+    pub keycode: Keycode,
     pub event_type: u8,
     pub request_major: u8,
     pub request_minor: u8,
@@ -9694,14 +9694,14 @@ impl ControlsNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (num_groups, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (changed_controls, remaining) = u32::try_parse(remaining)?;
         let (enabled_controls, remaining) = u32::try_parse(remaining)?;
         let (enabled_control_changes, remaining) = u32::try_parse(remaining)?;
-        let (keycode, remaining) = KEYCODE::try_parse(remaining)?;
+        let (keycode, remaining) = Keycode::try_parse(remaining)?;
         let (event_type, remaining) = u8::try_parse(remaining)?;
         let (request_major, remaining) = u8::try_parse(remaining)?;
         let (request_minor, remaining) = u8::try_parse(remaining)?;
@@ -9762,7 +9762,7 @@ pub struct IndicatorStateNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub device_id: u8,
     pub state: u32,
     pub state_changed: u32,
@@ -9772,7 +9772,7 @@ impl IndicatorStateNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (state, remaining) = u32::try_parse(remaining)?;
@@ -9828,7 +9828,7 @@ pub struct IndicatorMapNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub device_id: u8,
     pub state: u32,
     pub map_changed: u32,
@@ -9838,7 +9838,7 @@ impl IndicatorMapNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (state, remaining) = u32::try_parse(remaining)?;
@@ -9894,7 +9894,7 @@ pub struct NamesNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub device_id: u8,
     pub changed: u16,
     pub first_type: u8,
@@ -9905,7 +9905,7 @@ pub struct NamesNotifyEvent {
     pub n_key_aliases: u8,
     pub changed_group_names: u8,
     pub changed_virtual_mods: u16,
-    pub first_key: KEYCODE,
+    pub first_key: Keycode,
     pub n_keys: u8,
     pub changed_indicators: u32,
 }
@@ -9914,7 +9914,7 @@ impl NamesNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (changed, remaining) = u16::try_parse(remaining)?;
@@ -9927,7 +9927,7 @@ impl NamesNotifyEvent {
         let (n_key_aliases, remaining) = u8::try_parse(remaining)?;
         let (changed_group_names, remaining) = u8::try_parse(remaining)?;
         let (changed_virtual_mods, remaining) = u16::try_parse(remaining)?;
-        let (first_key, remaining) = KEYCODE::try_parse(remaining)?;
+        let (first_key, remaining) = Keycode::try_parse(remaining)?;
         let (n_keys, remaining) = u8::try_parse(remaining)?;
         let (changed_indicators, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
@@ -9991,7 +9991,7 @@ pub struct CompatMapNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub device_id: u8,
     pub changed_groups: u8,
     pub first_si: u16,
@@ -10003,7 +10003,7 @@ impl CompatMapNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (changed_groups, remaining) = u8::try_parse(remaining)?;
         let (first_si, remaining) = u16::try_parse(remaining)?;
@@ -10062,15 +10062,15 @@ pub struct BellNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub device_id: u8,
     pub bell_class: BellClassResult,
     pub bell_id: u8,
     pub percent: u8,
     pub pitch: u16,
     pub duration: u16,
-    pub name: ATOM,
-    pub window: WINDOW,
+    pub name: Atom,
+    pub window: Window,
     pub event_only: bool,
 }
 impl BellNotifyEvent {
@@ -10078,15 +10078,15 @@ impl BellNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (bell_class, remaining) = u8::try_parse(remaining)?;
         let (bell_id, remaining) = u8::try_parse(remaining)?;
         let (percent, remaining) = u8::try_parse(remaining)?;
         let (pitch, remaining) = u16::try_parse(remaining)?;
         let (duration, remaining) = u16::try_parse(remaining)?;
-        let (name, remaining) = ATOM::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (name, remaining) = Atom::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
         let (event_only, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(7..).ok_or(ParseError::ParseError)?;
         let bell_class = bell_class.try_into()?;
@@ -10146,35 +10146,35 @@ pub struct ActionMessageEvent {
     pub response_type: u8,
     pub xkb_type: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub device_id: u8,
-    pub keycode: KEYCODE,
+    pub keycode: Keycode,
     pub press: bool,
     pub key_event_follows: bool,
     pub mods: u8,
     pub group: Group,
-    pub message: [STRING8; 8],
+    pub message: [String8; 8],
 }
 impl ActionMessageEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
-        let (keycode, remaining) = KEYCODE::try_parse(remaining)?;
+        let (keycode, remaining) = Keycode::try_parse(remaining)?;
         let (press, remaining) = bool::try_parse(remaining)?;
         let (key_event_follows, remaining) = bool::try_parse(remaining)?;
         let (mods, remaining) = u8::try_parse(remaining)?;
         let (group, remaining) = u8::try_parse(remaining)?;
-        let (message_0, remaining) = STRING8::try_parse(remaining)?;
-        let (message_1, remaining) = STRING8::try_parse(remaining)?;
-        let (message_2, remaining) = STRING8::try_parse(remaining)?;
-        let (message_3, remaining) = STRING8::try_parse(remaining)?;
-        let (message_4, remaining) = STRING8::try_parse(remaining)?;
-        let (message_5, remaining) = STRING8::try_parse(remaining)?;
-        let (message_6, remaining) = STRING8::try_parse(remaining)?;
-        let (message_7, remaining) = STRING8::try_parse(remaining)?;
+        let (message_0, remaining) = String8::try_parse(remaining)?;
+        let (message_1, remaining) = String8::try_parse(remaining)?;
+        let (message_2, remaining) = String8::try_parse(remaining)?;
+        let (message_3, remaining) = String8::try_parse(remaining)?;
+        let (message_4, remaining) = String8::try_parse(remaining)?;
+        let (message_5, remaining) = String8::try_parse(remaining)?;
+        let (message_6, remaining) = String8::try_parse(remaining)?;
+        let (message_7, remaining) = String8::try_parse(remaining)?;
         let message = [
             message_0,
             message_1,
@@ -10240,9 +10240,9 @@ pub struct AccessXNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub device_id: u8,
-    pub keycode: KEYCODE,
+    pub keycode: Keycode,
     pub detailt: u16,
     pub slow_keys_delay: u16,
     pub debounce_delay: u16,
@@ -10252,9 +10252,9 @@ impl AccessXNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
-        let (keycode, remaining) = KEYCODE::try_parse(remaining)?;
+        let (keycode, remaining) = Keycode::try_parse(remaining)?;
         let (detailt, remaining) = u16::try_parse(remaining)?;
         let (slow_keys_delay, remaining) = u16::try_parse(remaining)?;
         let (debounce_delay, remaining) = u16::try_parse(remaining)?;
@@ -10311,7 +10311,7 @@ pub struct ExtensionDeviceNotifyEvent {
     pub response_type: u8,
     pub xkb_type: u8,
     pub sequence: u16,
-    pub time: TIMESTAMP,
+    pub time: Timestamp,
     pub device_id: u8,
     pub reason: u16,
     pub led_class: LedClassResult,
@@ -10328,7 +10328,7 @@ impl ExtensionDeviceNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (time, remaining) = Timestamp::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (reason, remaining) = u16::try_parse(remaining)?;
@@ -10404,7 +10404,7 @@ pub trait ConnectionExt: RequestConnection {
         select_events(self, device_spec, affect_which, clear, select_all, affect_map, map, details)
     }
 
-    fn xkb_bell(&self, device_spec: DeviceSpec, bell_class: BellClassSpec, bell_id: IDSpec, percent: i8, force_sound: bool, event_only: bool, pitch: i16, duration: i16, name: ATOM, window: WINDOW) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xkb_bell(&self, device_spec: DeviceSpec, bell_class: BellClassSpec, bell_id: IDSpec, percent: i8, force_sound: bool, event_only: bool, pitch: i16, duration: i16, name: Atom, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         bell(self, device_spec, bell_class, bell_id, percent, force_sound, event_only, pitch, duration, name, window)
     }
@@ -10430,12 +10430,12 @@ pub trait ConnectionExt: RequestConnection {
         set_controls(self, device_spec, affect_internal_real_mods, internal_real_mods, affect_ignore_lock_real_mods, ignore_lock_real_mods, affect_internal_virtual_mods, internal_virtual_mods, affect_ignore_lock_virtual_mods, ignore_lock_virtual_mods, mouse_keys_dflt_btn, groups_wrap, access_x_options, affect_enabled_controls, enabled_controls, change_controls, repeat_delay, repeat_interval, slow_keys_delay, debounce_delay, mouse_keys_delay, mouse_keys_interval, mouse_keys_time_to_max, mouse_keys_max_speed, mouse_keys_curve, access_x_timeout, access_x_timeout_mask, access_x_timeout_values, access_x_timeout_options_mask, access_x_timeout_options_values, per_key_repeat)
     }
 
-    fn xkb_get_map(&self, device_spec: DeviceSpec, full: u16, partial: u16, first_type: u8, n_types: u8, first_key_sym: KEYCODE, n_key_syms: u8, first_key_action: KEYCODE, n_key_actions: u8, first_key_behavior: KEYCODE, n_key_behaviors: u8, virtual_mods: u16, first_key_explicit: KEYCODE, n_key_explicit: u8, first_mod_map_key: KEYCODE, n_mod_map_keys: u8, first_v_mod_map_key: KEYCODE, n_v_mod_map_keys: u8) -> Result<Cookie<'_, Self, GetMapReply>, ConnectionError>
+    fn xkb_get_map(&self, device_spec: DeviceSpec, full: u16, partial: u16, first_type: u8, n_types: u8, first_key_sym: Keycode, n_key_syms: u8, first_key_action: Keycode, n_key_actions: u8, first_key_behavior: Keycode, n_key_behaviors: u8, virtual_mods: u16, first_key_explicit: Keycode, n_key_explicit: u8, first_mod_map_key: Keycode, n_mod_map_keys: u8, first_v_mod_map_key: Keycode, n_v_mod_map_keys: u8) -> Result<Cookie<'_, Self, GetMapReply>, ConnectionError>
     {
         get_map(self, device_spec, full, partial, first_type, n_types, first_key_sym, n_key_syms, first_key_action, n_key_actions, first_key_behavior, n_key_behaviors, virtual_mods, first_key_explicit, n_key_explicit, first_mod_map_key, n_mod_map_keys, first_v_mod_map_key, n_v_mod_map_keys)
     }
 
-    fn xkb_set_map<'c>(&'c self, device_spec: DeviceSpec, flags: u16, min_key_code: KEYCODE, max_key_code: KEYCODE, first_type: u8, n_types: u8, first_key_sym: KEYCODE, n_key_syms: u8, total_syms: u16, first_key_action: KEYCODE, n_key_actions: u8, total_actions: u16, first_key_behavior: KEYCODE, n_key_behaviors: u8, total_key_behaviors: u8, first_key_explicit: KEYCODE, n_key_explicit: u8, total_key_explicit: u8, first_mod_map_key: KEYCODE, n_mod_map_keys: u8, total_mod_map_keys: u8, first_v_mod_map_key: KEYCODE, n_v_mod_map_keys: u8, total_v_mod_map_keys: u8, virtual_mods: u16, values: &SetMapAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xkb_set_map<'c>(&'c self, device_spec: DeviceSpec, flags: u16, min_key_code: Keycode, max_key_code: Keycode, first_type: u8, n_types: u8, first_key_sym: Keycode, n_key_syms: u8, total_syms: u16, first_key_action: Keycode, n_key_actions: u8, total_actions: u16, first_key_behavior: Keycode, n_key_behaviors: u8, total_key_behaviors: u8, first_key_explicit: Keycode, n_key_explicit: u8, total_key_explicit: u8, first_mod_map_key: Keycode, n_mod_map_keys: u8, total_mod_map_keys: u8, first_v_mod_map_key: Keycode, n_v_mod_map_keys: u8, total_v_mod_map_keys: u8, virtual_mods: u16, values: &SetMapAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_map(self, device_spec, flags, min_key_code, max_key_code, first_type, n_types, first_key_sym, n_key_syms, total_syms, first_key_action, n_key_actions, total_actions, first_key_behavior, n_key_behaviors, total_key_behaviors, first_key_explicit, n_key_explicit, total_key_explicit, first_mod_map_key, n_mod_map_keys, total_mod_map_keys, first_v_mod_map_key, n_v_mod_map_keys, total_v_mod_map_keys, virtual_mods, values)
     }
@@ -10465,13 +10465,13 @@ pub trait ConnectionExt: RequestConnection {
         set_indicator_map(self, device_spec, which, maps)
     }
 
-    fn xkb_get_named_indicator<A>(&self, device_spec: DeviceSpec, led_class: A, led_id: IDSpec, indicator: ATOM) -> Result<Cookie<'_, Self, GetNamedIndicatorReply>, ConnectionError>
+    fn xkb_get_named_indicator<A>(&self, device_spec: DeviceSpec, led_class: A, led_id: IDSpec, indicator: Atom) -> Result<Cookie<'_, Self, GetNamedIndicatorReply>, ConnectionError>
     where A: Into<LedClassSpec>
     {
         get_named_indicator(self, device_spec, led_class, led_id, indicator)
     }
 
-    fn xkb_set_named_indicator<A>(&self, device_spec: DeviceSpec, led_class: A, led_id: IDSpec, indicator: ATOM, set_state: bool, on: bool, set_map: bool, create_map: bool, map_flags: u8, map_which_groups: u8, map_groups: u8, map_which_mods: u8, map_real_mods: u8, map_vmods: u16, map_ctrls: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xkb_set_named_indicator<A>(&self, device_spec: DeviceSpec, led_class: A, led_id: IDSpec, indicator: Atom, set_state: bool, on: bool, set_map: bool, create_map: bool, map_flags: u8, map_which_groups: u8, map_groups: u8, map_which_mods: u8, map_real_mods: u8, map_vmods: u16, map_ctrls: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<LedClassSpec>
     {
         set_named_indicator(self, device_spec, led_class, led_id, indicator, set_state, on, set_map, create_map, map_flags, map_which_groups, map_groups, map_which_mods, map_real_mods, map_vmods, map_ctrls)
@@ -10482,7 +10482,7 @@ pub trait ConnectionExt: RequestConnection {
         get_names(self, device_spec, which)
     }
 
-    fn xkb_set_names<'c>(&'c self, device_spec: DeviceSpec, virtual_mods: u16, first_type: u8, n_types: u8, first_kt_levelt: u8, n_kt_levels: u8, indicators: u32, group_names: u8, n_radio_groups: u8, first_key: KEYCODE, n_keys: u8, n_key_aliases: u8, total_kt_level_names: u16, values: &SetNamesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xkb_set_names<'c>(&'c self, device_spec: DeviceSpec, virtual_mods: u16, first_type: u8, n_types: u8, first_kt_levelt: u8, n_kt_levels: u8, indicators: u32, group_names: u8, n_radio_groups: u8, first_key: Keycode, n_keys: u8, n_key_aliases: u8, total_kt_level_names: u16, values: &SetNamesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_names(self, device_spec, virtual_mods, first_type, n_types, first_kt_levelt, n_kt_levels, indicators, group_names, n_radio_groups, first_key, n_keys, n_key_aliases, total_kt_level_names, values)
     }
@@ -10509,7 +10509,7 @@ pub trait ConnectionExt: RequestConnection {
         set_device_info(self, device_spec, first_btn, change, btn_actions, leds)
     }
 
-    fn xkb_set_debugging_flags<'c>(&'c self, affect_flags: u32, flags: u32, affect_ctrls: u32, ctrls: u32, message: &[STRING8]) -> Result<Cookie<'c, Self, SetDebuggingFlagsReply>, ConnectionError>
+    fn xkb_set_debugging_flags<'c>(&'c self, affect_flags: u32, flags: u32, affect_ctrls: u32, ctrls: u32, message: &[String8]) -> Result<Cookie<'c, Self, SetDebuggingFlagsReply>, ConnectionError>
     {
         set_debugging_flags(self, affect_flags, flags, affect_ctrls, ctrls, message)
     }

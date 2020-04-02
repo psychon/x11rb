@@ -115,7 +115,7 @@ mod generated;
 use connection::Connection;
 use errors::ConnectError;
 pub use generated::*;
-use xproto::{KEYSYM, TIMESTAMP};
+use xproto::{Keysym, Timestamp};
 
 /// Establish a new connection to an X11 server.
 ///
@@ -155,7 +155,7 @@ pub const COPY_DEPTH_FROM_PARENT: u8 = 0;
 pub const COPY_CLASS_FROM_PARENT: u16 = 0;
 
 /// This constant can be used in most request that take a timestamp argument
-pub const CURRENT_TIME: TIMESTAMP = 0;
+pub const CURRENT_TIME: Timestamp = 0;
 
-/// This constant can be used to fill unused entries in `KEYSYM` tables
-pub const NO_SYMBOL: KEYSYM = 0;
+/// This constant can be used to fill unused entries in `Keysym` tables
+pub const NO_SYMBOL: Keysym = 0;

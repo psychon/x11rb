@@ -36,7 +36,7 @@ pub const X11_EXTENSION_NAME: &str = "SYNC";
 /// send the maximum version of the extension that you need.
 pub const X11_XML_VERSION: (u32, u32) = (3, 1);
 
-pub type ALARM = u32;
+pub type Alarm = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -103,9 +103,9 @@ impl TryFrom<u32> for ALARMSTATE {
     }
 }
 
-pub type COUNTER = u32;
+pub type Counter = u32;
 
-pub type FENCE = u32;
+pub type Fence = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -356,14 +356,14 @@ impl Serialize for Int64 {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Systemcounter {
-    pub counter: COUNTER,
+    pub counter: Counter,
     pub resolution: Int64,
     pub name: Vec<u8>,
 }
 impl TryParse for Systemcounter {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
-        let (counter, remaining) = COUNTER::try_parse(remaining)?;
+        let (counter, remaining) = Counter::try_parse(remaining)?;
         let (resolution, remaining) = Int64::try_parse(remaining)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_len as usize)?;
@@ -401,14 +401,14 @@ impl Serialize for Systemcounter {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Trigger {
-    pub counter: COUNTER,
+    pub counter: Counter,
     pub wait_type: VALUETYPE,
     pub wait_value: Int64,
     pub test_type: TESTTYPE,
 }
 impl TryParse for Trigger {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (counter, remaining) = COUNTER::try_parse(remaining)?;
+        let (counter, remaining) = Counter::try_parse(remaining)?;
         let (wait_type, remaining) = u32::try_parse(remaining)?;
         let (wait_value, remaining) = Int64::try_parse(remaining)?;
         let (test_type, remaining) = u32::try_parse(remaining)?;
@@ -748,7 +748,7 @@ impl TryFrom<&[u8]> for ListSystemCountersReply {
 
 /// Opcode for the CreateCounter request
 pub const CREATE_COUNTER_REQUEST: u8 = 2;
-pub fn create_counter<Conn>(conn: &Conn, id: COUNTER, initial_value: Int64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_counter<Conn>(conn: &Conn, id: Counter, initial_value: Int64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -782,7 +782,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the DestroyCounter request
 pub const DESTROY_COUNTER_REQUEST: u8 = 6;
-pub fn destroy_counter<Conn>(conn: &Conn, counter: COUNTER) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn destroy_counter<Conn>(conn: &Conn, counter: Counter) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -807,7 +807,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the QueryCounter request
 pub const QUERY_COUNTER_REQUEST: u8 = 5;
-pub fn query_counter<Conn>(conn: &Conn, counter: COUNTER) -> Result<Cookie<'_, Conn, QueryCounterReply>, ConnectionError>
+pub fn query_counter<Conn>(conn: &Conn, counter: Counter) -> Result<Cookie<'_, Conn, QueryCounterReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -880,7 +880,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the ChangeCounter request
 pub const CHANGE_COUNTER_REQUEST: u8 = 4;
-pub fn change_counter<Conn>(conn: &Conn, counter: COUNTER, amount: Int64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn change_counter<Conn>(conn: &Conn, counter: Counter, amount: Int64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -914,7 +914,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the SetCounter request
 pub const SET_COUNTER_REQUEST: u8 = 3;
-pub fn set_counter<Conn>(conn: &Conn, counter: COUNTER, value: Int64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_counter<Conn>(conn: &Conn, counter: Counter, value: Int64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -951,7 +951,7 @@ pub const CREATE_ALARM_REQUEST: u8 = 8;
 /// Auxiliary and optional information for the create_alarm function.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct CreateAlarmAux {
-    pub counter: Option<COUNTER>,
+    pub counter: Option<Counter>,
     pub value_type: Option<u32>,
     pub value: Option<Int64>,
     pub test_type: Option<u32>,
@@ -986,7 +986,7 @@ impl CreateAlarmAux {
         mask
     }
     /// Set the counter field of this structure.
-    pub fn counter<I>(mut self, value: I) -> Self where I: Into<Option<COUNTER>> {
+    pub fn counter<I>(mut self, value: I) -> Self where I: Into<Option<Counter>> {
         self.counter = value.into();
         self
     }
@@ -1044,7 +1044,7 @@ impl Serialize for CreateAlarmAux {
         }
     }
 }
-pub fn create_alarm<'c, Conn>(conn: &'c Conn, id: ALARM, value_list: &CreateAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_alarm<'c, Conn>(conn: &'c Conn, id: Alarm, value_list: &CreateAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1082,7 +1082,7 @@ pub const CHANGE_ALARM_REQUEST: u8 = 9;
 /// Auxiliary and optional information for the change_alarm function.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ChangeAlarmAux {
-    pub counter: Option<COUNTER>,
+    pub counter: Option<Counter>,
     pub value_type: Option<u32>,
     pub value: Option<Int64>,
     pub test_type: Option<u32>,
@@ -1117,7 +1117,7 @@ impl ChangeAlarmAux {
         mask
     }
     /// Set the counter field of this structure.
-    pub fn counter<I>(mut self, value: I) -> Self where I: Into<Option<COUNTER>> {
+    pub fn counter<I>(mut self, value: I) -> Self where I: Into<Option<Counter>> {
         self.counter = value.into();
         self
     }
@@ -1175,7 +1175,7 @@ impl Serialize for ChangeAlarmAux {
         }
     }
 }
-pub fn change_alarm<'c, Conn>(conn: &'c Conn, id: ALARM, value_list: &ChangeAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_alarm<'c, Conn>(conn: &'c Conn, id: Alarm, value_list: &ChangeAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1210,7 +1210,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the DestroyAlarm request
 pub const DESTROY_ALARM_REQUEST: u8 = 11;
-pub fn destroy_alarm<Conn>(conn: &Conn, alarm: ALARM) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn destroy_alarm<Conn>(conn: &Conn, alarm: Alarm) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1235,7 +1235,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the QueryAlarm request
 pub const QUERY_ALARM_REQUEST: u8 = 10;
-pub fn query_alarm<Conn>(conn: &Conn, alarm: ALARM) -> Result<Cookie<'_, Conn, QueryAlarmReply>, ConnectionError>
+pub fn query_alarm<Conn>(conn: &Conn, alarm: Alarm) -> Result<Cookie<'_, Conn, QueryAlarmReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1371,7 +1371,7 @@ impl TryFrom<&[u8]> for GetPriorityReply {
 
 /// Opcode for the CreateFence request
 pub const CREATE_FENCE_REQUEST: u8 = 14;
-pub fn create_fence<Conn>(conn: &Conn, drawable: DRAWABLE, fence: FENCE, initially_triggered: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_fence<Conn>(conn: &Conn, drawable: Drawable, fence: Fence, initially_triggered: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1406,7 +1406,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the TriggerFence request
 pub const TRIGGER_FENCE_REQUEST: u8 = 15;
-pub fn trigger_fence<Conn>(conn: &Conn, fence: FENCE) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn trigger_fence<Conn>(conn: &Conn, fence: Fence) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1431,7 +1431,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the ResetFence request
 pub const RESET_FENCE_REQUEST: u8 = 16;
-pub fn reset_fence<Conn>(conn: &Conn, fence: FENCE) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn reset_fence<Conn>(conn: &Conn, fence: Fence) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1456,7 +1456,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the DestroyFence request
 pub const DESTROY_FENCE_REQUEST: u8 = 17;
-pub fn destroy_fence<Conn>(conn: &Conn, fence: FENCE) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn destroy_fence<Conn>(conn: &Conn, fence: Fence) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1481,7 +1481,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the QueryFence request
 pub const QUERY_FENCE_REQUEST: u8 = 18;
-pub fn query_fence<Conn>(conn: &Conn, fence: FENCE) -> Result<Cookie<'_, Conn, QueryFenceReply>, ConnectionError>
+pub fn query_fence<Conn>(conn: &Conn, fence: Fence) -> Result<Cookie<'_, Conn, QueryFenceReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1531,7 +1531,7 @@ impl TryFrom<&[u8]> for QueryFenceReply {
 
 /// Opcode for the AwaitFence request
 pub const AWAIT_FENCE_REQUEST: u8 = 19;
-pub fn await_fence<'c, Conn>(conn: &'c Conn, fence_list: &[FENCE]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn await_fence<'c, Conn>(conn: &'c Conn, fence_list: &[Fence]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1560,10 +1560,10 @@ pub struct CounterNotifyEvent {
     pub response_type: u8,
     pub kind: u8,
     pub sequence: u16,
-    pub counter: COUNTER,
+    pub counter: Counter,
     pub wait_value: Int64,
     pub counter_value: Int64,
-    pub timestamp: TIMESTAMP,
+    pub timestamp: Timestamp,
     pub count: u16,
     pub destroyed: bool,
 }
@@ -1572,10 +1572,10 @@ impl CounterNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (kind, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (counter, remaining) = COUNTER::try_parse(remaining)?;
+        let (counter, remaining) = Counter::try_parse(remaining)?;
         let (wait_value, remaining) = Int64::try_parse(remaining)?;
         let (counter_value, remaining) = Int64::try_parse(remaining)?;
-        let (timestamp, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
         let (count, remaining) = u16::try_parse(remaining)?;
         let (destroyed, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
@@ -1631,10 +1631,10 @@ pub struct AlarmNotifyEvent {
     pub response_type: u8,
     pub kind: u8,
     pub sequence: u16,
-    pub alarm: ALARM,
+    pub alarm: Alarm,
     pub counter_value: Int64,
     pub alarm_value: Int64,
-    pub timestamp: TIMESTAMP,
+    pub timestamp: Timestamp,
     pub state: ALARMSTATE,
 }
 impl AlarmNotifyEvent {
@@ -1642,10 +1642,10 @@ impl AlarmNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (kind, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (alarm, remaining) = ALARM::try_parse(remaining)?;
+        let (alarm, remaining) = Alarm::try_parse(remaining)?;
         let (counter_value, remaining) = Int64::try_parse(remaining)?;
         let (alarm_value, remaining) = Int64::try_parse(remaining)?;
-        let (timestamp, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let state = state.try_into()?;
@@ -1705,17 +1705,17 @@ pub trait ConnectionExt: RequestConnection {
         list_system_counters(self)
     }
 
-    fn sync_create_counter(&self, id: COUNTER, initial_value: Int64) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn sync_create_counter(&self, id: Counter, initial_value: Int64) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_counter(self, id, initial_value)
     }
 
-    fn sync_destroy_counter(&self, counter: COUNTER) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn sync_destroy_counter(&self, counter: Counter) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_counter(self, counter)
     }
 
-    fn sync_query_counter(&self, counter: COUNTER) -> Result<Cookie<'_, Self, QueryCounterReply>, ConnectionError>
+    fn sync_query_counter(&self, counter: Counter) -> Result<Cookie<'_, Self, QueryCounterReply>, ConnectionError>
     {
         query_counter(self, counter)
     }
@@ -1725,32 +1725,32 @@ pub trait ConnectionExt: RequestConnection {
         await_(self, wait_list)
     }
 
-    fn sync_change_counter(&self, counter: COUNTER, amount: Int64) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn sync_change_counter(&self, counter: Counter, amount: Int64) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         change_counter(self, counter, amount)
     }
 
-    fn sync_set_counter(&self, counter: COUNTER, value: Int64) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn sync_set_counter(&self, counter: Counter, value: Int64) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_counter(self, counter, value)
     }
 
-    fn sync_create_alarm<'c>(&'c self, id: ALARM, value_list: &CreateAlarmAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn sync_create_alarm<'c>(&'c self, id: Alarm, value_list: &CreateAlarmAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_alarm(self, id, value_list)
     }
 
-    fn sync_change_alarm<'c>(&'c self, id: ALARM, value_list: &ChangeAlarmAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn sync_change_alarm<'c>(&'c self, id: Alarm, value_list: &ChangeAlarmAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_alarm(self, id, value_list)
     }
 
-    fn sync_destroy_alarm(&self, alarm: ALARM) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn sync_destroy_alarm(&self, alarm: Alarm) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_alarm(self, alarm)
     }
 
-    fn sync_query_alarm(&self, alarm: ALARM) -> Result<Cookie<'_, Self, QueryAlarmReply>, ConnectionError>
+    fn sync_query_alarm(&self, alarm: Alarm) -> Result<Cookie<'_, Self, QueryAlarmReply>, ConnectionError>
     {
         query_alarm(self, alarm)
     }
@@ -1765,32 +1765,32 @@ pub trait ConnectionExt: RequestConnection {
         get_priority(self, id)
     }
 
-    fn sync_create_fence(&self, drawable: DRAWABLE, fence: FENCE, initially_triggered: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn sync_create_fence(&self, drawable: Drawable, fence: Fence, initially_triggered: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_fence(self, drawable, fence, initially_triggered)
     }
 
-    fn sync_trigger_fence(&self, fence: FENCE) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn sync_trigger_fence(&self, fence: Fence) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         trigger_fence(self, fence)
     }
 
-    fn sync_reset_fence(&self, fence: FENCE) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn sync_reset_fence(&self, fence: Fence) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         reset_fence(self, fence)
     }
 
-    fn sync_destroy_fence(&self, fence: FENCE) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn sync_destroy_fence(&self, fence: Fence) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_fence(self, fence)
     }
 
-    fn sync_query_fence(&self, fence: FENCE) -> Result<Cookie<'_, Self, QueryFenceReply>, ConnectionError>
+    fn sync_query_fence(&self, fence: Fence) -> Result<Cookie<'_, Self, QueryFenceReply>, ConnectionError>
     {
         query_fence(self, fence)
     }
 
-    fn sync_await_fence<'c>(&'c self, fence_list: &[FENCE]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn sync_await_fence<'c>(&'c self, fence_list: &[Fence]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         await_fence(self, fence_list)
     }

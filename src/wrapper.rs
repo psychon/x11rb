@@ -6,7 +6,7 @@ use std::marker::PhantomData;
 use super::cookie::VoidCookie;
 use super::errors::{ConnectionError, ReplyError};
 use super::x11_utils::TryParse;
-use super::xproto::{ConnectionExt as XProtoConnectionExt, ATOM, WINDOW};
+use super::xproto::{Atom, ConnectionExt as XProtoConnectionExt, Window};
 
 /// Iterator implementation used by `GetPropertyReply`.
 ///
@@ -54,15 +54,15 @@ pub trait ConnectionExt: XProtoConnectionExt {
     fn change_property8<A, B, C>(
         &self,
         mode: A,
-        window: WINDOW,
+        window: Window,
         property: B,
         type_: C,
         data: &[u8],
     ) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
         A: Into<u8>,
-        B: Into<ATOM>,
-        C: Into<ATOM>,
+        B: Into<Atom>,
+        C: Into<Atom>,
     {
         self.change_property(
             mode,
@@ -79,15 +79,15 @@ pub trait ConnectionExt: XProtoConnectionExt {
     fn change_property16<A, B, C>(
         &self,
         mode: A,
-        window: WINDOW,
+        window: Window,
         property: B,
         type_: C,
         data: &[u16],
     ) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
         A: Into<u8>,
-        B: Into<ATOM>,
-        C: Into<ATOM>,
+        B: Into<Atom>,
+        C: Into<Atom>,
     {
         let mut data_u8 = Vec::with_capacity(data.len() * 2);
         for item in data {
@@ -108,15 +108,15 @@ pub trait ConnectionExt: XProtoConnectionExt {
     fn change_property32<A, B, C>(
         &self,
         mode: A,
-        window: WINDOW,
+        window: Window,
         property: B,
         type_: C,
         data: &[u32],
     ) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
         A: Into<u8>,
-        B: Into<ATOM>,
-        C: Into<ATOM>,
+        B: Into<Atom>,
+        C: Into<Atom>,
     {
         let mut data_u8 = Vec::with_capacity(data.len() * 4);
         for item in data {

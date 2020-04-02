@@ -11,11 +11,11 @@ mod util {
     use x11rb::connection::Connection;
     use x11rb::xproto::{
         ClientMessageData, ClientMessageEvent, ConnectionExt as _, EventMask, CLIENT_MESSAGE_EVENT,
-        WINDOW,
+        Window,
     };
     use x11rb::x11_utils::TryParse;
 
-    pub fn start_timeout_thread<C>(conn: Arc<C>, window: WINDOW)
+    pub fn start_timeout_thread<C>(conn: Arc<C>, window: Window)
     where
         C: Connection + Send + Sync + 'static,
     {

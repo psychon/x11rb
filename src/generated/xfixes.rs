@@ -285,7 +285,7 @@ impl TryFrom<u32> for SaveSetMapping {
 
 /// Opcode for the ChangeSaveSet request
 pub const CHANGE_SAVE_SET_REQUEST: u8 = 1;
-pub fn change_save_set<Conn, A, B, C>(conn: &Conn, mode: A, target: B, map: C, window: WINDOW) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn change_save_set<Conn, A, B, C>(conn: &Conn, mode: A, target: B, map: C, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>, C: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -456,22 +456,22 @@ pub struct SelectionNotifyEvent {
     pub response_type: u8,
     pub subtype: SelectionEvent,
     pub sequence: u16,
-    pub window: WINDOW,
-    pub owner: WINDOW,
-    pub selection: ATOM,
-    pub timestamp: TIMESTAMP,
-    pub selection_timestamp: TIMESTAMP,
+    pub window: Window,
+    pub owner: Window,
+    pub selection: Atom,
+    pub timestamp: Timestamp,
+    pub selection_timestamp: Timestamp,
 }
 impl SelectionNotifyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (subtype, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
-        let (owner, remaining) = WINDOW::try_parse(remaining)?;
-        let (selection, remaining) = ATOM::try_parse(remaining)?;
-        let (timestamp, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (selection_timestamp, remaining) = TIMESTAMP::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
+        let (owner, remaining) = Window::try_parse(remaining)?;
+        let (selection, remaining) = Atom::try_parse(remaining)?;
+        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
+        let (selection_timestamp, remaining) = Timestamp::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
         let subtype = subtype.try_into()?;
         let result = SelectionNotifyEvent { response_type, subtype, sequence, window, owner, selection, timestamp, selection_timestamp };
@@ -520,7 +520,7 @@ impl From<SelectionNotifyEvent> for [u8; 32] {
 
 /// Opcode for the SelectSelectionInput request
 pub const SELECT_SELECTION_INPUT_REQUEST: u8 = 2;
-pub fn select_selection_input<Conn>(conn: &Conn, window: WINDOW, selection: ATOM, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn select_selection_input<Conn>(conn: &Conn, window: Window, selection: Atom, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -679,20 +679,20 @@ pub struct CursorNotifyEvent {
     pub response_type: u8,
     pub subtype: CursorNotify,
     pub sequence: u16,
-    pub window: WINDOW,
+    pub window: Window,
     pub cursor_serial: u32,
-    pub timestamp: TIMESTAMP,
-    pub name: ATOM,
+    pub timestamp: Timestamp,
+    pub name: Atom,
 }
 impl CursorNotifyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (subtype, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (window, remaining) = WINDOW::try_parse(remaining)?;
+        let (window, remaining) = Window::try_parse(remaining)?;
         let (cursor_serial, remaining) = u32::try_parse(remaining)?;
-        let (timestamp, remaining) = TIMESTAMP::try_parse(remaining)?;
-        let (name, remaining) = ATOM::try_parse(remaining)?;
+        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
+        let (name, remaining) = Atom::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let subtype = subtype.try_into()?;
         let result = CursorNotifyEvent { response_type, subtype, sequence, window, cursor_serial, timestamp, name };
@@ -740,7 +740,7 @@ impl From<CursorNotifyEvent> for [u8; 32] {
 
 /// Opcode for the SelectCursorInput request
 pub const SELECT_CURSOR_INPUT_REQUEST: u8 = 3;
-pub fn select_cursor_input<Conn>(conn: &Conn, window: WINDOW, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn select_cursor_input<Conn>(conn: &Conn, window: Window, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -827,7 +827,7 @@ impl TryFrom<&[u8]> for GetCursorImageReply {
     }
 }
 
-pub type REGION = u32;
+pub type Region = u32;
 
 /// Opcode for the BadRegion error
 pub const BAD_REGION_ERROR: u8 = 0;
@@ -883,57 +883,57 @@ impl From<BadRegionError> for [u8; 32] {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-pub enum Region {
+pub enum RegionEnum {
     None = 0,
 }
-impl From<Region> for u8 {
-    fn from(input: Region) -> Self {
+impl From<RegionEnum> for u8 {
+    fn from(input: RegionEnum) -> Self {
         match input {
-            Region::None => 0,
+            RegionEnum::None => 0,
         }
     }
 }
-impl From<Region> for Option<u8> {
-    fn from(input: Region) -> Self {
+impl From<RegionEnum> for Option<u8> {
+    fn from(input: RegionEnum) -> Self {
         Some(u8::from(input))
     }
 }
-impl From<Region> for u16 {
-    fn from(input: Region) -> Self {
+impl From<RegionEnum> for u16 {
+    fn from(input: RegionEnum) -> Self {
         Self::from(u8::from(input))
     }
 }
-impl From<Region> for Option<u16> {
-    fn from(input: Region) -> Self {
+impl From<RegionEnum> for Option<u16> {
+    fn from(input: RegionEnum) -> Self {
         Some(u16::from(input))
     }
 }
-impl From<Region> for u32 {
-    fn from(input: Region) -> Self {
+impl From<RegionEnum> for u32 {
+    fn from(input: RegionEnum) -> Self {
         Self::from(u8::from(input))
     }
 }
-impl From<Region> for Option<u32> {
-    fn from(input: Region) -> Self {
+impl From<RegionEnum> for Option<u32> {
+    fn from(input: RegionEnum) -> Self {
         Some(u32::from(input))
     }
 }
-impl TryFrom<u8> for Region {
+impl TryFrom<u8> for RegionEnum {
     type Error = ParseError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(Region::None),
+            0 => Ok(RegionEnum::None),
             _ => Err(ParseError::ParseError)
         }
     }
 }
-impl TryFrom<u16> for Region {
+impl TryFrom<u16> for RegionEnum {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
         Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
     }
 }
-impl TryFrom<u32> for Region {
+impl TryFrom<u32> for RegionEnum {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
@@ -942,7 +942,7 @@ impl TryFrom<u32> for Region {
 
 /// Opcode for the CreateRegion request
 pub const CREATE_REGION_REQUEST: u8 = 5;
-pub fn create_region<'c, Conn>(conn: &'c Conn, region: REGION, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_region<'c, Conn>(conn: &'c Conn, region: Region, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -971,7 +971,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CreateRegionFromBitmap request
 pub const CREATE_REGION_FROM_BITMAP_REQUEST: u8 = 6;
-pub fn create_region_from_bitmap<Conn>(conn: &Conn, region: REGION, bitmap: PIXMAP) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_region_from_bitmap<Conn>(conn: &Conn, region: Region, bitmap: Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1001,8 +1001,8 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CreateRegionFromWindow request
 pub const CREATE_REGION_FROM_WINDOW_REQUEST: u8 = 7;
-pub fn create_region_from_window<Conn, A>(conn: &Conn, region: REGION, window: WINDOW, kind: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<shape::KIND>
+pub fn create_region_from_window<Conn, A>(conn: &Conn, region: Region, window: Window, kind: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+where Conn: RequestConnection + ?Sized, A: Into<shape::Kind>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1037,7 +1037,7 @@ where Conn: RequestConnection + ?Sized, A: Into<shape::KIND>
 
 /// Opcode for the CreateRegionFromGC request
 pub const CREATE_REGION_FROM_GC_REQUEST: u8 = 8;
-pub fn create_region_from_gc<Conn>(conn: &Conn, region: REGION, gc: GCONTEXT) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_region_from_gc<Conn>(conn: &Conn, region: Region, gc: Gcontext) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1067,7 +1067,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CreateRegionFromPicture request
 pub const CREATE_REGION_FROM_PICTURE_REQUEST: u8 = 9;
-pub fn create_region_from_picture<Conn>(conn: &Conn, region: REGION, picture: render::PICTURE) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_region_from_picture<Conn>(conn: &Conn, region: Region, picture: render::Picture) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1097,7 +1097,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the DestroyRegion request
 pub const DESTROY_REGION_REQUEST: u8 = 10;
-pub fn destroy_region<Conn>(conn: &Conn, region: REGION) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn destroy_region<Conn>(conn: &Conn, region: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1122,7 +1122,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the SetRegion request
 pub const SET_REGION_REQUEST: u8 = 11;
-pub fn set_region<'c, Conn>(conn: &'c Conn, region: REGION, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_region<'c, Conn>(conn: &'c Conn, region: Region, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1151,7 +1151,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CopyRegion request
 pub const COPY_REGION_REQUEST: u8 = 12;
-pub fn copy_region<Conn>(conn: &Conn, source: REGION, destination: REGION) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn copy_region<Conn>(conn: &Conn, source: Region, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1181,7 +1181,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the UnionRegion request
 pub const UNION_REGION_REQUEST: u8 = 13;
-pub fn union_region<Conn>(conn: &Conn, source1: REGION, source2: REGION, destination: REGION) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn union_region<Conn>(conn: &Conn, source1: Region, source2: Region, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1216,7 +1216,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the IntersectRegion request
 pub const INTERSECT_REGION_REQUEST: u8 = 14;
-pub fn intersect_region<Conn>(conn: &Conn, source1: REGION, source2: REGION, destination: REGION) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn intersect_region<Conn>(conn: &Conn, source1: Region, source2: Region, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1251,7 +1251,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the SubtractRegion request
 pub const SUBTRACT_REGION_REQUEST: u8 = 15;
-pub fn subtract_region<Conn>(conn: &Conn, source1: REGION, source2: REGION, destination: REGION) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn subtract_region<Conn>(conn: &Conn, source1: Region, source2: Region, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1286,7 +1286,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the InvertRegion request
 pub const INVERT_REGION_REQUEST: u8 = 16;
-pub fn invert_region<Conn>(conn: &Conn, source: REGION, bounds: Rectangle, destination: REGION) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn invert_region<Conn>(conn: &Conn, source: Region, bounds: Rectangle, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1325,7 +1325,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the TranslateRegion request
 pub const TRANSLATE_REGION_REQUEST: u8 = 17;
-pub fn translate_region<Conn>(conn: &Conn, region: REGION, dx: i16, dy: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn translate_region<Conn>(conn: &Conn, region: Region, dx: i16, dy: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1356,7 +1356,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the RegionExtents request
 pub const REGION_EXTENTS_REQUEST: u8 = 18;
-pub fn region_extents<Conn>(conn: &Conn, source: REGION, destination: REGION) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn region_extents<Conn>(conn: &Conn, source: Region, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1386,7 +1386,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the FetchRegion request
 pub const FETCH_REGION_REQUEST: u8 = 19;
-pub fn fetch_region<Conn>(conn: &Conn, region: REGION) -> Result<Cookie<'_, Conn, FetchRegionReply>, ConnectionError>
+pub fn fetch_region<Conn>(conn: &Conn, region: Region) -> Result<Cookie<'_, Conn, FetchRegionReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1437,7 +1437,7 @@ impl TryFrom<&[u8]> for FetchRegionReply {
 
 /// Opcode for the SetGCClipRegion request
 pub const SET_GC_CLIP_REGION_REQUEST: u8 = 20;
-pub fn set_gc_clip_region<Conn>(conn: &Conn, gc: GCONTEXT, region: REGION, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_gc_clip_region<Conn>(conn: &Conn, gc: Gcontext, region: Region, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1473,8 +1473,8 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the SetWindowShapeRegion request
 pub const SET_WINDOW_SHAPE_REGION_REQUEST: u8 = 21;
-pub fn set_window_shape_region<Conn, A>(conn: &Conn, dest: WINDOW, dest_kind: A, x_offset: i16, y_offset: i16, region: REGION) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<shape::KIND>
+pub fn set_window_shape_region<Conn, A>(conn: &Conn, dest: Window, dest_kind: A, x_offset: i16, y_offset: i16, region: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+where Conn: RequestConnection + ?Sized, A: Into<shape::Kind>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1515,7 +1515,7 @@ where Conn: RequestConnection + ?Sized, A: Into<shape::KIND>
 
 /// Opcode for the SetPictureClipRegion request
 pub const SET_PICTURE_CLIP_REGION_REQUEST: u8 = 22;
-pub fn set_picture_clip_region<Conn>(conn: &Conn, picture: render::PICTURE, region: REGION, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_picture_clip_region<Conn>(conn: &Conn, picture: render::Picture, region: Region, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1551,7 +1551,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the SetCursorName request
 pub const SET_CURSOR_NAME_REQUEST: u8 = 23;
-pub fn set_cursor_name<'c, Conn>(conn: &'c Conn, cursor: CURSOR, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_cursor_name<'c, Conn>(conn: &'c Conn, cursor: Cursor, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1585,7 +1585,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetCursorName request
 pub const GET_CURSOR_NAME_REQUEST: u8 = 24;
-pub fn get_cursor_name<Conn>(conn: &Conn, cursor: CURSOR) -> Result<Cookie<'_, Conn, GetCursorNameReply>, ConnectionError>
+pub fn get_cursor_name<Conn>(conn: &Conn, cursor: Cursor) -> Result<Cookie<'_, Conn, GetCursorNameReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1612,7 +1612,7 @@ pub struct GetCursorNameReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub atom: ATOM,
+    pub atom: Atom,
     pub name: Vec<u8>,
 }
 impl GetCursorNameReply {
@@ -1621,7 +1621,7 @@ impl GetCursorNameReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (atom, remaining) = ATOM::try_parse(remaining)?;
+        let (atom, remaining) = Atom::try_parse(remaining)?;
         let (nbytes, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, nbytes as usize)?;
@@ -1667,7 +1667,7 @@ pub struct GetCursorImageAndNameReply {
     pub xhot: u16,
     pub yhot: u16,
     pub cursor_serial: u32,
-    pub cursor_atom: ATOM,
+    pub cursor_atom: Atom,
     pub cursor_image: Vec<u32>,
     pub name: Vec<u8>,
 }
@@ -1684,7 +1684,7 @@ impl GetCursorImageAndNameReply {
         let (xhot, remaining) = u16::try_parse(remaining)?;
         let (yhot, remaining) = u16::try_parse(remaining)?;
         let (cursor_serial, remaining) = u32::try_parse(remaining)?;
-        let (cursor_atom, remaining) = ATOM::try_parse(remaining)?;
+        let (cursor_atom, remaining) = Atom::try_parse(remaining)?;
         let (nbytes, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (cursor_image, remaining) = crate::x11_utils::parse_list::<u32>(remaining, (width as usize) * (height as usize))?;
@@ -1702,7 +1702,7 @@ impl TryFrom<&[u8]> for GetCursorImageAndNameReply {
 
 /// Opcode for the ChangeCursor request
 pub const CHANGE_CURSOR_REQUEST: u8 = 26;
-pub fn change_cursor<Conn>(conn: &Conn, source: CURSOR, destination: CURSOR) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn change_cursor<Conn>(conn: &Conn, source: Cursor, destination: Cursor) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1732,7 +1732,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the ChangeCursorByName request
 pub const CHANGE_CURSOR_BY_NAME_REQUEST: u8 = 27;
-pub fn change_cursor_by_name<'c, Conn>(conn: &'c Conn, src: CURSOR, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_cursor_by_name<'c, Conn>(conn: &'c Conn, src: Cursor, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1766,7 +1766,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the ExpandRegion request
 pub const EXPAND_REGION_REQUEST: u8 = 28;
-pub fn expand_region<Conn>(conn: &Conn, source: REGION, destination: REGION, left: u16, right: u16, top: u16, bottom: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn expand_region<Conn>(conn: &Conn, source: Region, destination: Region, left: u16, right: u16, top: u16, bottom: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1808,7 +1808,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the HideCursor request
 pub const HIDE_CURSOR_REQUEST: u8 = 29;
-pub fn hide_cursor<Conn>(conn: &Conn, window: WINDOW) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn hide_cursor<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1833,7 +1833,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the ShowCursor request
 pub const SHOW_CURSOR_REQUEST: u8 = 30;
-pub fn show_cursor<Conn>(conn: &Conn, window: WINDOW) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn show_cursor<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1856,7 +1856,7 @@ where Conn: RequestConnection + ?Sized
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
-pub type BARRIER = u32;
+pub type Barrier = u32;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -1929,7 +1929,7 @@ bitmask_binop!(BarrierDirections, u8);
 
 /// Opcode for the CreatePointerBarrier request
 pub const CREATE_POINTER_BARRIER_REQUEST: u8 = 31;
-pub fn create_pointer_barrier<'c, Conn>(conn: &'c Conn, barrier: BARRIER, window: WINDOW, x1: u16, y1: u16, x2: u16, y2: u16, directions: u32, devices: &[u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_pointer_barrier<'c, Conn>(conn: &'c Conn, barrier: Barrier, window: Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: u32, devices: &[u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1986,7 +1986,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the DeletePointerBarrier request
 pub const DELETE_POINTER_BARRIER_REQUEST: u8 = 32;
-pub fn delete_pointer_barrier<Conn>(conn: &Conn, barrier: BARRIER) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn delete_pointer_barrier<Conn>(conn: &Conn, barrier: Barrier) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2016,18 +2016,18 @@ pub trait ConnectionExt: RequestConnection {
         query_version(self, client_major_version, client_minor_version)
     }
 
-    fn xfixes_change_save_set<A, B, C>(&self, mode: A, target: B, map: C, window: WINDOW) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_change_save_set<A, B, C>(&self, mode: A, target: B, map: C, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<u8>, B: Into<u8>, C: Into<u8>
     {
         change_save_set(self, mode, target, map, window)
     }
 
-    fn xfixes_select_selection_input(&self, window: WINDOW, selection: ATOM, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_select_selection_input(&self, window: Window, selection: Atom, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_selection_input(self, window, selection, event_mask)
     }
 
-    fn xfixes_select_cursor_input(&self, window: WINDOW, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_select_cursor_input(&self, window: Window, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_cursor_input(self, window, event_mask)
     }
@@ -2037,104 +2037,104 @@ pub trait ConnectionExt: RequestConnection {
         get_cursor_image(self)
     }
 
-    fn xfixes_create_region<'c>(&'c self, region: REGION, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xfixes_create_region<'c>(&'c self, region: Region, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_region(self, region, rectangles)
     }
 
-    fn xfixes_create_region_from_bitmap(&self, region: REGION, bitmap: PIXMAP) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_create_region_from_bitmap(&self, region: Region, bitmap: Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_region_from_bitmap(self, region, bitmap)
     }
 
-    fn xfixes_create_region_from_window<A>(&self, region: REGION, window: WINDOW, kind: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<shape::KIND>
+    fn xfixes_create_region_from_window<A>(&self, region: Region, window: Window, kind: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where A: Into<shape::Kind>
     {
         create_region_from_window(self, region, window, kind)
     }
 
-    fn xfixes_create_region_from_gc(&self, region: REGION, gc: GCONTEXT) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_create_region_from_gc(&self, region: Region, gc: Gcontext) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_region_from_gc(self, region, gc)
     }
 
-    fn xfixes_create_region_from_picture(&self, region: REGION, picture: render::PICTURE) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_create_region_from_picture(&self, region: Region, picture: render::Picture) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_region_from_picture(self, region, picture)
     }
 
-    fn xfixes_destroy_region(&self, region: REGION) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_destroy_region(&self, region: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_region(self, region)
     }
 
-    fn xfixes_set_region<'c>(&'c self, region: REGION, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xfixes_set_region<'c>(&'c self, region: Region, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_region(self, region, rectangles)
     }
 
-    fn xfixes_copy_region(&self, source: REGION, destination: REGION) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_copy_region(&self, source: Region, destination: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         copy_region(self, source, destination)
     }
 
-    fn xfixes_union_region(&self, source1: REGION, source2: REGION, destination: REGION) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_union_region(&self, source1: Region, source2: Region, destination: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         union_region(self, source1, source2, destination)
     }
 
-    fn xfixes_intersect_region(&self, source1: REGION, source2: REGION, destination: REGION) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_intersect_region(&self, source1: Region, source2: Region, destination: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         intersect_region(self, source1, source2, destination)
     }
 
-    fn xfixes_subtract_region(&self, source1: REGION, source2: REGION, destination: REGION) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_subtract_region(&self, source1: Region, source2: Region, destination: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         subtract_region(self, source1, source2, destination)
     }
 
-    fn xfixes_invert_region(&self, source: REGION, bounds: Rectangle, destination: REGION) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_invert_region(&self, source: Region, bounds: Rectangle, destination: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         invert_region(self, source, bounds, destination)
     }
 
-    fn xfixes_translate_region(&self, region: REGION, dx: i16, dy: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_translate_region(&self, region: Region, dx: i16, dy: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         translate_region(self, region, dx, dy)
     }
 
-    fn xfixes_region_extents(&self, source: REGION, destination: REGION) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_region_extents(&self, source: Region, destination: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         region_extents(self, source, destination)
     }
 
-    fn xfixes_fetch_region(&self, region: REGION) -> Result<Cookie<'_, Self, FetchRegionReply>, ConnectionError>
+    fn xfixes_fetch_region(&self, region: Region) -> Result<Cookie<'_, Self, FetchRegionReply>, ConnectionError>
     {
         fetch_region(self, region)
     }
 
-    fn xfixes_set_gc_clip_region(&self, gc: GCONTEXT, region: REGION, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_set_gc_clip_region(&self, gc: Gcontext, region: Region, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_gc_clip_region(self, gc, region, x_origin, y_origin)
     }
 
-    fn xfixes_set_window_shape_region<A>(&self, dest: WINDOW, dest_kind: A, x_offset: i16, y_offset: i16, region: REGION) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<shape::KIND>
+    fn xfixes_set_window_shape_region<A>(&self, dest: Window, dest_kind: A, x_offset: i16, y_offset: i16, region: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where A: Into<shape::Kind>
     {
         set_window_shape_region(self, dest, dest_kind, x_offset, y_offset, region)
     }
 
-    fn xfixes_set_picture_clip_region(&self, picture: render::PICTURE, region: REGION, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_set_picture_clip_region(&self, picture: render::Picture, region: Region, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_picture_clip_region(self, picture, region, x_origin, y_origin)
     }
 
-    fn xfixes_set_cursor_name<'c>(&'c self, cursor: CURSOR, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xfixes_set_cursor_name<'c>(&'c self, cursor: Cursor, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_cursor_name(self, cursor, name)
     }
 
-    fn xfixes_get_cursor_name(&self, cursor: CURSOR) -> Result<Cookie<'_, Self, GetCursorNameReply>, ConnectionError>
+    fn xfixes_get_cursor_name(&self, cursor: Cursor) -> Result<Cookie<'_, Self, GetCursorNameReply>, ConnectionError>
     {
         get_cursor_name(self, cursor)
     }
@@ -2144,37 +2144,37 @@ pub trait ConnectionExt: RequestConnection {
         get_cursor_image_and_name(self)
     }
 
-    fn xfixes_change_cursor(&self, source: CURSOR, destination: CURSOR) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_change_cursor(&self, source: Cursor, destination: Cursor) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         change_cursor(self, source, destination)
     }
 
-    fn xfixes_change_cursor_by_name<'c>(&'c self, src: CURSOR, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xfixes_change_cursor_by_name<'c>(&'c self, src: Cursor, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_cursor_by_name(self, src, name)
     }
 
-    fn xfixes_expand_region(&self, source: REGION, destination: REGION, left: u16, right: u16, top: u16, bottom: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_expand_region(&self, source: Region, destination: Region, left: u16, right: u16, top: u16, bottom: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         expand_region(self, source, destination, left, right, top, bottom)
     }
 
-    fn xfixes_hide_cursor(&self, window: WINDOW) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_hide_cursor(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         hide_cursor(self, window)
     }
 
-    fn xfixes_show_cursor(&self, window: WINDOW) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_show_cursor(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         show_cursor(self, window)
     }
 
-    fn xfixes_create_pointer_barrier<'c>(&'c self, barrier: BARRIER, window: WINDOW, x1: u16, y1: u16, x2: u16, y2: u16, directions: u32, devices: &[u16]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xfixes_create_pointer_barrier<'c>(&'c self, barrier: Barrier, window: Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: u32, devices: &[u16]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_pointer_barrier(self, barrier, window, x1, y1, x2, y2, directions, devices)
     }
 
-    fn xfixes_delete_pointer_barrier(&self, barrier: BARRIER) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_delete_pointer_barrier(&self, barrier: Barrier) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_pointer_barrier(self, barrier)
     }

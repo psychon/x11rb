@@ -15,7 +15,7 @@ use x11rb::xproto::{self, ConnectionExt as _, ImageFormat};
 
 const TEMP_FILE_CONTENT: [u8; 8] = [0x00, 0x01, 0x02, 0x03, 0xff, 0xfe, 0xfd, 0xfc];
 
-struct FreePixmap<'c, C: Connection>(&'c C, xproto::PIXMAP);
+struct FreePixmap<'c, C: Connection>(&'c C, xproto::Pixmap);
 impl<C: Connection> Drop for FreePixmap<'_, C> {
     fn drop(&mut self) {
         self.0.free_pixmap(self.1).unwrap();
@@ -40,7 +40,7 @@ fn check_shm_version<C: Connection>(conn: &C) -> Result<Option<(u16, u16)>, Repl
 fn get_shared_memory_content_at_offset<C: Connection>(
     conn: &C,
     screen: &xproto::Screen,
-    shmseg: shm::SEG,
+    shmseg: shm::Seg,
     offset: u32,
 ) -> Result<Vec<u8>, ReplyOrIdError<C::Buf>> {
     let width = match screen.root_depth {
@@ -69,7 +69,7 @@ fn get_shared_memory_content_at_offset<C: Connection>(
 fn use_shared_mem<C: Connection>(
     conn: &C,
     screen_num: usize,
-    shmseg: shm::SEG,
+    shmseg: shm::Seg,
 ) -> Result<(), ReplyOrIdError<C::Buf>> {
     let screen = &conn.setup().roots[screen_num];
 

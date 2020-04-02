@@ -100,57 +100,57 @@ impl TryFrom<u32> for PictType {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
-pub enum Picture {
+pub enum PictureEnum {
     None = 0,
 }
-impl From<Picture> for u8 {
-    fn from(input: Picture) -> Self {
+impl From<PictureEnum> for u8 {
+    fn from(input: PictureEnum) -> Self {
         match input {
-            Picture::None => 0,
+            PictureEnum::None => 0,
         }
     }
 }
-impl From<Picture> for Option<u8> {
-    fn from(input: Picture) -> Self {
+impl From<PictureEnum> for Option<u8> {
+    fn from(input: PictureEnum) -> Self {
         Some(u8::from(input))
     }
 }
-impl From<Picture> for u16 {
-    fn from(input: Picture) -> Self {
+impl From<PictureEnum> for u16 {
+    fn from(input: PictureEnum) -> Self {
         Self::from(u8::from(input))
     }
 }
-impl From<Picture> for Option<u16> {
-    fn from(input: Picture) -> Self {
+impl From<PictureEnum> for Option<u16> {
+    fn from(input: PictureEnum) -> Self {
         Some(u16::from(input))
     }
 }
-impl From<Picture> for u32 {
-    fn from(input: Picture) -> Self {
+impl From<PictureEnum> for u32 {
+    fn from(input: PictureEnum) -> Self {
         Self::from(u8::from(input))
     }
 }
-impl From<Picture> for Option<u32> {
-    fn from(input: Picture) -> Self {
+impl From<PictureEnum> for Option<u32> {
+    fn from(input: PictureEnum) -> Self {
         Some(u32::from(input))
     }
 }
-impl TryFrom<u8> for Picture {
+impl TryFrom<u8> for PictureEnum {
     type Error = ParseError;
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
-            0 => Ok(Picture::None),
+            0 => Ok(PictureEnum::None),
             _ => Err(ParseError::ParseError)
         }
     }
 }
-impl TryFrom<u16> for Picture {
+impl TryFrom<u16> for PictureEnum {
     type Error = ParseError;
     fn try_from(value: u16) -> Result<Self, Self::Error> {
         Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
     }
 }
-impl TryFrom<u32> for Picture {
+impl TryFrom<u32> for PictureEnum {
     type Error = ParseError;
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         Self::try_from(u8::try_from(value).or(Err(ParseError::ParseError))?)
@@ -718,15 +718,15 @@ impl TryFrom<u32> for Repeat {
     }
 }
 
-pub type GLYPH = u32;
+pub type Glyph = u32;
 
-pub type GLYPHSET = u32;
+pub type Glyphset = u32;
 
-pub type PICTURE = u32;
+pub type Picture = u32;
 
-pub type PICTFORMAT = u32;
+pub type Pictformat = u32;
 
-pub type FIXED = i32;
+pub type Fixed = i32;
 
 /// Opcode for the PictFormat error
 pub const PICT_FORMAT_ERROR: u8 = 0;
@@ -1064,20 +1064,20 @@ impl Serialize for Directformat {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Pictforminfo {
-    pub id: PICTFORMAT,
+    pub id: Pictformat,
     pub type_: PictType,
     pub depth: u8,
     pub direct: Directformat,
-    pub colormap: COLORMAP,
+    pub colormap: Colormap,
 }
 impl TryParse for Pictforminfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (id, remaining) = PICTFORMAT::try_parse(remaining)?;
+        let (id, remaining) = Pictformat::try_parse(remaining)?;
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (depth, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (direct, remaining) = Directformat::try_parse(remaining)?;
-        let (colormap, remaining) = COLORMAP::try_parse(remaining)?;
+        let (colormap, remaining) = Colormap::try_parse(remaining)?;
         let type_ = type_.try_into()?;
         let result = Pictforminfo { id, type_, depth, direct, colormap };
         Ok((result, remaining))
@@ -1141,13 +1141,13 @@ impl Serialize for Pictforminfo {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Pictvisual {
-    pub visual: VISUALID,
-    pub format: PICTFORMAT,
+    pub visual: Visualid,
+    pub format: Pictformat,
 }
 impl TryParse for Pictvisual {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (visual, remaining) = VISUALID::try_parse(remaining)?;
-        let (format, remaining) = PICTFORMAT::try_parse(remaining)?;
+        let (visual, remaining) = Visualid::try_parse(remaining)?;
+        let (format, remaining) = Pictformat::try_parse(remaining)?;
         let result = Pictvisual { visual, format };
         Ok((result, remaining))
     }
@@ -1223,13 +1223,13 @@ impl Serialize for Pictdepth {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Pictscreen {
-    pub fallback: PICTFORMAT,
+    pub fallback: Pictformat,
     pub depths: Vec<Pictdepth>,
 }
 impl TryParse for Pictscreen {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_depths, remaining) = u32::try_parse(remaining)?;
-        let (fallback, remaining) = PICTFORMAT::try_parse(remaining)?;
+        let (fallback, remaining) = Pictformat::try_parse(remaining)?;
         let (depths, remaining) = crate::x11_utils::parse_list::<Pictdepth>(remaining, num_depths as usize)?;
         let result = Pictscreen { fallback, depths };
         Ok((result, remaining))
@@ -1367,13 +1367,13 @@ impl Serialize for Color {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Pointfix {
-    pub x: FIXED,
-    pub y: FIXED,
+    pub x: Fixed,
+    pub y: Fixed,
 }
 impl TryParse for Pointfix {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (x, remaining) = FIXED::try_parse(remaining)?;
-        let (y, remaining) = FIXED::try_parse(remaining)?;
+        let (x, remaining) = Fixed::try_parse(remaining)?;
+        let (y, remaining) = Fixed::try_parse(remaining)?;
         let result = Pointfix { x, y };
         Ok((result, remaining))
     }
@@ -1521,15 +1521,15 @@ impl Serialize for Triangle {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Trapezoid {
-    pub top: FIXED,
-    pub bottom: FIXED,
+    pub top: Fixed,
+    pub bottom: Fixed,
     pub left: Linefix,
     pub right: Linefix,
 }
 impl TryParse for Trapezoid {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (top, remaining) = FIXED::try_parse(remaining)?;
-        let (bottom, remaining) = FIXED::try_parse(remaining)?;
+        let (top, remaining) = Fixed::try_parse(remaining)?;
+        let (bottom, remaining) = Fixed::try_parse(remaining)?;
         let (left, remaining) = Linefix::try_parse(remaining)?;
         let (right, remaining) = Linefix::try_parse(remaining)?;
         let result = Trapezoid { top, bottom, left, right };
@@ -1778,7 +1778,7 @@ impl TryFrom<&[u8]> for QueryPictFormatsReply {
 
 /// Opcode for the QueryPictIndexValues request
 pub const QUERY_PICT_INDEX_VALUES_REQUEST: u8 = 2;
-pub fn query_pict_index_values<Conn>(conn: &Conn, format: PICTFORMAT) -> Result<Cookie<'_, Conn, QueryPictIndexValuesReply>, ConnectionError>
+pub fn query_pict_index_values<Conn>(conn: &Conn, format: Pictformat) -> Result<Cookie<'_, Conn, QueryPictIndexValuesReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1833,17 +1833,17 @@ pub const CREATE_PICTURE_REQUEST: u8 = 4;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct CreatePictureAux {
     pub repeat: Option<u32>,
-    pub alphamap: Option<PICTURE>,
+    pub alphamap: Option<Picture>,
     pub alphaxorigin: Option<i32>,
     pub alphayorigin: Option<i32>,
     pub clipxorigin: Option<i32>,
     pub clipyorigin: Option<i32>,
-    pub clipmask: Option<PIXMAP>,
+    pub clipmask: Option<Pixmap>,
     pub graphicsexposure: Option<u32>,
     pub subwindowmode: Option<u32>,
     pub polyedge: Option<u32>,
     pub polymode: Option<u32>,
-    pub dither: Option<ATOM>,
+    pub dither: Option<Atom>,
     pub componentalpha: Option<u32>,
 }
 impl CreatePictureAux {
@@ -1900,7 +1900,7 @@ impl CreatePictureAux {
         self
     }
     /// Set the alphamap field of this structure.
-    pub fn alphamap<I>(mut self, value: I) -> Self where I: Into<Option<PICTURE>> {
+    pub fn alphamap<I>(mut self, value: I) -> Self where I: Into<Option<Picture>> {
         self.alphamap = value.into();
         self
     }
@@ -1925,7 +1925,7 @@ impl CreatePictureAux {
         self
     }
     /// Set the clipmask field of this structure.
-    pub fn clipmask<I>(mut self, value: I) -> Self where I: Into<Option<PIXMAP>> {
+    pub fn clipmask<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.clipmask = value.into();
         self
     }
@@ -1950,7 +1950,7 @@ impl CreatePictureAux {
         self
     }
     /// Set the dither field of this structure.
-    pub fn dither<I>(mut self, value: I) -> Self where I: Into<Option<ATOM>> {
+    pub fn dither<I>(mut self, value: I) -> Self where I: Into<Option<Atom>> {
         self.dither = value.into();
         self
     }
@@ -2009,7 +2009,7 @@ impl Serialize for CreatePictureAux {
         }
     }
 }
-pub fn create_picture<'c, Conn>(conn: &'c Conn, pid: PICTURE, drawable: DRAWABLE, format: PICTFORMAT, value_list: &CreatePictureAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_picture<'c, Conn>(conn: &'c Conn, pid: Picture, drawable: Drawable, format: Pictformat, value_list: &CreatePictureAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2058,17 +2058,17 @@ pub const CHANGE_PICTURE_REQUEST: u8 = 5;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ChangePictureAux {
     pub repeat: Option<u32>,
-    pub alphamap: Option<PICTURE>,
+    pub alphamap: Option<Picture>,
     pub alphaxorigin: Option<i32>,
     pub alphayorigin: Option<i32>,
     pub clipxorigin: Option<i32>,
     pub clipyorigin: Option<i32>,
-    pub clipmask: Option<PIXMAP>,
+    pub clipmask: Option<Pixmap>,
     pub graphicsexposure: Option<u32>,
     pub subwindowmode: Option<u32>,
     pub polyedge: Option<u32>,
     pub polymode: Option<u32>,
-    pub dither: Option<ATOM>,
+    pub dither: Option<Atom>,
     pub componentalpha: Option<u32>,
 }
 impl ChangePictureAux {
@@ -2125,7 +2125,7 @@ impl ChangePictureAux {
         self
     }
     /// Set the alphamap field of this structure.
-    pub fn alphamap<I>(mut self, value: I) -> Self where I: Into<Option<PICTURE>> {
+    pub fn alphamap<I>(mut self, value: I) -> Self where I: Into<Option<Picture>> {
         self.alphamap = value.into();
         self
     }
@@ -2150,7 +2150,7 @@ impl ChangePictureAux {
         self
     }
     /// Set the clipmask field of this structure.
-    pub fn clipmask<I>(mut self, value: I) -> Self where I: Into<Option<PIXMAP>> {
+    pub fn clipmask<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.clipmask = value.into();
         self
     }
@@ -2175,7 +2175,7 @@ impl ChangePictureAux {
         self
     }
     /// Set the dither field of this structure.
-    pub fn dither<I>(mut self, value: I) -> Self where I: Into<Option<ATOM>> {
+    pub fn dither<I>(mut self, value: I) -> Self where I: Into<Option<Atom>> {
         self.dither = value.into();
         self
     }
@@ -2234,7 +2234,7 @@ impl Serialize for ChangePictureAux {
         }
     }
 }
-pub fn change_picture<'c, Conn>(conn: &'c Conn, picture: PICTURE, value_list: &ChangePictureAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_picture<'c, Conn>(conn: &'c Conn, picture: Picture, value_list: &ChangePictureAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2269,7 +2269,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the SetPictureClipRectangles request
 pub const SET_PICTURE_CLIP_RECTANGLES_REQUEST: u8 = 6;
-pub fn set_picture_clip_rectangles<'c, Conn>(conn: &'c Conn, picture: PICTURE, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_picture_clip_rectangles<'c, Conn>(conn: &'c Conn, picture: Picture, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2304,7 +2304,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the FreePicture request
 pub const FREE_PICTURE_REQUEST: u8 = 7;
-pub fn free_picture<Conn>(conn: &Conn, picture: PICTURE) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn free_picture<Conn>(conn: &Conn, picture: Picture) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2329,7 +2329,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the Composite request
 pub const COMPOSITE_REQUEST: u8 = 8;
-pub fn composite<Conn, A>(conn: &Conn, op: A, src: PICTURE, mask: PICTURE, dst: PICTURE, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn composite<Conn, A>(conn: &Conn, op: A, src: Picture, mask: Picture, dst: Picture, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2394,7 +2394,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the Trapezoids request
 pub const TRAPEZOIDS_REQUEST: u8 = 10;
-pub fn trapezoids<'c, Conn, A>(conn: &'c Conn, op: A, src: PICTURE, dst: PICTURE, mask_format: PICTFORMAT, src_x: i16, src_y: i16, traps: &[Trapezoid]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn trapezoids<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, traps: &[Trapezoid]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2445,7 +2445,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the Triangles request
 pub const TRIANGLES_REQUEST: u8 = 11;
-pub fn triangles<'c, Conn, A>(conn: &'c Conn, op: A, src: PICTURE, dst: PICTURE, mask_format: PICTFORMAT, src_x: i16, src_y: i16, triangles: &[Triangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn triangles<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, triangles: &[Triangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2496,7 +2496,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the TriStrip request
 pub const TRI_STRIP_REQUEST: u8 = 12;
-pub fn tri_strip<'c, Conn, A>(conn: &'c Conn, op: A, src: PICTURE, dst: PICTURE, mask_format: PICTFORMAT, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn tri_strip<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2547,7 +2547,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the TriFan request
 pub const TRI_FAN_REQUEST: u8 = 13;
-pub fn tri_fan<'c, Conn, A>(conn: &'c Conn, op: A, src: PICTURE, dst: PICTURE, mask_format: PICTFORMAT, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn tri_fan<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2598,7 +2598,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the CreateGlyphSet request
 pub const CREATE_GLYPH_SET_REQUEST: u8 = 17;
-pub fn create_glyph_set<Conn>(conn: &Conn, gsid: GLYPHSET, format: PICTFORMAT) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_glyph_set<Conn>(conn: &Conn, gsid: Glyphset, format: Pictformat) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2628,7 +2628,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the ReferenceGlyphSet request
 pub const REFERENCE_GLYPH_SET_REQUEST: u8 = 18;
-pub fn reference_glyph_set<Conn>(conn: &Conn, gsid: GLYPHSET, existing: GLYPHSET) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn reference_glyph_set<Conn>(conn: &Conn, gsid: Glyphset, existing: Glyphset) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2658,7 +2658,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the FreeGlyphSet request
 pub const FREE_GLYPH_SET_REQUEST: u8 = 19;
-pub fn free_glyph_set<Conn>(conn: &Conn, glyphset: GLYPHSET) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn free_glyph_set<Conn>(conn: &Conn, glyphset: Glyphset) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2683,7 +2683,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the AddGlyphs request
 pub const ADD_GLYPHS_REQUEST: u8 = 20;
-pub fn add_glyphs<'c, Conn>(conn: &'c Conn, glyphset: GLYPHSET, glyphs_len: u32, glyphids: &[u32], glyphs: &[Glyphinfo], data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn add_glyphs<'c, Conn>(conn: &'c Conn, glyphset: Glyphset, glyphs_len: u32, glyphids: &[u32], glyphs: &[Glyphinfo], data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2722,7 +2722,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the FreeGlyphs request
 pub const FREE_GLYPHS_REQUEST: u8 = 22;
-pub fn free_glyphs<'c, Conn>(conn: &'c Conn, glyphset: GLYPHSET, glyphs: &[GLYPH]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn free_glyphs<'c, Conn>(conn: &'c Conn, glyphset: Glyphset, glyphs: &[Glyph]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2751,7 +2751,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CompositeGlyphs8 request
 pub const COMPOSITE_GLYPHS8_REQUEST: u8 = 23;
-pub fn composite_glyphs8<'c, Conn, A>(conn: &'c Conn, op: A, src: PICTURE, dst: PICTURE, mask_format: PICTFORMAT, glyphset: GLYPHSET, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn composite_glyphs8<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2806,7 +2806,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the CompositeGlyphs16 request
 pub const COMPOSITE_GLYPHS16_REQUEST: u8 = 24;
-pub fn composite_glyphs16<'c, Conn, A>(conn: &'c Conn, op: A, src: PICTURE, dst: PICTURE, mask_format: PICTFORMAT, glyphset: GLYPHSET, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn composite_glyphs16<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2861,7 +2861,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the CompositeGlyphs32 request
 pub const COMPOSITE_GLYPHS32_REQUEST: u8 = 25;
-pub fn composite_glyphs32<'c, Conn, A>(conn: &'c Conn, op: A, src: PICTURE, dst: PICTURE, mask_format: PICTFORMAT, glyphset: GLYPHSET, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn composite_glyphs32<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2916,7 +2916,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the FillRectangles request
 pub const FILL_RECTANGLES_REQUEST: u8 = 26;
-pub fn fill_rectangles<'c, Conn, A>(conn: &'c Conn, op: A, dst: PICTURE, color: Color, rects: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn fill_rectangles<'c, Conn, A>(conn: &'c Conn, op: A, dst: Picture, color: Color, rects: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2960,7 +2960,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the CreateCursor request
 pub const CREATE_CURSOR_REQUEST: u8 = 27;
-pub fn create_cursor<Conn>(conn: &Conn, cid: CURSOR, source: PICTURE, x: u16, y: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_cursor<Conn>(conn: &Conn, cid: Cursor, source: Picture, x: u16, y: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2996,27 +2996,27 @@ where Conn: RequestConnection + ?Sized
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Transform {
-    pub matrix11: FIXED,
-    pub matrix12: FIXED,
-    pub matrix13: FIXED,
-    pub matrix21: FIXED,
-    pub matrix22: FIXED,
-    pub matrix23: FIXED,
-    pub matrix31: FIXED,
-    pub matrix32: FIXED,
-    pub matrix33: FIXED,
+    pub matrix11: Fixed,
+    pub matrix12: Fixed,
+    pub matrix13: Fixed,
+    pub matrix21: Fixed,
+    pub matrix22: Fixed,
+    pub matrix23: Fixed,
+    pub matrix31: Fixed,
+    pub matrix32: Fixed,
+    pub matrix33: Fixed,
 }
 impl TryParse for Transform {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (matrix11, remaining) = FIXED::try_parse(remaining)?;
-        let (matrix12, remaining) = FIXED::try_parse(remaining)?;
-        let (matrix13, remaining) = FIXED::try_parse(remaining)?;
-        let (matrix21, remaining) = FIXED::try_parse(remaining)?;
-        let (matrix22, remaining) = FIXED::try_parse(remaining)?;
-        let (matrix23, remaining) = FIXED::try_parse(remaining)?;
-        let (matrix31, remaining) = FIXED::try_parse(remaining)?;
-        let (matrix32, remaining) = FIXED::try_parse(remaining)?;
-        let (matrix33, remaining) = FIXED::try_parse(remaining)?;
+        let (matrix11, remaining) = Fixed::try_parse(remaining)?;
+        let (matrix12, remaining) = Fixed::try_parse(remaining)?;
+        let (matrix13, remaining) = Fixed::try_parse(remaining)?;
+        let (matrix21, remaining) = Fixed::try_parse(remaining)?;
+        let (matrix22, remaining) = Fixed::try_parse(remaining)?;
+        let (matrix23, remaining) = Fixed::try_parse(remaining)?;
+        let (matrix31, remaining) = Fixed::try_parse(remaining)?;
+        let (matrix32, remaining) = Fixed::try_parse(remaining)?;
+        let (matrix33, remaining) = Fixed::try_parse(remaining)?;
         let result = Transform { matrix11, matrix12, matrix13, matrix21, matrix22, matrix23, matrix31, matrix32, matrix33 };
         Ok((result, remaining))
     }
@@ -3094,7 +3094,7 @@ impl Serialize for Transform {
 
 /// Opcode for the SetPictureTransform request
 pub const SET_PICTURE_TRANSFORM_REQUEST: u8 = 28;
-pub fn set_picture_transform<Conn>(conn: &Conn, picture: PICTURE, transform: Transform) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_picture_transform<Conn>(conn: &Conn, picture: Picture, transform: Transform) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -3156,7 +3156,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the QueryFilters request
 pub const QUERY_FILTERS_REQUEST: u8 = 29;
-pub fn query_filters<Conn>(conn: &Conn, drawable: DRAWABLE) -> Result<Cookie<'_, Conn, QueryFiltersReply>, ConnectionError>
+pub fn query_filters<Conn>(conn: &Conn, drawable: Drawable) -> Result<Cookie<'_, Conn, QueryFiltersReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -3210,7 +3210,7 @@ impl TryFrom<&[u8]> for QueryFiltersReply {
 
 /// Opcode for the SetPictureFilter request
 pub const SET_PICTURE_FILTER_REQUEST: u8 = 30;
-pub fn set_picture_filter<'c, Conn>(conn: &'c Conn, picture: PICTURE, filter: &[u8], values: &[FIXED]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_picture_filter<'c, Conn>(conn: &'c Conn, picture: Picture, filter: &[u8], values: &[Fixed]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -3248,12 +3248,12 @@ where Conn: RequestConnection + ?Sized
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Animcursorelt {
-    pub cursor: CURSOR,
+    pub cursor: Cursor,
     pub delay: u32,
 }
 impl TryParse for Animcursorelt {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (cursor, remaining) = CURSOR::try_parse(remaining)?;
+        let (cursor, remaining) = Cursor::try_parse(remaining)?;
         let (delay, remaining) = u32::try_parse(remaining)?;
         let result = Animcursorelt { cursor, delay };
         Ok((result, remaining))
@@ -3290,7 +3290,7 @@ impl Serialize for Animcursorelt {
 
 /// Opcode for the CreateAnimCursor request
 pub const CREATE_ANIM_CURSOR_REQUEST: u8 = 31;
-pub fn create_anim_cursor<'c, Conn>(conn: &'c Conn, cid: CURSOR, cursors: &[Animcursorelt]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_anim_cursor<'c, Conn>(conn: &'c Conn, cid: Cursor, cursors: &[Animcursorelt]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -3319,15 +3319,15 @@ where Conn: RequestConnection + ?Sized
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Spanfix {
-    pub l: FIXED,
-    pub r: FIXED,
-    pub y: FIXED,
+    pub l: Fixed,
+    pub r: Fixed,
+    pub y: Fixed,
 }
 impl TryParse for Spanfix {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (l, remaining) = FIXED::try_parse(remaining)?;
-        let (r, remaining) = FIXED::try_parse(remaining)?;
-        let (y, remaining) = FIXED::try_parse(remaining)?;
+        let (l, remaining) = Fixed::try_parse(remaining)?;
+        let (r, remaining) = Fixed::try_parse(remaining)?;
+        let (y, remaining) = Fixed::try_parse(remaining)?;
         let result = Spanfix { l, r, y };
         Ok((result, remaining))
     }
@@ -3427,7 +3427,7 @@ impl Serialize for Trap {
 
 /// Opcode for the AddTraps request
 pub const ADD_TRAPS_REQUEST: u8 = 32;
-pub fn add_traps<'c, Conn>(conn: &'c Conn, picture: PICTURE, x_off: i16, y_off: i16, traps: &[Trap]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn add_traps<'c, Conn>(conn: &'c Conn, picture: Picture, x_off: i16, y_off: i16, traps: &[Trap]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -3462,7 +3462,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CreateSolidFill request
 pub const CREATE_SOLID_FILL_REQUEST: u8 = 33;
-pub fn create_solid_fill<Conn>(conn: &Conn, picture: PICTURE, color: Color) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_solid_fill<Conn>(conn: &Conn, picture: Picture, color: Color) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -3496,7 +3496,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CreateLinearGradient request
 pub const CREATE_LINEAR_GRADIENT_REQUEST: u8 = 34;
-pub fn create_linear_gradient<'c, Conn>(conn: &'c Conn, picture: PICTURE, p1: Pointfix, p2: Pointfix, num_stops: u32, stops: &[FIXED], colors: &[Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_linear_gradient<'c, Conn>(conn: &'c Conn, picture: Picture, p1: Pointfix, p2: Pointfix, num_stops: u32, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -3552,7 +3552,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CreateRadialGradient request
 pub const CREATE_RADIAL_GRADIENT_REQUEST: u8 = 35;
-pub fn create_radial_gradient<'c, Conn>(conn: &'c Conn, picture: PICTURE, inner: Pointfix, outer: Pointfix, inner_radius: FIXED, outer_radius: FIXED, num_stops: u32, stops: &[FIXED], colors: &[Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_radial_gradient<'c, Conn>(conn: &'c Conn, picture: Picture, inner: Pointfix, outer: Pointfix, inner_radius: Fixed, outer_radius: Fixed, num_stops: u32, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -3618,7 +3618,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CreateConicalGradient request
 pub const CREATE_CONICAL_GRADIENT_REQUEST: u8 = 36;
-pub fn create_conical_gradient<'c, Conn>(conn: &'c Conn, picture: PICTURE, center: Pointfix, angle: FIXED, num_stops: u32, stops: &[FIXED], colors: &[Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_conical_gradient<'c, Conn>(conn: &'c Conn, picture: Picture, center: Pointfix, angle: Fixed, num_stops: u32, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -3680,156 +3680,156 @@ pub trait ConnectionExt: RequestConnection {
         query_pict_formats(self)
     }
 
-    fn render_query_pict_index_values(&self, format: PICTFORMAT) -> Result<Cookie<'_, Self, QueryPictIndexValuesReply>, ConnectionError>
+    fn render_query_pict_index_values(&self, format: Pictformat) -> Result<Cookie<'_, Self, QueryPictIndexValuesReply>, ConnectionError>
     {
         query_pict_index_values(self, format)
     }
 
-    fn render_create_picture<'c>(&'c self, pid: PICTURE, drawable: DRAWABLE, format: PICTFORMAT, value_list: &CreatePictureAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_create_picture<'c>(&'c self, pid: Picture, drawable: Drawable, format: Pictformat, value_list: &CreatePictureAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_picture(self, pid, drawable, format, value_list)
     }
 
-    fn render_change_picture<'c>(&'c self, picture: PICTURE, value_list: &ChangePictureAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_change_picture<'c>(&'c self, picture: Picture, value_list: &ChangePictureAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_picture(self, picture, value_list)
     }
 
-    fn render_set_picture_clip_rectangles<'c>(&'c self, picture: PICTURE, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_set_picture_clip_rectangles<'c>(&'c self, picture: Picture, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_picture_clip_rectangles(self, picture, clip_x_origin, clip_y_origin, rectangles)
     }
 
-    fn render_free_picture(&self, picture: PICTURE) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn render_free_picture(&self, picture: Picture) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         free_picture(self, picture)
     }
 
-    fn render_composite<A>(&self, op: A, src: PICTURE, mask: PICTURE, dst: PICTURE, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn render_composite<A>(&self, op: A, src: Picture, mask: Picture, dst: Picture, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<u8>
     {
         composite(self, op, src, mask, dst, src_x, src_y, mask_x, mask_y, dst_x, dst_y, width, height)
     }
 
-    fn render_trapezoids<'c, A>(&'c self, op: A, src: PICTURE, dst: PICTURE, mask_format: PICTFORMAT, src_x: i16, src_y: i16, traps: &[Trapezoid]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_trapezoids<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, traps: &[Trapezoid]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>
     {
         trapezoids(self, op, src, dst, mask_format, src_x, src_y, traps)
     }
 
-    fn render_triangles<'c, A>(&'c self, op: A, src: PICTURE, dst: PICTURE, mask_format: PICTFORMAT, src_x: i16, src_y: i16, triangles: &[Triangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_triangles<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, triangles: &[Triangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>
     {
         self::triangles(self, op, src, dst, mask_format, src_x, src_y, triangles)
     }
 
-    fn render_tri_strip<'c, A>(&'c self, op: A, src: PICTURE, dst: PICTURE, mask_format: PICTFORMAT, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_tri_strip<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>
     {
         tri_strip(self, op, src, dst, mask_format, src_x, src_y, points)
     }
 
-    fn render_tri_fan<'c, A>(&'c self, op: A, src: PICTURE, dst: PICTURE, mask_format: PICTFORMAT, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_tri_fan<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>
     {
         tri_fan(self, op, src, dst, mask_format, src_x, src_y, points)
     }
 
-    fn render_create_glyph_set(&self, gsid: GLYPHSET, format: PICTFORMAT) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn render_create_glyph_set(&self, gsid: Glyphset, format: Pictformat) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_glyph_set(self, gsid, format)
     }
 
-    fn render_reference_glyph_set(&self, gsid: GLYPHSET, existing: GLYPHSET) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn render_reference_glyph_set(&self, gsid: Glyphset, existing: Glyphset) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         reference_glyph_set(self, gsid, existing)
     }
 
-    fn render_free_glyph_set(&self, glyphset: GLYPHSET) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn render_free_glyph_set(&self, glyphset: Glyphset) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         free_glyph_set(self, glyphset)
     }
 
-    fn render_add_glyphs<'c>(&'c self, glyphset: GLYPHSET, glyphs_len: u32, glyphids: &[u32], glyphs: &[Glyphinfo], data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_add_glyphs<'c>(&'c self, glyphset: Glyphset, glyphs_len: u32, glyphids: &[u32], glyphs: &[Glyphinfo], data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         add_glyphs(self, glyphset, glyphs_len, glyphids, glyphs, data)
     }
 
-    fn render_free_glyphs<'c>(&'c self, glyphset: GLYPHSET, glyphs: &[GLYPH]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_free_glyphs<'c>(&'c self, glyphset: Glyphset, glyphs: &[Glyph]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         free_glyphs(self, glyphset, glyphs)
     }
 
-    fn render_composite_glyphs8<'c, A>(&'c self, op: A, src: PICTURE, dst: PICTURE, mask_format: PICTFORMAT, glyphset: GLYPHSET, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_composite_glyphs8<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>
     {
         composite_glyphs8(self, op, src, dst, mask_format, glyphset, src_x, src_y, glyphcmds)
     }
 
-    fn render_composite_glyphs16<'c, A>(&'c self, op: A, src: PICTURE, dst: PICTURE, mask_format: PICTFORMAT, glyphset: GLYPHSET, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_composite_glyphs16<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>
     {
         composite_glyphs16(self, op, src, dst, mask_format, glyphset, src_x, src_y, glyphcmds)
     }
 
-    fn render_composite_glyphs32<'c, A>(&'c self, op: A, src: PICTURE, dst: PICTURE, mask_format: PICTFORMAT, glyphset: GLYPHSET, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_composite_glyphs32<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>
     {
         composite_glyphs32(self, op, src, dst, mask_format, glyphset, src_x, src_y, glyphcmds)
     }
 
-    fn render_fill_rectangles<'c, A>(&'c self, op: A, dst: PICTURE, color: Color, rects: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_fill_rectangles<'c, A>(&'c self, op: A, dst: Picture, color: Color, rects: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>
     {
         fill_rectangles(self, op, dst, color, rects)
     }
 
-    fn render_create_cursor(&self, cid: CURSOR, source: PICTURE, x: u16, y: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn render_create_cursor(&self, cid: Cursor, source: Picture, x: u16, y: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_cursor(self, cid, source, x, y)
     }
 
-    fn render_set_picture_transform(&self, picture: PICTURE, transform: Transform) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn render_set_picture_transform(&self, picture: Picture, transform: Transform) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_picture_transform(self, picture, transform)
     }
 
-    fn render_query_filters(&self, drawable: DRAWABLE) -> Result<Cookie<'_, Self, QueryFiltersReply>, ConnectionError>
+    fn render_query_filters(&self, drawable: Drawable) -> Result<Cookie<'_, Self, QueryFiltersReply>, ConnectionError>
     {
         query_filters(self, drawable)
     }
 
-    fn render_set_picture_filter<'c>(&'c self, picture: PICTURE, filter: &[u8], values: &[FIXED]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_set_picture_filter<'c>(&'c self, picture: Picture, filter: &[u8], values: &[Fixed]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_picture_filter(self, picture, filter, values)
     }
 
-    fn render_create_anim_cursor<'c>(&'c self, cid: CURSOR, cursors: &[Animcursorelt]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_create_anim_cursor<'c>(&'c self, cid: Cursor, cursors: &[Animcursorelt]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_anim_cursor(self, cid, cursors)
     }
 
-    fn render_add_traps<'c>(&'c self, picture: PICTURE, x_off: i16, y_off: i16, traps: &[Trap]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_add_traps<'c>(&'c self, picture: Picture, x_off: i16, y_off: i16, traps: &[Trap]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         add_traps(self, picture, x_off, y_off, traps)
     }
 
-    fn render_create_solid_fill(&self, picture: PICTURE, color: Color) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn render_create_solid_fill(&self, picture: Picture, color: Color) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_solid_fill(self, picture, color)
     }
 
-    fn render_create_linear_gradient<'c>(&'c self, picture: PICTURE, p1: Pointfix, p2: Pointfix, num_stops: u32, stops: &[FIXED], colors: &[Color]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_create_linear_gradient<'c>(&'c self, picture: Picture, p1: Pointfix, p2: Pointfix, num_stops: u32, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_linear_gradient(self, picture, p1, p2, num_stops, stops, colors)
     }
 
-    fn render_create_radial_gradient<'c>(&'c self, picture: PICTURE, inner: Pointfix, outer: Pointfix, inner_radius: FIXED, outer_radius: FIXED, num_stops: u32, stops: &[FIXED], colors: &[Color]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_create_radial_gradient<'c>(&'c self, picture: Picture, inner: Pointfix, outer: Pointfix, inner_radius: Fixed, outer_radius: Fixed, num_stops: u32, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_radial_gradient(self, picture, inner, outer, inner_radius, outer_radius, num_stops, stops, colors)
     }
 
-    fn render_create_conical_gradient<'c>(&'c self, picture: PICTURE, center: Pointfix, angle: FIXED, num_stops: u32, stops: &[FIXED], colors: &[Color]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_create_conical_gradient<'c>(&'c self, picture: Picture, center: Pointfix, angle: Fixed, num_stops: u32, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_conical_gradient(self, picture, center, angle, num_stops, stops, colors)
     }
