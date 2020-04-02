@@ -25,6 +25,14 @@ def _get_events_from_module(module):
     return sorted(events)
 
 
+def _get_requests_from_module(module):
+    """Get requests from this module"""
+    prefix = module.outer_module.namespace.prefix
+    requests = filter(lambda x: hasattr(x[1], "reply"), module.outer_module.all)
+    requests = sorted(requests)
+    return list(map(lambda x: x[1], requests))
+
+
 def _get_module_name_prefix(module):
     """Get the prefix that should be used for enum variants from this module."""
     if module.namespace.is_ext:
@@ -225,6 +233,52 @@ def _events(out, modules):
     out("}")
 
 
+def _requests(out, modules):
+    requests = [_get_requests_from_module(module) for module in modules]
+    xproto_index = next(iter(filter(lambda m: not m[1].namespace.is_ext, enumerate(modules))))[0]
+
+    out("/// Get the name of a request based on its opcodes.")
+    out("pub fn request_name(")
+    out.indent("major_opcode: u8,")
+    out.indent("minor_opcode: u8,")
+    out.indent("mut iter: impl Iterator<Item=(&'static str, QueryExtensionReply)>,")
+    out(") -> &'static str {")
+    with Indent(out):
+        out("// Core protocol")
+        out("match major_opcode {")
+        for request in requests[xproto_index]:
+            out.indent("%s => return \"%s\",",
+                       request.opcode, request.name[-1])
+        out.indent("_ => {}")
+        out("}")
+        out("// Find the extension by its opcode")
+        out("let ext_name = iter")
+        out.indent(".find(|&(_, reply)| reply.major_opcode == major_opcode)")
+        out.indent(".map(|(name, _)| name);")
+        out("match ext_name {")
+        with Indent(out):
+            for module, mod_requests in zip(modules, requests):
+                if not module.namespace.is_ext:
+                    continue
+                mod_name = module.namespace.header
+                ext_xname = module.namespace.ext_xname
+                variant = _get_module_name_prefix(module)
+                if module.has_feature:
+                    out("#[cfg(feature = \"%s\")]", module.namespace.header)
+                out("Some(\"%s\") => match minor_opcode {", ext_xname)
+                for request in mod_requests:
+                    out.indent("%s => \"%s::%s\",",
+                               request.opcode, request.name[-2], request.name[-1])
+                out.indent("_ => \"%s::unknown request\"", module.namespace.ext_name)
+                out("}")
+            out("_ => \"unknown request\"")
+        out("}")
+    out("}")
+
+
 def generate(out, modules):
     _errors(out, modules)
+    out("")
     _events(out, modules)
+    out("")
+    _requests(out, modules)
