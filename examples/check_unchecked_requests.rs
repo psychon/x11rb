@@ -39,9 +39,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Errors can show up as 'events' in wait_for_event() by just dropping the cookie
     let cookie = conn.get_geometry(INVALID_WINDOW)?;
     let seq2 = cookie.sequence_number();
-    std::mem::drop(cookie);
+    drop(cookie);
     // The short version of the above would be:
-    //   std::mem::drop(conn.get_geometry(INVALID_WINDOW)?);
+    //   drop(conn.get_geometry(INVALID_WINDOW)?);
 
     // For requests without responses, there are three possibilities
 
@@ -55,9 +55,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // An error can be handled as an event.
     let cookie = conn.destroy_window(INVALID_WINDOW)?;
     let seq3 = cookie.sequence_number();
-    std::mem::drop(cookie);
+    drop(cookie);
     // The short version of the above would be:
-    //   std::mem::drop(conn.destroy_window(INVALID_WINDOW)?);
+    //   drop(conn.destroy_window(INVALID_WINDOW)?);
 
     // Synchronise with the server so that all errors are already received.
     conn.sync()?;
