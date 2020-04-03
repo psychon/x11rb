@@ -24,9 +24,8 @@ use std::error::Error;
 use x11rb::connection::{Connection, SequenceNumber};
 use x11rb::errors::{ConnectionError, ReplyError, ReplyOrIdError};
 use x11rb::wrapper::ConnectionExt as _;
-use x11rb::x11_utils::Event;
-use x11rb::xproto::{self, *};
-use x11rb::COPY_DEPTH_FROM_PARENT;
+use x11rb::xproto::*;
+use x11rb::{Event, COPY_DEPTH_FROM_PARENT};
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -784,8 +783,8 @@ fn example6() -> Result<(), Box<dyn Error>> {
     conn.flush()?;
 
     loop {
-        let event = conn.wait_for_event()?;
-        if event.response_type() == xproto::EXPOSE_EVENT {
+        let event = conn.parse_event(conn.wait_for_event()?)?;
+        if let Event::Expose(_) = event {
             // We draw the points
             conn.poly_point(CoordMode::Origin, win, foreground, &points)?;
 
@@ -957,16 +956,12 @@ fn example_change_event_mask<C: Connection>(conn: &C, win: Window) -> Result<(),
 #[allow(unused)]
 fn example_wait_for_event<C: Connection>(conn: &C) -> Result<(), Box<dyn Error>> {
     loop {
-        let event = conn.wait_for_event()?;
-        match event.response_type() {
-            xproto::EXPOSE_EVENT => {
-                // Handle the expose event type
-                let ev = ExposeEvent::from(event);
+        let event = conn.parse_event(conn.wait_for_event()?)?;
+        match event {
+            Event::Expose(_event) => {
                 // ....
             }
-            xproto::BUTTON_PRESS_EVENT => {
-                // Handle the button press event type
-                let ev = ButtonPressEvent::from(event);
+            Event::ButtonPress(_event) => {
                 // ....
             }
             _ => {
@@ -1305,76 +1300,68 @@ fn example7() -> Result<(), Box<dyn Error>> {
     conn.flush()?;
 
     loop {
-        let event = conn.wait_for_event()?;
-        match event.response_type() {
-            xproto::EXPOSE_EVENT => {
-                let ev = ExposeEvent::from(event);
+        let event = conn.parse_event(conn.wait_for_event()?)?;
+        match event {
+            Event::Expose(event) => {
                 println!(
                     "Window {} exposed. Region to be redrawn at location ({},{}) \
                          with dimensions ({},{})",
-                    ev.window, ev.x, ev.y, ev.width, ev.height
+                    event.window, event.x, event.y, event.width, event.height
                 );
             }
-            xproto::BUTTON_PRESS_EVENT => {
-                let ev = ButtonPressEvent::from(event);
-                print_modifiers(ev.state);
-                match ev.detail {
+            Event::ButtonPress(event) => {
+                print_modifiers(event.state);
+                match event.detail {
                     4 => println!(
                         "Wheel Button up in window {}, at coordinates ({},{})",
-                        ev.event, ev.event_x, ev.event_y
+                        event.event, event.event_x, event.event_y
                     ),
                     5 => println!(
                         "Wheel Button down in window {}, at coordinates ({},{})",
-                        ev.event, ev.event_x, ev.event_y
+                        event.event, event.event_x, event.event_y
                     ),
                     _ => println!(
                         "Button {} pressed in window {}, at coordinates ({},{})",
-                        ev.detail, ev.event, ev.event_x, ev.event_y
+                        event.detail, event.event, event.event_x, event.event_y
                     ),
                 }
             }
-            xproto::BUTTON_RELEASE_EVENT => {
-                let ev = ButtonReleaseEvent::from(event);
-                print_modifiers(ev.state);
+            Event::ButtonRelease(event) => {
+                print_modifiers(event.state);
                 println!(
                     "Button {} released in window {}, at coordinates ({},{})",
-                    ev.detail, ev.event, ev.event_x, ev.event_y
+                    event.detail, event.event, event.event_x, event.event_y
                 );
             }
-            xproto::MOTION_NOTIFY_EVENT => {
-                let ev = MotionNotifyEvent::from(event);
+            Event::MotionNotify(event) => {
                 println!(
                     "Mouse moved in window {} at coordinates ({},{})",
-                    ev.event, ev.event_x, ev.event_y
+                    event.event, event.event_x, event.event_y
                 );
             }
-            xproto::ENTER_NOTIFY_EVENT => {
-                let ev = EnterNotifyEvent::from(event);
+            Event::EnterNotify(event) => {
                 println!(
                     "Mouse entered window {} at coordinates ({},{})",
-                    ev.event, ev.event_x, ev.event_y
+                    event.event, event.event_x, event.event_y
                 );
             }
-            xproto::LEAVE_NOTIFY_EVENT => {
-                let ev = LeaveNotifyEvent::from(event);
+            Event::LeaveNotify(event) => {
                 println!(
                     "Mouse left window {} at coordinates ({},{})",
-                    ev.event, ev.event_x, ev.event_y
+                    event.event, event.event_x, event.event_y
                 );
             }
-            xproto::KEY_PRESS_EVENT => {
-                let ev = KeyPressEvent::from(event);
-                print_modifiers(ev.state);
-                println!("Key pressed in window {}", ev.event);
+            Event::KeyPress(event) => {
+                print_modifiers(event.state);
+                println!("Key pressed in window {}", event.event);
             }
-            xproto::KEY_RELEASE_EVENT => {
-                let ev = KeyReleaseEvent::from(event);
-                print_modifiers(ev.state);
-                println!("Key released in window {}", ev.event);
+            Event::KeyRelease(event) => {
+                print_modifiers(event.state);
+                println!("Key released in window {}", event.event);
             }
             _ => {
                 // Unknown event type, ignore it
-                println!("Unknown event: {}", event.raw_response_type());
+                println!("Unknown event: {:?}", event);
             }
         }
     }
@@ -1542,16 +1529,15 @@ fn example8() -> Result<(), Box<dyn Error>> {
     conn.flush()?;
 
     loop {
-        let event = conn.wait_for_event()?;
-        match event.response_type() {
-            xproto::EXPOSE_EVENT => {
+        let event = conn.parse_event(conn.wait_for_event()?)?;
+        match event {
+            Event::Expose(_) => {
                 let text = "Press ESC key to exit...";
                 text_draw(&conn, screen, window, 10, HEIGHT as i16 - 10, text)?;
                 conn.flush()?;
             }
-            xproto::KEY_RELEASE_EVENT => {
-                let ev = KeyReleaseEvent::from(event);
-                if ev.detail == 9 {
+            Event::KeyRelease(event) => {
+                if event.detail == 9 {
                     // ESC
                     return Ok(());
                 }
@@ -2418,9 +2404,9 @@ fn example10() -> Result<(), Box<dyn Error>> {
     let mut is_hand = false;
 
     loop {
-        let event = conn.wait_for_event()?;
-        match event.response_type() {
-            xproto::EXPOSE_EVENT => {
+        let event = conn.parse_event(conn.wait_for_event()?)?;
+        match event {
+            Event::Expose(_) => {
                 let text = "click here to change cursor";
                 button_draw(
                     &conn,
@@ -2435,7 +2421,7 @@ fn example10() -> Result<(), Box<dyn Error>> {
                 text_draw(&conn, screen, window, 10, HEIGHT - 10, text)?;
                 conn.flush()?;
             }
-            xproto::BUTTON_PRESS_EVENT => {
+            Event::ButtonPress(event) => {
                 let ev = ButtonPressEvent::from(event);
                 let length = "click here to change cursor".len() as i16;
 
@@ -2454,9 +2440,8 @@ fn example10() -> Result<(), Box<dyn Error>> {
                 }
                 conn.flush()?;
             }
-            xproto::KEY_RELEASE_EVENT => {
-                let ev = KeyReleaseEvent::from(event);
-                if ev.detail == 9 {
+            Event::KeyRelease(event) => {
+                if event.detail == 9 {
                     // ESC
                     return Ok(());
                 }
