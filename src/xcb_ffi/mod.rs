@@ -503,12 +503,12 @@ impl Connection for XCBConnection {
 
     fn parse_error(&self, error: GenericError) -> Result<Error, ParseError> {
         let ext_mgr = self.ext_mgr.lock().unwrap();
-        Error::parse(error, ext_mgr.known_present())
+        Error::parse(error, &*ext_mgr)
     }
 
     fn parse_event(&self, event: GenericEvent) -> Result<Event, ParseError> {
         let ext_mgr = self.ext_mgr.lock().unwrap();
-        Event::parse(event, ext_mgr.known_present())
+        Event::parse(event, &*ext_mgr)
     }
 
     fn flush(&self) -> Result<(), ConnectionError> {

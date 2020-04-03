@@ -13,6 +13,21 @@ pub struct ExtensionInformation {
     pub first_error: u8,
 }
 
+/// Trait to provide information about extensions.
+pub trait ExtInfoProvider {
+    /// Returns the information of the extension that whose
+    /// opcode is `major_opcode`.
+    fn get_from_major_opcode(&self, major_opcode: u8) -> Option<(&str, ExtensionInformation)>;
+
+    /// Returns the information of the extension that whose
+    /// event number range includes `event_number`.
+    fn get_from_event_code(&self, event_code: u8) -> Option<(&str, ExtensionInformation)>;
+
+    /// Returns the information of the extension that whose
+    /// error number range includes `error_number`.
+    fn get_from_error_code(&self, error_code: u8) -> Option<(&str, ExtensionInformation)>;
+}
+
 /// Common information on events and errors.
 ///
 /// This trait exists to share some code between `GenericEvent` and `GenericError`.
