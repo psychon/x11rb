@@ -3,8 +3,7 @@
 
 use std::convert::{TryFrom, TryInto};
 use crate::errors::ParseError;
-use crate::x11_utils::{Event as _, GenericError, GenericEvent};
-use xproto::QueryExtensionReply;
+use crate::x11_utils::{Event as _, ExtensionInformation, GenericError, GenericEvent};
 pub mod bigreq;
 #[cfg(feature = "composite")]
 pub mod composite;
@@ -184,7 +183,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
     /// Parse a generic X11 error into a concrete error type.
     pub fn parse(
         error: GenericError<B>,
-        iter: impl Iterator<Item=(&'static str, QueryExtensionReply)>,
+        iter: impl Iterator<Item=(&'static str, ExtensionInformation)>,
     ) -> Result<Self, ParseError> {
         let error_code = error.error_code();
         // Check if this is a core protocol error
@@ -210,7 +209,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
         }
         // Find the extension that this error could belong to
         let ext_info = iter
-            .map(|(name, reply)| (name, reply.first_error))
+            .map(|(name, ext_info)| (name, ext_info.first_error))
             .filter(|&(_, first_error)| first_error <= error_code)
             .max_by_key(|&(_, first_error)| first_error);
         match ext_info {
@@ -543,7 +542,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
     /// Parse a generic X11 event into a concrete event type.
     pub fn parse(
         event: GenericEvent<B>,
-        iter: impl Iterator<Item=(&'static str, QueryExtensionReply)>,
+        iter: impl Iterator<Item=(&'static str, ExtensionInformation)>,
     ) -> Result<Self, ParseError> {
         let event_type = event.response_type();
         // Check if this is a core protocol error or from the generic event extension
@@ -587,7 +586,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
         }
         // Find the extension that this event could belong to
         let ext_info = iter
-            .map(|(name, reply)| (name, reply.first_event))
+            .map(|(name, ext_info)| (name, ext_info.first_event))
             .filter(|&(_, first_event)| first_event <= event_type)
             .max_by_key(|&(_, first_event)| first_event);
         match ext_info {
@@ -732,14 +731,14 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
 
     fn from_generic_event(
         event: GenericEvent<B>,
-        iter: impl Iterator<Item=(&'static str, QueryExtensionReply)>,
+        iter: impl Iterator<Item=(&'static str, ExtensionInformation)>,
     ) -> Result<Self, ParseError> {
         let bytes = event.raw_bytes();
         let ge_event = xproto::GeGenericEvent::try_from(bytes)?;
         #[allow(unused_variables)]
         let (extension, event_type) = (ge_event.extension, ge_event.event_type);
         let ext_name = iter
-            .map(|(name, reply)| (name, reply.major_opcode))
+            .map(|(name, ext_info)| (name, ext_info.major_opcode))
             .find(|&(_, opcode)| extension == opcode)
             .map(|(name, _)| name);
         match ext_name {

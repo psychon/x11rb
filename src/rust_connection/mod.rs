@@ -10,9 +10,10 @@ use crate::connection::{
 };
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 pub use crate::errors::{ConnectError, ConnectionError, ParseError};
-use crate::extension_information::ExtensionInformation;
+use crate::extension_manager::ExtensionManager;
 use crate::utils::RawFdContainer;
-use crate::xproto::{QueryExtensionReply, Setup};
+use crate::x11_utils::ExtensionInformation;
+use crate::xproto::Setup;
 
 mod id_allocator;
 mod inner;
@@ -50,7 +51,7 @@ pub struct RustConnection<R: Read = BufReader<stream::Stream>, W: Write = BufWri
     reader_condition: Condvar,
     id_allocator: Mutex<id_allocator::IDAllocator>,
     setup: Setup,
-    extension_information: Mutex<ExtensionInformation>,
+    extension_manager: Mutex<ExtensionManager>,
     maximum_request_bytes: Mutex<MaxRequestBytes>,
 }
 
@@ -144,7 +145,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
             reader_condition: Condvar::new(),
             id_allocator: Mutex::new(allocator),
             setup,
-            extension_information: Default::default(),
+            extension_manager: Default::default(),
             maximum_request_bytes: Mutex::new(MaxRequestBytes::Unknown),
         })
     }
@@ -294,7 +295,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         &self,
         extension_name: &'static str,
     ) -> Result<(), ConnectionError> {
-        self.extension_information
+        self.extension_manager
             .lock()
             .unwrap()
             .prefetch_extension_information(self, extension_name)
@@ -303,8 +304,8 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
     fn extension_information(
         &self,
         extension_name: &'static str,
-    ) -> Result<Option<QueryExtensionReply>, ConnectionError> {
-        self.extension_information
+    ) -> Result<Option<ExtensionInformation>, ConnectionError> {
+        self.extension_manager
             .lock()
             .unwrap()
             .extension_information(self, extension_name)
@@ -414,12 +415,12 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
     }
 
     fn parse_error(&self, error: GenericError) -> Result<Error, ParseError> {
-        let ext_info = self.extension_information.lock().unwrap();
+        let ext_info = self.extension_manager.lock().unwrap();
         Error::parse(error, ext_info.known_present())
     }
 
     fn parse_event(&self, event: GenericEvent) -> Result<Event, ParseError> {
-        let ext_info = self.extension_information.lock().unwrap();
+        let ext_info = self.extension_manager.lock().unwrap();
         Event::parse(event, ext_info.known_present())
     }
 
