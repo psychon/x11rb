@@ -5,7 +5,7 @@ use std::collections::{hash_map::Entry as HashMapEntry, HashMap};
 use crate::connection::{RequestConnection, SequenceNumber};
 use crate::cookie::Cookie;
 use crate::errors::{ConnectionError, ReplyError};
-use crate::x11_utils::ExtensionInformation;
+use crate::x11_utils::{ExtInfoProvider, ExtensionInformation};
 use crate::xproto::{ConnectionExt, QueryExtensionReply};
 
 /// Helper for implementing `RequestConnection::extension_information()`.
@@ -95,22 +95,54 @@ impl ExtensionManager {
             CheckState::Error => Err(ConnectionError::UnknownError),
         }
     }
+}
 
-    /// Create an iterator that allows to iterate over the known present extensions.
-    ///
-    /// This function returns an iterator that provides information about all the extensions that
-    /// were queried and found to be present. Extensions that were not queried or which are not
-    /// present are not returned.
-    pub fn known_present<'a>(
-        &'a self,
-    ) -> impl 'a + Iterator<Item = (&'static str, ExtensionInformation)> {
-        self.0.iter().filter_map(|(name, state)| {
-            if let CheckState::Present(reply) = state {
-                Some((*name, *reply))
-            } else {
-                None
-            }
-        })
+impl ExtInfoProvider for ExtensionManager {
+    fn get_from_major_opcode(&self, major_opcode: u8) -> Option<(&str, ExtensionInformation)> {
+        self.0
+            .iter()
+            .filter_map(|(name, state)| {
+                if let CheckState::Present(info) = state {
+                    Some((*name, *info))
+                } else {
+                    None
+                }
+            })
+            .find(|(_, info)| info.major_opcode == major_opcode)
+    }
+
+    fn get_from_event_code(&self, event_code: u8) -> Option<(&str, ExtensionInformation)> {
+        self.0
+            .iter()
+            .filter_map(|(name, state)| {
+                if let CheckState::Present(info) = state {
+                    if info.first_event <= event_code {
+                        Some((*name, *info))
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            })
+            .max_by_key(|(_, info)| info.first_event)
+    }
+
+    fn get_from_error_code(&self, error_code: u8) -> Option<(&str, ExtensionInformation)> {
+        self.0
+            .iter()
+            .filter_map(|(name, state)| {
+                if let CheckState::Present(info) = state {
+                    if info.first_error <= error_code {
+                        Some((*name, *info))
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            })
+            .max_by_key(|(_, info)| info.first_error)
     }
 }
 
@@ -126,7 +158,7 @@ mod test {
     use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
     use crate::errors::{ConnectionError, ParseError, ReplyError};
     use crate::utils::RawFdContainer;
-    use crate::x11_utils::{ExtensionInformation, GenericError};
+    use crate::x11_utils::{ExtInfoProvider, ExtensionInformation, GenericError};
 
     use super::{CheckState, ExtensionManager};
 
@@ -251,7 +283,7 @@ mod test {
     }
 
     #[test]
-    fn test_iter() {
+    fn test_info_provider() {
         let info = ExtensionInformation {
             major_opcode: 4,
             first_event: 5,
@@ -264,7 +296,8 @@ mod test {
         let _ = ext_info.0.insert("missing", CheckState::Missing);
         let _ = ext_info.0.insert("error", CheckState::Error);
 
-        let known = ext_info.known_present().collect::<Vec<_>>();
-        assert_eq!(known, [("present", info)]);
+        assert_eq!(ext_info.get_from_major_opcode(4), Some(("present", info)));
+        assert_eq!(ext_info.get_from_event_code(5), Some(("present", info)));
+        assert_eq!(ext_info.get_from_error_code(6), Some(("present", info)));
     }
 }

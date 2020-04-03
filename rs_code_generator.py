@@ -31,7 +31,7 @@ main_output_file = output_helper.Output()
 output_helper.generated_code_header(main_output_file)
 main_output_file("use std::convert::{TryFrom, TryInto};")
 main_output_file("use crate::errors::ParseError;")
-main_output_file("use crate::x11_utils::{Event as _, ExtensionInformation, GenericError, GenericEvent};")
+main_output_file("use crate::x11_utils::{Event as _, ExtInfoProvider, GenericError, GenericEvent};")
 
 
 # Now the real fun begins

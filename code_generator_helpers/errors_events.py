@@ -63,7 +63,7 @@ def _errors(out, modules):
         out("/// Parse a generic X11 error into a concrete error type.")
         out("pub fn parse(")
         out.indent("error: GenericError<B>,")
-        out.indent("iter: impl Iterator<Item=(&'static str, ExtensionInformation)>,")
+        out.indent("ext_info_provider: &dyn ExtInfoProvider,")
         out(") -> Result<Self, ParseError> {")
         with Indent(out):
             out("let error_code = error.error_code();")
@@ -79,10 +79,7 @@ def _errors(out, modules):
             out("}")
 
             out("// Find the extension that this error could belong to")
-            out("let ext_info = iter")
-            out.indent(".map(|(name, ext_info)| (name, ext_info.first_error))")
-            out.indent(".filter(|&(_, first_error)| first_error <= error_code)")
-            out.indent(".max_by_key(|&(_, first_error)| first_error);")
+            out("let ext_info = ext_info_provider.get_from_error_code(error_code);")
             out("match ext_info {")
             with Indent(out):
                 for module, mod_errors in zip(modules, errors):
@@ -93,9 +90,9 @@ def _errors(out, modules):
                     variant = _get_module_name_prefix(module)
                     if module.has_feature:
                         out("#[cfg(feature = \"%s\")]", module.namespace.header)
-                    out("Some((\"%s\", first_error)) => {", ext_xname)
+                    out("Some((\"%s\", ext_info)) => {", ext_xname)
                     with Indent(out):
-                        out("match error_code - first_error {")
+                        out("match error_code - ext_info.first_error {")
                         for name, error in mod_errors:
                             opcode = camel_case_to_upper_snake(name[-1]) + "_ERROR"
                             err_name = name[-1]
@@ -121,14 +118,14 @@ def _events(out, modules):
         out("/// Parse a generic X11 event into a concrete event type.")
         out("pub fn parse(")
         out.indent("event: GenericEvent<B>,")
-        out.indent("iter: impl Iterator<Item=(&'static str, ExtensionInformation)>,")
+        out.indent("ext_info_provider: &dyn ExtInfoProvider,")
         out(") -> Result<Self, ParseError> {")
         with Indent(out):
             out("let event_type = event.response_type();")
             out("// Check if this is a core protocol error or from the generic event extension")
             out("match event_type {")
             with Indent(out):
-                out("0 => return Ok(Self::Error(Error::parse(event.try_into()?, iter)?)),")
+                out("0 => return Ok(Self::Error(Error::parse(event.try_into()?, ext_info_provider)?)),")
                 for name, event in events[xproto_index]:
                     if name == ('xcb', 'GeGeneric'):
                         # This does not really count and is parsed as an extension's event
@@ -137,15 +134,12 @@ def _events(out, modules):
                     event_name = name[-1]
                     out("xproto::%s => return Ok(Self::%s(event.into())),",
                         opcode, event_name)
-                out("xproto::GE_GENERIC_EVENT => return Self::from_generic_event(event, iter),")
+                out("xproto::GE_GENERIC_EVENT => return Self::from_generic_event(event, ext_info_provider),")
                 out("_ => {}")
             out("}")
 
             out("// Find the extension that this event could belong to")
-            out("let ext_info = iter")
-            out.indent(".map(|(name, ext_info)| (name, ext_info.first_event))")
-            out.indent(".filter(|&(_, first_event)| first_event <= event_type)")
-            out.indent(".max_by_key(|&(_, first_event)| first_event);")
+            out("let ext_info = ext_info_provider.get_from_event_code(event_type);")
             out("match ext_info {")
             with Indent(out):
                 for module, mod_events in zip(modules, events):
@@ -158,15 +152,15 @@ def _events(out, modules):
                     variant = _get_module_name_prefix(module)
                     if module.has_feature:
                         out("#[cfg(feature = \"%s\")]", module.namespace.header)
-                    out("Some((\"%s\", first_event)) => {", ext_xname)
+                    out("Some((\"%s\", ext_info)) => {", ext_xname)
                     with Indent(out):
                         if module.namespace.header == 'xkb':
-                            out("if event_type != first_event {")
+                            out("if event_type != ext_info.first_event {")
                             out.indent("return Ok(Self::Unknown(event));")
                             out("}")
                             out("match event.raw_bytes()[1] {")
                         else:
-                            out("match event_type - first_event {")
+                            out("match event_type - ext_info.first_event {")
                         for name, event in mod_events:
                             if event.is_ge_event:
                                 continue
@@ -184,16 +178,13 @@ def _events(out, modules):
 
         out("fn from_generic_event(")
         out.indent("event: GenericEvent<B>,")
-        out.indent("iter: impl Iterator<Item=(&'static str, ExtensionInformation)>,")
+        out.indent("ext_info_provider: &dyn ExtInfoProvider,")
         out(") -> Result<Self, ParseError> {")
         with Indent(out):
             out("let bytes = event.raw_bytes();")
             out("let ge_event = xproto::GeGenericEvent::try_from(bytes)?;")
-            out("#[allow(unused_variables)]")
-            out("let (extension, event_type) = (ge_event.extension, ge_event.event_type);")
-            out("let ext_name = iter")
-            out.indent(".map(|(name, ext_info)| (name, ext_info.major_opcode))")
-            out.indent(".find(|&(_, opcode)| extension == opcode)")
+            out("let ext_name = ext_info_provider")
+            out.indent(".get_from_major_opcode(ge_event.extension)")
             out.indent(".map(|(name, _)| name);")
             out("match ext_name {")
             with Indent(out):
@@ -208,7 +199,7 @@ def _events(out, modules):
                         out("#[cfg(feature = \"%s\")]", module.namespace.header)
                     out("Some(\"%s\") => {", ext_xname)
                     with Indent(out):
-                        out("match event_type {")
+                        out("match ge_event.event_type {")
                         for name, event in mod_events:
                             if not event.is_ge_event:
                                 continue
