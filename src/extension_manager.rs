@@ -5,6 +5,7 @@ use std::collections::{hash_map::Entry as HashMapEntry, HashMap};
 use crate::connection::{RequestConnection, SequenceNumber};
 use crate::cookie::Cookie;
 use crate::errors::{ConnectionError, ReplyError};
+use crate::x11_utils::ExtensionInformation;
 use crate::xproto::{ConnectionExt, QueryExtensionReply};
 
 /// Helper for implementing `RequestConnection::extension_information()`.
@@ -12,17 +13,17 @@ use crate::xproto::{ConnectionExt, QueryExtensionReply};
 /// This helps with implementing `RequestConnection`. Most likely, you do not need this in your own
 /// code, unless you really want to implement your own X11 connection.
 #[derive(Debug, Default)]
-pub struct ExtensionInformation(HashMap<&'static str, CheckState>);
+pub struct ExtensionManager(HashMap<&'static str, CheckState>);
 
 #[derive(Debug)]
 enum CheckState {
     Prefetched(SequenceNumber),
-    Present(QueryExtensionReply),
+    Present(ExtensionInformation),
     Missing,
     Error,
 }
 
-impl ExtensionInformation {
+impl ExtensionManager {
     /// If the extension has not prefetched yet, sends a `QueryExtension`
     /// requests, adds a field to the hash map and returns a reference to it.
     fn prefetch_extension_information_aux<C: RequestConnection>(
@@ -59,7 +60,7 @@ impl ExtensionInformation {
         &mut self,
         conn: &C,
         extension_name: &'static str,
-    ) -> Result<Option<QueryExtensionReply>, ConnectionError> {
+    ) -> Result<Option<ExtensionInformation>, ConnectionError> {
         let entry = self.prefetch_extension_information_aux(conn, extension_name)?;
         match entry {
             CheckState::Prefetched(sequence_number) => {
@@ -75,6 +76,11 @@ impl ExtensionInformation {
                     }
                     Ok(info) => {
                         if info.present {
+                            let info = ExtensionInformation {
+                                major_opcode: info.major_opcode,
+                                first_event: info.first_event,
+                                first_error: info.first_error,
+                            };
                             *entry = CheckState::Present(info);
                             Ok(Some(info))
                         } else {
@@ -97,7 +103,7 @@ impl ExtensionInformation {
     /// present are not returned.
     pub fn known_present<'a>(
         &'a self,
-    ) -> impl 'a + Iterator<Item = (&'static str, QueryExtensionReply)> {
+    ) -> impl 'a + Iterator<Item = (&'static str, ExtensionInformation)> {
         self.0.iter().filter_map(|(name, state)| {
             if let CheckState::Present(reply) = state {
                 Some((*name, *reply))
@@ -120,10 +126,9 @@ mod test {
     use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
     use crate::errors::{ConnectionError, ParseError, ReplyError};
     use crate::utils::RawFdContainer;
-    use crate::x11_utils::GenericError;
-    use crate::xproto::QueryExtensionReply;
+    use crate::x11_utils::{ExtensionInformation, GenericError};
 
-    use super::{CheckState, ExtensionInformation};
+    use super::{CheckState, ExtensionManager};
 
     struct FakeConnection(RefCell<SequenceNumber>);
 
@@ -174,7 +179,7 @@ mod test {
         fn extension_information(
             &self,
             _extension_name: &'static str,
-        ) -> Result<Option<QueryExtensionReply>, ConnectionError> {
+        ) -> Result<Option<ExtensionInformation>, ConnectionError> {
             unimplemented!()
         }
 
@@ -229,7 +234,7 @@ mod test {
     #[test]
     fn test_double_await() {
         let conn = FakeConnection(RefCell::new(0));
-        let mut ext_info = ExtensionInformation::default();
+        let mut ext_info = ExtensionManager::default();
 
         // Ask for an extension info. FakeConnection will return an error.
         match ext_info.extension_information(&conn, "whatever") {
@@ -247,23 +252,19 @@ mod test {
 
     #[test]
     fn test_iter() {
-        let reply = QueryExtensionReply {
-            response_type: 1,
-            sequence: 2,
-            length: 3,
-            present: true,
+        let info = ExtensionInformation {
             major_opcode: 4,
             first_event: 5,
             first_error: 6,
         };
 
-        let mut ext_info = ExtensionInformation::default();
+        let mut ext_info = ExtensionManager::default();
         let _ = ext_info.0.insert("prefetched", CheckState::Prefetched(42));
-        let _ = ext_info.0.insert("present", CheckState::Present(reply));
+        let _ = ext_info.0.insert("present", CheckState::Present(info));
         let _ = ext_info.0.insert("missing", CheckState::Missing);
         let _ = ext_info.0.insert("error", CheckState::Error);
 
         let known = ext_info.known_present().collect::<Vec<_>>();
-        assert_eq!(known, [("present", reply)]);
+        assert_eq!(known, [("present", info)]);
     }
 }

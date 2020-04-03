@@ -63,7 +63,7 @@ def _errors(out, modules):
         out("/// Parse a generic X11 error into a concrete error type.")
         out("pub fn parse(")
         out.indent("error: GenericError<B>,")
-        out.indent("iter: impl Iterator<Item=(&'static str, QueryExtensionReply)>,")
+        out.indent("iter: impl Iterator<Item=(&'static str, ExtensionInformation)>,")
         out(") -> Result<Self, ParseError> {")
         with Indent(out):
             out("let error_code = error.error_code();")
@@ -80,7 +80,7 @@ def _errors(out, modules):
 
             out("// Find the extension that this error could belong to")
             out("let ext_info = iter")
-            out.indent(".map(|(name, reply)| (name, reply.first_error))")
+            out.indent(".map(|(name, ext_info)| (name, ext_info.first_error))")
             out.indent(".filter(|&(_, first_error)| first_error <= error_code)")
             out.indent(".max_by_key(|&(_, first_error)| first_error);")
             out("match ext_info {")
@@ -121,7 +121,7 @@ def _events(out, modules):
         out("/// Parse a generic X11 event into a concrete event type.")
         out("pub fn parse(")
         out.indent("event: GenericEvent<B>,")
-        out.indent("iter: impl Iterator<Item=(&'static str, QueryExtensionReply)>,")
+        out.indent("iter: impl Iterator<Item=(&'static str, ExtensionInformation)>,")
         out(") -> Result<Self, ParseError> {")
         with Indent(out):
             out("let event_type = event.response_type();")
@@ -143,7 +143,7 @@ def _events(out, modules):
 
             out("// Find the extension that this event could belong to")
             out("let ext_info = iter")
-            out.indent(".map(|(name, reply)| (name, reply.first_event))")
+            out.indent(".map(|(name, ext_info)| (name, ext_info.first_event))")
             out.indent(".filter(|&(_, first_event)| first_event <= event_type)")
             out.indent(".max_by_key(|&(_, first_event)| first_event);")
             out("match ext_info {")
@@ -184,7 +184,7 @@ def _events(out, modules):
 
         out("fn from_generic_event(")
         out.indent("event: GenericEvent<B>,")
-        out.indent("iter: impl Iterator<Item=(&'static str, QueryExtensionReply)>,")
+        out.indent("iter: impl Iterator<Item=(&'static str, ExtensionInformation)>,")
         out(") -> Result<Self, ParseError> {")
         with Indent(out):
             out("let bytes = event.raw_bytes();")
@@ -192,7 +192,7 @@ def _events(out, modules):
             out("#[allow(unused_variables)]")
             out("let (extension, event_type) = (ge_event.extension, ge_event.event_type);")
             out("let ext_name = iter")
-            out.indent(".map(|(name, reply)| (name, reply.major_opcode))")
+            out.indent(".map(|(name, ext_info)| (name, ext_info.major_opcode))")
             out.indent(".find(|&(_, opcode)| extension == opcode)")
             out.indent(".map(|(name, _)| name);")
             out("match ext_name {")

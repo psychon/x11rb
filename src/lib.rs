@@ -105,7 +105,7 @@ pub mod x11_utils;
 pub mod connection;
 pub mod cookie;
 pub mod errors;
-pub mod extension_information;
+pub mod extension_manager;
 pub mod rust_connection;
 pub mod wrapper;
 

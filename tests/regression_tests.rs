@@ -9,10 +9,9 @@ use x11rb::connection::{
 use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
 use x11rb::errors::{ConnectionError, ParseError, ReplyError};
 use x11rb::utils::RawFdContainer;
-use x11rb::x11_utils::{GenericError, Serialize, TryParse};
+use x11rb::x11_utils::{ExtensionInformation, GenericError, Serialize, TryParse};
 use x11rb::xproto::{
-    ClientMessageData, ConnectionExt, KeymapNotifyEvent, QueryExtensionReply, Segment,
-    SetupAuthenticate,
+    ClientMessageData, ConnectionExt, KeymapNotifyEvent, Segment, SetupAuthenticate,
 };
 
 #[derive(Debug)]
@@ -110,7 +109,7 @@ impl RequestConnection for FakeConnection {
     fn extension_information(
         &self,
         _extension_name: &'static str,
-    ) -> Result<Option<QueryExtensionReply>, ConnectionError> {
+    ) -> Result<Option<ExtensionInformation>, ConnectionError> {
         unimplemented!()
     }
 

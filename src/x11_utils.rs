@@ -2,6 +2,17 @@ use std::convert::{TryFrom, TryInto};
 
 use crate::errors::ParseError;
 
+/// Information about a X11 extension.
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub struct ExtensionInformation {
+    /// Major opcode used in request
+    pub major_opcode: u8,
+    /// Lowest event number used by the extension.
+    pub first_event: u8,
+    /// Lowest error number used by the extension.
+    pub first_error: u8,
+}
+
 /// Common information on events and errors.
 ///
 /// This trait exists to share some code between `GenericEvent` and `GenericError`.

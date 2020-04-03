@@ -12,14 +12,15 @@ use std::sync::Mutex;
 
 use libc::c_void;
 
-use super::xproto::{QueryExtensionReply, Setup};
+use super::xproto::Setup;
 use crate::connection::{
     compute_length_field, Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber,
 };
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 pub use crate::errors::{ConnectError, ConnectionError, ParseError};
-use crate::extension_information::ExtensionInformation;
+use crate::extension_manager::ExtensionManager;
 use crate::utils::{CSlice, RawFdContainer};
+use crate::x11_utils::ExtensionInformation;
 
 mod pending_errors;
 mod raw_ffi;
@@ -42,7 +43,7 @@ pub type Event = crate::Event<Buffer>;
 pub struct XCBConnection {
     conn: raw_ffi::XCBConnectionWrapper,
     setup: Setup,
-    ext_info: Mutex<ExtensionInformation>,
+    ext_mgr: Mutex<ExtensionManager>,
     errors: pending_errors::PendingErrors,
     should_drop: bool,
 }
@@ -106,7 +107,7 @@ impl XCBConnection {
                     // `xcb_connect` will never return null.
                     conn: raw_ffi::XCBConnectionWrapper(NonNull::new(connection).unwrap()),
                     setup: Self::parse_setup(setup)?,
-                    ext_info: Default::default(),
+                    ext_mgr: Default::default(),
                     errors: Default::default(),
                     should_drop: true,
                 };
@@ -132,7 +133,7 @@ impl XCBConnection {
         Ok(XCBConnection {
             conn: raw_ffi::XCBConnectionWrapper(NonNull::new(ptr).unwrap()),
             setup: Self::parse_setup(setup)?,
-            ext_info: Default::default(),
+            ext_mgr: Default::default(),
             errors: Default::default(),
             should_drop,
         })
@@ -374,7 +375,7 @@ impl RequestConnection for XCBConnection {
         &self,
         extension_name: &'static str,
     ) -> Result<(), ConnectionError> {
-        self.ext_info
+        self.ext_mgr
             .lock()
             .unwrap()
             .prefetch_extension_information(self, extension_name)
@@ -383,8 +384,8 @@ impl RequestConnection for XCBConnection {
     fn extension_information(
         &self,
         extension_name: &'static str,
-    ) -> Result<Option<QueryExtensionReply>, ConnectionError> {
-        self.ext_info
+    ) -> Result<Option<ExtensionInformation>, ConnectionError> {
+        self.ext_mgr
             .lock()
             .unwrap()
             .extension_information(self, extension_name)
@@ -501,13 +502,13 @@ impl Connection for XCBConnection {
     }
 
     fn parse_error(&self, error: GenericError) -> Result<Error, ParseError> {
-        let ext_info = self.ext_info.lock().unwrap();
-        Error::parse(error, ext_info.known_present())
+        let ext_mgr = self.ext_mgr.lock().unwrap();
+        Error::parse(error, ext_mgr.known_present())
     }
 
     fn parse_event(&self, event: GenericEvent) -> Result<Event, ParseError> {
-        let ext_info = self.ext_info.lock().unwrap();
-        Event::parse(event, ext_info.known_present())
+        let ext_mgr = self.ext_mgr.lock().unwrap();
+        Event::parse(event, ext_mgr.known_present())
     }
 
     fn flush(&self) -> Result<(), ConnectionError> {

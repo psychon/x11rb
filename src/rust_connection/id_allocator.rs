@@ -78,8 +78,7 @@ mod test {
     use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
     use crate::errors::{ConnectionError, ParseError, ReplyError};
     use crate::utils::RawFdContainer;
-    use crate::x11_utils::GenericError;
-    use crate::xproto::QueryExtensionReply;
+    use crate::x11_utils::{ExtensionInformation, GenericError};
 
     use super::IDAllocator;
 
@@ -185,12 +184,8 @@ mod test {
         fn extension_information(
             &self,
             _extension_name: &'static str,
-        ) -> Result<Option<QueryExtensionReply>, ConnectionError> {
-            Ok(self.0.as_ref().map(|_| QueryExtensionReply {
-                response_type: 1,
-                sequence: 0,
-                length: 0,
-                present: true,
+        ) -> Result<Option<ExtensionInformation>, ConnectionError> {
+            Ok(self.0.as_ref().map(|_| ExtensionInformation {
                 major_opcode: 127,
                 first_event: 0,
                 first_error: 0,

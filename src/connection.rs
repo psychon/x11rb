@@ -46,8 +46,8 @@ use std::io::IoSlice;
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::utils::RawFdContainer;
-use crate::x11_utils::{GenericError, GenericEvent};
-use crate::xproto::{QueryExtensionReply, Setup};
+use crate::x11_utils::{ExtensionInformation, GenericError, GenericEvent};
+use crate::xproto::Setup;
 use crate::{Error, Event};
 
 /// Number type used for referring to things that were sent to the server in responses from the
@@ -176,15 +176,16 @@ pub trait RequestConnection {
 
     /// Get information about an extension.
     ///
-    /// To send a request for some extension, the `QueryExtensionReply` for the extension is
-    /// necessary. This function provides this information.
+    /// To send a request for some extension, information about the extension (major opcode,
+    /// first event code and first error code) is necessary. This function provides this
+    /// information.
     ///
     /// The returned object is guaranteed to have a non-zero `present` field. Extensions that are
     /// not present are instead returned as `None`.
     fn extension_information(
         &self,
         extension_name: &'static str,
-    ) -> Result<Option<QueryExtensionReply>, ConnectionError>;
+    ) -> Result<Option<ExtensionInformation>, ConnectionError>;
 
     /// Wait for the reply to a request.
     ///
@@ -349,6 +350,7 @@ pub enum DiscardMode {
 /// use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
 /// use x11rb::errors::{ParseError, ConnectionError};
 /// use x11rb::utils::RawFdContainer;
+/// use x11rb::x11_utils::ExtensionInformation;
 ///
 /// struct MyConnection();
 ///
@@ -368,7 +370,7 @@ pub enum DiscardMode {
 ///     #     unimplemented!()
 ///     # }
 ///     # fn extension_information(&self, ext: &'static str)
-///     # -> Result<Option<x11rb::xproto::QueryExtensionReply>, ConnectionError> {
+///     # -> Result<Option<ExtensionInformation>, ConnectionError> {
 ///     #    unimplemented!()
 ///     # }
 ///     # fn wait_for_reply_or_error(&self, sequence: SequenceNumber)
