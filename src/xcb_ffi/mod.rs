@@ -259,12 +259,8 @@ impl XCBConnection {
         unsafe {
             let mut reply = null_mut();
             let mut error = null_mut();
-            let found = raw_ffi::xcb_poll_for_reply(
-                self.conn.as_ptr(),
-                sequence as _,
-                &mut reply,
-                &mut error,
-            );
+            let found =
+                raw_ffi::xcb_poll_for_reply64(self.conn.as_ptr(), sequence, &mut reply, &mut error);
             if found == 0 {
                 return Err(());
             }

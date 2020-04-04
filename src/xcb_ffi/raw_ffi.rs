@@ -171,11 +171,11 @@ extern "C" {
         request: u64,
         e: *mut *mut xcb_generic_error_t,
     ) -> *mut c_void;
-    pub(crate) fn xcb_poll_for_reply(
+    pub(crate) fn xcb_poll_for_reply64(
         c: *mut xcb_connection_t,
-        request: c_uint,
+        request: u64,
         reply: *mut *mut c_void,
-        e: *mut *mut xcb_generic_error_t,
+        error: *mut *mut xcb_generic_error_t,
     ) -> c_int;
 }
 
@@ -324,11 +324,11 @@ mod mock {
         unimplemented!();
     }
 
-    pub(crate) unsafe fn xcb_poll_for_reply(
+    pub(crate) unsafe fn xcb_poll_for_reply64(
         _c: *mut xcb_connection_t,
-        _request: c_uint,
+        _request: u64,
         _reply: *mut *mut c_void,
-        _e: *mut *mut xcb_generic_error_t,
+        _error: *mut *mut xcb_generic_error_t,
     ) -> c_int {
         unimplemented!();
     }
