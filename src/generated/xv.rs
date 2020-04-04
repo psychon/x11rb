@@ -1341,14 +1341,16 @@ impl TryFrom<&[u8]> for VideoNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for VideoNotifyEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for VideoNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for VideoNotifyEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for VideoNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&VideoNotifyEvent> for [u8; 32] {
@@ -1403,14 +1405,16 @@ impl TryFrom<&[u8]> for PortNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for PortNotifyEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for PortNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for PortNotifyEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for PortNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&PortNotifyEvent> for [u8; 32] {

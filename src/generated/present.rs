@@ -838,14 +838,16 @@ impl TryFrom<&[u8]> for GenericEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<crate::x11_utils::GenericEvent<B>> for GenericEvent {
-    fn from(value: crate::x11_utils::GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<crate::x11_utils::GenericEvent<B>> for GenericEvent {
+    type Error = ParseError;
+    fn try_from(value: crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericEvent<B>> for GenericEvent {
-    fn from(value: &crate::x11_utils::GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&crate::x11_utils::GenericEvent<B>> for GenericEvent {
+    type Error = ParseError;
+    fn try_from(value: &crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&GenericEvent> for [u8; 32] {

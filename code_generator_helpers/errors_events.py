@@ -116,6 +116,7 @@ def _events(out, modules):
     out("impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {")
     with Indent(out):
         out("/// Parse a generic X11 event into a concrete event type.")
+        out("#[allow(clippy::cognitive_complexity)]")
         out("pub fn parse(")
         out.indent("event: GenericEvent<B>,")
         out.indent("ext_info_provider: &dyn ExtInfoProvider,")
@@ -132,7 +133,7 @@ def _events(out, modules):
                         continue
                     opcode = camel_case_to_upper_snake(name[-1]) + "_EVENT"
                     event_name = name[-1]
-                    out("xproto::%s => return Ok(Self::%s(event.into())),",
+                    out("xproto::%s => return Ok(Self::%s(event.try_into()?)),",
                         opcode, event_name)
                 out("xproto::GE_GENERIC_EVENT => return Self::from_generic_event(event, ext_info_provider),")
                 out("_ => {}")
@@ -166,7 +167,7 @@ def _events(out, modules):
                                 continue
                             opcode = camel_case_to_upper_snake(name[-1]) + "_EVENT"
                             event_name = name[-1]
-                            out.indent("%s::%s => Ok(Self::%s%s(event.into())),",
+                            out.indent("%s::%s => Ok(Self::%s%s(event.try_into()?)),",
                                        mod_name, opcode, variant, event_name)
                         out.indent("_ => Ok(Self::Unknown(event))")
                         out("}")

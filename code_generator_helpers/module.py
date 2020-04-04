@@ -704,11 +704,9 @@ class Module(object):
         emit_doc(self.out, event.doc)
         self.complex_type(event, self._name(name) + 'Event', False, [])
 
+        self._emit_tryfrom_generic(name, self.generic_event_name, 'Event')
         if not event.is_ge_event:
-            self._emit_from_generic(name, self.generic_event_name, 'Event')
             self._emit_serialize(event, name, 'Event')
-        else:
-            self._emit_tryfrom_generic(name, self.generic_event_name, 'Event')
         self.out("")
 
     def error(self, error, name):

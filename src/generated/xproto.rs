@@ -1319,14 +1319,16 @@ impl TryFrom<&[u8]> for KeyPressEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for KeyPressEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for KeyPressEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for KeyPressEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for KeyPressEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&KeyPressEvent> for [u8; 32] {
@@ -1427,14 +1429,16 @@ impl TryFrom<&[u8]> for KeyReleaseEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for KeyReleaseEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for KeyReleaseEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for KeyReleaseEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for KeyReleaseEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&KeyReleaseEvent> for [u8; 32] {
@@ -1594,14 +1598,16 @@ impl TryFrom<&[u8]> for ButtonPressEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for ButtonPressEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ButtonPressEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ButtonPressEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ButtonPressEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&ButtonPressEvent> for [u8; 32] {
@@ -1702,14 +1708,16 @@ impl TryFrom<&[u8]> for ButtonReleaseEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for ButtonReleaseEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ButtonReleaseEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ButtonReleaseEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ButtonReleaseEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&ButtonReleaseEvent> for [u8; 32] {
@@ -1873,14 +1881,16 @@ impl TryFrom<&[u8]> for MotionNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for MotionNotifyEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for MotionNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for MotionNotifyEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for MotionNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&MotionNotifyEvent> for [u8; 32] {
@@ -2122,14 +2132,16 @@ impl TryFrom<&[u8]> for EnterNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for EnterNotifyEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for EnterNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for EnterNotifyEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for EnterNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&EnterNotifyEvent> for [u8; 32] {
@@ -2224,14 +2236,16 @@ impl TryFrom<&[u8]> for LeaveNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for LeaveNotifyEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for LeaveNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for LeaveNotifyEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for LeaveNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&LeaveNotifyEvent> for [u8; 32] {
@@ -2301,14 +2315,16 @@ impl TryFrom<&[u8]> for FocusInEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for FocusInEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for FocusInEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for FocusInEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for FocusInEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&FocusInEvent> for [u8; 32] {
@@ -2369,14 +2385,16 @@ impl TryFrom<&[u8]> for FocusOutEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for FocusOutEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for FocusOutEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for FocusOutEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for FocusOutEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&FocusOutEvent> for [u8; 32] {
@@ -2484,14 +2502,16 @@ impl TryFrom<&[u8]> for KeymapNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for KeymapNotifyEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for KeymapNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for KeymapNotifyEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for KeymapNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&KeymapNotifyEvent> for [u8; 32] {
@@ -2562,14 +2582,16 @@ impl TryFrom<&[u8]> for ExposeEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for ExposeEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ExposeEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ExposeEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ExposeEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&ExposeEvent> for [u8; 32] {
@@ -2635,14 +2657,16 @@ impl TryFrom<&[u8]> for GraphicsExposureEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for GraphicsExposureEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for GraphicsExposureEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for GraphicsExposureEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for GraphicsExposureEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&GraphicsExposureEvent> for [u8; 32] {
@@ -2700,14 +2724,16 @@ impl TryFrom<&[u8]> for NoExposureEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for NoExposureEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for NoExposureEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for NoExposureEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for NoExposureEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&NoExposureEvent> for [u8; 32] {
@@ -2824,14 +2850,16 @@ impl TryFrom<&[u8]> for VisibilityNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for VisibilityNotifyEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for VisibilityNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for VisibilityNotifyEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for VisibilityNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&VisibilityNotifyEvent> for [u8; 32] {
@@ -2893,14 +2921,16 @@ impl TryFrom<&[u8]> for CreateNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for CreateNotifyEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for CreateNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for CreateNotifyEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for CreateNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&CreateNotifyEvent> for [u8; 32] {
@@ -2967,14 +2997,16 @@ impl TryFrom<&[u8]> for DestroyNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for DestroyNotifyEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DestroyNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for DestroyNotifyEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DestroyNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&DestroyNotifyEvent> for [u8; 32] {
@@ -3040,14 +3072,16 @@ impl TryFrom<&[u8]> for UnmapNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for UnmapNotifyEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for UnmapNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for UnmapNotifyEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for UnmapNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&UnmapNotifyEvent> for [u8; 32] {
@@ -3113,14 +3147,16 @@ impl TryFrom<&[u8]> for MapNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for MapNotifyEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for MapNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for MapNotifyEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for MapNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&MapNotifyEvent> for [u8; 32] {
@@ -3181,14 +3217,16 @@ impl TryFrom<&[u8]> for MapRequestEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for MapRequestEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for MapRequestEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for MapRequestEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for MapRequestEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&MapRequestEvent> for [u8; 32] {
@@ -3246,14 +3284,16 @@ impl TryFrom<&[u8]> for ReparentNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for ReparentNotifyEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ReparentNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ReparentNotifyEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ReparentNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&ReparentNotifyEvent> for [u8; 32] {
@@ -3344,14 +3384,16 @@ impl TryFrom<&[u8]> for ConfigureNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for ConfigureNotifyEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ConfigureNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ConfigureNotifyEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ConfigureNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&ConfigureNotifyEvent> for [u8; 32] {
@@ -3423,14 +3465,16 @@ impl TryFrom<&[u8]> for ConfigureRequestEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for ConfigureRequestEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ConfigureRequestEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ConfigureRequestEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ConfigureRequestEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&ConfigureRequestEvent> for [u8; 32] {
@@ -3491,14 +3535,16 @@ impl TryFrom<&[u8]> for GravityNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for GravityNotifyEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for GravityNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for GravityNotifyEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for GravityNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&GravityNotifyEvent> for [u8; 32] {
@@ -3551,14 +3597,16 @@ impl TryFrom<&[u8]> for ResizeRequestEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for ResizeRequestEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ResizeRequestEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ResizeRequestEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ResizeRequestEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&ResizeRequestEvent> for [u8; 32] {
@@ -3694,14 +3742,16 @@ impl TryFrom<&[u8]> for CirculateNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for CirculateNotifyEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for CirculateNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for CirculateNotifyEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for CirculateNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&CirculateNotifyEvent> for [u8; 32] {
@@ -3768,14 +3818,16 @@ impl TryFrom<&[u8]> for CirculateRequestEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for CirculateRequestEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for CirculateRequestEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for CirculateRequestEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for CirculateRequestEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&CirculateRequestEvent> for [u8; 32] {
@@ -3905,14 +3957,16 @@ impl TryFrom<&[u8]> for PropertyNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for PropertyNotifyEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for PropertyNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for PropertyNotifyEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for PropertyNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&PropertyNotifyEvent> for [u8; 32] {
@@ -3965,14 +4019,16 @@ impl TryFrom<&[u8]> for SelectionClearEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for SelectionClearEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for SelectionClearEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for SelectionClearEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for SelectionClearEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&SelectionClearEvent> for [u8; 32] {
@@ -4265,14 +4321,16 @@ impl TryFrom<&[u8]> for SelectionRequestEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for SelectionRequestEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for SelectionRequestEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for SelectionRequestEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for SelectionRequestEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&SelectionRequestEvent> for [u8; 32] {
@@ -4331,14 +4389,16 @@ impl TryFrom<&[u8]> for SelectionNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for SelectionNotifyEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for SelectionNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for SelectionNotifyEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for SelectionNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&SelectionNotifyEvent> for [u8; 32] {
@@ -4537,14 +4597,16 @@ impl TryFrom<&[u8]> for ColormapNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for ColormapNotifyEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ColormapNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ColormapNotifyEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ColormapNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&ColormapNotifyEvent> for [u8; 32] {
@@ -4810,14 +4872,16 @@ impl TryFrom<&[u8]> for ClientMessageEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for ClientMessageEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ClientMessageEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for ClientMessageEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ClientMessageEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&ClientMessageEvent> for [u8; 32] {
@@ -4944,14 +5008,16 @@ impl TryFrom<&[u8]> for MappingNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for MappingNotifyEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for MappingNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for MappingNotifyEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for MappingNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&MappingNotifyEvent> for [u8; 32] {

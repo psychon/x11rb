@@ -1589,14 +1589,16 @@ impl TryFrom<&[u8]> for CounterNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for CounterNotifyEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for CounterNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for CounterNotifyEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for CounterNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&CounterNotifyEvent> for [u8; 32] {
@@ -1659,14 +1661,16 @@ impl TryFrom<&[u8]> for AlarmNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericEvent<B>> for AlarmNotifyEvent {
-    fn from(value: GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for AlarmNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
-impl<B: AsRef<[u8]>> From<&GenericEvent<B>> for AlarmNotifyEvent {
-    fn from(value: &GenericEvent<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
+impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for AlarmNotifyEvent {
+    type Error = ParseError;
+    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
+        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&AlarmNotifyEvent> for [u8; 32] {
