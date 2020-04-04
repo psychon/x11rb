@@ -135,9 +135,8 @@ def _events(out, modules):
                         continue
                     opcode = camel_case_to_upper_snake(name[-1]) + "_EVENT"
                     event_name = name[-1]
-                    func = "into()" if event.implements_from else "try_into()?"
-                    out("xproto::%s => return Ok(Self::%s(event.%s)),",
-                        opcode, event_name, func)
+                    out("xproto::%s => return Ok(Self::%s(event.try_into()?)),",
+                        opcode, event_name)
                 out("xproto::GE_GENERIC_EVENT => return Self::from_generic_event(event, iter),")
                 out("_ => {}")
             out("}")
@@ -173,9 +172,8 @@ def _events(out, modules):
                                 continue
                             opcode = camel_case_to_upper_snake(name[-1]) + "_EVENT"
                             event_name = name[-1]
-                            func = "into()" if event.implements_from else "try_into()?"
-                            out.indent("%s::%s => Ok(Self::%s%s(event.%s)),",
-                                       mod_name, opcode, variant, event_name, func)
+                            out.indent("%s::%s => Ok(Self::%s%s(event.try_into()?)),",
+                                       mod_name, opcode, variant, event_name)
                         out.indent("_ => Ok(Self::Unknown(event))")
                         out("}")
                     out("}")

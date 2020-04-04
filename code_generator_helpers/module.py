@@ -704,13 +704,7 @@ class Module(object):
         emit_doc(self.out, event.doc)
         self.complex_type(event, self._name(name) + 'Event', False, [])
 
-        has_enum = any(field.enum is not None for field in event.fields)
-        if not event.is_ge_event and not has_enum:
-            event.implements_from = True
-            self._emit_from_generic(name, self.generic_event_name, 'Event')
-        else:
-            event.implements_from = False
-            self._emit_tryfrom_generic(name, self.generic_event_name, 'Event')
+        self._emit_tryfrom_generic(name, self.generic_event_name, 'Event')
         if not event.is_ge_event:
             self._emit_serialize(event, name, 'Event')
         self.out("")
