@@ -2422,13 +2422,12 @@ fn example10() -> Result<(), Box<dyn Error>> {
                 conn.flush()?;
             }
             Event::ButtonPress(event) => {
-                let ev = ButtonPressEvent::from(event);
                 let length = "click here to change cursor".len() as i16;
 
-                if (ev.event_x >= (WIDTH - 7 * length) / 2)
-                    && (ev.event_x <= ((WIDTH - 7 * length) / 2 + 7 * length + 6))
-                    && (ev.event_y >= (HEIGHT - 16) / 2 - 19)
-                    && (ev.event_y <= ((HEIGHT - 16) / 2))
+                if (event.event_x >= (WIDTH - 7 * length) / 2)
+                    && (event.event_x <= ((WIDTH - 7 * length) / 2 + 7 * length + 6))
+                    && (event.event_y >= (HEIGHT - 16) / 2 - 19)
+                    && (event.event_y <= ((HEIGHT - 16) / 2))
                 {
                     is_hand = !is_hand;
                 }
