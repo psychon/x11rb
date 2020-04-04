@@ -415,13 +415,13 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
     }
 
     fn parse_error(&self, error: GenericError) -> Result<Error, ParseError> {
-        let ext_info = self.extension_manager.lock().unwrap();
-        Error::parse(error, ext_info.known_present())
+        let ext_mgr = self.extension_manager.lock().unwrap();
+        Error::parse(error, &*ext_mgr)
     }
 
     fn parse_event(&self, event: GenericEvent) -> Result<Event, ParseError> {
-        let ext_info = self.extension_manager.lock().unwrap();
-        Event::parse(event, ext_info.known_present())
+        let ext_mgr = self.extension_manager.lock().unwrap();
+        Event::parse(event, &*ext_mgr)
     }
 
     fn flush(&self) -> Result<(), ConnectionError> {

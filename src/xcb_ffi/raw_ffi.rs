@@ -22,12 +22,38 @@ pub(crate) struct xcb_connection_t {
 }
 
 #[derive(Debug)]
-pub(crate) struct XCBConnectionWrapper(pub(crate) NonNull<xcb_connection_t>);
+pub(crate) struct XCBConnectionWrapper {
+    ptr: NonNull<xcb_connection_t>,
+    should_drop: bool,
+}
 
 // libxcb is fully thread-safe (well, except for xcb_disconnect()), so the following is
 // actually fine and safe:
 unsafe impl Send for XCBConnectionWrapper {}
 unsafe impl Sync for XCBConnectionWrapper {}
+
+impl Drop for XCBConnectionWrapper {
+    fn drop(&mut self) {
+        if self.should_drop {
+            unsafe {
+                xcb_disconnect(self.ptr.as_ptr());
+            }
+        }
+    }
+}
+
+impl XCBConnectionWrapper {
+    pub(crate) unsafe fn new(ptr: *mut xcb_connection_t, should_drop: bool) -> Self {
+        Self {
+            ptr: NonNull::new_unchecked(ptr),
+            should_drop,
+        }
+    }
+
+    pub(crate) fn as_ptr(&self) -> *mut xcb_connection_t {
+        self.ptr.as_ptr()
+    }
+}
 
 #[allow(non_camel_case_types)]
 #[repr(C)]
