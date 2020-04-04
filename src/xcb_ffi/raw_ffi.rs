@@ -57,9 +57,26 @@ impl XCBConnectionWrapper {
 
 #[allow(non_camel_case_types)]
 #[repr(C)]
-pub(crate) struct xcb_extension_t {
-    pub(crate) name: *const c_char,
-    pub(crate) global_id: c_int,
+pub(crate) struct xcb_generic_event_t {
+    pub(crate) response_type: u8,
+    pub(crate) pad0: u8,
+    pub(crate) sequence: u16,
+    pub(crate) pad: [u32; 7],
+    pub(crate) full_sequence: u32,
+}
+
+#[allow(non_camel_case_types)]
+#[repr(C)]
+pub(crate) struct xcb_generic_error_t {
+    pub(crate) response_type: u8,
+    pub(crate) error_code: u8,
+    pub(crate) sequence: u16,
+    pub(crate) resource_id: u32,
+    pub(crate) minor_code: u16,
+    pub(crate) major_code: u8,
+    pub(crate) pad0: u8,
+    pub(crate) pad: [u32; 5],
+    pub(crate) full_sequence: u32,
 }
 
 #[allow(non_camel_case_types)]
@@ -70,11 +87,24 @@ pub(crate) struct xcb_void_cookie_t {
 
 #[allow(non_camel_case_types)]
 #[repr(C)]
+pub(crate) struct xcb_extension_t {
+    pub(crate) name: *const c_char,
+    pub(crate) global_id: c_int,
+}
+
+#[allow(non_camel_case_types)]
+#[repr(C)]
 pub(crate) struct xcb_protocol_request_t {
     pub(crate) count: usize,
     pub(crate) ext: *mut xcb_extension_t,
     pub(crate) opcode: u8,
     pub(crate) isvoid: u8,
+}
+
+#[allow(non_camel_case_types)]
+#[repr(C)]
+pub(crate) struct xcb_setup_t {
+    _unused: [u8; 0],
 }
 
 pub(crate) mod connection_errors {
@@ -99,51 +129,54 @@ pub(crate) mod send_request_flags {
 #[cfg(not(test))]
 #[link(name = "xcb")]
 extern "C" {
+    // From xcb.h
+    pub(crate) fn xcb_flush(c: *mut xcb_connection_t) -> c_int;
+    pub(crate) fn xcb_get_maximum_request_length(c: *mut xcb_connection_t) -> u32;
+    pub(crate) fn xcb_prefetch_maximum_request_length(c: *mut xcb_connection_t);
+    pub(crate) fn xcb_wait_for_event(c: *mut xcb_connection_t) -> *mut xcb_generic_event_t;
+    pub(crate) fn xcb_poll_for_event(c: *mut xcb_connection_t) -> *mut xcb_generic_event_t;
+    pub(crate) fn xcb_request_check(
+        c: *mut xcb_connection_t,
+        void_cookie: xcb_void_cookie_t,
+    ) -> *mut xcb_generic_error_t;
+    pub(crate) fn xcb_discard_reply64(c: *mut xcb_connection_t, sequence: u64);
+    pub(crate) fn xcb_get_setup(c: *mut xcb_connection_t) -> *const xcb_setup_t;
+    #[cfg(unix)]
+    pub(crate) fn xcb_get_file_descriptor(c: *mut xcb_connection_t) -> c_int;
+    pub(crate) fn xcb_connection_has_error(c: *mut xcb_connection_t) -> c_int;
+    pub(crate) fn xcb_disconnect(c: *mut xcb_connection_t);
     pub(crate) fn xcb_connect(
         displayname: *const c_char,
         screenp: *mut c_int,
     ) -> *mut xcb_connection_t;
-    pub(crate) fn xcb_disconnect(c: *mut xcb_connection_t);
-    pub(crate) fn xcb_connection_has_error(c: *const xcb_connection_t) -> c_int;
+    pub(crate) fn xcb_generate_id(c: *mut xcb_connection_t) -> u32;
+
+    // From xcbext.h
     pub(crate) fn xcb_send_request64(
-        c: *const xcb_connection_t,
+        c: *mut xcb_connection_t,
         flags: c_int,
         vector: *mut iovec,
         request: *const xcb_protocol_request_t,
     ) -> u64;
     pub(crate) fn xcb_send_request_with_fds64(
-        c: *const xcb_connection_t,
+        c: *mut xcb_connection_t,
         flags: c_int,
         vector: *mut iovec,
         request: *const xcb_protocol_request_t,
         num_fds: c_uint,
         fds: *mut c_int,
     ) -> u64;
-    pub(crate) fn xcb_discard_reply64(c: *const xcb_connection_t, sequence: u64);
     pub(crate) fn xcb_wait_for_reply64(
-        c: *const xcb_connection_t,
+        c: *mut xcb_connection_t,
         request: u64,
-        e: *mut *mut c_void,
+        e: *mut *mut xcb_generic_error_t,
     ) -> *mut c_void;
-    pub(crate) fn xcb_poll_for_reply(
-        c: *const xcb_connection_t,
-        request: c_uint,
+    pub(crate) fn xcb_poll_for_reply64(
+        c: *mut xcb_connection_t,
+        request: u64,
         reply: *mut *mut c_void,
-        e: *mut *mut c_void,
+        error: *mut *mut xcb_generic_error_t,
     ) -> c_int;
-    pub(crate) fn xcb_request_check(
-        c: *const xcb_connection_t,
-        void_cookie: xcb_void_cookie_t,
-    ) -> *mut c_void;
-    pub(crate) fn xcb_wait_for_event(c: *const xcb_connection_t) -> *mut c_void;
-    pub(crate) fn xcb_poll_for_event(c: *const xcb_connection_t) -> *mut c_void;
-    pub(crate) fn xcb_flush(c: *const xcb_connection_t) -> c_int;
-    pub(crate) fn xcb_generate_id(c: *const xcb_connection_t) -> u32;
-    pub(crate) fn xcb_get_setup(c: *const xcb_connection_t) -> *const u8;
-    #[cfg(unix)]
-    pub(crate) fn xcb_get_file_descriptor(c: *const xcb_connection_t) -> c_int;
-    pub(crate) fn xcb_get_maximum_request_length(c: *const xcb_connection_t) -> u32;
-    pub(crate) fn xcb_prefetch_maximum_request_length(c: *const xcb_connection_t);
 }
 
 #[cfg(test)]
@@ -152,7 +185,10 @@ mod mock {
 
     use libc::{c_char, c_int, c_uint, c_void};
 
-    use super::{iovec, xcb_connection_t, xcb_protocol_request_t, xcb_void_cookie_t};
+    use super::{
+        iovec, xcb_connection_t, xcb_generic_error_t, xcb_generic_event_t, xcb_protocol_request_t,
+        xcb_setup_t, xcb_void_cookie_t,
+    };
     use crate::x11_utils::Serialize;
     use crate::xproto::{ImageOrder, Setup};
 
@@ -160,6 +196,61 @@ mod mock {
     struct ConnectionMock {
         error: c_int,
         setup: Vec<u8>,
+    }
+
+    // From xcb.h
+    pub(crate) unsafe fn xcb_flush(_c: *mut xcb_connection_t) -> c_int {
+        unimplemented!();
+    }
+
+    pub(crate) unsafe fn xcb_get_maximum_request_length(_c: *mut xcb_connection_t) -> u32 {
+        unimplemented!();
+    }
+
+    pub(crate) unsafe fn xcb_prefetch_maximum_request_length(_c: *mut xcb_connection_t) {
+        unimplemented!();
+    }
+
+    pub(crate) unsafe fn xcb_wait_for_event(_c: *mut xcb_connection_t) -> *mut xcb_generic_event_t {
+        unimplemented!();
+    }
+
+    pub(crate) unsafe fn xcb_poll_for_event(_c: *mut xcb_connection_t) -> *mut xcb_generic_event_t {
+        unimplemented!();
+    }
+
+    pub(crate) unsafe fn xcb_request_check(
+        _c: *mut xcb_connection_t,
+        _void_cookie: xcb_void_cookie_t,
+    ) -> *mut xcb_generic_error_t {
+        unimplemented!();
+    }
+
+    pub(crate) unsafe fn xcb_discard_reply64(_c: *mut xcb_connection_t, _sequence: u64) {
+        unimplemented!();
+    }
+
+    pub(crate) unsafe fn xcb_get_setup(c: *mut xcb_connection_t) -> *const xcb_setup_t {
+        // The pointer is suitable aligned since our xcb_connect() mock above created it
+        #[allow(clippy::cast_ptr_alignment)]
+        ((*(c as *const ConnectionMock)).setup.as_ptr() as _)
+    }
+
+    #[cfg(unix)]
+    pub(crate) unsafe fn xcb_get_file_descriptor(_c: *mut xcb_connection_t) -> c_int {
+        unimplemented!();
+    }
+
+    pub(crate) unsafe fn xcb_connection_has_error(c: *mut xcb_connection_t) -> c_int {
+        // The pointer is suitable aligned since our xcb_connect() mock above created it
+        #[allow(clippy::cast_ptr_alignment)]
+        (*(c as *const ConnectionMock)).error
+    }
+
+    pub(crate) unsafe fn xcb_disconnect(c: *mut xcb_connection_t) {
+        // The pointer is suitable aligned since our xcb_connect() mock above created it
+        #[allow(clippy::cast_ptr_alignment)]
+        let _ = Box::from_raw(c as *mut ConnectionMock);
     }
 
     pub(crate) unsafe fn xcb_connect(
@@ -200,20 +291,13 @@ mod mock {
         Box::into_raw(Box::new(mock)) as _
     }
 
-    pub(crate) unsafe fn xcb_disconnect(c: *mut xcb_connection_t) {
-        // The pointer is suitable aligned since our xcb_connect() mock above created it
-        #[allow(clippy::cast_ptr_alignment)]
-        let _ = Box::from_raw(c as *mut ConnectionMock);
+    pub(crate) unsafe fn xcb_generate_id(_c: *mut xcb_connection_t) -> u32 {
+        unimplemented!();
     }
 
-    pub(crate) unsafe fn xcb_connection_has_error(c: *const xcb_connection_t) -> c_int {
-        // The pointer is suitable aligned since our xcb_connect() mock above created it
-        #[allow(clippy::cast_ptr_alignment)]
-        (*(c as *const ConnectionMock)).error
-    }
-
+    // From xcbext.h
     pub(crate) unsafe fn xcb_send_request64(
-        _c: *const xcb_connection_t,
+        _c: *mut xcb_connection_t,
         _flags: c_int,
         _vector: *mut iovec,
         _request: *const xcb_protocol_request_t,
@@ -222,7 +306,7 @@ mod mock {
     }
 
     pub(crate) unsafe fn xcb_send_request_with_fds64(
-        _c: *const xcb_connection_t,
+        _c: *mut xcb_connection_t,
         _flags: c_int,
         _vector: *mut iovec,
         _request: *const xcb_protocol_request_t,
@@ -232,66 +316,20 @@ mod mock {
         unimplemented!();
     }
 
-    pub(crate) unsafe fn xcb_discard_reply64(_c: *const xcb_connection_t, _sequence: u64) {
-        unimplemented!();
-    }
-
     pub(crate) unsafe fn xcb_wait_for_reply64(
-        _c: *const xcb_connection_t,
+        _c: *mut xcb_connection_t,
         _request: u64,
-        _e: *mut *mut c_void,
+        _e: *mut *mut xcb_generic_error_t,
     ) -> *mut c_void {
         unimplemented!();
     }
 
-    pub(crate) unsafe fn xcb_poll_for_reply(
-        _c: *const xcb_connection_t,
-        _request: c_uint,
+    pub(crate) unsafe fn xcb_poll_for_reply64(
+        _c: *mut xcb_connection_t,
+        _request: u64,
         _reply: *mut *mut c_void,
-        _e: *mut *mut c_void,
+        _error: *mut *mut xcb_generic_error_t,
     ) -> c_int {
-        unimplemented!();
-    }
-
-    pub(crate) unsafe fn xcb_request_check(
-        _c: *const xcb_connection_t,
-        _void_cookie: xcb_void_cookie_t,
-    ) -> *mut c_void {
-        unimplemented!();
-    }
-
-    pub(crate) unsafe fn xcb_wait_for_event(_c: *const xcb_connection_t) -> *mut c_void {
-        unimplemented!();
-    }
-
-    pub(crate) unsafe fn xcb_poll_for_event(_c: *const xcb_connection_t) -> *mut c_void {
-        unimplemented!();
-    }
-
-    pub(crate) unsafe fn xcb_flush(_c: *const xcb_connection_t) -> c_int {
-        unimplemented!();
-    }
-
-    pub(crate) unsafe fn xcb_generate_id(_c: *const xcb_connection_t) -> u32 {
-        unimplemented!();
-    }
-
-    pub(crate) unsafe fn xcb_get_setup(c: *const xcb_connection_t) -> *const u8 {
-        // The pointer is suitable aligned since our xcb_connect() mock above created it
-        #[allow(clippy::cast_ptr_alignment)]
-        (*(c as *const ConnectionMock)).setup.as_ptr()
-    }
-
-    #[cfg(unix)]
-    pub(crate) unsafe fn xcb_get_file_descriptor(_c: *const xcb_connection_t) -> c_int {
-        unimplemented!();
-    }
-
-    pub(crate) unsafe fn xcb_get_maximum_request_length(_c: *const xcb_connection_t) -> u32 {
-        unimplemented!();
-    }
-
-    pub(crate) unsafe fn xcb_prefetch_maximum_request_length(_c: *const xcb_connection_t) {
         unimplemented!();
     }
 }

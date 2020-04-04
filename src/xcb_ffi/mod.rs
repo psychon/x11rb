@@ -49,7 +49,7 @@ pub struct XCBConnection {
 
 impl XCBConnection {
     unsafe fn connection_error_from_connection(
-        c: *const raw_ffi::xcb_connection_t,
+        c: *mut raw_ffi::xcb_connection_t,
     ) -> ConnectionError {
         Self::connection_error_from_c_error(raw_ffi::xcb_connection_has_error(c))
     }
@@ -139,12 +139,12 @@ impl XCBConnection {
         })
     }
 
-    unsafe fn parse_setup(setup: *const u8) -> Result<Setup, ParseError> {
+    unsafe fn parse_setup(setup: *const raw_ffi::xcb_setup_t) -> Result<Setup, ParseError> {
         use std::slice::from_raw_parts;
 
         // We know that the setup information has at least eight bytes.
         // Use a slice instead of Buffer::CSlice since we must not free() the xcb_setup_t that libxcb owns.
-        let wrapper = from_raw_parts(setup, 8);
+        let wrapper = from_raw_parts(setup as *const u8, 8);
 
         // The length field is in the last two bytes
         let length = u16::from_ne_bytes([wrapper[6], wrapper[7]]);
@@ -259,12 +259,8 @@ impl XCBConnection {
         unsafe {
             let mut reply = null_mut();
             let mut error = null_mut();
-            let found = raw_ffi::xcb_poll_for_reply(
-                self.conn.as_ptr(),
-                sequence as _,
-                &mut reply,
-                &mut error,
-            );
+            let found =
+                raw_ffi::xcb_poll_for_reply64(self.conn.as_ptr(), sequence, &mut reply, &mut error);
             if found == 0 {
                 return Err(());
             }
