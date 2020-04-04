@@ -540,6 +540,7 @@ pub enum Event<B: std::fmt::Debug + AsRef<[u8]>> {
 }
 impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
     /// Parse a generic X11 event into a concrete event type.
+    #[allow(clippy::cognitive_complexity)]
     pub fn parse(
         event: GenericEvent<B>,
         iter: impl Iterator<Item=(&'static str, ExtensionInformation)>,

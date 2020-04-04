@@ -119,6 +119,7 @@ def _events(out, modules):
     out("impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {")
     with Indent(out):
         out("/// Parse a generic X11 event into a concrete event type.")
+        out("#[allow(clippy::cognitive_complexity)]")
         out("pub fn parse(")
         out.indent("event: GenericEvent<B>,")
         out.indent("iter: impl Iterator<Item=(&'static str, ExtensionInformation)>,")
