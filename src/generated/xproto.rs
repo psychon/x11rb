@@ -8740,7 +8740,7 @@ impl GetPropertyReply {
     /// };
     /// assert!(reply.value8().is_none());
     /// ```
-    #[allow(single_use_lifetimes)] // Work around a rustc bug
+    #[allow(single_use_lifetimes, private_doc_tests)] // Work around a rustc bug and rustdoc bug
     pub fn value8<'a>(&'a self) -> Option<impl Iterator<Item=u8> + 'a> {
         if self.format == 8 {
             Some(crate::wrapper::PropertyIterator::new(&self.value))
@@ -8794,7 +8794,7 @@ impl GetPropertyReply {
     /// };
     /// assert!(reply.value16().is_none());
     /// ```
-    #[allow(single_use_lifetimes)] // Work around a rustc bug
+    #[allow(single_use_lifetimes, private_doc_tests)] // Work around a rustc bug and rustdoc bug
     pub fn value16<'a>(&'a self) -> Option<impl Iterator<Item=u16> + 'a> {
         if self.format == 16 {
             Some(crate::wrapper::PropertyIterator::new(&self.value))
@@ -8847,7 +8847,7 @@ impl GetPropertyReply {
     /// };
     /// assert!(reply.value32().is_none());
     /// ```
-    #[allow(single_use_lifetimes)] // Work around a rustc bug
+    #[allow(single_use_lifetimes, private_doc_tests)] // Work around a rustc bug and rustdoc bug
     pub fn value32<'a>(&'a self) -> Option<impl Iterator<Item=u32> + 'a> {
         if self.format == 32 {
             Some(crate::wrapper::PropertyIterator::new(&self.value))

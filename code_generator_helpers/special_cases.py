@@ -93,7 +93,7 @@ def extra_get_property_impl(out):
             out("/// };")
             out("/// assert!(reply.value%d().is_none());", width)
             out("/// ```")
-            out("#[allow(single_use_lifetimes)] // Work around a rustc bug")
+            out("#[allow(single_use_lifetimes, private_doc_tests)] // Work around a rustc bug and rustdoc bug")
             out("pub fn value%d<'a>(&'a self) -> Option<impl Iterator<Item=u%d> + 'a> {", width, width)
             with Indent(out):
                 out("if self.format == %d {", width)
