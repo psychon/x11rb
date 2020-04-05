@@ -2,7 +2,7 @@
 
 use std::error::Error;
 
-use crate::x11_utils::{Event as _, GenericError};
+use crate::x11_utils::GenericError;
 use crate::xproto::{SetupAuthenticate, SetupFailed};
 
 /// An error occurred while parsing some data
@@ -193,7 +193,7 @@ impl<B: AsRef<[u8]> + std::fmt::Debug> std::fmt::Display for ReplyError<B> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ReplyError::ConnectionError(e) => write!(f, "{}", e),
-            ReplyError::X11Error(e) => write!(f, "X11 error {:?}", e.raw_bytes()),
+            ReplyError::X11Error(e) => write!(f, "X11 error {:?}", e),
         }
     }
 }
@@ -244,7 +244,7 @@ impl<B: AsRef<[u8]> + std::fmt::Debug> std::fmt::Display for ReplyOrIdError<B> {
         match self {
             ReplyOrIdError::IdsExhausted => f.write_str("X11 IDs have been exhausted"),
             ReplyOrIdError::ConnectionError(e) => write!(f, "{}", e),
-            ReplyOrIdError::X11Error(e) => write!(f, "X11 error {:?}", e.raw_bytes()),
+            ReplyOrIdError::X11Error(e) => write!(f, "X11 error {:?}", e),
         }
     }
 }
