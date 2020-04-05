@@ -51,6 +51,7 @@ script:
 
   - cargo build --verbose --all-targets --all-features
   - cargo test --verbose --all-features
+  - cargo doc --verbose --all-features
 
   - pycodestyle --show-pep8 --show-source $(git ls-files '*.py' | grep -v xcb-proto-1.14) --max-line-length=130
 

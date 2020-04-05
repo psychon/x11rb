@@ -15,6 +15,7 @@ test_script:
   # We do not have libxcb and thus cannot build XCBConnection
   - cargo build --verbose --all-targets --no-default-features --features all-extensions
   - cargo test --verbose --no-default-features --features all-extensions
+  - cargo doc --verbose --no-default-features --features all-extensions
 
   # Start an X11 server in the background
   - ps: $Server = Start-Process -PassThru -FilePath C:\cygwin\bin\Xvfb.exe -ArgumentList "-listen tcp :0"
