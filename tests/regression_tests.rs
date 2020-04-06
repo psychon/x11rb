@@ -149,6 +149,14 @@ impl RequestConnection for FakeConnection {
     fn prefetch_maximum_request_bytes(&self) {
         unimplemented!()
     }
+
+    fn parse_error(&self, _error: GenericError<Self::Buf>) -> Result<x11rb::Error<Self::Buf>, ParseError> {
+        unimplemented!()
+    }
+
+    fn parse_event(&self, _event: x11rb::x11_utils::GenericEvent<Self::Buf>) -> Result<x11rb::Event<Self::Buf>, ParseError> {
+        unimplemented!()
+    }
 }
 
 #[test]

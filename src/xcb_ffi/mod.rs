@@ -463,6 +463,16 @@ impl RequestConnection for XCBConnection {
     fn prefetch_maximum_request_bytes(&self) {
         unsafe { raw_ffi::xcb_prefetch_maximum_request_length(self.conn.as_ptr()) };
     }
+
+    fn parse_error(&self, error: GenericError) -> Result<Error, ParseError> {
+        let ext_mgr = self.ext_mgr.lock().unwrap();
+        Error::parse(error, &*ext_mgr)
+    }
+
+    fn parse_event(&self, event: GenericEvent) -> Result<Event, ParseError> {
+        let ext_mgr = self.ext_mgr.lock().unwrap();
+        Event::parse(event, &*ext_mgr)
+    }
 }
 
 impl Connection for XCBConnection {
@@ -495,16 +505,6 @@ impl Connection for XCBConnection {
             }
             Ok(Some(Self::wrap_event(event as _)?))
         }
-    }
-
-    fn parse_error(&self, error: GenericError) -> Result<Error, ParseError> {
-        let ext_mgr = self.ext_mgr.lock().unwrap();
-        Error::parse(error, &*ext_mgr)
-    }
-
-    fn parse_event(&self, event: GenericEvent) -> Result<Event, ParseError> {
-        let ext_mgr = self.ext_mgr.lock().unwrap();
-        Event::parse(event, &*ext_mgr)
     }
 
     fn flush(&self) -> Result<(), ConnectionError> {

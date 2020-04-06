@@ -21,7 +21,7 @@ extern crate x11rb;
 
 use std::error::Error;
 
-use x11rb::connection::{Connection, SequenceNumber};
+use x11rb::connection::{Connection, SequenceNumber, RequestConnection};
 use x11rb::errors::{ConnectionError, ReplyError, ReplyOrIdError};
 use x11rb::wrapper::ConnectionExt as _;
 use x11rb::xproto::*;

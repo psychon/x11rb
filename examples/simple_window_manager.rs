@@ -6,7 +6,7 @@ extern crate x11rb;
 use std::collections::HashSet;
 use std::process::exit;
 
-use x11rb::connection::Connection;
+use x11rb::connection::{Connection, RequestConnection};
 use x11rb::errors::{ReplyError, ReplyOrIdError};
 use x11rb::x11_utils::Event as _;
 use x11rb::xproto::*;

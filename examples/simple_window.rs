@@ -1,6 +1,6 @@
 extern crate x11rb;
 
-use x11rb::connection::Connection;
+use x11rb::connection::{Connection, RequestConnection};
 use x11rb::wrapper::ConnectionExt as _;
 use x11rb::xproto::*;
 use x11rb::Event;

@@ -397,6 +397,16 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         let mut max_bytes = self.maximum_request_bytes.lock().unwrap();
         self.prefetch_maximum_request_bytes_impl(&mut max_bytes);
     }
+
+    fn parse_error(&self, error: GenericError) -> Result<Error, ParseError> {
+        let ext_mgr = self.extension_manager.lock().unwrap();
+        Error::parse(error, &*ext_mgr)
+    }
+
+    fn parse_event(&self, event: GenericEvent) -> Result<Event, ParseError> {
+        let ext_mgr = self.extension_manager.lock().unwrap();
+        Event::parse(event, &*ext_mgr)
+    }
 }
 
 impl<R: Read, W: Write> Connection for RustConnection<R, W> {
@@ -412,16 +422,6 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
 
     fn poll_for_event_with_sequence(&self) -> Result<Option<EventAndSeqNumber>, ConnectionError> {
         Ok(self.inner.lock().unwrap().poll_for_event_with_sequence())
-    }
-
-    fn parse_error(&self, error: GenericError) -> Result<Error, ParseError> {
-        let ext_mgr = self.extension_manager.lock().unwrap();
-        Error::parse(error, &*ext_mgr)
-    }
-
-    fn parse_event(&self, event: GenericEvent) -> Result<Event, ParseError> {
-        let ext_mgr = self.extension_manager.lock().unwrap();
-        Event::parse(event, &*ext_mgr)
     }
 
     fn flush(&self) -> Result<(), ConnectionError> {

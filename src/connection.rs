@@ -259,6 +259,12 @@ pub trait RequestConnection {
 
     /// The maximum number of bytes that the X11 server accepts in a request.
     fn maximum_request_bytes(&self) -> usize;
+
+    /// Parse a generic error.
+    fn parse_error(&self, error: GenericError<Self::Buf>) -> Result<Error<Self::Buf>, ParseError>;
+
+    /// Parse a generic event.
+    fn parse_event(&self, event: GenericEvent<Self::Buf>) -> Result<Event<Self::Buf>, ParseError>;
 }
 
 /// A connection to an X11 server.
@@ -281,12 +287,6 @@ pub trait Connection: RequestConnection {
     fn poll_for_event_with_sequence(
         &self,
     ) -> Result<Option<EventAndSeqNumber<Self::Buf>>, ConnectionError>;
-
-    /// Parse a generic error.
-    fn parse_error(&self, error: GenericError<Self::Buf>) -> Result<Error<Self::Buf>, ParseError>;
-
-    /// Parse a generic event.
-    fn parse_event(&self, event: GenericEvent<Self::Buf>) -> Result<Event<Self::Buf>, ParseError>;
 
     /// Send all pending requests to the server.
     ///
@@ -350,7 +350,7 @@ pub enum DiscardMode {
 /// use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
 /// use x11rb::errors::{ParseError, ConnectionError};
 /// use x11rb::utils::RawFdContainer;
-/// use x11rb::x11_utils::ExtensionInformation;
+/// use x11rb::x11_utils::{ExtensionInformation, GenericError, GenericEvent};
 ///
 /// struct MyConnection();
 ///
@@ -394,6 +394,12 @@ pub enum DiscardMode {
 ///     # }
 ///     # fn prefetch_maximum_request_bytes(&self) {
 ///     #    unimplemented!()
+///     # }
+///     # fn parse_error(&self, _error: GenericError<Self::Buf>) -> Result<x11rb::Error<Self::Buf>, ParseError> {
+///     #     unimplemented!()
+///     # }
+///     # fn parse_event(&self, _event: GenericEvent<Self::Buf>) -> Result<x11rb::Event<Self::Buf>, ParseError> {
+///     #     unimplemented!()
 ///     # }
 ///
 ///     fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)
