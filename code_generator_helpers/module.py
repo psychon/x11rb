@@ -264,10 +264,7 @@ class Module(object):
         for (name, header) in outer_module.imports:
             assert name == header, (name, header)  # I don't know what is going on here...
             self.out("#[allow(unused_imports)]")
-            if header == "xproto":
-                self.out("use super::%s::*;", header)
-            else:
-                self.out("use super::%s;", header)
+            self.out("use super::%s;", header)
 
         if self.namespace.is_ext:
             self.out("")
@@ -1417,23 +1414,31 @@ class Module(object):
 
         if name[0] == 'xcb':
             name = name[1:]
+            is_builtin_type = False
         else:
             assert len(name) == 1, name
             name = (rust_type_mapping.get(name[0], name[0]),)
-        if self.namespace.is_ext and name[0] == self.namespace.ext_name:
-            name = name[1:]
-        if len(name) == 2:
-            # Could be a type from another module which we imported
-            try:
-                ext = self.outer_module.get_namespace(name[0]).header
-            except KeyError:
-                ext = None
+            is_builtin_type = True
 
-            if ext:
-                # Yup, it's a type from another module.
-                name = (ext + "::" + name[1],)
-            else:
-                name = (name[0] + self._to_rust_identifier(name[1]),)
+        if len(name) == 1 and not is_builtin_type and self.namespace.is_ext:
+            # It is a type imported from xproto
+            name = ("xproto::" + name[0],)
+        else:
+            if self.namespace.is_ext and name[0] == self.namespace.ext_name:
+                name = name[1:]
+            if len(name) == 2:
+                # Could be a type from another module which we imported
+                try:
+                    ext = self.outer_module.get_namespace(name[0]).header
+                except KeyError:
+                    ext = None
+
+                if ext:
+                    # Yup, it's a type from another module.
+                    name = (ext + "::" + name[1],)
+                else:
+                    name = (name[0] + self._to_rust_identifier(name[1]),)
+
         assert len(name) == 1, orig_name
         name = name[0]
 

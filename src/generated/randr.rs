@@ -23,7 +23,7 @@ use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
 #[allow(unused_imports)]
-use super::xproto::*;
+use super::xproto;
 #[allow(unused_imports)]
 use super::render;
 
@@ -541,7 +541,7 @@ impl TryFrom<u32> for SetConfig {
 
 /// Opcode for the SetScreenConfig request
 pub const SET_SCREEN_CONFIG_REQUEST: u8 = 2;
-pub fn set_screen_config<Conn>(conn: &Conn, window: Window, timestamp: Timestamp, config_timestamp: Timestamp, size_id: u16, rotation: u16, rate: u16) -> Result<Cookie<'_, Conn, SetScreenConfigReply>, ConnectionError>
+pub fn set_screen_config<Conn>(conn: &Conn, window: xproto::Window, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, size_id: u16, rotation: u16, rate: u16) -> Result<Cookie<'_, Conn, SetScreenConfigReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -590,9 +590,9 @@ pub struct SetScreenConfigReply {
     pub status: SetConfig,
     pub sequence: u16,
     pub length: u32,
-    pub new_timestamp: Timestamp,
-    pub config_timestamp: Timestamp,
-    pub root: Window,
+    pub new_timestamp: xproto::Timestamp,
+    pub config_timestamp: xproto::Timestamp,
+    pub root: xproto::Window,
     pub subpixel_order: render::SubPixel,
 }
 impl SetScreenConfigReply {
@@ -601,9 +601,9 @@ impl SetScreenConfigReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (new_timestamp, remaining) = Timestamp::try_parse(remaining)?;
-        let (config_timestamp, remaining) = Timestamp::try_parse(remaining)?;
-        let (root, remaining) = Window::try_parse(remaining)?;
+        let (new_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (root, remaining) = xproto::Window::try_parse(remaining)?;
         let (subpixel_order, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(10..).ok_or(ParseError::ParseError)?;
         let status = status.try_into()?;
@@ -702,7 +702,7 @@ bitmask_binop!(NotifyMask, u8);
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 4;
-pub fn select_input<Conn>(conn: &Conn, window: Window, enable: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn select_input<Conn>(conn: &Conn, window: xproto::Window, enable: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -732,7 +732,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetScreenInfo request
 pub const GET_SCREEN_INFO_REQUEST: u8 = 5;
-pub fn get_screen_info<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, GetScreenInfoReply>, ConnectionError>
+pub fn get_screen_info<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetScreenInfoReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -760,9 +760,9 @@ pub struct GetScreenInfoReply {
     pub rotations: u8,
     pub sequence: u16,
     pub length: u32,
-    pub root: Window,
-    pub timestamp: Timestamp,
-    pub config_timestamp: Timestamp,
+    pub root: xproto::Window,
+    pub timestamp: xproto::Timestamp,
+    pub config_timestamp: xproto::Timestamp,
     pub size_id: u16,
     pub rotation: u16,
     pub rate: u16,
@@ -776,9 +776,9 @@ impl GetScreenInfoReply {
         let (rotations, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (root, remaining) = Window::try_parse(remaining)?;
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
-        let (config_timestamp, remaining) = Timestamp::try_parse(remaining)?;
+        let (root, remaining) = xproto::Window::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (n_sizes, remaining) = u16::try_parse(remaining)?;
         let (size_id, remaining) = u16::try_parse(remaining)?;
         let (rotation, remaining) = u16::try_parse(remaining)?;
@@ -800,7 +800,7 @@ impl TryFrom<&[u8]> for GetScreenInfoReply {
 
 /// Opcode for the GetScreenSizeRange request
 pub const GET_SCREEN_SIZE_RANGE_REQUEST: u8 = 6;
-pub fn get_screen_size_range<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, GetScreenSizeRangeReply>, ConnectionError>
+pub fn get_screen_size_range<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetScreenSizeRangeReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -856,7 +856,7 @@ impl TryFrom<&[u8]> for GetScreenSizeRangeReply {
 
 /// Opcode for the SetScreenSize request
 pub const SET_SCREEN_SIZE_REQUEST: u8 = 7;
-pub fn set_screen_size<Conn>(conn: &Conn, window: Window, width: u16, height: u16, mm_width: u32, mm_height: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_screen_size<Conn>(conn: &Conn, window: xproto::Window, width: u16, height: u16, mm_width: u32, mm_height: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1090,7 +1090,7 @@ impl Serialize for ModeInfo {
 
 /// Opcode for the GetScreenResources request
 pub const GET_SCREEN_RESOURCES_REQUEST: u8 = 8;
-pub fn get_screen_resources<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, GetScreenResourcesReply>, ConnectionError>
+pub fn get_screen_resources<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetScreenResourcesReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1117,8 +1117,8 @@ pub struct GetScreenResourcesReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub timestamp: Timestamp,
-    pub config_timestamp: Timestamp,
+    pub timestamp: xproto::Timestamp,
+    pub config_timestamp: xproto::Timestamp,
     pub crtcs: Vec<Crtc>,
     pub outputs: Vec<Output>,
     pub modes: Vec<ModeInfo>,
@@ -1130,8 +1130,8 @@ impl GetScreenResourcesReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
-        let (config_timestamp, remaining) = Timestamp::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (num_crtcs, remaining) = u16::try_parse(remaining)?;
         let (num_outputs, remaining) = u16::try_parse(remaining)?;
         let (num_modes, remaining) = u16::try_parse(remaining)?;
@@ -1219,7 +1219,7 @@ impl TryFrom<u32> for Connection {
 
 /// Opcode for the GetOutputInfo request
 pub const GET_OUTPUT_INFO_REQUEST: u8 = 9;
-pub fn get_output_info<Conn>(conn: &Conn, output: Output, config_timestamp: Timestamp) -> Result<Cookie<'_, Conn, GetOutputInfoReply>, ConnectionError>
+pub fn get_output_info<Conn>(conn: &Conn, output: Output, config_timestamp: xproto::Timestamp) -> Result<Cookie<'_, Conn, GetOutputInfoReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1252,7 +1252,7 @@ pub struct GetOutputInfoReply {
     pub status: SetConfig,
     pub sequence: u16,
     pub length: u32,
-    pub timestamp: Timestamp,
+    pub timestamp: xproto::Timestamp,
     pub crtc: Crtc,
     pub mm_width: u32,
     pub mm_height: u32,
@@ -1270,7 +1270,7 @@ impl GetOutputInfoReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (crtc, remaining) = Crtc::try_parse(remaining)?;
         let (mm_width, remaining) = u32::try_parse(remaining)?;
         let (mm_height, remaining) = u32::try_parse(remaining)?;
@@ -1328,7 +1328,7 @@ pub struct ListOutputPropertiesReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub atoms: Vec<Atom>,
+    pub atoms: Vec<xproto::Atom>,
 }
 impl ListOutputPropertiesReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1338,7 +1338,7 @@ impl ListOutputPropertiesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_atoms, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (atoms, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, num_atoms as usize)?;
+        let (atoms, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_atoms as usize)?;
         let result = ListOutputPropertiesReply { response_type, sequence, length, atoms };
         Ok((result, remaining))
     }
@@ -1352,7 +1352,7 @@ impl TryFrom<&[u8]> for ListOutputPropertiesReply {
 
 /// Opcode for the QueryOutputProperty request
 pub const QUERY_OUTPUT_PROPERTY_REQUEST: u8 = 11;
-pub fn query_output_property<Conn>(conn: &Conn, output: Output, property: Atom) -> Result<Cookie<'_, Conn, QueryOutputPropertyReply>, ConnectionError>
+pub fn query_output_property<Conn>(conn: &Conn, output: Output, property: xproto::Atom) -> Result<Cookie<'_, Conn, QueryOutputPropertyReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1412,7 +1412,7 @@ impl TryFrom<&[u8]> for QueryOutputPropertyReply {
 
 /// Opcode for the ConfigureOutputProperty request
 pub const CONFIGURE_OUTPUT_PROPERTY_REQUEST: u8 = 12;
-pub fn configure_output_property<'c, Conn>(conn: &'c Conn, output: Output, property: Atom, pending: bool, range: bool, values: &[i32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn configure_output_property<'c, Conn>(conn: &'c Conn, output: Output, property: xproto::Atom, pending: bool, range: bool, values: &[i32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1452,7 +1452,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the ChangeOutputProperty request
 pub const CHANGE_OUTPUT_PROPERTY_REQUEST: u8 = 13;
-pub fn change_output_property<'c, Conn, A>(conn: &'c Conn, output: Output, property: Atom, type_: Atom, format: u8, mode: A, num_units: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_output_property<'c, Conn, A>(conn: &'c Conn, output: Output, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: A, num_units: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1503,7 +1503,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the DeleteOutputProperty request
 pub const DELETE_OUTPUT_PROPERTY_REQUEST: u8 = 14;
-pub fn delete_output_property<Conn>(conn: &Conn, output: Output, property: Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn delete_output_property<Conn>(conn: &Conn, output: Output, property: xproto::Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1533,7 +1533,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetOutputProperty request
 pub const GET_OUTPUT_PROPERTY_REQUEST: u8 = 15;
-pub fn get_output_property<Conn>(conn: &Conn, output: Output, property: Atom, type_: Atom, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Conn, GetOutputPropertyReply>, ConnectionError>
+pub fn get_output_property<Conn>(conn: &Conn, output: Output, property: xproto::Atom, type_: xproto::Atom, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Conn, GetOutputPropertyReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1587,7 +1587,7 @@ pub struct GetOutputPropertyReply {
     pub format: u8,
     pub sequence: u16,
     pub length: u32,
-    pub type_: Atom,
+    pub type_: xproto::Atom,
     pub bytes_after: u32,
     pub num_items: u32,
     pub data: Vec<u8>,
@@ -1598,7 +1598,7 @@ impl GetOutputPropertyReply {
         let (format, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (type_, remaining) = Atom::try_parse(remaining)?;
+        let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
@@ -1616,7 +1616,7 @@ impl TryFrom<&[u8]> for GetOutputPropertyReply {
 
 /// Opcode for the CreateMode request
 pub const CREATE_MODE_REQUEST: u8 = 16;
-pub fn create_mode<'c, Conn>(conn: &'c Conn, window: Window, mode_info: ModeInfo, name: &[u8]) -> Result<Cookie<'c, Conn, CreateModeReply>, ConnectionError>
+pub fn create_mode<'c, Conn>(conn: &'c Conn, window: xproto::Window, mode_info: ModeInfo, name: &[u8]) -> Result<Cookie<'c, Conn, CreateModeReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1787,7 +1787,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetCrtcInfo request
 pub const GET_CRTC_INFO_REQUEST: u8 = 20;
-pub fn get_crtc_info<Conn>(conn: &Conn, crtc: Crtc, config_timestamp: Timestamp) -> Result<Cookie<'_, Conn, GetCrtcInfoReply>, ConnectionError>
+pub fn get_crtc_info<Conn>(conn: &Conn, crtc: Crtc, config_timestamp: xproto::Timestamp) -> Result<Cookie<'_, Conn, GetCrtcInfoReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1820,7 +1820,7 @@ pub struct GetCrtcInfoReply {
     pub status: SetConfig,
     pub sequence: u16,
     pub length: u32,
-    pub timestamp: Timestamp,
+    pub timestamp: xproto::Timestamp,
     pub x: i16,
     pub y: i16,
     pub width: u16,
@@ -1837,7 +1837,7 @@ impl GetCrtcInfoReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (x, remaining) = i16::try_parse(remaining)?;
         let (y, remaining) = i16::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
@@ -1863,7 +1863,7 @@ impl TryFrom<&[u8]> for GetCrtcInfoReply {
 
 /// Opcode for the SetCrtcConfig request
 pub const SET_CRTC_CONFIG_REQUEST: u8 = 21;
-pub fn set_crtc_config<'c, Conn>(conn: &'c Conn, crtc: Crtc, timestamp: Timestamp, config_timestamp: Timestamp, x: i16, y: i16, mode: Mode, rotation: u16, outputs: &[Output]) -> Result<Cookie<'c, Conn, SetCrtcConfigReply>, ConnectionError>
+pub fn set_crtc_config<'c, Conn>(conn: &'c Conn, crtc: Crtc, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, x: i16, y: i16, mode: Mode, rotation: u16, outputs: &[Output]) -> Result<Cookie<'c, Conn, SetCrtcConfigReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1921,7 +1921,7 @@ pub struct SetCrtcConfigReply {
     pub status: SetConfig,
     pub sequence: u16,
     pub length: u32,
-    pub timestamp: Timestamp,
+    pub timestamp: xproto::Timestamp,
 }
 impl SetCrtcConfigReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1929,7 +1929,7 @@ impl SetCrtcConfigReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let status = status.try_into()?;
         let result = SetCrtcConfigReply { response_type, status, sequence, length, timestamp };
@@ -2092,7 +2092,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetScreenResourcesCurrent request
 pub const GET_SCREEN_RESOURCES_CURRENT_REQUEST: u8 = 25;
-pub fn get_screen_resources_current<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, GetScreenResourcesCurrentReply>, ConnectionError>
+pub fn get_screen_resources_current<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetScreenResourcesCurrentReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2119,8 +2119,8 @@ pub struct GetScreenResourcesCurrentReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub timestamp: Timestamp,
-    pub config_timestamp: Timestamp,
+    pub timestamp: xproto::Timestamp,
+    pub config_timestamp: xproto::Timestamp,
     pub crtcs: Vec<Crtc>,
     pub outputs: Vec<Output>,
     pub modes: Vec<ModeInfo>,
@@ -2132,8 +2132,8 @@ impl GetScreenResourcesCurrentReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
-        let (config_timestamp, remaining) = Timestamp::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (num_crtcs, remaining) = u16::try_parse(remaining)?;
         let (num_outputs, remaining) = u16::try_parse(remaining)?;
         let (num_modes, remaining) = u16::try_parse(remaining)?;
@@ -2404,7 +2404,7 @@ pub struct GetPanningReply {
     pub status: SetConfig,
     pub sequence: u16,
     pub length: u32,
-    pub timestamp: Timestamp,
+    pub timestamp: xproto::Timestamp,
     pub left: u16,
     pub top: u16,
     pub width: u16,
@@ -2424,7 +2424,7 @@ impl GetPanningReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (left, remaining) = u16::try_parse(remaining)?;
         let (top, remaining) = u16::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
@@ -2451,7 +2451,7 @@ impl TryFrom<&[u8]> for GetPanningReply {
 
 /// Opcode for the SetPanning request
 pub const SET_PANNING_REQUEST: u8 = 29;
-pub fn set_panning<Conn>(conn: &Conn, crtc: Crtc, timestamp: Timestamp, left: u16, top: u16, width: u16, height: u16, track_left: u16, track_top: u16, track_width: u16, track_height: u16, border_left: i16, border_top: i16, border_right: i16, border_bottom: i16) -> Result<Cookie<'_, Conn, SetPanningReply>, ConnectionError>
+pub fn set_panning<Conn>(conn: &Conn, crtc: Crtc, timestamp: xproto::Timestamp, left: u16, top: u16, width: u16, height: u16, track_left: u16, track_top: u16, track_width: u16, track_height: u16, border_left: i16, border_top: i16, border_right: i16, border_bottom: i16) -> Result<Cookie<'_, Conn, SetPanningReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2520,7 +2520,7 @@ pub struct SetPanningReply {
     pub status: SetConfig,
     pub sequence: u16,
     pub length: u32,
-    pub timestamp: Timestamp,
+    pub timestamp: xproto::Timestamp,
 }
 impl SetPanningReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2528,7 +2528,7 @@ impl SetPanningReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let status = status.try_into()?;
         let result = SetPanningReply { response_type, status, sequence, length, timestamp };
         Ok((result, remaining))
@@ -2543,7 +2543,7 @@ impl TryFrom<&[u8]> for SetPanningReply {
 
 /// Opcode for the SetOutputPrimary request
 pub const SET_OUTPUT_PRIMARY_REQUEST: u8 = 30;
-pub fn set_output_primary<Conn>(conn: &Conn, window: Window, output: Output) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_output_primary<Conn>(conn: &Conn, window: xproto::Window, output: Output) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2573,7 +2573,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetOutputPrimary request
 pub const GET_OUTPUT_PRIMARY_REQUEST: u8 = 31;
-pub fn get_output_primary<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, GetOutputPrimaryReply>, ConnectionError>
+pub fn get_output_primary<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetOutputPrimaryReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2622,7 +2622,7 @@ impl TryFrom<&[u8]> for GetOutputPrimaryReply {
 
 /// Opcode for the GetProviders request
 pub const GET_PROVIDERS_REQUEST: u8 = 32;
-pub fn get_providers<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, GetProvidersReply>, ConnectionError>
+pub fn get_providers<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetProvidersReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2649,7 +2649,7 @@ pub struct GetProvidersReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub timestamp: Timestamp,
+    pub timestamp: xproto::Timestamp,
     pub providers: Vec<Provider>,
 }
 impl GetProvidersReply {
@@ -2658,7 +2658,7 @@ impl GetProvidersReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (num_providers, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
         let (providers, remaining) = crate::x11_utils::parse_list::<Provider>(remaining, num_providers as usize)?;
@@ -2744,7 +2744,7 @@ bitmask_binop!(ProviderCapability, u8);
 
 /// Opcode for the GetProviderInfo request
 pub const GET_PROVIDER_INFO_REQUEST: u8 = 33;
-pub fn get_provider_info<Conn>(conn: &Conn, provider: Provider, config_timestamp: Timestamp) -> Result<Cookie<'_, Conn, GetProviderInfoReply>, ConnectionError>
+pub fn get_provider_info<Conn>(conn: &Conn, provider: Provider, config_timestamp: xproto::Timestamp) -> Result<Cookie<'_, Conn, GetProviderInfoReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2777,7 +2777,7 @@ pub struct GetProviderInfoReply {
     pub status: u8,
     pub sequence: u16,
     pub length: u32,
-    pub timestamp: Timestamp,
+    pub timestamp: xproto::Timestamp,
     pub capabilities: u32,
     pub num_associated_providers: u16,
     pub crtcs: Vec<Crtc>,
@@ -2792,7 +2792,7 @@ impl GetProviderInfoReply {
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (capabilities, remaining) = u32::try_parse(remaining)?;
         let (num_crtcs, remaining) = u16::try_parse(remaining)?;
         let (num_outputs, remaining) = u16::try_parse(remaining)?;
@@ -2817,7 +2817,7 @@ impl TryFrom<&[u8]> for GetProviderInfoReply {
 
 /// Opcode for the SetProviderOffloadSink request
 pub const SET_PROVIDER_OFFLOAD_SINK_REQUEST: u8 = 34;
-pub fn set_provider_offload_sink<Conn>(conn: &Conn, provider: Provider, sink_provider: Provider, config_timestamp: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_provider_offload_sink<Conn>(conn: &Conn, provider: Provider, sink_provider: Provider, config_timestamp: xproto::Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2852,7 +2852,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the SetProviderOutputSource request
 pub const SET_PROVIDER_OUTPUT_SOURCE_REQUEST: u8 = 35;
-pub fn set_provider_output_source<Conn>(conn: &Conn, provider: Provider, source_provider: Provider, config_timestamp: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_provider_output_source<Conn>(conn: &Conn, provider: Provider, source_provider: Provider, config_timestamp: xproto::Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2914,7 +2914,7 @@ pub struct ListProviderPropertiesReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub atoms: Vec<Atom>,
+    pub atoms: Vec<xproto::Atom>,
 }
 impl ListProviderPropertiesReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -2924,7 +2924,7 @@ impl ListProviderPropertiesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_atoms, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (atoms, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, num_atoms as usize)?;
+        let (atoms, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_atoms as usize)?;
         let result = ListProviderPropertiesReply { response_type, sequence, length, atoms };
         Ok((result, remaining))
     }
@@ -2938,7 +2938,7 @@ impl TryFrom<&[u8]> for ListProviderPropertiesReply {
 
 /// Opcode for the QueryProviderProperty request
 pub const QUERY_PROVIDER_PROPERTY_REQUEST: u8 = 37;
-pub fn query_provider_property<Conn>(conn: &Conn, provider: Provider, property: Atom) -> Result<Cookie<'_, Conn, QueryProviderPropertyReply>, ConnectionError>
+pub fn query_provider_property<Conn>(conn: &Conn, provider: Provider, property: xproto::Atom) -> Result<Cookie<'_, Conn, QueryProviderPropertyReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2998,7 +2998,7 @@ impl TryFrom<&[u8]> for QueryProviderPropertyReply {
 
 /// Opcode for the ConfigureProviderProperty request
 pub const CONFIGURE_PROVIDER_PROPERTY_REQUEST: u8 = 38;
-pub fn configure_provider_property<'c, Conn>(conn: &'c Conn, provider: Provider, property: Atom, pending: bool, range: bool, values: &[i32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn configure_provider_property<'c, Conn>(conn: &'c Conn, provider: Provider, property: xproto::Atom, pending: bool, range: bool, values: &[i32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -3038,7 +3038,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the ChangeProviderProperty request
 pub const CHANGE_PROVIDER_PROPERTY_REQUEST: u8 = 39;
-pub fn change_provider_property<'c, Conn>(conn: &'c Conn, provider: Provider, property: Atom, type_: Atom, format: u8, mode: u8, num_items: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_provider_property<'c, Conn>(conn: &'c Conn, provider: Provider, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: u8, num_items: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -3088,7 +3088,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the DeleteProviderProperty request
 pub const DELETE_PROVIDER_PROPERTY_REQUEST: u8 = 40;
-pub fn delete_provider_property<Conn>(conn: &Conn, provider: Provider, property: Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn delete_provider_property<Conn>(conn: &Conn, provider: Provider, property: xproto::Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -3118,7 +3118,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetProviderProperty request
 pub const GET_PROVIDER_PROPERTY_REQUEST: u8 = 41;
-pub fn get_provider_property<Conn>(conn: &Conn, provider: Provider, property: Atom, type_: Atom, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Conn, GetProviderPropertyReply>, ConnectionError>
+pub fn get_provider_property<Conn>(conn: &Conn, provider: Provider, property: xproto::Atom, type_: xproto::Atom, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Conn, GetProviderPropertyReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -3172,7 +3172,7 @@ pub struct GetProviderPropertyReply {
     pub format: u8,
     pub sequence: u16,
     pub length: u32,
-    pub type_: Atom,
+    pub type_: xproto::Atom,
     pub bytes_after: u32,
     pub num_items: u32,
     pub data: Vec<u8>,
@@ -3183,7 +3183,7 @@ impl GetProviderPropertyReply {
         let (format, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (type_, remaining) = Atom::try_parse(remaining)?;
+        let (type_, remaining) = xproto::Atom::try_parse(remaining)?;
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
@@ -3206,10 +3206,10 @@ pub struct ScreenChangeNotifyEvent {
     pub response_type: u8,
     pub rotation: u8,
     pub sequence: u16,
-    pub timestamp: Timestamp,
-    pub config_timestamp: Timestamp,
-    pub root: Window,
-    pub request_window: Window,
+    pub timestamp: xproto::Timestamp,
+    pub config_timestamp: xproto::Timestamp,
+    pub root: xproto::Window,
+    pub request_window: xproto::Window,
     pub size_id: u16,
     pub subpixel_order: render::SubPixel,
     pub width: u16,
@@ -3222,10 +3222,10 @@ impl ScreenChangeNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (rotation, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
-        let (config_timestamp, remaining) = Timestamp::try_parse(remaining)?;
-        let (root, remaining) = Window::try_parse(remaining)?;
-        let (request_window, remaining) = Window::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (root, remaining) = xproto::Window::try_parse(remaining)?;
+        let (request_window, remaining) = xproto::Window::try_parse(remaining)?;
         let (size_id, remaining) = u16::try_parse(remaining)?;
         let (subpixel_order, remaining) = u16::try_parse(remaining)?;
         let (width, remaining) = u16::try_parse(remaining)?;
@@ -3363,8 +3363,8 @@ impl TryFrom<u32> for Notify {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CrtcChange {
-    pub timestamp: Timestamp,
-    pub window: Window,
+    pub timestamp: xproto::Timestamp,
+    pub window: xproto::Window,
     pub crtc: Crtc,
     pub mode: Mode,
     pub rotation: u16,
@@ -3375,8 +3375,8 @@ pub struct CrtcChange {
 }
 impl TryParse for CrtcChange {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
-        let (window, remaining) = Window::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (crtc, remaining) = Crtc::try_parse(remaining)?;
         let (mode, remaining) = Mode::try_parse(remaining)?;
         let (rotation, remaining) = u16::try_parse(remaining)?;
@@ -3455,9 +3455,9 @@ impl Serialize for CrtcChange {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct OutputChange {
-    pub timestamp: Timestamp,
-    pub config_timestamp: Timestamp,
-    pub window: Window,
+    pub timestamp: xproto::Timestamp,
+    pub config_timestamp: xproto::Timestamp,
+    pub window: xproto::Window,
     pub output: Output,
     pub crtc: Crtc,
     pub mode: Mode,
@@ -3467,9 +3467,9 @@ pub struct OutputChange {
 }
 impl TryParse for OutputChange {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
-        let (config_timestamp, remaining) = Timestamp::try_parse(remaining)?;
-        let (window, remaining) = Window::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (config_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (output, remaining) = Output::try_parse(remaining)?;
         let (crtc, remaining) = Crtc::try_parse(remaining)?;
         let (mode, remaining) = Mode::try_parse(remaining)?;
@@ -3547,18 +3547,18 @@ impl Serialize for OutputChange {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct OutputProperty {
-    pub window: Window,
+    pub window: xproto::Window,
     pub output: Output,
-    pub atom: Atom,
-    pub timestamp: Timestamp,
-    pub status: Property,
+    pub atom: xproto::Atom,
+    pub timestamp: xproto::Timestamp,
+    pub status: xproto::Property,
 }
 impl TryParse for OutputProperty {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (window, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (output, remaining) = Output::try_parse(remaining)?;
-        let (atom, remaining) = Atom::try_parse(remaining)?;
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
+        let (atom, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
         let status = status.try_into()?;
@@ -3624,14 +3624,14 @@ impl Serialize for OutputProperty {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ProviderChange {
-    pub timestamp: Timestamp,
-    pub window: Window,
+    pub timestamp: xproto::Timestamp,
+    pub window: xproto::Window,
     pub provider: Provider,
 }
 impl TryParse for ProviderChange {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
-        let (window, remaining) = Window::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (provider, remaining) = Provider::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
         let result = ProviderChange { timestamp, window, provider };
@@ -3692,18 +3692,18 @@ impl Serialize for ProviderChange {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ProviderProperty {
-    pub window: Window,
+    pub window: xproto::Window,
     pub provider: Provider,
-    pub atom: Atom,
-    pub timestamp: Timestamp,
+    pub atom: xproto::Atom,
+    pub timestamp: xproto::Timestamp,
     pub state: u8,
 }
 impl TryParse for ProviderProperty {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (window, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (provider, remaining) = Provider::try_parse(remaining)?;
-        let (atom, remaining) = Atom::try_parse(remaining)?;
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
+        let (atom, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
         let result = ProviderProperty { window, provider, atom, timestamp, state };
@@ -3768,13 +3768,13 @@ impl Serialize for ProviderProperty {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ResourceChange {
-    pub timestamp: Timestamp,
-    pub window: Window,
+    pub timestamp: xproto::Timestamp,
+    pub window: xproto::Window,
 }
 impl TryParse for ResourceChange {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
-        let (window, remaining) = Window::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let result = ResourceChange { timestamp, window };
         Ok((result, remaining))
@@ -3832,7 +3832,7 @@ impl Serialize for ResourceChange {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MonitorInfo {
-    pub name: Atom,
+    pub name: xproto::Atom,
     pub primary: bool,
     pub automatic: bool,
     pub x: i16,
@@ -3845,7 +3845,7 @@ pub struct MonitorInfo {
 }
 impl TryParse for MonitorInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (name, remaining) = Atom::try_parse(remaining)?;
+        let (name, remaining) = xproto::Atom::try_parse(remaining)?;
         let (primary, remaining) = bool::try_parse(remaining)?;
         let (automatic, remaining) = bool::try_parse(remaining)?;
         let (n_output, remaining) = u16::try_parse(remaining)?;
@@ -3892,7 +3892,7 @@ impl Serialize for MonitorInfo {
 
 /// Opcode for the GetMonitors request
 pub const GET_MONITORS_REQUEST: u8 = 42;
-pub fn get_monitors<Conn>(conn: &Conn, window: Window, get_active: bool) -> Result<Cookie<'_, Conn, GetMonitorsReply>, ConnectionError>
+pub fn get_monitors<Conn>(conn: &Conn, window: xproto::Window, get_active: bool) -> Result<Cookie<'_, Conn, GetMonitorsReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -3924,7 +3924,7 @@ pub struct GetMonitorsReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub timestamp: Timestamp,
+    pub timestamp: xproto::Timestamp,
     pub n_outputs: u32,
     pub monitors: Vec<MonitorInfo>,
 }
@@ -3934,7 +3934,7 @@ impl GetMonitorsReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (n_monitors, remaining) = u32::try_parse(remaining)?;
         let (n_outputs, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
@@ -3952,7 +3952,7 @@ impl TryFrom<&[u8]> for GetMonitorsReply {
 
 /// Opcode for the SetMonitor request
 pub const SET_MONITOR_REQUEST: u8 = 43;
-pub fn set_monitor<Conn>(conn: &Conn, window: Window, monitorinfo: MonitorInfo) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_monitor<Conn>(conn: &Conn, window: xproto::Window, monitorinfo: MonitorInfo) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -3981,7 +3981,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the DeleteMonitor request
 pub const DELETE_MONITOR_REQUEST: u8 = 44;
-pub fn delete_monitor<Conn>(conn: &Conn, window: Window, name: Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn delete_monitor<Conn>(conn: &Conn, window: xproto::Window, name: xproto::Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -4011,7 +4011,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CreateLease request
 pub const CREATE_LEASE_REQUEST: u8 = 45;
-pub fn create_lease<'c, Conn>(conn: &'c Conn, window: Window, lid: Lease, crtcs: &[Crtc], outputs: &[Output]) -> Result<CookieWithFds<'c, Conn, CreateLeaseReply>, ConnectionError>
+pub fn create_lease<'c, Conn>(conn: &'c Conn, window: xproto::Window, lid: Lease, crtcs: &[Crtc], outputs: &[Output]) -> Result<CookieWithFds<'c, Conn, CreateLeaseReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -4113,15 +4113,15 @@ where Conn: RequestConnection + ?Sized
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LeaseNotify {
-    pub timestamp: Timestamp,
-    pub window: Window,
+    pub timestamp: xproto::Timestamp,
+    pub window: xproto::Window,
     pub lease: Lease,
     pub created: u8,
 }
 impl TryParse for LeaseNotify {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
-        let (window, remaining) = Window::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (lease, remaining) = Lease::try_parse(remaining)?;
         let (created, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(15..).ok_or(ParseError::ParseError)?;
@@ -4186,7 +4186,7 @@ impl Serialize for LeaseNotify {
 #[derive(Debug, Copy, Clone)]
 pub struct NotifyData([u8; 28]);
 impl NotifyData {
-    pub fn as_cc(&self) -> CrtcChange {
+    pub fn as_xproto_cc(&self) -> CrtcChange {
         fn do_the_parse(remaining: &[u8]) -> Result<CrtcChange, ParseError> {
             let (cc, remaining) = CrtcChange::try_parse(remaining)?;
             let _ = remaining;
@@ -4194,7 +4194,7 @@ impl NotifyData {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_oc(&self) -> OutputChange {
+    pub fn as_xproto_oc(&self) -> OutputChange {
         fn do_the_parse(remaining: &[u8]) -> Result<OutputChange, ParseError> {
             let (oc, remaining) = OutputChange::try_parse(remaining)?;
             let _ = remaining;
@@ -4202,7 +4202,7 @@ impl NotifyData {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_op(&self) -> OutputProperty {
+    pub fn as_xproto_op(&self) -> OutputProperty {
         fn do_the_parse(remaining: &[u8]) -> Result<OutputProperty, ParseError> {
             let (op, remaining) = OutputProperty::try_parse(remaining)?;
             let _ = remaining;
@@ -4210,7 +4210,7 @@ impl NotifyData {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_pc(&self) -> ProviderChange {
+    pub fn as_xproto_pc(&self) -> ProviderChange {
         fn do_the_parse(remaining: &[u8]) -> Result<ProviderChange, ParseError> {
             let (pc, remaining) = ProviderChange::try_parse(remaining)?;
             let _ = remaining;
@@ -4218,7 +4218,7 @@ impl NotifyData {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_pp(&self) -> ProviderProperty {
+    pub fn as_xproto_pp(&self) -> ProviderProperty {
         fn do_the_parse(remaining: &[u8]) -> Result<ProviderProperty, ParseError> {
             let (pp, remaining) = ProviderProperty::try_parse(remaining)?;
             let _ = remaining;
@@ -4226,7 +4226,7 @@ impl NotifyData {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_rc(&self) -> ResourceChange {
+    pub fn as_xproto_rc(&self) -> ResourceChange {
         fn do_the_parse(remaining: &[u8]) -> Result<ResourceChange, ParseError> {
             let (rc, remaining) = ResourceChange::try_parse(remaining)?;
             let _ = remaining;
@@ -4234,7 +4234,7 @@ impl NotifyData {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_lc(&self) -> LeaseNotify {
+    pub fn as_xproto_lc(&self) -> LeaseNotify {
         fn do_the_parse(remaining: &[u8]) -> Result<LeaseNotify, ParseError> {
             let (lc, remaining) = LeaseNotify::try_parse(remaining)?;
             let _ = remaining;
@@ -4363,37 +4363,37 @@ pub trait ConnectionExt: RequestConnection {
         query_version(self, major_version, minor_version)
     }
 
-    fn randr_set_screen_config(&self, window: Window, timestamp: Timestamp, config_timestamp: Timestamp, size_id: u16, rotation: u16, rate: u16) -> Result<Cookie<'_, Self, SetScreenConfigReply>, ConnectionError>
+    fn randr_set_screen_config(&self, window: xproto::Window, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, size_id: u16, rotation: u16, rate: u16) -> Result<Cookie<'_, Self, SetScreenConfigReply>, ConnectionError>
     {
         set_screen_config(self, window, timestamp, config_timestamp, size_id, rotation, rate)
     }
 
-    fn randr_select_input(&self, window: Window, enable: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn randr_select_input(&self, window: xproto::Window, enable: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_input(self, window, enable)
     }
 
-    fn randr_get_screen_info(&self, window: Window) -> Result<Cookie<'_, Self, GetScreenInfoReply>, ConnectionError>
+    fn randr_get_screen_info(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetScreenInfoReply>, ConnectionError>
     {
         get_screen_info(self, window)
     }
 
-    fn randr_get_screen_size_range(&self, window: Window) -> Result<Cookie<'_, Self, GetScreenSizeRangeReply>, ConnectionError>
+    fn randr_get_screen_size_range(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetScreenSizeRangeReply>, ConnectionError>
     {
         get_screen_size_range(self, window)
     }
 
-    fn randr_set_screen_size(&self, window: Window, width: u16, height: u16, mm_width: u32, mm_height: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn randr_set_screen_size(&self, window: xproto::Window, width: u16, height: u16, mm_width: u32, mm_height: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_screen_size(self, window, width, height, mm_width, mm_height)
     }
 
-    fn randr_get_screen_resources(&self, window: Window) -> Result<Cookie<'_, Self, GetScreenResourcesReply>, ConnectionError>
+    fn randr_get_screen_resources(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetScreenResourcesReply>, ConnectionError>
     {
         get_screen_resources(self, window)
     }
 
-    fn randr_get_output_info(&self, output: Output, config_timestamp: Timestamp) -> Result<Cookie<'_, Self, GetOutputInfoReply>, ConnectionError>
+    fn randr_get_output_info(&self, output: Output, config_timestamp: xproto::Timestamp) -> Result<Cookie<'_, Self, GetOutputInfoReply>, ConnectionError>
     {
         get_output_info(self, output, config_timestamp)
     }
@@ -4403,33 +4403,33 @@ pub trait ConnectionExt: RequestConnection {
         list_output_properties(self, output)
     }
 
-    fn randr_query_output_property(&self, output: Output, property: Atom) -> Result<Cookie<'_, Self, QueryOutputPropertyReply>, ConnectionError>
+    fn randr_query_output_property(&self, output: Output, property: xproto::Atom) -> Result<Cookie<'_, Self, QueryOutputPropertyReply>, ConnectionError>
     {
         query_output_property(self, output, property)
     }
 
-    fn randr_configure_output_property<'c>(&'c self, output: Output, property: Atom, pending: bool, range: bool, values: &[i32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn randr_configure_output_property<'c>(&'c self, output: Output, property: xproto::Atom, pending: bool, range: bool, values: &[i32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         configure_output_property(self, output, property, pending, range, values)
     }
 
-    fn randr_change_output_property<'c, A>(&'c self, output: Output, property: Atom, type_: Atom, format: u8, mode: A, num_units: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn randr_change_output_property<'c, A>(&'c self, output: Output, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: A, num_units: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>
     {
         change_output_property(self, output, property, type_, format, mode, num_units, data)
     }
 
-    fn randr_delete_output_property(&self, output: Output, property: Atom) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn randr_delete_output_property(&self, output: Output, property: xproto::Atom) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_output_property(self, output, property)
     }
 
-    fn randr_get_output_property(&self, output: Output, property: Atom, type_: Atom, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Self, GetOutputPropertyReply>, ConnectionError>
+    fn randr_get_output_property(&self, output: Output, property: xproto::Atom, type_: xproto::Atom, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Self, GetOutputPropertyReply>, ConnectionError>
     {
         get_output_property(self, output, property, type_, long_offset, long_length, delete, pending)
     }
 
-    fn randr_create_mode<'c>(&'c self, window: Window, mode_info: ModeInfo, name: &[u8]) -> Result<Cookie<'c, Self, CreateModeReply>, ConnectionError>
+    fn randr_create_mode<'c>(&'c self, window: xproto::Window, mode_info: ModeInfo, name: &[u8]) -> Result<Cookie<'c, Self, CreateModeReply>, ConnectionError>
     {
         create_mode(self, window, mode_info, name)
     }
@@ -4449,12 +4449,12 @@ pub trait ConnectionExt: RequestConnection {
         delete_output_mode(self, output, mode)
     }
 
-    fn randr_get_crtc_info(&self, crtc: Crtc, config_timestamp: Timestamp) -> Result<Cookie<'_, Self, GetCrtcInfoReply>, ConnectionError>
+    fn randr_get_crtc_info(&self, crtc: Crtc, config_timestamp: xproto::Timestamp) -> Result<Cookie<'_, Self, GetCrtcInfoReply>, ConnectionError>
     {
         get_crtc_info(self, crtc, config_timestamp)
     }
 
-    fn randr_set_crtc_config<'c>(&'c self, crtc: Crtc, timestamp: Timestamp, config_timestamp: Timestamp, x: i16, y: i16, mode: Mode, rotation: u16, outputs: &[Output]) -> Result<Cookie<'c, Self, SetCrtcConfigReply>, ConnectionError>
+    fn randr_set_crtc_config<'c>(&'c self, crtc: Crtc, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, x: i16, y: i16, mode: Mode, rotation: u16, outputs: &[Output]) -> Result<Cookie<'c, Self, SetCrtcConfigReply>, ConnectionError>
     {
         set_crtc_config(self, crtc, timestamp, config_timestamp, x, y, mode, rotation, outputs)
     }
@@ -4474,7 +4474,7 @@ pub trait ConnectionExt: RequestConnection {
         set_crtc_gamma(self, crtc, size, red, green, blue)
     }
 
-    fn randr_get_screen_resources_current(&self, window: Window) -> Result<Cookie<'_, Self, GetScreenResourcesCurrentReply>, ConnectionError>
+    fn randr_get_screen_resources_current(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetScreenResourcesCurrentReply>, ConnectionError>
     {
         get_screen_resources_current(self, window)
     }
@@ -4494,37 +4494,37 @@ pub trait ConnectionExt: RequestConnection {
         get_panning(self, crtc)
     }
 
-    fn randr_set_panning(&self, crtc: Crtc, timestamp: Timestamp, left: u16, top: u16, width: u16, height: u16, track_left: u16, track_top: u16, track_width: u16, track_height: u16, border_left: i16, border_top: i16, border_right: i16, border_bottom: i16) -> Result<Cookie<'_, Self, SetPanningReply>, ConnectionError>
+    fn randr_set_panning(&self, crtc: Crtc, timestamp: xproto::Timestamp, left: u16, top: u16, width: u16, height: u16, track_left: u16, track_top: u16, track_width: u16, track_height: u16, border_left: i16, border_top: i16, border_right: i16, border_bottom: i16) -> Result<Cookie<'_, Self, SetPanningReply>, ConnectionError>
     {
         set_panning(self, crtc, timestamp, left, top, width, height, track_left, track_top, track_width, track_height, border_left, border_top, border_right, border_bottom)
     }
 
-    fn randr_set_output_primary(&self, window: Window, output: Output) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn randr_set_output_primary(&self, window: xproto::Window, output: Output) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_output_primary(self, window, output)
     }
 
-    fn randr_get_output_primary(&self, window: Window) -> Result<Cookie<'_, Self, GetOutputPrimaryReply>, ConnectionError>
+    fn randr_get_output_primary(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetOutputPrimaryReply>, ConnectionError>
     {
         get_output_primary(self, window)
     }
 
-    fn randr_get_providers(&self, window: Window) -> Result<Cookie<'_, Self, GetProvidersReply>, ConnectionError>
+    fn randr_get_providers(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetProvidersReply>, ConnectionError>
     {
         get_providers(self, window)
     }
 
-    fn randr_get_provider_info(&self, provider: Provider, config_timestamp: Timestamp) -> Result<Cookie<'_, Self, GetProviderInfoReply>, ConnectionError>
+    fn randr_get_provider_info(&self, provider: Provider, config_timestamp: xproto::Timestamp) -> Result<Cookie<'_, Self, GetProviderInfoReply>, ConnectionError>
     {
         get_provider_info(self, provider, config_timestamp)
     }
 
-    fn randr_set_provider_offload_sink(&self, provider: Provider, sink_provider: Provider, config_timestamp: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn randr_set_provider_offload_sink(&self, provider: Provider, sink_provider: Provider, config_timestamp: xproto::Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_provider_offload_sink(self, provider, sink_provider, config_timestamp)
     }
 
-    fn randr_set_provider_output_source(&self, provider: Provider, source_provider: Provider, config_timestamp: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn randr_set_provider_output_source(&self, provider: Provider, source_provider: Provider, config_timestamp: xproto::Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_provider_output_source(self, provider, source_provider, config_timestamp)
     }
@@ -4534,47 +4534,47 @@ pub trait ConnectionExt: RequestConnection {
         list_provider_properties(self, provider)
     }
 
-    fn randr_query_provider_property(&self, provider: Provider, property: Atom) -> Result<Cookie<'_, Self, QueryProviderPropertyReply>, ConnectionError>
+    fn randr_query_provider_property(&self, provider: Provider, property: xproto::Atom) -> Result<Cookie<'_, Self, QueryProviderPropertyReply>, ConnectionError>
     {
         query_provider_property(self, provider, property)
     }
 
-    fn randr_configure_provider_property<'c>(&'c self, provider: Provider, property: Atom, pending: bool, range: bool, values: &[i32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn randr_configure_provider_property<'c>(&'c self, provider: Provider, property: xproto::Atom, pending: bool, range: bool, values: &[i32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         configure_provider_property(self, provider, property, pending, range, values)
     }
 
-    fn randr_change_provider_property<'c>(&'c self, provider: Provider, property: Atom, type_: Atom, format: u8, mode: u8, num_items: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn randr_change_provider_property<'c>(&'c self, provider: Provider, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: u8, num_items: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_provider_property(self, provider, property, type_, format, mode, num_items, data)
     }
 
-    fn randr_delete_provider_property(&self, provider: Provider, property: Atom) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn randr_delete_provider_property(&self, provider: Provider, property: xproto::Atom) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_provider_property(self, provider, property)
     }
 
-    fn randr_get_provider_property(&self, provider: Provider, property: Atom, type_: Atom, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Self, GetProviderPropertyReply>, ConnectionError>
+    fn randr_get_provider_property(&self, provider: Provider, property: xproto::Atom, type_: xproto::Atom, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Self, GetProviderPropertyReply>, ConnectionError>
     {
         get_provider_property(self, provider, property, type_, long_offset, long_length, delete, pending)
     }
 
-    fn randr_get_monitors(&self, window: Window, get_active: bool) -> Result<Cookie<'_, Self, GetMonitorsReply>, ConnectionError>
+    fn randr_get_monitors(&self, window: xproto::Window, get_active: bool) -> Result<Cookie<'_, Self, GetMonitorsReply>, ConnectionError>
     {
         get_monitors(self, window, get_active)
     }
 
-    fn randr_set_monitor(&self, window: Window, monitorinfo: MonitorInfo) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn randr_set_monitor(&self, window: xproto::Window, monitorinfo: MonitorInfo) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_monitor(self, window, monitorinfo)
     }
 
-    fn randr_delete_monitor(&self, window: Window, name: Atom) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn randr_delete_monitor(&self, window: xproto::Window, name: xproto::Atom) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_monitor(self, window, name)
     }
 
-    fn randr_create_lease<'c>(&'c self, window: Window, lid: Lease, crtcs: &[Crtc], outputs: &[Output]) -> Result<CookieWithFds<'c, Self, CreateLeaseReply>, ConnectionError>
+    fn randr_create_lease<'c>(&'c self, window: xproto::Window, lid: Lease, crtcs: &[Crtc], outputs: &[Output]) -> Result<CookieWithFds<'c, Self, CreateLeaseReply>, ConnectionError>
     {
         create_lease(self, window, lid, crtcs, outputs)
     }

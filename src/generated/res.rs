@@ -23,7 +23,7 @@ use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
 #[allow(unused_imports)]
-use super::xproto::*;
+use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
 pub const X11_EXTENSION_NAME: &str = "X-Resource";
@@ -80,12 +80,12 @@ impl Serialize for Client {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Type {
-    pub resource_type: Atom,
+    pub resource_type: xproto::Atom,
     pub count: u32,
 }
 impl TryParse for Type {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (resource_type, remaining) = Atom::try_parse(remaining)?;
+        let (resource_type, remaining) = xproto::Atom::try_parse(remaining)?;
         let (count, remaining) = u32::try_parse(remaining)?;
         let result = Type { resource_type, count };
         Ok((result, remaining))

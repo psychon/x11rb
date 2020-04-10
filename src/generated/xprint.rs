@@ -23,7 +23,7 @@ use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
 #[allow(unused_imports)]
-use super::xproto::*;
+use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
 pub const X11_EXTENSION_NAME: &str = "XpExtension";
@@ -656,7 +656,7 @@ pub struct PrintGetScreenOfContextReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub root: Window,
+    pub root: xproto::Window,
 }
 impl PrintGetScreenOfContextReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -664,7 +664,7 @@ impl PrintGetScreenOfContextReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (root, remaining) = Window::try_parse(remaining)?;
+        let (root, remaining) = xproto::Window::try_parse(remaining)?;
         let result = PrintGetScreenOfContextReply { response_type, sequence, length, root };
         Ok((result, remaining))
     }
@@ -778,7 +778,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the PrintPutDocumentData request
 pub const PRINT_PUT_DOCUMENT_DATA_REQUEST: u8 = 11;
-pub fn print_put_document_data<'c, Conn>(conn: &'c Conn, drawable: Drawable, data: &[u8], doc_format: &[String8], options: &[String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn print_put_document_data<'c, Conn>(conn: &'c Conn, drawable: xproto::Drawable, data: &[u8], doc_format: &[String8], options: &[String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -882,7 +882,7 @@ impl TryFrom<&[u8]> for PrintGetDocumentDataReply {
 
 /// Opcode for the PrintStartPage request
 pub const PRINT_START_PAGE_REQUEST: u8 = 13;
-pub fn print_start_page<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn print_start_page<Conn>(conn: &Conn, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1254,7 +1254,7 @@ pub struct PrintQueryScreensReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub roots: Vec<Window>,
+    pub roots: Vec<xproto::Window>,
 }
 impl PrintQueryScreensReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1264,7 +1264,7 @@ impl PrintQueryScreensReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (list_count, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (roots, remaining) = crate::x11_utils::parse_list::<Window>(remaining, list_count as usize)?;
+        let (roots, remaining) = crate::x11_utils::parse_list::<xproto::Window>(remaining, list_count as usize)?;
         let result = PrintQueryScreensReply { response_type, sequence, length, roots };
         Ok((result, remaining))
     }
@@ -1663,7 +1663,7 @@ pub trait ConnectionExt: RequestConnection {
         print_end_doc(self, cancel)
     }
 
-    fn xprint_print_put_document_data<'c>(&'c self, drawable: Drawable, data: &[u8], doc_format: &[String8], options: &[String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xprint_print_put_document_data<'c>(&'c self, drawable: xproto::Drawable, data: &[u8], doc_format: &[String8], options: &[String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         print_put_document_data(self, drawable, data, doc_format, options)
     }
@@ -1673,7 +1673,7 @@ pub trait ConnectionExt: RequestConnection {
         print_get_document_data(self, context, max_bytes)
     }
 
-    fn xprint_print_start_page(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xprint_print_start_page(&self, window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_start_page(self, window)
     }

@@ -23,7 +23,7 @@ use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
 #[allow(unused_imports)]
-use super::xproto::*;
+use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
 pub const X11_EXTENSION_NAME: &str = "DRI3";
@@ -94,7 +94,7 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 /// Opcode for the Open request
 pub const OPEN_REQUEST: u8 = 1;
-pub fn open<Conn>(conn: &Conn, drawable: Drawable, provider: u32) -> Result<CookieWithFds<'_, Conn, OpenReply>, ConnectionError>
+pub fn open<Conn>(conn: &Conn, drawable: xproto::Drawable, provider: u32) -> Result<CookieWithFds<'_, Conn, OpenReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -152,7 +152,7 @@ impl TryFrom<(&[u8], Vec<RawFdContainer>)> for OpenReply {
 
 /// Opcode for the PixmapFromBuffer request
 pub const PIXMAP_FROM_BUFFER_REQUEST: u8 = 2;
-pub fn pixmap_from_buffer<Conn, A>(conn: &Conn, pixmap: Pixmap, drawable: Drawable, size: u32, width: u16, height: u16, stride: u16, depth: u8, bpp: u8, pixmap_fd: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn pixmap_from_buffer<Conn, A>(conn: &Conn, pixmap: xproto::Pixmap, drawable: xproto::Drawable, size: u32, width: u16, height: u16, stride: u16, depth: u8, bpp: u8, pixmap_fd: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<RawFdContainer>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -201,7 +201,7 @@ where Conn: RequestConnection + ?Sized, A: Into<RawFdContainer>
 
 /// Opcode for the BufferFromPixmap request
 pub const BUFFER_FROM_PIXMAP_REQUEST: u8 = 3;
-pub fn buffer_from_pixmap<Conn>(conn: &Conn, pixmap: Pixmap) -> Result<CookieWithFds<'_, Conn, BufferFromPixmapReply>, ConnectionError>
+pub fn buffer_from_pixmap<Conn>(conn: &Conn, pixmap: xproto::Pixmap) -> Result<CookieWithFds<'_, Conn, BufferFromPixmapReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -266,7 +266,7 @@ impl TryFrom<(&[u8], Vec<RawFdContainer>)> for BufferFromPixmapReply {
 
 /// Opcode for the FenceFromFD request
 pub const FENCE_FROM_FD_REQUEST: u8 = 4;
-pub fn fence_from_fd<Conn, A>(conn: &Conn, drawable: Drawable, fence: u32, initially_triggered: bool, fence_fd: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn fence_from_fd<Conn, A>(conn: &Conn, drawable: xproto::Drawable, fence: u32, initially_triggered: bool, fence_fd: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<RawFdContainer>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -302,7 +302,7 @@ where Conn: RequestConnection + ?Sized, A: Into<RawFdContainer>
 
 /// Opcode for the FDFromFence request
 pub const FD_FROM_FENCE_REQUEST: u8 = 5;
-pub fn fd_from_fence<Conn>(conn: &Conn, drawable: Drawable, fence: u32) -> Result<CookieWithFds<'_, Conn, FDFromFenceReply>, ConnectionError>
+pub fn fd_from_fence<Conn>(conn: &Conn, drawable: xproto::Drawable, fence: u32) -> Result<CookieWithFds<'_, Conn, FDFromFenceReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -420,7 +420,7 @@ impl TryFrom<&[u8]> for GetSupportedModifiersReply {
 
 /// Opcode for the PixmapFromBuffers request
 pub const PIXMAP_FROM_BUFFERS_REQUEST: u8 = 7;
-pub fn pixmap_from_buffers<'c, Conn>(conn: &'c Conn, pixmap: Pixmap, window: Window, width: u16, height: u16, stride0: u32, offset0: u32, stride1: u32, offset1: u32, stride2: u32, offset2: u32, stride3: u32, offset3: u32, depth: u8, bpp: u8, modifier: u64, buffers: Vec<RawFdContainer>) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn pixmap_from_buffers<'c, Conn>(conn: &'c Conn, pixmap: xproto::Pixmap, window: xproto::Window, width: u16, height: u16, stride0: u32, offset0: u32, stride1: u32, offset1: u32, stride2: u32, offset2: u32, stride3: u32, offset3: u32, depth: u8, bpp: u8, modifier: u64, buffers: Vec<RawFdContainer>) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -517,7 +517,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the BuffersFromPixmap request
 pub const BUFFERS_FROM_PIXMAP_REQUEST: u8 = 8;
-pub fn buffers_from_pixmap<Conn>(conn: &Conn, pixmap: Pixmap) -> Result<CookieWithFds<'_, Conn, BuffersFromPixmapReply>, ConnectionError>
+pub fn buffers_from_pixmap<Conn>(conn: &Conn, pixmap: xproto::Pixmap) -> Result<CookieWithFds<'_, Conn, BuffersFromPixmapReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -592,29 +592,29 @@ pub trait ConnectionExt: RequestConnection {
         query_version(self, major_version, minor_version)
     }
 
-    fn dri3_open(&self, drawable: Drawable, provider: u32) -> Result<CookieWithFds<'_, Self, OpenReply>, ConnectionError>
+    fn dri3_open(&self, drawable: xproto::Drawable, provider: u32) -> Result<CookieWithFds<'_, Self, OpenReply>, ConnectionError>
     {
         open(self, drawable, provider)
     }
 
-    fn dri3_pixmap_from_buffer<A>(&self, pixmap: Pixmap, drawable: Drawable, size: u32, width: u16, height: u16, stride: u16, depth: u8, bpp: u8, pixmap_fd: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn dri3_pixmap_from_buffer<A>(&self, pixmap: xproto::Pixmap, drawable: xproto::Drawable, size: u32, width: u16, height: u16, stride: u16, depth: u8, bpp: u8, pixmap_fd: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<RawFdContainer>
     {
         pixmap_from_buffer(self, pixmap, drawable, size, width, height, stride, depth, bpp, pixmap_fd)
     }
 
-    fn dri3_buffer_from_pixmap(&self, pixmap: Pixmap) -> Result<CookieWithFds<'_, Self, BufferFromPixmapReply>, ConnectionError>
+    fn dri3_buffer_from_pixmap(&self, pixmap: xproto::Pixmap) -> Result<CookieWithFds<'_, Self, BufferFromPixmapReply>, ConnectionError>
     {
         buffer_from_pixmap(self, pixmap)
     }
 
-    fn dri3_fence_from_fd<A>(&self, drawable: Drawable, fence: u32, initially_triggered: bool, fence_fd: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn dri3_fence_from_fd<A>(&self, drawable: xproto::Drawable, fence: u32, initially_triggered: bool, fence_fd: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<RawFdContainer>
     {
         fence_from_fd(self, drawable, fence, initially_triggered, fence_fd)
     }
 
-    fn dri3_fd_from_fence(&self, drawable: Drawable, fence: u32) -> Result<CookieWithFds<'_, Self, FDFromFenceReply>, ConnectionError>
+    fn dri3_fd_from_fence(&self, drawable: xproto::Drawable, fence: u32) -> Result<CookieWithFds<'_, Self, FDFromFenceReply>, ConnectionError>
     {
         fd_from_fence(self, drawable, fence)
     }
@@ -624,12 +624,12 @@ pub trait ConnectionExt: RequestConnection {
         get_supported_modifiers(self, window, depth, bpp)
     }
 
-    fn dri3_pixmap_from_buffers<'c>(&'c self, pixmap: Pixmap, window: Window, width: u16, height: u16, stride0: u32, offset0: u32, stride1: u32, offset1: u32, stride2: u32, offset2: u32, stride3: u32, offset3: u32, depth: u8, bpp: u8, modifier: u64, buffers: Vec<RawFdContainer>) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn dri3_pixmap_from_buffers<'c>(&'c self, pixmap: xproto::Pixmap, window: xproto::Window, width: u16, height: u16, stride0: u32, offset0: u32, stride1: u32, offset1: u32, stride2: u32, offset2: u32, stride3: u32, offset3: u32, depth: u8, bpp: u8, modifier: u64, buffers: Vec<RawFdContainer>) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         pixmap_from_buffers(self, pixmap, window, width, height, stride0, offset0, stride1, offset1, stride2, offset2, stride3, offset3, depth, bpp, modifier, buffers)
     }
 
-    fn dri3_buffers_from_pixmap(&self, pixmap: Pixmap) -> Result<CookieWithFds<'_, Self, BuffersFromPixmapReply>, ConnectionError>
+    fn dri3_buffers_from_pixmap(&self, pixmap: xproto::Pixmap) -> Result<CookieWithFds<'_, Self, BuffersFromPixmapReply>, ConnectionError>
     {
         buffers_from_pixmap(self, pixmap)
     }

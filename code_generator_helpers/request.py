@@ -90,11 +90,6 @@ def collect_function_arguments(module, obj, name, aux_name):
                 where.append("%s: Into<%s>" % (letter, rust_type))
                 rust_type = letter
 
-            if name == ('xcb', 'Test', 'CompareCursor') and field.field_name == 'cursor':
-                # xtest contains a 'Cursor' enum that shadows the cursor type from xproto.
-                # Since this problem only occurs once, handle it explicitly/specially.
-                rust_type = "super::xproto::" + rust_type
-
             args.append("%s: %s" % (module._to_rust_variable(field.field_name), rust_type))
             arg_names.append(module._to_rust_variable(field.field_name))
             if field.isfd:

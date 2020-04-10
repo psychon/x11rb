@@ -23,7 +23,7 @@ use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
 #[allow(unused_imports)]
-use super::xproto::*;
+use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
 pub const X11_EXTENSION_NAME: &str = "MIT-SHM";
@@ -44,7 +44,7 @@ pub const COMPLETION_EVENT: u8 = 0;
 pub struct CompletionEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub drawable: Drawable,
+    pub drawable: xproto::Drawable,
     pub minor_event: u16,
     pub major_event: u8,
     pub shmseg: Seg,
@@ -55,7 +55,7 @@ impl CompletionEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (drawable, remaining) = Drawable::try_parse(remaining)?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
         let (minor_event, remaining) = u16::try_parse(remaining)?;
         let (major_event, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
@@ -284,7 +284,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the PutImage request
 pub const PUT_IMAGE_REQUEST: u8 = 3;
-pub fn put_image<Conn>(conn: &Conn, drawable: Drawable, gc: Gcontext, total_width: u16, total_height: u16, src_x: u16, src_y: u16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16, depth: u8, format: u8, send_event: bool, shmseg: Seg, offset: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn put_image<Conn>(conn: &Conn, drawable: xproto::Drawable, gc: xproto::Gcontext, total_width: u16, total_height: u16, src_x: u16, src_y: u16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16, depth: u8, format: u8, send_event: bool, shmseg: Seg, offset: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -355,7 +355,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetImage request
 pub const GET_IMAGE_REQUEST: u8 = 4;
-pub fn get_image<Conn>(conn: &Conn, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32, format: u8, shmseg: Seg, offset: u32) -> Result<Cookie<'_, Conn, GetImageReply>, ConnectionError>
+pub fn get_image<Conn>(conn: &Conn, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32, format: u8, shmseg: Seg, offset: u32) -> Result<Cookie<'_, Conn, GetImageReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -415,7 +415,7 @@ pub struct GetImageReply {
     pub depth: u8,
     pub sequence: u16,
     pub length: u32,
-    pub visual: Visualid,
+    pub visual: xproto::Visualid,
     pub size: u32,
 }
 impl GetImageReply {
@@ -424,7 +424,7 @@ impl GetImageReply {
         let (depth, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (visual, remaining) = Visualid::try_parse(remaining)?;
+        let (visual, remaining) = xproto::Visualid::try_parse(remaining)?;
         let (size, remaining) = u32::try_parse(remaining)?;
         let result = GetImageReply { response_type, depth, sequence, length, visual, size };
         Ok((result, remaining))
@@ -439,7 +439,7 @@ impl TryFrom<&[u8]> for GetImageReply {
 
 /// Opcode for the CreatePixmap request
 pub const CREATE_PIXMAP_REQUEST: u8 = 5;
-pub fn create_pixmap<Conn>(conn: &Conn, pid: Pixmap, drawable: Drawable, width: u16, height: u16, depth: u8, shmseg: Seg, offset: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_pixmap<Conn>(conn: &Conn, pid: xproto::Pixmap, drawable: xproto::Drawable, width: u16, height: u16, depth: u8, shmseg: Seg, offset: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -599,17 +599,17 @@ pub trait ConnectionExt: RequestConnection {
         detach(self, shmseg)
     }
 
-    fn shm_put_image(&self, drawable: Drawable, gc: Gcontext, total_width: u16, total_height: u16, src_x: u16, src_y: u16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16, depth: u8, format: u8, send_event: bool, shmseg: Seg, offset: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn shm_put_image(&self, drawable: xproto::Drawable, gc: xproto::Gcontext, total_width: u16, total_height: u16, src_x: u16, src_y: u16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16, depth: u8, format: u8, send_event: bool, shmseg: Seg, offset: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         put_image(self, drawable, gc, total_width, total_height, src_x, src_y, src_width, src_height, dst_x, dst_y, depth, format, send_event, shmseg, offset)
     }
 
-    fn shm_get_image(&self, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32, format: u8, shmseg: Seg, offset: u32) -> Result<Cookie<'_, Self, GetImageReply>, ConnectionError>
+    fn shm_get_image(&self, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32, format: u8, shmseg: Seg, offset: u32) -> Result<Cookie<'_, Self, GetImageReply>, ConnectionError>
     {
         get_image(self, drawable, x, y, width, height, plane_mask, format, shmseg, offset)
     }
 
-    fn shm_create_pixmap(&self, pid: Pixmap, drawable: Drawable, width: u16, height: u16, depth: u8, shmseg: Seg, offset: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn shm_create_pixmap(&self, pid: xproto::Pixmap, drawable: xproto::Drawable, width: u16, height: u16, depth: u8, shmseg: Seg, offset: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_pixmap(self, pid, drawable, width, height, depth, shmseg, offset)
     }

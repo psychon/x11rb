@@ -23,7 +23,7 @@ use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
 #[allow(unused_imports)]
-use super::xproto::*;
+use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
 pub const X11_EXTENSION_NAME: &str = "MIT-SCREEN-SAVER";
@@ -287,7 +287,7 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 /// Opcode for the QueryInfo request
 pub const QUERY_INFO_REQUEST: u8 = 1;
-pub fn query_info<Conn>(conn: &Conn, drawable: Drawable) -> Result<Cookie<'_, Conn, QueryInfoReply>, ConnectionError>
+pub fn query_info<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<Cookie<'_, Conn, QueryInfoReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -315,7 +315,7 @@ pub struct QueryInfoReply {
     pub state: u8,
     pub sequence: u16,
     pub length: u32,
-    pub saver_window: Window,
+    pub saver_window: xproto::Window,
     pub ms_until_server: u32,
     pub ms_since_user_input: u32,
     pub event_mask: u32,
@@ -327,7 +327,7 @@ impl QueryInfoReply {
         let (state, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (saver_window, remaining) = Window::try_parse(remaining)?;
+        let (saver_window, remaining) = xproto::Window::try_parse(remaining)?;
         let (ms_until_server, remaining) = u32::try_parse(remaining)?;
         let (ms_since_user_input, remaining) = u32::try_parse(remaining)?;
         let (event_mask, remaining) = u32::try_parse(remaining)?;
@@ -347,7 +347,7 @@ impl TryFrom<&[u8]> for QueryInfoReply {
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 2;
-pub fn select_input<Conn>(conn: &Conn, drawable: Drawable, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn select_input<Conn>(conn: &Conn, drawable: xproto::Drawable, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -380,21 +380,21 @@ pub const SET_ATTRIBUTES_REQUEST: u8 = 3;
 /// Auxiliary and optional information for the set_attributes function.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct SetAttributesAux {
-    pub background_pixmap: Option<Pixmap>,
+    pub background_pixmap: Option<xproto::Pixmap>,
     pub background_pixel: Option<u32>,
-    pub border_pixmap: Option<Pixmap>,
+    pub border_pixmap: Option<xproto::Pixmap>,
     pub border_pixel: Option<u32>,
     pub bit_gravity: Option<u32>,
     pub win_gravity: Option<u32>,
     pub backing_store: Option<u32>,
     pub backing_planes: Option<u32>,
     pub backing_pixel: Option<u32>,
-    pub override_redirect: Option<Bool32>,
-    pub save_under: Option<Bool32>,
+    pub override_redirect: Option<xproto::Bool32>,
+    pub save_under: Option<xproto::Bool32>,
     pub event_mask: Option<u32>,
     pub do_not_propogate_mask: Option<u32>,
-    pub colormap: Option<Colormap>,
-    pub cursor: Option<Cursor>,
+    pub colormap: Option<xproto::Colormap>,
+    pub cursor: Option<xproto::Cursor>,
 }
 impl SetAttributesAux {
     /// Create a new instance with all fields unset / not present.
@@ -404,54 +404,54 @@ impl SetAttributesAux {
     fn value_mask(&self) -> u32 {
         let mut mask = 0;
         if self.background_pixmap.is_some() {
-            mask |= Into::<u32>::into(CW::BackPixmap);
+            mask |= Into::<u32>::into(xproto::CW::BackPixmap);
         }
         if self.background_pixel.is_some() {
-            mask |= Into::<u32>::into(CW::BackPixel);
+            mask |= Into::<u32>::into(xproto::CW::BackPixel);
         }
         if self.border_pixmap.is_some() {
-            mask |= Into::<u32>::into(CW::BorderPixmap);
+            mask |= Into::<u32>::into(xproto::CW::BorderPixmap);
         }
         if self.border_pixel.is_some() {
-            mask |= Into::<u32>::into(CW::BorderPixel);
+            mask |= Into::<u32>::into(xproto::CW::BorderPixel);
         }
         if self.bit_gravity.is_some() {
-            mask |= Into::<u32>::into(CW::BitGravity);
+            mask |= Into::<u32>::into(xproto::CW::BitGravity);
         }
         if self.win_gravity.is_some() {
-            mask |= Into::<u32>::into(CW::WinGravity);
+            mask |= Into::<u32>::into(xproto::CW::WinGravity);
         }
         if self.backing_store.is_some() {
-            mask |= Into::<u32>::into(CW::BackingStore);
+            mask |= Into::<u32>::into(xproto::CW::BackingStore);
         }
         if self.backing_planes.is_some() {
-            mask |= Into::<u32>::into(CW::BackingPlanes);
+            mask |= Into::<u32>::into(xproto::CW::BackingPlanes);
         }
         if self.backing_pixel.is_some() {
-            mask |= Into::<u32>::into(CW::BackingPixel);
+            mask |= Into::<u32>::into(xproto::CW::BackingPixel);
         }
         if self.override_redirect.is_some() {
-            mask |= Into::<u32>::into(CW::OverrideRedirect);
+            mask |= Into::<u32>::into(xproto::CW::OverrideRedirect);
         }
         if self.save_under.is_some() {
-            mask |= Into::<u32>::into(CW::SaveUnder);
+            mask |= Into::<u32>::into(xproto::CW::SaveUnder);
         }
         if self.event_mask.is_some() {
-            mask |= Into::<u32>::into(CW::EventMask);
+            mask |= Into::<u32>::into(xproto::CW::EventMask);
         }
         if self.do_not_propogate_mask.is_some() {
-            mask |= Into::<u32>::into(CW::DontPropagate);
+            mask |= Into::<u32>::into(xproto::CW::DontPropagate);
         }
         if self.colormap.is_some() {
-            mask |= Into::<u32>::into(CW::Colormap);
+            mask |= Into::<u32>::into(xproto::CW::Colormap);
         }
         if self.cursor.is_some() {
-            mask |= Into::<u32>::into(CW::Cursor);
+            mask |= Into::<u32>::into(xproto::CW::Cursor);
         }
         mask
     }
     /// Set the background_pixmap field of this structure.
-    pub fn background_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
+    pub fn background_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Pixmap>> {
         self.background_pixmap = value.into();
         self
     }
@@ -461,7 +461,7 @@ impl SetAttributesAux {
         self
     }
     /// Set the border_pixmap field of this structure.
-    pub fn border_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
+    pub fn border_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Pixmap>> {
         self.border_pixmap = value.into();
         self
     }
@@ -496,12 +496,12 @@ impl SetAttributesAux {
         self
     }
     /// Set the override_redirect field of this structure.
-    pub fn override_redirect<I>(mut self, value: I) -> Self where I: Into<Option<Bool32>> {
+    pub fn override_redirect<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Bool32>> {
         self.override_redirect = value.into();
         self
     }
     /// Set the save_under field of this structure.
-    pub fn save_under<I>(mut self, value: I) -> Self where I: Into<Option<Bool32>> {
+    pub fn save_under<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Bool32>> {
         self.save_under = value.into();
         self
     }
@@ -516,12 +516,12 @@ impl SetAttributesAux {
         self
     }
     /// Set the colormap field of this structure.
-    pub fn colormap<I>(mut self, value: I) -> Self where I: Into<Option<Colormap>> {
+    pub fn colormap<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Colormap>> {
         self.colormap = value.into();
         self
     }
     /// Set the cursor field of this structure.
-    pub fn cursor<I>(mut self, value: I) -> Self where I: Into<Option<Cursor>> {
+    pub fn cursor<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Cursor>> {
         self.cursor = value.into();
         self
     }
@@ -581,7 +581,7 @@ impl Serialize for SetAttributesAux {
         }
     }
 }
-pub fn set_attributes<'c, Conn, A>(conn: &'c Conn, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, depth: u8, visual: Visualid, value_list: &SetAttributesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_attributes<'c, Conn, A>(conn: &'c Conn, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, depth: u8, visual: xproto::Visualid, value_list: &SetAttributesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -641,7 +641,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the UnsetAttributes request
 pub const UNSET_ATTRIBUTES_REQUEST: u8 = 4;
-pub fn unset_attributes<Conn>(conn: &Conn, drawable: Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn unset_attributes<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -696,9 +696,9 @@ pub struct NotifyEvent {
     pub response_type: u8,
     pub state: State,
     pub sequence: u16,
-    pub time: Timestamp,
-    pub root: Window,
-    pub window: Window,
+    pub time: xproto::Timestamp,
+    pub root: xproto::Window,
+    pub window: xproto::Window,
     pub kind: Kind,
     pub forced: bool,
 }
@@ -707,9 +707,9 @@ impl NotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = Timestamp::try_parse(remaining)?;
-        let (root, remaining) = Window::try_parse(remaining)?;
-        let (window, remaining) = Window::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (root, remaining) = xproto::Window::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (kind, remaining) = u8::try_parse(remaining)?;
         let (forced, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(14..).ok_or(ParseError::ParseError)?;
@@ -768,23 +768,23 @@ pub trait ConnectionExt: RequestConnection {
         query_version(self, client_major_version, client_minor_version)
     }
 
-    fn screensaver_query_info(&self, drawable: Drawable) -> Result<Cookie<'_, Self, QueryInfoReply>, ConnectionError>
+    fn screensaver_query_info(&self, drawable: xproto::Drawable) -> Result<Cookie<'_, Self, QueryInfoReply>, ConnectionError>
     {
         query_info(self, drawable)
     }
 
-    fn screensaver_select_input(&self, drawable: Drawable, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn screensaver_select_input(&self, drawable: xproto::Drawable, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_input(self, drawable, event_mask)
     }
 
-    fn screensaver_set_attributes<'c, A>(&'c self, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, depth: u8, visual: Visualid, value_list: &SetAttributesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn screensaver_set_attributes<'c, A>(&'c self, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, depth: u8, visual: xproto::Visualid, value_list: &SetAttributesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>
     {
         set_attributes(self, drawable, x, y, width, height, border_width, class, depth, visual, value_list)
     }
 
-    fn screensaver_unset_attributes(&self, drawable: Drawable) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn screensaver_unset_attributes(&self, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         unset_attributes(self, drawable)
     }

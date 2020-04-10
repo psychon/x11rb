@@ -23,7 +23,7 @@ use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
 #[allow(unused_imports)]
-use super::xproto::*;
+use super::xproto;
 #[allow(unused_imports)]
 use super::render;
 #[allow(unused_imports)]
@@ -223,7 +223,7 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 /// Opcode for the Create request
 pub const CREATE_REQUEST: u8 = 1;
-pub fn create<Conn, A>(conn: &Conn, damage: Damage, drawable: Drawable, level: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create<Conn, A>(conn: &Conn, damage: Damage, drawable: xproto::Drawable, level: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -319,7 +319,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the Add request
 pub const ADD_REQUEST: u8 = 4;
-pub fn add<Conn>(conn: &Conn, drawable: Drawable, region: xfixes::Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn add<Conn>(conn: &Conn, drawable: xproto::Drawable, region: xfixes::Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -354,22 +354,22 @@ pub struct NotifyEvent {
     pub response_type: u8,
     pub level: ReportLevel,
     pub sequence: u16,
-    pub drawable: Drawable,
+    pub drawable: xproto::Drawable,
     pub damage: Damage,
-    pub timestamp: Timestamp,
-    pub area: Rectangle,
-    pub geometry: Rectangle,
+    pub timestamp: xproto::Timestamp,
+    pub area: xproto::Rectangle,
+    pub geometry: xproto::Rectangle,
 }
 impl NotifyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (level, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (drawable, remaining) = Drawable::try_parse(remaining)?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
         let (damage, remaining) = Damage::try_parse(remaining)?;
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
-        let (area, remaining) = Rectangle::try_parse(remaining)?;
-        let (geometry, remaining) = Rectangle::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (area, remaining) = xproto::Rectangle::try_parse(remaining)?;
+        let (geometry, remaining) = xproto::Rectangle::try_parse(remaining)?;
         let level = level.try_into()?;
         let result = NotifyEvent { response_type, level, sequence, drawable, damage, timestamp, area, geometry };
         Ok((result, remaining))
@@ -424,7 +424,7 @@ pub trait ConnectionExt: RequestConnection {
         query_version(self, client_major_version, client_minor_version)
     }
 
-    fn damage_create<A>(&self, damage: Damage, drawable: Drawable, level: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn damage_create<A>(&self, damage: Damage, drawable: xproto::Drawable, level: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<u8>
     {
         create(self, damage, drawable, level)
@@ -440,7 +440,7 @@ pub trait ConnectionExt: RequestConnection {
         subtract(self, damage, repair, parts)
     }
 
-    fn damage_add(&self, drawable: Drawable, region: xfixes::Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn damage_add(&self, drawable: xproto::Drawable, region: xfixes::Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         add(self, drawable, region)
     }

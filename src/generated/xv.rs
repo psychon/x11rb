@@ -23,7 +23,7 @@ use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
 #[allow(unused_imports)]
-use super::xproto::*;
+use super::xproto;
 #[allow(unused_imports)]
 use super::shm;
 
@@ -553,12 +553,12 @@ impl Serialize for Rational {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Format {
-    pub visual: Visualid,
+    pub visual: xproto::Visualid,
     pub depth: u8,
 }
 impl TryParse for Format {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (visual, remaining) = Visualid::try_parse(remaining)?;
+        let (visual, remaining) = xproto::Visualid::try_parse(remaining)?;
         let (depth, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let result = Format { visual, depth };
@@ -807,7 +807,7 @@ impl Serialize for AttributeInfo {
 pub struct ImageFormatInfo {
     pub id: u32,
     pub type_: ImageFormatInfoType,
-    pub byte_order: ImageOrder,
+    pub byte_order: xproto::ImageOrder,
     pub guid: [u8; 16],
     pub bpp: u8,
     pub num_planes: u8,
@@ -1318,8 +1318,8 @@ pub struct VideoNotifyEvent {
     pub response_type: u8,
     pub reason: VideoNotifyReason,
     pub sequence: u16,
-    pub time: Timestamp,
-    pub drawable: Drawable,
+    pub time: xproto::Timestamp,
+    pub drawable: xproto::Drawable,
     pub port: Port,
 }
 impl VideoNotifyEvent {
@@ -1327,8 +1327,8 @@ impl VideoNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (reason, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = Timestamp::try_parse(remaining)?;
-        let (drawable, remaining) = Drawable::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
         let (port, remaining) = Port::try_parse(remaining)?;
         let reason = reason.try_into()?;
         let result = VideoNotifyEvent { response_type, reason, sequence, time, drawable, port };
@@ -1381,9 +1381,9 @@ pub const PORT_NOTIFY_EVENT: u8 = 1;
 pub struct PortNotifyEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub time: Timestamp,
+    pub time: xproto::Timestamp,
     pub port: Port,
-    pub attribute: Atom,
+    pub attribute: xproto::Atom,
     pub value: i32,
 }
 impl PortNotifyEvent {
@@ -1391,9 +1391,9 @@ impl PortNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (time, remaining) = Timestamp::try_parse(remaining)?;
+        let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (port, remaining) = Port::try_parse(remaining)?;
-        let (attribute, remaining) = Atom::try_parse(remaining)?;
+        let (attribute, remaining) = xproto::Atom::try_parse(remaining)?;
         let (value, remaining) = i32::try_parse(remaining)?;
         let result = PortNotifyEvent { response_type, sequence, time, port, attribute, value };
         Ok((result, remaining))
@@ -1487,7 +1487,7 @@ impl TryFrom<&[u8]> for QueryExtensionReply {
 
 /// Opcode for the QueryAdaptors request
 pub const QUERY_ADAPTORS_REQUEST: u8 = 1;
-pub fn query_adaptors<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, QueryAdaptorsReply>, ConnectionError>
+pub fn query_adaptors<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, QueryAdaptorsReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1589,7 +1589,7 @@ impl TryFrom<&[u8]> for QueryEncodingsReply {
 
 /// Opcode for the GrabPort request
 pub const GRAB_PORT_REQUEST: u8 = 3;
-pub fn grab_port<Conn>(conn: &Conn, port: Port, time: Timestamp) -> Result<Cookie<'_, Conn, GrabPortReply>, ConnectionError>
+pub fn grab_port<Conn>(conn: &Conn, port: Port, time: xproto::Timestamp) -> Result<Cookie<'_, Conn, GrabPortReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1643,7 +1643,7 @@ impl TryFrom<&[u8]> for GrabPortReply {
 
 /// Opcode for the UngrabPort request
 pub const UNGRAB_PORT_REQUEST: u8 = 4;
-pub fn ungrab_port<Conn>(conn: &Conn, port: Port, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn ungrab_port<Conn>(conn: &Conn, port: Port, time: xproto::Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1673,7 +1673,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the PutVideo request
 pub const PUT_VIDEO_REQUEST: u8 = 5;
-pub fn put_video<Conn>(conn: &Conn, port: Port, drawable: Drawable, gc: Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn put_video<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1732,7 +1732,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the PutStill request
 pub const PUT_STILL_REQUEST: u8 = 6;
-pub fn put_still<Conn>(conn: &Conn, port: Port, drawable: Drawable, gc: Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn put_still<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1791,7 +1791,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetVideo request
 pub const GET_VIDEO_REQUEST: u8 = 7;
-pub fn get_video<Conn>(conn: &Conn, port: Port, drawable: Drawable, gc: Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn get_video<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1850,7 +1850,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetStill request
 pub const GET_STILL_REQUEST: u8 = 8;
-pub fn get_still<Conn>(conn: &Conn, port: Port, drawable: Drawable, gc: Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn get_still<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1909,7 +1909,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the StopVideo request
 pub const STOP_VIDEO_REQUEST: u8 = 9;
-pub fn stop_video<Conn>(conn: &Conn, port: Port, drawable: Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn stop_video<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1939,7 +1939,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the SelectVideoNotify request
 pub const SELECT_VIDEO_NOTIFY_REQUEST: u8 = 10;
-pub fn select_video_notify<Conn>(conn: &Conn, drawable: Drawable, onoff: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn select_video_notify<Conn>(conn: &Conn, drawable: xproto::Drawable, onoff: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2067,7 +2067,7 @@ impl TryFrom<&[u8]> for QueryBestSizeReply {
 
 /// Opcode for the SetPortAttribute request
 pub const SET_PORT_ATTRIBUTE_REQUEST: u8 = 13;
-pub fn set_port_attribute<Conn>(conn: &Conn, port: Port, attribute: Atom, value: i32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_port_attribute<Conn>(conn: &Conn, port: Port, attribute: xproto::Atom, value: i32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2102,7 +2102,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetPortAttribute request
 pub const GET_PORT_ATTRIBUTE_REQUEST: u8 = 14;
-pub fn get_port_attribute<Conn>(conn: &Conn, port: Port, attribute: Atom) -> Result<Cookie<'_, Conn, GetPortAttributeReply>, ConnectionError>
+pub fn get_port_attribute<Conn>(conn: &Conn, port: Port, attribute: xproto::Atom) -> Result<Cookie<'_, Conn, GetPortAttributeReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2331,7 +2331,7 @@ impl TryFrom<&[u8]> for QueryImageAttributesReply {
 
 /// Opcode for the PutImage request
 pub const PUT_IMAGE_REQUEST: u8 = 18;
-pub fn put_image<'c, Conn>(conn: &'c Conn, port: Port, drawable: Drawable, gc: Gcontext, id: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn put_image<'c, Conn>(conn: &'c Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, id: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2404,7 +2404,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the ShmPutImage request
 pub const SHM_PUT_IMAGE_REQUEST: u8 = 19;
-pub fn shm_put_image<Conn>(conn: &Conn, port: Port, drawable: Drawable, gc: Gcontext, shmseg: shm::Seg, id: u32, offset: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, send_event: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn shm_put_image<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, shmseg: shm::Seg, id: u32, offset: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, send_event: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2494,7 +2494,7 @@ pub trait ConnectionExt: RequestConnection {
         query_extension(self)
     }
 
-    fn xv_query_adaptors(&self, window: Window) -> Result<Cookie<'_, Self, QueryAdaptorsReply>, ConnectionError>
+    fn xv_query_adaptors(&self, window: xproto::Window) -> Result<Cookie<'_, Self, QueryAdaptorsReply>, ConnectionError>
     {
         query_adaptors(self, window)
     }
@@ -2504,42 +2504,42 @@ pub trait ConnectionExt: RequestConnection {
         query_encodings(self, port)
     }
 
-    fn xv_grab_port(&self, port: Port, time: Timestamp) -> Result<Cookie<'_, Self, GrabPortReply>, ConnectionError>
+    fn xv_grab_port(&self, port: Port, time: xproto::Timestamp) -> Result<Cookie<'_, Self, GrabPortReply>, ConnectionError>
     {
         grab_port(self, port, time)
     }
 
-    fn xv_ungrab_port(&self, port: Port, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xv_ungrab_port(&self, port: Port, time: xproto::Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_port(self, port, time)
     }
 
-    fn xv_put_video(&self, port: Port, drawable: Drawable, gc: Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xv_put_video(&self, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         put_video(self, port, drawable, gc, vid_x, vid_y, vid_w, vid_h, drw_x, drw_y, drw_w, drw_h)
     }
 
-    fn xv_put_still(&self, port: Port, drawable: Drawable, gc: Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xv_put_still(&self, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         put_still(self, port, drawable, gc, vid_x, vid_y, vid_w, vid_h, drw_x, drw_y, drw_w, drw_h)
     }
 
-    fn xv_get_video(&self, port: Port, drawable: Drawable, gc: Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xv_get_video(&self, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         get_video(self, port, drawable, gc, vid_x, vid_y, vid_w, vid_h, drw_x, drw_y, drw_w, drw_h)
     }
 
-    fn xv_get_still(&self, port: Port, drawable: Drawable, gc: Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xv_get_still(&self, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         get_still(self, port, drawable, gc, vid_x, vid_y, vid_w, vid_h, drw_x, drw_y, drw_w, drw_h)
     }
 
-    fn xv_stop_video(&self, port: Port, drawable: Drawable) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xv_stop_video(&self, port: Port, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         stop_video(self, port, drawable)
     }
 
-    fn xv_select_video_notify(&self, drawable: Drawable, onoff: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xv_select_video_notify(&self, drawable: xproto::Drawable, onoff: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_video_notify(self, drawable, onoff)
     }
@@ -2554,12 +2554,12 @@ pub trait ConnectionExt: RequestConnection {
         query_best_size(self, port, vid_w, vid_h, drw_w, drw_h, motion)
     }
 
-    fn xv_set_port_attribute(&self, port: Port, attribute: Atom, value: i32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xv_set_port_attribute(&self, port: Port, attribute: xproto::Atom, value: i32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_port_attribute(self, port, attribute, value)
     }
 
-    fn xv_get_port_attribute(&self, port: Port, attribute: Atom) -> Result<Cookie<'_, Self, GetPortAttributeReply>, ConnectionError>
+    fn xv_get_port_attribute(&self, port: Port, attribute: xproto::Atom) -> Result<Cookie<'_, Self, GetPortAttributeReply>, ConnectionError>
     {
         get_port_attribute(self, port, attribute)
     }
@@ -2579,12 +2579,12 @@ pub trait ConnectionExt: RequestConnection {
         query_image_attributes(self, port, id, width, height)
     }
 
-    fn xv_put_image<'c>(&'c self, port: Port, drawable: Drawable, gc: Gcontext, id: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xv_put_image<'c>(&'c self, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, id: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         put_image(self, port, drawable, gc, id, src_x, src_y, src_w, src_h, drw_x, drw_y, drw_w, drw_h, width, height, data)
     }
 
-    fn xv_shm_put_image(&self, port: Port, drawable: Drawable, gc: Gcontext, shmseg: shm::Seg, id: u32, offset: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, send_event: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xv_shm_put_image(&self, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, shmseg: shm::Seg, id: u32, offset: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, send_event: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         shm_put_image(self, port, drawable, gc, shmseg, id, offset, src_x, src_y, src_w, src_h, drw_x, drw_y, drw_w, drw_h, width, height, send_event)
     }

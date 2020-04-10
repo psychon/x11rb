@@ -23,7 +23,7 @@ use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
 #[allow(unused_imports)]
-use super::xproto::*;
+use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
 pub const X11_EXTENSION_NAME: &str = "SYNC";
@@ -1371,7 +1371,7 @@ impl TryFrom<&[u8]> for GetPriorityReply {
 
 /// Opcode for the CreateFence request
 pub const CREATE_FENCE_REQUEST: u8 = 14;
-pub fn create_fence<Conn>(conn: &Conn, drawable: Drawable, fence: Fence, initially_triggered: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_fence<Conn>(conn: &Conn, drawable: xproto::Drawable, fence: Fence, initially_triggered: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1563,7 +1563,7 @@ pub struct CounterNotifyEvent {
     pub counter: Counter,
     pub wait_value: Int64,
     pub counter_value: Int64,
-    pub timestamp: Timestamp,
+    pub timestamp: xproto::Timestamp,
     pub count: u16,
     pub destroyed: bool,
 }
@@ -1575,7 +1575,7 @@ impl CounterNotifyEvent {
         let (counter, remaining) = Counter::try_parse(remaining)?;
         let (wait_value, remaining) = Int64::try_parse(remaining)?;
         let (counter_value, remaining) = Int64::try_parse(remaining)?;
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (count, remaining) = u16::try_parse(remaining)?;
         let (destroyed, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
@@ -1636,7 +1636,7 @@ pub struct AlarmNotifyEvent {
     pub alarm: Alarm,
     pub counter_value: Int64,
     pub alarm_value: Int64,
-    pub timestamp: Timestamp,
+    pub timestamp: xproto::Timestamp,
     pub state: ALARMSTATE,
 }
 impl AlarmNotifyEvent {
@@ -1647,7 +1647,7 @@ impl AlarmNotifyEvent {
         let (alarm, remaining) = Alarm::try_parse(remaining)?;
         let (counter_value, remaining) = Int64::try_parse(remaining)?;
         let (alarm_value, remaining) = Int64::try_parse(remaining)?;
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let state = state.try_into()?;
@@ -1769,7 +1769,7 @@ pub trait ConnectionExt: RequestConnection {
         get_priority(self, id)
     }
 
-    fn sync_create_fence(&self, drawable: Drawable, fence: Fence, initially_triggered: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn sync_create_fence(&self, drawable: xproto::Drawable, fence: Fence, initially_triggered: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_fence(self, drawable, fence, initially_triggered)
     }

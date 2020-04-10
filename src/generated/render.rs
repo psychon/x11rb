@@ -23,7 +23,7 @@ use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
 #[allow(unused_imports)]
-use super::xproto::*;
+use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
 pub const X11_EXTENSION_NAME: &str = "RENDER";
@@ -1068,7 +1068,7 @@ pub struct Pictforminfo {
     pub type_: PictType,
     pub depth: u8,
     pub direct: Directformat,
-    pub colormap: Colormap,
+    pub colormap: xproto::Colormap,
 }
 impl TryParse for Pictforminfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1077,7 +1077,7 @@ impl TryParse for Pictforminfo {
         let (depth, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (direct, remaining) = Directformat::try_parse(remaining)?;
-        let (colormap, remaining) = Colormap::try_parse(remaining)?;
+        let (colormap, remaining) = xproto::Colormap::try_parse(remaining)?;
         let type_ = type_.try_into()?;
         let result = Pictforminfo { id, type_, depth, direct, colormap };
         Ok((result, remaining))
@@ -1141,12 +1141,12 @@ impl Serialize for Pictforminfo {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Pictvisual {
-    pub visual: Visualid,
+    pub visual: xproto::Visualid,
     pub format: Pictformat,
 }
 impl TryParse for Pictvisual {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (visual, remaining) = Visualid::try_parse(remaining)?;
+        let (visual, remaining) = xproto::Visualid::try_parse(remaining)?;
         let (format, remaining) = Pictformat::try_parse(remaining)?;
         let result = Pictvisual { visual, format };
         Ok((result, remaining))
@@ -1838,12 +1838,12 @@ pub struct CreatePictureAux {
     pub alphayorigin: Option<i32>,
     pub clipxorigin: Option<i32>,
     pub clipyorigin: Option<i32>,
-    pub clipmask: Option<Pixmap>,
+    pub clipmask: Option<xproto::Pixmap>,
     pub graphicsexposure: Option<u32>,
     pub subwindowmode: Option<u32>,
     pub polyedge: Option<u32>,
     pub polymode: Option<u32>,
-    pub dither: Option<Atom>,
+    pub dither: Option<xproto::Atom>,
     pub componentalpha: Option<u32>,
 }
 impl CreatePictureAux {
@@ -1925,7 +1925,7 @@ impl CreatePictureAux {
         self
     }
     /// Set the clipmask field of this structure.
-    pub fn clipmask<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
+    pub fn clipmask<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Pixmap>> {
         self.clipmask = value.into();
         self
     }
@@ -1950,7 +1950,7 @@ impl CreatePictureAux {
         self
     }
     /// Set the dither field of this structure.
-    pub fn dither<I>(mut self, value: I) -> Self where I: Into<Option<Atom>> {
+    pub fn dither<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Atom>> {
         self.dither = value.into();
         self
     }
@@ -2009,7 +2009,7 @@ impl Serialize for CreatePictureAux {
         }
     }
 }
-pub fn create_picture<'c, Conn>(conn: &'c Conn, pid: Picture, drawable: Drawable, format: Pictformat, value_list: &CreatePictureAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_picture<'c, Conn>(conn: &'c Conn, pid: Picture, drawable: xproto::Drawable, format: Pictformat, value_list: &CreatePictureAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2063,12 +2063,12 @@ pub struct ChangePictureAux {
     pub alphayorigin: Option<i32>,
     pub clipxorigin: Option<i32>,
     pub clipyorigin: Option<i32>,
-    pub clipmask: Option<Pixmap>,
+    pub clipmask: Option<xproto::Pixmap>,
     pub graphicsexposure: Option<u32>,
     pub subwindowmode: Option<u32>,
     pub polyedge: Option<u32>,
     pub polymode: Option<u32>,
-    pub dither: Option<Atom>,
+    pub dither: Option<xproto::Atom>,
     pub componentalpha: Option<u32>,
 }
 impl ChangePictureAux {
@@ -2150,7 +2150,7 @@ impl ChangePictureAux {
         self
     }
     /// Set the clipmask field of this structure.
-    pub fn clipmask<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
+    pub fn clipmask<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Pixmap>> {
         self.clipmask = value.into();
         self
     }
@@ -2175,7 +2175,7 @@ impl ChangePictureAux {
         self
     }
     /// Set the dither field of this structure.
-    pub fn dither<I>(mut self, value: I) -> Self where I: Into<Option<Atom>> {
+    pub fn dither<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Atom>> {
         self.dither = value.into();
         self
     }
@@ -2269,7 +2269,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the SetPictureClipRectangles request
 pub const SET_PICTURE_CLIP_RECTANGLES_REQUEST: u8 = 6;
-pub fn set_picture_clip_rectangles<'c, Conn>(conn: &'c Conn, picture: Picture, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_picture_clip_rectangles<'c, Conn>(conn: &'c Conn, picture: Picture, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2916,7 +2916,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the FillRectangles request
 pub const FILL_RECTANGLES_REQUEST: u8 = 26;
-pub fn fill_rectangles<'c, Conn, A>(conn: &'c Conn, op: A, dst: Picture, color: Color, rects: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn fill_rectangles<'c, Conn, A>(conn: &'c Conn, op: A, dst: Picture, color: Color, rects: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2960,7 +2960,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the CreateCursor request
 pub const CREATE_CURSOR_REQUEST: u8 = 27;
-pub fn create_cursor<Conn>(conn: &Conn, cid: Cursor, source: Picture, x: u16, y: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_cursor<Conn>(conn: &Conn, cid: xproto::Cursor, source: Picture, x: u16, y: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -3156,7 +3156,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the QueryFilters request
 pub const QUERY_FILTERS_REQUEST: u8 = 29;
-pub fn query_filters<Conn>(conn: &Conn, drawable: Drawable) -> Result<Cookie<'_, Conn, QueryFiltersReply>, ConnectionError>
+pub fn query_filters<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<Cookie<'_, Conn, QueryFiltersReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -3184,7 +3184,7 @@ pub struct QueryFiltersReply {
     pub sequence: u16,
     pub length: u32,
     pub aliases: Vec<u16>,
-    pub filters: Vec<Str>,
+    pub filters: Vec<xproto::Str>,
 }
 impl QueryFiltersReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -3196,7 +3196,7 @@ impl QueryFiltersReply {
         let (num_filters, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
         let (aliases, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_aliases as usize)?;
-        let (filters, remaining) = crate::x11_utils::parse_list::<Str>(remaining, num_filters as usize)?;
+        let (filters, remaining) = crate::x11_utils::parse_list::<xproto::Str>(remaining, num_filters as usize)?;
         let result = QueryFiltersReply { response_type, sequence, length, aliases, filters };
         Ok((result, remaining))
     }
@@ -3248,12 +3248,12 @@ where Conn: RequestConnection + ?Sized
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Animcursorelt {
-    pub cursor: Cursor,
+    pub cursor: xproto::Cursor,
     pub delay: u32,
 }
 impl TryParse for Animcursorelt {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
-        let (cursor, remaining) = Cursor::try_parse(remaining)?;
+        let (cursor, remaining) = xproto::Cursor::try_parse(remaining)?;
         let (delay, remaining) = u32::try_parse(remaining)?;
         let result = Animcursorelt { cursor, delay };
         Ok((result, remaining))
@@ -3290,7 +3290,7 @@ impl Serialize for Animcursorelt {
 
 /// Opcode for the CreateAnimCursor request
 pub const CREATE_ANIM_CURSOR_REQUEST: u8 = 31;
-pub fn create_anim_cursor<'c, Conn>(conn: &'c Conn, cid: Cursor, cursors: &[Animcursorelt]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_anim_cursor<'c, Conn>(conn: &'c Conn, cid: xproto::Cursor, cursors: &[Animcursorelt]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -3685,7 +3685,7 @@ pub trait ConnectionExt: RequestConnection {
         query_pict_index_values(self, format)
     }
 
-    fn render_create_picture<'c>(&'c self, pid: Picture, drawable: Drawable, format: Pictformat, value_list: &CreatePictureAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_create_picture<'c>(&'c self, pid: Picture, drawable: xproto::Drawable, format: Pictformat, value_list: &CreatePictureAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_picture(self, pid, drawable, format, value_list)
     }
@@ -3695,7 +3695,7 @@ pub trait ConnectionExt: RequestConnection {
         change_picture(self, picture, value_list)
     }
 
-    fn render_set_picture_clip_rectangles<'c>(&'c self, picture: Picture, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_set_picture_clip_rectangles<'c>(&'c self, picture: Picture, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_picture_clip_rectangles(self, picture, clip_x_origin, clip_y_origin, rectangles)
     }
@@ -3778,13 +3778,13 @@ pub trait ConnectionExt: RequestConnection {
         composite_glyphs32(self, op, src, dst, mask_format, glyphset, src_x, src_y, glyphcmds)
     }
 
-    fn render_fill_rectangles<'c, A>(&'c self, op: A, dst: Picture, color: Color, rects: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_fill_rectangles<'c, A>(&'c self, op: A, dst: Picture, color: Color, rects: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where A: Into<u8>
     {
         fill_rectangles(self, op, dst, color, rects)
     }
 
-    fn render_create_cursor(&self, cid: Cursor, source: Picture, x: u16, y: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn render_create_cursor(&self, cid: xproto::Cursor, source: Picture, x: u16, y: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_cursor(self, cid, source, x, y)
     }
@@ -3794,7 +3794,7 @@ pub trait ConnectionExt: RequestConnection {
         set_picture_transform(self, picture, transform)
     }
 
-    fn render_query_filters(&self, drawable: Drawable) -> Result<Cookie<'_, Self, QueryFiltersReply>, ConnectionError>
+    fn render_query_filters(&self, drawable: xproto::Drawable) -> Result<Cookie<'_, Self, QueryFiltersReply>, ConnectionError>
     {
         query_filters(self, drawable)
     }
@@ -3804,7 +3804,7 @@ pub trait ConnectionExt: RequestConnection {
         set_picture_filter(self, picture, filter, values)
     }
 
-    fn render_create_anim_cursor<'c>(&'c self, cid: Cursor, cursors: &[Animcursorelt]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_create_anim_cursor<'c>(&'c self, cid: xproto::Cursor, cursors: &[Animcursorelt]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_anim_cursor(self, cid, cursors)
     }
