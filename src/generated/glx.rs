@@ -21,7 +21,7 @@ use crate::errors::{ParseError, ConnectionError};
 #[allow(unused_imports)]
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
-use super::xproto::*;
+use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
 pub const X11_EXTENSION_NAME: &str = "GLX";
@@ -1301,7 +1301,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 3;
-pub fn create_context<Conn>(conn: &Conn, context: Context, visual: Visualid, screen: u32, share_list: Context, is_direct: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_context<Conn>(conn: &Conn, context: Context, visual: xproto::Visualid, screen: u32, share_list: Context, is_direct: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1746,7 +1746,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the UseXFont request
 pub const USE_X_FONT_REQUEST: u8 = 12;
-pub fn use_x_font<Conn>(conn: &Conn, context_tag: ContextTag, font: Font, first: u32, count: u32, list_base: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn use_x_font<Conn>(conn: &Conn, context_tag: ContextTag, font: xproto::Font, first: u32, count: u32, list_base: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1791,7 +1791,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CreateGLXPixmap request
 pub const CREATE_GLX_PIXMAP_REQUEST: u8 = 13;
-pub fn create_glx_pixmap<Conn>(conn: &Conn, screen: u32, visual: Visualid, pixmap: Pixmap, glx_pixmap: Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_glx_pixmap<Conn>(conn: &Conn, screen: u32, visual: xproto::Visualid, pixmap: xproto::Pixmap, glx_pixmap: Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2251,7 +2251,7 @@ impl TryFrom<&[u8]> for GetFBConfigsReply {
 
 /// Opcode for the CreatePixmap request
 pub const CREATE_PIXMAP_REQUEST: u8 = 22;
-pub fn create_pixmap<'c, Conn>(conn: &'c Conn, screen: u32, fbconfig: Fbconfig, pixmap: Pixmap, glx_pixmap: Pixmap, attribs: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_pixmap<'c, Conn>(conn: &'c Conn, screen: u32, fbconfig: Fbconfig, pixmap: xproto::Pixmap, glx_pixmap: Pixmap, attribs: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2651,7 +2651,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CreateWindow request
 pub const CREATE_WINDOW_REQUEST: u8 = 31;
-pub fn create_window<'c, Conn>(conn: &'c Conn, screen: u32, fbconfig: Fbconfig, window: Window, glx_window: Window, attribs: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_window<'c, Conn>(conn: &'c Conn, screen: u32, fbconfig: Fbconfig, window: xproto::Window, glx_window: Window, attribs: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -6780,7 +6780,7 @@ pub trait ConnectionExt: RequestConnection {
         render_large(self, context_tag, request_num, request_total, data)
     }
 
-    fn glx_create_context(&self, context: Context, visual: Visualid, screen: u32, share_list: Context, is_direct: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn glx_create_context(&self, context: Context, visual: xproto::Visualid, screen: u32, share_list: Context, is_direct: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_context(self, context, visual, screen, share_list, is_direct)
     }
@@ -6825,12 +6825,12 @@ pub trait ConnectionExt: RequestConnection {
         swap_buffers(self, context_tag, drawable)
     }
 
-    fn glx_use_x_font(&self, context_tag: ContextTag, font: Font, first: u32, count: u32, list_base: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn glx_use_x_font(&self, context_tag: ContextTag, font: xproto::Font, first: u32, count: u32, list_base: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         use_x_font(self, context_tag, font, first, count, list_base)
     }
 
-    fn glx_create_glx_pixmap(&self, screen: u32, visual: Visualid, pixmap: Pixmap, glx_pixmap: Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn glx_create_glx_pixmap(&self, screen: u32, visual: xproto::Visualid, pixmap: xproto::Pixmap, glx_pixmap: Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_glx_pixmap(self, screen, visual, pixmap, glx_pixmap)
     }
@@ -6875,7 +6875,7 @@ pub trait ConnectionExt: RequestConnection {
         get_fb_configs(self, screen)
     }
 
-    fn glx_create_pixmap<'c>(&'c self, screen: u32, fbconfig: Fbconfig, pixmap: Pixmap, glx_pixmap: Pixmap, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn glx_create_pixmap<'c>(&'c self, screen: u32, fbconfig: Fbconfig, pixmap: xproto::Pixmap, glx_pixmap: Pixmap, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_pixmap(self, screen, fbconfig, pixmap, glx_pixmap, attribs)
     }
@@ -6920,7 +6920,7 @@ pub trait ConnectionExt: RequestConnection {
         change_drawable_attributes(self, drawable, attribs)
     }
 
-    fn glx_create_window<'c>(&'c self, screen: u32, fbconfig: Fbconfig, window: Window, glx_window: Window, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn glx_create_window<'c>(&'c self, screen: u32, fbconfig: Fbconfig, window: xproto::Window, glx_window: Window, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_window(self, screen, fbconfig, window, glx_window, attribs)
     }

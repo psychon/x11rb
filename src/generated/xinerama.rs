@@ -23,7 +23,7 @@ use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
 #[allow(unused_imports)]
-use super::xproto::*;
+use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
 pub const X11_EXTENSION_NAME: &str = "XINERAMA";
@@ -140,7 +140,7 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 /// Opcode for the GetState request
 pub const GET_STATE_REQUEST: u8 = 1;
-pub fn get_state<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, GetStateReply>, ConnectionError>
+pub fn get_state<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetStateReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -168,7 +168,7 @@ pub struct GetStateReply {
     pub state: u8,
     pub sequence: u16,
     pub length: u32,
-    pub window: Window,
+    pub window: xproto::Window,
 }
 impl GetStateReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -176,7 +176,7 @@ impl GetStateReply {
         let (state, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (window, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let result = GetStateReply { response_type, state, sequence, length, window };
         Ok((result, remaining))
     }
@@ -190,7 +190,7 @@ impl TryFrom<&[u8]> for GetStateReply {
 
 /// Opcode for the GetScreenCount request
 pub const GET_SCREEN_COUNT_REQUEST: u8 = 2;
-pub fn get_screen_count<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, GetScreenCountReply>, ConnectionError>
+pub fn get_screen_count<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetScreenCountReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -218,7 +218,7 @@ pub struct GetScreenCountReply {
     pub screen_count: u8,
     pub sequence: u16,
     pub length: u32,
-    pub window: Window,
+    pub window: xproto::Window,
 }
 impl GetScreenCountReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -226,7 +226,7 @@ impl GetScreenCountReply {
         let (screen_count, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (window, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let result = GetScreenCountReply { response_type, screen_count, sequence, length, window };
         Ok((result, remaining))
     }
@@ -240,7 +240,7 @@ impl TryFrom<&[u8]> for GetScreenCountReply {
 
 /// Opcode for the GetScreenSize request
 pub const GET_SCREEN_SIZE_REQUEST: u8 = 3;
-pub fn get_screen_size<Conn>(conn: &Conn, window: Window, screen: u32) -> Result<Cookie<'_, Conn, GetScreenSizeReply>, ConnectionError>
+pub fn get_screen_size<Conn>(conn: &Conn, window: xproto::Window, screen: u32) -> Result<Cookie<'_, Conn, GetScreenSizeReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -274,7 +274,7 @@ pub struct GetScreenSizeReply {
     pub length: u32,
     pub width: u32,
     pub height: u32,
-    pub window: Window,
+    pub window: xproto::Window,
     pub screen: u32,
 }
 impl GetScreenSizeReply {
@@ -285,7 +285,7 @@ impl GetScreenSizeReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (width, remaining) = u32::try_parse(remaining)?;
         let (height, remaining) = u32::try_parse(remaining)?;
-        let (window, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (screen, remaining) = u32::try_parse(remaining)?;
         let result = GetScreenSizeReply { response_type, sequence, length, width, height, window, screen };
         Ok((result, remaining))
@@ -395,17 +395,17 @@ pub trait ConnectionExt: RequestConnection {
         query_version(self, major, minor)
     }
 
-    fn xinerama_get_state(&self, window: Window) -> Result<Cookie<'_, Self, GetStateReply>, ConnectionError>
+    fn xinerama_get_state(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetStateReply>, ConnectionError>
     {
         get_state(self, window)
     }
 
-    fn xinerama_get_screen_count(&self, window: Window) -> Result<Cookie<'_, Self, GetScreenCountReply>, ConnectionError>
+    fn xinerama_get_screen_count(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetScreenCountReply>, ConnectionError>
     {
         get_screen_count(self, window)
     }
 
-    fn xinerama_get_screen_size(&self, window: Window, screen: u32) -> Result<Cookie<'_, Self, GetScreenSizeReply>, ConnectionError>
+    fn xinerama_get_screen_size(&self, window: xproto::Window, screen: u32) -> Result<Cookie<'_, Self, GetScreenSizeReply>, ConnectionError>
     {
         get_screen_size(self, window, screen)
     }

@@ -23,7 +23,7 @@ use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
 #[allow(unused_imports)]
-use super::xproto::*;
+use super::xproto;
 #[allow(unused_imports)]
 use super::render;
 #[allow(unused_imports)]
@@ -163,7 +163,7 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 /// Opcode for the RedirectWindow request
 pub const REDIRECT_WINDOW_REQUEST: u8 = 1;
-pub fn redirect_window<Conn, A>(conn: &Conn, window: Window, update: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn redirect_window<Conn, A>(conn: &Conn, window: xproto::Window, update: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -194,7 +194,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the RedirectSubwindows request
 pub const REDIRECT_SUBWINDOWS_REQUEST: u8 = 2;
-pub fn redirect_subwindows<Conn, A>(conn: &Conn, window: Window, update: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn redirect_subwindows<Conn, A>(conn: &Conn, window: xproto::Window, update: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -225,7 +225,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the UnredirectWindow request
 pub const UNREDIRECT_WINDOW_REQUEST: u8 = 3;
-pub fn unredirect_window<Conn, A>(conn: &Conn, window: Window, update: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn unredirect_window<Conn, A>(conn: &Conn, window: xproto::Window, update: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -256,7 +256,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the UnredirectSubwindows request
 pub const UNREDIRECT_SUBWINDOWS_REQUEST: u8 = 4;
-pub fn unredirect_subwindows<Conn, A>(conn: &Conn, window: Window, update: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn unredirect_subwindows<Conn, A>(conn: &Conn, window: xproto::Window, update: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -287,7 +287,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 
 /// Opcode for the CreateRegionFromBorderClip request
 pub const CREATE_REGION_FROM_BORDER_CLIP_REQUEST: u8 = 5;
-pub fn create_region_from_border_clip<Conn>(conn: &Conn, region: xfixes::Region, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_region_from_border_clip<Conn>(conn: &Conn, region: xfixes::Region, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -317,7 +317,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the NameWindowPixmap request
 pub const NAME_WINDOW_PIXMAP_REQUEST: u8 = 6;
-pub fn name_window_pixmap<Conn>(conn: &Conn, window: Window, pixmap: Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn name_window_pixmap<Conn>(conn: &Conn, window: xproto::Window, pixmap: xproto::Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -347,7 +347,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetOverlayWindow request
 pub const GET_OVERLAY_WINDOW_REQUEST: u8 = 7;
-pub fn get_overlay_window<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, GetOverlayWindowReply>, ConnectionError>
+pub fn get_overlay_window<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetOverlayWindowReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -374,7 +374,7 @@ pub struct GetOverlayWindowReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub overlay_win: Window,
+    pub overlay_win: xproto::Window,
 }
 impl GetOverlayWindowReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -382,7 +382,7 @@ impl GetOverlayWindowReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (overlay_win, remaining) = Window::try_parse(remaining)?;
+        let (overlay_win, remaining) = xproto::Window::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let result = GetOverlayWindowReply { response_type, sequence, length, overlay_win };
         Ok((result, remaining))
@@ -397,7 +397,7 @@ impl TryFrom<&[u8]> for GetOverlayWindowReply {
 
 /// Opcode for the ReleaseOverlayWindow request
 pub const RELEASE_OVERLAY_WINDOW_REQUEST: u8 = 8;
-pub fn release_overlay_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn release_overlay_window<Conn>(conn: &Conn, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -427,46 +427,46 @@ pub trait ConnectionExt: RequestConnection {
         query_version(self, client_major_version, client_minor_version)
     }
 
-    fn composite_redirect_window<A>(&self, window: Window, update: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn composite_redirect_window<A>(&self, window: xproto::Window, update: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<u8>
     {
         redirect_window(self, window, update)
     }
 
-    fn composite_redirect_subwindows<A>(&self, window: Window, update: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn composite_redirect_subwindows<A>(&self, window: xproto::Window, update: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<u8>
     {
         redirect_subwindows(self, window, update)
     }
 
-    fn composite_unredirect_window<A>(&self, window: Window, update: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn composite_unredirect_window<A>(&self, window: xproto::Window, update: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<u8>
     {
         unredirect_window(self, window, update)
     }
 
-    fn composite_unredirect_subwindows<A>(&self, window: Window, update: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn composite_unredirect_subwindows<A>(&self, window: xproto::Window, update: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<u8>
     {
         unredirect_subwindows(self, window, update)
     }
 
-    fn composite_create_region_from_border_clip(&self, region: xfixes::Region, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn composite_create_region_from_border_clip(&self, region: xfixes::Region, window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_region_from_border_clip(self, region, window)
     }
 
-    fn composite_name_window_pixmap(&self, window: Window, pixmap: Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn composite_name_window_pixmap(&self, window: xproto::Window, pixmap: xproto::Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         name_window_pixmap(self, window, pixmap)
     }
 
-    fn composite_get_overlay_window(&self, window: Window) -> Result<Cookie<'_, Self, GetOverlayWindowReply>, ConnectionError>
+    fn composite_get_overlay_window(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetOverlayWindowReply>, ConnectionError>
     {
         get_overlay_window(self, window)
     }
 
-    fn composite_release_overlay_window(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn composite_release_overlay_window(&self, window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         release_overlay_window(self, window)
     }

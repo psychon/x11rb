@@ -23,7 +23,7 @@ use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
 #[allow(unused_imports)]
-use super::xproto::*;
+use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
 pub const X11_EXTENSION_NAME: &str = "DRI2";
@@ -421,7 +421,7 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 /// Opcode for the Connect request
 pub const CONNECT_REQUEST: u8 = 1;
-pub fn connect<Conn, A>(conn: &Conn, window: Window, driver_type: A) -> Result<Cookie<'_, Conn, ConnectReply>, ConnectionError>
+pub fn connect<Conn, A>(conn: &Conn, window: xproto::Window, driver_type: A) -> Result<Cookie<'_, Conn, ConnectReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u32>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -483,7 +483,7 @@ impl TryFrom<&[u8]> for ConnectReply {
 
 /// Opcode for the Authenticate request
 pub const AUTHENTICATE_REQUEST: u8 = 2;
-pub fn authenticate<Conn>(conn: &Conn, window: Window, magic: u32) -> Result<Cookie<'_, Conn, AuthenticateReply>, ConnectionError>
+pub fn authenticate<Conn>(conn: &Conn, window: xproto::Window, magic: u32) -> Result<Cookie<'_, Conn, AuthenticateReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -537,7 +537,7 @@ impl TryFrom<&[u8]> for AuthenticateReply {
 
 /// Opcode for the CreateDrawable request
 pub const CREATE_DRAWABLE_REQUEST: u8 = 3;
-pub fn create_drawable<Conn>(conn: &Conn, drawable: Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_drawable<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -562,7 +562,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the DestroyDrawable request
 pub const DESTROY_DRAWABLE_REQUEST: u8 = 4;
-pub fn destroy_drawable<Conn>(conn: &Conn, drawable: Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn destroy_drawable<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -587,7 +587,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetBuffers request
 pub const GET_BUFFERS_REQUEST: u8 = 5;
-pub fn get_buffers<'c, Conn>(conn: &'c Conn, drawable: Drawable, count: u32, attachments: &[u32]) -> Result<Cookie<'c, Conn, GetBuffersReply>, ConnectionError>
+pub fn get_buffers<'c, Conn>(conn: &'c Conn, drawable: xproto::Drawable, count: u32, attachments: &[u32]) -> Result<Cookie<'c, Conn, GetBuffersReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -651,7 +651,7 @@ impl TryFrom<&[u8]> for GetBuffersReply {
 
 /// Opcode for the CopyRegion request
 pub const COPY_REGION_REQUEST: u8 = 6;
-pub fn copy_region<Conn>(conn: &Conn, drawable: Drawable, region: u32, dest: u32, src: u32) -> Result<Cookie<'_, Conn, CopyRegionReply>, ConnectionError>
+pub fn copy_region<Conn>(conn: &Conn, drawable: xproto::Drawable, region: u32, dest: u32, src: u32) -> Result<Cookie<'_, Conn, CopyRegionReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -713,7 +713,7 @@ impl TryFrom<&[u8]> for CopyRegionReply {
 
 /// Opcode for the GetBuffersWithFormat request
 pub const GET_BUFFERS_WITH_FORMAT_REQUEST: u8 = 7;
-pub fn get_buffers_with_format<'c, Conn>(conn: &'c Conn, drawable: Drawable, count: u32, attachments: &[AttachFormat]) -> Result<Cookie<'c, Conn, GetBuffersWithFormatReply>, ConnectionError>
+pub fn get_buffers_with_format<'c, Conn>(conn: &'c Conn, drawable: xproto::Drawable, count: u32, attachments: &[AttachFormat]) -> Result<Cookie<'c, Conn, GetBuffersWithFormatReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -777,7 +777,7 @@ impl TryFrom<&[u8]> for GetBuffersWithFormatReply {
 
 /// Opcode for the SwapBuffers request
 pub const SWAP_BUFFERS_REQUEST: u8 = 8;
-pub fn swap_buffers<Conn>(conn: &Conn, drawable: Drawable, target_msc_hi: u32, target_msc_lo: u32, divisor_hi: u32, divisor_lo: u32, remainder_hi: u32, remainder_lo: u32) -> Result<Cookie<'_, Conn, SwapBuffersReply>, ConnectionError>
+pub fn swap_buffers<Conn>(conn: &Conn, drawable: xproto::Drawable, target_msc_hi: u32, target_msc_lo: u32, divisor_hi: u32, divisor_lo: u32, remainder_hi: u32, remainder_lo: u32) -> Result<Cookie<'_, Conn, SwapBuffersReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -858,7 +858,7 @@ impl TryFrom<&[u8]> for SwapBuffersReply {
 
 /// Opcode for the GetMSC request
 pub const GET_MSC_REQUEST: u8 = 9;
-pub fn get_msc<Conn>(conn: &Conn, drawable: Drawable) -> Result<Cookie<'_, Conn, GetMSCReply>, ConnectionError>
+pub fn get_msc<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<Cookie<'_, Conn, GetMSCReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -917,7 +917,7 @@ impl TryFrom<&[u8]> for GetMSCReply {
 
 /// Opcode for the WaitMSC request
 pub const WAIT_MSC_REQUEST: u8 = 10;
-pub fn wait_msc<Conn>(conn: &Conn, drawable: Drawable, target_msc_hi: u32, target_msc_lo: u32, divisor_hi: u32, divisor_lo: u32, remainder_hi: u32, remainder_lo: u32) -> Result<Cookie<'_, Conn, WaitMSCReply>, ConnectionError>
+pub fn wait_msc<Conn>(conn: &Conn, drawable: xproto::Drawable, target_msc_hi: u32, target_msc_lo: u32, divisor_hi: u32, divisor_lo: u32, remainder_hi: u32, remainder_lo: u32) -> Result<Cookie<'_, Conn, WaitMSCReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1006,7 +1006,7 @@ impl TryFrom<&[u8]> for WaitMSCReply {
 
 /// Opcode for the WaitSBC request
 pub const WAIT_SBC_REQUEST: u8 = 11;
-pub fn wait_sbc<Conn>(conn: &Conn, drawable: Drawable, target_sbc_hi: u32, target_sbc_lo: u32) -> Result<Cookie<'_, Conn, WaitSBCReply>, ConnectionError>
+pub fn wait_sbc<Conn>(conn: &Conn, drawable: xproto::Drawable, target_sbc_hi: u32, target_sbc_lo: u32) -> Result<Cookie<'_, Conn, WaitSBCReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1075,7 +1075,7 @@ impl TryFrom<&[u8]> for WaitSBCReply {
 
 /// Opcode for the SwapInterval request
 pub const SWAP_INTERVAL_REQUEST: u8 = 12;
-pub fn swap_interval<Conn>(conn: &Conn, drawable: Drawable, interval: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn swap_interval<Conn>(conn: &Conn, drawable: xproto::Drawable, interval: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1105,7 +1105,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetParam request
 pub const GET_PARAM_REQUEST: u8 = 13;
-pub fn get_param<Conn>(conn: &Conn, drawable: Drawable, param: u32) -> Result<Cookie<'_, Conn, GetParamReply>, ConnectionError>
+pub fn get_param<Conn>(conn: &Conn, drawable: xproto::Drawable, param: u32) -> Result<Cookie<'_, Conn, GetParamReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1167,7 +1167,7 @@ pub struct BufferSwapCompleteEvent {
     pub response_type: u8,
     pub sequence: u16,
     pub event_type: EventType,
-    pub drawable: Drawable,
+    pub drawable: xproto::Drawable,
     pub ust_hi: u32,
     pub ust_lo: u32,
     pub msc_hi: u32,
@@ -1181,7 +1181,7 @@ impl BufferSwapCompleteEvent {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (event_type, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (drawable, remaining) = Drawable::try_parse(remaining)?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
         let (ust_hi, remaining) = u32::try_parse(remaining)?;
         let (ust_lo, remaining) = u32::try_parse(remaining)?;
         let (msc_hi, remaining) = u32::try_parse(remaining)?;
@@ -1241,14 +1241,14 @@ pub const INVALIDATE_BUFFERS_EVENT: u8 = 1;
 pub struct InvalidateBuffersEvent {
     pub response_type: u8,
     pub sequence: u16,
-    pub drawable: Drawable,
+    pub drawable: xproto::Drawable,
 }
 impl InvalidateBuffersEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (drawable, remaining) = Drawable::try_parse(remaining)?;
+        let (drawable, remaining) = xproto::Drawable::try_parse(remaining)?;
         let result = InvalidateBuffersEvent { response_type, sequence, drawable };
         Ok((result, remaining))
     }
@@ -1297,68 +1297,68 @@ pub trait ConnectionExt: RequestConnection {
         query_version(self, major_version, minor_version)
     }
 
-    fn dri2_connect<A>(&self, window: Window, driver_type: A) -> Result<Cookie<'_, Self, ConnectReply>, ConnectionError>
+    fn dri2_connect<A>(&self, window: xproto::Window, driver_type: A) -> Result<Cookie<'_, Self, ConnectReply>, ConnectionError>
     where A: Into<u32>
     {
         connect(self, window, driver_type)
     }
 
-    fn dri2_authenticate(&self, window: Window, magic: u32) -> Result<Cookie<'_, Self, AuthenticateReply>, ConnectionError>
+    fn dri2_authenticate(&self, window: xproto::Window, magic: u32) -> Result<Cookie<'_, Self, AuthenticateReply>, ConnectionError>
     {
         authenticate(self, window, magic)
     }
 
-    fn dri2_create_drawable(&self, drawable: Drawable) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn dri2_create_drawable(&self, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_drawable(self, drawable)
     }
 
-    fn dri2_destroy_drawable(&self, drawable: Drawable) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn dri2_destroy_drawable(&self, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_drawable(self, drawable)
     }
 
-    fn dri2_get_buffers<'c>(&'c self, drawable: Drawable, count: u32, attachments: &[u32]) -> Result<Cookie<'c, Self, GetBuffersReply>, ConnectionError>
+    fn dri2_get_buffers<'c>(&'c self, drawable: xproto::Drawable, count: u32, attachments: &[u32]) -> Result<Cookie<'c, Self, GetBuffersReply>, ConnectionError>
     {
         get_buffers(self, drawable, count, attachments)
     }
 
-    fn dri2_copy_region(&self, drawable: Drawable, region: u32, dest: u32, src: u32) -> Result<Cookie<'_, Self, CopyRegionReply>, ConnectionError>
+    fn dri2_copy_region(&self, drawable: xproto::Drawable, region: u32, dest: u32, src: u32) -> Result<Cookie<'_, Self, CopyRegionReply>, ConnectionError>
     {
         copy_region(self, drawable, region, dest, src)
     }
 
-    fn dri2_get_buffers_with_format<'c>(&'c self, drawable: Drawable, count: u32, attachments: &[AttachFormat]) -> Result<Cookie<'c, Self, GetBuffersWithFormatReply>, ConnectionError>
+    fn dri2_get_buffers_with_format<'c>(&'c self, drawable: xproto::Drawable, count: u32, attachments: &[AttachFormat]) -> Result<Cookie<'c, Self, GetBuffersWithFormatReply>, ConnectionError>
     {
         get_buffers_with_format(self, drawable, count, attachments)
     }
 
-    fn dri2_swap_buffers(&self, drawable: Drawable, target_msc_hi: u32, target_msc_lo: u32, divisor_hi: u32, divisor_lo: u32, remainder_hi: u32, remainder_lo: u32) -> Result<Cookie<'_, Self, SwapBuffersReply>, ConnectionError>
+    fn dri2_swap_buffers(&self, drawable: xproto::Drawable, target_msc_hi: u32, target_msc_lo: u32, divisor_hi: u32, divisor_lo: u32, remainder_hi: u32, remainder_lo: u32) -> Result<Cookie<'_, Self, SwapBuffersReply>, ConnectionError>
     {
         swap_buffers(self, drawable, target_msc_hi, target_msc_lo, divisor_hi, divisor_lo, remainder_hi, remainder_lo)
     }
 
-    fn dri2_get_msc(&self, drawable: Drawable) -> Result<Cookie<'_, Self, GetMSCReply>, ConnectionError>
+    fn dri2_get_msc(&self, drawable: xproto::Drawable) -> Result<Cookie<'_, Self, GetMSCReply>, ConnectionError>
     {
         get_msc(self, drawable)
     }
 
-    fn dri2_wait_msc(&self, drawable: Drawable, target_msc_hi: u32, target_msc_lo: u32, divisor_hi: u32, divisor_lo: u32, remainder_hi: u32, remainder_lo: u32) -> Result<Cookie<'_, Self, WaitMSCReply>, ConnectionError>
+    fn dri2_wait_msc(&self, drawable: xproto::Drawable, target_msc_hi: u32, target_msc_lo: u32, divisor_hi: u32, divisor_lo: u32, remainder_hi: u32, remainder_lo: u32) -> Result<Cookie<'_, Self, WaitMSCReply>, ConnectionError>
     {
         wait_msc(self, drawable, target_msc_hi, target_msc_lo, divisor_hi, divisor_lo, remainder_hi, remainder_lo)
     }
 
-    fn dri2_wait_sbc(&self, drawable: Drawable, target_sbc_hi: u32, target_sbc_lo: u32) -> Result<Cookie<'_, Self, WaitSBCReply>, ConnectionError>
+    fn dri2_wait_sbc(&self, drawable: xproto::Drawable, target_sbc_hi: u32, target_sbc_lo: u32) -> Result<Cookie<'_, Self, WaitSBCReply>, ConnectionError>
     {
         wait_sbc(self, drawable, target_sbc_hi, target_sbc_lo)
     }
 
-    fn dri2_swap_interval(&self, drawable: Drawable, interval: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn dri2_swap_interval(&self, drawable: xproto::Drawable, interval: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         swap_interval(self, drawable, interval)
     }
 
-    fn dri2_get_param(&self, drawable: Drawable, param: u32) -> Result<Cookie<'_, Self, GetParamReply>, ConnectionError>
+    fn dri2_get_param(&self, drawable: xproto::Drawable, param: u32) -> Result<Cookie<'_, Self, GetParamReply>, ConnectionError>
     {
         get_param(self, drawable, param)
     }

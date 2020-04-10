@@ -23,7 +23,7 @@ use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
 #[allow(unused_imports)]
-use super::xproto::*;
+use super::xproto;
 #[allow(unused_imports)]
 use super::render;
 #[allow(unused_imports)]
@@ -285,7 +285,7 @@ impl TryFrom<u32> for SaveSetMapping {
 
 /// Opcode for the ChangeSaveSet request
 pub const CHANGE_SAVE_SET_REQUEST: u8 = 1;
-pub fn change_save_set<Conn, A, B, C>(conn: &Conn, mode: A, target: B, map: C, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn change_save_set<Conn, A, B, C>(conn: &Conn, mode: A, target: B, map: C, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>, C: Into<u8>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -456,22 +456,22 @@ pub struct SelectionNotifyEvent {
     pub response_type: u8,
     pub subtype: SelectionEvent,
     pub sequence: u16,
-    pub window: Window,
-    pub owner: Window,
-    pub selection: Atom,
-    pub timestamp: Timestamp,
-    pub selection_timestamp: Timestamp,
+    pub window: xproto::Window,
+    pub owner: xproto::Window,
+    pub selection: xproto::Atom,
+    pub timestamp: xproto::Timestamp,
+    pub selection_timestamp: xproto::Timestamp,
 }
 impl SelectionNotifyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (subtype, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (window, remaining) = Window::try_parse(remaining)?;
-        let (owner, remaining) = Window::try_parse(remaining)?;
-        let (selection, remaining) = Atom::try_parse(remaining)?;
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
-        let (selection_timestamp, remaining) = Timestamp::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
+        let (owner, remaining) = xproto::Window::try_parse(remaining)?;
+        let (selection, remaining) = xproto::Atom::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (selection_timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
         let subtype = subtype.try_into()?;
         let result = SelectionNotifyEvent { response_type, subtype, sequence, window, owner, selection, timestamp, selection_timestamp };
@@ -522,7 +522,7 @@ impl From<SelectionNotifyEvent> for [u8; 32] {
 
 /// Opcode for the SelectSelectionInput request
 pub const SELECT_SELECTION_INPUT_REQUEST: u8 = 2;
-pub fn select_selection_input<Conn>(conn: &Conn, window: Window, selection: Atom, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn select_selection_input<Conn>(conn: &Conn, window: xproto::Window, selection: xproto::Atom, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -681,20 +681,20 @@ pub struct CursorNotifyEvent {
     pub response_type: u8,
     pub subtype: CursorNotify,
     pub sequence: u16,
-    pub window: Window,
+    pub window: xproto::Window,
     pub cursor_serial: u32,
-    pub timestamp: Timestamp,
-    pub name: Atom,
+    pub timestamp: xproto::Timestamp,
+    pub name: xproto::Atom,
 }
 impl CursorNotifyEvent {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (subtype, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (window, remaining) = Window::try_parse(remaining)?;
+        let (window, remaining) = xproto::Window::try_parse(remaining)?;
         let (cursor_serial, remaining) = u32::try_parse(remaining)?;
-        let (timestamp, remaining) = Timestamp::try_parse(remaining)?;
-        let (name, remaining) = Atom::try_parse(remaining)?;
+        let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
+        let (name, remaining) = xproto::Atom::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let subtype = subtype.try_into()?;
         let result = CursorNotifyEvent { response_type, subtype, sequence, window, cursor_serial, timestamp, name };
@@ -744,7 +744,7 @@ impl From<CursorNotifyEvent> for [u8; 32] {
 
 /// Opcode for the SelectCursorInput request
 pub const SELECT_CURSOR_INPUT_REQUEST: u8 = 3;
-pub fn select_cursor_input<Conn>(conn: &Conn, window: Window, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn select_cursor_input<Conn>(conn: &Conn, window: xproto::Window, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -946,7 +946,7 @@ impl TryFrom<u32> for RegionEnum {
 
 /// Opcode for the CreateRegion request
 pub const CREATE_REGION_REQUEST: u8 = 5;
-pub fn create_region<'c, Conn>(conn: &'c Conn, region: Region, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_region<'c, Conn>(conn: &'c Conn, region: Region, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -975,7 +975,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CreateRegionFromBitmap request
 pub const CREATE_REGION_FROM_BITMAP_REQUEST: u8 = 6;
-pub fn create_region_from_bitmap<Conn>(conn: &Conn, region: Region, bitmap: Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_region_from_bitmap<Conn>(conn: &Conn, region: Region, bitmap: xproto::Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1005,7 +1005,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the CreateRegionFromWindow request
 pub const CREATE_REGION_FROM_WINDOW_REQUEST: u8 = 7;
-pub fn create_region_from_window<Conn, A>(conn: &Conn, region: Region, window: Window, kind: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_region_from_window<Conn, A>(conn: &Conn, region: Region, window: xproto::Window, kind: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<shape::Kind>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1041,7 +1041,7 @@ where Conn: RequestConnection + ?Sized, A: Into<shape::Kind>
 
 /// Opcode for the CreateRegionFromGC request
 pub const CREATE_REGION_FROM_GC_REQUEST: u8 = 8;
-pub fn create_region_from_gc<Conn>(conn: &Conn, region: Region, gc: Gcontext) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_region_from_gc<Conn>(conn: &Conn, region: Region, gc: xproto::Gcontext) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1126,7 +1126,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the SetRegion request
 pub const SET_REGION_REQUEST: u8 = 11;
-pub fn set_region<'c, Conn>(conn: &'c Conn, region: Region, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_region<'c, Conn>(conn: &'c Conn, region: Region, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1290,7 +1290,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the InvertRegion request
 pub const INVERT_REGION_REQUEST: u8 = 16;
-pub fn invert_region<Conn>(conn: &Conn, source: Region, bounds: Rectangle, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn invert_region<Conn>(conn: &Conn, source: Region, bounds: xproto::Rectangle, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1416,8 +1416,8 @@ where Conn: RequestConnection + ?Sized
 pub struct FetchRegionReply {
     pub response_type: u8,
     pub sequence: u16,
-    pub extents: Rectangle,
-    pub rectangles: Vec<Rectangle>,
+    pub extents: xproto::Rectangle,
+    pub rectangles: Vec<xproto::Rectangle>,
 }
 impl FetchRegionReply {
     pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1425,9 +1425,9 @@ impl FetchRegionReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (extents, remaining) = Rectangle::try_parse(remaining)?;
+        let (extents, remaining) = xproto::Rectangle::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
-        let (rectangles, remaining) = crate::x11_utils::parse_list::<Rectangle>(remaining, (length as usize) / (2))?;
+        let (rectangles, remaining) = crate::x11_utils::parse_list::<xproto::Rectangle>(remaining, (length as usize) / (2))?;
         let result = FetchRegionReply { response_type, sequence, extents, rectangles };
         Ok((result, remaining))
     }
@@ -1441,7 +1441,7 @@ impl TryFrom<&[u8]> for FetchRegionReply {
 
 /// Opcode for the SetGCClipRegion request
 pub const SET_GC_CLIP_REGION_REQUEST: u8 = 20;
-pub fn set_gc_clip_region<Conn>(conn: &Conn, gc: Gcontext, region: Region, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_gc_clip_region<Conn>(conn: &Conn, gc: xproto::Gcontext, region: Region, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1477,7 +1477,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the SetWindowShapeRegion request
 pub const SET_WINDOW_SHAPE_REGION_REQUEST: u8 = 21;
-pub fn set_window_shape_region<Conn, A>(conn: &Conn, dest: Window, dest_kind: A, x_offset: i16, y_offset: i16, region: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_window_shape_region<Conn, A>(conn: &Conn, dest: xproto::Window, dest_kind: A, x_offset: i16, y_offset: i16, region: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized, A: Into<shape::Kind>
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1555,7 +1555,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the SetCursorName request
 pub const SET_CURSOR_NAME_REQUEST: u8 = 23;
-pub fn set_cursor_name<'c, Conn>(conn: &'c Conn, cursor: Cursor, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_cursor_name<'c, Conn>(conn: &'c Conn, cursor: xproto::Cursor, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1589,7 +1589,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the GetCursorName request
 pub const GET_CURSOR_NAME_REQUEST: u8 = 24;
-pub fn get_cursor_name<Conn>(conn: &Conn, cursor: Cursor) -> Result<Cookie<'_, Conn, GetCursorNameReply>, ConnectionError>
+pub fn get_cursor_name<Conn>(conn: &Conn, cursor: xproto::Cursor) -> Result<Cookie<'_, Conn, GetCursorNameReply>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1616,7 +1616,7 @@ pub struct GetCursorNameReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub atom: Atom,
+    pub atom: xproto::Atom,
     pub name: Vec<u8>,
 }
 impl GetCursorNameReply {
@@ -1625,7 +1625,7 @@ impl GetCursorNameReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (atom, remaining) = Atom::try_parse(remaining)?;
+        let (atom, remaining) = xproto::Atom::try_parse(remaining)?;
         let (nbytes, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
         let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, nbytes as usize)?;
@@ -1671,7 +1671,7 @@ pub struct GetCursorImageAndNameReply {
     pub xhot: u16,
     pub yhot: u16,
     pub cursor_serial: u32,
-    pub cursor_atom: Atom,
+    pub cursor_atom: xproto::Atom,
     pub cursor_image: Vec<u32>,
     pub name: Vec<u8>,
 }
@@ -1688,7 +1688,7 @@ impl GetCursorImageAndNameReply {
         let (xhot, remaining) = u16::try_parse(remaining)?;
         let (yhot, remaining) = u16::try_parse(remaining)?;
         let (cursor_serial, remaining) = u32::try_parse(remaining)?;
-        let (cursor_atom, remaining) = Atom::try_parse(remaining)?;
+        let (cursor_atom, remaining) = xproto::Atom::try_parse(remaining)?;
         let (nbytes, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (cursor_image, remaining) = crate::x11_utils::parse_list::<u32>(remaining, (width as usize) * (height as usize))?;
@@ -1706,7 +1706,7 @@ impl TryFrom<&[u8]> for GetCursorImageAndNameReply {
 
 /// Opcode for the ChangeCursor request
 pub const CHANGE_CURSOR_REQUEST: u8 = 26;
-pub fn change_cursor<Conn>(conn: &Conn, source: Cursor, destination: Cursor) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn change_cursor<Conn>(conn: &Conn, source: xproto::Cursor, destination: xproto::Cursor) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1736,7 +1736,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the ChangeCursorByName request
 pub const CHANGE_CURSOR_BY_NAME_REQUEST: u8 = 27;
-pub fn change_cursor_by_name<'c, Conn>(conn: &'c Conn, src: Cursor, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_cursor_by_name<'c, Conn>(conn: &'c Conn, src: xproto::Cursor, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1812,7 +1812,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the HideCursor request
 pub const HIDE_CURSOR_REQUEST: u8 = 29;
-pub fn hide_cursor<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn hide_cursor<Conn>(conn: &Conn, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1837,7 +1837,7 @@ where Conn: RequestConnection + ?Sized
 
 /// Opcode for the ShowCursor request
 pub const SHOW_CURSOR_REQUEST: u8 = 30;
-pub fn show_cursor<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn show_cursor<Conn>(conn: &Conn, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -1933,7 +1933,7 @@ bitmask_binop!(BarrierDirections, u8);
 
 /// Opcode for the CreatePointerBarrier request
 pub const CREATE_POINTER_BARRIER_REQUEST: u8 = 31;
-pub fn create_pointer_barrier<'c, Conn>(conn: &'c Conn, barrier: Barrier, window: Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: u32, devices: &[u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_pointer_barrier<'c, Conn>(conn: &'c Conn, barrier: Barrier, window: xproto::Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: u32, devices: &[u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where Conn: RequestConnection + ?Sized
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
@@ -2020,18 +2020,18 @@ pub trait ConnectionExt: RequestConnection {
         query_version(self, client_major_version, client_minor_version)
     }
 
-    fn xfixes_change_save_set<A, B, C>(&self, mode: A, target: B, map: C, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_change_save_set<A, B, C>(&self, mode: A, target: B, map: C, window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<u8>, B: Into<u8>, C: Into<u8>
     {
         change_save_set(self, mode, target, map, window)
     }
 
-    fn xfixes_select_selection_input(&self, window: Window, selection: Atom, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_select_selection_input(&self, window: xproto::Window, selection: xproto::Atom, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_selection_input(self, window, selection, event_mask)
     }
 
-    fn xfixes_select_cursor_input(&self, window: Window, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_select_cursor_input(&self, window: xproto::Window, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_cursor_input(self, window, event_mask)
     }
@@ -2041,23 +2041,23 @@ pub trait ConnectionExt: RequestConnection {
         get_cursor_image(self)
     }
 
-    fn xfixes_create_region<'c>(&'c self, region: Region, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xfixes_create_region<'c>(&'c self, region: Region, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_region(self, region, rectangles)
     }
 
-    fn xfixes_create_region_from_bitmap(&self, region: Region, bitmap: Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_create_region_from_bitmap(&self, region: Region, bitmap: xproto::Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_region_from_bitmap(self, region, bitmap)
     }
 
-    fn xfixes_create_region_from_window<A>(&self, region: Region, window: Window, kind: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_create_region_from_window<A>(&self, region: Region, window: xproto::Window, kind: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<shape::Kind>
     {
         create_region_from_window(self, region, window, kind)
     }
 
-    fn xfixes_create_region_from_gc(&self, region: Region, gc: Gcontext) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_create_region_from_gc(&self, region: Region, gc: xproto::Gcontext) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_region_from_gc(self, region, gc)
     }
@@ -2072,7 +2072,7 @@ pub trait ConnectionExt: RequestConnection {
         destroy_region(self, region)
     }
 
-    fn xfixes_set_region<'c>(&'c self, region: Region, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xfixes_set_region<'c>(&'c self, region: Region, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_region(self, region, rectangles)
     }
@@ -2097,7 +2097,7 @@ pub trait ConnectionExt: RequestConnection {
         subtract_region(self, source1, source2, destination)
     }
 
-    fn xfixes_invert_region(&self, source: Region, bounds: Rectangle, destination: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_invert_region(&self, source: Region, bounds: xproto::Rectangle, destination: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         invert_region(self, source, bounds, destination)
     }
@@ -2117,12 +2117,12 @@ pub trait ConnectionExt: RequestConnection {
         fetch_region(self, region)
     }
 
-    fn xfixes_set_gc_clip_region(&self, gc: Gcontext, region: Region, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_set_gc_clip_region(&self, gc: xproto::Gcontext, region: Region, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_gc_clip_region(self, gc, region, x_origin, y_origin)
     }
 
-    fn xfixes_set_window_shape_region<A>(&self, dest: Window, dest_kind: A, x_offset: i16, y_offset: i16, region: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_set_window_shape_region<A>(&self, dest: xproto::Window, dest_kind: A, x_offset: i16, y_offset: i16, region: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where A: Into<shape::Kind>
     {
         set_window_shape_region(self, dest, dest_kind, x_offset, y_offset, region)
@@ -2133,12 +2133,12 @@ pub trait ConnectionExt: RequestConnection {
         set_picture_clip_region(self, picture, region, x_origin, y_origin)
     }
 
-    fn xfixes_set_cursor_name<'c>(&'c self, cursor: Cursor, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xfixes_set_cursor_name<'c>(&'c self, cursor: xproto::Cursor, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_cursor_name(self, cursor, name)
     }
 
-    fn xfixes_get_cursor_name(&self, cursor: Cursor) -> Result<Cookie<'_, Self, GetCursorNameReply>, ConnectionError>
+    fn xfixes_get_cursor_name(&self, cursor: xproto::Cursor) -> Result<Cookie<'_, Self, GetCursorNameReply>, ConnectionError>
     {
         get_cursor_name(self, cursor)
     }
@@ -2148,12 +2148,12 @@ pub trait ConnectionExt: RequestConnection {
         get_cursor_image_and_name(self)
     }
 
-    fn xfixes_change_cursor(&self, source: Cursor, destination: Cursor) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_change_cursor(&self, source: xproto::Cursor, destination: xproto::Cursor) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         change_cursor(self, source, destination)
     }
 
-    fn xfixes_change_cursor_by_name<'c>(&'c self, src: Cursor, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xfixes_change_cursor_by_name<'c>(&'c self, src: xproto::Cursor, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_cursor_by_name(self, src, name)
     }
@@ -2163,17 +2163,17 @@ pub trait ConnectionExt: RequestConnection {
         expand_region(self, source, destination, left, right, top, bottom)
     }
 
-    fn xfixes_hide_cursor(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_hide_cursor(&self, window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         hide_cursor(self, window)
     }
 
-    fn xfixes_show_cursor(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_show_cursor(&self, window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         show_cursor(self, window)
     }
 
-    fn xfixes_create_pointer_barrier<'c>(&'c self, barrier: Barrier, window: Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: u32, devices: &[u16]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xfixes_create_pointer_barrier<'c>(&'c self, barrier: Barrier, window: xproto::Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: u32, devices: &[u16]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_pointer_barrier(self, barrier, window, x1, y1, x2, y2, directions, devices)
     }

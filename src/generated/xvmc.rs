@@ -23,7 +23,7 @@ use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
 #[allow(unused_imports)]
-use super::xproto::*;
+use super::xproto;
 #[allow(unused_imports)]
 use super::shm;
 #[allow(unused_imports)]
