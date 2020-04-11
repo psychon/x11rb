@@ -334,10 +334,8 @@ fn become_wm<C: Connection>(conn: &C, screen: &Screen) -> Result<(), ReplyError<
             Error::Access(_) => {
                 eprintln!("Another WM is already running.");
                 exit(1);
-            },
-            // FIXME
-            //err => Err(error.into())
-            err => panic!("Unexpected error: {:?}", err)
+            }
+            error => Err(ReplyError::X11Error(error))
         }
     } else {
         Ok(())
