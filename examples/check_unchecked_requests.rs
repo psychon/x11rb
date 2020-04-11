@@ -67,8 +67,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     for &seq in &[seq1, seq2, seq3] {
         let (seq2, event) = conn.wait_for_event_with_sequence()?;
         match event {
-            Event::Error(_) => {},
-            event => panic!("Unexpectedly got {:?} instead of an X11 error", event)
+            Event::Error(_) => {}
+            event => panic!("Unexpectedly got {:?} instead of an X11 error", event),
         }
         assert_eq!(seq, seq2);
     }

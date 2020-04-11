@@ -4,7 +4,8 @@ use std::io::IoSlice;
 use std::ops::Deref;
 
 use x11rb::connection::{
-    compute_length_field, BufWithFds, DiscardMode, ReplyOrError, RequestConnection, RequestKind, SequenceNumber,
+    compute_length_field, BufWithFds, DiscardMode, ReplyOrError, RequestConnection, RequestKind,
+    SequenceNumber,
 };
 use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
 use x11rb::errors::{ConnectionError, ParseError, ReplyError};
@@ -150,11 +151,17 @@ impl RequestConnection for FakeConnection {
         unimplemented!()
     }
 
-    fn parse_error(&self, _error: GenericError<Self::Buf>) -> Result<x11rb::Error<Self::Buf>, ParseError> {
+    fn parse_error(
+        &self,
+        _error: GenericError<Self::Buf>,
+    ) -> Result<x11rb::Error<Self::Buf>, ParseError> {
         unimplemented!()
     }
 
-    fn parse_event(&self, _event: x11rb::x11_utils::GenericEvent<Self::Buf>) -> Result<x11rb::Event<Self::Buf>, ParseError> {
+    fn parse_event(
+        &self,
+        _event: x11rb::x11_utils::GenericEvent<Self::Buf>,
+    ) -> Result<x11rb::Event<Self::Buf>, ParseError> {
         unimplemented!()
     }
 }

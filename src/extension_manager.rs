@@ -262,11 +262,17 @@ mod test {
             unimplemented!()
         }
 
-        fn parse_error(&self, _error: GenericError<Self::Buf>) -> Result<crate::Error<Self::Buf>, ParseError> {
+        fn parse_error(
+            &self,
+            _error: GenericError<Self::Buf>,
+        ) -> Result<crate::Error<Self::Buf>, ParseError> {
             unimplemented!()
         }
 
-        fn parse_event(&self, _event: crate::x11_utils::GenericEvent<Self::Buf>) -> Result<crate::Event<Self::Buf>, ParseError> {
+        fn parse_event(
+            &self,
+            _event: crate::x11_utils::GenericEvent<Self::Buf>,
+        ) -> Result<crate::Event<Self::Buf>, ParseError> {
             unimplemented!()
         }
     }

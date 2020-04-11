@@ -6,7 +6,8 @@ use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 
 use crate::bigreq::{ConnectionExt as _, EnableReply};
 use crate::connection::{
-    compute_length_field, Connection, DiscardMode, ReplyOrError, RequestConnection, RequestKind, SequenceNumber,
+    compute_length_field, Connection, DiscardMode, ReplyOrError, RequestConnection, RequestKind,
+    SequenceNumber,
 };
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 pub use crate::errors::{ConnectError, ConnectionError, ParseError};
@@ -312,7 +313,10 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
             .extension_information(self, extension_name)
     }
 
-    fn wait_for_reply_or_raw_error(&self, sequence: SequenceNumber) -> Result<ReplyOrError<Vec<u8>>, ConnectionError> {
+    fn wait_for_reply_or_raw_error(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<ReplyOrError<Vec<u8>>, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
         inner.flush()?; // Ensure the request is sent
         loop {
@@ -358,7 +362,10 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         }
     }
 
-    fn wait_for_reply_with_fds_raw(&self, _sequence: SequenceNumber) -> Result<ReplyOrError<BufWithFds, Buffer>, ConnectionError> {
+    fn wait_for_reply_with_fds_raw(
+        &self,
+        _sequence: SequenceNumber,
+    ) -> Result<ReplyOrError<BufWithFds, Buffer>, ConnectionError> {
         unreachable!(
             "To wait for a reply containing FDs, a successful call to \
         send_request_with_reply_with_fds() is necessary. However, this function never succeeds."
@@ -421,7 +428,9 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
         }
     }
 
-    fn poll_for_raw_event_with_sequence(&self) -> Result<Option<RawEventAndSeqNumber>, ConnectionError> {
+    fn poll_for_raw_event_with_sequence(
+        &self,
+    ) -> Result<Option<RawEventAndSeqNumber>, ConnectionError> {
         Ok(self.inner.lock().unwrap().poll_for_event_with_sequence())
     }
 

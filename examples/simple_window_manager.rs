@@ -335,7 +335,7 @@ fn become_wm<C: Connection>(conn: &C, screen: &Screen) -> Result<(), ReplyError<
                 eprintln!("Another WM is already running.");
                 exit(1);
             }
-            error => Err(ReplyError::X11Error(error))
+            error => Err(ReplyError::X11Error(error)),
         }
     } else {
         Ok(())

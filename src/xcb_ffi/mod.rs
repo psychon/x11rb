@@ -14,7 +14,8 @@ use libc::c_void;
 
 use super::xproto::Setup;
 use crate::connection::{
-    compute_length_field, Connection, DiscardMode, ReplyOrError, RequestConnection, RequestKind, SequenceNumber,
+    compute_length_field, Connection, DiscardMode, ReplyOrError, RequestConnection, RequestKind,
+    SequenceNumber,
 };
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 pub use crate::errors::{ConnectError, ConnectionError, ParseError};
@@ -388,16 +389,19 @@ impl RequestConnection for XCBConnection {
             .extension_information(self, extension_name)
     }
 
-    fn wait_for_reply_or_raw_error(&self, sequence: SequenceNumber) -> Result<ReplyOrError<CSlice>, ConnectionError> {
+    fn wait_for_reply_or_raw_error(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<ReplyOrError<CSlice>, ConnectionError> {
         unsafe {
             let mut error = null_mut();
             let reply = raw_ffi::xcb_wait_for_reply64(self.conn.as_ptr(), sequence, &mut error);
             match (reply.is_null(), error.is_null()) {
-                (true, true) => {
-                    Err(Self::connection_error_from_connection(self.conn.as_ptr()))
-                }
+                (true, true) => Err(Self::connection_error_from_connection(self.conn.as_ptr())),
                 (false, true) => Ok(ReplyOrError::Reply(Self::wrap_reply(reply as _))),
-                (true, false) => Ok(ReplyOrError::Error(GenericError::new(Self::wrap_error(error as _))?)),
+                (true, false) => Ok(ReplyOrError::Error(GenericError::new(Self::wrap_error(
+                    error as _,
+                ))?)),
                 // At least one of these pointers must be NULL.
                 (false, false) => unreachable!(),
             }
@@ -410,15 +414,18 @@ impl RequestConnection for XCBConnection {
             ReplyOrError::Error(error) => {
                 self.errors.append_error((sequence, error));
                 Ok(None)
-            },
+            }
         }
     }
 
     #[cfg(unix)]
-    fn wait_for_reply_with_fds_raw(&self, sequence: SequenceNumber) -> Result<ReplyOrError<BufWithFds, Buffer>, ConnectionError> {
+    fn wait_for_reply_with_fds_raw(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<ReplyOrError<BufWithFds, Buffer>, ConnectionError> {
         let buffer = match self.wait_for_reply_or_raw_error(sequence)? {
             ReplyOrError::Reply(reply) => reply,
-            ReplyOrError::Error(error) => return Ok(ReplyOrError::Error(error))
+            ReplyOrError::Error(error) => return Ok(ReplyOrError::Error(error)),
         };
 
         // Get a pointer to the array of integers where libxcb saved the FD numbers.
@@ -436,7 +443,10 @@ impl RequestConnection for XCBConnection {
     }
 
     #[cfg(not(unix))]
-    fn wait_for_reply_with_fds_raw(&self, sequence: SequenceNumber) -> Result<ReplyOrError<BufWithFds, Buffer>, ConnectionError> {
+    fn wait_for_reply_with_fds_raw(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<ReplyOrError<BufWithFds, Buffer>, ConnectionError> {
         unimplemented!("FD passing is currently only implemented on Unix-like systems")
     }
 
@@ -488,7 +498,9 @@ impl Connection for XCBConnection {
         }
     }
 
-    fn poll_for_raw_event_with_sequence(&self) -> Result<Option<RawEventAndSeqNumber>, ConnectionError> {
+    fn poll_for_raw_event_with_sequence(
+        &self,
+    ) -> Result<Option<RawEventAndSeqNumber>, ConnectionError> {
         if let Some(error) = self.errors.get(self) {
             return Ok(Some((error.0, error.1.into())));
         }

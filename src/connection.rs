@@ -66,11 +66,13 @@ pub type RawEventAndSeqNumber<B> = (SequenceNumber, GenericEvent<B>);
 
 /// Either a raw reply or a raw error response to an X11 request.
 #[derive(Debug)]
-pub enum ReplyOrError<R, E=R>
-where R: std::fmt::Debug,
-      E: AsRef<[u8]> + std::fmt::Debug {
+pub enum ReplyOrError<R, E = R>
+where
+    R: std::fmt::Debug,
+    E: AsRef<[u8]> + std::fmt::Debug,
+{
     Reply(R),
-    Error(GenericError<E>)
+    Error(GenericError<E>),
 }
 
 /// A connection to an X11 server for sending requests.
@@ -209,7 +211,7 @@ pub trait RequestConnection {
     ) -> Result<Self::Buf, ReplyError<Self::Buf>> {
         match self.wait_for_reply_or_raw_error(sequence)? {
             ReplyOrError::Reply(reply) => Ok(reply),
-            ReplyOrError::Error(error) => Err(ReplyError::X11Error(self.parse_error(error)?))
+            ReplyOrError::Error(error) => Err(ReplyError::X11Error(self.parse_error(error)?)),
         }
     }
 
@@ -335,16 +337,18 @@ pub trait Connection: RequestConnection {
     }
 
     /// Wait for a new event from the X11 server.
-    fn wait_for_event_with_sequence(&self)
-        -> Result<EventAndSeqNumber<Self::Buf>, ConnectionError> {
+    fn wait_for_event_with_sequence(
+        &self,
+    ) -> Result<EventAndSeqNumber<Self::Buf>, ConnectionError> {
         let (seq, event) = self.wait_for_raw_event_with_sequence()?;
         let event = self.parse_event(event)?;
         Ok((seq, event))
     }
 
     /// Wait for a new raw/unparsed event from the X11 server.
-    fn wait_for_raw_event_with_sequence(&self)
-        -> Result<RawEventAndSeqNumber<Self::Buf>, ConnectionError>;
+    fn wait_for_raw_event_with_sequence(
+        &self,
+    ) -> Result<RawEventAndSeqNumber<Self::Buf>, ConnectionError>;
 
     /// Poll for a new event from the X11 server.
     fn poll_for_event(&self) -> Result<Option<Event<Self::Buf>>, ConnectionError> {
@@ -362,7 +366,7 @@ pub trait Connection: RequestConnection {
     ) -> Result<Option<EventAndSeqNumber<Self::Buf>>, ConnectionError> {
         Ok(match self.poll_for_raw_event_with_sequence()? {
             Some((seq, event)) => Some((seq, self.parse_event(event)?)),
-            None => None
+            None => None,
         })
     }
 
