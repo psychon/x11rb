@@ -86,7 +86,6 @@ fn main() {
 
     loop {
         let event = conn.wait_for_event().unwrap();
-        let event = conn.parse_event(event).unwrap();
         println!("{:?})", event);
         match event {
             Event::Expose(event) => {

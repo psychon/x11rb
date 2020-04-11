@@ -61,7 +61,8 @@ pub type SequenceNumber = u64;
 
 // Used to avoid too-complex types.
 pub type BufWithFds<B> = (B, Vec<RawFdContainer>);
-pub type EventAndSeqNumber<B> = (SequenceNumber, GenericEvent<B>);
+pub type EventAndSeqNumber<B> = (SequenceNumber, Event<B>);
+pub type RawEventAndSeqNumber<B> = (SequenceNumber, GenericEvent<B>);
 
 /// A connection to an X11 server for sending requests.
 ///
@@ -270,23 +271,51 @@ pub trait RequestConnection {
 /// A connection to an X11 server.
 pub trait Connection: RequestConnection {
     /// Wait for a new event from the X11 server.
-    fn wait_for_event(&self) -> Result<GenericEvent<Self::Buf>, ConnectionError> {
+    fn wait_for_event(&self) -> Result<Event<Self::Buf>, ConnectionError> {
         Ok(self.wait_for_event_with_sequence()?.1)
+    }
+
+    /// Wait for a new raw/unparsed event from the X11 server.
+    fn wait_for_raw_event(&self) -> Result<GenericEvent<Self::Buf>, ConnectionError> {
+        Ok(self.wait_for_raw_event_with_sequence()?.1)
     }
 
     /// Wait for a new event from the X11 server.
     fn wait_for_event_with_sequence(&self)
-        -> Result<EventAndSeqNumber<Self::Buf>, ConnectionError>;
+        -> Result<EventAndSeqNumber<Self::Buf>, ConnectionError> {
+        let (seq, event) = self.wait_for_raw_event_with_sequence()?;
+        let event = self.parse_event(event)?;
+        Ok((seq, event))
+    }
+
+    /// Wait for a new raw/unparsed event from the X11 server.
+    fn wait_for_raw_event_with_sequence(&self)
+        -> Result<RawEventAndSeqNumber<Self::Buf>, ConnectionError>;
 
     /// Poll for a new event from the X11 server.
-    fn poll_for_event(&self) -> Result<Option<GenericEvent<Self::Buf>>, ConnectionError> {
+    fn poll_for_event(&self) -> Result<Option<Event<Self::Buf>>, ConnectionError> {
         Ok(self.poll_for_event_with_sequence()?.map(|r| r.1))
+    }
+
+    /// Poll for a new raw/unparsed event from the X11 server.
+    fn poll_for_raw_event(&self) -> Result<Option<GenericEvent<Self::Buf>>, ConnectionError> {
+        Ok(self.poll_for_raw_event_with_sequence()?.map(|r| r.1))
     }
 
     /// Poll for a new event from the X11 server.
     fn poll_for_event_with_sequence(
         &self,
-    ) -> Result<Option<EventAndSeqNumber<Self::Buf>>, ConnectionError>;
+    ) -> Result<Option<EventAndSeqNumber<Self::Buf>>, ConnectionError> {
+        Ok(match self.poll_for_raw_event_with_sequence()? {
+            Some((seq, event)) => Some((seq, self.parse_event(event)?)),
+            None => None
+        })
+    }
+
+    /// Poll for a new unparsed/raw event from the X11 server.
+    fn poll_for_raw_event_with_sequence(
+        &self,
+    ) -> Result<Option<RawEventAndSeqNumber<Self::Buf>>, ConnectionError>;
 
     /// Send all pending requests to the server.
     ///

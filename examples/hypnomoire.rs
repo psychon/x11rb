@@ -190,7 +190,6 @@ where
 
     loop {
         let event = conn.wait_for_event()?;
-        let event = conn.parse_event(event)?;
         match event {
             Event::Expose(event) => {
                 if let Some(state) = find_window_by_id(&windows, event.window) {

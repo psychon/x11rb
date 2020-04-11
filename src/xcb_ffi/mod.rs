@@ -31,6 +31,7 @@ pub type ReplyError = crate::errors::ReplyError<Buffer>;
 pub type GenericError = crate::x11_utils::GenericError<Buffer>;
 pub type GenericEvent = crate::x11_utils::GenericEvent<Buffer>;
 pub type EventAndSeqNumber = crate::connection::EventAndSeqNumber<Buffer>;
+pub type RawEventAndSeqNumber = crate::connection::RawEventAndSeqNumber<Buffer>;
 pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
 pub type Error = crate::Error<Buffer>;
 pub type Event = crate::Event<Buffer>;
@@ -476,7 +477,7 @@ impl RequestConnection for XCBConnection {
 }
 
 impl Connection for XCBConnection {
-    fn wait_for_event_with_sequence(&self) -> Result<EventAndSeqNumber, ConnectionError> {
+    fn wait_for_raw_event_with_sequence(&self) -> Result<RawEventAndSeqNumber, ConnectionError> {
         if let Some(error) = self.errors.get(self) {
             return Ok((error.0, error.1.into()));
         }
@@ -489,7 +490,7 @@ impl Connection for XCBConnection {
         }
     }
 
-    fn poll_for_event_with_sequence(&self) -> Result<Option<EventAndSeqNumber>, ConnectionError> {
+    fn poll_for_raw_event_with_sequence(&self) -> Result<Option<RawEventAndSeqNumber>, ConnectionError> {
         if let Some(error) = self.errors.get(self) {
             return Ok(Some((error.0, error.1.into())));
         }

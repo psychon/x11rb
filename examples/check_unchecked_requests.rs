@@ -65,7 +65,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Now check if the things above really caused errors. This is the part that is supposed to
     // turn this example into a (bad) integration test.
     for &seq in &[seq1, seq2, seq3] {
-        let event = conn.wait_for_event()?;
+        let event = conn.wait_for_raw_event()?;
         assert_eq!(0, event.response_type());
         assert_eq!(Some(seq as _), event.raw_sequence_number());
     }

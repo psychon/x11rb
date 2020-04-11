@@ -46,7 +46,7 @@ fn multithread_test() {
 
     // Main thread: wait for events until finished
     loop {
-        let event = conn.wait_for_event().unwrap();
+        let event = conn.wait_for_raw_event().unwrap();
         if event.response_type() == CLIENT_MESSAGE_EVENT {
             break;
         }

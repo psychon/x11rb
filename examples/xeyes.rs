@@ -307,7 +307,7 @@ fn main() {
         let event = conn.wait_for_event().unwrap();
         let mut event_option = Some(event);
         while let Some(event) = event_option {
-            match conn.parse_event(event).unwrap() {
+            match event {
                 Event::Expose(event) => {
                     if event.count == 0 {
                         need_repaint = true;

@@ -359,7 +359,7 @@ fn main() {
         wm_state.refresh().unwrap();
         conn.flush().unwrap();
 
-        let event = conn.wait_for_event().unwrap();
+        let event = conn.wait_for_raw_event().unwrap();
         let mut event_option = Some(event);
         while let Some(event) = event_option {
             if event.response_type() == CLIENT_MESSAGE_EVENT {
@@ -369,7 +369,7 @@ fn main() {
 
             let event = conn.parse_event(event).unwrap();
             wm_state.handle_event(event).unwrap();
-            event_option = conn.poll_for_event().unwrap();
+            event_option = conn.poll_for_raw_event().unwrap();
         }
     }
 }

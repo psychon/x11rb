@@ -29,6 +29,7 @@ pub type ReplyError = crate::errors::ReplyError<Buffer>;
 pub type GenericError = crate::x11_utils::GenericError<Buffer>;
 pub type GenericEvent = crate::x11_utils::GenericEvent<Buffer>;
 pub type EventAndSeqNumber = crate::connection::EventAndSeqNumber<Buffer>;
+pub type RawEventAndSeqNumber = crate::connection::RawEventAndSeqNumber<Buffer>;
 pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
 pub type Error = crate::Error<Buffer>;
 pub type Event = crate::Event<Buffer>;
@@ -410,7 +411,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
 }
 
 impl<R: Read, W: Write> Connection for RustConnection<R, W> {
-    fn wait_for_event_with_sequence(&self) -> Result<EventAndSeqNumber, ConnectionError> {
+    fn wait_for_raw_event_with_sequence(&self) -> Result<RawEventAndSeqNumber, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
         loop {
             if let Some(event) = inner.poll_for_event_with_sequence() {
@@ -420,7 +421,7 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
         }
     }
 
-    fn poll_for_event_with_sequence(&self) -> Result<Option<EventAndSeqNumber>, ConnectionError> {
+    fn poll_for_raw_event_with_sequence(&self) -> Result<Option<RawEventAndSeqNumber>, ConnectionError> {
         Ok(self.inner.lock().unwrap().poll_for_event_with_sequence())
     }
 
