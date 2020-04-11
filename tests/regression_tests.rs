@@ -134,7 +134,7 @@ impl RequestConnection for FakeConnection {
         unimplemented!()
     }
 
-    fn check_for_error(
+    fn check_for_raw_error(
         &self,
         _sequence: SequenceNumber,
     ) -> Result<Option<GenericError<Vec<u8>>>, ConnectionError> {

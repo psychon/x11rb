@@ -341,7 +341,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         }
     }
 
-    fn check_for_error(
+    fn check_for_raw_error(
         &self,
         sequence: SequenceNumber,
     ) -> Result<Option<GenericError>, ConnectionError> {

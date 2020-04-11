@@ -10,7 +10,7 @@ use x11rb::connection::{Connection, RequestConnection};
 use x11rb::errors::{ReplyError, ReplyOrIdError};
 use x11rb::x11_utils::Event as _;
 use x11rb::xproto::*;
-use x11rb::{Event, COPY_DEPTH_FROM_PARENT};
+use x11rb::{Error, Event, COPY_DEPTH_FROM_PARENT};
 
 const TITLEBAR_HEIGHT: u16 = 20;
 
@@ -330,13 +330,18 @@ fn become_wm<C: Connection>(conn: &C, screen: &Screen) -> Result<(), ReplyError<
         .change_window_attributes(screen.root, &change)?
         .check()?;
     if let Some(error) = error {
-        if error.error_code() == ACCESS_ERROR {
-            eprintln!("Another WM is already running.");
-            exit(1);
+        match error {
+            Error::Access(_) => {
+                eprintln!("Another WM is already running.");
+                exit(1);
+            },
+            // FIXME
+            //err => Err(error.into())
+            err => panic!("Unexpected error: {:?}", err)
         }
-        return Err(error.into());
+    } else {
+        Ok(())
     }
-    Ok(())
 }
 
 fn main() {

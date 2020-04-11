@@ -229,6 +229,20 @@ pub trait RequestConnection {
     fn check_for_error(
         &self,
         sequence: SequenceNumber,
+    ) -> Result<Option<Error<Self::Buf>>, ConnectionError> {
+        let res = self.check_for_raw_error(sequence)?;
+        let res = res.map(|e| self.parse_error(e)).transpose()?;
+        Ok(res)
+    }
+
+    /// Check whether a request that does not have a reply caused an X11 error.
+    ///
+    /// The given sequence number identifies the request for which the check should be performed.
+    ///
+    /// Users of this library will most likely not want to use this function directly.
+    fn check_for_raw_error(
+        &self,
+        sequence: SequenceNumber,
     ) -> Result<Option<GenericError<Self::Buf>>, ConnectionError>;
 
     /// Prefetches the maximum request length.
@@ -414,7 +428,7 @@ pub enum DiscardMode {
 ///     # -> Result<BufWithFds<Vec<u8>>, x11rb::errors::ReplyError<Vec<u8>>> {
 ///     #    unimplemented!()
 ///     # }
-///     # fn check_for_error(&self, sequence: SequenceNumber)
+///     # fn check_for_raw_error(&self, sequence: SequenceNumber)
 ///     # ->Result<Option<x11rb::x11_utils::GenericError<Vec<u8>>>, ConnectionError> {
 ///     #    unimplemented!()
 ///     # }

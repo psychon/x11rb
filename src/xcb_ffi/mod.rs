@@ -442,7 +442,7 @@ impl RequestConnection for XCBConnection {
         unimplemented!("FD passing is currently only implemented on Unix-like systems")
     }
 
-    fn check_for_error(
+    fn check_for_raw_error(
         &self,
         sequence: SequenceNumber,
     ) -> Result<Option<GenericError>, ConnectionError> {
