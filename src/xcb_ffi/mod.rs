@@ -28,6 +28,7 @@ mod raw_ffi;
 type Buffer = <XCBConnection as RequestConnection>::Buf;
 pub type ReplyOrIdError = crate::errors::ReplyOrIdError<Buffer>;
 pub type ReplyError = crate::errors::ReplyError<Buffer>;
+pub type RawReplyError = crate::errors::RawReplyError<Buffer>;
 pub type GenericError = crate::x11_utils::GenericError<Buffer>;
 pub type GenericEvent = crate::x11_utils::GenericEvent<Buffer>;
 pub type EventAndSeqNumber = crate::connection::EventAndSeqNumber<Buffer>;
@@ -388,7 +389,7 @@ impl RequestConnection for XCBConnection {
             .extension_information(self, extension_name)
     }
 
-    fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<CSlice, ReplyError> {
+    fn wait_for_reply_or_raw_error(&self, sequence: SequenceNumber) -> Result<CSlice, RawReplyError> {
         unsafe {
             let mut error = null_mut();
             let reply = raw_ffi::xcb_wait_for_reply64(self.conn.as_ptr(), sequence, &mut error);
@@ -407,11 +408,11 @@ impl RequestConnection for XCBConnection {
     }
 
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<CSlice>, ConnectionError> {
-        match self.wait_for_reply_or_error(sequence) {
+        match self.wait_for_reply_or_raw_error(sequence) {
             Ok(buffer) => Ok(Some(buffer)),
             Err(err) => match err {
-                ReplyError::ConnectionError(err) => Err(err),
-                ReplyError::X11Error(err) => {
+                RawReplyError::ConnectionError(err) => Err(err),
+                RawReplyError::X11Error(err) => {
                     self.errors.append_error((sequence, err));
                     Ok(None)
                 }
@@ -420,8 +421,8 @@ impl RequestConnection for XCBConnection {
     }
 
     #[cfg(unix)]
-    fn wait_for_reply_with_fds(&self, sequence: SequenceNumber) -> Result<BufWithFds, ReplyError> {
-        let buffer = self.wait_for_reply_or_error(sequence)?;
+    fn wait_for_reply_with_fds_raw(&self, sequence: SequenceNumber) -> Result<BufWithFds, RawReplyError> {
+        let buffer = self.wait_for_reply_or_raw_error(sequence)?;
 
         // Get a pointer to the array of integers where libxcb saved the FD numbers.
         // libxcb saves the list of FDs after the data of the reply. Since the reply's

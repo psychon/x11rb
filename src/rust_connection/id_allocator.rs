@@ -76,7 +76,7 @@ mod test {
         BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber,
     };
     use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-    use crate::errors::{ConnectionError, ParseError, ReplyError};
+    use crate::errors::{ConnectionError, ParseError, RawReplyError};
     use crate::utils::RawFdContainer;
     use crate::x11_utils::{ExtensionInformation, GenericError};
 
@@ -192,10 +192,10 @@ mod test {
             }))
         }
 
-        fn wait_for_reply_or_error(
+        fn wait_for_reply_or_raw_error(
             &self,
             _sequence: SequenceNumber,
-        ) -> Result<Vec<u8>, ReplyError<Vec<u8>>> {
+        ) -> Result<Vec<u8>, RawReplyError<Vec<u8>>> {
             Ok(self.0.as_ref().unwrap().clone())
         }
 
@@ -206,10 +206,10 @@ mod test {
             unimplemented!()
         }
 
-        fn wait_for_reply_with_fds(
+        fn wait_for_reply_with_fds_raw(
             &self,
             _sequence: SequenceNumber,
-        ) -> Result<BufWithFds<Vec<u8>>, ReplyError<Vec<u8>>> {
+        ) -> Result<BufWithFds<Vec<u8>>, RawReplyError<Vec<u8>>> {
             unimplemented!()
         }
 

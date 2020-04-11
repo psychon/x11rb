@@ -26,6 +26,7 @@ use inner::PollReply;
 type Buffer = <RustConnection as RequestConnection>::Buf;
 pub type ReplyOrIdError = crate::errors::ReplyOrIdError<Buffer>;
 pub type ReplyError = crate::errors::ReplyError<Buffer>;
+pub type RawReplyError = crate::errors::RawReplyError<Buffer>;
 pub type GenericError = crate::x11_utils::GenericError<Buffer>;
 pub type GenericEvent = crate::x11_utils::GenericEvent<Buffer>;
 pub type EventAndSeqNumber = crate::connection::EventAndSeqNumber<Buffer>;
@@ -312,7 +313,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
             .extension_information(self, extension_name)
     }
 
-    fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Vec<u8>, ReplyError> {
+    fn wait_for_reply_or_raw_error(&self, sequence: SequenceNumber) -> Result<Vec<u8>, RawReplyError> {
         let mut inner = self.inner.lock().unwrap();
         inner.flush()?; // Ensure the request is sent
         loop {
@@ -358,7 +359,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         }
     }
 
-    fn wait_for_reply_with_fds(&self, _sequence: SequenceNumber) -> Result<BufWithFds, ReplyError> {
+    fn wait_for_reply_with_fds_raw(&self, _sequence: SequenceNumber) -> Result<BufWithFds, RawReplyError> {
         unreachable!(
             "To wait for a reply containing FDs, a successful call to \
         send_request_with_reply_with_fds() is necessary. However, this function never succeeds."

@@ -1,9 +1,8 @@
 //! This module contains the current mess that is error handling.
 
-use std::error::Error;
-
 use crate::x11_utils::GenericError;
 use crate::xproto::{SetupAuthenticate, SetupFailed};
+use crate::Error;
 
 /// An error occurred while parsing some data
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -12,7 +11,7 @@ pub enum ParseError {
     ParseError,
 }
 
-impl Error for ParseError {}
+impl std::error::Error for ParseError {}
 
 impl std::fmt::Display for ParseError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -64,7 +63,7 @@ pub enum ConnectError {
     SetupFailed(SetupFailed),
 }
 
-impl Error for ConnectError {}
+impl std::error::Error for ConnectError {}
 
 impl std::fmt::Display for ConnectError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -140,7 +139,7 @@ pub enum ConnectionError {
     IOError(std::io::Error),
 }
 
-impl Error for ConnectionError {}
+impl std::error::Error for ConnectionError {}
 
 impl std::fmt::Display for ConnectionError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -184,10 +183,10 @@ pub enum ReplyError<B: AsRef<[u8]> + std::fmt::Debug> {
     /// Some error occurred on the X11 connection.
     ConnectionError(ConnectionError),
     /// The X11 server sent an error in response to the request.
-    X11Error(GenericError<B>),
+    X11Error(Error<B>),
 }
 
-impl<B: AsRef<[u8]> + std::fmt::Debug> Error for ReplyError<B> {}
+impl<B: AsRef<[u8]> + std::fmt::Debug> std::error::Error for ReplyError<B> {}
 
 impl<B: AsRef<[u8]> + std::fmt::Debug> std::fmt::Display for ReplyError<B> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -222,7 +221,57 @@ impl<B: AsRef<[u8]> + std::fmt::Debug> From<ConnectionError> for ReplyError<B> {
     }
 }
 
-impl<B: AsRef<[u8]> + std::fmt::Debug> From<GenericError<B>> for ReplyError<B> {
+impl<B: AsRef<[u8]> + std::fmt::Debug> From<Error<B>> for ReplyError<B> {
+    fn from(err: Error<B>) -> Self {
+        Self::X11Error(err)
+    }
+}
+
+/// An error that occurred with some request.
+#[derive(Debug)]
+pub enum RawReplyError<B: AsRef<[u8]> + std::fmt::Debug> {
+    /// Some error occurred on the X11 connection.
+    ConnectionError(ConnectionError),
+    /// The X11 server sent an error in response to the request.
+    X11Error(GenericError<B>),
+}
+
+impl<B: AsRef<[u8]> + std::fmt::Debug> std::error::Error for RawReplyError<B> {}
+
+impl<B: AsRef<[u8]> + std::fmt::Debug> std::fmt::Display for RawReplyError<B> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            RawReplyError::ConnectionError(e) => write!(f, "{}", e),
+            RawReplyError::X11Error(e) => write!(f, "X11 error {:?}", e),
+        }
+    }
+}
+
+impl<B: AsRef<[u8]> + std::fmt::Debug> From<ParseError> for RawReplyError<B> {
+    fn from(err: ParseError) -> Self {
+        Self::from(ConnectionError::from(err))
+    }
+}
+
+impl<B: AsRef<[u8]> + std::fmt::Debug> From<std::num::TryFromIntError> for RawReplyError<B> {
+    fn from(err: std::num::TryFromIntError) -> Self {
+        Self::from(ParseError::from(err))
+    }
+}
+
+impl<B: AsRef<[u8]> + std::fmt::Debug> From<std::io::Error> for RawReplyError<B> {
+    fn from(err: std::io::Error) -> Self {
+        ConnectionError::from(err).into()
+    }
+}
+
+impl<B: AsRef<[u8]> + std::fmt::Debug> From<ConnectionError> for RawReplyError<B> {
+    fn from(err: ConnectionError) -> Self {
+        Self::ConnectionError(err)
+    }
+}
+
+impl<B: AsRef<[u8]> + std::fmt::Debug> From<GenericError<B>> for RawReplyError<B> {
     fn from(err: GenericError<B>) -> Self {
         Self::X11Error(err)
     }
@@ -236,7 +285,7 @@ pub enum ReplyOrIdError<B: AsRef<[u8]> + std::fmt::Debug> {
     /// Some error occurred on the X11 connection.
     ConnectionError(ConnectionError),
     /// The X11 server sent an error in response to a XC-MISC request.
-    X11Error(GenericError<B>),
+    X11Error(Error<B>),
 }
 
 impl<B: AsRef<[u8]> + std::fmt::Debug> std::fmt::Display for ReplyOrIdError<B> {
@@ -249,7 +298,7 @@ impl<B: AsRef<[u8]> + std::fmt::Debug> std::fmt::Display for ReplyOrIdError<B> {
     }
 }
 
-impl<B: AsRef<[u8]> + std::fmt::Debug> Error for ReplyOrIdError<B> {}
+impl<B: AsRef<[u8]> + std::fmt::Debug> std::error::Error for ReplyOrIdError<B> {}
 
 impl<B: AsRef<[u8]> + std::fmt::Debug> From<ConnectionError> for ReplyOrIdError<B> {
     fn from(err: ConnectionError) -> Self {
@@ -257,8 +306,8 @@ impl<B: AsRef<[u8]> + std::fmt::Debug> From<ConnectionError> for ReplyOrIdError<
     }
 }
 
-impl<B: AsRef<[u8]> + std::fmt::Debug> From<GenericError<B>> for ReplyOrIdError<B> {
-    fn from(err: GenericError<B>) -> Self {
+impl<B: AsRef<[u8]> + std::fmt::Debug> From<Error<B>> for ReplyOrIdError<B> {
+    fn from(err: Error<B>) -> Self {
         ReplyOrIdError::X11Error(err)
     }
 }

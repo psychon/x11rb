@@ -44,7 +44,7 @@ use std::convert::{TryFrom, TryInto};
 use std::io::IoSlice;
 
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ConnectionError, ParseError, ReplyError, ReplyOrIdError};
+use crate::errors::{ConnectionError, ParseError, RawReplyError, ReplyError, ReplyOrIdError};
 use crate::utils::RawFdContainer;
 use crate::x11_utils::{ExtensionInformation, GenericError, GenericEvent};
 use crate::xproto::Setup;
@@ -197,7 +197,24 @@ pub trait RequestConnection {
     fn wait_for_reply_or_error(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<Self::Buf, ReplyError<Self::Buf>>;
+    ) -> Result<Self::Buf, ReplyError<Self::Buf>> {
+        match self.wait_for_reply_or_raw_error(sequence) {
+            Err(RawReplyError::X11Error(err)) => Err(ReplyError::X11Error(self.parse_error(err)?)),
+            Err(RawReplyError::ConnectionError(err)) => Err(ReplyError::ConnectionError(err)),
+            Ok(reply) => Ok(reply)
+        }
+    }
+
+    /// Wait for the reply to a request.
+    ///
+    /// The given sequence number identifies the request for which replies are expected. If the X11
+    /// server answered the request with an error, that error is returned as an `Err`.
+    ///
+    /// Users of this library will most likely not want to use this function directly.
+    fn wait_for_reply_or_raw_error(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<Self::Buf, RawReplyError<Self::Buf>>;
 
     /// Wait for the reply to a request.
     ///
@@ -219,7 +236,23 @@ pub trait RequestConnection {
     fn wait_for_reply_with_fds(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<BufWithFds<Self::Buf>, ReplyError<Self::Buf>>;
+    ) -> Result<BufWithFds<Self::Buf>, ReplyError<Self::Buf>> {
+        match self.wait_for_reply_with_fds_raw(sequence) {
+            Err(RawReplyError::X11Error(err)) => Err(ReplyError::X11Error(self.parse_error(err)?)),
+            Err(RawReplyError::ConnectionError(err)) => Err(ReplyError::ConnectionError(err)),
+            Ok(reply) => Ok(reply)
+        }
+    }
+
+    /// Wait for the reply to a request that has FDs.
+    ///
+    /// The given sequence number identifies the request for which replies are expected.
+    ///
+    /// Users of this library will most likely not want to use this function directly.
+    fn wait_for_reply_with_fds_raw(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<BufWithFds<Self::Buf>, RawReplyError<Self::Buf>>;
 
     /// Check whether a request that does not have a reply caused an X11 error.
     ///
@@ -416,16 +449,16 @@ pub enum DiscardMode {
 ///     # -> Result<Option<ExtensionInformation>, ConnectionError> {
 ///     #    unimplemented!()
 ///     # }
-///     # fn wait_for_reply_or_error(&self, sequence: SequenceNumber)
-///     # -> Result<Vec<u8>, x11rb::errors::ReplyError<Vec<u8>>> {
+///     # fn wait_for_reply_or_raw_error(&self, sequence: SequenceNumber)
+///     # -> Result<Vec<u8>, x11rb::errors::RawReplyError<Vec<u8>>> {
 ///     #    unimplemented!()
 ///     # }
 ///     # fn wait_for_reply(&self, sequence: SequenceNumber)
 ///     # -> Result<Option<Vec<u8>>, x11rb::errors::ConnectionError> {
 ///     #    unimplemented!()
 ///     # }
-///     # fn wait_for_reply_with_fds(&self, sequence: SequenceNumber)
-///     # -> Result<BufWithFds<Vec<u8>>, x11rb::errors::ReplyError<Vec<u8>>> {
+///     # fn wait_for_reply_with_fds_raw(&self, sequence: SequenceNumber)
+///     # -> Result<BufWithFds<Vec<u8>>, x11rb::errors::RawReplyError<Vec<u8>>> {
 ///     #    unimplemented!()
 ///     # }
 ///     # fn check_for_raw_error(&self, sequence: SequenceNumber)

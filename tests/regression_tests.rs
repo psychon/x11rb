@@ -7,7 +7,7 @@ use x11rb::connection::{
     compute_length_field, BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber,
 };
 use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
-use x11rb::errors::{ConnectionError, ParseError, ReplyError};
+use x11rb::errors::{ConnectionError, ParseError, RawReplyError, ReplyError};
 use x11rb::utils::RawFdContainer;
 use x11rb::x11_utils::{ExtensionInformation, GenericError, Serialize, TryParse};
 use x11rb::xproto::{
@@ -113,10 +113,10 @@ impl RequestConnection for FakeConnection {
         unimplemented!()
     }
 
-    fn wait_for_reply_or_error(
+    fn wait_for_reply_or_raw_error(
         &self,
         _sequence: SequenceNumber,
-    ) -> Result<Vec<u8>, ReplyError<Vec<u8>>> {
+    ) -> Result<Vec<u8>, RawReplyError<Vec<u8>>> {
         unimplemented!()
     }
 
@@ -127,10 +127,10 @@ impl RequestConnection for FakeConnection {
         unimplemented!()
     }
 
-    fn wait_for_reply_with_fds(
+    fn wait_for_reply_with_fds_raw(
         &self,
         _sequence: SequenceNumber,
-    ) -> Result<BufWithFds<Vec<u8>>, ReplyError<Vec<u8>>> {
+    ) -> Result<BufWithFds<Vec<u8>>, RawReplyError<Vec<u8>>> {
         unimplemented!()
     }
 
