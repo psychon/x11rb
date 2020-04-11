@@ -394,7 +394,7 @@ impl RequestConnection for XCBConnection {
             let reply = raw_ffi::xcb_wait_for_reply64(self.conn.as_ptr(), sequence, &mut error);
             match (reply.is_null(), error.is_null()) {
                 (true, true) => {
-                    Err(Self::connection_error_from_connection(self.conn.as_ptr()).into())
+                    Err(Self::connection_error_from_connection(self.conn.as_ptr()))
                 }
                 (false, true) => Ok(ReplyOrError::Reply(Self::wrap_reply(reply as _))),
                 (true, false) => Ok(ReplyOrError::Error(GenericError::new(Self::wrap_error(error as _))?)),
