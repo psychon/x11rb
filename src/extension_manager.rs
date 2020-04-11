@@ -153,10 +153,10 @@ mod test {
     use std::io::IoSlice;
 
     use crate::connection::{
-        BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber,
+        BufWithFds, DiscardMode, ReplyOrError, RequestConnection, RequestKind, SequenceNumber,
     };
     use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-    use crate::errors::{ConnectionError, ParseError, RawReplyError};
+    use crate::errors::{ConnectionError, ParseError};
     use crate::utils::RawFdContainer;
     use crate::x11_utils::{ExtInfoProvider, ExtensionInformation, GenericError};
 
@@ -218,7 +218,7 @@ mod test {
         fn wait_for_reply_or_raw_error(
             &self,
             sequence: SequenceNumber,
-        ) -> Result<Vec<u8>, RawReplyError<Vec<u8>>> {
+        ) -> Result<ReplyOrError<Vec<u8>>, ConnectionError> {
             // Code should only ask once for the reply to a request. Check that this is the case
             // (by requiring monotonically increasing sequence numbers here).
             let mut last = self.0.borrow_mut();
@@ -230,7 +230,7 @@ mod test {
             );
             *last = sequence;
             // Then return an error, because that's what the #[test] below needs.
-            Err(RawReplyError::ConnectionError(ConnectionError::UnknownError))
+            Err(ConnectionError::UnknownError)
         }
 
         fn wait_for_reply(
@@ -243,7 +243,7 @@ mod test {
         fn wait_for_reply_with_fds_raw(
             &self,
             _sequence: SequenceNumber,
-        ) -> Result<BufWithFds<Vec<u8>>, RawReplyError<Vec<u8>>> {
+        ) -> Result<ReplyOrError<BufWithFds<Vec<u8>>, Vec<u8>>, ConnectionError> {
             unimplemented!()
         }
 

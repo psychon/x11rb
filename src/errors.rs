@@ -1,6 +1,5 @@
 //! This module contains the current mess that is error handling.
 
-use crate::x11_utils::GenericError;
 use crate::xproto::{SetupAuthenticate, SetupFailed};
 use crate::Error;
 
@@ -223,56 +222,6 @@ impl<B: AsRef<[u8]> + std::fmt::Debug> From<ConnectionError> for ReplyError<B> {
 
 impl<B: AsRef<[u8]> + std::fmt::Debug> From<Error<B>> for ReplyError<B> {
     fn from(err: Error<B>) -> Self {
-        Self::X11Error(err)
-    }
-}
-
-/// An error that occurred with some request.
-#[derive(Debug)]
-pub enum RawReplyError<B: AsRef<[u8]> + std::fmt::Debug> {
-    /// Some error occurred on the X11 connection.
-    ConnectionError(ConnectionError),
-    /// The X11 server sent an error in response to the request.
-    X11Error(GenericError<B>),
-}
-
-impl<B: AsRef<[u8]> + std::fmt::Debug> std::error::Error for RawReplyError<B> {}
-
-impl<B: AsRef<[u8]> + std::fmt::Debug> std::fmt::Display for RawReplyError<B> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            RawReplyError::ConnectionError(e) => write!(f, "{}", e),
-            RawReplyError::X11Error(e) => write!(f, "X11 error {:?}", e),
-        }
-    }
-}
-
-impl<B: AsRef<[u8]> + std::fmt::Debug> From<ParseError> for RawReplyError<B> {
-    fn from(err: ParseError) -> Self {
-        Self::from(ConnectionError::from(err))
-    }
-}
-
-impl<B: AsRef<[u8]> + std::fmt::Debug> From<std::num::TryFromIntError> for RawReplyError<B> {
-    fn from(err: std::num::TryFromIntError) -> Self {
-        Self::from(ParseError::from(err))
-    }
-}
-
-impl<B: AsRef<[u8]> + std::fmt::Debug> From<std::io::Error> for RawReplyError<B> {
-    fn from(err: std::io::Error) -> Self {
-        ConnectionError::from(err).into()
-    }
-}
-
-impl<B: AsRef<[u8]> + std::fmt::Debug> From<ConnectionError> for RawReplyError<B> {
-    fn from(err: ConnectionError) -> Self {
-        Self::ConnectionError(err)
-    }
-}
-
-impl<B: AsRef<[u8]> + std::fmt::Debug> From<GenericError<B>> for RawReplyError<B> {
-    fn from(err: GenericError<B>) -> Self {
         Self::X11Error(err)
     }
 }

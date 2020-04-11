@@ -73,10 +73,10 @@ mod test {
     use std::io::IoSlice;
 
     use crate::connection::{
-        BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber,
+        BufWithFds, DiscardMode, ReplyOrError, RequestConnection, RequestKind, SequenceNumber,
     };
     use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-    use crate::errors::{ConnectionError, ParseError, RawReplyError};
+    use crate::errors::{ConnectionError, ParseError};
     use crate::utils::RawFdContainer;
     use crate::x11_utils::{ExtensionInformation, GenericError};
 
@@ -195,8 +195,8 @@ mod test {
         fn wait_for_reply_or_raw_error(
             &self,
             _sequence: SequenceNumber,
-        ) -> Result<Vec<u8>, RawReplyError<Vec<u8>>> {
-            Ok(self.0.as_ref().unwrap().clone())
+        ) -> Result<ReplyOrError<Vec<u8>>, ConnectionError> {
+            Ok(ReplyOrError::Reply(self.0.as_ref().unwrap().clone()))
         }
 
         fn wait_for_reply(
@@ -209,7 +209,7 @@ mod test {
         fn wait_for_reply_with_fds_raw(
             &self,
             _sequence: SequenceNumber,
-        ) -> Result<BufWithFds<Vec<u8>>, RawReplyError<Vec<u8>>> {
+        ) -> Result<ReplyOrError<BufWithFds<Vec<u8>>, Vec<u8>>, ConnectionError> {
             unimplemented!()
         }
 

@@ -4,10 +4,10 @@ use std::io::IoSlice;
 use std::ops::Deref;
 
 use x11rb::connection::{
-    compute_length_field, BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber,
+    compute_length_field, BufWithFds, DiscardMode, ReplyOrError, RequestConnection, RequestKind, SequenceNumber,
 };
 use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
-use x11rb::errors::{ConnectionError, ParseError, RawReplyError, ReplyError};
+use x11rb::errors::{ConnectionError, ParseError, ReplyError};
 use x11rb::utils::RawFdContainer;
 use x11rb::x11_utils::{ExtensionInformation, GenericError, Serialize, TryParse};
 use x11rb::xproto::{
@@ -116,7 +116,7 @@ impl RequestConnection for FakeConnection {
     fn wait_for_reply_or_raw_error(
         &self,
         _sequence: SequenceNumber,
-    ) -> Result<Vec<u8>, RawReplyError<Vec<u8>>> {
+    ) -> Result<ReplyOrError<Vec<u8>>, ConnectionError> {
         unimplemented!()
     }
 
@@ -130,7 +130,7 @@ impl RequestConnection for FakeConnection {
     fn wait_for_reply_with_fds_raw(
         &self,
         _sequence: SequenceNumber,
-    ) -> Result<BufWithFds<Vec<u8>>, RawReplyError<Vec<u8>>> {
+    ) -> Result<ReplyOrError<BufWithFds<Vec<u8>>, Vec<u8>>, ConnectionError> {
         unimplemented!()
     }
 

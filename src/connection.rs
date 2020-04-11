@@ -44,7 +44,7 @@ use std::convert::{TryFrom, TryInto};
 use std::io::IoSlice;
 
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ConnectionError, ParseError, RawReplyError, ReplyError, ReplyOrIdError};
+use crate::errors::{ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::utils::RawFdContainer;
 use crate::x11_utils::{ExtensionInformation, GenericError, GenericEvent};
 use crate::xproto::Setup;
@@ -63,6 +63,15 @@ pub type SequenceNumber = u64;
 pub type BufWithFds<B> = (B, Vec<RawFdContainer>);
 pub type EventAndSeqNumber<B> = (SequenceNumber, Event<B>);
 pub type RawEventAndSeqNumber<B> = (SequenceNumber, GenericEvent<B>);
+
+/// Either a raw reply or a raw error response to an X11 request.
+#[derive(Debug)]
+pub enum ReplyOrError<R, E=R>
+where R: std::fmt::Debug,
+      E: AsRef<[u8]> + std::fmt::Debug {
+    Reply(R),
+    Error(GenericError<E>)
+}
 
 /// A connection to an X11 server for sending requests.
 ///
@@ -198,10 +207,9 @@ pub trait RequestConnection {
         &self,
         sequence: SequenceNumber,
     ) -> Result<Self::Buf, ReplyError<Self::Buf>> {
-        match self.wait_for_reply_or_raw_error(sequence) {
-            Err(RawReplyError::X11Error(err)) => Err(ReplyError::X11Error(self.parse_error(err)?)),
-            Err(RawReplyError::ConnectionError(err)) => Err(ReplyError::ConnectionError(err)),
-            Ok(reply) => Ok(reply)
+        match self.wait_for_reply_or_raw_error(sequence)? {
+            ReplyOrError::Reply(reply) => Ok(reply),
+            ReplyOrError::Error(error) => Err(ReplyError::X11Error(self.parse_error(error)?))
         }
     }
 
@@ -214,7 +222,7 @@ pub trait RequestConnection {
     fn wait_for_reply_or_raw_error(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<Self::Buf, RawReplyError<Self::Buf>>;
+    ) -> Result<ReplyOrError<Self::Buf>, ConnectionError>;
 
     /// Wait for the reply to a request.
     ///
@@ -237,10 +245,9 @@ pub trait RequestConnection {
         &self,
         sequence: SequenceNumber,
     ) -> Result<BufWithFds<Self::Buf>, ReplyError<Self::Buf>> {
-        match self.wait_for_reply_with_fds_raw(sequence) {
-            Err(RawReplyError::X11Error(err)) => Err(ReplyError::X11Error(self.parse_error(err)?)),
-            Err(RawReplyError::ConnectionError(err)) => Err(ReplyError::ConnectionError(err)),
-            Ok(reply) => Ok(reply)
+        match self.wait_for_reply_with_fds_raw(sequence)? {
+            ReplyOrError::Reply(reply) => Ok(reply),
+            ReplyOrError::Error(error) => Err(ReplyError::X11Error(self.parse_error(error)?)),
         }
     }
 
@@ -252,7 +259,7 @@ pub trait RequestConnection {
     fn wait_for_reply_with_fds_raw(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<BufWithFds<Self::Buf>, RawReplyError<Self::Buf>>;
+    ) -> Result<ReplyOrError<BufWithFds<Self::Buf>, Self::Buf>, ConnectionError>;
 
     /// Check whether a request that does not have a reply caused an X11 error.
     ///
@@ -427,6 +434,7 @@ pub enum DiscardMode {
 /// use x11rb::errors::{ParseError, ConnectionError};
 /// use x11rb::utils::RawFdContainer;
 /// use x11rb::x11_utils::{ExtensionInformation, GenericError, GenericEvent};
+/// # use x11rb::connection::ReplyOrError;
 ///
 /// struct MyConnection();
 ///
@@ -450,7 +458,7 @@ pub enum DiscardMode {
 ///     #    unimplemented!()
 ///     # }
 ///     # fn wait_for_reply_or_raw_error(&self, sequence: SequenceNumber)
-///     # -> Result<Vec<u8>, x11rb::errors::RawReplyError<Vec<u8>>> {
+///     # -> Result<ReplyOrError<Vec<u8>>, ConnectionError> {
 ///     #    unimplemented!()
 ///     # }
 ///     # fn wait_for_reply(&self, sequence: SequenceNumber)
@@ -458,7 +466,7 @@ pub enum DiscardMode {
 ///     #    unimplemented!()
 ///     # }
 ///     # fn wait_for_reply_with_fds_raw(&self, sequence: SequenceNumber)
-///     # -> Result<BufWithFds<Vec<u8>>, x11rb::errors::RawReplyError<Vec<u8>>> {
+///     # -> Result<ReplyOrError<BufWithFds<Vec<u8>>, Vec<u8>>, ConnectionError> {
 ///     #    unimplemented!()
 ///     # }
 ///     # fn check_for_raw_error(&self, sequence: SequenceNumber)
