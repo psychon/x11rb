@@ -104,6 +104,56 @@ def _errors(out, modules):
                 out("_ => Ok(Self::Unknown(error))")
             out("}")
         out("}")
+        out("")
+
+        out("/// Get the sequence number contained in this X11 error")
+        out("pub fn wire_sequence_number(&self) -> u16 {")
+        with Indent(out):
+            out("match self {")
+            out.indent("Error::Unknown(value) => value.raw_sequence_number()" +
+                       ".expect(\"Errors should always have a sequence number\"),")
+            for module, mod_errors in zip(modules, errors):
+                variant = _get_module_name_prefix(module)
+                for name, error in mod_errors:
+                    err_name = name[-1]
+                    if module.has_feature:
+                        out.indent("#[cfg(feature = \"%s\")]", module.namespace.header)
+                    out.indent("Error::%s%s(value) => value.sequence,", variant, err_name)
+            out("}")
+        out("}")
+        out("")
+
+        out("/// Get the error code of this X11 error")
+        out("pub fn error_code(&self) -> u8 {")
+        with Indent(out):
+            out("match self {")
+            out.indent("Error::Unknown(value) => value.error_code(),")
+            for module, mod_errors in zip(modules, errors):
+                variant = _get_module_name_prefix(module)
+                for name, error in mod_errors:
+                    err_name = name[-1]
+                    if module.has_feature:
+                        out.indent("#[cfg(feature = \"%s\")]", module.namespace.header)
+                    out.indent("Error::%s%s(value) => value.error_code,", variant, err_name)
+            out("}")
+        out("}")
+
+        out("/// Get the response type of this X11 error")
+        out("///")
+        out("/// This is not `pub` because it should always be `0` for errors.")
+        out("fn raw_response_type(&self) -> u8 {")
+        with Indent(out):
+            out("match self {")
+            out.indent("Error::Unknown(value) => value.response_type(),")
+            for module, mod_errors in zip(modules, errors):
+                variant = _get_module_name_prefix(module)
+                for name, error in mod_errors:
+                    err_name = name[-1]
+                    if module.has_feature:
+                        out.indent("#[cfg(feature = \"%s\")]", module.namespace.header)
+                    out.indent("Error::%s%s(value) => value.response_type,", variant, err_name)
+            out("}")
+        out("}")
     out("}")
 
 
@@ -213,6 +263,74 @@ def _events(out, modules):
                     out("}")
                 out("_ => Ok(Self::Unknown(event))")
             out("}")
+        out("}")
+        out("")
+
+        out("/// Get the sequence number contained in this X11 event")
+        out("pub fn wire_sequence_number(&self) -> Option<u16> {")
+        with Indent(out):
+            out("match self {")
+            out.indent("Event::Unknown(value) => value.raw_sequence_number(),")
+            out.indent("Event::Error(value) => Some(value.wire_sequence_number()),")
+            for module, mod_events in zip(modules, events):
+                variant = _get_module_name_prefix(module)
+                for name, event in mod_events:
+                    err_name = name[-1]
+                    if module.has_feature:
+                        out.indent("#[cfg(feature = \"%s\")]", module.namespace.header)
+                    has_sequence = any(field.field_name == "sequence" for field in event.fields)
+                    if has_sequence:
+                        out.indent("Event::%s%s(value) => Some(value.sequence),", variant, err_name)
+                    else:
+                        out.indent("Event::%s%s(_) => None,", variant, err_name)
+            out("}")
+        out("}")
+        out("")
+
+        out("/// Get the raw response type of this X11 event")
+        out("///")
+        out("/// Response types have seven bits in X11. The eight bit indicates whether")
+        out("/// the packet was generated through the `SendEvent` request. This function")
+        out("/// returns all eight bits.")
+        out("///")
+        out("/// See also the `response_type()`, `server_generated()` and `sent_event()` methods.")
+        out("pub fn raw_response_type(&self) -> u8 {")
+        with Indent(out):
+            out("match self {")
+            out.indent("Event::Unknown(value) => value.raw_response_type(),")
+            out.indent("Event::Error(value) => value.raw_response_type(),")
+            for module, mod_events in zip(modules, events):
+                variant = _get_module_name_prefix(module)
+                for name, event in mod_events:
+                    err_name = name[-1]
+                    if module.has_feature:
+                        out.indent("#[cfg(feature = \"%s\")]", module.namespace.header)
+                    out.indent("Event::%s%s(value) => value.response_type,", variant, err_name)
+            out("}")
+        out("}")
+        out("")
+
+        out("/// Get the response type of this X11 event")
+        out("pub fn response_type(&self) -> u8 {")
+        out.indent("self.raw_response_type() & 0x7f")
+        out("}")
+        out("")
+
+        out("/// Was this event generated by the X11 server?")
+        out("///")
+        out("/// If this function returns true, then this event comes from the X11 server.")
+        out("/// Otherwise, it was sent from another client via the `SendEvent` request.")
+        out("pub fn server_generated(&self) -> bool {")
+        out.indent("self.raw_response_type() & 0x80 == 0")
+        out("}")
+        out("")
+
+        out("/// Was this event generated by another X11 client?")
+        out("///")
+        out("/// If this function returns true, then this event comes from another client via")
+        out("/// the `SendEvent` request. Otherwise, it was generated by the X11 server.")
+        out("pub fn sent_event(&self) -> bool {")
+        out.indent("self.raw_response_type() & 0x80 != 0")
         out("}")
     out("}")
 
