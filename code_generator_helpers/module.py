@@ -1262,12 +1262,26 @@ class Module(object):
                 self.out("match self {")
                 with Indent(self.out):
                     for case in switch_type.bitcases:
+                        suffix = ".to_vec()" if case.type.fixed_size() else ""
                         if hasattr(case, "rust_name"):
                             variant = self._to_rust_identifier(case.type.name[-1])
+                            self.out("%s::%s(value) => value.serialize()%s,", name, variant, suffix)
                         else:
                             variant = self._to_rust_identifier(case.only_field.field_name)
-                        suffix = ".to_vec()" if case.type.fixed_size() else ""
-                        self.out("%s::%s(value) => value.serialize()%s,", name, variant, suffix)
+                            if len(case.type.fields) == 1:
+                                self.out("%s::%s(value) => value.serialize()%s,", name, variant, suffix)
+                            else:
+                                self.out("%s::%s(value) => {", name, variant)
+                                self.out.indent("let mut result = Vec::new();")
+                                with Indent(self.out):
+                                    for field in case.type.fields:
+                                        if field.visible:
+                                            assert field == case.only_field, field
+                                            self.out("value.serialize_into(&mut result);")
+                                        else:
+                                            serialise_align_pad(self.out, field, "result")
+                                self.out.indent("result")
+                                self.out("}")
                 self.out("}")
             self.out("}")
             self.out("fn serialize_into(&self, bytes: &mut Vec<u8>) {")
@@ -1277,9 +1291,21 @@ class Module(object):
                     for case in switch_type.bitcases:
                         if hasattr(case, "rust_name"):
                             variant = self._to_rust_identifier(case.type.name[-1])
+                            self.out("%s::%s(value) => value.serialize_into(bytes),", name, variant)
                         else:
                             variant = self._to_rust_identifier(case.only_field.field_name)
-                        self.out("%s::%s(value) => value.serialize_into(bytes),", name, variant)
+                            if len(case.type.fields) == 1:
+                                self.out("%s::%s(value) => value.serialize_into(bytes),", name, variant)
+                            else:
+                                self.out("%s::%s(value) => {", name, variant)
+                                with Indent(self.out):
+                                    for field in case.type.fields:
+                                        if field.visible:
+                                            assert field == case.only_field, field
+                                            self.out("value.serialize_into(bytes);")
+                                        else:
+                                            serialise_align_pad(self.out, field, "bytes")
+                                self.out("}")
                 self.out("}")
             self.out("}")
         self.out("}")
