@@ -8,7 +8,10 @@ use std::io::{Error as IOError, ErrorKind, IoSlice};
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, RawFd};
 use std::ptr::{null, null_mut};
-use std::sync::{atomic::{AtomicU64, Ordering}, Mutex};
+use std::sync::{
+    atomic::{AtomicU64, Ordering},
+    Mutex,
+};
 
 use libc::c_void;
 
@@ -301,7 +304,10 @@ impl XCBConnection {
         CSlice::new(error, 32)
     }
 
-    unsafe fn wrap_event(&self, event: *mut u8) -> Result<(SequenceNumber, GenericEvent), ParseError> {
+    unsafe fn wrap_event(
+        &self,
+        event: *mut u8,
+    ) -> Result<(SequenceNumber, GenericEvent), ParseError> {
         let header = CSlice::new(event, 36);
         let mut length = 32;
         // XCB inserts a uint32_t with the sequence number after the first 32 bytes.
@@ -330,7 +336,10 @@ impl XCBConnection {
     /// recently. Thus, the maximum sequence number that was received so far is used to fill in the
     /// missing bytes for the result.
     fn reconstruct_full_sequence(&self, seqno: u32) -> SequenceNumber {
-        reconstruct_full_sequence_impl(self.maximum_sequence_received.load(Ordering::Relaxed), seqno)
+        reconstruct_full_sequence_impl(
+            self.maximum_sequence_received.load(Ordering::Relaxed),
+            seqno,
+        )
     }
 }
 
@@ -417,10 +426,9 @@ impl RequestConnection for XCBConnection {
             match (reply.is_null(), error.is_null()) {
                 (true, true) => Err(Self::connection_error_from_connection(self.conn.as_ptr())),
                 (false, true) => Ok(ReplyOrError::Reply(self.wrap_reply(reply as _, sequence))),
-                (true, false) => Ok(ReplyOrError::Error(GenericError::new(self.wrap_error(
-                    error as _,
-                    sequence,
-                ))?)),
+                (true, false) => Ok(ReplyOrError::Error(GenericError::new(
+                    self.wrap_error(error as _, sequence),
+                )?)),
                 // At least one of these pointers must be NULL.
                 (false, false) => unreachable!(),
             }
@@ -480,7 +488,11 @@ impl RequestConnection for XCBConnection {
         if error.is_null() {
             Ok(None)
         } else {
-            unsafe { Ok(Some(GenericError::new(self.wrap_error(error as _, sequence))?)) }
+            unsafe {
+                Ok(Some(GenericError::new(
+                    self.wrap_error(error as _, sequence),
+                )?))
+            }
         }
     }
 
@@ -609,24 +621,28 @@ fn reconstruct_full_sequence_impl(recent: SequenceNumber, value: u32) -> Sequenc
         expanded_value,
         expanded_value + step,
         expanded_value.wrapping_sub(step),
-    ].iter()
-        .map(|x| *x)
-        .min_by_key(|&value| {
-            if value > recent {
-                value - recent
-            } else {
-                recent - value
-            }
-        })
-        .unwrap();
+    ]
+    .iter()
+    .copied()
+    .min_by_key(|&value| {
+        if value > recent {
+            value - recent
+        } else {
+            recent - value
+        }
+    })
+    .unwrap();
     // Just because: Check that the result matches the passed-in value in the low bits
-    assert_eq!(result & SequenceNumber::from(u32::max_value()), SequenceNumber::from(value));
+    assert_eq!(
+        result & SequenceNumber::from(u32::max_value()),
+        SequenceNumber::from(value),
+    );
     result
 }
 
 #[cfg(test)]
 mod test {
-    use super::{ConnectionError, XCBConnection, atomic_u64_max};
+    use super::{atomic_u64_max, ConnectionError, XCBConnection};
     use std::ffi::CString;
 
     #[test]
@@ -681,14 +697,17 @@ mod test {
             (max32_p1, 0, max32_p1),
             (max32_p1, 10, max32_p1 + 10),
             (max32_p1, max32, max32_),
-            (large_offset | 0xdeadcafe, 0, large_offset + max32_p1),
-            (large_offset | 0xdeadcafe, max32, large_offset + max32_),
+            (large_offset | 0xdead_cafe, 0, large_offset + max32_p1),
+            (large_offset | 0xdead_cafe, max32, large_offset + max32_),
             (0xabcd_1234_5678, 0xf000_0000, 0xabcc_f000_0000),
             (0xabcd_8765_4321, 0xf000_0000, 0xabcd_f000_0000),
         ] {
             let actual = reconstruct_full_sequence_impl(recent, value);
-            assert_eq!(actual, expected, "reconstruct({:x}, {:x}) == {:x}, but was {:x}",
-                recent, value, expected, actual);
+            assert_eq!(
+                actual, expected,
+                "reconstruct({:x}, {:x}) == {:x}, but was {:x}",
+                recent, value, expected, actual,
+            );
         }
     }
 }
