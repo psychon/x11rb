@@ -6,7 +6,8 @@ use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 
 use crate::bigreq::{ConnectionExt as _, EnableReply};
 use crate::connection::{
-    compute_length_field, Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber,
+    compute_length_field, Connection, DiscardMode, ReplyOrError, RequestConnection, RequestKind,
+    SequenceNumber,
 };
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 pub use crate::errors::{ConnectError, ConnectionError, ParseError};
@@ -29,6 +30,7 @@ pub type ReplyError = crate::errors::ReplyError<Buffer>;
 pub type GenericError = crate::x11_utils::GenericError<Buffer>;
 pub type GenericEvent = crate::x11_utils::GenericEvent<Buffer>;
 pub type EventAndSeqNumber = crate::connection::EventAndSeqNumber<Buffer>;
+pub type RawEventAndSeqNumber = crate::connection::RawEventAndSeqNumber<Buffer>;
 pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
 pub type Error = crate::Error<Buffer>;
 pub type Event = crate::Event<Buffer>;
@@ -311,16 +313,19 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
             .extension_information(self, extension_name)
     }
 
-    fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Vec<u8>, ReplyError> {
+    fn wait_for_reply_or_raw_error(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<ReplyOrError<Vec<u8>>, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
         inner.flush()?; // Ensure the request is sent
         loop {
             if let Some(reply) = inner.poll_for_reply_or_error(sequence) {
                 if reply[0] == 0 {
                     let error = GenericError::new(reply)?;
-                    return Err(error.into());
+                    return Ok(ReplyOrError::Error(error));
                 } else {
-                    return Ok(reply);
+                    return Ok(ReplyOrError::Reply(reply));
                 }
             }
             inner = self.read_packet_and_enqueue(inner)?;
@@ -340,7 +345,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         }
     }
 
-    fn check_for_error(
+    fn check_for_raw_error(
         &self,
         sequence: SequenceNumber,
     ) -> Result<Option<GenericError>, ConnectionError> {
@@ -357,7 +362,10 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         }
     }
 
-    fn wait_for_reply_with_fds(&self, _sequence: SequenceNumber) -> Result<BufWithFds, ReplyError> {
+    fn wait_for_reply_with_fds_raw(
+        &self,
+        _sequence: SequenceNumber,
+    ) -> Result<ReplyOrError<BufWithFds, Buffer>, ConnectionError> {
         unreachable!(
             "To wait for a reply containing FDs, a successful call to \
         send_request_with_reply_with_fds() is necessary. However, this function never succeeds."
@@ -397,22 +405,6 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         let mut max_bytes = self.maximum_request_bytes.lock().unwrap();
         self.prefetch_maximum_request_bytes_impl(&mut max_bytes);
     }
-}
-
-impl<R: Read, W: Write> Connection for RustConnection<R, W> {
-    fn wait_for_event_with_sequence(&self) -> Result<EventAndSeqNumber, ConnectionError> {
-        let mut inner = self.inner.lock().unwrap();
-        loop {
-            if let Some(event) = inner.poll_for_event_with_sequence() {
-                return Ok(event);
-            }
-            inner = self.read_packet_and_enqueue(inner)?;
-        }
-    }
-
-    fn poll_for_event_with_sequence(&self) -> Result<Option<EventAndSeqNumber>, ConnectionError> {
-        Ok(self.inner.lock().unwrap().poll_for_event_with_sequence())
-    }
 
     fn parse_error(&self, error: GenericError) -> Result<Error, ParseError> {
         let ext_mgr = self.extension_manager.lock().unwrap();
@@ -422,6 +414,24 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
     fn parse_event(&self, event: GenericEvent) -> Result<Event, ParseError> {
         let ext_mgr = self.extension_manager.lock().unwrap();
         Event::parse(event, &*ext_mgr)
+    }
+}
+
+impl<R: Read, W: Write> Connection for RustConnection<R, W> {
+    fn wait_for_raw_event_with_sequence(&self) -> Result<RawEventAndSeqNumber, ConnectionError> {
+        let mut inner = self.inner.lock().unwrap();
+        loop {
+            if let Some(event) = inner.poll_for_event_with_sequence() {
+                return Ok(event);
+            }
+            inner = self.read_packet_and_enqueue(inner)?;
+        }
+    }
+
+    fn poll_for_raw_event_with_sequence(
+        &self,
+    ) -> Result<Option<RawEventAndSeqNumber>, ConnectionError> {
+        Ok(self.inner.lock().unwrap().poll_for_event_with_sequence())
     }
 
     fn flush(&self) -> Result<(), ConnectionError> {

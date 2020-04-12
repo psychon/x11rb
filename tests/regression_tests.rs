@@ -4,7 +4,8 @@ use std::io::IoSlice;
 use std::ops::Deref;
 
 use x11rb::connection::{
-    compute_length_field, BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber,
+    compute_length_field, BufWithFds, DiscardMode, ReplyOrError, RequestConnection, RequestKind,
+    SequenceNumber,
 };
 use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
 use x11rb::errors::{ConnectionError, ParseError, ReplyError};
@@ -113,10 +114,10 @@ impl RequestConnection for FakeConnection {
         unimplemented!()
     }
 
-    fn wait_for_reply_or_error(
+    fn wait_for_reply_or_raw_error(
         &self,
         _sequence: SequenceNumber,
-    ) -> Result<Vec<u8>, ReplyError<Vec<u8>>> {
+    ) -> Result<ReplyOrError<Vec<u8>>, ConnectionError> {
         unimplemented!()
     }
 
@@ -127,14 +128,14 @@ impl RequestConnection for FakeConnection {
         unimplemented!()
     }
 
-    fn wait_for_reply_with_fds(
+    fn wait_for_reply_with_fds_raw(
         &self,
         _sequence: SequenceNumber,
-    ) -> Result<BufWithFds<Vec<u8>>, ReplyError<Vec<u8>>> {
+    ) -> Result<ReplyOrError<BufWithFds<Vec<u8>>, Vec<u8>>, ConnectionError> {
         unimplemented!()
     }
 
-    fn check_for_error(
+    fn check_for_raw_error(
         &self,
         _sequence: SequenceNumber,
     ) -> Result<Option<GenericError<Vec<u8>>>, ConnectionError> {
@@ -147,6 +148,20 @@ impl RequestConnection for FakeConnection {
     }
 
     fn prefetch_maximum_request_bytes(&self) {
+        unimplemented!()
+    }
+
+    fn parse_error(
+        &self,
+        _error: GenericError<Self::Buf>,
+    ) -> Result<x11rb::Error<Self::Buf>, ParseError> {
+        unimplemented!()
+    }
+
+    fn parse_event(
+        &self,
+        _event: x11rb::x11_utils::GenericEvent<Self::Buf>,
+    ) -> Result<x11rb::Event<Self::Buf>, ParseError> {
         unimplemented!()
     }
 }

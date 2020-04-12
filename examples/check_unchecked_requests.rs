@@ -9,8 +9,8 @@ extern crate x11rb;
 
 use x11rb::connection::Connection;
 use x11rb::wrapper::ConnectionExt as _;
-use x11rb::x11_utils::Event;
 use x11rb::xproto::ConnectionExt as _;
+use x11rb::Event;
 
 const INVALID_WINDOW: u32 = 0;
 
@@ -65,9 +65,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Now check if the things above really caused errors. This is the part that is supposed to
     // turn this example into a (bad) integration test.
     for &seq in &[seq1, seq2, seq3] {
-        let event = conn.wait_for_event()?;
-        assert_eq!(0, event.response_type());
-        assert_eq!(Some(seq as _), event.raw_sequence_number());
+        let (seq2, event) = conn.wait_for_event_with_sequence()?;
+        match event {
+            Event::Error(_) => {}
+            event => panic!("Unexpectedly got {:?} instead of an X11 error", event),
+        }
+        assert_eq!(seq, seq2);
     }
     assert!(conn.poll_for_event()?.is_none());
 

@@ -61,7 +61,19 @@ pub type SequenceNumber = u64;
 
 // Used to avoid too-complex types.
 pub type BufWithFds<B> = (B, Vec<RawFdContainer>);
-pub type EventAndSeqNumber<B> = (SequenceNumber, GenericEvent<B>);
+pub type EventAndSeqNumber<B> = (SequenceNumber, Event<B>);
+pub type RawEventAndSeqNumber<B> = (SequenceNumber, GenericEvent<B>);
+
+/// Either a raw reply or a raw error response to an X11 request.
+#[derive(Debug)]
+pub enum ReplyOrError<R, E = R>
+where
+    R: std::fmt::Debug,
+    E: AsRef<[u8]> + std::fmt::Debug,
+{
+    Reply(R),
+    Error(GenericError<E>),
+}
 
 /// A connection to an X11 server for sending requests.
 ///
@@ -196,7 +208,23 @@ pub trait RequestConnection {
     fn wait_for_reply_or_error(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<Self::Buf, ReplyError<Self::Buf>>;
+    ) -> Result<Self::Buf, ReplyError<Self::Buf>> {
+        match self.wait_for_reply_or_raw_error(sequence)? {
+            ReplyOrError::Reply(reply) => Ok(reply),
+            ReplyOrError::Error(error) => Err(ReplyError::X11Error(self.parse_error(error)?)),
+        }
+    }
+
+    /// Wait for the reply to a request.
+    ///
+    /// The given sequence number identifies the request for which replies are expected. If the X11
+    /// server answered the request with an error, that error is returned as an `Err`.
+    ///
+    /// Users of this library will most likely not want to use this function directly.
+    fn wait_for_reply_or_raw_error(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<ReplyOrError<Self::Buf>, ConnectionError>;
 
     /// Wait for the reply to a request.
     ///
@@ -218,7 +246,22 @@ pub trait RequestConnection {
     fn wait_for_reply_with_fds(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<BufWithFds<Self::Buf>, ReplyError<Self::Buf>>;
+    ) -> Result<BufWithFds<Self::Buf>, ReplyError<Self::Buf>> {
+        match self.wait_for_reply_with_fds_raw(sequence)? {
+            ReplyOrError::Reply(reply) => Ok(reply),
+            ReplyOrError::Error(error) => Err(ReplyError::X11Error(self.parse_error(error)?)),
+        }
+    }
+
+    /// Wait for the reply to a request that has FDs.
+    ///
+    /// The given sequence number identifies the request for which replies are expected.
+    ///
+    /// Users of this library will most likely not want to use this function directly.
+    fn wait_for_reply_with_fds_raw(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<ReplyOrError<BufWithFds<Self::Buf>, Self::Buf>, ConnectionError>;
 
     /// Check whether a request that does not have a reply caused an X11 error.
     ///
@@ -226,6 +269,20 @@ pub trait RequestConnection {
     ///
     /// Users of this library will most likely not want to use this function directly.
     fn check_for_error(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<Option<Error<Self::Buf>>, ConnectionError> {
+        let res = self.check_for_raw_error(sequence)?;
+        let res = res.map(|e| self.parse_error(e)).transpose()?;
+        Ok(res)
+    }
+
+    /// Check whether a request that does not have a reply caused an X11 error.
+    ///
+    /// The given sequence number identifies the request for which the check should be performed.
+    ///
+    /// Users of this library will most likely not want to use this function directly.
+    fn check_for_raw_error(
         &self,
         sequence: SequenceNumber,
     ) -> Result<Option<GenericError<Self::Buf>>, ConnectionError>;
@@ -259,34 +316,64 @@ pub trait RequestConnection {
 
     /// The maximum number of bytes that the X11 server accepts in a request.
     fn maximum_request_bytes(&self) -> usize;
-}
-
-/// A connection to an X11 server.
-pub trait Connection: RequestConnection {
-    /// Wait for a new event from the X11 server.
-    fn wait_for_event(&self) -> Result<GenericEvent<Self::Buf>, ConnectionError> {
-        Ok(self.wait_for_event_with_sequence()?.1)
-    }
-
-    /// Wait for a new event from the X11 server.
-    fn wait_for_event_with_sequence(&self)
-        -> Result<EventAndSeqNumber<Self::Buf>, ConnectionError>;
-
-    /// Poll for a new event from the X11 server.
-    fn poll_for_event(&self) -> Result<Option<GenericEvent<Self::Buf>>, ConnectionError> {
-        Ok(self.poll_for_event_with_sequence()?.map(|r| r.1))
-    }
-
-    /// Poll for a new event from the X11 server.
-    fn poll_for_event_with_sequence(
-        &self,
-    ) -> Result<Option<EventAndSeqNumber<Self::Buf>>, ConnectionError>;
 
     /// Parse a generic error.
     fn parse_error(&self, error: GenericError<Self::Buf>) -> Result<Error<Self::Buf>, ParseError>;
 
     /// Parse a generic event.
     fn parse_event(&self, event: GenericEvent<Self::Buf>) -> Result<Event<Self::Buf>, ParseError>;
+}
+
+/// A connection to an X11 server.
+pub trait Connection: RequestConnection {
+    /// Wait for a new event from the X11 server.
+    fn wait_for_event(&self) -> Result<Event<Self::Buf>, ConnectionError> {
+        Ok(self.wait_for_event_with_sequence()?.1)
+    }
+
+    /// Wait for a new raw/unparsed event from the X11 server.
+    fn wait_for_raw_event(&self) -> Result<GenericEvent<Self::Buf>, ConnectionError> {
+        Ok(self.wait_for_raw_event_with_sequence()?.1)
+    }
+
+    /// Wait for a new event from the X11 server.
+    fn wait_for_event_with_sequence(
+        &self,
+    ) -> Result<EventAndSeqNumber<Self::Buf>, ConnectionError> {
+        let (seq, event) = self.wait_for_raw_event_with_sequence()?;
+        let event = self.parse_event(event)?;
+        Ok((seq, event))
+    }
+
+    /// Wait for a new raw/unparsed event from the X11 server.
+    fn wait_for_raw_event_with_sequence(
+        &self,
+    ) -> Result<RawEventAndSeqNumber<Self::Buf>, ConnectionError>;
+
+    /// Poll for a new event from the X11 server.
+    fn poll_for_event(&self) -> Result<Option<Event<Self::Buf>>, ConnectionError> {
+        Ok(self.poll_for_event_with_sequence()?.map(|r| r.1))
+    }
+
+    /// Poll for a new raw/unparsed event from the X11 server.
+    fn poll_for_raw_event(&self) -> Result<Option<GenericEvent<Self::Buf>>, ConnectionError> {
+        Ok(self.poll_for_raw_event_with_sequence()?.map(|r| r.1))
+    }
+
+    /// Poll for a new event from the X11 server.
+    fn poll_for_event_with_sequence(
+        &self,
+    ) -> Result<Option<EventAndSeqNumber<Self::Buf>>, ConnectionError> {
+        Ok(match self.poll_for_raw_event_with_sequence()? {
+            Some((seq, event)) => Some((seq, self.parse_event(event)?)),
+            None => None,
+        })
+    }
+
+    /// Poll for a new unparsed/raw event from the X11 server.
+    fn poll_for_raw_event_with_sequence(
+        &self,
+    ) -> Result<Option<RawEventAndSeqNumber<Self::Buf>>, ConnectionError>;
 
     /// Send all pending requests to the server.
     ///
@@ -350,7 +437,8 @@ pub enum DiscardMode {
 /// use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
 /// use x11rb::errors::{ParseError, ConnectionError};
 /// use x11rb::utils::RawFdContainer;
-/// use x11rb::x11_utils::ExtensionInformation;
+/// use x11rb::x11_utils::{ExtensionInformation, GenericError, GenericEvent};
+/// # use x11rb::connection::ReplyOrError;
 ///
 /// struct MyConnection();
 ///
@@ -373,19 +461,19 @@ pub enum DiscardMode {
 ///     # -> Result<Option<ExtensionInformation>, ConnectionError> {
 ///     #    unimplemented!()
 ///     # }
-///     # fn wait_for_reply_or_error(&self, sequence: SequenceNumber)
-///     # -> Result<Vec<u8>, x11rb::errors::ReplyError<Vec<u8>>> {
+///     # fn wait_for_reply_or_raw_error(&self, sequence: SequenceNumber)
+///     # -> Result<ReplyOrError<Vec<u8>>, ConnectionError> {
 ///     #    unimplemented!()
 ///     # }
 ///     # fn wait_for_reply(&self, sequence: SequenceNumber)
 ///     # -> Result<Option<Vec<u8>>, x11rb::errors::ConnectionError> {
 ///     #    unimplemented!()
 ///     # }
-///     # fn wait_for_reply_with_fds(&self, sequence: SequenceNumber)
-///     # -> Result<BufWithFds<Vec<u8>>, x11rb::errors::ReplyError<Vec<u8>>> {
+///     # fn wait_for_reply_with_fds_raw(&self, sequence: SequenceNumber)
+///     # -> Result<ReplyOrError<BufWithFds<Vec<u8>>, Vec<u8>>, ConnectionError> {
 ///     #    unimplemented!()
 ///     # }
-///     # fn check_for_error(&self, sequence: SequenceNumber)
+///     # fn check_for_raw_error(&self, sequence: SequenceNumber)
 ///     # ->Result<Option<x11rb::x11_utils::GenericError<Vec<u8>>>, ConnectionError> {
 ///     #    unimplemented!()
 ///     # }
@@ -394,6 +482,12 @@ pub enum DiscardMode {
 ///     # }
 ///     # fn prefetch_maximum_request_bytes(&self) {
 ///     #    unimplemented!()
+///     # }
+///     # fn parse_error(&self, _error: GenericError<Self::Buf>) -> Result<x11rb::Error<Self::Buf>, ParseError> {
+///     #     unimplemented!()
+///     # }
+///     # fn parse_event(&self, _event: GenericEvent<Self::Buf>) -> Result<x11rb::Event<Self::Buf>, ParseError> {
+///     #     unimplemented!()
 ///     # }
 ///
 ///     fn send_request_with_reply<R>(&self, bufs: &[IoSlice], fds: Vec<RawFdContainer>)

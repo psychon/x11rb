@@ -73,10 +73,10 @@ mod test {
     use std::io::IoSlice;
 
     use crate::connection::{
-        BufWithFds, DiscardMode, RequestConnection, RequestKind, SequenceNumber,
+        BufWithFds, DiscardMode, ReplyOrError, RequestConnection, RequestKind, SequenceNumber,
     };
     use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-    use crate::errors::{ConnectionError, ParseError, ReplyError};
+    use crate::errors::{ConnectionError, ParseError};
     use crate::utils::RawFdContainer;
     use crate::x11_utils::{ExtensionInformation, GenericError};
 
@@ -192,11 +192,11 @@ mod test {
             }))
         }
 
-        fn wait_for_reply_or_error(
+        fn wait_for_reply_or_raw_error(
             &self,
             _sequence: SequenceNumber,
-        ) -> Result<Vec<u8>, ReplyError<Vec<u8>>> {
-            Ok(self.0.as_ref().unwrap().clone())
+        ) -> Result<ReplyOrError<Vec<u8>>, ConnectionError> {
+            Ok(ReplyOrError::Reply(self.0.as_ref().unwrap().clone()))
         }
 
         fn wait_for_reply(
@@ -206,14 +206,14 @@ mod test {
             unimplemented!()
         }
 
-        fn wait_for_reply_with_fds(
+        fn wait_for_reply_with_fds_raw(
             &self,
             _sequence: SequenceNumber,
-        ) -> Result<BufWithFds<Vec<u8>>, ReplyError<Vec<u8>>> {
+        ) -> Result<ReplyOrError<BufWithFds<Vec<u8>>, Vec<u8>>, ConnectionError> {
             unimplemented!()
         }
 
-        fn check_for_error(
+        fn check_for_raw_error(
             &self,
             _sequence: SequenceNumber,
         ) -> Result<Option<GenericError<Vec<u8>>>, ConnectionError> {
@@ -225,6 +225,20 @@ mod test {
         }
 
         fn prefetch_maximum_request_bytes(&self) {
+            unimplemented!()
+        }
+
+        fn parse_error(
+            &self,
+            _error: GenericError<Self::Buf>,
+        ) -> Result<crate::Error<Self::Buf>, ParseError> {
+            unimplemented!()
+        }
+
+        fn parse_event(
+            &self,
+            _event: crate::x11_utils::GenericEvent<Self::Buf>,
+        ) -> Result<crate::Event<Self::Buf>, ParseError> {
             unimplemented!()
         }
     }

@@ -14,7 +14,8 @@ use libc::c_void;
 
 use super::xproto::Setup;
 use crate::connection::{
-    compute_length_field, Connection, DiscardMode, RequestConnection, RequestKind, SequenceNumber,
+    compute_length_field, Connection, DiscardMode, ReplyOrError, RequestConnection, RequestKind,
+    SequenceNumber,
 };
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 pub use crate::errors::{ConnectError, ConnectionError, ParseError};
@@ -31,6 +32,7 @@ pub type ReplyError = crate::errors::ReplyError<Buffer>;
 pub type GenericError = crate::x11_utils::GenericError<Buffer>;
 pub type GenericEvent = crate::x11_utils::GenericEvent<Buffer>;
 pub type EventAndSeqNumber = crate::connection::EventAndSeqNumber<Buffer>;
+pub type RawEventAndSeqNumber = crate::connection::RawEventAndSeqNumber<Buffer>;
 pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
 pub type Error = crate::Error<Buffer>;
 pub type Event = crate::Event<Buffer>;
@@ -387,18 +389,19 @@ impl RequestConnection for XCBConnection {
             .extension_information(self, extension_name)
     }
 
-    fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<CSlice, ReplyError> {
+    fn wait_for_reply_or_raw_error(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<ReplyOrError<CSlice>, ConnectionError> {
         unsafe {
             let mut error = null_mut();
             let reply = raw_ffi::xcb_wait_for_reply64(self.conn.as_ptr(), sequence, &mut error);
             match (reply.is_null(), error.is_null()) {
-                (true, true) => {
-                    Err(Self::connection_error_from_connection(self.conn.as_ptr()).into())
-                }
-                (false, true) => Ok(Self::wrap_reply(reply as _)),
-                (true, false) => Err(GenericError::new(Self::wrap_error(error as _))
-                    .unwrap()
-                    .into()),
+                (true, true) => Err(Self::connection_error_from_connection(self.conn.as_ptr())),
+                (false, true) => Ok(ReplyOrError::Reply(Self::wrap_reply(reply as _))),
+                (true, false) => Ok(ReplyOrError::Error(GenericError::new(Self::wrap_error(
+                    error as _,
+                ))?)),
                 // At least one of these pointers must be NULL.
                 (false, false) => unreachable!(),
             }
@@ -406,21 +409,24 @@ impl RequestConnection for XCBConnection {
     }
 
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<CSlice>, ConnectionError> {
-        match self.wait_for_reply_or_error(sequence) {
-            Ok(buffer) => Ok(Some(buffer)),
-            Err(err) => match err {
-                ReplyError::ConnectionError(err) => Err(err),
-                ReplyError::X11Error(err) => {
-                    self.errors.append_error((sequence, err));
-                    Ok(None)
-                }
-            },
+        match self.wait_for_reply_or_raw_error(sequence)? {
+            ReplyOrError::Reply(reply) => Ok(Some(reply)),
+            ReplyOrError::Error(error) => {
+                self.errors.append_error((sequence, error));
+                Ok(None)
+            }
         }
     }
 
     #[cfg(unix)]
-    fn wait_for_reply_with_fds(&self, sequence: SequenceNumber) -> Result<BufWithFds, ReplyError> {
-        let buffer = self.wait_for_reply_or_error(sequence)?;
+    fn wait_for_reply_with_fds_raw(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<ReplyOrError<BufWithFds, Buffer>, ConnectionError> {
+        let buffer = match self.wait_for_reply_or_raw_error(sequence)? {
+            ReplyOrError::Reply(reply) => reply,
+            ReplyOrError::Error(error) => return Ok(ReplyOrError::Error(error)),
+        };
 
         // Get a pointer to the array of integers where libxcb saved the FD numbers.
         // libxcb saves the list of FDs after the data of the reply. Since the reply's
@@ -433,15 +439,18 @@ impl RequestConnection for XCBConnection {
         let vector = unsafe { std::slice::from_raw_parts(fd_ptr, usize::from(buffer[1])) };
         let vector = vector.iter().map(|&fd| RawFdContainer::new(fd)).collect();
 
-        Ok((buffer, vector))
+        Ok(ReplyOrError::Reply((buffer, vector)))
     }
 
     #[cfg(not(unix))]
-    fn wait_for_reply_with_fds(&self, _sequence: SequenceNumber) -> Result<BufWithFds, ReplyError> {
+    fn wait_for_reply_with_fds_raw(
+        &self,
+        sequence: SequenceNumber,
+    ) -> Result<ReplyOrError<BufWithFds, Buffer>, ConnectionError> {
         unimplemented!("FD passing is currently only implemented on Unix-like systems")
     }
 
-    fn check_for_error(
+    fn check_for_raw_error(
         &self,
         sequence: SequenceNumber,
     ) -> Result<Option<GenericError>, ConnectionError> {
@@ -463,10 +472,20 @@ impl RequestConnection for XCBConnection {
     fn prefetch_maximum_request_bytes(&self) {
         unsafe { raw_ffi::xcb_prefetch_maximum_request_length(self.conn.as_ptr()) };
     }
+
+    fn parse_error(&self, error: GenericError) -> Result<Error, ParseError> {
+        let ext_mgr = self.ext_mgr.lock().unwrap();
+        Error::parse(error, &*ext_mgr)
+    }
+
+    fn parse_event(&self, event: GenericEvent) -> Result<Event, ParseError> {
+        let ext_mgr = self.ext_mgr.lock().unwrap();
+        Event::parse(event, &*ext_mgr)
+    }
 }
 
 impl Connection for XCBConnection {
-    fn wait_for_event_with_sequence(&self) -> Result<EventAndSeqNumber, ConnectionError> {
+    fn wait_for_raw_event_with_sequence(&self) -> Result<RawEventAndSeqNumber, ConnectionError> {
         if let Some(error) = self.errors.get(self) {
             return Ok((error.0, error.1.into()));
         }
@@ -479,7 +498,9 @@ impl Connection for XCBConnection {
         }
     }
 
-    fn poll_for_event_with_sequence(&self) -> Result<Option<EventAndSeqNumber>, ConnectionError> {
+    fn poll_for_raw_event_with_sequence(
+        &self,
+    ) -> Result<Option<RawEventAndSeqNumber>, ConnectionError> {
         if let Some(error) = self.errors.get(self) {
             return Ok(Some((error.0, error.1.into())));
         }
@@ -495,16 +516,6 @@ impl Connection for XCBConnection {
             }
             Ok(Some(Self::wrap_event(event as _)?))
         }
-    }
-
-    fn parse_error(&self, error: GenericError) -> Result<Error, ParseError> {
-        let ext_mgr = self.ext_mgr.lock().unwrap();
-        Error::parse(error, &*ext_mgr)
-    }
-
-    fn parse_event(&self, event: GenericEvent) -> Result<Event, ParseError> {
-        let ext_mgr = self.ext_mgr.lock().unwrap();
-        Event::parse(event, &*ext_mgr)
     }
 
     fn flush(&self) -> Result<(), ConnectionError> {

@@ -783,7 +783,7 @@ fn example6() -> Result<(), Box<dyn Error>> {
     conn.flush()?;
 
     loop {
-        let event = conn.parse_event(conn.wait_for_event()?)?;
+        let event = conn.wait_for_event()?;
         if let Event::Expose(_) = event {
             // We draw the points
             conn.poly_point(CoordMode::Origin, win, foreground, &points)?;
@@ -956,7 +956,7 @@ fn example_change_event_mask<C: Connection>(conn: &C, win: Window) -> Result<(),
 #[allow(unused)]
 fn example_wait_for_event<C: Connection>(conn: &C) -> Result<(), Box<dyn Error>> {
     loop {
-        let event = conn.parse_event(conn.wait_for_event()?)?;
+        let event = conn.wait_for_event()?;
         match event {
             Event::Expose(_event) => {
                 // ....
@@ -1300,7 +1300,7 @@ fn example7() -> Result<(), Box<dyn Error>> {
     conn.flush()?;
 
     loop {
-        let event = conn.parse_event(conn.wait_for_event()?)?;
+        let event = conn.wait_for_event()?;
         match event {
             Event::Expose(event) => {
                 println!(
@@ -1529,7 +1529,7 @@ fn example8() -> Result<(), Box<dyn Error>> {
     conn.flush()?;
 
     loop {
-        let event = conn.parse_event(conn.wait_for_event()?)?;
+        let event = conn.wait_for_event()?;
         match event {
             Event::Expose(_) => {
                 let text = "Press ESC key to exit...";
@@ -2404,7 +2404,7 @@ fn example10() -> Result<(), Box<dyn Error>> {
     let mut is_hand = false;
 
     loop {
-        let event = conn.parse_event(conn.wait_for_event()?)?;
+        let event = conn.wait_for_event()?;
         match event {
             Event::Expose(_) => {
                 let text = "click here to change cursor";
