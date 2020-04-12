@@ -7947,6 +7947,7 @@ impl Serialize for SetMapAux {
         }
         if let Some(ref value) = self.vmods {
             value.serialize_into(bytes);
+            bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         }
         if let Some(ref value) = self.explicit {
             value.serialize_into(bytes);

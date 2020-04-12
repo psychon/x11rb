@@ -6080,7 +6080,12 @@ impl Serialize for DeviceStateData {
             DeviceStateData::Resolution(value) => value.serialize(),
             DeviceStateData::AbsCalib(value) => value.serialize().to_vec(),
             DeviceStateData::Core(value) => value.serialize().to_vec(),
-            DeviceStateData::Enable(value) => value.serialize().to_vec(),
+            DeviceStateData::Enable(value) => {
+                let mut result = Vec::new();
+                value.serialize_into(&mut result);
+                result.extend_from_slice(&[0; 3]);
+                result
+            }
             DeviceStateData::AbsArea(value) => value.serialize().to_vec(),
         }
     }
@@ -6089,7 +6094,10 @@ impl Serialize for DeviceStateData {
             DeviceStateData::Resolution(value) => value.serialize_into(bytes),
             DeviceStateData::AbsCalib(value) => value.serialize_into(bytes),
             DeviceStateData::Core(value) => value.serialize_into(bytes),
-            DeviceStateData::Enable(value) => value.serialize_into(bytes),
+            DeviceStateData::Enable(value) => {
+                value.serialize_into(bytes);
+                bytes.extend_from_slice(&[0; 3]);
+            }
             DeviceStateData::AbsArea(value) => value.serialize_into(bytes),
         }
     }
@@ -6806,8 +6814,18 @@ impl Serialize for DeviceCtlData {
         match self {
             DeviceCtlData::Resolution(value) => value.serialize(),
             DeviceCtlData::AbsCalib(value) => value.serialize().to_vec(),
-            DeviceCtlData::Status(value) => value.serialize().to_vec(),
-            DeviceCtlData::Enable(value) => value.serialize().to_vec(),
+            DeviceCtlData::Status(value) => {
+                let mut result = Vec::new();
+                value.serialize_into(&mut result);
+                result.extend_from_slice(&[0; 3]);
+                result
+            }
+            DeviceCtlData::Enable(value) => {
+                let mut result = Vec::new();
+                value.serialize_into(&mut result);
+                result.extend_from_slice(&[0; 3]);
+                result
+            }
             DeviceCtlData::AbsArea(value) => value.serialize().to_vec(),
         }
     }
@@ -6815,8 +6833,14 @@ impl Serialize for DeviceCtlData {
         match self {
             DeviceCtlData::Resolution(value) => value.serialize_into(bytes),
             DeviceCtlData::AbsCalib(value) => value.serialize_into(bytes),
-            DeviceCtlData::Status(value) => value.serialize_into(bytes),
-            DeviceCtlData::Enable(value) => value.serialize_into(bytes),
+            DeviceCtlData::Status(value) => {
+                value.serialize_into(bytes);
+                bytes.extend_from_slice(&[0; 3]);
+            }
+            DeviceCtlData::Enable(value) => {
+                value.serialize_into(bytes);
+                bytes.extend_from_slice(&[0; 3]);
+            }
             DeviceCtlData::AbsArea(value) => value.serialize_into(bytes),
         }
     }
@@ -7044,15 +7068,31 @@ impl Serialize for ChangeDevicePropertyAux {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
         match self {
-            ChangeDevicePropertyAux::Data8(value) => value.serialize(),
-            ChangeDevicePropertyAux::Data16(value) => value.serialize(),
+            ChangeDevicePropertyAux::Data8(value) => {
+                let mut result = Vec::new();
+                value.serialize_into(&mut result);
+                result.extend_from_slice(&[0; 3][..(4 - (result.len() % 4)) % 4]);
+                result
+            }
+            ChangeDevicePropertyAux::Data16(value) => {
+                let mut result = Vec::new();
+                value.serialize_into(&mut result);
+                result.extend_from_slice(&[0; 3][..(4 - (result.len() % 4)) % 4]);
+                result
+            }
             ChangeDevicePropertyAux::Data32(value) => value.serialize(),
         }
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         match self {
-            ChangeDevicePropertyAux::Data8(value) => value.serialize_into(bytes),
-            ChangeDevicePropertyAux::Data16(value) => value.serialize_into(bytes),
+            ChangeDevicePropertyAux::Data8(value) => {
+                value.serialize_into(bytes);
+                bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
+            }
+            ChangeDevicePropertyAux::Data16(value) => {
+                value.serialize_into(bytes);
+                bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
+            }
             ChangeDevicePropertyAux::Data32(value) => value.serialize_into(bytes),
         }
     }
@@ -7256,15 +7296,31 @@ impl Serialize for GetDevicePropertyItems {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
         match self {
-            GetDevicePropertyItems::Data8(value) => value.serialize(),
-            GetDevicePropertyItems::Data16(value) => value.serialize(),
+            GetDevicePropertyItems::Data8(value) => {
+                let mut result = Vec::new();
+                value.serialize_into(&mut result);
+                result.extend_from_slice(&[0; 3][..(4 - (result.len() % 4)) % 4]);
+                result
+            }
+            GetDevicePropertyItems::Data16(value) => {
+                let mut result = Vec::new();
+                value.serialize_into(&mut result);
+                result.extend_from_slice(&[0; 3][..(4 - (result.len() % 4)) % 4]);
+                result
+            }
             GetDevicePropertyItems::Data32(value) => value.serialize(),
         }
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         match self {
-            GetDevicePropertyItems::Data8(value) => value.serialize_into(bytes),
-            GetDevicePropertyItems::Data16(value) => value.serialize_into(bytes),
+            GetDevicePropertyItems::Data8(value) => {
+                value.serialize_into(bytes);
+                bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
+            }
+            GetDevicePropertyItems::Data16(value) => {
+                value.serialize_into(bytes);
+                bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
+            }
             GetDevicePropertyItems::Data32(value) => value.serialize_into(bytes),
         }
     }
@@ -8198,7 +8254,12 @@ impl Serialize for HierarchyChangeData {
             HierarchyChangeData::AddMaster(value) => value.serialize(),
             HierarchyChangeData::RemoveMaster(value) => value.serialize().to_vec(),
             HierarchyChangeData::AttachSlave(value) => value.serialize().to_vec(),
-            HierarchyChangeData::Deviceid(value) => value.serialize().to_vec(),
+            HierarchyChangeData::Deviceid(value) => {
+                let mut result = Vec::new();
+                value.serialize_into(&mut result);
+                result.extend_from_slice(&[0; 2]);
+                result
+            }
         }
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
@@ -8206,7 +8267,10 @@ impl Serialize for HierarchyChangeData {
             HierarchyChangeData::AddMaster(value) => value.serialize_into(bytes),
             HierarchyChangeData::RemoveMaster(value) => value.serialize_into(bytes),
             HierarchyChangeData::AttachSlave(value) => value.serialize_into(bytes),
-            HierarchyChangeData::Deviceid(value) => value.serialize_into(bytes),
+            HierarchyChangeData::Deviceid(value) => {
+                value.serialize_into(bytes);
+                bytes.extend_from_slice(&[0; 2]);
+            }
         }
     }
 }
@@ -10563,15 +10627,31 @@ impl Serialize for XIChangePropertyAux {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
         match self {
-            XIChangePropertyAux::Data8(value) => value.serialize(),
-            XIChangePropertyAux::Data16(value) => value.serialize(),
+            XIChangePropertyAux::Data8(value) => {
+                let mut result = Vec::new();
+                value.serialize_into(&mut result);
+                result.extend_from_slice(&[0; 3][..(4 - (result.len() % 4)) % 4]);
+                result
+            }
+            XIChangePropertyAux::Data16(value) => {
+                let mut result = Vec::new();
+                value.serialize_into(&mut result);
+                result.extend_from_slice(&[0; 3][..(4 - (result.len() % 4)) % 4]);
+                result
+            }
             XIChangePropertyAux::Data32(value) => value.serialize(),
         }
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         match self {
-            XIChangePropertyAux::Data8(value) => value.serialize_into(bytes),
-            XIChangePropertyAux::Data16(value) => value.serialize_into(bytes),
+            XIChangePropertyAux::Data8(value) => {
+                value.serialize_into(bytes);
+                bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
+            }
+            XIChangePropertyAux::Data16(value) => {
+                value.serialize_into(bytes);
+                bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
+            }
             XIChangePropertyAux::Data32(value) => value.serialize_into(bytes),
         }
     }
@@ -10775,15 +10855,31 @@ impl Serialize for XIGetPropertyItems {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Vec<u8> {
         match self {
-            XIGetPropertyItems::Data8(value) => value.serialize(),
-            XIGetPropertyItems::Data16(value) => value.serialize(),
+            XIGetPropertyItems::Data8(value) => {
+                let mut result = Vec::new();
+                value.serialize_into(&mut result);
+                result.extend_from_slice(&[0; 3][..(4 - (result.len() % 4)) % 4]);
+                result
+            }
+            XIGetPropertyItems::Data16(value) => {
+                let mut result = Vec::new();
+                value.serialize_into(&mut result);
+                result.extend_from_slice(&[0; 3][..(4 - (result.len() % 4)) % 4]);
+                result
+            }
             XIGetPropertyItems::Data32(value) => value.serialize(),
         }
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         match self {
-            XIGetPropertyItems::Data8(value) => value.serialize_into(bytes),
-            XIGetPropertyItems::Data16(value) => value.serialize_into(bytes),
+            XIGetPropertyItems::Data8(value) => {
+                value.serialize_into(bytes);
+                bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
+            }
+            XIGetPropertyItems::Data16(value) => {
+                value.serialize_into(bytes);
+                bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
+            }
             XIGetPropertyItems::Data32(value) => value.serialize_into(bytes),
         }
     }
