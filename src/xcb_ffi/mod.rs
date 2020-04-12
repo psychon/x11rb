@@ -306,7 +306,7 @@ impl XCBConnection {
         let mut length = 32;
         // XCB inserts a uint32_t with the sequence number after the first 32 bytes.
         let seqno = u32::from_ne_bytes([header[32], header[33], header[34], header[35]]);
-        let seqno = SequenceNumber::from(seqno); // FIXME: Figure out a way to get the high bytes
+        let seqno = self.reconstruct_full_sequence(seqno);
 
         // The first byte contains the event type, check for XGE events
         if (*event & 0x7f) == super::xproto::GE_GENERIC_EVENT {
@@ -322,6 +322,15 @@ impl XCBConnection {
             seqno,
             GenericEvent::new(CSlice::new(header.into_ptr(), length))?,
         ))
+    }
+
+    /// Reconstruct a full sequence number based on a partial value.
+    ///
+    /// The assumption for the algorithm here is that the given sequence number was received
+    /// recently. Thus, the maximum sequence number that was received so far is used to fill in the
+    /// missing bytes for the result.
+    fn reconstruct_full_sequence(&self, seqno: u32) -> SequenceNumber {
+        reconstruct_full_sequence_impl(self.maximum_sequence_received.load(Ordering::Relaxed), seqno)
     }
 }
 
@@ -579,6 +588,42 @@ fn atomic_u64_max(value: &AtomicU64, new: u64) {
     }
 }
 
+/// Reconstruct a partial sequence number based on a recently received 'full' sequence number.
+///
+/// The new sequence number may be before or after the `recent` sequence number.
+fn reconstruct_full_sequence_impl(recent: SequenceNumber, value: u32) -> SequenceNumber {
+    // Expand 'value' to a full sequence number. The high bits are copied from 'recent'.
+    let u32_max = SequenceNumber::from(u32::max_value());
+    let expanded_value = SequenceNumber::from(value) | (recent & !u32_max);
+
+    // The "step size" is the difference between two sequence numbers that cannot be told apart
+    // from their truncated value.
+    let step: SequenceNumber = SequenceNumber::from(1u8) << 32;
+
+    // There are three possible values for the returned sequence number:
+    // - The extended value
+    // - The extended value plus one step
+    // - The extended value minus one step
+    // Pick the value out of the possible values that is closest to `recent`.
+    let result = [
+        expanded_value,
+        expanded_value + step,
+        expanded_value.wrapping_sub(step),
+    ].iter()
+        .map(|x| *x)
+        .min_by_key(|&value| {
+            if value > recent {
+                value - recent
+            } else {
+                recent - value
+            }
+        })
+        .unwrap();
+    // Just because: Check that the result matches the passed-in value in the low bits
+    assert_eq!(result & SequenceNumber::from(u32::max_value()), SequenceNumber::from(value));
+    result
+}
+
 #[cfg(test)]
 mod test {
     use super::{ConnectionError, XCBConnection, atomic_u64_max};
@@ -615,5 +660,35 @@ mod test {
 
         atomic_u64_max(&value, 9);
         assert_eq!(value.load(Ordering::Relaxed), 9);
+    }
+
+    #[test]
+    fn reconstruct_full_sequence() {
+        use super::reconstruct_full_sequence_impl;
+        let max32 = u32::max_value();
+        let max32_: u64 = max32.into();
+        let max32_p1 = max32_ + 1;
+        let large_offset = max32_p1 * u64::from(u16::max_value());
+        for &(recent, value, expected) in &[
+            (0, 0, 0),
+            (0, 10, 10),
+            // This one is a special case: Technically, -1 is closer and should be reconstructed,
+            // but -1 does not fit into an unsigned integer.
+            (0, max32, max32_),
+            (max32_, 0, max32_p1),
+            (max32_, 10, max32_p1 + 10),
+            (max32_, max32, max32_),
+            (max32_p1, 0, max32_p1),
+            (max32_p1, 10, max32_p1 + 10),
+            (max32_p1, max32, max32_),
+            (large_offset | 0xdeadcafe, 0, large_offset + max32_p1),
+            (large_offset | 0xdeadcafe, max32, large_offset + max32_),
+            (0xabcd_1234_5678, 0xf000_0000, 0xabcc_f000_0000),
+            (0xabcd_8765_4321, 0xf000_0000, 0xabcd_f000_0000),
+        ] {
+            let actual = reconstruct_full_sequence_impl(recent, value);
+            assert_eq!(actual, expected, "reconstruct({:x}, {:x}) == {:x}, but was {:x}",
+                recent, value, expected, actual);
+        }
     }
 }
