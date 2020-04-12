@@ -8,7 +8,7 @@ use std::io::{Error as IOError, ErrorKind, IoSlice};
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, RawFd};
 use std::ptr::{null, null_mut};
-use std::sync::Mutex;
+use std::sync::{atomic::{AtomicU64, Ordering}, Mutex};
 
 use libc::c_void;
 
@@ -47,6 +47,7 @@ pub struct XCBConnection {
     setup: Setup,
     ext_mgr: Mutex<ExtensionManager>,
     errors: pending_errors::PendingErrors,
+    maximum_sequence_received: AtomicU64,
 }
 
 impl XCBConnection {
@@ -112,6 +113,7 @@ impl XCBConnection {
                     setup: Self::parse_setup(setup)?,
                     ext_mgr: Default::default(),
                     errors: Default::default(),
+                    maximum_sequence_received: AtomicU64::new(0),
                 };
                 Ok((conn, screen as usize))
             }
@@ -130,7 +132,7 @@ impl XCBConnection {
     pub unsafe fn from_raw_xcb_connection(
         ptr: *mut c_void,
         should_drop: bool,
-    ) -> Result<XCBConnection, ConnectionError> {
+    ) -> Result<XCBConnection, ConnectError> {
         let ptr = ptr as *mut raw_ffi::xcb_connection_t;
         let setup = raw_ffi::xcb_get_setup(ptr);
         Ok(XCBConnection {
@@ -138,6 +140,7 @@ impl XCBConnection {
             setup: Self::parse_setup(setup)?,
             ext_mgr: Default::default(),
             errors: Default::default(),
+            maximum_sequence_received: AtomicU64::new(0),
         })
     }
 
@@ -269,14 +272,17 @@ impl XCBConnection {
             assert_eq!(found, 1);
             match (reply.is_null(), error.is_null()) {
                 (true, true) => Ok(None),
-                (true, false) => Ok(Some(self.wrap_error(error as _))),
-                (false, true) => Ok(Some(self.wrap_reply(reply as _))),
+                (true, false) => Ok(Some(self.wrap_error(error as _, sequence))),
+                (false, true) => Ok(Some(self.wrap_reply(reply as _, sequence))),
                 (false, false) => unreachable!(),
             }
         }
     }
 
-    unsafe fn wrap_reply(&self, reply: *const u8) -> CSlice {
+    unsafe fn wrap_reply(&self, reply: *const u8, sequence: SequenceNumber) -> CSlice {
+        // Update our "max sequence number received" field
+        atomic_u64_max(&self.maximum_sequence_received, sequence);
+
         let header = CSlice::new(reply, 32);
 
         let length_field = u32::from_ne_bytes(header[4..8].try_into().unwrap());
@@ -288,7 +294,10 @@ impl XCBConnection {
         CSlice::new(header.into_ptr(), length)
     }
 
-    unsafe fn wrap_error(&self, error: *const u8) -> CSlice {
+    unsafe fn wrap_error(&self, error: *const u8, sequence: SequenceNumber) -> CSlice {
+        // Update our "max sequence number received" field
+        atomic_u64_max(&self.maximum_sequence_received, sequence);
+
         CSlice::new(error, 32)
     }
 
@@ -398,9 +407,10 @@ impl RequestConnection for XCBConnection {
             let reply = raw_ffi::xcb_wait_for_reply64(self.conn.as_ptr(), sequence, &mut error);
             match (reply.is_null(), error.is_null()) {
                 (true, true) => Err(Self::connection_error_from_connection(self.conn.as_ptr())),
-                (false, true) => Ok(ReplyOrError::Reply(self.wrap_reply(reply as _))),
+                (false, true) => Ok(ReplyOrError::Reply(self.wrap_reply(reply as _, sequence))),
                 (true, false) => Ok(ReplyOrError::Error(GenericError::new(self.wrap_error(
                     error as _,
+                    sequence,
                 ))?)),
                 // At least one of these pointers must be NULL.
                 (false, false) => unreachable!(),
@@ -461,7 +471,7 @@ impl RequestConnection for XCBConnection {
         if error.is_null() {
             Ok(None)
         } else {
-            unsafe { Ok(Some(GenericError::new(self.wrap_error(error as _))?)) }
+            unsafe { Ok(Some(GenericError::new(self.wrap_error(error as _, sequence))?)) }
         }
     }
 
@@ -554,9 +564,24 @@ impl AsRawFd for XCBConnection {
     }
 }
 
+/// Atomically sets `value` to the maximum of `value` and `new`.
+fn atomic_u64_max(value: &AtomicU64, new: u64) {
+    // If only AtomicU64::fetch_max were stable...
+    let mut old = value.load(Ordering::Relaxed);
+    loop {
+        if old >= new {
+            return;
+        }
+        match value.compare_exchange_weak(old, new, Ordering::Relaxed, Ordering::Relaxed) {
+            Ok(_) => return,
+            Err(val) => old = val,
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
-    use super::{ConnectionError, XCBConnection};
+    use super::{ConnectionError, XCBConnection, atomic_u64_max};
     use std::ffi::CString;
 
     #[test]
@@ -569,5 +594,26 @@ mod test {
         assert_eq!(screen, 0);
 
         Ok(())
+    }
+
+    #[test]
+    fn u64_max() {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        let value = AtomicU64::new(0);
+
+        atomic_u64_max(&value, 3);
+        assert_eq!(value.load(Ordering::Relaxed), 3);
+
+        atomic_u64_max(&value, 7);
+        assert_eq!(value.load(Ordering::Relaxed), 7);
+
+        atomic_u64_max(&value, 5);
+        assert_eq!(value.load(Ordering::Relaxed), 7);
+
+        atomic_u64_max(&value, 7);
+        assert_eq!(value.load(Ordering::Relaxed), 7);
+
+        atomic_u64_max(&value, 9);
+        assert_eq!(value.load(Ordering::Relaxed), 9);
     }
 }
