@@ -269,14 +269,14 @@ impl XCBConnection {
             assert_eq!(found, 1);
             match (reply.is_null(), error.is_null()) {
                 (true, true) => Ok(None),
-                (true, false) => Ok(Some(Self::wrap_error(error as _))),
-                (false, true) => Ok(Some(Self::wrap_reply(reply as _))),
+                (true, false) => Ok(Some(self.wrap_error(error as _))),
+                (false, true) => Ok(Some(self.wrap_reply(reply as _))),
                 (false, false) => unreachable!(),
             }
         }
     }
 
-    unsafe fn wrap_reply(reply: *const u8) -> CSlice {
+    unsafe fn wrap_reply(&self, reply: *const u8) -> CSlice {
         let header = CSlice::new(reply, 32);
 
         let length_field = u32::from_ne_bytes(header[4..8].try_into().unwrap());
@@ -288,11 +288,11 @@ impl XCBConnection {
         CSlice::new(header.into_ptr(), length)
     }
 
-    unsafe fn wrap_error(error: *const u8) -> CSlice {
+    unsafe fn wrap_error(&self, error: *const u8) -> CSlice {
         CSlice::new(error, 32)
     }
 
-    unsafe fn wrap_event(event: *mut u8) -> Result<(SequenceNumber, GenericEvent), ParseError> {
+    unsafe fn wrap_event(&self, event: *mut u8) -> Result<(SequenceNumber, GenericEvent), ParseError> {
         let header = CSlice::new(event, 36);
         let mut length = 32;
         // XCB inserts a uint32_t with the sequence number after the first 32 bytes.
@@ -398,8 +398,8 @@ impl RequestConnection for XCBConnection {
             let reply = raw_ffi::xcb_wait_for_reply64(self.conn.as_ptr(), sequence, &mut error);
             match (reply.is_null(), error.is_null()) {
                 (true, true) => Err(Self::connection_error_from_connection(self.conn.as_ptr())),
-                (false, true) => Ok(ReplyOrError::Reply(Self::wrap_reply(reply as _))),
-                (true, false) => Ok(ReplyOrError::Error(GenericError::new(Self::wrap_error(
+                (false, true) => Ok(ReplyOrError::Reply(self.wrap_reply(reply as _))),
+                (true, false) => Ok(ReplyOrError::Error(GenericError::new(self.wrap_error(
                     error as _,
                 ))?)),
                 // At least one of these pointers must be NULL.
@@ -461,7 +461,7 @@ impl RequestConnection for XCBConnection {
         if error.is_null() {
             Ok(None)
         } else {
-            unsafe { Ok(Some(GenericError::new(Self::wrap_error(error as _))?)) }
+            unsafe { Ok(Some(GenericError::new(self.wrap_error(error as _))?)) }
         }
     }
 
@@ -494,7 +494,7 @@ impl Connection for XCBConnection {
             if event.is_null() {
                 return Err(Self::connection_error_from_connection(self.conn.as_ptr()));
             }
-            Ok(Self::wrap_event(event as _)?)
+            Ok(self.wrap_event(event as _)?)
         }
     }
 
@@ -514,7 +514,7 @@ impl Connection for XCBConnection {
                     return Err(Self::connection_error_from_c_error(err));
                 }
             }
-            Ok(Some(Self::wrap_event(event as _)?))
+            Ok(Some(self.wrap_event(event as _)?))
         }
     }
 
