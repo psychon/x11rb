@@ -199,6 +199,23 @@ def find_field(fields, name):
     return result
 
 
+def serialise_align_pad(out, field, target_variable):
+    assert field.type.is_pad
+    if field.type.fixed_size():
+        # Fixed size padding
+        assert field.type.align == 1
+        assert field.type.size == 1
+        out("%s.extend_from_slice(&[0; %s]);", target_variable, field.type.nmemb)
+    else:
+        # Align to multiple of 'align'
+        assert field.type.size == 1
+        assert field.type.nmemb == 1
+        align = field.type.align
+        assert align > 0
+        out("%s.extend_from_slice(&[0; %d][..(%d - (%s.len() %% %d)) %% %d]);",
+            target_variable, align - 1, align, target_variable, align, align)
+
+
 class Module(object):
     def __init__(self, outer_module):
         self.out = Output()
@@ -485,7 +502,7 @@ class Module(object):
                 for field in complex.fields:
                     assert field.type.fixed_size()
                     if field.type.is_pad:
-                        self.out("bytes.extend_from_slice(&[0; %s]);", field.type.nmemb)
+                        serialise_align_pad(self.out, field, "bytes")
                     else:
                         field_name = self._to_rust_variable(field.field_name)
                         if not hasattr(field, "has_enum_type"):
@@ -528,18 +545,7 @@ class Module(object):
                 # Now serialize each field
                 for field in complex.fields:
                     if field.type.is_pad:
-                        if not complex.fixed_size() and field.type.align != 1:
-                            # Align the output buffer to a multiple of field.type.align
-                            assert field.type.size == 1
-                            assert field.type.nmemb == 1
-                            align = field.type.align
-                            # As done in request.py/_emit_padding_for_alignment
-                            self.out("bytes.extend_from_slice(&[0; %d][..(%d - (bytes.len() %% %d)) %% %d]);",
-                                     align - 1, align, align, align)
-                        else:
-                            assert field.type.align == 1
-                            assert field.type.size == 1
-                            self.out("bytes.extend_from_slice(&[0; %s]);", field.type.nmemb)
+                        serialise_align_pad(self.out, field, "bytes")
                     else:
                         field_name = self._to_rust_variable(field.field_name)
                         if hasattr(field, "is_length_field_for"):
