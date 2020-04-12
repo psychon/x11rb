@@ -104,6 +104,23 @@ def _errors(out, modules):
                 out("_ => Ok(Self::Unknown(error))")
             out("}")
         out("}")
+        out("")
+
+        out("/// Get the sequence number contained in this X11 error")
+        out("pub fn wire_sequence_number(&self) -> u16 {")
+        with Indent(out):
+            out("match self {")
+            out.indent("Error::Unknown(value) => value.raw_sequence_number()" +
+                       ".expect(\"Errors should always have a sequence number\"),")
+            for module, mod_errors in zip(modules, errors):
+                variant = _get_module_name_prefix(module)
+                for name, error in mod_errors:
+                    err_name = name[-1]
+                    if module.has_feature:
+                        out.indent("#[cfg(feature = \"%s\")]", module.namespace.header)
+                    out.indent("Error::%s%s(value) => value.sequence,", variant, err_name)
+            out("}")
+        out("}")
     out("}")
 
 
@@ -212,6 +229,27 @@ def _events(out, modules):
                         out("}")
                     out("}")
                 out("_ => Ok(Self::Unknown(event))")
+            out("}")
+        out("}")
+        out("")
+
+        out("/// Get the sequence number contained in this X11 event")
+        out("pub fn wire_sequence_number(&self) -> Option<u16> {")
+        with Indent(out):
+            out("match self {")
+            out.indent("Event::Unknown(value) => value.raw_sequence_number(),")
+            out.indent("Event::Error(value) => Some(value.wire_sequence_number()),")
+            for module, mod_events in zip(modules, events):
+                variant = _get_module_name_prefix(module)
+                for name, event in mod_events:
+                    err_name = name[-1]
+                    if module.has_feature:
+                        out.indent("#[cfg(feature = \"%s\")]", module.namespace.header)
+                    has_sequence = any(field.field_name == "sequence" for field in event.fields)
+                    if has_sequence:
+                        out.indent("Event::%s%s(value) => Some(value.sequence),", variant, err_name)
+                    else:
+                        out.indent("Event::%s%s(_) => None,", variant, err_name)
             out("}")
         out("}")
     out("}")
