@@ -574,6 +574,125 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
             Error::XvBadPort(value) => value.error_code,
         }
     }
+    /// Get the response type of this X11 error
+    ///
+    /// This is not `pub` because it should always be `0` for errors.
+    fn raw_response_type(&self) -> u8 {
+        match self {
+            Error::Unknown(value) => value.response_type(),
+            #[cfg(feature = "damage")]
+            Error::DamageBadDamage(value) => value.response_type,
+            #[cfg(feature = "glx")]
+            Error::GlxBadContext(value) => value.response_type,
+            #[cfg(feature = "glx")]
+            Error::GlxBadContextState(value) => value.response_type,
+            #[cfg(feature = "glx")]
+            Error::GlxBadContextTag(value) => value.response_type,
+            #[cfg(feature = "glx")]
+            Error::GlxBadCurrentDrawable(value) => value.response_type,
+            #[cfg(feature = "glx")]
+            Error::GlxBadCurrentWindow(value) => value.response_type,
+            #[cfg(feature = "glx")]
+            Error::GlxBadDrawable(value) => value.response_type,
+            #[cfg(feature = "glx")]
+            Error::GlxBadFBConfig(value) => value.response_type,
+            #[cfg(feature = "glx")]
+            Error::GlxBadLargeRequest(value) => value.response_type,
+            #[cfg(feature = "glx")]
+            Error::GlxBadPbuffer(value) => value.response_type,
+            #[cfg(feature = "glx")]
+            Error::GlxBadPixmap(value) => value.response_type,
+            #[cfg(feature = "glx")]
+            Error::GlxBadRenderRequest(value) => value.response_type,
+            #[cfg(feature = "glx")]
+            Error::GlxBadWindow(value) => value.response_type,
+            #[cfg(feature = "glx")]
+            Error::GlxGLXBadProfileARB(value) => value.response_type,
+            #[cfg(feature = "glx")]
+            Error::GlxUnsupportedPrivateRequest(value) => value.response_type,
+            #[cfg(feature = "randr")]
+            Error::RandrBadCrtc(value) => value.response_type,
+            #[cfg(feature = "randr")]
+            Error::RandrBadMode(value) => value.response_type,
+            #[cfg(feature = "randr")]
+            Error::RandrBadOutput(value) => value.response_type,
+            #[cfg(feature = "randr")]
+            Error::RandrBadProvider(value) => value.response_type,
+            #[cfg(feature = "record")]
+            Error::RecordBadContext(value) => value.response_type,
+            #[cfg(feature = "render")]
+            Error::RenderGlyph(value) => value.response_type,
+            #[cfg(feature = "render")]
+            Error::RenderGlyphSet(value) => value.response_type,
+            #[cfg(feature = "render")]
+            Error::RenderPictFormat(value) => value.response_type,
+            #[cfg(feature = "render")]
+            Error::RenderPictOp(value) => value.response_type,
+            #[cfg(feature = "render")]
+            Error::RenderPicture(value) => value.response_type,
+            #[cfg(feature = "shm")]
+            Error::ShmBadSeg(value) => value.response_type,
+            #[cfg(feature = "sync")]
+            Error::SyncAlarm(value) => value.response_type,
+            #[cfg(feature = "sync")]
+            Error::SyncCounter(value) => value.response_type,
+            #[cfg(feature = "xf86vidmode")]
+            Error::Xf86vidmodeBadClock(value) => value.response_type,
+            #[cfg(feature = "xf86vidmode")]
+            Error::Xf86vidmodeBadHTimings(value) => value.response_type,
+            #[cfg(feature = "xf86vidmode")]
+            Error::Xf86vidmodeBadVTimings(value) => value.response_type,
+            #[cfg(feature = "xf86vidmode")]
+            Error::Xf86vidmodeClientNotLocal(value) => value.response_type,
+            #[cfg(feature = "xf86vidmode")]
+            Error::Xf86vidmodeExtensionDisabled(value) => value.response_type,
+            #[cfg(feature = "xf86vidmode")]
+            Error::Xf86vidmodeModeUnsuitable(value) => value.response_type,
+            #[cfg(feature = "xf86vidmode")]
+            Error::Xf86vidmodeZoomLocked(value) => value.response_type,
+            #[cfg(feature = "xfixes")]
+            Error::XfixesBadRegion(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Error::XinputClass(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Error::XinputDevice(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Error::XinputDeviceBusy(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Error::XinputEvent(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Error::XinputMode(value) => value.response_type,
+            #[cfg(feature = "xkb")]
+            Error::XkbKeyboard(value) => value.response_type,
+            #[cfg(feature = "xprint")]
+            Error::XprintBadContext(value) => value.response_type,
+            #[cfg(feature = "xprint")]
+            Error::XprintBadSequence(value) => value.response_type,
+            Error::Access(value) => value.response_type,
+            Error::Alloc(value) => value.response_type,
+            Error::Atom(value) => value.response_type,
+            Error::Colormap(value) => value.response_type,
+            Error::Cursor(value) => value.response_type,
+            Error::Drawable(value) => value.response_type,
+            Error::Font(value) => value.response_type,
+            Error::GContext(value) => value.response_type,
+            Error::IDChoice(value) => value.response_type,
+            Error::Implementation(value) => value.response_type,
+            Error::Length(value) => value.response_type,
+            Error::Match(value) => value.response_type,
+            Error::Name(value) => value.response_type,
+            Error::Pixmap(value) => value.response_type,
+            Error::Request(value) => value.response_type,
+            Error::Value(value) => value.response_type,
+            Error::Window(value) => value.response_type,
+            #[cfg(feature = "xv")]
+            Error::XvBadControl(value) => value.response_type,
+            #[cfg(feature = "xv")]
+            Error::XvBadEncoding(value) => value.response_type,
+            #[cfg(feature = "xv")]
+            Error::XvBadPort(value) => value.response_type,
+        }
+    }
 }
 /// Enumeration of all possible X11 events.
 #[derive(Debug, Clone)]
@@ -1212,5 +1331,230 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
             #[cfg(feature = "xv")]
             Event::XvVideoNotify(value) => Some(value.sequence),
         }
+    }
+
+    /// Get the raw response type of this X11 event
+    ///
+    /// Response types have seven bits in X11. The eight bit indicates whether
+    /// the packet was generated through the `SendEvent` request. This function
+    /// returns all eight bits.
+    ///
+    /// See also the `response_type()`, `server_generated()` and `sent_event()` methods.
+    pub fn raw_response_type(&self) -> u8 {
+        match self {
+            Event::Unknown(value) => value.raw_response_type(),
+            Event::Error(value) => value.raw_response_type(),
+            #[cfg(feature = "damage")]
+            Event::DamageNotify(value) => value.response_type,
+            #[cfg(feature = "dri2")]
+            Event::Dri2BufferSwapComplete(value) => value.response_type,
+            #[cfg(feature = "dri2")]
+            Event::Dri2InvalidateBuffers(value) => value.response_type,
+            #[cfg(feature = "glx")]
+            Event::GlxBufferSwapComplete(value) => value.response_type,
+            #[cfg(feature = "glx")]
+            Event::GlxPbufferClobber(value) => value.response_type,
+            #[cfg(feature = "present")]
+            Event::PresentCompleteNotify(value) => value.response_type,
+            #[cfg(feature = "present")]
+            Event::PresentConfigureNotify(value) => value.response_type,
+            #[cfg(feature = "present")]
+            Event::PresentGeneric(value) => value.response_type,
+            #[cfg(feature = "present")]
+            Event::PresentIdleNotify(value) => value.response_type,
+            #[cfg(feature = "present")]
+            Event::PresentRedirectNotify(value) => value.response_type,
+            #[cfg(feature = "randr")]
+            Event::RandrNotify(value) => value.response_type,
+            #[cfg(feature = "randr")]
+            Event::RandrScreenChangeNotify(value) => value.response_type,
+            #[cfg(feature = "screensaver")]
+            Event::ScreensaverNotify(value) => value.response_type,
+            #[cfg(feature = "shape")]
+            Event::ShapeNotify(value) => value.response_type,
+            #[cfg(feature = "shm")]
+            Event::ShmCompletion(value) => value.response_type,
+            #[cfg(feature = "sync")]
+            Event::SyncAlarmNotify(value) => value.response_type,
+            #[cfg(feature = "sync")]
+            Event::SyncCounterNotify(value) => value.response_type,
+            #[cfg(feature = "xfixes")]
+            Event::XfixesCursorNotify(value) => value.response_type,
+            #[cfg(feature = "xfixes")]
+            Event::XfixesSelectionNotify(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputBarrierHit(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputBarrierLeave(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputButtonPress(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputButtonRelease(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputChangeDeviceNotify(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputDeviceButtonPress(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputDeviceButtonRelease(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputDeviceButtonStateNotify(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputDeviceChanged(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputDeviceFocusIn(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputDeviceFocusOut(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputDeviceKeyPress(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputDeviceKeyRelease(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputDeviceKeyStateNotify(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputDeviceMappingNotify(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputDeviceMotionNotify(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputDevicePresenceNotify(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputDevicePropertyNotify(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputDeviceStateNotify(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputDeviceValuator(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputEnter(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputFocusIn(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputFocusOut(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputHierarchy(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputKeyPress(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputKeyRelease(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputLeave(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputMotion(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputProperty(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputProximityIn(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputProximityOut(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputRawButtonPress(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputRawButtonRelease(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputRawKeyPress(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputRawKeyRelease(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputRawMotion(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputRawTouchBegin(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputRawTouchEnd(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputRawTouchUpdate(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputTouchBegin(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputTouchEnd(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputTouchOwnership(value) => value.response_type,
+            #[cfg(feature = "xinput")]
+            Event::XinputTouchUpdate(value) => value.response_type,
+            #[cfg(feature = "xkb")]
+            Event::XkbAccessXNotify(value) => value.response_type,
+            #[cfg(feature = "xkb")]
+            Event::XkbActionMessage(value) => value.response_type,
+            #[cfg(feature = "xkb")]
+            Event::XkbBellNotify(value) => value.response_type,
+            #[cfg(feature = "xkb")]
+            Event::XkbCompatMapNotify(value) => value.response_type,
+            #[cfg(feature = "xkb")]
+            Event::XkbControlsNotify(value) => value.response_type,
+            #[cfg(feature = "xkb")]
+            Event::XkbExtensionDeviceNotify(value) => value.response_type,
+            #[cfg(feature = "xkb")]
+            Event::XkbIndicatorMapNotify(value) => value.response_type,
+            #[cfg(feature = "xkb")]
+            Event::XkbIndicatorStateNotify(value) => value.response_type,
+            #[cfg(feature = "xkb")]
+            Event::XkbMapNotify(value) => value.response_type,
+            #[cfg(feature = "xkb")]
+            Event::XkbNamesNotify(value) => value.response_type,
+            #[cfg(feature = "xkb")]
+            Event::XkbNewKeyboardNotify(value) => value.response_type,
+            #[cfg(feature = "xkb")]
+            Event::XkbStateNotify(value) => value.response_type,
+            #[cfg(feature = "xprint")]
+            Event::XprintAttributNotify(value) => value.response_type,
+            #[cfg(feature = "xprint")]
+            Event::XprintNotify(value) => value.response_type,
+            Event::ButtonPress(value) => value.response_type,
+            Event::ButtonRelease(value) => value.response_type,
+            Event::CirculateNotify(value) => value.response_type,
+            Event::CirculateRequest(value) => value.response_type,
+            Event::ClientMessage(value) => value.response_type,
+            Event::ColormapNotify(value) => value.response_type,
+            Event::ConfigureNotify(value) => value.response_type,
+            Event::ConfigureRequest(value) => value.response_type,
+            Event::CreateNotify(value) => value.response_type,
+            Event::DestroyNotify(value) => value.response_type,
+            Event::EnterNotify(value) => value.response_type,
+            Event::Expose(value) => value.response_type,
+            Event::FocusIn(value) => value.response_type,
+            Event::FocusOut(value) => value.response_type,
+            Event::GeGeneric(value) => value.response_type,
+            Event::GraphicsExposure(value) => value.response_type,
+            Event::GravityNotify(value) => value.response_type,
+            Event::KeyPress(value) => value.response_type,
+            Event::KeyRelease(value) => value.response_type,
+            Event::KeymapNotify(value) => value.response_type,
+            Event::LeaveNotify(value) => value.response_type,
+            Event::MapNotify(value) => value.response_type,
+            Event::MapRequest(value) => value.response_type,
+            Event::MappingNotify(value) => value.response_type,
+            Event::MotionNotify(value) => value.response_type,
+            Event::NoExposure(value) => value.response_type,
+            Event::PropertyNotify(value) => value.response_type,
+            Event::ReparentNotify(value) => value.response_type,
+            Event::ResizeRequest(value) => value.response_type,
+            Event::SelectionClear(value) => value.response_type,
+            Event::SelectionNotify(value) => value.response_type,
+            Event::SelectionRequest(value) => value.response_type,
+            Event::UnmapNotify(value) => value.response_type,
+            Event::VisibilityNotify(value) => value.response_type,
+            #[cfg(feature = "xv")]
+            Event::XvPortNotify(value) => value.response_type,
+            #[cfg(feature = "xv")]
+            Event::XvVideoNotify(value) => value.response_type,
+        }
+    }
+
+    /// Get the response type of this X11 event
+    pub fn response_type(&self) -> u8 {
+        self.raw_response_type() & 0x7f
+    }
+
+    /// Was this event generated by the X11 server?
+    ///
+    /// If this function returns true, then this event comes from the X11 server.
+    /// Otherwise, it was sent from another client via the `SendEvent` request.
+    pub fn server_generated(&self) -> bool {
+        self.raw_response_type() & 0x80 == 0
+    }
+
+    /// Was this event generated by another X11 client?
+    ///
+    /// If this function returns true, then this event comes from another client via
+    /// the `SendEvent` request. Otherwise, it was generated by the X11 server.
+    pub fn sent_event(&self) -> bool {
+        self.raw_response_type() & 0x80 != 0
     }
 }
