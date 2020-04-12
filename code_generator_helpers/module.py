@@ -1412,10 +1412,15 @@ class Module(object):
                             self.out("value.serialize_into(bytes);")
                         self.out("}")
                     else:
-                        field = case.only_field
-                        self.out("if let Some(ref value) = self.%s {", self._aux_field_name(field))
+                        self.out("if let Some(ref value) = self.%s {",
+                                 self._aux_field_name(case.only_field))
                         with Indent(self.out):
-                            self.out("value.serialize_into(bytes);")
+                            for field in case.type.fields:
+                                if field.visible:
+                                    assert field == case.only_field, field
+                                    self.out("value.serialize_into(bytes);")
+                                else:
+                                    serialise_align_pad(self.out, field, "bytes")
                         self.out("}")
             self.out("}")
         self.out("}")
