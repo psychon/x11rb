@@ -195,8 +195,10 @@ pub trait Serialize {
     /// Serialize this value into X11 raw bytes.
     fn serialize(&self) -> Self::Bytes;
 
-    /// Serialize this value into X11 raw bytes,
-    /// appending the result into `bytes`.
+    /// Serialize this value into X11 raw bytes, appending the result into `bytes`.
+    ///
+    /// When calling this method, the given vector must satisfy `assert_eq!(bytes.len() % 4, 0);`.
+    /// In words: Its length must be a multiple of four.
     fn serialize_into(&self, bytes: &mut Vec<u8>);
 }
 
