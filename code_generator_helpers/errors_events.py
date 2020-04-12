@@ -121,6 +121,22 @@ def _errors(out, modules):
                     out.indent("Error::%s%s(value) => value.sequence,", variant, err_name)
             out("}")
         out("}")
+        out("")
+
+        out("/// Get the error code of this X11 error")
+        out("pub fn error_code(&self) -> u8 {")
+        with Indent(out):
+            out("match self {")
+            out.indent("Error::Unknown(value) => value.error_code(),")
+            for module, mod_errors in zip(modules, errors):
+                variant = _get_module_name_prefix(module)
+                for name, error in mod_errors:
+                    err_name = name[-1]
+                    if module.has_feature:
+                        out.indent("#[cfg(feature = \"%s\")]", module.namespace.header)
+                    out.indent("Error::%s%s(value) => value.error_code,", variant, err_name)
+            out("}")
+        out("}")
     out("}")
 
 

@@ -456,6 +456,124 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
             Error::XvBadPort(value) => value.sequence,
         }
     }
+
+    /// Get the error code of this X11 error
+    pub fn error_code(&self) -> u8 {
+        match self {
+            Error::Unknown(value) => value.error_code(),
+            #[cfg(feature = "damage")]
+            Error::DamageBadDamage(value) => value.error_code,
+            #[cfg(feature = "glx")]
+            Error::GlxBadContext(value) => value.error_code,
+            #[cfg(feature = "glx")]
+            Error::GlxBadContextState(value) => value.error_code,
+            #[cfg(feature = "glx")]
+            Error::GlxBadContextTag(value) => value.error_code,
+            #[cfg(feature = "glx")]
+            Error::GlxBadCurrentDrawable(value) => value.error_code,
+            #[cfg(feature = "glx")]
+            Error::GlxBadCurrentWindow(value) => value.error_code,
+            #[cfg(feature = "glx")]
+            Error::GlxBadDrawable(value) => value.error_code,
+            #[cfg(feature = "glx")]
+            Error::GlxBadFBConfig(value) => value.error_code,
+            #[cfg(feature = "glx")]
+            Error::GlxBadLargeRequest(value) => value.error_code,
+            #[cfg(feature = "glx")]
+            Error::GlxBadPbuffer(value) => value.error_code,
+            #[cfg(feature = "glx")]
+            Error::GlxBadPixmap(value) => value.error_code,
+            #[cfg(feature = "glx")]
+            Error::GlxBadRenderRequest(value) => value.error_code,
+            #[cfg(feature = "glx")]
+            Error::GlxBadWindow(value) => value.error_code,
+            #[cfg(feature = "glx")]
+            Error::GlxGLXBadProfileARB(value) => value.error_code,
+            #[cfg(feature = "glx")]
+            Error::GlxUnsupportedPrivateRequest(value) => value.error_code,
+            #[cfg(feature = "randr")]
+            Error::RandrBadCrtc(value) => value.error_code,
+            #[cfg(feature = "randr")]
+            Error::RandrBadMode(value) => value.error_code,
+            #[cfg(feature = "randr")]
+            Error::RandrBadOutput(value) => value.error_code,
+            #[cfg(feature = "randr")]
+            Error::RandrBadProvider(value) => value.error_code,
+            #[cfg(feature = "record")]
+            Error::RecordBadContext(value) => value.error_code,
+            #[cfg(feature = "render")]
+            Error::RenderGlyph(value) => value.error_code,
+            #[cfg(feature = "render")]
+            Error::RenderGlyphSet(value) => value.error_code,
+            #[cfg(feature = "render")]
+            Error::RenderPictFormat(value) => value.error_code,
+            #[cfg(feature = "render")]
+            Error::RenderPictOp(value) => value.error_code,
+            #[cfg(feature = "render")]
+            Error::RenderPicture(value) => value.error_code,
+            #[cfg(feature = "shm")]
+            Error::ShmBadSeg(value) => value.error_code,
+            #[cfg(feature = "sync")]
+            Error::SyncAlarm(value) => value.error_code,
+            #[cfg(feature = "sync")]
+            Error::SyncCounter(value) => value.error_code,
+            #[cfg(feature = "xf86vidmode")]
+            Error::Xf86vidmodeBadClock(value) => value.error_code,
+            #[cfg(feature = "xf86vidmode")]
+            Error::Xf86vidmodeBadHTimings(value) => value.error_code,
+            #[cfg(feature = "xf86vidmode")]
+            Error::Xf86vidmodeBadVTimings(value) => value.error_code,
+            #[cfg(feature = "xf86vidmode")]
+            Error::Xf86vidmodeClientNotLocal(value) => value.error_code,
+            #[cfg(feature = "xf86vidmode")]
+            Error::Xf86vidmodeExtensionDisabled(value) => value.error_code,
+            #[cfg(feature = "xf86vidmode")]
+            Error::Xf86vidmodeModeUnsuitable(value) => value.error_code,
+            #[cfg(feature = "xf86vidmode")]
+            Error::Xf86vidmodeZoomLocked(value) => value.error_code,
+            #[cfg(feature = "xfixes")]
+            Error::XfixesBadRegion(value) => value.error_code,
+            #[cfg(feature = "xinput")]
+            Error::XinputClass(value) => value.error_code,
+            #[cfg(feature = "xinput")]
+            Error::XinputDevice(value) => value.error_code,
+            #[cfg(feature = "xinput")]
+            Error::XinputDeviceBusy(value) => value.error_code,
+            #[cfg(feature = "xinput")]
+            Error::XinputEvent(value) => value.error_code,
+            #[cfg(feature = "xinput")]
+            Error::XinputMode(value) => value.error_code,
+            #[cfg(feature = "xkb")]
+            Error::XkbKeyboard(value) => value.error_code,
+            #[cfg(feature = "xprint")]
+            Error::XprintBadContext(value) => value.error_code,
+            #[cfg(feature = "xprint")]
+            Error::XprintBadSequence(value) => value.error_code,
+            Error::Access(value) => value.error_code,
+            Error::Alloc(value) => value.error_code,
+            Error::Atom(value) => value.error_code,
+            Error::Colormap(value) => value.error_code,
+            Error::Cursor(value) => value.error_code,
+            Error::Drawable(value) => value.error_code,
+            Error::Font(value) => value.error_code,
+            Error::GContext(value) => value.error_code,
+            Error::IDChoice(value) => value.error_code,
+            Error::Implementation(value) => value.error_code,
+            Error::Length(value) => value.error_code,
+            Error::Match(value) => value.error_code,
+            Error::Name(value) => value.error_code,
+            Error::Pixmap(value) => value.error_code,
+            Error::Request(value) => value.error_code,
+            Error::Value(value) => value.error_code,
+            Error::Window(value) => value.error_code,
+            #[cfg(feature = "xv")]
+            Error::XvBadControl(value) => value.error_code,
+            #[cfg(feature = "xv")]
+            Error::XvBadEncoding(value) => value.error_code,
+            #[cfg(feature = "xv")]
+            Error::XvBadPort(value) => value.error_code,
+        }
+    }
 }
 /// Enumeration of all possible X11 events.
 #[derive(Debug, Clone)]
