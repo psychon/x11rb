@@ -11,6 +11,8 @@ use crate::x11_utils::{TryParse, Serialize};
 // WM_CLASS
 
 /// A cookie for getting a window's `WM_CLASS` property.
+///
+/// See `WmClass`.
 #[derive(Debug)]
 pub struct WmClassCookie<'a, Conn: RequestConnection + ?Sized>(Cookie<'a, Conn, GetPropertyReply>);
 
@@ -45,6 +47,31 @@ where Conn: RequestConnection + ?Sized
 }
 
 /// The value of a window's `WM_CLASS` property.
+///
+/// Usage example:
+/// ```
+/// use x11rb::connection::Connection;
+/// use x11rb::errors::ConnectionError;
+/// use x11rb::properties::WmClass;
+/// use x11rb::xproto::Window;
+///
+/// fn print_class_instance(
+///     conn: &impl Connection,
+///     window: Window,
+/// ) -> Result<bool, ConnectionError> {
+///     let wm_class = match WmClass::get(conn, window)?.reply_unchecked()? {
+///         Some(wm_class) => wm_class,
+///         None => return Ok(false), // Getting the property failed
+///     };
+///     // Note that the WM_CLASS property is not actually encoded in utf8.
+///     // ASCII values are most common and for these from_utf8() should be fine.
+///     let class = std::str::from_utf8(wm_class.class());
+///     let instance = std::str::from_utf8(wm_class.instance());
+///     println!("For window {:x}, class is '{:?}' and instance is '{:?}'",
+///         window, class, instance);
+///     Ok(true)
+/// }
+/// ```
 #[derive(Debug)]
 pub struct WmClass(GetPropertyReply, usize);
 
@@ -108,7 +135,7 @@ const NUM_WM_SIZE_HINTS_ELEMENTS: u32 = 18;
 impl<'a, Conn> WmSizeHintsCookie<'a, Conn>
 where Conn: RequestConnection + ?Sized
 {
-    /// Send a `GetProperty` request for the `WM_SIZE_HINTS` property of the given window.
+    /// Send a `GetProperty` request for the given property of the given window
     pub fn new(conn: &'a Conn, window: Window, property: impl Into<Atom>) -> Result<Self, ConnectionError> {
         Ok(Self(get_property(
             conn,
@@ -218,8 +245,6 @@ impl WmSizeHints {
     /// The original `WmSizeHints` request must have been for a `WM_SIZE_HINTS` property for this
     /// function to return sensible results.
     pub fn from_reply(reply: GetPropertyReply) -> Result<Self, ParseError> {
-        // Implemented based on what xcb_icccm does. At least a bit. This stuff makes no sense...
-
         if reply.type_ != AtomEnum::WM_SIZE_HINTS.into() || reply.format != 32 {
             return Err(ParseError::ParseError);
         }
@@ -249,6 +274,8 @@ impl WmSizeHints {
 
 impl TryParse for WmSizeHints {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        // Implemented based on what xcb_icccm does. At least a bit. This stuff makes no sense...
+
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (x, remaining) = i32::try_parse(remaining)?;
         let (y, remaining) = i32::try_parse(remaining)?;
@@ -267,7 +294,8 @@ impl TryParse for WmSizeHints {
             (base_size, wire_win_gravity, remaining)
         };
 
-        // FIXME: Move this into the code generator
+        // FIXME: Move this into the code generator. Currently, the trouble is that BitForget and
+        // WinUnmap both are assigned the value 0, which does not matter here.
         let win_gravity = match wire_win_gravity {
             None => None,
             Some(1) => Some(xproto::Gravity::NorthWest),
@@ -363,6 +391,8 @@ impl Serialize for WmSizeHints {
 // WM_HINTS
 
 /// A cookie for getting a window's `WM_HINTS` property.
+///
+/// See `WmHints`.
 #[derive(Debug)]
 pub struct WmHintsCookie<'a, Conn: RequestConnection + ?Sized>(Cookie<'a, Conn, GetPropertyReply>);
 
