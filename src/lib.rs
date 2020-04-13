@@ -106,6 +106,7 @@ pub mod connection;
 pub mod cookie;
 pub mod errors;
 pub mod extension_manager;
+pub mod properties;
 pub mod rust_connection;
 pub mod wrapper;
 

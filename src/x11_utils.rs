@@ -292,6 +292,83 @@ impl Serialize for bool {
     }
 }
 
+// Tuple handling
+
+macro_rules! tuple_try_parse {
+    ($($name:ident)*) => {
+        impl<$($name,)*> TryParse for ($($name,)*)
+        where $($name: TryParse,)*
+        {
+            #[allow(non_snake_case)]
+            fn try_parse(remaining: &[u8]) -> Result<(($($name,)*), &[u8]), ParseError> {
+                $(let ($name, remaining) = $name::try_parse(remaining)?;)*
+                Ok((($($name,)*), remaining))
+            }
+        }
+    }
+}
+
+macro_rules! tuple_serialize {
+    ($($name:ident:$idx:tt)*) => {
+        impl<$($name,)*> Serialize for ($($name,)*)
+        where $($name: Serialize,)*
+        {
+            type Bytes = Vec<u8>;
+            fn serialize(&self) -> Self::Bytes {
+                let mut result = Vec::new();
+                self.serialize_into(&mut result);
+                result
+            }
+            fn serialize_into(&self, bytes: &mut Vec<u8>) {
+                $(self.$idx.serialize_into(bytes);)*
+            }
+        }
+    }
+}
+
+macro_rules! tuple_impls {
+    ($($name:ident:$idx:tt)*) => {
+        tuple_try_parse!($($name)*);
+        tuple_serialize!($($name:$idx)*);
+    }
+}
+
+// We can optimise serialisation of empty tuples or one-element-tuples with different Bytes type
+impl Serialize for () {
+    type Bytes = [u8; 0];
+    fn serialize(&self) -> Self::Bytes {
+        []
+    }
+    fn serialize_into(&self, _bytes: &mut Vec<u8>) {}
+}
+
+impl<T: Serialize> Serialize for (T,) {
+    type Bytes = T::Bytes;
+    fn serialize(&self) -> Self::Bytes {
+        self.0.serialize()
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        self.0.serialize_into(bytes)
+    }
+}
+
+tuple_try_parse!();
+tuple_try_parse!(A);
+tuple_impls!(A:0 B:1);
+tuple_impls!(A:0 B:1 C:2);
+tuple_impls!(A:0 B:1 C:2 D:3);
+tuple_impls!(A:0 B:1 C:2 D:3 E:4);
+tuple_impls!(A:0 B:1 C:2 D:3 E:4 F:5);
+tuple_impls!(A:0 B:1 C:2 D:3 E:4 F:5 G:6);
+tuple_impls!(A:0 B:1 C:2 D:3 E:4 F:5 G:6 H:7);
+tuple_impls!(A:0 B:1 C:2 D:3 E:4 F:5 G:6 H:7 I:8);
+tuple_impls!(A:0 B:1 C:2 D:3 E:4 F:5 G:6 H:7 I:8 J:9);
+tuple_impls!(A:0 B:1 C:2 D:3 E:4 F:5 G:6 H:7 I:8 J:9 K:10);
+tuple_impls!(A:0 B:1 C:2 D:3 E:4 F:5 G:6 H:7 I:8 J:9 K:10 L:11);
+tuple_impls!(A:0 B:1 C:2 D:3 E:4 F:5 G:6 H:7 I:8 J:9 K:10 L:11 M:12);
+tuple_impls!(A:0 B:1 C:2 D:3 E:4 F:5 G:6 H:7 I:8 J:9 K:10 L:11 M:12 N:13);
+tuple_impls!(A:0 B:1 C:2 D:3 E:4 F:5 G:6 H:7 I:8 J:9 K:10 L:11 M:12 N:13 O:14);
+
 /// Parse a list of objects from the given data.
 ///
 /// This function parses a list of objects where the length of the list was specified externally.
@@ -426,6 +503,7 @@ macro_rules! atom_manager {
         #[allow(non_snake_case)]
         #[derive(Debug)]
         $vis struct $cookie_name<'a, C: $crate::xproto::ConnectionExt> {
+            phantom: std::marker::PhantomData<&'a C>,
             $(
                 $field_name: $crate::cookie::Cookie<'a, C, $crate::xproto::InternAtomReply>,
             )*
@@ -442,11 +520,12 @@ macro_rules! atom_manager {
 
         impl $struct_name {
             $vis fn new<C: $crate::xproto::ConnectionExt>(
-                conn: &C,
+                _conn: &C,
             ) -> ::std::result::Result<$cookie_name<'_, C>, $crate::errors::ConnectionError> {
                 Ok($cookie_name {
+                    phantom: std::marker::PhantomData,
                     $(
-                        $field_name: conn.intern_atom(
+                        $field_name: _conn.intern_atom(
                             false,
                             $crate::__atom_manager_atom_value!($field_name$(: $atom_value)?),
                         )?,
