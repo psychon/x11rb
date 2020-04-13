@@ -8,6 +8,8 @@ use crate::errors::{ConnectionError, ParseError, ReplyError};
 use crate::xproto::{Atom, AtomEnum, GetPropertyReply, Window, get_property, self};
 use crate::x11_utils::{TryParse, Serialize};
 
+// WM_CLASS
+
 /// A cookie for getting a window's `WM_CLASS` property.
 #[derive(Debug)]
 pub struct WmClassCookie<'a, Conn: RequestConnection + ?Sized>(Cookie<'a, Conn, GetPropertyReply>);
@@ -87,6 +89,8 @@ impl WmClass {
         &self.0.value[start..end]
     }
 }
+
+// WM_SIZE_HINTS
 
 /// Representation of whether some part of `WM_SIZE_HINTS` was user/program specified.
 #[derive(Debug, Copy, Clone)]
@@ -219,8 +223,32 @@ impl WmSizeHints {
         if reply.type_ != AtomEnum::WM_SIZE_HINTS.into() || reply.format != 32 {
             return Err(ParseError::ParseError);
         }
+        Ok(Self::try_parse(&reply.value)?.0)
+    }
 
-        let remaining = &reply.value;
+    /// Set these `WM_SIZE_HINTS` on some window as the `WM_NORMAL_HINTS` property.
+    pub fn set_normal_hints<'a, C: RequestConnection + ?Sized>(&self, conn: &'a C, window: Window) -> Result<VoidCookie<'a, C>, ConnectionError> {
+        self.set(conn, window, AtomEnum::WM_NORMAL_HINTS)
+    }
+
+    /// Set these `WM_SIZE_HINTS` on some window as the given property.
+    pub fn set<'a, C: RequestConnection + ?Sized>(&self, conn: &'a C, window: Window, property: impl Into<Atom>) -> Result<VoidCookie<'a, C>, ConnectionError> {
+        let data = self.serialize();
+        xproto::change_property(
+            conn,
+            xproto::PropMode::Replace,
+            window,
+            property.into(),
+            AtomEnum::WM_SIZE_HINTS,
+            32,
+            NUM_WM_SIZE_HINTS_ELEMENTS,
+            &data,
+        )
+    }
+}
+
+impl TryParse for WmSizeHints {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (x, remaining) = i32::try_parse(remaining)?;
         let (y, remaining) = i32::try_parse(remaining)?;
@@ -231,12 +259,12 @@ impl WmSizeHints {
         let (size_increment, remaining) = parse_with_flag::<(i32, i32)>(remaining, flags, P_RESIZE_INCREMENT)?;
         let (aspect, remaining) = parse_with_flag::<(AspectRatio, AspectRatio)>(remaining, flags, P_ASPECT)?;
         // Apparently, some older version of ICCCM didn't have these...?
-        let (base_size, wire_win_gravity) = if remaining.is_empty() {
-            (min_size, Some(1))
+        let (base_size, wire_win_gravity, remaining) = if remaining.is_empty() {
+            (min_size, Some(1), remaining)
         } else {
             let (base_size, remaining) = parse_with_flag::<(i32, i32)>(remaining, flags, P_BASE_SIZE)?;
-            let (wire_win_gravity, _remaining) = parse_with_flag::<u32>(remaining, flags, P_WIN_GRAVITY)?;
-            (base_size, wire_win_gravity)
+            let (wire_win_gravity, remaining) = parse_with_flag::<u32>(remaining, flags, P_WIN_GRAVITY)?;
+            (base_size, wire_win_gravity, remaining)
         };
 
         // FIXME: Move this into the code generator
@@ -272,7 +300,7 @@ impl WmSizeHints {
             None
         };
 
-        Ok(WmSizeHints {
+        Ok((WmSizeHints {
             position,
             size,
             min_size,
@@ -281,19 +309,19 @@ impl WmSizeHints {
             aspect,
             base_size,
             win_gravity,
-        })
+        }, remaining))
     }
+}
 
-    /// Set these `WM_SIZE_HINTS` on some window as the `WM_NORMAL_HINTS` property.
-    pub fn set_normal_hints<'a, C: RequestConnection + ?Sized>(&self, conn: &'a C, window: Window) -> Result<VoidCookie<'a, C>, ConnectionError> {
-        self.set(conn, window, AtomEnum::WM_NORMAL_HINTS)
-    }
-
-    /// Set these `WM_SIZE_HINTS` on some window as the given property.
-    pub fn set<'a, C: RequestConnection + ?Sized>(&self, conn: &'a C, window: Window, property: impl Into<Atom>) -> Result<VoidCookie<'a, C>, ConnectionError> {
+impl Serialize for WmSizeHints {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Self::Bytes {
         // 18*4 surely fits into an usize, so this unwrap() cannot trigger
-        let mut data = Vec::with_capacity((NUM_WM_SIZE_HINTS_ELEMENTS * 4).try_into().unwrap());
-
+        let mut result = Vec::with_capacity((NUM_WM_SIZE_HINTS_ELEMENTS * 4).try_into().unwrap());
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
         let mut flags = 0;
         match self.position {
             Some((WmSizeHintsSpecification::UserSpecified, _, _)) => flags |= U_S_POSITION,
@@ -311,35 +339,24 @@ impl WmSizeHints {
         flags |= self.aspect.map_or(0, |_| P_ASPECT);
         flags |= self.base_size.map_or(0, |_| P_BASE_SIZE);
         flags |= self.win_gravity.map_or(0, |_| P_WIN_GRAVITY);
-        flags.serialize_into(&mut data);
+        flags.serialize_into(bytes);
 
         match self.position {
             Some((_, x, y)) => (x, y),
             None => (0, 0),
-        }.serialize_into(&mut data);
+        }.serialize_into(bytes);
 
          match self.size {
             Some((_, width, height)) => (width, height),
             None => (0, 0),
-        }.serialize_into(&mut data);
+        }.serialize_into(bytes);
 
-        self.min_size.unwrap_or((0, 0)).serialize_into(&mut data);
-        self.max_size.unwrap_or((0, 0)).serialize_into(&mut data);
-        self.size_increment.unwrap_or((0, 0)).serialize_into(&mut data);
-        self.aspect.unwrap_or((AspectRatio::new(0, 0), AspectRatio::new(0, 0))).serialize_into(&mut data);
-        self.base_size.unwrap_or((0, 0)).serialize_into(&mut data);
-        self.win_gravity.map_or(0, u32::from).serialize_into(&mut data);
-
-        xproto::change_property(
-            conn,
-            xproto::PropMode::Replace,
-            window,
-            property.into(),
-            AtomEnum::WM_SIZE_HINTS,
-            32,
-            NUM_WM_SIZE_HINTS_ELEMENTS,
-            &data,
-        )
+        self.min_size.unwrap_or((0, 0)).serialize_into(bytes);
+        self.max_size.unwrap_or((0, 0)).serialize_into(bytes);
+        self.size_increment.unwrap_or((0, 0)).serialize_into(bytes);
+        self.aspect.unwrap_or((AspectRatio::new(0, 0), AspectRatio::new(0, 0))).serialize_into(bytes);
+        self.base_size.unwrap_or((0, 0)).serialize_into(bytes);
+        self.win_gravity.map_or(0, u32::from).serialize_into(bytes);
     }
 }
 
@@ -433,7 +450,27 @@ impl WmHints {
             return Err(ParseError::ParseError);
         }
 
-        let remaining = &reply.value;
+        Ok(Self::try_parse(&reply.value)?.0)
+    }
+
+    /// Set these `WM_HINTS` on some window.
+    pub fn set<'a, C: RequestConnection + ?Sized>(&self, conn: &'a C, window: Window) -> Result<VoidCookie<'a, C>, ConnectionError> {
+        let data = self.serialize();
+        xproto::change_property(
+            conn,
+            xproto::PropMode::Replace,
+            window,
+            xproto::AtomEnum::WM_HINTS,
+            xproto::AtomEnum::WM_HINTS,
+            32,
+            NUM_WM_HINTS_ELEMENTS,
+            &data,
+        )
+    }
+}
+
+impl TryParse for WmHints {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (input, remaining) = parse_with_flag::<u32>(remaining, flags, HINT_INPUT)?;
         let (initial_state, remaining) = parse_with_flag::<u32>(remaining, flags, HINT_STATE)?;
@@ -442,11 +479,11 @@ impl WmHints {
         let (icon_position, remaining) = parse_with_flag::<(i32, i32)>(remaining, flags, HINT_ICON_POSITION)?;
         let (icon_mask, remaining) = parse_with_flag::<u32>(remaining, flags, HINT_ICON_MASK)?;
         // Apparently, some older version of ICCCM didn't have this...?
-        let window_group = if remaining.is_empty() {
-            None
+        let (window_group, remaining) = if remaining.is_empty() {
+            (None, remaining)
         } else {
-            let (window_group, _remaining) = parse_with_flag::<u32>(remaining, flags, HINT_WINDOW_GROUP)?;
-            window_group
+            let (window_group, remaining) = parse_with_flag::<u32>(remaining, flags, HINT_WINDOW_GROUP)?;
+            (window_group, remaining)
         };
 
         let input = input.map(|input| input != 0);
@@ -460,7 +497,7 @@ impl WmHints {
 
         let urgent = flags & HINT_URGENCY != 0;
 
-        Ok(WmHints {
+        Ok((WmHints {
             input,
             initial_state,
             icon_pixmap,
@@ -469,14 +506,19 @@ impl WmHints {
             icon_mask,
             window_group,
             urgent,
-        })
+        }, remaining))
     }
+}
 
-    /// Set these `WM_HINTS` on some window.
-    pub fn set<'a, C: RequestConnection + ?Sized>(&self, conn: &'a C, window: Window) -> Result<VoidCookie<'a, C>, ConnectionError> {
+impl Serialize for WmHints {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Self::Bytes {
         // 9*4 surely fits into an usize, so this unwrap() cannot trigger
-        let mut data = Vec::with_capacity((NUM_WM_HINTS_ELEMENTS * 4).try_into().unwrap());
-
+        let mut result = Vec::with_capacity((NUM_WM_HINTS_ELEMENTS * 4).try_into().unwrap());
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
         let mut flags = 0;
         flags |= self.input.map_or(0, |_| HINT_INPUT);
         flags |= self.initial_state.map_or(0, |_| HINT_STATE);
@@ -489,29 +531,18 @@ impl WmHints {
             flags |= HINT_URGENCY;
         }
 
-        flags.serialize_into(&mut data);
-        self.input.unwrap_or(false).serialize_into(&mut data);
+        flags.serialize_into(bytes);
+        self.input.unwrap_or(false).serialize_into(bytes);
         match self.initial_state {
             Some(WmHintsState::Normal) => 1,
             Some(WmHintsState::Iconic) => 3,
             None => 0,
-        }.serialize_into(&mut data);
-        self.icon_pixmap.unwrap_or(0).serialize_into(&mut data);
-        self.icon_window.unwrap_or(0).serialize_into(&mut data);
-        self.icon_position.unwrap_or((0, 0)).serialize_into(&mut data);
-        self.icon_mask.unwrap_or(0).serialize_into(&mut data);
-        self.window_group.unwrap_or(0).serialize_into(&mut data);
-
-        xproto::change_property(
-            conn,
-            xproto::PropMode::Replace,
-            window,
-            xproto::AtomEnum::WM_HINTS,
-            xproto::AtomEnum::WM_HINTS,
-            32,
-            NUM_WM_HINTS_ELEMENTS,
-            &data,
-        )
+        }.serialize_into(bytes);
+        self.icon_pixmap.unwrap_or(0).serialize_into(bytes);
+        self.icon_window.unwrap_or(0).serialize_into(bytes);
+        self.icon_position.unwrap_or((0, 0)).serialize_into(bytes);
+        self.icon_mask.unwrap_or(0).serialize_into(bytes);
+        self.window_group.unwrap_or(0).serialize_into(bytes);
     }
 }
 
