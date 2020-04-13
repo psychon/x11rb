@@ -40,7 +40,7 @@ where Conn: RequestConnection + ?Sized
     /// Get the reply that the server sent, but have errors handled as events.
     pub fn reply_unchecked(self) -> Result<Option<WmClass>, ConnectionError> {
         self.0.reply_unchecked()?
-            .map(|r| WmClass::from_reply(r))
+            .map(WmClass::from_reply)
             .transpose()
             .map_err(Into::into)
     }
@@ -156,14 +156,14 @@ where Conn: RequestConnection + ?Sized
     /// Get the reply that the server sent, but have errors handled as events.
     pub fn reply_unchecked(self) -> Result<Option<WmSizeHints>, ConnectionError> {
         self.0.reply_unchecked()?
-            .map(|r| WmSizeHints::from_reply(r))
+            .map(WmSizeHints::from_reply)
             .transpose()
             .map_err(Into::into)
     }
 }
 
 // Possible flags for `WM_SIZE_HINTS`.
-const U_S_POSITION: u32 = 1 << 0;
+const U_S_POSITION: u32 = 1;
 const U_S_SIZE: u32 = 1 << 1;
 const P_S_POSITION: u32 = 1 << 2;
 const P_S_SIZE: u32 = 1 << 3;
@@ -198,6 +198,7 @@ impl TryParse for AspectRatio {
     }
 }
 
+#[allow(clippy::many_single_char_names)]
 impl Serialize for AspectRatio {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
@@ -422,7 +423,7 @@ where Conn: RequestConnection + ?Sized
     /// Get the reply that the server sent, but have errors handled as events.
     pub fn reply_unchecked(self) -> Result<Option<WmHints>, ConnectionError> {
         self.0.reply_unchecked()?
-            .map(|r| WmHints::from_reply(r))
+            .map(WmHints::from_reply)
             .transpose()
             .map_err(Into::into)
     }
@@ -436,7 +437,7 @@ pub enum WmHintsState {
 }
 
 // Possible flags for `WM_HINTS`.
-const HINT_INPUT: u32 = 1 << 0;
+const HINT_INPUT: u32 = 1;
 const HINT_STATE: u32 = 1 << 1;
 const HINT_ICON_PIXMAP: u32 = 1 << 2;
 const HINT_ICON_WINDOW: u32 = 1 << 3;
@@ -631,9 +632,9 @@ mod test {
         // This is the value of some random xterm window.
         // It was acquired via 'xtrace xprop WM_NORMAL_HINTS'.
         let input = [
-            0x00000350, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000015, 0x00000017,
-            0x00000000, 0x00000000, 0x0000000a, 0x00000013, 0x00000000, 0x00000000, 0x00000000,
-            0x00000000, 0x0000000b, 0x00000004, 0x00000001,
+            0x0000_0350, 0x0000_0000, 0x0000_0000, 0x0000_0000, 0x0000_0000, 0x0000_0015, 0x0000_0017,
+            0x0000_0000, 0x0000_0000, 0x0000_000a, 0x0000_0013, 0x0000_0000, 0x0000_0000, 0x0000_0000,
+            0x0000_0000, 0x0000_000b, 0x0000_0004, 0x0000_0001,
         ];
         let input = input
             .iter()
@@ -658,8 +659,8 @@ mod test {
         // This is the value of some random xterm window.
         // It was acquired via 'xtrace xprop WM_HINTS'.
         let input = [
-            0x00000043, 0x00000001, 0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
-            0x00000000, 0x00600009,
+            0x0000_0043, 0x0000_0001, 0x0000_0001, 0x0000_0000, 0x0000_0000, 0x000_00000, 0x000_00000,
+            0x0000_0000, 0x0060_0009,
         ];
         let input = input
             .iter()
@@ -676,7 +677,7 @@ mod test {
         assert_eq!(wm_hints.icon_window, None);
         assert_eq!(wm_hints.icon_position, None);
         assert_eq!(wm_hints.icon_mask, None);
-        assert_eq!(wm_hints.window_group, Some(0x600009));
+        assert_eq!(wm_hints.window_group, Some(0x0060_0009));
         assert_eq!(wm_hints.urgent, false);
 
         assert_eq!(input, wm_hints.serialize());
