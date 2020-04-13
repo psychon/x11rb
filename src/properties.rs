@@ -532,7 +532,7 @@ impl Serialize for WmHints {
         }
 
         flags.serialize_into(bytes);
-        self.input.unwrap_or(false).serialize_into(bytes);
+        Into::<u32>::into(self.input.unwrap_or(false)).serialize_into(bytes);
         match self.initial_state {
             Some(WmHintsState::Normal) => 1,
             Some(WmHintsState::Iconic) => 3,
@@ -619,6 +619,8 @@ mod test {
         assert!(wm_size_hints.aspect.is_none(), "{:?}", wm_size_hints.aspect);
         assert_eq!(wm_size_hints.base_size, Some((11, 4)));
         assert_eq!(wm_size_hints.win_gravity, Some(Gravity::NorthWest));
+
+        assert_eq!(input, wm_size_hints.serialize());
     }
 
     #[test]
@@ -646,5 +648,7 @@ mod test {
         assert_eq!(wm_hints.icon_mask, None);
         assert_eq!(wm_hints.window_group, Some(0x600009));
         assert_eq!(wm_hints.urgent, false);
+
+        assert_eq!(input, wm_hints.serialize());
     }
 }
