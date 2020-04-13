@@ -504,6 +504,7 @@ macro_rules! atom_manager {
         #[allow(non_snake_case)]
         #[derive(Debug)]
         $vis struct $cookie_name<'a, C: $crate::xproto::ConnectionExt> {
+            phantom: std::marker::PhantomData<&'a C>,
             $(
                 $field_name: $crate::cookie::Cookie<'a, C, $crate::xproto::InternAtomReply>,
             )*
@@ -520,11 +521,12 @@ macro_rules! atom_manager {
 
         impl $struct_name {
             $vis fn new<C: $crate::xproto::ConnectionExt>(
-                conn: &C,
+                _conn: &C,
             ) -> ::std::result::Result<$cookie_name<'_, C>, $crate::errors::ConnectionError> {
                 Ok($cookie_name {
+                    phantom: std::marker::PhantomData,
                     $(
-                        $field_name: conn.intern_atom(
+                        $field_name: _conn.intern_atom(
                             false,
                             $crate::__atom_manager_atom_value!($field_name$(: $atom_value)?),
                         )?,
