@@ -386,6 +386,226 @@ impl WmSizeHints {
     }
 }
 
+// WM_HINTS
+
+/// A cookie for getting a window's `WM_HINTS` property.
+#[derive(Debug)]
+pub struct WmHintsCookie<'a, Conn: RequestConnection + ?Sized>(Cookie<'a, Conn, GetPropertyReply>);
+
+const NUM_WM_HINTS_ELEMENTS: u32 = 9;
+
+impl<'a, Conn> WmHintsCookie<'a, Conn>
+where Conn: RequestConnection + ?Sized
+{
+    /// Send a `GetProperty` request for the `WM_CLASS` property of the given window
+    pub fn new(conn: &'a Conn, window: Window) -> Result<Self, ConnectionError> {
+        Ok(Self(get_property(
+            conn,
+            false,
+            window,
+            AtomEnum::WM_HINTS.into(),
+            AtomEnum::WM_HINTS.into(),
+            0,
+            NUM_WM_HINTS_ELEMENTS,
+        )?))
+    }
+
+    /// Get the reply that the server sent.
+    pub fn reply(self) -> Result<WmHints, ReplyError<Conn::Buf>> {
+        Ok(WmHints::from_reply(self.0.reply()?)?)
+    }
+
+    /// Get the reply that the server sent, but have errors handled as events.
+    pub fn reply_unchecked(self) -> Result<Option<WmHints>, ConnectionError> {
+        self.0.reply_unchecked()?
+            .map(|r| WmHints::from_reply(r))
+            .transpose()
+            .map_err(Into::into)
+    }
+}
+
+/// The possible values for a `WM_STATE`'s state field.
+#[derive(Debug, Copy, Clone)]
+pub enum WmStateState {
+    Normal,
+    Iconic,
+}
+
+// Possible flags for `WM_HINTS`.
+const HINT_INPUT: u32 = 1 << 0;
+const HINT_STATE: u32 = 1 << 1;
+const HINT_ICON_PIXMAP: u32 = 1 << 2;
+const HINT_ICON_WINDOW: u32 = 1 << 3;
+const HINT_ICON_POSITION: u32 = 1 << 4;
+const HINT_ICON_MASK: u32 = 1 << 5;
+const HINT_WINDOW_GROUP: u32 = 1 << 6;
+// This bit is obsolete, according to ICCCM
+//const HINT_MESSAGE: u32 = 1 << 7;
+const HINT_URGENCY: u32 = 1 << 8;
+
+/// A structure representing a `WM_HINTS` property.
+#[derive(Debug, Default, Copy, Clone)]
+pub struct WmHints {
+    pub input: Option<bool>,
+    pub initial_state: Option<WmStateState>,
+    pub icon_pixmap: Option<xproto::Pixmap>,
+    pub icon_window: Option<Window>,
+    pub icon_position: Option<(i32, i32)>,
+    pub icon_mask: Option<xproto::Pixmap>,
+    pub window_group: Option<Window>,
+    pub urgent: bool,
+}
+
+impl WmHints {
+    /// Get a new, empty `WmSizeHints` structure.
+    pub fn new() -> Self {
+        Default::default()
+    }
+
+    /// Send a `GetProperty` request for the `WM_HINTS` property of the given window
+    pub fn get<C: RequestConnection>(conn: &C, window: Window) -> Result<WmHintsCookie<'_, C>, ConnectionError> {
+        WmHintsCookie::new(conn, window)
+    }
+
+    /// Construct a new `WmHints` instance from a `GetPropertyReply`.
+    ///
+    /// The original `WmHints` request must have been for a `WM_HINTS` property for this
+    /// function to return sensible results.
+    pub fn from_reply(reply: GetPropertyReply) -> Result<Self, ParseError> {
+        if reply.type_ != AtomEnum::WM_HINTS.into() || reply.format != 32 {
+            return Err(ParseError::ParseError);
+        }
+
+        let remaining = &reply.value;
+        let (flags, remaining) = u32::try_parse(remaining)?;
+        let (input, remaining) = u32::try_parse(remaining)?;
+        let (initial_state, remaining) = u32::try_parse(remaining)?;
+        let (icon_pixmap, remaining) = u32::try_parse(remaining)?;
+        let (icon_window, remaining) = u32::try_parse(remaining)?;
+        let (icon_x, remaining) = i32::try_parse(remaining)?;
+        let (icon_y, remaining) = i32::try_parse(remaining)?;
+        let (icon_mask, remaining) = u32::try_parse(remaining)?;
+        // Apparently, some older version of ICCCM didn't have tis...?
+        let window_group = if remaining.is_empty() {
+            0
+        } else {
+            let (window_group, _remaining) = u32::try_parse(remaining)?;
+            window_group
+        };
+
+        let input = if flags & HINT_INPUT != 0 {
+            Some(input != 0)
+        } else {
+            None
+        };
+        let initial_state = if flags & HINT_STATE != 0 {
+            Some(match initial_state {
+                1 => WmStateState::Normal,
+                3 => WmStateState::Iconic,
+                _ => return Err(ParseError::ParseError),
+            })
+        } else {
+            None
+        };
+        let icon_pixmap = if flags & HINT_ICON_PIXMAP != 0 {
+            Some(icon_pixmap)
+        } else {
+            None
+        };
+        let icon_window = if flags & HINT_ICON_WINDOW != 0 {
+            Some(icon_window)
+        } else {
+            None
+        };
+        let icon_position = if flags & HINT_ICON_POSITION != 0 {
+            Some((icon_x, icon_y))
+        } else {
+            None
+        };
+        let icon_mask = if flags & HINT_ICON_MASK != 0 {
+            Some(icon_mask)
+        } else {
+            None
+        };
+        let window_group = if flags & HINT_WINDOW_GROUP != 0 {
+            Some(window_group)
+        } else {
+            None
+        };
+        let urgent = flags & HINT_URGENCY != 0;
+
+        Ok(WmHints {
+            input,
+            initial_state,
+            icon_pixmap,
+            icon_window,
+            icon_position,
+            icon_mask,
+            window_group,
+            urgent,
+        })
+    }
+
+    /// Set these `WM_HINTS` on some window.
+    pub fn set<'a, C: RequestConnection + ?Sized>(&self, conn: &'a C, window: Window) -> Result<VoidCookie<'a, C>, ConnectionError> {
+        // 9*4 surely fits into an usize, so this unwrap() cannot trigger
+        let mut data = Vec::with_capacity((NUM_WM_HINTS_ELEMENTS * 4).try_into().unwrap());
+
+        let mut flags = 0;
+        if self.input.is_some() {
+            flags |= HINT_INPUT;
+        }
+        if self.initial_state.is_some() {
+            flags |= HINT_STATE;
+        }
+        if self.icon_pixmap.is_some() {
+            flags |= HINT_ICON_PIXMAP;
+        }
+        if self.icon_window.is_some() {
+            flags |= HINT_ICON_WINDOW;
+        }
+        if self.icon_position.is_some() {
+            flags |= HINT_ICON_POSITION;
+        }
+        if self.icon_mask.is_some() {
+            flags |= HINT_ICON_MASK;
+        }
+        if self.window_group.is_some() {
+            flags |= HINT_WINDOW_GROUP;
+        }
+        if self.urgent {
+            flags |= HINT_URGENCY;
+        }
+
+        flags.serialize_into(&mut data);
+        self.input.unwrap_or(false).serialize_into(&mut data);
+        let initial_state = match self.initial_state {
+            Some(WmStateState::Normal) => 1,
+            Some(WmStateState::Iconic) => 3,
+            None => 0,
+        };
+        initial_state.serialize_into(&mut data);
+        self.icon_pixmap.unwrap_or(0).serialize_into(&mut data);
+        self.icon_window.unwrap_or(0).serialize_into(&mut data);
+        let (icon_x, icon_y) = self.icon_position.unwrap_or((0, 0));
+        icon_x.serialize_into(&mut data);
+        icon_y.serialize_into(&mut data);
+        self.icon_mask.unwrap_or(0).serialize_into(&mut data);
+        self.window_group.unwrap_or(0).serialize_into(&mut data);
+
+        xproto::change_property(
+            conn,
+            xproto::PropMode::Replace,
+            window,
+            xproto::AtomEnum::WM_HINTS,
+            xproto::AtomEnum::WM_HINTS,
+            32,
+            NUM_WM_HINTS_ELEMENTS,
+            &data,
+        )
+    }
+}
+
 #[cfg(test)]
 mod test {
     use std::convert::TryInto;
