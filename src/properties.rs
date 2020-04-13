@@ -105,12 +105,12 @@ impl<'a, Conn> WmSizeHintsCookie<'a, Conn>
 where Conn: RequestConnection + ?Sized
 {
     /// Send a `GetProperty` request for the `WM_SIZE_HINTS` property of the given window.
-    pub fn new(conn: &'a Conn, window: Window, property: Atom) -> Result<Self, ConnectionError> {
+    pub fn new(conn: &'a Conn, window: Window, property: impl Into<Atom>) -> Result<Self, ConnectionError> {
         Ok(Self(get_property(
             conn,
             false,
             window,
-            property,
+            property.into(),
             AtomEnum::WM_SIZE_HINTS.into(),
             0,
             NUM_WM_SIZE_HINTS_ELEMENTS,
@@ -199,9 +199,14 @@ impl WmSizeHints {
         Default::default()
     }
 
-    /// Send a `GetProperty` request for the `WM_SIZE_HINTS` property of the given window
-    pub fn get<C: RequestConnection>(conn: &C, window: Window, property: Atom) -> Result<WmSizeHintsCookie<'_, C>, ConnectionError> {
+    /// Send a `GetProperty` request for the given property of the given window
+    pub fn get<C: RequestConnection>(conn: &C, window: Window, property: impl Into<Atom>) -> Result<WmSizeHintsCookie<'_, C>, ConnectionError> {
         WmSizeHintsCookie::new(conn, window, property)
+    }
+
+    /// Send a `GetProperty` request for the `WM_NORMAL_HINTS` property of the given window
+    pub fn get_normal_hints<C: RequestConnection>(conn: &C, window: Window) -> Result<WmSizeHintsCookie<'_, C>, ConnectionError> {
+        Self::get(conn, window, AtomEnum::WM_NORMAL_HINTS)
     }
 
     /// Construct a new `WmSizeHints` instance from a `GetPropertyReply`.
@@ -279,8 +284,13 @@ impl WmSizeHints {
         })
     }
 
-    /// Set these `WM_SIZE_HINTS` on some window.
-    pub fn set<'a, C: RequestConnection + ?Sized>(&self, conn: &'a C, window: Window, property: Atom) -> Result<VoidCookie<'a, C>, ConnectionError> {
+    /// Set these `WM_SIZE_HINTS` on some window as the `WM_NORMAL_HINTS` property.
+    pub fn set_normal_hints<'a, C: RequestConnection + ?Sized>(&self, conn: &'a C, window: Window) -> Result<VoidCookie<'a, C>, ConnectionError> {
+        self.set(conn, window, AtomEnum::WM_NORMAL_HINTS)
+    }
+
+    /// Set these `WM_SIZE_HINTS` on some window as the given property.
+    pub fn set<'a, C: RequestConnection + ?Sized>(&self, conn: &'a C, window: Window, property: impl Into<Atom>) -> Result<VoidCookie<'a, C>, ConnectionError> {
         // 18*4 surely fits into an usize, so this unwrap() cannot trigger
         let mut data = Vec::with_capacity((NUM_WM_SIZE_HINTS_ELEMENTS * 4).try_into().unwrap());
 
@@ -324,7 +334,7 @@ impl WmSizeHints {
             conn,
             xproto::PropMode::Replace,
             window,
-            property,
+            property.into(),
             AtomEnum::WM_SIZE_HINTS,
             32,
             NUM_WM_SIZE_HINTS_ELEMENTS,
