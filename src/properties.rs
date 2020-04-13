@@ -159,6 +159,18 @@ impl AspectRatio {
     }
 }
 
+impl Serialize for AspectRatio {
+    type Bytes = [u8; 8];
+    fn serialize(&self) -> Self::Bytes {
+        let [a, b, c, d] = self.numerator.serialize();
+        let [e, f, g, h] = self.denominator.serialize();
+        [a, b, c, d, e, f, g, h]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        (self.numerator, self.denominator).serialize_into(bytes);
+    }
+}
+
 /// A structure representing a `WM_SIZE_HINTS` property.
 #[derive(Debug, Default, Copy, Clone)]
 pub struct WmSizeHints {
@@ -334,44 +346,22 @@ impl WmSizeHints {
 
         flags.serialize_into(&mut data);
 
-        let (x, y) = match self.position {
+        match self.position {
             Some((_, x, y)) => (x, y),
             None => (0, 0),
-        };
-        x.serialize_into(&mut data);
-        y.serialize_into(&mut data);
+        }.serialize_into(&mut data);
 
-        let (width, height) = match self.size {
+         match self.size {
             Some((_, width, height)) => (width, height),
             None => (0, 0),
-        };
-        width.serialize_into(&mut data);
-        height.serialize_into(&mut data);
+        }.serialize_into(&mut data);
 
-        let (min_width, min_height) = self.min_size.unwrap_or((0, 0));
-        min_width.serialize_into(&mut data);
-        min_height.serialize_into(&mut data);
-
-        let (max_width, max_height) = self.max_size.unwrap_or((0, 0));
-        max_width.serialize_into(&mut data);
-        max_height.serialize_into(&mut data);
-
-        let (width_inc, height_inc) = self.size_increment.unwrap_or((0, 0));
-        width_inc.serialize_into(&mut data);
-        height_inc.serialize_into(&mut data);
-
-        let (min_aspect, max_aspect) = self.aspect.unwrap_or((AspectRatio::new(0, 0), AspectRatio::new(0, 0)));
-        min_aspect.numerator.serialize_into(&mut data);
-        min_aspect.denominator.serialize_into(&mut data);
-        max_aspect.numerator.serialize_into(&mut data);
-        max_aspect.denominator.serialize_into(&mut data);
-
-        let (base_width, base_height) = self.base_size.unwrap_or((0, 0));
-        base_width.serialize_into(&mut data);
-        base_height.serialize_into(&mut data);
-
-        let gravity = self.win_gravity.map_or(0, u32::from);
-        gravity.serialize_into(&mut data);
+        self.min_size.unwrap_or((0, 0)).serialize_into(&mut data);
+        self.max_size.unwrap_or((0, 0)).serialize_into(&mut data);
+        self.size_increment.unwrap_or((0, 0)).serialize_into(&mut data);
+        self.aspect.unwrap_or((AspectRatio::new(0, 0), AspectRatio::new(0, 0))).serialize_into(&mut data);
+        self.base_size.unwrap_or((0, 0)).serialize_into(&mut data);
+        self.win_gravity.map_or(0, u32::from).serialize_into(&mut data);
 
         xproto::change_property(
             conn,
@@ -579,17 +569,14 @@ impl WmHints {
 
         flags.serialize_into(&mut data);
         self.input.unwrap_or(false).serialize_into(&mut data);
-        let initial_state = match self.initial_state {
+        match self.initial_state {
             Some(WmStateState::Normal) => 1,
             Some(WmStateState::Iconic) => 3,
             None => 0,
-        };
-        initial_state.serialize_into(&mut data);
+        }.serialize_into(&mut data);
         self.icon_pixmap.unwrap_or(0).serialize_into(&mut data);
         self.icon_window.unwrap_or(0).serialize_into(&mut data);
-        let (icon_x, icon_y) = self.icon_position.unwrap_or((0, 0));
-        icon_x.serialize_into(&mut data);
-        icon_y.serialize_into(&mut data);
+         self.icon_position.unwrap_or((0, 0)).serialize_into(&mut data);
         self.icon_mask.unwrap_or(0).serialize_into(&mut data);
         self.window_group.unwrap_or(0).serialize_into(&mut data);
 
