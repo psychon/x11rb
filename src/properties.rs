@@ -5,8 +5,8 @@ use std::convert::TryInto;
 use crate::connection::RequestConnection;
 use crate::cookie::{Cookie, VoidCookie};
 use crate::errors::{ConnectionError, ParseError, ReplyError};
-use crate::xproto::{Atom, AtomEnum, GetPropertyReply, Window, get_property, self};
-use crate::x11_utils::{TryParse, Serialize};
+use crate::x11_utils::{Serialize, TryParse};
+use crate::xproto::{self, Atom, AtomEnum, GetPropertyReply, Window};
 
 // WM_CLASS
 
@@ -17,11 +17,12 @@ use crate::x11_utils::{TryParse, Serialize};
 pub struct WmClassCookie<'a, Conn: RequestConnection + ?Sized>(Cookie<'a, Conn, GetPropertyReply>);
 
 impl<'a, Conn> WmClassCookie<'a, Conn>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     /// Send a `GetProperty` request for the `WM_CLASS` property of the given window
     pub fn new(conn: &'a Conn, window: Window) -> Result<Self, ConnectionError> {
-        Ok(Self(get_property(
+        Ok(Self(xproto::get_property(
             conn,
             false,
             window,
@@ -39,7 +40,8 @@ where Conn: RequestConnection + ?Sized
 
     /// Get the reply that the server sent, but have errors handled as events.
     pub fn reply_unchecked(self) -> Result<Option<WmClass>, ConnectionError> {
-        self.0.reply_unchecked()?
+        self.0
+            .reply_unchecked()?
             .map(WmClass::from_reply)
             .transpose()
             .map_err(Into::into)
@@ -77,7 +79,10 @@ pub struct WmClass(GetPropertyReply, usize);
 
 impl WmClass {
     /// Send a `GetProperty` request for the `WM_CLASS` property of the given window
-    pub fn get<C: RequestConnection>(conn: &C, window: Window) -> Result<WmClassCookie<'_, C>, ConnectionError> {
+    pub fn get<C: RequestConnection>(
+        conn: &C,
+        window: Window,
+    ) -> Result<WmClassCookie<'_, C>, ConnectionError> {
         WmClassCookie::new(conn, window)
     }
 
@@ -90,7 +95,8 @@ impl WmClass {
             return Err(ParseError::ParseError);
         }
         // Find the first zero byte in the value
-        let offset = reply.value
+        let offset = reply
+            .value
             .iter()
             .position(|&v| v == 0)
             .unwrap_or_else(|| reply.value.len());
@@ -128,16 +134,23 @@ pub enum WmSizeHintsSpecification {
 
 /// A cookie for getting a window's `WM_SIZE_HINTS` property.
 #[derive(Debug)]
-pub struct WmSizeHintsCookie<'a, Conn: RequestConnection + ?Sized>(Cookie<'a, Conn, GetPropertyReply>);
+pub struct WmSizeHintsCookie<'a, Conn: RequestConnection + ?Sized>(
+    Cookie<'a, Conn, GetPropertyReply>,
+);
 
 const NUM_WM_SIZE_HINTS_ELEMENTS: u32 = 18;
 
 impl<'a, Conn> WmSizeHintsCookie<'a, Conn>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     /// Send a `GetProperty` request for the given property of the given window
-    pub fn new(conn: &'a Conn, window: Window, property: impl Into<Atom>) -> Result<Self, ConnectionError> {
-        Ok(Self(get_property(
+    pub fn new(
+        conn: &'a Conn,
+        window: Window,
+        property: impl Into<Atom>,
+    ) -> Result<Self, ConnectionError> {
+        Ok(Self(xproto::get_property(
             conn,
             false,
             window,
@@ -155,7 +168,8 @@ where Conn: RequestConnection + ?Sized
 
     /// Get the reply that the server sent, but have errors handled as events.
     pub fn reply_unchecked(self) -> Result<Option<WmSizeHints>, ConnectionError> {
-        self.0.reply_unchecked()?
+        self.0
+            .reply_unchecked()?
             .map(WmSizeHints::from_reply)
             .transpose()
             .map_err(Into::into)
@@ -185,7 +199,7 @@ impl AspectRatio {
     pub fn new(numerator: i32, denominator: i32) -> Self {
         Self {
             numerator,
-            denominator
+            denominator,
         }
     }
 }
@@ -232,12 +246,19 @@ impl WmSizeHints {
     }
 
     /// Send a `GetProperty` request for the given property of the given window
-    pub fn get<C: RequestConnection>(conn: &C, window: Window, property: impl Into<Atom>) -> Result<WmSizeHintsCookie<'_, C>, ConnectionError> {
+    pub fn get<C: RequestConnection>(
+        conn: &C,
+        window: Window,
+        property: impl Into<Atom>,
+    ) -> Result<WmSizeHintsCookie<'_, C>, ConnectionError> {
         WmSizeHintsCookie::new(conn, window, property)
     }
 
     /// Send a `GetProperty` request for the `WM_NORMAL_HINTS` property of the given window
-    pub fn get_normal_hints<C: RequestConnection>(conn: &C, window: Window) -> Result<WmSizeHintsCookie<'_, C>, ConnectionError> {
+    pub fn get_normal_hints<C: RequestConnection>(
+        conn: &C,
+        window: Window,
+    ) -> Result<WmSizeHintsCookie<'_, C>, ConnectionError> {
         Self::get(conn, window, AtomEnum::WM_NORMAL_HINTS)
     }
 
@@ -253,12 +274,21 @@ impl WmSizeHints {
     }
 
     /// Set these `WM_SIZE_HINTS` on some window as the `WM_NORMAL_HINTS` property.
-    pub fn set_normal_hints<'a, C: RequestConnection + ?Sized>(&self, conn: &'a C, window: Window) -> Result<VoidCookie<'a, C>, ConnectionError> {
+    pub fn set_normal_hints<'a, C: RequestConnection + ?Sized>(
+        &self,
+        conn: &'a C,
+        window: Window,
+    ) -> Result<VoidCookie<'a, C>, ConnectionError> {
         self.set(conn, window, AtomEnum::WM_NORMAL_HINTS)
     }
 
     /// Set these `WM_SIZE_HINTS` on some window as the given property.
-    pub fn set<'a, C: RequestConnection + ?Sized>(&self, conn: &'a C, window: Window, property: impl Into<Atom>) -> Result<VoidCookie<'a, C>, ConnectionError> {
+    pub fn set<'a, C: RequestConnection + ?Sized>(
+        &self,
+        conn: &'a C,
+        window: Window,
+        property: impl Into<Atom>,
+    ) -> Result<VoidCookie<'a, C>, ConnectionError> {
         let data = self.serialize();
         xproto::change_property(
             conn,
@@ -284,14 +314,18 @@ impl TryParse for WmSizeHints {
         let (height, remaining) = i32::try_parse(remaining)?;
         let (min_size, remaining) = parse_with_flag::<(i32, i32)>(remaining, flags, P_MIN_SIZE)?;
         let (max_size, remaining) = parse_with_flag::<(i32, i32)>(remaining, flags, P_MAX_SIZE)?;
-        let (size_increment, remaining) = parse_with_flag::<(i32, i32)>(remaining, flags, P_RESIZE_INCREMENT)?;
-        let (aspect, remaining) = parse_with_flag::<(AspectRatio, AspectRatio)>(remaining, flags, P_ASPECT)?;
+        let (size_increment, remaining) =
+            parse_with_flag::<(i32, i32)>(remaining, flags, P_RESIZE_INCREMENT)?;
+        let (aspect, remaining) =
+            parse_with_flag::<(AspectRatio, AspectRatio)>(remaining, flags, P_ASPECT)?;
         // Apparently, some older version of ICCCM didn't have these...?
         let (base_size, wire_win_gravity, remaining) = if remaining.is_empty() {
             (min_size, Some(1), remaining)
         } else {
-            let (base_size, remaining) = parse_with_flag::<(i32, i32)>(remaining, flags, P_BASE_SIZE)?;
-            let (wire_win_gravity, remaining) = parse_with_flag::<u32>(remaining, flags, P_WIN_GRAVITY)?;
+            let (base_size, remaining) =
+                parse_with_flag::<(i32, i32)>(remaining, flags, P_BASE_SIZE)?;
+            let (wire_win_gravity, remaining) =
+                parse_with_flag::<u32>(remaining, flags, P_WIN_GRAVITY)?;
             (base_size, wire_win_gravity, remaining)
         };
 
@@ -329,16 +363,19 @@ impl TryParse for WmSizeHints {
             None
         };
 
-        Ok((WmSizeHints {
-            position,
-            size,
-            min_size,
-            max_size,
-            size_increment,
-            aspect,
-            base_size,
-            win_gravity,
-        }, remaining))
+        Ok((
+            WmSizeHints {
+                position,
+                size,
+                min_size,
+                max_size,
+                size_increment,
+                aspect,
+                base_size,
+                win_gravity,
+            },
+            remaining,
+        ))
     }
 }
 
@@ -355,12 +392,12 @@ impl Serialize for WmSizeHints {
         match self.position {
             Some((WmSizeHintsSpecification::UserSpecified, _, _)) => flags |= U_S_POSITION,
             Some((WmSizeHintsSpecification::ProgramSpecified, _, _)) => flags |= P_S_POSITION,
-            None => {},
+            None => {}
         }
         match self.size {
             Some((WmSizeHintsSpecification::UserSpecified, _, _)) => flags |= U_S_SIZE,
             Some((WmSizeHintsSpecification::ProgramSpecified, _, _)) => flags |= P_S_SIZE,
-            None => {},
+            None => {}
         }
         flags |= self.min_size.map_or(0, |_| P_MIN_SIZE);
         flags |= self.max_size.map_or(0, |_| P_MAX_SIZE);
@@ -373,17 +410,21 @@ impl Serialize for WmSizeHints {
         match self.position {
             Some((_, x, y)) => (x, y),
             None => (0, 0),
-        }.serialize_into(bytes);
+        }
+        .serialize_into(bytes);
 
-         match self.size {
+        match self.size {
             Some((_, width, height)) => (width, height),
             None => (0, 0),
-        }.serialize_into(bytes);
+        }
+        .serialize_into(bytes);
 
         self.min_size.unwrap_or((0, 0)).serialize_into(bytes);
         self.max_size.unwrap_or((0, 0)).serialize_into(bytes);
         self.size_increment.unwrap_or((0, 0)).serialize_into(bytes);
-        self.aspect.unwrap_or((AspectRatio::new(0, 0), AspectRatio::new(0, 0))).serialize_into(bytes);
+        self.aspect
+            .unwrap_or((AspectRatio::new(0, 0), AspectRatio::new(0, 0)))
+            .serialize_into(bytes);
         self.base_size.unwrap_or((0, 0)).serialize_into(bytes);
         self.win_gravity.map_or(0, u32::from).serialize_into(bytes);
     }
@@ -400,11 +441,12 @@ pub struct WmHintsCookie<'a, Conn: RequestConnection + ?Sized>(Cookie<'a, Conn, 
 const NUM_WM_HINTS_ELEMENTS: u32 = 9;
 
 impl<'a, Conn> WmHintsCookie<'a, Conn>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     /// Send a `GetProperty` request for the `WM_CLASS` property of the given window
     pub fn new(conn: &'a Conn, window: Window) -> Result<Self, ConnectionError> {
-        Ok(Self(get_property(
+        Ok(Self(xproto::get_property(
             conn,
             false,
             window,
@@ -422,7 +464,8 @@ where Conn: RequestConnection + ?Sized
 
     /// Get the reply that the server sent, but have errors handled as events.
     pub fn reply_unchecked(self) -> Result<Option<WmHints>, ConnectionError> {
-        self.0.reply_unchecked()?
+        self.0
+            .reply_unchecked()?
             .map(WmHints::from_reply)
             .transpose()
             .map_err(Into::into)
@@ -468,7 +511,10 @@ impl WmHints {
     }
 
     /// Send a `GetProperty` request for the `WM_HINTS` property of the given window
-    pub fn get<C: RequestConnection>(conn: &C, window: Window) -> Result<WmHintsCookie<'_, C>, ConnectionError> {
+    pub fn get<C: RequestConnection>(
+        conn: &C,
+        window: Window,
+    ) -> Result<WmHintsCookie<'_, C>, ConnectionError> {
         WmHintsCookie::new(conn, window)
     }
 
@@ -485,7 +531,11 @@ impl WmHints {
     }
 
     /// Set these `WM_HINTS` on some window.
-    pub fn set<'a, C: RequestConnection + ?Sized>(&self, conn: &'a C, window: Window) -> Result<VoidCookie<'a, C>, ConnectionError> {
+    pub fn set<'a, C: RequestConnection + ?Sized>(
+        &self,
+        conn: &'a C,
+        window: Window,
+    ) -> Result<VoidCookie<'a, C>, ConnectionError> {
         let data = self.serialize();
         xproto::change_property(
             conn,
@@ -507,13 +557,15 @@ impl TryParse for WmHints {
         let (initial_state, remaining) = parse_with_flag::<u32>(remaining, flags, HINT_STATE)?;
         let (icon_pixmap, remaining) = parse_with_flag::<u32>(remaining, flags, HINT_ICON_PIXMAP)?;
         let (icon_window, remaining) = parse_with_flag::<u32>(remaining, flags, HINT_ICON_WINDOW)?;
-        let (icon_position, remaining) = parse_with_flag::<(i32, i32)>(remaining, flags, HINT_ICON_POSITION)?;
+        let (icon_position, remaining) =
+            parse_with_flag::<(i32, i32)>(remaining, flags, HINT_ICON_POSITION)?;
         let (icon_mask, remaining) = parse_with_flag::<u32>(remaining, flags, HINT_ICON_MASK)?;
         // Apparently, some older version of ICCCM didn't have this...?
         let (window_group, remaining) = if remaining.is_empty() {
             (None, remaining)
         } else {
-            let (window_group, remaining) = parse_with_flag::<u32>(remaining, flags, HINT_WINDOW_GROUP)?;
+            let (window_group, remaining) =
+                parse_with_flag::<u32>(remaining, flags, HINT_WINDOW_GROUP)?;
             (window_group, remaining)
         };
 
@@ -528,16 +580,19 @@ impl TryParse for WmHints {
 
         let urgent = flags & HINT_URGENCY != 0;
 
-        Ok((WmHints {
-            input,
-            initial_state,
-            icon_pixmap,
-            icon_window,
-            icon_position,
-            icon_mask,
-            window_group,
-            urgent,
-        }, remaining))
+        Ok((
+            WmHints {
+                input,
+                initial_state,
+                icon_pixmap,
+                icon_window,
+                icon_position,
+                icon_mask,
+                window_group,
+                urgent,
+            },
+            remaining,
+        ))
     }
 }
 
@@ -568,7 +623,8 @@ impl Serialize for WmHints {
             Some(WmHintsState::Normal) => 1,
             Some(WmHintsState::Iconic) => 3,
             None => 0,
-        }.serialize_into(bytes);
+        }
+        .serialize_into(bytes);
         self.icon_pixmap.unwrap_or(0).serialize_into(bytes);
         self.icon_window.unwrap_or(0).serialize_into(bytes);
         self.icon_position.unwrap_or((0, 0)).serialize_into(bytes);
@@ -579,7 +635,11 @@ impl Serialize for WmHints {
 
 /// Parse an element of type `T` and turn it into an `Option` by checking if the given `bit` is set
 /// in `flags`.
-fn parse_with_flag<T: TryParse>(remaining: &[u8], flags: u32, bit: u32) -> Result<(Option<T>, &[u8]), ParseError> {
+fn parse_with_flag<T: TryParse>(
+    remaining: &[u8],
+    flags: u32,
+    bit: u32,
+) -> Result<(Option<T>, &[u8]), ParseError> {
     let (value, remaining) = T::try_parse(remaining)?;
     if flags & bit != 0 {
         Ok((Some(value), remaining))
@@ -592,9 +652,9 @@ fn parse_with_flag<T: TryParse>(remaining: &[u8], flags: u32, bit: u32) -> Resul
 mod test {
     use std::convert::TryInto;
 
-    use crate::xproto::{Atom, AtomEnum, GetPropertyReply, Gravity};
+    use super::{WmClass, WmHints, WmHintsState, WmSizeHints};
     use crate::x11_utils::Serialize;
-    use super::{WmClass, WmSizeHints, WmHints, WmHintsState};
+    use crate::xproto::{Atom, AtomEnum, GetPropertyReply, Gravity};
 
     fn get_property_reply(value: &[u8], format: u8, type_: impl Into<Atom>) -> GetPropertyReply {
         GetPropertyReply {
@@ -622,7 +682,8 @@ mod test {
             (b"Hello\0World", b"Hello", b"World"),
             (b"Hello\0World\0Good\0Day", b"Hello", b"World\0Good\0Day"),
         ] {
-            let wm_class = WmClass::from_reply(get_property_reply(input, 8, AtomEnum::STRING)).unwrap();
+            let wm_class =
+                WmClass::from_reply(get_property_reply(input, 8, AtomEnum::STRING)).unwrap();
             assert_eq!((wm_class.instance(), wm_class.class()), (*instance, *class));
         }
     }
@@ -632,17 +693,38 @@ mod test {
         // This is the value of some random xterm window.
         // It was acquired via 'xtrace xprop WM_NORMAL_HINTS'.
         let input = [
-            0x0000_0350, 0x0000_0000, 0x0000_0000, 0x0000_0000, 0x0000_0000, 0x0000_0015, 0x0000_0017,
-            0x0000_0000, 0x0000_0000, 0x0000_000a, 0x0000_0013, 0x0000_0000, 0x0000_0000, 0x0000_0000,
-            0x0000_0000, 0x0000_000b, 0x0000_0004, 0x0000_0001,
+            0x0000_0350,
+            0x0000_0000,
+            0x0000_0000,
+            0x0000_0000,
+            0x0000_0000,
+            0x0000_0015,
+            0x0000_0017,
+            0x0000_0000,
+            0x0000_0000,
+            0x0000_000a,
+            0x0000_0013,
+            0x0000_0000,
+            0x0000_0000,
+            0x0000_0000,
+            0x0000_0000,
+            0x0000_000b,
+            0x0000_0004,
+            0x0000_0001,
         ];
         let input = input
             .iter()
             .flat_map(|v| u32::serialize(v).to_vec())
             .collect::<Vec<u8>>();
-        let wm_size_hints = WmSizeHints::from_reply(get_property_reply(&input, 32, AtomEnum::WM_SIZE_HINTS)).unwrap();
+        let wm_size_hints =
+            WmSizeHints::from_reply(get_property_reply(&input, 32, AtomEnum::WM_SIZE_HINTS))
+                .unwrap();
 
-        assert!(wm_size_hints.position.is_none(), "{:?}", wm_size_hints.position);
+        assert!(
+            wm_size_hints.position.is_none(),
+            "{:?}",
+            wm_size_hints.position,
+        );
         assert!(wm_size_hints.size.is_none(), "{:?}", wm_size_hints.size);
         assert_eq!(wm_size_hints.min_size, Some((21, 23)));
         assert_eq!(wm_size_hints.max_size, None);
@@ -659,18 +741,26 @@ mod test {
         // This is the value of some random xterm window.
         // It was acquired via 'xtrace xprop WM_HINTS'.
         let input = [
-            0x0000_0043, 0x0000_0001, 0x0000_0001, 0x0000_0000, 0x0000_0000, 0x000_00000, 0x000_00000,
-            0x0000_0000, 0x0060_0009,
+            0x0000_0043,
+            0x0000_0001,
+            0x0000_0001,
+            0x0000_0000,
+            0x0000_0000,
+            0x0000_0000,
+            0x0000_0000,
+            0x0000_0000,
+            0x0060_0009,
         ];
         let input = input
             .iter()
             .flat_map(|v| u32::serialize(v).to_vec())
             .collect::<Vec<u8>>();
-        let wm_hints = WmHints::from_reply(get_property_reply(&input, 32, AtomEnum::WM_HINTS)).unwrap();
+        let wm_hints =
+            WmHints::from_reply(get_property_reply(&input, 32, AtomEnum::WM_HINTS)).unwrap();
 
         assert_eq!(wm_hints.input, Some(true));
         match wm_hints.initial_state {
-            Some(WmHintsState::Normal) => {},
+            Some(WmHintsState::Normal) => {}
             value => panic!("Expected Some(Normal), but got {:?}", value),
         }
         assert_eq!(wm_hints.icon_pixmap, None);

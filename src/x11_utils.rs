@@ -339,8 +339,7 @@ impl Serialize for () {
     fn serialize(&self) -> Self::Bytes {
         []
     }
-    fn serialize_into(&self, _bytes: &mut Vec<u8>) {
-    }
+    fn serialize_into(&self, _bytes: &mut Vec<u8>) {}
 }
 
 impl<T: Serialize> Serialize for (T,) {
