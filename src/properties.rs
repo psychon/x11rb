@@ -159,6 +159,14 @@ impl AspectRatio {
     }
 }
 
+impl TryParse for AspectRatio {
+    fn try_parse(value: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let ((numerator, denominator), remaining) = TryParse::try_parse(value)?;
+        let result = AspectRatio::new(numerator, denominator);
+        Ok((result, remaining))
+    }
+}
+
 impl Serialize for AspectRatio {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
@@ -213,42 +221,36 @@ impl WmSizeHints {
         let (y, remaining) = i32::try_parse(remaining)?;
         let (width, remaining) = i32::try_parse(remaining)?;
         let (height, remaining) = i32::try_parse(remaining)?;
-        let (min_width, remaining) = i32::try_parse(remaining)?;
-        let (min_height, remaining) = i32::try_parse(remaining)?;
-        let (max_width, remaining) = i32::try_parse(remaining)?;
-        let (max_height, remaining) = i32::try_parse(remaining)?;
-        let (width_increment, remaining) = i32::try_parse(remaining)?;
-        let (height_increment, remaining) = i32::try_parse(remaining)?;
-        let (min_aspect_num, remaining) = i32::try_parse(remaining)?;
-        let (min_aspect_den, remaining) = i32::try_parse(remaining)?;
-        let (max_aspect_num, remaining) = i32::try_parse(remaining)?;
-        let (max_aspect_den, remaining) = i32::try_parse(remaining)?;
+        let (min_size, remaining) = parse_with_flag::<(i32, i32)>(remaining, flags, P_MIN_SIZE)?;
+        let (max_size, remaining) = parse_with_flag::<(i32, i32)>(remaining, flags, P_MAX_SIZE)?;
+        let (size_increment, remaining) = parse_with_flag::<(i32, i32)>(remaining, flags, P_RESIZE_INCREMENT)?;
+        let (aspect, remaining) = parse_with_flag::<(AspectRatio, AspectRatio)>(remaining, flags, P_ASPECT)?;
         // Apparently, some older version of ICCCM didn't have these...?
-        let (base_width, base_height, wire_win_gravity) = if remaining.is_empty() {
-            (min_width, min_height, 1)
+        let (base_size, wire_win_gravity) = if remaining.is_empty() {
+            (min_size, Some(1))
         } else {
-            let (base_width, remaining) = i32::try_parse(remaining)?;
-            let (base_height, remaining) = i32::try_parse(remaining)?;
-            let (wire_win_gravity, _remaining) = u32::try_parse(remaining)?;
-            (base_width, base_height, wire_win_gravity)
+            let (base_size, remaining) = parse_with_flag::<(i32, i32)>(remaining, flags, P_BASE_SIZE)?;
+            let (wire_win_gravity, _remaining) = parse_with_flag::<u32>(remaining, flags, P_WIN_GRAVITY)?;
+            (base_size, wire_win_gravity)
         };
 
         // FIXME: Move this into the code generator
         let win_gravity = match wire_win_gravity {
-            1 => xproto::Gravity::NorthWest,
-            2 => xproto::Gravity::North,
-            3 => xproto::Gravity::NorthEast,
-            4 => xproto::Gravity::West,
-            5 => xproto::Gravity::Center,
-            6 => xproto::Gravity::East,
-            7 => xproto::Gravity::SouthWest,
-            8 => xproto::Gravity::South,
-            9 => xproto::Gravity::SouthEast,
-            10 => xproto::Gravity::Static,
+            None => None,
+            Some(1) => Some(xproto::Gravity::NorthWest),
+            Some(2) => Some(xproto::Gravity::North),
+            Some(3) => Some(xproto::Gravity::NorthEast),
+            Some(4) => Some(xproto::Gravity::West),
+            Some(5) => Some(xproto::Gravity::Center),
+            Some(6) => Some(xproto::Gravity::East),
+            Some(7) => Some(xproto::Gravity::SouthWest),
+            Some(8) => Some(xproto::Gravity::South),
+            Some(9) => Some(xproto::Gravity::SouthEast),
+            Some(10) => Some(xproto::Gravity::Static),
             // BitForget and WinUnmap are not allowed here
             _ => return Err(ParseError::ParseError),
         };
-        assert_eq!(wire_win_gravity, win_gravity.into());
+        assert_eq!(wire_win_gravity, win_gravity.map(Into::into));
 
         let position = if flags & U_S_POSITION != 0 {
             Some((WmSizeHintsSpecification::UserSpecified, x, y))
@@ -261,38 +263,6 @@ impl WmSizeHints {
             Some((WmSizeHintsSpecification::UserSpecified, width, height))
         } else if flags & P_S_SIZE != 0 {
             Some((WmSizeHintsSpecification::ProgramSpecified, width, height))
-        } else {
-            None
-        };
-        let min_size = if flags & P_MIN_SIZE != 0 {
-            Some((min_width, min_height))
-        } else {
-            None
-        };
-        let max_size = if flags & P_MAX_SIZE != 0 {
-            Some((max_width, max_height))
-        } else {
-            None
-        };
-        let size_increment = if flags & P_RESIZE_INCREMENT != 0 {
-            Some((width_increment, height_increment))
-        } else {
-            None
-        };
-        let aspect = if flags & P_ASPECT != 0 {
-            let min_aspect = AspectRatio::new(min_aspect_num, min_aspect_den);
-            let max_aspect = AspectRatio::new(max_aspect_num, max_aspect_den);
-            Some((min_aspect, max_aspect))
-        } else {
-            None
-        };
-        let base_size = if flags & P_BASE_SIZE != 0 {
-            Some((base_width, base_height))
-        } else {
-            None
-        };
-        let win_gravity = if flags & P_WIN_GRAVITY != 0 {
-            Some(win_gravity)
         } else {
             None
         };
@@ -325,25 +295,12 @@ impl WmSizeHints {
             Some((WmSizeHintsSpecification::ProgramSpecified, _, _)) => flags |= P_S_SIZE,
             None => {},
         }
-        if self.min_size.is_some() {
-            flags |= P_MIN_SIZE;
-        }
-        if self.max_size.is_some() {
-            flags |= P_MAX_SIZE;
-        }
-        if self.size_increment.is_some() {
-            flags |= P_RESIZE_INCREMENT;
-        }
-        if self.aspect.is_some() {
-            flags |= P_ASPECT;
-        }
-        if self.base_size.is_some() {
-            flags |= P_BASE_SIZE;
-        }
-        if self.win_gravity.is_some() {
-            flags |= P_WIN_GRAVITY;
-        }
-
+        flags |= self.min_size.map_or(0, |_| P_MIN_SIZE);
+        flags |= self.max_size.map_or(0, |_| P_MAX_SIZE);
+        flags |= self.size_increment.map_or(0, |_| P_RESIZE_INCREMENT);
+        flags |= self.aspect.map_or(0, |_| P_ASPECT);
+        flags |= self.base_size.map_or(0, |_| P_BASE_SIZE);
+        flags |= self.win_gravity.map_or(0, |_| P_WIN_GRAVITY);
         flags.serialize_into(&mut data);
 
         match self.position {
@@ -468,60 +425,29 @@ impl WmHints {
 
         let remaining = &reply.value;
         let (flags, remaining) = u32::try_parse(remaining)?;
-        let (input, remaining) = u32::try_parse(remaining)?;
-        let (initial_state, remaining) = u32::try_parse(remaining)?;
-        let (icon_pixmap, remaining) = u32::try_parse(remaining)?;
-        let (icon_window, remaining) = u32::try_parse(remaining)?;
-        let (icon_x, remaining) = i32::try_parse(remaining)?;
-        let (icon_y, remaining) = i32::try_parse(remaining)?;
-        let (icon_mask, remaining) = u32::try_parse(remaining)?;
-        // Apparently, some older version of ICCCM didn't have tis...?
+        let (input, remaining) = parse_with_flag::<u32>(remaining, flags, HINT_INPUT)?;
+        let (initial_state, remaining) = parse_with_flag::<u32>(remaining, flags, HINT_STATE)?;
+        let (icon_pixmap, remaining) = parse_with_flag::<u32>(remaining, flags, HINT_ICON_PIXMAP)?;
+        let (icon_window, remaining) = parse_with_flag::<u32>(remaining, flags, HINT_ICON_WINDOW)?;
+        let (icon_position, remaining) = parse_with_flag::<(i32, i32)>(remaining, flags, HINT_ICON_POSITION)?;
+        let (icon_mask, remaining) = parse_with_flag::<u32>(remaining, flags, HINT_ICON_MASK)?;
+        // Apparently, some older version of ICCCM didn't have this...?
         let window_group = if remaining.is_empty() {
-            0
+            None
         } else {
-            let (window_group, _remaining) = u32::try_parse(remaining)?;
+            let (window_group, _remaining) = parse_with_flag::<u32>(remaining, flags, HINT_WINDOW_GROUP)?;
             window_group
         };
 
-        let input = if flags & HINT_INPUT != 0 {
-            Some(input != 0)
-        } else {
-            None
+        let input = input.map(|input| input != 0);
+
+        let initial_state = match initial_state {
+            None => None,
+            Some(1) => Some(WmStateState::Normal),
+            Some(3) => Some(WmStateState::Iconic),
+            _ => return Err(ParseError::ParseError),
         };
-        let initial_state = if flags & HINT_STATE != 0 {
-            Some(match initial_state {
-                1 => WmStateState::Normal,
-                3 => WmStateState::Iconic,
-                _ => return Err(ParseError::ParseError),
-            })
-        } else {
-            None
-        };
-        let icon_pixmap = if flags & HINT_ICON_PIXMAP != 0 {
-            Some(icon_pixmap)
-        } else {
-            None
-        };
-        let icon_window = if flags & HINT_ICON_WINDOW != 0 {
-            Some(icon_window)
-        } else {
-            None
-        };
-        let icon_position = if flags & HINT_ICON_POSITION != 0 {
-            Some((icon_x, icon_y))
-        } else {
-            None
-        };
-        let icon_mask = if flags & HINT_ICON_MASK != 0 {
-            Some(icon_mask)
-        } else {
-            None
-        };
-        let window_group = if flags & HINT_WINDOW_GROUP != 0 {
-            Some(window_group)
-        } else {
-            None
-        };
+
         let urgent = flags & HINT_URGENCY != 0;
 
         Ok(WmHints {
@@ -542,27 +468,13 @@ impl WmHints {
         let mut data = Vec::with_capacity((NUM_WM_HINTS_ELEMENTS * 4).try_into().unwrap());
 
         let mut flags = 0;
-        if self.input.is_some() {
-            flags |= HINT_INPUT;
-        }
-        if self.initial_state.is_some() {
-            flags |= HINT_STATE;
-        }
-        if self.icon_pixmap.is_some() {
-            flags |= HINT_ICON_PIXMAP;
-        }
-        if self.icon_window.is_some() {
-            flags |= HINT_ICON_WINDOW;
-        }
-        if self.icon_position.is_some() {
-            flags |= HINT_ICON_POSITION;
-        }
-        if self.icon_mask.is_some() {
-            flags |= HINT_ICON_MASK;
-        }
-        if self.window_group.is_some() {
-            flags |= HINT_WINDOW_GROUP;
-        }
+        flags |= self.input.map_or(0, |_| HINT_INPUT);
+        flags |= self.initial_state.map_or(0, |_| HINT_STATE);
+        flags |= self.icon_pixmap.map_or(0, |_| HINT_ICON_PIXMAP);
+        flags |= self.icon_window.map_or(0, |_| HINT_ICON_WINDOW);
+        flags |= self.icon_position.map_or(0, |_| HINT_ICON_POSITION);
+        flags |= self.icon_mask.map_or(0, |_| HINT_ICON_MASK);
+        flags |= self.window_group.map_or(0, |_| HINT_WINDOW_GROUP);
         if self.urgent {
             flags |= HINT_URGENCY;
         }
@@ -576,7 +488,7 @@ impl WmHints {
         }.serialize_into(&mut data);
         self.icon_pixmap.unwrap_or(0).serialize_into(&mut data);
         self.icon_window.unwrap_or(0).serialize_into(&mut data);
-         self.icon_position.unwrap_or((0, 0)).serialize_into(&mut data);
+        self.icon_position.unwrap_or((0, 0)).serialize_into(&mut data);
         self.icon_mask.unwrap_or(0).serialize_into(&mut data);
         self.window_group.unwrap_or(0).serialize_into(&mut data);
 
@@ -590,6 +502,17 @@ impl WmHints {
             NUM_WM_HINTS_ELEMENTS,
             &data,
         )
+    }
+}
+
+/// Parse an element of type `T` and turn it into an `Option` by checking if the given `bit` is set
+/// in `flags`.
+fn parse_with_flag<T: TryParse>(remaining: &[u8], flags: u32, bit: u32) -> Result<(Option<T>, &[u8]), ParseError> {
+    let (value, remaining) = T::try_parse(remaining)?;
+    if flags & bit != 0 {
+        Ok((Some(value), remaining))
+    } else {
+        Ok((None, remaining))
     }
 }
 
