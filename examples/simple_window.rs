@@ -18,8 +18,12 @@ fn main() {
 
     let wm_protocols = conn.intern_atom(false, b"WM_PROTOCOLS").unwrap();
     let wm_delete_window = conn.intern_atom(false, b"WM_DELETE_WINDOW").unwrap();
+    let net_wm_name = conn.intern_atom(false, b"_NET_WM_NAME").unwrap();
+    let utf8_string = conn.intern_atom(false, b"UTF8_STRING").unwrap();
     let wm_protocols = wm_protocols.reply().unwrap().atom;
     let wm_delete_window = wm_delete_window.reply().unwrap().atom;
+    let net_wm_name = net_wm_name.reply().unwrap().atom;
+    let utf8_string = utf8_string.reply().unwrap().atom;
 
     let win_aux = CreateWindowAux::new()
         .event_mask(EventMask::Exposure | EventMask::StructureNotify | EventMask::NoEvent)
@@ -56,12 +60,40 @@ fn main() {
         title.as_bytes(),
     )
     .unwrap();
+    conn.change_property8(
+        PropMode::Replace,
+        win_id,
+        net_wm_name,
+        utf8_string,
+        title.as_bytes(),
+    )
+    .unwrap();
     conn.change_property32(
         PropMode::Replace,
         win_id,
         wm_protocols,
         AtomEnum::ATOM,
         &[wm_delete_window],
+    )
+    .unwrap();
+    conn.change_property8(
+        PropMode::Replace,
+        win_id,
+        AtomEnum::WM_CLASS,
+        AtomEnum::STRING,
+        b"simple_window\0simple_window\0",
+    )
+    .unwrap();
+    conn.change_property8(
+        PropMode::Replace,
+        win_id,
+        AtomEnum::WM_CLIENT_MACHINE,
+        AtomEnum::STRING,
+        // Text encoding in X11 is complicated. Let's use UTF-8 and hope for the best.
+        gethostname::gethostname()
+            .to_str()
+            .unwrap_or("[Invalid]")
+            .as_bytes(),
     )
     .unwrap();
 
@@ -90,8 +122,8 @@ fn main() {
         match event {
             Event::Expose(event) => {
                 if event.count == 0 {
-                    // We ought to clear the background before drawing something new, but...
-                    // whatever
+                    // There already is a white background because we set background_pixel to white
+                    // when creating the window.
                     let (width, height): (i16, i16) = (width as _, height as _);
                     let points = [
                         Point {
