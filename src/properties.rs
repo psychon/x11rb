@@ -383,7 +383,7 @@ where Conn: RequestConnection + ?Sized
 
 /// The possible values for a `WM_STATE`'s state field.
 #[derive(Debug, Copy, Clone)]
-pub enum WmStateState {
+pub enum WmHintsState {
     Normal,
     Iconic,
 }
@@ -404,7 +404,7 @@ const HINT_URGENCY: u32 = 1 << 8;
 #[derive(Debug, Default, Copy, Clone)]
 pub struct WmHints {
     pub input: Option<bool>,
-    pub initial_state: Option<WmStateState>,
+    pub initial_state: Option<WmHintsState>,
     pub icon_pixmap: Option<xproto::Pixmap>,
     pub icon_window: Option<Window>,
     pub icon_position: Option<(i32, i32)>,
@@ -453,8 +453,8 @@ impl WmHints {
 
         let initial_state = match initial_state {
             None => None,
-            Some(1) => Some(WmStateState::Normal),
-            Some(3) => Some(WmStateState::Iconic),
+            Some(1) => Some(WmHintsState::Normal),
+            Some(3) => Some(WmHintsState::Iconic),
             _ => return Err(ParseError::ParseError),
         };
 
@@ -492,8 +492,8 @@ impl WmHints {
         flags.serialize_into(&mut data);
         self.input.unwrap_or(false).serialize_into(&mut data);
         match self.initial_state {
-            Some(WmStateState::Normal) => 1,
-            Some(WmStateState::Iconic) => 3,
+            Some(WmHintsState::Normal) => 1,
+            Some(WmHintsState::Iconic) => 3,
             None => 0,
         }.serialize_into(&mut data);
         self.icon_pixmap.unwrap_or(0).serialize_into(&mut data);
@@ -530,16 +530,17 @@ fn parse_with_flag<T: TryParse>(remaining: &[u8], flags: u32, bit: u32) -> Resul
 mod test {
     use std::convert::TryInto;
 
-    use crate::xproto::{AtomEnum, GetPropertyReply};
-    use super::WmClass;
+    use crate::xproto::{Atom, AtomEnum, GetPropertyReply, Gravity};
+    use crate::x11_utils::Serialize;
+    use super::{WmClass, WmSizeHints, WmHints, WmHintsState};
 
-    fn get_property_reply(value: &[u8]) -> GetPropertyReply {
+    fn get_property_reply(value: &[u8], format: u8, type_: impl Into<Atom>) -> GetPropertyReply {
         GetPropertyReply {
             response_type: 1,
-            format: 8,
+            format,
             sequence: 0,
             length: 0,
-            type_: AtomEnum::STRING.into(),
+            type_: type_.into(),
             bytes_after: 0,
             value_len: value.len().try_into().unwrap(),
             value: value.to_vec(),
@@ -559,8 +560,60 @@ mod test {
             (b"Hello\0World", b"Hello", b"World"),
             (b"Hello\0World\0Good\0Day", b"Hello", b"World\0Good\0Day"),
         ] {
-            let wm_class = WmClass::from_reply(get_property_reply(input)).unwrap();
+            let wm_class = WmClass::from_reply(get_property_reply(input, 8, AtomEnum::STRING)).unwrap();
             assert_eq!((wm_class.instance(), wm_class.class()), (*instance, *class));
         }
+    }
+
+    #[test]
+    fn test_wm_normal_hints() {
+        // This is the value of some random xterm window.
+        // It was acquired via 'xtrace xprop WM_NORMAL_HINTS'.
+        let input = [
+            0x00000350, 0x00000000, 0x00000000, 0x00000000, 0x00000000, 0x00000015, 0x00000017,
+            0x00000000, 0x00000000, 0x0000000a, 0x00000013, 0x00000000, 0x00000000, 0x00000000,
+            0x00000000, 0x0000000b, 0x00000004, 0x00000001,
+        ];
+        let input = input
+            .iter()
+            .flat_map(|v| u32::serialize(v).to_vec())
+            .collect::<Vec<u8>>();
+        let wm_size_hints = WmSizeHints::from_reply(get_property_reply(&input, 32, AtomEnum::WM_SIZE_HINTS)).unwrap();
+
+        assert!(wm_size_hints.position.is_none(), "{:?}", wm_size_hints.position);
+        assert!(wm_size_hints.size.is_none(), "{:?}", wm_size_hints.size);
+        assert_eq!(wm_size_hints.min_size, Some((21, 23)));
+        assert_eq!(wm_size_hints.max_size, None);
+        assert_eq!(wm_size_hints.size_increment, Some((10, 19)));
+        assert!(wm_size_hints.aspect.is_none(), "{:?}", wm_size_hints.aspect);
+        assert_eq!(wm_size_hints.base_size, Some((11, 4)));
+        assert_eq!(wm_size_hints.win_gravity, Some(Gravity::NorthWest));
+    }
+
+    #[test]
+    fn test_wm_hints() {
+        // This is the value of some random xterm window.
+        // It was acquired via 'xtrace xprop WM_HINTS'.
+        let input = [
+            0x00000043, 0x00000001, 0x00000001, 0x00000000, 0x00000000, 0x00000000, 0x00000000,
+            0x00000000, 0x00600009,
+        ];
+        let input = input
+            .iter()
+            .flat_map(|v| u32::serialize(v).to_vec())
+            .collect::<Vec<u8>>();
+        let wm_hints = WmHints::from_reply(get_property_reply(&input, 32, AtomEnum::WM_HINTS)).unwrap();
+
+        assert_eq!(wm_hints.input, Some(true));
+        match wm_hints.initial_state {
+            Some(WmHintsState::Normal) => {},
+            value => panic!("Expected Some(Normal), but got {:?}", value),
+        }
+        assert_eq!(wm_hints.icon_pixmap, None);
+        assert_eq!(wm_hints.icon_window, None);
+        assert_eq!(wm_hints.icon_position, None);
+        assert_eq!(wm_hints.icon_mask, None);
+        assert_eq!(wm_hints.window_group, Some(0x600009));
+        assert_eq!(wm_hints.urgent, false);
     }
 }
