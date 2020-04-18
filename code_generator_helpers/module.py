@@ -246,6 +246,7 @@ class Module(object):
         self.out("#![allow(clippy::identity_op)]")
         self.out("#![allow(clippy::trivially_copy_pass_by_ref)]")
         self.out("#![allow(clippy::eq_op)]")
+        self.out("")
         self.out("use std::convert::TryFrom;")
         self.out("#[allow(unused_imports)]")
         self.out("use std::convert::TryInto;")
@@ -254,13 +255,13 @@ class Module(object):
         self.out("use crate::utils::RawFdContainer;")
         self.out("#[allow(unused_imports)]")
         self.out("use crate::x11_utils::Event as _;")
-        self.out("use crate::x11_utils::{TryParse, Serialize};")
+        self.out("use crate::x11_utils::{Serialize, TryParse};")
         self.out("use crate::connection::RequestConnection;")
         self.out("#[allow(unused_imports)]")
         self.out("use crate::cookie::{Cookie, CookieWithFds, VoidCookie};")
         if not self.namespace.is_ext:
             self.out("use crate::cookie::ListFontsWithInfoCookie;")
-        self.out("use crate::errors::{ParseError, ConnectionError};")
+        self.out("use crate::errors::{ConnectionError, ParseError};")
 
         self.generic_event_name = "GenericEvent"
         self.option_name = "Option"

@@ -5,6 +5,7 @@
 #![allow(clippy::identity_op)]
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
+
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -13,12 +14,12 @@ use std::io::IoSlice;
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::Event as _;
-use crate::x11_utils::{TryParse, Serialize};
+use crate::x11_utils::{Serialize, TryParse};
 use crate::connection::RequestConnection;
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::cookie::ListFontsWithInfoCookie;
-use crate::errors::{ParseError, ConnectionError};
+use crate::errors::{ConnectionError, ParseError};
 #[allow(unused_imports)]
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
