@@ -537,7 +537,7 @@ pub fn compute_length_field<'b>(
     let first_buf = &request_buffers[0];
 
     // If the length fits into an u16, just return the request as-is
-    if let Ok(wire_length) = TryInto::<u16>::try_into(wire_length) {
+    if let Ok(wire_length) = u16::try_from(wire_length) {
         // Check that the request contains the correct length field
         let length_field = u16::from_ne_bytes([first_buf[2], first_buf[3]]);
         assert_eq!(

@@ -261,16 +261,16 @@ impl<'a, C: Connection> WMState<'a, C> {
             unimplemented!();
         }
         let mut aux = ConfigureWindowAux::default();
-        if event.value_mask & Into::<u16>::into(ConfigWindow::X) != 0 {
+        if event.value_mask & u16::from(ConfigWindow::X) != 0 {
             aux = aux.x(i32::from(event.x));
         }
-        if event.value_mask & Into::<u16>::into(ConfigWindow::Y) != 0 {
+        if event.value_mask & u16::from(ConfigWindow::Y) != 0 {
             aux = aux.y(i32::from(event.y));
         }
-        if event.value_mask & Into::<u16>::into(ConfigWindow::Width) != 0 {
+        if event.value_mask & u16::from(ConfigWindow::Width) != 0 {
             aux = aux.width(u32::from(event.width));
         }
-        if event.value_mask & Into::<u16>::into(ConfigWindow::Height) != 0 {
+        if event.value_mask & u16::from(ConfigWindow::Height) != 0 {
             aux = aux.height(u32::from(event.height));
         }
         println!("Configure: {:?}", aux);
