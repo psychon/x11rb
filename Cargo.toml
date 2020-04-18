@@ -2,7 +2,10 @@
 name = "x11rb"
 version = "0.4.1"
 description = "Rust bindings to X11"
-authors = ["Uli Schlachter <psychon@znc.in>"]
+authors = [
+    "Uli Schlachter <psychon@znc.in>",
+    "Eduardo Sánchez Muñoz <esm@eduardosm.net>",
+]
 repository = "https://github.com/psychon/x11rb"
 readme = "README.md"
 edition = "2018"
