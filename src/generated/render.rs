@@ -5,6 +5,7 @@
 #![allow(clippy::identity_op)]
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
+
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -13,11 +14,12 @@ use std::io::IoSlice;
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::Event as _;
-use crate::x11_utils::{TryParse, Serialize};
+#[allow(unused_imports)]
+use crate::x11_utils::{Serialize, TryParse};
 use crate::connection::RequestConnection;
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ParseError, ConnectionError};
+use crate::errors::{ConnectionError, ParseError};
 #[allow(unused_imports)]
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
@@ -81,7 +83,7 @@ impl TryFrom<u8> for PictType {
         match value {
             0 => Ok(PictType::Indexed),
             1 => Ok(PictType::Direct),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -140,7 +142,7 @@ impl TryFrom<u8> for PictureEnum {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             0 => Ok(PictureEnum::None),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -355,7 +357,7 @@ impl TryFrom<u8> for PictOp {
             60 => Ok(PictOp::HSLSaturation),
             61 => Ok(PictOp::HSLColor),
             62 => Ok(PictOp::HSLLuminosity),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -417,7 +419,7 @@ impl TryFrom<u8> for PolyEdge {
         match value {
             0 => Ok(PolyEdge::Sharp),
             1 => Ok(PolyEdge::Smooth),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -479,7 +481,7 @@ impl TryFrom<u8> for PolyMode {
         match value {
             0 => Ok(PolyMode::Precise),
             1 => Ok(PolyMode::Imprecise),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -564,7 +566,7 @@ impl TryFrom<u16> for CP {
             1024 => Ok(CP::PolyMode),
             2048 => Ok(CP::Dither),
             4096 => Ok(CP::ComponentAlpha),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -633,7 +635,7 @@ impl TryFrom<u8> for SubPixel {
             3 => Ok(SubPixel::VerticalRGB),
             4 => Ok(SubPixel::VerticalBGR),
             5 => Ok(SubPixel::None),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -701,7 +703,7 @@ impl TryFrom<u8> for Repeat {
             1 => Ok(Repeat::Normal),
             2 => Ok(Repeat::Pad),
             3 => Ok(Repeat::Reflect),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1093,7 +1095,7 @@ impl Serialize for Pictforminfo {
     type Bytes = [u8; 28];
     fn serialize(&self) -> Self::Bytes {
         let id_bytes = self.id.serialize();
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let depth_bytes = self.depth.serialize();
         let direct_bytes = self.direct.serialize();
         let colormap_bytes = self.colormap.serialize();
@@ -1131,7 +1133,7 @@ impl Serialize for Pictforminfo {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(28);
         self.id.serialize_into(bytes);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.depth.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.direct.serialize_into(bytes);
@@ -1666,19 +1668,19 @@ impl Serialize for Glyphinfo {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 pub fn query_version<Conn>(conn: &Conn, client_major_version: u32, client_minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let client_major_version_bytes = client_major_version.serialize();
     let client_minor_version_bytes = client_minor_version.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_VERSION_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         client_major_version_bytes[0],
         client_major_version_bytes[1],
         client_major_version_bytes[2],
@@ -1688,9 +1690,11 @@ where Conn: RequestConnection + ?Sized
         client_minor_version_bytes[2],
         client_minor_version_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -1723,21 +1727,23 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 /// Opcode for the QueryPictFormats request
 pub const QUERY_PICT_FORMATS_REQUEST: u8 = 1;
 pub fn query_pict_formats<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryPictFormatsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
-    let request0 = [
+    let length_so_far = 0;
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_PICT_FORMATS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryPictFormatsReply {
@@ -1779,26 +1785,28 @@ impl TryFrom<&[u8]> for QueryPictFormatsReply {
 /// Opcode for the QueryPictIndexValues request
 pub const QUERY_PICT_INDEX_VALUES_REQUEST: u8 = 2;
 pub fn query_pict_index_values<Conn>(conn: &Conn, format: Pictformat) -> Result<Cookie<'_, Conn, QueryPictIndexValuesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let format_bytes = format.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_PICT_INDEX_VALUES_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         format_bytes[0],
         format_bytes[1],
         format_bytes[2],
         format_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryPictIndexValuesReply {
@@ -1854,43 +1862,43 @@ impl CreatePictureAux {
     fn value_mask(&self) -> u32 {
         let mut mask = 0;
         if self.repeat.is_some() {
-            mask |= Into::<u32>::into(CP::Repeat);
+            mask |= u32::from(CP::Repeat);
         }
         if self.alphamap.is_some() {
-            mask |= Into::<u32>::into(CP::AlphaMap);
+            mask |= u32::from(CP::AlphaMap);
         }
         if self.alphaxorigin.is_some() {
-            mask |= Into::<u32>::into(CP::AlphaXOrigin);
+            mask |= u32::from(CP::AlphaXOrigin);
         }
         if self.alphayorigin.is_some() {
-            mask |= Into::<u32>::into(CP::AlphaYOrigin);
+            mask |= u32::from(CP::AlphaYOrigin);
         }
         if self.clipxorigin.is_some() {
-            mask |= Into::<u32>::into(CP::ClipXOrigin);
+            mask |= u32::from(CP::ClipXOrigin);
         }
         if self.clipyorigin.is_some() {
-            mask |= Into::<u32>::into(CP::ClipYOrigin);
+            mask |= u32::from(CP::ClipYOrigin);
         }
         if self.clipmask.is_some() {
-            mask |= Into::<u32>::into(CP::ClipMask);
+            mask |= u32::from(CP::ClipMask);
         }
         if self.graphicsexposure.is_some() {
-            mask |= Into::<u32>::into(CP::GraphicsExposure);
+            mask |= u32::from(CP::GraphicsExposure);
         }
         if self.subwindowmode.is_some() {
-            mask |= Into::<u32>::into(CP::SubwindowMode);
+            mask |= u32::from(CP::SubwindowMode);
         }
         if self.polyedge.is_some() {
-            mask |= Into::<u32>::into(CP::PolyEdge);
+            mask |= u32::from(CP::PolyEdge);
         }
         if self.polymode.is_some() {
-            mask |= Into::<u32>::into(CP::PolyMode);
+            mask |= u32::from(CP::PolyMode);
         }
         if self.dither.is_some() {
-            mask |= Into::<u32>::into(CP::Dither);
+            mask |= u32::from(CP::Dither);
         }
         if self.componentalpha.is_some() {
-            mask |= Into::<u32>::into(CP::ComponentAlpha);
+            mask |= u32::from(CP::ComponentAlpha);
         }
         mask
     }
@@ -2010,23 +2018,23 @@ impl Serialize for CreatePictureAux {
     }
 }
 pub fn create_picture<'c, Conn>(conn: &'c Conn, pid: Picture, drawable: xproto::Drawable, format: Pictformat, value_list: &CreatePictureAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
-    let length: usize = (20 + value_list_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let pid_bytes = pid.serialize();
     let drawable_bytes = drawable.serialize();
     let format_bytes = format.serialize();
     let value_mask_bytes = value_mask.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CREATE_PICTURE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         pid_bytes[0],
         pid_bytes[1],
         pid_bytes[2],
@@ -2044,12 +2052,14 @@ where Conn: RequestConnection + ?Sized
         value_mask_bytes[2],
         value_mask_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&value_list_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the ChangePicture request
@@ -2079,43 +2089,43 @@ impl ChangePictureAux {
     fn value_mask(&self) -> u32 {
         let mut mask = 0;
         if self.repeat.is_some() {
-            mask |= Into::<u32>::into(CP::Repeat);
+            mask |= u32::from(CP::Repeat);
         }
         if self.alphamap.is_some() {
-            mask |= Into::<u32>::into(CP::AlphaMap);
+            mask |= u32::from(CP::AlphaMap);
         }
         if self.alphaxorigin.is_some() {
-            mask |= Into::<u32>::into(CP::AlphaXOrigin);
+            mask |= u32::from(CP::AlphaXOrigin);
         }
         if self.alphayorigin.is_some() {
-            mask |= Into::<u32>::into(CP::AlphaYOrigin);
+            mask |= u32::from(CP::AlphaYOrigin);
         }
         if self.clipxorigin.is_some() {
-            mask |= Into::<u32>::into(CP::ClipXOrigin);
+            mask |= u32::from(CP::ClipXOrigin);
         }
         if self.clipyorigin.is_some() {
-            mask |= Into::<u32>::into(CP::ClipYOrigin);
+            mask |= u32::from(CP::ClipYOrigin);
         }
         if self.clipmask.is_some() {
-            mask |= Into::<u32>::into(CP::ClipMask);
+            mask |= u32::from(CP::ClipMask);
         }
         if self.graphicsexposure.is_some() {
-            mask |= Into::<u32>::into(CP::GraphicsExposure);
+            mask |= u32::from(CP::GraphicsExposure);
         }
         if self.subwindowmode.is_some() {
-            mask |= Into::<u32>::into(CP::SubwindowMode);
+            mask |= u32::from(CP::SubwindowMode);
         }
         if self.polyedge.is_some() {
-            mask |= Into::<u32>::into(CP::PolyEdge);
+            mask |= u32::from(CP::PolyEdge);
         }
         if self.polymode.is_some() {
-            mask |= Into::<u32>::into(CP::PolyMode);
+            mask |= u32::from(CP::PolyMode);
         }
         if self.dither.is_some() {
-            mask |= Into::<u32>::into(CP::Dither);
+            mask |= u32::from(CP::Dither);
         }
         if self.componentalpha.is_some() {
-            mask |= Into::<u32>::into(CP::ComponentAlpha);
+            mask |= u32::from(CP::ComponentAlpha);
         }
         mask
     }
@@ -2235,21 +2245,21 @@ impl Serialize for ChangePictureAux {
     }
 }
 pub fn change_picture<'c, Conn>(conn: &'c Conn, picture: Picture, value_list: &ChangePictureAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
-    let length: usize = (12 + value_list_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let picture_bytes = picture.serialize();
     let value_mask_bytes = value_mask.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CHANGE_PICTURE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         picture_bytes[0],
         picture_bytes[1],
         picture_bytes[2],
@@ -2259,32 +2269,34 @@ where Conn: RequestConnection + ?Sized
         value_mask_bytes[2],
         value_mask_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&value_list_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the SetPictureClipRectangles request
 pub const SET_PICTURE_CLIP_RECTANGLES_REQUEST: u8 = 6;
 pub fn set_picture_clip_rectangles<'c, Conn>(conn: &'c Conn, picture: Picture, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12 + 8 * rectangles.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let picture_bytes = picture.serialize();
     let clip_x_origin_bytes = clip_x_origin.serialize();
     let clip_y_origin_bytes = clip_y_origin.serialize();
     let rectangles_bytes = rectangles.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         SET_PICTURE_CLIP_RECTANGLES_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         picture_bytes[0],
         picture_bytes[1],
         picture_bytes[2],
@@ -2294,48 +2306,53 @@ where Conn: RequestConnection + ?Sized
         clip_y_origin_bytes[0],
         clip_y_origin_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&rectangles_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&rectangles_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&rectangles_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the FreePicture request
 pub const FREE_PICTURE_REQUEST: u8 = 7;
 pub fn free_picture<Conn>(conn: &Conn, picture: Picture) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let picture_bytes = picture.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         FREE_PICTURE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         picture_bytes[0],
         picture_bytes[1],
         picture_bytes[2],
         picture_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the Composite request
 pub const COMPOSITE_REQUEST: u8 = 8;
 pub fn composite<Conn, A>(conn: &Conn, op: A, src: Picture, mask: Picture, dst: Picture, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (36) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let op = op.into();
     let op_bytes = op.serialize();
     let src_bytes = src.serialize();
@@ -2349,11 +2366,11 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let dst_y_bytes = dst_y.serialize();
     let width_bytes = width.serialize();
     let height_bytes = height.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         COMPOSITE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         op_bytes[0],
         0,
         0,
@@ -2387,20 +2404,23 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
         height_bytes[0],
         height_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the Trapezoids request
 pub const TRAPEZOIDS_REQUEST: u8 = 10;
 pub fn trapezoids<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, traps: &[Trapezoid]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (24 + 40 * traps.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let op = op.into();
     let op_bytes = op.serialize();
     let src_bytes = src.serialize();
@@ -2409,11 +2429,11 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let src_x_bytes = src_x.serialize();
     let src_y_bytes = src_y.serialize();
     let traps_bytes = traps.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         TRAPEZOIDS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         op_bytes[0],
         0,
         0,
@@ -2435,23 +2455,26 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&traps_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&traps_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&traps_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the Triangles request
 pub const TRIANGLES_REQUEST: u8 = 11;
 pub fn triangles<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, triangles: &[Triangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (24 + 24 * triangles.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let op = op.into();
     let op_bytes = op.serialize();
     let src_bytes = src.serialize();
@@ -2460,11 +2483,11 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let src_x_bytes = src_x.serialize();
     let src_y_bytes = src_y.serialize();
     let triangles_bytes = triangles.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         TRIANGLES_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         op_bytes[0],
         0,
         0,
@@ -2486,23 +2509,26 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&triangles_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&triangles_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&triangles_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the TriStrip request
 pub const TRI_STRIP_REQUEST: u8 = 12;
 pub fn tri_strip<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (24 + 8 * points.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let op = op.into();
     let op_bytes = op.serialize();
     let src_bytes = src.serialize();
@@ -2511,11 +2537,11 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let src_x_bytes = src_x.serialize();
     let src_y_bytes = src_y.serialize();
     let points_bytes = points.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         TRI_STRIP_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         op_bytes[0],
         0,
         0,
@@ -2537,23 +2563,26 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&points_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&points_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&points_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the TriFan request
 pub const TRI_FAN_REQUEST: u8 = 13;
 pub fn tri_fan<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (24 + 8 * points.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let op = op.into();
     let op_bytes = op.serialize();
     let src_bytes = src.serialize();
@@ -2562,11 +2591,11 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let src_x_bytes = src_x.serialize();
     let src_y_bytes = src_y.serialize();
     let points_bytes = points.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         TRI_FAN_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         op_bytes[0],
         0,
         0,
@@ -2588,30 +2617,32 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&points_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&points_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&points_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the CreateGlyphSet request
 pub const CREATE_GLYPH_SET_REQUEST: u8 = 17;
 pub fn create_glyph_set<Conn>(conn: &Conn, gsid: Glyphset, format: Pictformat) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let gsid_bytes = gsid.serialize();
     let format_bytes = format.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CREATE_GLYPH_SET_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         gsid_bytes[0],
         gsid_bytes[1],
         gsid_bytes[2],
@@ -2621,27 +2652,29 @@ where Conn: RequestConnection + ?Sized
         format_bytes[2],
         format_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the ReferenceGlyphSet request
 pub const REFERENCE_GLYPH_SET_REQUEST: u8 = 18;
 pub fn reference_glyph_set<Conn>(conn: &Conn, gsid: Glyphset, existing: Glyphset) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let gsid_bytes = gsid.serialize();
     let existing_bytes = existing.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         REFERENCE_GLYPH_SET_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         gsid_bytes[0],
         gsid_bytes[1],
         gsid_bytes[2],
@@ -2651,54 +2684,58 @@ where Conn: RequestConnection + ?Sized
         existing_bytes[2],
         existing_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the FreeGlyphSet request
 pub const FREE_GLYPH_SET_REQUEST: u8 = 19;
 pub fn free_glyph_set<Conn>(conn: &Conn, glyphset: Glyphset) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let glyphset_bytes = glyphset.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         FREE_GLYPH_SET_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         glyphset_bytes[0],
         glyphset_bytes[1],
         glyphset_bytes[2],
         glyphset_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the AddGlyphs request
 pub const ADD_GLYPHS_REQUEST: u8 = 20;
 pub fn add_glyphs<'c, Conn>(conn: &'c Conn, glyphset: Glyphset, glyphs_len: u32, glyphids: &[u32], glyphs: &[Glyphinfo], data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12 + 4 * glyphids.len() + 12 * glyphs.len() + 1 * data.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let glyphset_bytes = glyphset.serialize();
     let glyphs_len_bytes = glyphs_len.serialize();
     assert_eq!(glyphids.len(), glyphs_len as usize, "Argument glyphids has an incorrect length");
     let glyphids_bytes = glyphids.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         ADD_GLYPHS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         glyphset_bytes[0],
         glyphset_bytes[1],
         glyphset_bytes[2],
@@ -2708,56 +2745,61 @@ where Conn: RequestConnection + ?Sized
         glyphs_len_bytes[2],
         glyphs_len_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&glyphids_bytes).len();
     assert_eq!(glyphs.len(), glyphs_len as usize, "Argument glyphs has an incorrect length");
     let glyphs_bytes = glyphs.serialize();
     let length_so_far = length_so_far + (&glyphs_bytes).len();
     let length_so_far = length_so_far + (data).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&glyphids_bytes), IoSlice::new(&glyphs_bytes), IoSlice::new(data), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&glyphids_bytes), IoSlice::new(&glyphs_bytes), IoSlice::new(data), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the FreeGlyphs request
 pub const FREE_GLYPHS_REQUEST: u8 = 22;
 pub fn free_glyphs<'c, Conn>(conn: &'c Conn, glyphset: Glyphset, glyphs: &[Glyph]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8 + 4 * glyphs.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let glyphset_bytes = glyphset.serialize();
     let glyphs_bytes = glyphs.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         FREE_GLYPHS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         glyphset_bytes[0],
         glyphset_bytes[1],
         glyphset_bytes[2],
         glyphset_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&glyphs_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&glyphs_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&glyphs_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the CompositeGlyphs8 request
 pub const COMPOSITE_GLYPHS8_REQUEST: u8 = 23;
 pub fn composite_glyphs8<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (28 + 1 * glyphcmds.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let op = op.into();
     let op_bytes = op.serialize();
     let src_bytes = src.serialize();
@@ -2766,11 +2808,11 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let glyphset_bytes = glyphset.serialize();
     let src_x_bytes = src_x.serialize();
     let src_y_bytes = src_y.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         COMPOSITE_GLYPHS8_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         op_bytes[0],
         0,
         0,
@@ -2796,23 +2838,26 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (glyphcmds).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(glyphcmds), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(glyphcmds), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the CompositeGlyphs16 request
 pub const COMPOSITE_GLYPHS16_REQUEST: u8 = 24;
 pub fn composite_glyphs16<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (28 + 1 * glyphcmds.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let op = op.into();
     let op_bytes = op.serialize();
     let src_bytes = src.serialize();
@@ -2821,11 +2866,11 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let glyphset_bytes = glyphset.serialize();
     let src_x_bytes = src_x.serialize();
     let src_y_bytes = src_y.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         COMPOSITE_GLYPHS16_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         op_bytes[0],
         0,
         0,
@@ -2851,23 +2896,26 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (glyphcmds).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(glyphcmds), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(glyphcmds), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the CompositeGlyphs32 request
 pub const COMPOSITE_GLYPHS32_REQUEST: u8 = 25;
 pub fn composite_glyphs32<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (28 + 1 * glyphcmds.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let op = op.into();
     let op_bytes = op.serialize();
     let src_bytes = src.serialize();
@@ -2876,11 +2924,11 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let glyphset_bytes = glyphset.serialize();
     let src_x_bytes = src_x.serialize();
     let src_y_bytes = src_y.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         COMPOSITE_GLYPHS32_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         op_bytes[0],
         0,
         0,
@@ -2906,33 +2954,36 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (glyphcmds).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(glyphcmds), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(glyphcmds), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the FillRectangles request
 pub const FILL_RECTANGLES_REQUEST: u8 = 26;
 pub fn fill_rectangles<'c, Conn, A>(conn: &'c Conn, op: A, dst: Picture, color: Color, rects: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (20 + 8 * rects.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let op = op.into();
     let op_bytes = op.serialize();
     let dst_bytes = dst.serialize();
     let color_bytes = color.serialize();
     let rects_bytes = rects.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         FILL_RECTANGLES_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         op_bytes[0],
         0,
         0,
@@ -2950,32 +3001,34 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
         color_bytes[6],
         color_bytes[7],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&rects_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&rects_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&rects_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the CreateCursor request
 pub const CREATE_CURSOR_REQUEST: u8 = 27;
 pub fn create_cursor<Conn>(conn: &Conn, cid: xproto::Cursor, source: Picture, x: u16, y: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let cid_bytes = cid.serialize();
     let source_bytes = source.serialize();
     let x_bytes = x.serialize();
     let y_bytes = y.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CREATE_CURSOR_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cid_bytes[0],
         cid_bytes[1],
         cid_bytes[2],
@@ -2989,9 +3042,11 @@ where Conn: RequestConnection + ?Sized
         y_bytes[0],
         y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -3095,19 +3150,19 @@ impl Serialize for Transform {
 /// Opcode for the SetPictureTransform request
 pub const SET_PICTURE_TRANSFORM_REQUEST: u8 = 28;
 pub fn set_picture_transform<Conn>(conn: &Conn, picture: Picture, transform: Transform) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (44) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let picture_bytes = picture.serialize();
     let transform_bytes = transform.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         SET_PICTURE_TRANSFORM_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         picture_bytes[0],
         picture_bytes[1],
         picture_bytes[2],
@@ -3149,34 +3204,38 @@ where Conn: RequestConnection + ?Sized
         transform_bytes[34],
         transform_bytes[35],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the QueryFilters request
 pub const QUERY_FILTERS_REQUEST: u8 = 29;
 pub fn query_filters<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<Cookie<'_, Conn, QueryFiltersReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_FILTERS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
         drawable_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryFiltersReply {
@@ -3211,20 +3270,20 @@ impl TryFrom<&[u8]> for QueryFiltersReply {
 /// Opcode for the SetPictureFilter request
 pub const SET_PICTURE_FILTER_REQUEST: u8 = 30;
 pub fn set_picture_filter<'c, Conn>(conn: &'c Conn, picture: Picture, filter: &[u8], values: &[Fixed]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12 + 1 * filter.len() + 4 * values.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let picture_bytes = picture.serialize();
     let filter_len: u16 = filter.len().try_into()?;
     let filter_len_bytes = filter_len.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         SET_PICTURE_FILTER_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         picture_bytes[0],
         picture_bytes[1],
         picture_bytes[2],
@@ -3234,16 +3293,18 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (filter).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
     let values_bytes = values.serialize();
     let length_so_far = length_so_far + (&values_bytes).len();
-    let padding2 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding2).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(filter), IoSlice::new(&padding1), IoSlice::new(&values_bytes), IoSlice::new(&padding2)], Vec::new())?)
+    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding1).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(filter), IoSlice::new(&padding0), IoSlice::new(&values_bytes), IoSlice::new(&padding1)], vec![])?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -3291,30 +3352,32 @@ impl Serialize for Animcursorelt {
 /// Opcode for the CreateAnimCursor request
 pub const CREATE_ANIM_CURSOR_REQUEST: u8 = 31;
 pub fn create_anim_cursor<'c, Conn>(conn: &'c Conn, cid: xproto::Cursor, cursors: &[Animcursorelt]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8 + 8 * cursors.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let cid_bytes = cid.serialize();
     let cursors_bytes = cursors.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CREATE_ANIM_CURSOR_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cid_bytes[0],
         cid_bytes[1],
         cid_bytes[2],
         cid_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&cursors_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&cursors_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&cursors_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -3428,21 +3491,21 @@ impl Serialize for Trap {
 /// Opcode for the AddTraps request
 pub const ADD_TRAPS_REQUEST: u8 = 32;
 pub fn add_traps<'c, Conn>(conn: &'c Conn, picture: Picture, x_off: i16, y_off: i16, traps: &[Trap]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12 + 24 * traps.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let picture_bytes = picture.serialize();
     let x_off_bytes = x_off.serialize();
     let y_off_bytes = y_off.serialize();
     let traps_bytes = traps.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         ADD_TRAPS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         picture_bytes[0],
         picture_bytes[1],
         picture_bytes[2],
@@ -3452,30 +3515,32 @@ where Conn: RequestConnection + ?Sized
         y_off_bytes[0],
         y_off_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&traps_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&traps_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&traps_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the CreateSolidFill request
 pub const CREATE_SOLID_FILL_REQUEST: u8 = 33;
 pub fn create_solid_fill<Conn>(conn: &Conn, picture: Picture, color: Color) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let picture_bytes = picture.serialize();
     let color_bytes = color.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CREATE_SOLID_FILL_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         picture_bytes[0],
         picture_bytes[1],
         picture_bytes[2],
@@ -3489,31 +3554,33 @@ where Conn: RequestConnection + ?Sized
         color_bytes[6],
         color_bytes[7],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the CreateLinearGradient request
 pub const CREATE_LINEAR_GRADIENT_REQUEST: u8 = 34;
 pub fn create_linear_gradient<'c, Conn>(conn: &'c Conn, picture: Picture, p1: Pointfix, p2: Pointfix, num_stops: u32, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (28 + 4 * stops.len() + 8 * colors.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let picture_bytes = picture.serialize();
     let p1_bytes = p1.serialize();
     let p2_bytes = p2.serialize();
     let num_stops_bytes = num_stops.serialize();
     assert_eq!(stops.len(), num_stops as usize, "Argument stops has an incorrect length");
     let stops_bytes = stops.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CREATE_LINEAR_GRADIENT_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         picture_bytes[0],
         picture_bytes[1],
         picture_bytes[2],
@@ -3539,26 +3606,28 @@ where Conn: RequestConnection + ?Sized
         num_stops_bytes[2],
         num_stops_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&stops_bytes).len();
     assert_eq!(colors.len(), num_stops as usize, "Argument colors has an incorrect length");
     let colors_bytes = colors.serialize();
     let length_so_far = length_so_far + (&colors_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&stops_bytes), IoSlice::new(&colors_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&stops_bytes), IoSlice::new(&colors_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the CreateRadialGradient request
 pub const CREATE_RADIAL_GRADIENT_REQUEST: u8 = 35;
 pub fn create_radial_gradient<'c, Conn>(conn: &'c Conn, picture: Picture, inner: Pointfix, outer: Pointfix, inner_radius: Fixed, outer_radius: Fixed, num_stops: u32, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (36 + 4 * stops.len() + 8 * colors.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let picture_bytes = picture.serialize();
     let inner_bytes = inner.serialize();
     let outer_bytes = outer.serialize();
@@ -3567,11 +3636,11 @@ where Conn: RequestConnection + ?Sized
     let num_stops_bytes = num_stops.serialize();
     assert_eq!(stops.len(), num_stops as usize, "Argument stops has an incorrect length");
     let stops_bytes = stops.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CREATE_RADIAL_GRADIENT_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         picture_bytes[0],
         picture_bytes[1],
         picture_bytes[2],
@@ -3605,37 +3674,39 @@ where Conn: RequestConnection + ?Sized
         num_stops_bytes[2],
         num_stops_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&stops_bytes).len();
     assert_eq!(colors.len(), num_stops as usize, "Argument colors has an incorrect length");
     let colors_bytes = colors.serialize();
     let length_so_far = length_so_far + (&colors_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&stops_bytes), IoSlice::new(&colors_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&stops_bytes), IoSlice::new(&colors_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the CreateConicalGradient request
 pub const CREATE_CONICAL_GRADIENT_REQUEST: u8 = 36;
 pub fn create_conical_gradient<'c, Conn>(conn: &'c Conn, picture: Picture, center: Pointfix, angle: Fixed, num_stops: u32, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (24 + 4 * stops.len() + 8 * colors.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let picture_bytes = picture.serialize();
     let center_bytes = center.serialize();
     let angle_bytes = angle.serialize();
     let num_stops_bytes = num_stops.serialize();
     assert_eq!(stops.len(), num_stops as usize, "Argument stops has an incorrect length");
     let stops_bytes = stops.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CREATE_CONICAL_GRADIENT_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         picture_bytes[0],
         picture_bytes[1],
         picture_bytes[2],
@@ -3657,15 +3728,17 @@ where Conn: RequestConnection + ?Sized
         num_stops_bytes[2],
         num_stops_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&stops_bytes).len();
     assert_eq!(colors.len(), num_stops as usize, "Argument colors has an incorrect length");
     let colors_bytes = colors.serialize();
     let length_so_far = length_so_far + (&colors_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&stops_bytes), IoSlice::new(&colors_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&stops_bytes), IoSlice::new(&colors_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Extension trait defining the requests of this extension.
@@ -3706,31 +3779,36 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn render_composite<A>(&self, op: A, src: Picture, mask: Picture, dst: Picture, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         composite(self, op, src, mask, dst, src_x, src_y, mask_x, mask_y, dst_x, dst_y, width, height)
     }
 
     fn render_trapezoids<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, traps: &[Trapezoid]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         trapezoids(self, op, src, dst, mask_format, src_x, src_y, traps)
     }
 
     fn render_triangles<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, triangles: &[Triangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         self::triangles(self, op, src, dst, mask_format, src_x, src_y, triangles)
     }
 
     fn render_tri_strip<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         tri_strip(self, op, src, dst, mask_format, src_x, src_y, points)
     }
 
     fn render_tri_fan<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         tri_fan(self, op, src, dst, mask_format, src_x, src_y, points)
     }
@@ -3761,25 +3839,29 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn render_composite_glyphs8<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         composite_glyphs8(self, op, src, dst, mask_format, glyphset, src_x, src_y, glyphcmds)
     }
 
     fn render_composite_glyphs16<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         composite_glyphs16(self, op, src, dst, mask_format, glyphset, src_x, src_y, glyphcmds)
     }
 
     fn render_composite_glyphs32<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         composite_glyphs32(self, op, src, dst, mask_format, glyphset, src_x, src_y, glyphcmds)
     }
 
     fn render_fill_rectangles<'c, A>(&'c self, op: A, dst: Picture, color: Color, rects: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         fill_rectangles(self, op, dst, color, rects)
     }

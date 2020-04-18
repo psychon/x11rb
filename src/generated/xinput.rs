@@ -5,6 +5,7 @@
 #![allow(clippy::identity_op)]
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
+
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -13,11 +14,12 @@ use std::io::IoSlice;
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::Event as _;
-use crate::x11_utils::{TryParse, Serialize};
+#[allow(unused_imports)]
+use crate::x11_utils::{Serialize, TryParse};
 use crate::connection::RequestConnection;
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ParseError, ConnectionError};
+use crate::errors::{ConnectionError, ParseError};
 #[allow(unused_imports)]
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
@@ -95,30 +97,32 @@ impl Serialize for Fp3232 {
 /// Opcode for the GetExtensionVersion request
 pub const GET_EXTENSION_VERSION_REQUEST: u8 = 1;
 pub fn get_extension_version<'c, Conn>(conn: &'c Conn, name: &[u8]) -> Result<Cookie<'c, Conn, GetExtensionVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8 + 1 * name.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let name_len: u16 = name.len().try_into()?;
     let name_len_bytes = name_len.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GET_EXTENSION_VERSION_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         name_len_bytes[0],
         name_len_bytes[1],
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (name).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetExtensionVersionReply {
@@ -205,7 +209,7 @@ impl TryFrom<u8> for DeviceUse {
             2 => Ok(DeviceUse::IsXExtensionDevice),
             3 => Ok(DeviceUse::IsXExtensionKeyboard),
             4 => Ok(DeviceUse::IsXExtensionPointer),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -282,7 +286,7 @@ impl TryFrom<u8> for InputClass {
             4 => Ok(InputClass::Proximity),
             5 => Ok(InputClass::Focus),
             6 => Ok(InputClass::Other),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -344,7 +348,7 @@ impl TryFrom<u8> for ValuatorMode {
         match value {
             0 => Ok(ValuatorMode::Relative),
             1 => Ok(ValuatorMode::Absolute),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -392,7 +396,7 @@ impl Serialize for DeviceInfo {
         let device_type_bytes = self.device_type.serialize();
         let device_id_bytes = self.device_id.serialize();
         let num_class_info_bytes = self.num_class_info.serialize();
-        let device_use_bytes = Into::<u8>::into(self.device_use).serialize();
+        let device_use_bytes = u8::from(self.device_use).serialize();
         [
             device_type_bytes[0],
             device_type_bytes[1],
@@ -409,7 +413,7 @@ impl Serialize for DeviceInfo {
         self.device_type.serialize_into(bytes);
         self.device_id.serialize_into(bytes);
         self.num_class_info.serialize_into(bytes);
-        Into::<u8>::into(self.device_use).serialize_into(bytes);
+        u8::from(self.device_use).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
     }
 }
@@ -444,7 +448,7 @@ impl TryFrom<&[u8]> for KeyInfo {
 impl Serialize for KeyInfo {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let len_bytes = self.len.serialize();
         let min_keycode_bytes = self.min_keycode.serialize();
         let max_keycode_bytes = self.max_keycode.serialize();
@@ -462,7 +466,7 @@ impl Serialize for KeyInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.min_keycode.serialize_into(bytes);
         self.max_keycode.serialize_into(bytes);
@@ -496,7 +500,7 @@ impl TryFrom<&[u8]> for ButtonInfo {
 impl Serialize for ButtonInfo {
     type Bytes = [u8; 4];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let len_bytes = self.len.serialize();
         let num_buttons_bytes = self.num_buttons.serialize();
         [
@@ -508,7 +512,7 @@ impl Serialize for ButtonInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.num_buttons.serialize_into(bytes);
     }
@@ -601,11 +605,11 @@ impl Serialize for ValuatorInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         let axes_len = self.axes.len() as u8;
         axes_len.serialize_into(bytes);
-        Into::<u8>::into(self.mode).serialize_into(bytes);
+        u8::from(self.mode).serialize_into(bytes);
         self.motion_size.serialize_into(bytes);
         self.axes.serialize_into(bytes);
     }
@@ -690,7 +694,7 @@ impl Serialize for InputInfoInfoValuator {
         bytes.reserve(6);
         let axes_len = self.axes.len() as u8;
         axes_len.serialize_into(bytes);
-        Into::<u8>::into(self.mode).serialize_into(bytes);
+        u8::from(self.mode).serialize_into(bytes);
         self.motion_size.serialize_into(bytes);
         self.axes.serialize_into(bytes);
     }
@@ -705,20 +709,20 @@ impl InputInfoInfo {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if class_id == Into::<u8>::into(InputClass::Key) {
+        if class_id == u8::from(InputClass::Key) {
             let (key, new_remaining) = InputInfoInfoKey::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputInfoInfo::Key(key));
         }
-        if class_id == Into::<u8>::into(InputClass::Button) {
+        if class_id == u8::from(InputClass::Button) {
             let remaining = outer_remaining;
             let (num_buttons, remaining) = u16::try_parse(remaining)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputInfoInfo::NumButtons(num_buttons));
         }
-        if class_id == Into::<u8>::into(InputClass::Valuator) {
+        if class_id == u8::from(InputClass::Valuator) {
             let (valuator, new_remaining) = InputInfoInfoValuator::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -726,7 +730,7 @@ impl InputInfoInfo {
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, outer_remaining))
+            Some(result) => Ok((result, outer_remaining)),
         }
     }
     pub fn as_key(&self) -> Option<&InputInfoInfoKey> {
@@ -796,7 +800,7 @@ impl Serialize for InputInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.info.serialize_into(bytes);
     }
@@ -838,21 +842,23 @@ impl Serialize for DeviceName {
 /// Opcode for the ListInputDevices request
 pub const LIST_INPUT_DEVICES_REQUEST: u8 = 2;
 pub fn list_input_devices<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListInputDevicesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
-    let request0 = [
+    let length_so_far = 0;
+    let mut request0 = [
         extension_information.major_opcode,
         LIST_INPUT_DEVICES_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListInputDevicesReply {
@@ -875,7 +881,7 @@ impl ListInputDevicesReply {
         let (devices_len, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
         let (devices, remaining) = crate::x11_utils::parse_list::<DeviceInfo>(remaining, devices_len as usize)?;
-        let (infos, remaining) = crate::x11_utils::parse_list::<InputInfo>(remaining, devices.iter().map(|x| TryInto::<usize>::try_into(x.num_class_info).unwrap()).sum())?;
+        let (infos, remaining) = crate::x11_utils::parse_list::<InputInfo>(remaining, devices.iter().map(|x| usize::try_from(x.num_class_info).unwrap()).sum())?;
         let (names, remaining) = crate::x11_utils::parse_list::<xproto::Str>(remaining, devices_len as usize)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -917,7 +923,7 @@ impl TryFrom<&[u8]> for InputClassInfo {
 impl Serialize for InputClassInfo {
     type Bytes = [u8; 2];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let event_type_base_bytes = self.event_type_base.serialize();
         [
             class_id_bytes[0],
@@ -926,7 +932,7 @@ impl Serialize for InputClassInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.event_type_base.serialize_into(bytes);
     }
 }
@@ -934,26 +940,28 @@ impl Serialize for InputClassInfo {
 /// Opcode for the OpenDevice request
 pub const OPEN_DEVICE_REQUEST: u8 = 3;
 pub fn open_device<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, OpenDeviceReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let device_id_bytes = device_id.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         OPEN_DEVICE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         device_id_bytes[0],
         0,
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OpenDeviceReply {
@@ -991,53 +999,58 @@ impl TryFrom<&[u8]> for OpenDeviceReply {
 /// Opcode for the CloseDevice request
 pub const CLOSE_DEVICE_REQUEST: u8 = 4;
 pub fn close_device<Conn>(conn: &Conn, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let device_id_bytes = device_id.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CLOSE_DEVICE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         device_id_bytes[0],
         0,
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the SetDeviceMode request
 pub const SET_DEVICE_MODE_REQUEST: u8 = 5;
 pub fn set_device_mode<Conn, A>(conn: &Conn, device_id: u8, mode: A) -> Result<Cookie<'_, Conn, SetDeviceModeReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let device_id_bytes = device_id.serialize();
     let mode = mode.into();
     let mode_bytes = mode.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         SET_DEVICE_MODE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         device_id_bytes[0],
         mode_bytes[0],
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceModeReply {
@@ -1070,21 +1083,21 @@ impl TryFrom<&[u8]> for SetDeviceModeReply {
 /// Opcode for the SelectExtensionEvent request
 pub const SELECT_EXTENSION_EVENT_REQUEST: u8 = 6;
 pub fn select_extension_event<'c, Conn>(conn: &'c Conn, window: xproto::Window, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12 + 4 * classes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
     let num_classes: u16 = classes.len().try_into()?;
     let num_classes_bytes = num_classes.serialize();
     let classes_bytes = classes.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         SELECT_EXTENSION_EVENT_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
@@ -1094,37 +1107,41 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&classes_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&classes_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&classes_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the GetSelectedExtensionEvents request
 pub const GET_SELECTED_EXTENSION_EVENTS_REQUEST: u8 = 7;
 pub fn get_selected_extension_events<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetSelectedExtensionEventsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GET_SELECTED_EXTENSION_EVENTS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
         window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSelectedExtensionEventsReply {
@@ -1202,7 +1219,7 @@ impl TryFrom<u8> for PropagateMode {
         match value {
             0 => Ok(PropagateMode::AddToList),
             1 => Ok(PropagateMode::DeleteFromList),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1222,23 +1239,24 @@ impl TryFrom<u32> for PropagateMode {
 /// Opcode for the ChangeDeviceDontPropagateList request
 pub const CHANGE_DEVICE_DONT_PROPAGATE_LIST_REQUEST: u8 = 8;
 pub fn change_device_dont_propagate_list<'c, Conn, A>(conn: &'c Conn, window: xproto::Window, mode: A, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12 + 4 * classes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
     let num_classes: u16 = classes.len().try_into()?;
     let num_classes_bytes = num_classes.serialize();
     let mode = mode.into();
     let mode_bytes = mode.serialize();
     let classes_bytes = classes.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CHANGE_DEVICE_DONT_PROPAGATE_LIST_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
@@ -1248,37 +1266,41 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
         mode_bytes[0],
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&classes_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&classes_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&classes_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the GetDeviceDontPropagateList request
 pub const GET_DEVICE_DONT_PROPAGATE_LIST_REQUEST: u8 = 9;
 pub fn get_device_dont_propagate_list<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetDeviceDontPropagateListReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GET_DEVICE_DONT_PROPAGATE_LIST_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
         window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceDontPropagateListReply {
@@ -1341,20 +1363,20 @@ impl Serialize for DeviceTimeCoord {
 /// Opcode for the GetDeviceMotionEvents request
 pub const GET_DEVICE_MOTION_EVENTS_REQUEST: u8 = 10;
 pub fn get_device_motion_events<Conn>(conn: &Conn, start: xproto::Timestamp, stop: xproto::Timestamp, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceMotionEventsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let start_bytes = start.serialize();
     let stop_bytes = stop.serialize();
     let device_id_bytes = device_id.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GET_DEVICE_MOTION_EVENTS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         start_bytes[0],
         start_bytes[1],
         start_bytes[2],
@@ -1368,9 +1390,11 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceMotionEventsReply {
@@ -1415,26 +1439,28 @@ impl TryFrom<&[u8]> for GetDeviceMotionEventsReply {
 /// Opcode for the ChangeKeyboardDevice request
 pub const CHANGE_KEYBOARD_DEVICE_REQUEST: u8 = 11;
 pub fn change_keyboard_device<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, ChangeKeyboardDeviceReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let device_id_bytes = device_id.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CHANGE_KEYBOARD_DEVICE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         device_id_bytes[0],
         0,
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangeKeyboardDeviceReply {
@@ -1467,28 +1493,30 @@ impl TryFrom<&[u8]> for ChangeKeyboardDeviceReply {
 /// Opcode for the ChangePointerDevice request
 pub const CHANGE_POINTER_DEVICE_REQUEST: u8 = 12;
 pub fn change_pointer_device<Conn>(conn: &Conn, x_axis: u8, y_axis: u8, device_id: u8) -> Result<Cookie<'_, Conn, ChangePointerDeviceReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let x_axis_bytes = x_axis.serialize();
     let y_axis_bytes = y_axis.serialize();
     let device_id_bytes = device_id.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CHANGE_POINTER_DEVICE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         x_axis_bytes[0],
         y_axis_bytes[0],
         device_id_bytes[0],
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangePointerDeviceReply {
@@ -1521,12 +1549,14 @@ impl TryFrom<&[u8]> for ChangePointerDeviceReply {
 /// Opcode for the GrabDevice request
 pub const GRAB_DEVICE_REQUEST: u8 = 13;
 pub fn grab_device<'c, Conn, A, B>(conn: &'c Conn, grab_window: xproto::Window, time: xproto::Timestamp, this_device_mode: A, other_device_mode: B, owner_events: bool, device_id: u8, classes: &[EventClass]) -> Result<Cookie<'c, Conn, GrabDeviceReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
+    B: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (20 + 4 * classes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let grab_window_bytes = grab_window.serialize();
     let time_bytes = time.serialize();
     let num_classes: u16 = classes.len().try_into()?;
@@ -1538,11 +1568,11 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
     let owner_events_bytes = (owner_events as u8).serialize();
     let device_id_bytes = device_id.serialize();
     let classes_bytes = classes.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GRAB_DEVICE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         grab_window_bytes[0],
         grab_window_bytes[1],
         grab_window_bytes[2],
@@ -1560,12 +1590,14 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&classes_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&classes_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&classes_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabDeviceReply {
@@ -1598,19 +1630,19 @@ impl TryFrom<&[u8]> for GrabDeviceReply {
 /// Opcode for the UngrabDevice request
 pub const UNGRAB_DEVICE_REQUEST: u8 = 14;
 pub fn ungrab_device<Conn>(conn: &Conn, time: xproto::Timestamp, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let time_bytes = time.serialize();
     let device_id_bytes = device_id.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         UNGRAB_DEVICE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         time_bytes[0],
         time_bytes[1],
         time_bytes[2],
@@ -1620,9 +1652,11 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1667,7 +1701,7 @@ impl TryFrom<u8> for ModifierDevice {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             255 => Ok(ModifierDevice::UseXKeyboard),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1687,12 +1721,14 @@ impl TryFrom<u32> for ModifierDevice {
 /// Opcode for the GrabDeviceKey request
 pub const GRAB_DEVICE_KEY_REQUEST: u8 = 15;
 pub fn grab_device_key<'c, Conn, A, B>(conn: &'c Conn, grab_window: xproto::Window, modifiers: u16, modifier_device: u8, grabbed_device: u8, key: u8, this_device_mode: A, other_device_mode: B, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
+    B: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (20 + 4 * classes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let grab_window_bytes = grab_window.serialize();
     let num_classes: u16 = classes.len().try_into()?;
     let num_classes_bytes = num_classes.serialize();
@@ -1706,11 +1742,11 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
     let other_device_mode_bytes = other_device_mode.serialize();
     let owner_events_bytes = (owner_events as u8).serialize();
     let classes_bytes = classes.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GRAB_DEVICE_KEY_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         grab_window_bytes[0],
         grab_window_bytes[1],
         grab_window_bytes[2],
@@ -1728,33 +1764,35 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&classes_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&classes_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&classes_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the UngrabDeviceKey request
 pub const UNGRAB_DEVICE_KEY_REQUEST: u8 = 16;
 pub fn ungrab_device_key<Conn>(conn: &Conn, grab_window: xproto::Window, modifiers: u16, modifier_device: u8, key: u8, grabbed_device: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let grab_window_bytes = grab_window.serialize();
     let modifiers_bytes = modifiers.serialize();
     let modifier_device_bytes = modifier_device.serialize();
     let key_bytes = key.serialize();
     let grabbed_device_bytes = grabbed_device.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         UNGRAB_DEVICE_KEY_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         grab_window_bytes[0],
         grab_window_bytes[1],
         grab_window_bytes[2],
@@ -1768,20 +1806,24 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the GrabDeviceButton request
 pub const GRAB_DEVICE_BUTTON_REQUEST: u8 = 17;
 pub fn grab_device_button<'c, Conn, A, B>(conn: &'c Conn, grab_window: xproto::Window, grabbed_device: u8, modifier_device: u8, modifiers: u16, this_device_mode: A, other_device_mode: B, button: u8, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
+    B: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (20 + 4 * classes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let grab_window_bytes = grab_window.serialize();
     let grabbed_device_bytes = grabbed_device.serialize();
     let modifier_device_bytes = modifier_device.serialize();
@@ -1795,11 +1837,11 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
     let button_bytes = button.serialize();
     let owner_events_bytes = (owner_events as u8).serialize();
     let classes_bytes = classes.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GRAB_DEVICE_BUTTON_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         grab_window_bytes[0],
         grab_window_bytes[1],
         grab_window_bytes[2],
@@ -1817,33 +1859,35 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&classes_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&classes_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&classes_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the UngrabDeviceButton request
 pub const UNGRAB_DEVICE_BUTTON_REQUEST: u8 = 18;
 pub fn ungrab_device_button<Conn>(conn: &Conn, grab_window: xproto::Window, modifiers: u16, modifier_device: u8, button: u8, grabbed_device: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let grab_window_bytes = grab_window.serialize();
     let modifiers_bytes = modifiers.serialize();
     let modifier_device_bytes = modifier_device.serialize();
     let button_bytes = button.serialize();
     let grabbed_device_bytes = grabbed_device.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         UNGRAB_DEVICE_BUTTON_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         grab_window_bytes[0],
         grab_window_bytes[1],
         grab_window_bytes[2],
@@ -1857,9 +1901,11 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1919,7 +1965,7 @@ impl TryFrom<u8> for DeviceInputMode {
             3 => Ok(DeviceInputMode::AsyncOtherDevices),
             4 => Ok(DeviceInputMode::AsyncAll),
             5 => Ok(DeviceInputMode::SyncAll),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1939,21 +1985,22 @@ impl TryFrom<u32> for DeviceInputMode {
 /// Opcode for the AllowDeviceEvents request
 pub const ALLOW_DEVICE_EVENTS_REQUEST: u8 = 19;
 pub fn allow_device_events<Conn, A>(conn: &Conn, time: xproto::Timestamp, mode: A, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let time_bytes = time.serialize();
     let mode = mode.into();
     let mode_bytes = mode.serialize();
     let device_id_bytes = device_id.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         ALLOW_DEVICE_EVENTS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         time_bytes[0],
         time_bytes[1],
         time_bytes[2],
@@ -1963,34 +2010,38 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the GetDeviceFocus request
 pub const GET_DEVICE_FOCUS_REQUEST: u8 = 20;
 pub fn get_device_focus<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceFocusReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let device_id_bytes = device_id.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GET_DEVICE_FOCUS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         device_id_bytes[0],
         0,
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetDeviceFocusReply {
@@ -2027,22 +2078,23 @@ impl TryFrom<&[u8]> for GetDeviceFocusReply {
 /// Opcode for the SetDeviceFocus request
 pub const SET_DEVICE_FOCUS_REQUEST: u8 = 21;
 pub fn set_device_focus<Conn, A>(conn: &Conn, focus: xproto::Window, time: xproto::Timestamp, revert_to: A, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let focus_bytes = focus.serialize();
     let time_bytes = time.serialize();
     let revert_to = revert_to.into();
     let revert_to_bytes = revert_to.serialize();
     let device_id_bytes = device_id.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         SET_DEVICE_FOCUS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         focus_bytes[0],
         focus_bytes[1],
         focus_bytes[2],
@@ -2056,9 +2108,11 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -2118,7 +2172,7 @@ impl TryFrom<u8> for FeedbackClass {
             3 => Ok(FeedbackClass::Integer),
             4 => Ok(FeedbackClass::Led),
             5 => Ok(FeedbackClass::Bell),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -2242,7 +2296,7 @@ impl TryFrom<&[u8]> for KbdFeedbackState {
 impl Serialize for KbdFeedbackState {
     type Bytes = [u8; 52];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let pitch_bytes = self.pitch.serialize();
@@ -2309,7 +2363,7 @@ impl Serialize for KbdFeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(52);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.pitch.serialize_into(bytes);
@@ -2356,7 +2410,7 @@ impl TryFrom<&[u8]> for PtrFeedbackState {
 impl Serialize for PtrFeedbackState {
     type Bytes = [u8; 12];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let accel_num_bytes = self.accel_num.serialize();
@@ -2379,7 +2433,7 @@ impl Serialize for PtrFeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
@@ -2420,7 +2474,7 @@ impl TryFrom<&[u8]> for IntegerFeedbackState {
 impl Serialize for IntegerFeedbackState {
     type Bytes = [u8; 16];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let resolution_bytes = self.resolution.serialize();
@@ -2447,7 +2501,7 @@ impl Serialize for IntegerFeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(16);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.resolution.serialize_into(bytes);
@@ -2492,7 +2546,7 @@ impl Serialize for StringFeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.max_symbols.serialize_into(bytes);
@@ -2534,7 +2588,7 @@ impl TryFrom<&[u8]> for BellFeedbackState {
 impl Serialize for BellFeedbackState {
     type Bytes = [u8; 12];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let percent_bytes = self.percent.serialize();
@@ -2557,7 +2611,7 @@ impl Serialize for BellFeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.percent.serialize_into(bytes);
@@ -2596,7 +2650,7 @@ impl TryFrom<&[u8]> for LedFeedbackState {
 impl Serialize for LedFeedbackState {
     type Bytes = [u8; 12];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let led_mask_bytes = self.led_mask.serialize();
@@ -2618,7 +2672,7 @@ impl Serialize for LedFeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.led_mask.serialize_into(bytes);
@@ -3029,37 +3083,37 @@ impl FeedbackStateData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if class_id == Into::<u8>::into(FeedbackClass::Keyboard) {
+        if class_id == u8::from(FeedbackClass::Keyboard) {
             let (keyboard, new_remaining) = FeedbackStateDataKeyboard::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Keyboard(keyboard));
         }
-        if class_id == Into::<u8>::into(FeedbackClass::Pointer) {
+        if class_id == u8::from(FeedbackClass::Pointer) {
             let (pointer, new_remaining) = FeedbackStateDataPointer::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Pointer(pointer));
         }
-        if class_id == Into::<u8>::into(FeedbackClass::String) {
+        if class_id == u8::from(FeedbackClass::String) {
             let (string, new_remaining) = FeedbackStateDataString::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::String(string));
         }
-        if class_id == Into::<u8>::into(FeedbackClass::Integer) {
+        if class_id == u8::from(FeedbackClass::Integer) {
             let (integer, new_remaining) = FeedbackStateDataInteger::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Integer(integer));
         }
-        if class_id == Into::<u8>::into(FeedbackClass::Led) {
+        if class_id == u8::from(FeedbackClass::Led) {
             let (led, new_remaining) = FeedbackStateDataLed::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Led(led));
         }
-        if class_id == Into::<u8>::into(FeedbackClass::Bell) {
+        if class_id == u8::from(FeedbackClass::Bell) {
             let (bell, new_remaining) = FeedbackStateDataBell::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -3067,7 +3121,7 @@ impl FeedbackStateData {
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, outer_remaining))
+            Some(result) => Ok((result, outer_remaining)),
         }
     }
     pub fn as_keyboard(&self) -> Option<&FeedbackStateDataKeyboard> {
@@ -3163,7 +3217,7 @@ impl Serialize for FeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes);
@@ -3173,26 +3227,28 @@ impl Serialize for FeedbackState {
 /// Opcode for the GetFeedbackControl request
 pub const GET_FEEDBACK_CONTROL_REQUEST: u8 = 22;
 pub fn get_feedback_control<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, GetFeedbackControlReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let device_id_bytes = device_id.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GET_FEEDBACK_CONTROL_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         device_id_bytes[0],
         0,
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetFeedbackControlReply {
@@ -3263,7 +3319,7 @@ impl TryFrom<&[u8]> for KbdFeedbackCtl {
 impl Serialize for KbdFeedbackCtl {
     type Bytes = [u8; 20];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let key_bytes = self.key.serialize();
@@ -3299,7 +3355,7 @@ impl Serialize for KbdFeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(20);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.key.serialize_into(bytes);
@@ -3345,7 +3401,7 @@ impl TryFrom<&[u8]> for PtrFeedbackCtl {
 impl Serialize for PtrFeedbackCtl {
     type Bytes = [u8; 12];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let num_bytes = self.num.serialize();
@@ -3368,7 +3424,7 @@ impl Serialize for PtrFeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
@@ -3405,7 +3461,7 @@ impl TryFrom<&[u8]> for IntegerFeedbackCtl {
 impl Serialize for IntegerFeedbackCtl {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let int_to_display_bytes = self.int_to_display.serialize();
@@ -3422,7 +3478,7 @@ impl Serialize for IntegerFeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.int_to_display.serialize_into(bytes);
@@ -3464,7 +3520,7 @@ impl Serialize for StringFeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
@@ -3506,7 +3562,7 @@ impl TryFrom<&[u8]> for BellFeedbackCtl {
 impl Serialize for BellFeedbackCtl {
     type Bytes = [u8; 12];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let percent_bytes = self.percent.serialize();
@@ -3529,7 +3585,7 @@ impl Serialize for BellFeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.percent.serialize_into(bytes);
@@ -3568,7 +3624,7 @@ impl TryFrom<&[u8]> for LedFeedbackCtl {
 impl Serialize for LedFeedbackCtl {
     type Bytes = [u8; 12];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
         let led_mask_bytes = self.led_mask.serialize();
@@ -3590,7 +3646,7 @@ impl Serialize for LedFeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.led_mask.serialize_into(bytes);
@@ -3853,38 +3909,38 @@ impl FeedbackCtlData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if class_id == Into::<u8>::into(FeedbackClass::Keyboard) {
+        if class_id == u8::from(FeedbackClass::Keyboard) {
             let (keyboard, new_remaining) = FeedbackCtlDataKeyboard::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Keyboard(keyboard));
         }
-        if class_id == Into::<u8>::into(FeedbackClass::Pointer) {
+        if class_id == u8::from(FeedbackClass::Pointer) {
             let (pointer, new_remaining) = FeedbackCtlDataPointer::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Pointer(pointer));
         }
-        if class_id == Into::<u8>::into(FeedbackClass::String) {
+        if class_id == u8::from(FeedbackClass::String) {
             let (string, new_remaining) = FeedbackCtlDataString::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::String(string));
         }
-        if class_id == Into::<u8>::into(FeedbackClass::Integer) {
+        if class_id == u8::from(FeedbackClass::Integer) {
             let remaining = outer_remaining;
             let (int_to_display, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::IntToDisplay(int_to_display));
         }
-        if class_id == Into::<u8>::into(FeedbackClass::Led) {
+        if class_id == u8::from(FeedbackClass::Led) {
             let (led, new_remaining) = FeedbackCtlDataLed::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Led(led));
         }
-        if class_id == Into::<u8>::into(FeedbackClass::Bell) {
+        if class_id == u8::from(FeedbackClass::Bell) {
             let (bell, new_remaining) = FeedbackCtlDataBell::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -3892,7 +3948,7 @@ impl FeedbackCtlData {
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, outer_remaining))
+            Some(result) => Ok((result, outer_remaining)),
         }
     }
     pub fn as_keyboard(&self) -> Option<&FeedbackCtlDataKeyboard> {
@@ -3988,7 +4044,7 @@ impl Serialize for FeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes);
@@ -4060,21 +4116,21 @@ bitmask_binop!(ChangeFeedbackControlMask, u8);
 /// Opcode for the ChangeFeedbackControl request
 pub const CHANGE_FEEDBACK_CONTROL_REQUEST: u8 = 23;
 pub fn change_feedback_control<Conn>(conn: &Conn, mask: u32, device_id: u8, feedback_id: u8, feedback: FeedbackCtl) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let feedback_bytes = feedback.serialize();
-    let length: usize = (12 + feedback_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let mask_bytes = mask.serialize();
     let device_id_bytes = device_id.serialize();
     let feedback_id_bytes = feedback_id.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CHANGE_FEEDBACK_CONTROL_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         mask_bytes[0],
         mask_bytes[1],
         mask_bytes[2],
@@ -4084,39 +4140,43 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&feedback_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&feedback_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&feedback_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the GetDeviceKeyMapping request
 pub const GET_DEVICE_KEY_MAPPING_REQUEST: u8 = 24;
 pub fn get_device_key_mapping<Conn>(conn: &Conn, device_id: u8, first_keycode: KeyCode, count: u8) -> Result<Cookie<'_, Conn, GetDeviceKeyMappingReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let device_id_bytes = device_id.serialize();
     let first_keycode_bytes = first_keycode.serialize();
     let count_bytes = count.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GET_DEVICE_KEY_MAPPING_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         device_id_bytes[0],
         first_keycode_bytes[0],
         count_bytes[0],
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceKeyMappingReply {
@@ -4149,59 +4209,63 @@ impl TryFrom<&[u8]> for GetDeviceKeyMappingReply {
 /// Opcode for the ChangeDeviceKeyMapping request
 pub const CHANGE_DEVICE_KEY_MAPPING_REQUEST: u8 = 25;
 pub fn change_device_key_mapping<'c, Conn>(conn: &'c Conn, device_id: u8, first_keycode: KeyCode, keysyms_per_keycode: u8, keycode_count: u8, keysyms: &[xproto::Keysym]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8 + 4 * keysyms.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let device_id_bytes = device_id.serialize();
     let first_keycode_bytes = first_keycode.serialize();
     let keysyms_per_keycode_bytes = keysyms_per_keycode.serialize();
     let keycode_count_bytes = keycode_count.serialize();
     assert_eq!(keysyms.len(), (keycode_count as usize) * (keysyms_per_keycode as usize), "Argument keysyms has an incorrect length");
     let keysyms_bytes = keysyms.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CHANGE_DEVICE_KEY_MAPPING_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         device_id_bytes[0],
         first_keycode_bytes[0],
         keysyms_per_keycode_bytes[0],
         keycode_count_bytes[0],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&keysyms_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&keysyms_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&keysyms_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the GetDeviceModifierMapping request
 pub const GET_DEVICE_MODIFIER_MAPPING_REQUEST: u8 = 26;
 pub fn get_device_modifier_mapping<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceModifierMappingReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let device_id_bytes = device_id.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GET_DEVICE_MODIFIER_MAPPING_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         device_id_bytes[0],
         0,
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceModifierMappingReply {
@@ -4234,32 +4298,34 @@ impl TryFrom<&[u8]> for GetDeviceModifierMappingReply {
 /// Opcode for the SetDeviceModifierMapping request
 pub const SET_DEVICE_MODIFIER_MAPPING_REQUEST: u8 = 27;
 pub fn set_device_modifier_mapping<'c, Conn>(conn: &'c Conn, device_id: u8, keymaps: &[u8]) -> Result<Cookie<'c, Conn, SetDeviceModifierMappingReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8 + 1 * keymaps.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let device_id_bytes = device_id.serialize();
     assert_eq!(0, keymaps.len() % 8, "Argument keycodes_per_modifier has an incorrect length, must be a multiple of 8");
-    let keycodes_per_modifier: u8 = TryInto::try_into(keymaps.len() / 8).unwrap();
+    let keycodes_per_modifier = u8::try_from(keymaps.len() / 8).unwrap();
     let keycodes_per_modifier_bytes = keycodes_per_modifier.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         SET_DEVICE_MODIFIER_MAPPING_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         device_id_bytes[0],
         keycodes_per_modifier_bytes[0],
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (keymaps).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(keymaps), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(keymaps), IoSlice::new(&padding0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceModifierMappingReply {
@@ -4292,26 +4358,28 @@ impl TryFrom<&[u8]> for SetDeviceModifierMappingReply {
 /// Opcode for the GetDeviceButtonMapping request
 pub const GET_DEVICE_BUTTON_MAPPING_REQUEST: u8 = 28;
 pub fn get_device_button_mapping<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceButtonMappingReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let device_id_bytes = device_id.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GET_DEVICE_BUTTON_MAPPING_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         device_id_bytes[0],
         0,
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceButtonMappingReply {
@@ -4349,31 +4417,33 @@ impl TryFrom<&[u8]> for GetDeviceButtonMappingReply {
 /// Opcode for the SetDeviceButtonMapping request
 pub const SET_DEVICE_BUTTON_MAPPING_REQUEST: u8 = 29;
 pub fn set_device_button_mapping<'c, Conn>(conn: &'c Conn, device_id: u8, map: &[u8]) -> Result<Cookie<'c, Conn, SetDeviceButtonMappingReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8 + 1 * map.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let device_id_bytes = device_id.serialize();
     let map_size: u8 = map.len().try_into()?;
     let map_size_bytes = map_size.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         SET_DEVICE_BUTTON_MAPPING_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         device_id_bytes[0],
         map_size_bytes[0],
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (map).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(map), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(map), IoSlice::new(&padding0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceButtonMappingReply {
@@ -4496,7 +4566,7 @@ impl TryFrom<&[u8]> for KeyState {
 impl Serialize for KeyState {
     type Bytes = [u8; 36];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let len_bytes = self.len.serialize();
         let num_keys_bytes = self.num_keys.serialize();
         [
@@ -4540,7 +4610,7 @@ impl Serialize for KeyState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(36);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.num_keys.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
@@ -4641,7 +4711,7 @@ impl TryFrom<&[u8]> for ButtonState {
 impl Serialize for ButtonState {
     type Bytes = [u8; 36];
     fn serialize(&self) -> Self::Bytes {
-        let class_id_bytes = Into::<u8>::into(self.class_id).serialize();
+        let class_id_bytes = u8::from(self.class_id).serialize();
         let len_bytes = self.len.serialize();
         let num_buttons_bytes = self.num_buttons.serialize();
         [
@@ -4685,7 +4755,7 @@ impl Serialize for ButtonState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(36);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.num_buttons.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
@@ -4738,7 +4808,7 @@ impl TryFrom<u8> for ValuatorStateModeMask {
         match value {
             1 => Ok(ValuatorStateModeMask::DeviceModeAbsolute),
             2 => Ok(ValuatorStateModeMask::OutOfProximity),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -4790,7 +4860,7 @@ impl Serialize for ValuatorState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         let num_valuators = self.valuators.len() as u8;
         num_valuators.serialize_into(bytes);
@@ -5110,19 +5180,19 @@ impl InputStateData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if class_id == Into::<u8>::into(InputClass::Key) {
+        if class_id == u8::from(InputClass::Key) {
             let (key, new_remaining) = InputStateDataKey::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputStateData::Key(key));
         }
-        if class_id == Into::<u8>::into(InputClass::Button) {
+        if class_id == u8::from(InputClass::Button) {
             let (button, new_remaining) = InputStateDataButton::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputStateData::Button(button));
         }
-        if class_id == Into::<u8>::into(InputClass::Valuator) {
+        if class_id == u8::from(InputClass::Valuator) {
             let (valuator, new_remaining) = InputStateDataValuator::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -5130,7 +5200,7 @@ impl InputStateData {
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, outer_remaining))
+            Some(result) => Ok((result, outer_remaining)),
         }
     }
     pub fn as_key(&self) -> Option<&InputStateDataKey> {
@@ -5200,7 +5270,7 @@ impl Serialize for InputState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        Into::<u8>::into(self.class_id).serialize_into(bytes);
+        u8::from(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes);
     }
@@ -5209,26 +5279,28 @@ impl Serialize for InputState {
 /// Opcode for the QueryDeviceState request
 pub const QUERY_DEVICE_STATE_REQUEST: u8 = 30;
 pub fn query_device_state<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, QueryDeviceStateReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let device_id_bytes = device_id.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_DEVICE_STATE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         device_id_bytes[0],
         0,
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryDeviceStateReply {
@@ -5261,61 +5333,65 @@ impl TryFrom<&[u8]> for QueryDeviceStateReply {
 /// Opcode for the DeviceBell request
 pub const DEVICE_BELL_REQUEST: u8 = 32;
 pub fn device_bell<Conn>(conn: &Conn, device_id: u8, feedback_id: u8, feedback_class: u8, percent: i8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let device_id_bytes = device_id.serialize();
     let feedback_id_bytes = feedback_id.serialize();
     let feedback_class_bytes = feedback_class.serialize();
     let percent_bytes = percent.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         DEVICE_BELL_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         device_id_bytes[0],
         feedback_id_bytes[0],
         feedback_class_bytes[0],
         percent_bytes[0],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the SetDeviceValuators request
 pub const SET_DEVICE_VALUATORS_REQUEST: u8 = 33;
 pub fn set_device_valuators<'c, Conn>(conn: &'c Conn, device_id: u8, first_valuator: u8, valuators: &[i32]) -> Result<Cookie<'c, Conn, SetDeviceValuatorsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8 + 4 * valuators.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let device_id_bytes = device_id.serialize();
     let first_valuator_bytes = first_valuator.serialize();
     let num_valuators: u8 = valuators.len().try_into()?;
     let num_valuators_bytes = num_valuators.serialize();
     let valuators_bytes = valuators.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         SET_DEVICE_VALUATORS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         device_id_bytes[0],
         first_valuator_bytes[0],
         num_valuators_bytes[0],
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&valuators_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&valuators_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&valuators_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceValuatorsReply {
@@ -5399,7 +5475,7 @@ impl TryFrom<u8> for DeviceControl {
             3 => Ok(DeviceControl::Core),
             4 => Ok(DeviceControl::Enable),
             5 => Ok(DeviceControl::Absarea),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -5453,7 +5529,7 @@ impl Serialize for DeviceResolutionState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u16>::into(self.control_id).serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.num_valuators.serialize_into(bytes);
         self.resolution_values.serialize_into(bytes);
@@ -5501,7 +5577,7 @@ impl TryFrom<&[u8]> for DeviceAbsCalibState {
 impl Serialize for DeviceAbsCalibState {
     type Bytes = [u8; 36];
     fn serialize(&self) -> Self::Bytes {
-        let control_id_bytes = Into::<u16>::into(self.control_id).serialize();
+        let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let min_x_bytes = self.min_x.serialize();
         let max_x_bytes = self.max_x.serialize();
@@ -5552,7 +5628,7 @@ impl Serialize for DeviceAbsCalibState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(36);
-        Into::<u16>::into(self.control_id).serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.min_x.serialize_into(bytes);
         self.max_x.serialize_into(bytes);
@@ -5600,7 +5676,7 @@ impl TryFrom<&[u8]> for DeviceAbsAreaState {
 impl Serialize for DeviceAbsAreaState {
     type Bytes = [u8; 28];
     fn serialize(&self) -> Self::Bytes {
-        let control_id_bytes = Into::<u16>::into(self.control_id).serialize();
+        let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let offset_x_bytes = self.offset_x.serialize();
         let offset_y_bytes = self.offset_y.serialize();
@@ -5641,7 +5717,7 @@ impl Serialize for DeviceAbsAreaState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(28);
-        Into::<u16>::into(self.control_id).serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.offset_x.serialize_into(bytes);
         self.offset_y.serialize_into(bytes);
@@ -5680,7 +5756,7 @@ impl TryFrom<&[u8]> for DeviceCoreState {
 impl Serialize for DeviceCoreState {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let control_id_bytes = Into::<u16>::into(self.control_id).serialize();
+        let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let status_bytes = self.status.serialize();
         let iscore_bytes = self.iscore.serialize();
@@ -5697,7 +5773,7 @@ impl Serialize for DeviceCoreState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u16>::into(self.control_id).serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.status.serialize_into(bytes);
         self.iscore.serialize_into(bytes);
@@ -5731,7 +5807,7 @@ impl TryFrom<&[u8]> for DeviceEnableState {
 impl Serialize for DeviceEnableState {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let control_id_bytes = Into::<u16>::into(self.control_id).serialize();
+        let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let enable_bytes = self.enable.serialize();
         [
@@ -5747,7 +5823,7 @@ impl Serialize for DeviceEnableState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u16>::into(self.control_id).serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.enable.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
@@ -6005,25 +6081,25 @@ impl DeviceStateData {
     fn try_parse(value: &[u8], control_id: u16) -> Result<(Self, &[u8]), ParseError> {
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if control_id == Into::<u16>::into(DeviceControl::Resolution) {
+        if control_id == u16::from(DeviceControl::Resolution) {
             let (resolution, new_remaining) = DeviceStateDataResolution::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Resolution(resolution));
         }
-        if control_id == Into::<u16>::into(DeviceControl::Abscalib) {
+        if control_id == u16::from(DeviceControl::Abscalib) {
             let (abs_calib, new_remaining) = DeviceStateDataAbsCalib::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::AbsCalib(abs_calib));
         }
-        if control_id == Into::<u16>::into(DeviceControl::Core) {
+        if control_id == u16::from(DeviceControl::Core) {
             let (core, new_remaining) = DeviceStateDataCore::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Core(core));
         }
-        if control_id == Into::<u16>::into(DeviceControl::Enable) {
+        if control_id == u16::from(DeviceControl::Enable) {
             let remaining = outer_remaining;
             let (enable, remaining) = u8::try_parse(remaining)?;
             let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -6031,7 +6107,7 @@ impl DeviceStateData {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Enable(enable));
         }
-        if control_id == Into::<u16>::into(DeviceControl::Absarea) {
+        if control_id == u16::from(DeviceControl::Absarea) {
             let (abs_area, new_remaining) = DeviceStateDataAbsArea::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -6039,7 +6115,7 @@ impl DeviceStateData {
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, outer_remaining))
+            Some(result) => Ok((result, outer_remaining)),
         }
     }
     pub fn as_resolution(&self) -> Option<&DeviceStateDataResolution> {
@@ -6133,7 +6209,7 @@ impl Serialize for DeviceState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        Into::<u16>::into(self.control_id).serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes);
     }
@@ -6142,28 +6218,31 @@ impl Serialize for DeviceState {
 /// Opcode for the GetDeviceControl request
 pub const GET_DEVICE_CONTROL_REQUEST: u8 = 34;
 pub fn get_device_control<Conn, A>(conn: &Conn, control_id: A, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceControlReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u16>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u16>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let control_id = control_id.into();
     let control_id_bytes = control_id.serialize();
     let device_id_bytes = device_id.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GET_DEVICE_CONTROL_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         control_id_bytes[0],
         control_id_bytes[1],
         device_id_bytes[0],
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceControlReply {
@@ -6229,7 +6308,7 @@ impl Serialize for DeviceResolutionCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u16>::into(self.control_id).serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.first_valuator.serialize_into(bytes);
         let num_valuators = self.resolution_values.len() as u8;
@@ -6278,7 +6357,7 @@ impl TryFrom<&[u8]> for DeviceAbsCalibCtl {
 impl Serialize for DeviceAbsCalibCtl {
     type Bytes = [u8; 36];
     fn serialize(&self) -> Self::Bytes {
-        let control_id_bytes = Into::<u16>::into(self.control_id).serialize();
+        let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let min_x_bytes = self.min_x.serialize();
         let max_x_bytes = self.max_x.serialize();
@@ -6329,7 +6408,7 @@ impl Serialize for DeviceAbsCalibCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(36);
-        Into::<u16>::into(self.control_id).serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.min_x.serialize_into(bytes);
         self.max_x.serialize_into(bytes);
@@ -6377,7 +6456,7 @@ impl TryFrom<&[u8]> for DeviceAbsAreaCtrl {
 impl Serialize for DeviceAbsAreaCtrl {
     type Bytes = [u8; 28];
     fn serialize(&self) -> Self::Bytes {
-        let control_id_bytes = Into::<u16>::into(self.control_id).serialize();
+        let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let offset_x_bytes = self.offset_x.serialize();
         let offset_y_bytes = self.offset_y.serialize();
@@ -6418,7 +6497,7 @@ impl Serialize for DeviceAbsAreaCtrl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(28);
-        Into::<u16>::into(self.control_id).serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.offset_x.serialize_into(bytes);
         self.offset_y.serialize_into(bytes);
@@ -6455,7 +6534,7 @@ impl TryFrom<&[u8]> for DeviceCoreCtrl {
 impl Serialize for DeviceCoreCtrl {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let control_id_bytes = Into::<u16>::into(self.control_id).serialize();
+        let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let status_bytes = self.status.serialize();
         [
@@ -6471,7 +6550,7 @@ impl Serialize for DeviceCoreCtrl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u16>::into(self.control_id).serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.status.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
@@ -6504,7 +6583,7 @@ impl TryFrom<&[u8]> for DeviceEnableCtrl {
 impl Serialize for DeviceEnableCtrl {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let control_id_bytes = Into::<u16>::into(self.control_id).serialize();
+        let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let enable_bytes = self.enable.serialize();
         [
@@ -6520,7 +6599,7 @@ impl Serialize for DeviceEnableCtrl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u16>::into(self.control_id).serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.enable.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
@@ -6738,19 +6817,19 @@ impl DeviceCtlData {
     fn try_parse(value: &[u8], control_id: u16) -> Result<(Self, &[u8]), ParseError> {
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if control_id == Into::<u16>::into(DeviceControl::Resolution) {
+        if control_id == u16::from(DeviceControl::Resolution) {
             let (resolution, new_remaining) = DeviceCtlDataResolution::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Resolution(resolution));
         }
-        if control_id == Into::<u16>::into(DeviceControl::Abscalib) {
+        if control_id == u16::from(DeviceControl::Abscalib) {
             let (abs_calib, new_remaining) = DeviceCtlDataAbsCalib::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::AbsCalib(abs_calib));
         }
-        if control_id == Into::<u16>::into(DeviceControl::Core) {
+        if control_id == u16::from(DeviceControl::Core) {
             let remaining = outer_remaining;
             let (status, remaining) = u8::try_parse(remaining)?;
             let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -6758,7 +6837,7 @@ impl DeviceCtlData {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Status(status));
         }
-        if control_id == Into::<u16>::into(DeviceControl::Enable) {
+        if control_id == u16::from(DeviceControl::Enable) {
             let remaining = outer_remaining;
             let (enable, remaining) = u8::try_parse(remaining)?;
             let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -6766,7 +6845,7 @@ impl DeviceCtlData {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Enable(enable));
         }
-        if control_id == Into::<u16>::into(DeviceControl::Absarea) {
+        if control_id == u16::from(DeviceControl::Absarea) {
             let (abs_area, new_remaining) = DeviceCtlDataAbsArea::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -6774,7 +6853,7 @@ impl DeviceCtlData {
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, outer_remaining))
+            Some(result) => Ok((result, outer_remaining)),
         }
     }
     pub fn as_resolution(&self) -> Option<&DeviceCtlDataResolution> {
@@ -6876,7 +6955,7 @@ impl Serialize for DeviceCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        Into::<u16>::into(self.control_id).serialize_into(bytes);
+        u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes);
     }
@@ -6885,32 +6964,35 @@ impl Serialize for DeviceCtl {
 /// Opcode for the ChangeDeviceControl request
 pub const CHANGE_DEVICE_CONTROL_REQUEST: u8 = 35;
 pub fn change_device_control<Conn, A>(conn: &Conn, control_id: A, device_id: u8, control: DeviceCtl) -> Result<Cookie<'_, Conn, ChangeDeviceControlReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u16>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u16>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let control_bytes = control.serialize();
-    let length: usize = (8 + control_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let control_id = control_id.into();
     let control_id_bytes = control_id.serialize();
     let device_id_bytes = device_id.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CHANGE_DEVICE_CONTROL_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         control_id_bytes[0],
         control_id_bytes[1],
         device_id_bytes[0],
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&control_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&control_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&control_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangeDeviceControlReply {
@@ -6942,26 +7024,28 @@ impl TryFrom<&[u8]> for ChangeDeviceControlReply {
 /// Opcode for the ListDeviceProperties request
 pub const LIST_DEVICE_PROPERTIES_REQUEST: u8 = 36;
 pub fn list_device_properties<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, ListDevicePropertiesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let device_id_bytes = device_id.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         LIST_DEVICE_PROPERTIES_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         device_id_bytes[0],
         0,
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListDevicePropertiesReply {
@@ -7039,7 +7123,7 @@ impl TryFrom<u8> for PropertyFormat {
             8 => Ok(PropertyFormat::M8Bits),
             16 => Ok(PropertyFormat::M16Bits),
             32 => Ok(PropertyFormat::M32Bits),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -7107,14 +7191,15 @@ impl ChangeDevicePropertyAux {
     }
 }
 pub fn change_device_property<'c, Conn, A>(conn: &'c Conn, property: xproto::Atom, type_: xproto::Atom, device_id: u8, mode: A, num_items: u32, items: &ChangeDevicePropertyAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let format = items.format();
     let items_bytes = items.serialize();
-    let length: usize = (20 + items_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let property_bytes = property.serialize();
     let type_bytes = type_.serialize();
     let device_id_bytes = device_id.serialize();
@@ -7122,11 +7207,11 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let mode = mode.into();
     let mode_bytes = mode.serialize();
     let num_items_bytes = num_items.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CHANGE_DEVICE_PROPERTY_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         property_bytes[0],
         property_bytes[1],
         property_bytes[2],
@@ -7144,30 +7229,32 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
         num_items_bytes[2],
         num_items_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&items_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&items_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&items_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the DeleteDeviceProperty request
 pub const DELETE_DEVICE_PROPERTY_REQUEST: u8 = 38;
 pub fn delete_device_property<Conn>(conn: &Conn, property: xproto::Atom, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let property_bytes = property.serialize();
     let device_id_bytes = device_id.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         DELETE_DEVICE_PROPERTY_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         property_bytes[0],
         property_bytes[1],
         property_bytes[2],
@@ -7177,31 +7264,33 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the GetDeviceProperty request
 pub const GET_DEVICE_PROPERTY_REQUEST: u8 = 39;
 pub fn get_device_property<Conn>(conn: &Conn, property: xproto::Atom, type_: xproto::Atom, offset: u32, len: u32, device_id: u8, delete: bool) -> Result<Cookie<'_, Conn, GetDevicePropertyReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (24) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let property_bytes = property.serialize();
     let type_bytes = type_.serialize();
     let offset_bytes = offset.serialize();
     let len_bytes = len.serialize();
     let device_id_bytes = device_id.serialize();
     let delete_bytes = (delete as u8).serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GET_DEVICE_PROPERTY_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         property_bytes[0],
         property_bytes[1],
         property_bytes[2],
@@ -7223,9 +7312,11 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum GetDevicePropertyItems {
@@ -7237,7 +7328,7 @@ impl GetDevicePropertyItems {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if format == Into::<u8>::into(PropertyFormat::M8Bits) {
+        if format == u8::from(PropertyFormat::M8Bits) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data8, remaining) = crate::x11_utils::parse_list::<u8>(remaining, num_items as usize)?;
@@ -7249,7 +7340,7 @@ impl GetDevicePropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(GetDevicePropertyItems::Data8(data8));
         }
-        if format == Into::<u8>::into(PropertyFormat::M16Bits) {
+        if format == u8::from(PropertyFormat::M16Bits) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items as usize)?;
@@ -7261,7 +7352,7 @@ impl GetDevicePropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(GetDevicePropertyItems::Data16(data16));
         }
-        if format == Into::<u8>::into(PropertyFormat::M32Bits) {
+        if format == u8::from(PropertyFormat::M32Bits) {
             let remaining = outer_remaining;
             let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items as usize)?;
             outer_remaining = remaining;
@@ -7270,7 +7361,7 @@ impl GetDevicePropertyItems {
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, outer_remaining))
+            Some(result) => Ok((result, outer_remaining)),
         }
     }
     pub fn as_data8(&self) -> Option<&Vec<u8>> {
@@ -7408,7 +7499,7 @@ impl TryFrom<u8> for Device {
         match value {
             0 => Ok(Device::All),
             1 => Ok(Device::AllMaster),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -7532,19 +7623,19 @@ impl Serialize for ModifierInfo {
 /// Opcode for the XIQueryPointer request
 pub const XI_QUERY_POINTER_REQUEST: u8 = 40;
 pub fn xi_query_pointer<Conn>(conn: &Conn, window: xproto::Window, deviceid: DeviceId) -> Result<Cookie<'_, Conn, XIQueryPointerReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
     let deviceid_bytes = deviceid.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_QUERY_POINTER_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
@@ -7554,9 +7645,11 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIQueryPointerReply {
@@ -7606,12 +7699,12 @@ impl TryFrom<&[u8]> for XIQueryPointerReply {
 /// Opcode for the XIWarpPointer request
 pub const XI_WARP_POINTER_REQUEST: u8 = 41;
 pub fn xi_warp_pointer<Conn>(conn: &Conn, src_win: xproto::Window, dst_win: xproto::Window, src_x: Fp1616, src_y: Fp1616, src_width: u16, src_height: u16, dst_x: Fp1616, dst_y: Fp1616, deviceid: DeviceId) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (36) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let src_win_bytes = src_win.serialize();
     let dst_win_bytes = dst_win.serialize();
     let src_x_bytes = src_x.serialize();
@@ -7621,11 +7714,11 @@ where Conn: RequestConnection + ?Sized
     let dst_x_bytes = dst_x.serialize();
     let dst_y_bytes = dst_y.serialize();
     let deviceid_bytes = deviceid.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_WARP_POINTER_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         src_win_bytes[0],
         src_win_bytes[1],
         src_win_bytes[2],
@@ -7659,28 +7752,30 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the XIChangeCursor request
 pub const XI_CHANGE_CURSOR_REQUEST: u8 = 42;
 pub fn xi_change_cursor<Conn>(conn: &Conn, window: xproto::Window, cursor: xproto::Cursor, deviceid: DeviceId) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
     let cursor_bytes = cursor.serialize();
     let deviceid_bytes = deviceid.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_CHANGE_CURSOR_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
@@ -7694,9 +7789,11 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -7750,7 +7847,7 @@ impl TryFrom<u8> for HierarchyChangeType {
             2 => Ok(HierarchyChangeType::RemoveMaster),
             3 => Ok(HierarchyChangeType::AttachSlave),
             4 => Ok(HierarchyChangeType::DetachSlave),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -7812,7 +7909,7 @@ impl TryFrom<u8> for ChangeMode {
         match value {
             1 => Ok(ChangeMode::Attach),
             2 => Ok(ChangeMode::Float),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -7870,7 +7967,7 @@ impl Serialize for AddMaster {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u16>::into(self.type_).serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         let name_len = self.name.len() as u16;
         name_len.serialize_into(bytes);
@@ -7914,10 +8011,10 @@ impl TryFrom<&[u8]> for RemoveMaster {
 impl Serialize for RemoveMaster {
     type Bytes = [u8; 12];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u16>::into(self.type_).serialize();
+        let type_bytes = u16::from(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let deviceid_bytes = self.deviceid.serialize();
-        let return_mode_bytes = Into::<u8>::into(self.return_mode).serialize();
+        let return_mode_bytes = u8::from(self.return_mode).serialize();
         let return_pointer_bytes = self.return_pointer.serialize();
         let return_keyboard_bytes = self.return_keyboard.serialize();
         [
@@ -7937,10 +8034,10 @@ impl Serialize for RemoveMaster {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        Into::<u16>::into(self.type_).serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.deviceid.serialize_into(bytes);
-        Into::<u8>::into(self.return_mode).serialize_into(bytes);
+        u8::from(self.return_mode).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         self.return_pointer.serialize_into(bytes);
         self.return_keyboard.serialize_into(bytes);
@@ -7974,7 +8071,7 @@ impl TryFrom<&[u8]> for AttachSlave {
 impl Serialize for AttachSlave {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u16>::into(self.type_).serialize();
+        let type_bytes = u16::from(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let deviceid_bytes = self.deviceid.serialize();
         let master_bytes = self.master.serialize();
@@ -7991,7 +8088,7 @@ impl Serialize for AttachSlave {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u16>::into(self.type_).serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.deviceid.serialize_into(bytes);
         self.master.serialize_into(bytes);
@@ -8024,7 +8121,7 @@ impl TryFrom<&[u8]> for DetachSlave {
 impl Serialize for DetachSlave {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u16>::into(self.type_).serialize();
+        let type_bytes = u16::from(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let deviceid_bytes = self.deviceid.serialize();
         [
@@ -8040,7 +8137,7 @@ impl Serialize for DetachSlave {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u16>::into(self.type_).serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.deviceid.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
@@ -8120,7 +8217,7 @@ impl Serialize for HierarchyChangeDataRemoveMaster {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
         let deviceid_bytes = self.deviceid.serialize();
-        let return_mode_bytes = Into::<u8>::into(self.return_mode).serialize();
+        let return_mode_bytes = u8::from(self.return_mode).serialize();
         let return_pointer_bytes = self.return_pointer.serialize();
         let return_keyboard_bytes = self.return_keyboard.serialize();
         [
@@ -8137,7 +8234,7 @@ impl Serialize for HierarchyChangeDataRemoveMaster {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
         self.deviceid.serialize_into(bytes);
-        Into::<u8>::into(self.return_mode).serialize_into(bytes);
+        u8::from(self.return_mode).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         self.return_pointer.serialize_into(bytes);
         self.return_keyboard.serialize_into(bytes);
@@ -8191,25 +8288,25 @@ impl HierarchyChangeData {
     fn try_parse(value: &[u8], type_: u16) -> Result<(Self, &[u8]), ParseError> {
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if type_ == Into::<u16>::into(HierarchyChangeType::AddMaster) {
+        if type_ == u16::from(HierarchyChangeType::AddMaster) {
             let (add_master, new_remaining) = HierarchyChangeDataAddMaster::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::AddMaster(add_master));
         }
-        if type_ == Into::<u16>::into(HierarchyChangeType::RemoveMaster) {
+        if type_ == u16::from(HierarchyChangeType::RemoveMaster) {
             let (remove_master, new_remaining) = HierarchyChangeDataRemoveMaster::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::RemoveMaster(remove_master));
         }
-        if type_ == Into::<u16>::into(HierarchyChangeType::AttachSlave) {
+        if type_ == u16::from(HierarchyChangeType::AttachSlave) {
             let (attach_slave, new_remaining) = HierarchyChangeDataAttachSlave::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::AttachSlave(attach_slave));
         }
-        if type_ == Into::<u16>::into(HierarchyChangeType::DetachSlave) {
+        if type_ == u16::from(HierarchyChangeType::DetachSlave) {
             let remaining = outer_remaining;
             let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
             let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
@@ -8219,7 +8316,7 @@ impl HierarchyChangeData {
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, outer_remaining))
+            Some(result) => Ok((result, outer_remaining)),
         }
     }
     pub fn as_add_master(&self) -> Option<&HierarchyChangeDataAddMaster> {
@@ -8305,7 +8402,7 @@ impl Serialize for HierarchyChange {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        Into::<u16>::into(self.type_).serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes);
     }
@@ -8314,49 +8411,51 @@ impl Serialize for HierarchyChange {
 /// Opcode for the XIChangeHierarchy request
 pub const XI_CHANGE_HIERARCHY_REQUEST: u8 = 43;
 pub fn xi_change_hierarchy<'c, Conn>(conn: &'c Conn, changes: &[HierarchyChange]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let changes_bytes = changes.serialize();
-    let length: usize = (8 + changes_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let num_changes: u8 = changes.len().try_into()?;
     let num_changes_bytes = num_changes.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_CHANGE_HIERARCHY_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         num_changes_bytes[0],
         0,
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&changes_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&changes_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&changes_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the XISetClientPointer request
 pub const XI_SET_CLIENT_POINTER_REQUEST: u8 = 44;
 pub fn xi_set_client_pointer<Conn>(conn: &Conn, window: xproto::Window, deviceid: DeviceId) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
     let deviceid_bytes = deviceid.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_SET_CLIENT_POINTER_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
@@ -8366,34 +8465,38 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the XIGetClientPointer request
 pub const XI_GET_CLIENT_POINTER_REQUEST: u8 = 45;
 pub fn xi_get_client_pointer<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, XIGetClientPointerReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_GET_CLIENT_POINTER_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
         window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIGetClientPointerReply {
@@ -8521,7 +8624,7 @@ impl TryFrom<u32> for XIEventMask {
             16_777_216 => Ok(XIEventMask::RawTouchEnd),
             33_554_432 => Ok(XIEventMask::BarrierHit),
             67_108_864 => Ok(XIEventMask::BarrierLeave),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -8566,21 +8669,21 @@ impl Serialize for EventMask {
 /// Opcode for the XISelectEvents request
 pub const XI_SELECT_EVENTS_REQUEST: u8 = 46;
 pub fn xi_select_events<'c, Conn>(conn: &'c Conn, window: xproto::Window, masks: &[EventMask]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let masks_bytes = masks.serialize();
-    let length: usize = (12 + masks_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
     let num_mask: u16 = masks.len().try_into()?;
     let num_mask_bytes = num_mask.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_SELECT_EVENTS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
@@ -8590,38 +8693,42 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&masks_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&masks_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&masks_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the XIQueryVersion request
 pub const XI_QUERY_VERSION_REQUEST: u8 = 47;
 pub fn xi_query_version<Conn>(conn: &Conn, major_version: u16, minor_version: u16) -> Result<Cookie<'_, Conn, XIQueryVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let major_version_bytes = major_version.serialize();
     let minor_version_bytes = minor_version.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_QUERY_VERSION_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         major_version_bytes[0],
         major_version_bytes[1],
         minor_version_bytes[0],
         minor_version_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIQueryVersionReply {
@@ -8705,7 +8812,7 @@ impl TryFrom<u8> for DeviceClassType {
             2 => Ok(DeviceClassType::Valuator),
             3 => Ok(DeviceClassType::Scroll),
             8 => Ok(DeviceClassType::Touch),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -8776,7 +8883,7 @@ impl TryFrom<u8> for DeviceType {
             3 => Ok(DeviceType::SlavePointer),
             4 => Ok(DeviceType::SlaveKeyboard),
             5 => Ok(DeviceType::FloatingSlave),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -8838,7 +8945,7 @@ impl TryFrom<u8> for ScrollFlags {
         match value {
             1 => Ok(ScrollFlags::NoEmulation),
             2 => Ok(ScrollFlags::Preferred),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -8901,7 +9008,7 @@ impl TryFrom<u8> for ScrollType {
         match value {
             1 => Ok(ScrollType::Vertical),
             2 => Ok(ScrollType::Horizontal),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -8963,7 +9070,7 @@ impl TryFrom<u8> for TouchMode {
         match value {
             1 => Ok(TouchMode::Direct),
             2 => Ok(TouchMode::Dependent),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -9017,7 +9124,7 @@ impl Serialize for ButtonClass {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u16>::into(self.type_).serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
         self.num_buttons.serialize_into(bytes);
@@ -9060,7 +9167,7 @@ impl Serialize for KeyClass {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u16>::into(self.type_).serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
         let num_keys = self.keys.len() as u16;
@@ -9104,11 +9211,11 @@ impl TryFrom<&[u8]> for ScrollClass {
 impl Serialize for ScrollClass {
     type Bytes = [u8; 24];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u16>::into(self.type_).serialize();
+        let type_bytes = u16::from(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let sourceid_bytes = self.sourceid.serialize();
         let number_bytes = self.number.serialize();
-        let scroll_type_bytes = Into::<u16>::into(self.scroll_type).serialize();
+        let scroll_type_bytes = u16::from(self.scroll_type).serialize();
         let flags_bytes = self.flags.serialize();
         let increment_bytes = self.increment.serialize();
         [
@@ -9140,11 +9247,11 @@ impl Serialize for ScrollClass {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(24);
-        Into::<u16>::into(self.type_).serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
         self.number.serialize_into(bytes);
-        Into::<u16>::into(self.scroll_type).serialize_into(bytes);
+        u16::from(self.scroll_type).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.flags.serialize_into(bytes);
         self.increment.serialize_into(bytes);
@@ -9181,10 +9288,10 @@ impl TryFrom<&[u8]> for TouchClass {
 impl Serialize for TouchClass {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u16>::into(self.type_).serialize();
+        let type_bytes = u16::from(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let sourceid_bytes = self.sourceid.serialize();
-        let mode_bytes = Into::<u8>::into(self.mode).serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
         let num_touches_bytes = self.num_touches.serialize();
         [
             type_bytes[0],
@@ -9199,10 +9306,10 @@ impl Serialize for TouchClass {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u16>::into(self.type_).serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
-        Into::<u8>::into(self.mode).serialize_into(bytes);
+        u8::from(self.mode).serialize_into(bytes);
         self.num_touches.serialize_into(bytes);
     }
 }
@@ -9248,7 +9355,7 @@ impl TryFrom<&[u8]> for ValuatorClass {
 impl Serialize for ValuatorClass {
     type Bytes = [u8; 44];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u16>::into(self.type_).serialize();
+        let type_bytes = u16::from(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let sourceid_bytes = self.sourceid.serialize();
         let number_bytes = self.number.serialize();
@@ -9257,7 +9364,7 @@ impl Serialize for ValuatorClass {
         let max_bytes = self.max.serialize();
         let value_bytes = self.value.serialize();
         let resolution_bytes = self.resolution.serialize();
-        let mode_bytes = Into::<u8>::into(self.mode).serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
         [
             type_bytes[0],
             type_bytes[1],
@@ -9307,7 +9414,7 @@ impl Serialize for ValuatorClass {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(44);
-        Into::<u16>::into(self.type_).serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
         self.number.serialize_into(bytes);
@@ -9316,7 +9423,7 @@ impl Serialize for ValuatorClass {
         self.max.serialize_into(bytes);
         self.value.serialize_into(bytes);
         self.resolution.serialize_into(bytes);
-        Into::<u8>::into(self.mode).serialize_into(bytes);
+        u8::from(self.mode).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
     }
 }
@@ -9428,7 +9535,7 @@ impl Serialize for DeviceClassDataValuator {
         let max_bytes = self.max.serialize();
         let value_bytes = self.value.serialize();
         let resolution_bytes = self.resolution.serialize();
-        let mode_bytes = Into::<u8>::into(self.mode).serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
         [
             number_bytes[0],
             number_bytes[1],
@@ -9478,7 +9585,7 @@ impl Serialize for DeviceClassDataValuator {
         self.max.serialize_into(bytes);
         self.value.serialize_into(bytes);
         self.resolution.serialize_into(bytes);
-        Into::<u8>::into(self.mode).serialize_into(bytes);
+        u8::from(self.mode).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
     }
 }
@@ -9511,7 +9618,7 @@ impl Serialize for DeviceClassDataScroll {
     type Bytes = [u8; 18];
     fn serialize(&self) -> Self::Bytes {
         let number_bytes = self.number.serialize();
-        let scroll_type_bytes = Into::<u16>::into(self.scroll_type).serialize();
+        let scroll_type_bytes = u16::from(self.scroll_type).serialize();
         let flags_bytes = self.flags.serialize();
         let increment_bytes = self.increment.serialize();
         [
@@ -9538,7 +9645,7 @@ impl Serialize for DeviceClassDataScroll {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(18);
         self.number.serialize_into(bytes);
-        Into::<u16>::into(self.scroll_type).serialize_into(bytes);
+        u16::from(self.scroll_type).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.flags.serialize_into(bytes);
         self.increment.serialize_into(bytes);
@@ -9567,7 +9674,7 @@ impl TryFrom<&[u8]> for DeviceClassDataTouch {
 impl Serialize for DeviceClassDataTouch {
     type Bytes = [u8; 2];
     fn serialize(&self) -> Self::Bytes {
-        let mode_bytes = Into::<u8>::into(self.mode).serialize();
+        let mode_bytes = u8::from(self.mode).serialize();
         let num_touches_bytes = self.num_touches.serialize();
         [
             mode_bytes[0],
@@ -9576,7 +9683,7 @@ impl Serialize for DeviceClassDataTouch {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        Into::<u8>::into(self.mode).serialize_into(bytes);
+        u8::from(self.mode).serialize_into(bytes);
         self.num_touches.serialize_into(bytes);
     }
 }
@@ -9592,31 +9699,31 @@ impl DeviceClassData {
     fn try_parse(value: &[u8], type_: u16) -> Result<(Self, &[u8]), ParseError> {
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if type_ == Into::<u16>::into(DeviceClassType::Key) {
+        if type_ == u16::from(DeviceClassType::Key) {
             let (key, new_remaining) = DeviceClassDataKey::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Key(key));
         }
-        if type_ == Into::<u16>::into(DeviceClassType::Button) {
+        if type_ == u16::from(DeviceClassType::Button) {
             let (button, new_remaining) = DeviceClassDataButton::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Button(button));
         }
-        if type_ == Into::<u16>::into(DeviceClassType::Valuator) {
+        if type_ == u16::from(DeviceClassType::Valuator) {
             let (valuator, new_remaining) = DeviceClassDataValuator::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Valuator(valuator));
         }
-        if type_ == Into::<u16>::into(DeviceClassType::Scroll) {
+        if type_ == u16::from(DeviceClassType::Scroll) {
             let (scroll, new_remaining) = DeviceClassDataScroll::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Scroll(scroll));
         }
-        if type_ == Into::<u16>::into(DeviceClassType::Touch) {
+        if type_ == u16::from(DeviceClassType::Touch) {
             let (touch, new_remaining) = DeviceClassDataTouch::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -9624,7 +9731,7 @@ impl DeviceClassData {
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, outer_remaining))
+            Some(result) => Ok((result, outer_remaining)),
         }
     }
     pub fn as_key(&self) -> Option<&DeviceClassDataKey> {
@@ -9712,7 +9819,7 @@ impl Serialize for DeviceClass {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(6);
-        Into::<u16>::into(self.type_).serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
         self.data.serialize_into(bytes);
@@ -9765,7 +9872,7 @@ impl Serialize for XIDeviceInfo {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
         self.deviceid.serialize_into(bytes);
-        Into::<u16>::into(self.type_).serialize_into(bytes);
+        u16::from(self.type_).serialize_into(bytes);
         self.attachment.serialize_into(bytes);
         let num_classes = self.classes.len() as u16;
         num_classes.serialize_into(bytes);
@@ -9782,26 +9889,28 @@ impl Serialize for XIDeviceInfo {
 /// Opcode for the XIQueryDevice request
 pub const XI_QUERY_DEVICE_REQUEST: u8 = 48;
 pub fn xi_query_device<Conn>(conn: &Conn, deviceid: DeviceId) -> Result<Cookie<'_, Conn, XIQueryDeviceReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let deviceid_bytes = deviceid.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_QUERY_DEVICE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         deviceid_bytes[0],
         deviceid_bytes[1],
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIQueryDeviceReply {
@@ -9833,20 +9942,20 @@ impl TryFrom<&[u8]> for XIQueryDeviceReply {
 /// Opcode for the XISetFocus request
 pub const XI_SET_FOCUS_REQUEST: u8 = 49;
 pub fn xi_set_focus<Conn>(conn: &Conn, window: xproto::Window, time: xproto::Timestamp, deviceid: DeviceId) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
     let time_bytes = time.serialize();
     let deviceid_bytes = deviceid.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_SET_FOCUS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
@@ -9860,34 +9969,38 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the XIGetFocus request
 pub const XI_GET_FOCUS_REQUEST: u8 = 50;
 pub fn xi_get_focus<Conn>(conn: &Conn, deviceid: DeviceId) -> Result<Cookie<'_, Conn, XIGetFocusReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let deviceid_bytes = deviceid.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_GET_FOCUS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         deviceid_bytes[0],
         deviceid_bytes[1],
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIGetFocusReply {
@@ -9960,7 +10073,7 @@ impl TryFrom<u8> for GrabOwner {
         match value {
             0 => Ok(GrabOwner::NoOwner),
             1 => Ok(GrabOwner::Owner),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -9980,12 +10093,15 @@ impl TryFrom<u32> for GrabOwner {
 /// Opcode for the XIGrabDevice request
 pub const XI_GRAB_DEVICE_REQUEST: u8 = 51;
 pub fn xi_grab_device<'c, Conn, A, B, C>(conn: &'c Conn, window: xproto::Window, time: xproto::Timestamp, cursor: xproto::Cursor, deviceid: DeviceId, mode: A, paired_device_mode: B, owner_events: C, mask: &[u32]) -> Result<Cookie<'c, Conn, XIGrabDeviceReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>, C: Into<bool>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
+    B: Into<u8>,
+    C: Into<bool>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (24 + 4 * mask.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
     let time_bytes = time.serialize();
     let cursor_bytes = cursor.serialize();
@@ -9999,11 +10115,11 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>, C: Into<bool>
     let mask_len: u16 = mask.len().try_into()?;
     let mask_len_bytes = mask_len.serialize();
     let mask_bytes = mask.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_GRAB_DEVICE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
@@ -10025,12 +10141,14 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>, C: Into<bool>
         mask_len_bytes[0],
         mask_len_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&mask_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&mask_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&mask_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIGrabDeviceReply {
@@ -10062,19 +10180,19 @@ impl TryFrom<&[u8]> for XIGrabDeviceReply {
 /// Opcode for the XIUngrabDevice request
 pub const XI_UNGRAB_DEVICE_REQUEST: u8 = 52;
 pub fn xi_ungrab_device<Conn>(conn: &Conn, time: xproto::Timestamp, deviceid: DeviceId) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let time_bytes = time.serialize();
     let deviceid_bytes = deviceid.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_UNGRAB_DEVICE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         time_bytes[0],
         time_bytes[1],
         time_bytes[2],
@@ -10084,9 +10202,11 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -10152,7 +10272,7 @@ impl TryFrom<u8> for EventMode {
             5 => Ok(EventMode::SyncPair),
             6 => Ok(EventMode::AcceptTouch),
             7 => Ok(EventMode::RejectTouch),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -10172,23 +10292,24 @@ impl TryFrom<u32> for EventMode {
 /// Opcode for the XIAllowEvents request
 pub const XI_ALLOW_EVENTS_REQUEST: u8 = 53;
 pub fn xi_allow_events<Conn, A>(conn: &Conn, time: xproto::Timestamp, deviceid: DeviceId, event_mode: A, touchid: u32, grab_window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (20) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let time_bytes = time.serialize();
     let deviceid_bytes = deviceid.serialize();
     let event_mode = event_mode.into();
     let event_mode_bytes = event_mode.serialize();
     let touchid_bytes = touchid.serialize();
     let grab_window_bytes = grab_window.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_ALLOW_EVENTS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         time_bytes[0],
         time_bytes[1],
         time_bytes[2],
@@ -10206,9 +10327,11 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
         grab_window_bytes[2],
         grab_window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -10259,7 +10382,7 @@ impl TryFrom<u8> for GrabMode22 {
             0 => Ok(GrabMode22::Sync),
             1 => Ok(GrabMode22::Async),
             2 => Ok(GrabMode22::Touch),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -10330,7 +10453,7 @@ impl TryFrom<u8> for GrabType {
             2 => Ok(GrabType::Enter),
             3 => Ok(GrabType::FocusIn),
             4 => Ok(GrabType::TouchBegin),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -10369,7 +10492,7 @@ impl TryFrom<u32> for ModifierMask {
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
             2_147_483_648 => Ok(ModifierMask::Any),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -10400,7 +10523,7 @@ impl Serialize for GrabModifierInfo {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
         let modifiers_bytes = self.modifiers.serialize();
-        let status_bytes = Into::<u8>::into(self.status).serialize();
+        let status_bytes = u8::from(self.status).serialize();
         [
             modifiers_bytes[0],
             modifiers_bytes[1],
@@ -10415,7 +10538,7 @@ impl Serialize for GrabModifierInfo {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
         self.modifiers.serialize_into(bytes);
-        Into::<u8>::into(self.status).serialize_into(bytes);
+        u8::from(self.status).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
     }
 }
@@ -10423,12 +10546,16 @@ impl Serialize for GrabModifierInfo {
 /// Opcode for the XIPassiveGrabDevice request
 pub const XI_PASSIVE_GRAB_DEVICE_REQUEST: u8 = 54;
 pub fn xi_passive_grab_device<'c, Conn, A, B, C, D>(conn: &'c Conn, time: xproto::Timestamp, grab_window: xproto::Window, cursor: xproto::Cursor, detail: u32, deviceid: DeviceId, grab_type: A, grab_mode: B, paired_device_mode: C, owner_events: D, mask: &[u32], modifiers: &[u32]) -> Result<Cookie<'c, Conn, XIPassiveGrabDeviceReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>, C: Into<u8>, D: Into<bool>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
+    B: Into<u8>,
+    C: Into<u8>,
+    D: Into<bool>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (32 + 4 * mask.len() + 4 * modifiers.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let time_bytes = time.serialize();
     let grab_window_bytes = grab_window.serialize();
     let cursor_bytes = cursor.serialize();
@@ -10447,11 +10574,11 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>, C: Into<u8>, D
     let owner_events = owner_events.into();
     let owner_events_bytes = (owner_events as u8).serialize();
     let mask_bytes = mask.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_PASSIVE_GRAB_DEVICE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         time_bytes[0],
         time_bytes[1],
         time_bytes[2],
@@ -10481,14 +10608,16 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>, C: Into<u8>, D
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&mask_bytes).len();
     let modifiers_bytes = modifiers.serialize();
     let length_so_far = length_so_far + (&modifiers_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&mask_bytes), IoSlice::new(&modifiers_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&mask_bytes), IoSlice::new(&modifiers_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIPassiveGrabDeviceReply {
@@ -10520,12 +10649,13 @@ impl TryFrom<&[u8]> for XIPassiveGrabDeviceReply {
 /// Opcode for the XIPassiveUngrabDevice request
 pub const XI_PASSIVE_UNGRAB_DEVICE_REQUEST: u8 = 55;
 pub fn xi_passive_ungrab_device<'c, Conn, A>(conn: &'c Conn, grab_window: xproto::Window, detail: u32, deviceid: DeviceId, grab_type: A, modifiers: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (20 + 4 * modifiers.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let grab_window_bytes = grab_window.serialize();
     let detail_bytes = detail.serialize();
     let deviceid_bytes = deviceid.serialize();
@@ -10534,11 +10664,11 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let grab_type = grab_type.into();
     let grab_type_bytes = grab_type.serialize();
     let modifiers_bytes = modifiers.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_PASSIVE_UNGRAB_DEVICE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         grab_window_bytes[0],
         grab_window_bytes[1],
         grab_window_bytes[2],
@@ -10556,37 +10686,41 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&modifiers_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&modifiers_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&modifiers_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the XIListProperties request
 pub const XI_LIST_PROPERTIES_REQUEST: u8 = 56;
 pub fn xi_list_properties<Conn>(conn: &Conn, deviceid: DeviceId) -> Result<Cookie<'_, Conn, XIListPropertiesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let deviceid_bytes = deviceid.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_LIST_PROPERTIES_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         deviceid_bytes[0],
         deviceid_bytes[1],
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIListPropertiesReply {
@@ -10666,14 +10800,15 @@ impl XIChangePropertyAux {
     }
 }
 pub fn xi_change_property<'c, Conn, A>(conn: &'c Conn, deviceid: DeviceId, mode: A, property: xproto::Atom, type_: xproto::Atom, num_items: u32, items: &XIChangePropertyAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let format = items.format();
     let items_bytes = items.serialize();
-    let length: usize = (20 + items_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let deviceid_bytes = deviceid.serialize();
     let mode = mode.into();
     let mode_bytes = mode.serialize();
@@ -10681,11 +10816,11 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let property_bytes = property.serialize();
     let type_bytes = type_.serialize();
     let num_items_bytes = num_items.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_CHANGE_PROPERTY_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         deviceid_bytes[0],
         deviceid_bytes[1],
         mode_bytes[0],
@@ -10703,30 +10838,32 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
         num_items_bytes[2],
         num_items_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&items_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&items_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&items_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the XIDeleteProperty request
 pub const XI_DELETE_PROPERTY_REQUEST: u8 = 58;
 pub fn xi_delete_property<Conn>(conn: &Conn, deviceid: DeviceId, property: xproto::Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let deviceid_bytes = deviceid.serialize();
     let property_bytes = property.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_DELETE_PROPERTY_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         deviceid_bytes[0],
         deviceid_bytes[1],
         0,
@@ -10736,31 +10873,33 @@ where Conn: RequestConnection + ?Sized
         property_bytes[2],
         property_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the XIGetProperty request
 pub const XI_GET_PROPERTY_REQUEST: u8 = 59;
 pub fn xi_get_property<Conn>(conn: &Conn, deviceid: DeviceId, delete: bool, property: xproto::Atom, type_: xproto::Atom, offset: u32, len: u32) -> Result<Cookie<'_, Conn, XIGetPropertyReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (24) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let deviceid_bytes = deviceid.serialize();
     let delete_bytes = (delete as u8).serialize();
     let property_bytes = property.serialize();
     let type_bytes = type_.serialize();
     let offset_bytes = offset.serialize();
     let len_bytes = len.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_GET_PROPERTY_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         deviceid_bytes[0],
         deviceid_bytes[1],
         delete_bytes[0],
@@ -10782,9 +10921,11 @@ where Conn: RequestConnection + ?Sized
         len_bytes[2],
         len_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum XIGetPropertyItems {
@@ -10796,7 +10937,7 @@ impl XIGetPropertyItems {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if format == Into::<u8>::into(PropertyFormat::M8Bits) {
+        if format == u8::from(PropertyFormat::M8Bits) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data8, remaining) = crate::x11_utils::parse_list::<u8>(remaining, num_items as usize)?;
@@ -10808,7 +10949,7 @@ impl XIGetPropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIGetPropertyItems::Data8(data8));
         }
-        if format == Into::<u8>::into(PropertyFormat::M16Bits) {
+        if format == u8::from(PropertyFormat::M16Bits) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items as usize)?;
@@ -10820,7 +10961,7 @@ impl XIGetPropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIGetPropertyItems::Data16(data16));
         }
-        if format == Into::<u8>::into(PropertyFormat::M32Bits) {
+        if format == u8::from(PropertyFormat::M32Bits) {
             let remaining = outer_remaining;
             let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items as usize)?;
             outer_remaining = remaining;
@@ -10829,7 +10970,7 @@ impl XIGetPropertyItems {
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, outer_remaining))
+            Some(result) => Ok((result, outer_remaining)),
         }
     }
     pub fn as_data8(&self) -> Option<&Vec<u8>> {
@@ -10922,26 +11063,28 @@ impl TryFrom<&[u8]> for XIGetPropertyReply {
 /// Opcode for the XIGetSelectedEvents request
 pub const XI_GET_SELECTED_EVENTS_REQUEST: u8 = 60;
 pub fn xi_get_selected_events<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, XIGetSelectedEventsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_GET_SELECTED_EVENTS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
         window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIGetSelectedEventsReply {
@@ -11025,31 +11168,33 @@ impl Serialize for BarrierReleasePointerInfo {
 /// Opcode for the XIBarrierReleasePointer request
 pub const XI_BARRIER_RELEASE_POINTER_REQUEST: u8 = 61;
 pub fn xi_barrier_release_pointer<'c, Conn>(conn: &'c Conn, barriers: &[BarrierReleasePointerInfo]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8 + 12 * barriers.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let num_barriers: u32 = barriers.len().try_into()?;
     let num_barriers_bytes = num_barriers.serialize();
     let barriers_bytes = barriers.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         XI_BARRIER_RELEASE_POINTER_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         num_barriers_bytes[0],
         num_barriers_bytes[1],
         num_barriers_bytes[2],
         num_barriers_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&barriers_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&barriers_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&barriers_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the DeviceValuator event
@@ -11178,7 +11323,7 @@ impl TryFrom<u8> for MoreEventsMask {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             128 => Ok(MoreEventsMask::MoreEvents),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -11680,11 +11825,11 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceFocusInEvent {
 impl From<&DeviceFocusInEvent> for [u8; 32] {
     fn from(input: &DeviceFocusInEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let detail = Into::<u8>::into(input.detail).serialize();
+        let detail = u8::from(input.detail).serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let window = input.window.serialize();
-        let mode = Into::<u8>::into(input.mode).serialize();
+        let mode = u8::from(input.mode).serialize();
         let device_id = input.device_id.serialize();
         [
             response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
@@ -11749,11 +11894,11 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceFocusOutEvent {
 impl From<&DeviceFocusOutEvent> for [u8; 32] {
     fn from(input: &DeviceFocusOutEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let detail = Into::<u8>::into(input.detail).serialize();
+        let detail = u8::from(input.detail).serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let window = input.window.serialize();
-        let mode = Into::<u8>::into(input.mode).serialize();
+        let mode = u8::from(input.mode).serialize();
         let device_id = input.device_id.serialize();
         [
             response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
@@ -11997,7 +12142,7 @@ impl TryFrom<u8> for ClassesReportedMask {
             4 => Ok(ClassesReportedMask::ReportingValuators),
             2 => Ok(ClassesReportedMask::ReportingButtons),
             1 => Ok(ClassesReportedMask::ReportingKeys),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -12169,7 +12314,7 @@ impl From<&DeviceMappingNotifyEvent> for [u8; 32] {
         let response_type = input.response_type.serialize();
         let device_id = input.device_id.serialize();
         let sequence = input.sequence.serialize();
-        let request = Into::<u8>::into(input.request).serialize();
+        let request = u8::from(input.request).serialize();
         let first_keycode = input.first_keycode.serialize();
         let count = input.count.serialize();
         let time = input.time.serialize();
@@ -12232,7 +12377,7 @@ impl TryFrom<u8> for ChangeDevice {
         match value {
             0 => Ok(ChangeDevice::NewPointer),
             1 => Ok(ChangeDevice::NewKeyboard),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -12296,7 +12441,7 @@ impl From<&ChangeDeviceNotifyEvent> for [u8; 32] {
         let device_id = input.device_id.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
-        let request = Into::<u8>::into(input.request).serialize();
+        let request = u8::from(input.request).serialize();
         [
             response_type[0], device_id[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
             request[0], 0, 0, 0, 0, 0, 0, 0,
@@ -12594,7 +12739,7 @@ impl TryFrom<u8> for DeviceChange {
             3 => Ok(DeviceChange::Disabled),
             4 => Ok(DeviceChange::Unrecoverable),
             5 => Ok(DeviceChange::ControlChanged),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -12660,7 +12805,7 @@ impl From<&DevicePresenceNotifyEvent> for [u8; 32] {
         let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
-        let devchange = Into::<u8>::into(input.devchange).serialize();
+        let devchange = u8::from(input.devchange).serialize();
         let device_id = input.device_id.serialize();
         let control = input.control.serialize();
         [
@@ -12723,7 +12868,7 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DevicePropertyNotifyEvent {
 impl From<&DevicePropertyNotifyEvent> for [u8; 32] {
     fn from(input: &DevicePropertyNotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let state = Into::<u8>::into(input.state).serialize();
+        let state = u8::from(input.state).serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let property = input.property.serialize();
@@ -12787,7 +12932,7 @@ impl TryFrom<u8> for ChangeReason {
         match value {
             1 => Ok(ChangeReason::SlaveSwitch),
             2 => Ok(ChangeReason::DeviceChange),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -12879,7 +13024,7 @@ impl TryFrom<u32> for KeyEventFlags {
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
             65536 => Ok(KeyEventFlags::KeyRepeat),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -12938,7 +13083,7 @@ impl KeyPressEvent {
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
         let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
         let result = KeyPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -13015,7 +13160,7 @@ impl KeyReleaseEvent {
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
         let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
         let result = KeyReleaseEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -13061,7 +13206,7 @@ impl TryFrom<u32> for PointerEventFlags {
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
             65536 => Ok(PointerEventFlags::PointerEmulated),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -13120,7 +13265,7 @@ impl ButtonPressEvent {
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
         let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
         let result = ButtonPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -13197,7 +13342,7 @@ impl ButtonReleaseEvent {
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
         let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
         let result = ButtonReleaseEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -13274,7 +13419,7 @@ impl MotionEvent {
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
         let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
         let result = MotionEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -13355,7 +13500,7 @@ impl TryFrom<u8> for NotifyMode {
             3 => Ok(NotifyMode::WhileGrabbed),
             4 => Ok(NotifyMode::PassiveGrab),
             5 => Ok(NotifyMode::PassiveUngrab),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -13435,7 +13580,7 @@ impl TryFrom<u8> for NotifyDetail {
             5 => Ok(NotifyDetail::Pointer),
             6 => Ok(NotifyDetail::PointerRoot),
             7 => Ok(NotifyDetail::None),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -13823,7 +13968,7 @@ impl TryFrom<u8> for HierarchyMask {
             32 => Ok(HierarchyMask::SlaveDetached),
             64 => Ok(HierarchyMask::DeviceEnabled),
             128 => Ok(HierarchyMask::DeviceDisabled),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -13873,7 +14018,7 @@ impl Serialize for HierarchyInfo {
     fn serialize(&self) -> Self::Bytes {
         let deviceid_bytes = self.deviceid.serialize();
         let attachment_bytes = self.attachment.serialize();
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let enabled_bytes = self.enabled.serialize();
         let flags_bytes = self.flags.serialize();
         [
@@ -13895,7 +14040,7 @@ impl Serialize for HierarchyInfo {
         bytes.reserve(12);
         self.deviceid.serialize_into(bytes);
         self.attachment.serialize_into(bytes);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.enabled.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.flags.serialize_into(bytes);
@@ -14000,7 +14145,7 @@ impl TryFrom<u8> for PropertyFlag {
             0 => Ok(PropertyFlag::Deleted),
             1 => Ok(PropertyFlag::Created),
             2 => Ok(PropertyFlag::Modified),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -14100,8 +14245,8 @@ impl RawKeyPressEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
         let result = RawKeyPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -14158,8 +14303,8 @@ impl RawKeyReleaseEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
         let result = RawKeyReleaseEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -14216,8 +14361,8 @@ impl RawButtonPressEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
         let result = RawButtonPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -14274,8 +14419,8 @@ impl RawButtonReleaseEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
         let result = RawButtonReleaseEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -14332,8 +14477,8 @@ impl RawMotionEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
         let result = RawMotionEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -14382,7 +14527,7 @@ impl TryFrom<u32> for TouchEventFlags {
         match value {
             65536 => Ok(TouchEventFlags::TouchPendingEnd),
             131_072 => Ok(TouchEventFlags::TouchEmulatingPointer),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -14441,7 +14586,7 @@ impl TouchBeginEvent {
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
         let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
         let result = TouchBeginEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -14518,7 +14663,7 @@ impl TouchUpdateEvent {
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
         let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
         let result = TouchUpdateEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -14595,7 +14740,7 @@ impl TouchEndEvent {
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
         let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
         let result = TouchEndEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -14661,7 +14806,7 @@ impl TryFrom<u8> for TouchOwnershipFlags {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             0 => Ok(TouchOwnershipFlags::None),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -14770,8 +14915,8 @@ impl RawTouchBeginEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
         let result = RawTouchBeginEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -14828,8 +14973,8 @@ impl RawTouchUpdateEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
         let result = RawTouchUpdateEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -14886,8 +15031,8 @@ impl RawTouchEndEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| TryInto::<usize>::try_into(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from(x.count_ones()).unwrap()).sum())?;
         let result = RawTouchEndEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -14956,7 +15101,7 @@ impl TryFrom<u8> for BarrierFlags {
         match value {
             1 => Ok(BarrierFlags::PointerReleased),
             2 => Ok(BarrierFlags::DeviceIsGrabbed),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -15261,59 +15406,59 @@ impl TryParse for EventForSend {
 }
 impl From<DeviceValuatorEvent> for EventForSend {
     fn from(value: DeviceValuatorEvent) -> Self {
-        Self(Into::<[u8; 32]>::into(value))
+        Self(<[u8; 32]>::from(value))
     }
 }
 impl From<DeviceKeyPressEvent> for EventForSend {
     fn from(value: DeviceKeyPressEvent) -> Self {
-        Self(Into::<[u8; 32]>::into(value))
+        Self(<[u8; 32]>::from(value))
     }
 }
 impl From<DeviceFocusInEvent> for EventForSend {
     fn from(value: DeviceFocusInEvent) -> Self {
-        Self(Into::<[u8; 32]>::into(value))
+        Self(<[u8; 32]>::from(value))
     }
 }
 impl From<DeviceStateNotifyEvent> for EventForSend {
     fn from(value: DeviceStateNotifyEvent) -> Self {
-        Self(Into::<[u8; 32]>::into(value))
+        Self(<[u8; 32]>::from(value))
     }
 }
 impl From<DeviceMappingNotifyEvent> for EventForSend {
     fn from(value: DeviceMappingNotifyEvent) -> Self {
-        Self(Into::<[u8; 32]>::into(value))
+        Self(<[u8; 32]>::from(value))
     }
 }
 impl From<ChangeDeviceNotifyEvent> for EventForSend {
     fn from(value: ChangeDeviceNotifyEvent) -> Self {
-        Self(Into::<[u8; 32]>::into(value))
+        Self(<[u8; 32]>::from(value))
     }
 }
 impl From<DeviceKeyStateNotifyEvent> for EventForSend {
     fn from(value: DeviceKeyStateNotifyEvent) -> Self {
-        Self(Into::<[u8; 32]>::into(value))
+        Self(<[u8; 32]>::from(value))
     }
 }
 impl From<DeviceButtonStateNotifyEvent> for EventForSend {
     fn from(value: DeviceButtonStateNotifyEvent) -> Self {
-        Self(Into::<[u8; 32]>::into(value))
+        Self(<[u8; 32]>::from(value))
     }
 }
 impl From<DevicePresenceNotifyEvent> for EventForSend {
     fn from(value: DevicePresenceNotifyEvent) -> Self {
-        Self(Into::<[u8; 32]>::into(value))
+        Self(<[u8; 32]>::from(value))
     }
 }
 
 /// Opcode for the SendExtensionEvent request
 pub const SEND_EXTENSION_EVENT_REQUEST: u8 = 31;
 pub fn send_extension_event<'c, Conn>(conn: &'c Conn, destination: xproto::Window, device_id: u8, propagate: bool, events: &[EventForSend], classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (16 + 32 * events.len() + 4 * classes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let destination_bytes = destination.serialize();
     let device_id_bytes = device_id.serialize();
     let propagate_bytes = (propagate as u8).serialize();
@@ -15322,11 +15467,11 @@ where Conn: RequestConnection + ?Sized
     let num_events: u8 = events.len().try_into()?;
     let num_events_bytes = num_events.serialize();
     let events_bytes = events.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         SEND_EXTENSION_EVENT_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         destination_bytes[0],
         destination_bytes[1],
         destination_bytes[2],
@@ -15340,14 +15485,16 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&events_bytes).len();
     let classes_bytes = classes.serialize();
     let length_so_far = length_so_far + (&classes_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&events_bytes), IoSlice::new(&classes_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&events_bytes), IoSlice::new(&classes_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the Device error
@@ -15633,7 +15780,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_set_device_mode<A>(&self, device_id: u8, mode: A) -> Result<Cookie<'_, Self, SetDeviceModeReply>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         set_device_mode(self, device_id, mode)
     }
@@ -15649,7 +15797,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_change_device_dont_propagate_list<'c, A>(&'c self, window: xproto::Window, mode: A, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         change_device_dont_propagate_list(self, window, mode, classes)
     }
@@ -15675,7 +15824,9 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_grab_device<'c, A, B>(&'c self, grab_window: xproto::Window, time: xproto::Timestamp, this_device_mode: A, other_device_mode: B, owner_events: bool, device_id: u8, classes: &[EventClass]) -> Result<Cookie<'c, Self, GrabDeviceReply>, ConnectionError>
-    where A: Into<u8>, B: Into<u8>
+    where
+        A: Into<u8>,
+        B: Into<u8>,
     {
         grab_device(self, grab_window, time, this_device_mode, other_device_mode, owner_events, device_id, classes)
     }
@@ -15686,7 +15837,9 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_grab_device_key<'c, A, B>(&'c self, grab_window: xproto::Window, modifiers: u16, modifier_device: u8, grabbed_device: u8, key: u8, this_device_mode: A, other_device_mode: B, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>, B: Into<u8>
+    where
+        A: Into<u8>,
+        B: Into<u8>,
     {
         grab_device_key(self, grab_window, modifiers, modifier_device, grabbed_device, key, this_device_mode, other_device_mode, owner_events, classes)
     }
@@ -15697,7 +15850,9 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_grab_device_button<'c, A, B>(&'c self, grab_window: xproto::Window, grabbed_device: u8, modifier_device: u8, modifiers: u16, this_device_mode: A, other_device_mode: B, button: u8, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>, B: Into<u8>
+    where
+        A: Into<u8>,
+        B: Into<u8>,
     {
         grab_device_button(self, grab_window, grabbed_device, modifier_device, modifiers, this_device_mode, other_device_mode, button, owner_events, classes)
     }
@@ -15708,7 +15863,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_allow_device_events<A>(&self, time: xproto::Timestamp, mode: A, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         allow_device_events(self, time, mode, device_id)
     }
@@ -15719,7 +15875,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_set_device_focus<A>(&self, focus: xproto::Window, time: xproto::Timestamp, revert_to: A, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         set_device_focus(self, focus, time, revert_to, device_id)
     }
@@ -15780,13 +15937,15 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_get_device_control<A>(&self, control_id: A, device_id: u8) -> Result<Cookie<'_, Self, GetDeviceControlReply>, ConnectionError>
-    where A: Into<u16>
+    where
+        A: Into<u16>,
     {
         get_device_control(self, control_id, device_id)
     }
 
     fn xinput_change_device_control<A>(&self, control_id: A, device_id: u8, control: DeviceCtl) -> Result<Cookie<'_, Self, ChangeDeviceControlReply>, ConnectionError>
-    where A: Into<u16>
+    where
+        A: Into<u16>,
     {
         change_device_control(self, control_id, device_id, control)
     }
@@ -15797,7 +15956,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_change_device_property<'c, A>(&'c self, property: xproto::Atom, type_: xproto::Atom, device_id: u8, mode: A, num_items: u32, items: &ChangeDevicePropertyAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         change_device_property(self, property, type_, device_id, mode, num_items, items)
     }
@@ -15868,7 +16028,10 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_xi_grab_device<'c, A, B, C>(&'c self, window: xproto::Window, time: xproto::Timestamp, cursor: xproto::Cursor, deviceid: DeviceId, mode: A, paired_device_mode: B, owner_events: C, mask: &[u32]) -> Result<Cookie<'c, Self, XIGrabDeviceReply>, ConnectionError>
-    where A: Into<u8>, B: Into<u8>, C: Into<bool>
+    where
+        A: Into<u8>,
+        B: Into<u8>,
+        C: Into<bool>,
     {
         xi_grab_device(self, window, time, cursor, deviceid, mode, paired_device_mode, owner_events, mask)
     }
@@ -15879,19 +16042,25 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_xi_allow_events<A>(&self, time: xproto::Timestamp, deviceid: DeviceId, event_mode: A, touchid: u32, grab_window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         xi_allow_events(self, time, deviceid, event_mode, touchid, grab_window)
     }
 
     fn xinput_xi_passive_grab_device<'c, A, B, C, D>(&'c self, time: xproto::Timestamp, grab_window: xproto::Window, cursor: xproto::Cursor, detail: u32, deviceid: DeviceId, grab_type: A, grab_mode: B, paired_device_mode: C, owner_events: D, mask: &[u32], modifiers: &[u32]) -> Result<Cookie<'c, Self, XIPassiveGrabDeviceReply>, ConnectionError>
-    where A: Into<u8>, B: Into<u8>, C: Into<u8>, D: Into<bool>
+    where
+        A: Into<u8>,
+        B: Into<u8>,
+        C: Into<u8>,
+        D: Into<bool>,
     {
         xi_passive_grab_device(self, time, grab_window, cursor, detail, deviceid, grab_type, grab_mode, paired_device_mode, owner_events, mask, modifiers)
     }
 
     fn xinput_xi_passive_ungrab_device<'c, A>(&'c self, grab_window: xproto::Window, detail: u32, deviceid: DeviceId, grab_type: A, modifiers: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         xi_passive_ungrab_device(self, grab_window, detail, deviceid, grab_type, modifiers)
     }
@@ -15902,7 +16071,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_xi_change_property<'c, A>(&'c self, deviceid: DeviceId, mode: A, property: xproto::Atom, type_: xproto::Atom, num_items: u32, items: &XIChangePropertyAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         xi_change_property(self, deviceid, mode, property, type_, num_items, items)
     }

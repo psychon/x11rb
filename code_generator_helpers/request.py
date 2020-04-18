@@ -145,12 +145,7 @@ def request_implementation(module, obj, name, fds, fds_is_list):
 
     # Add the given byte array to requests
     def _emit_add_to_requests(part):
-        if requests:
-            add = "length_so_far + "
-        else:
-            add = ""
-        module.out("let length_so_far = %s(%s).len();",
-                   add, part)
+        module.out("let length_so_far = length_so_far + (%s).len();", part)
         requests.append(part)
 
     # This function adds the current 'request' to the list of 'requests'
@@ -158,7 +153,9 @@ def request_implementation(module, obj, name, fds, fds_is_list):
         if not request:
             return
 
-        module.out("let request%d = [", len(requests))
+        # The first chunk contains the request length, which is set later.
+        mut = "" if requests else "mut "
+        module.out("let %srequest%d = [", mut, len(requests))
         for byte in request:
             module.out.indent("%s,", byte)
         module.out("];")
@@ -171,10 +168,10 @@ def request_implementation(module, obj, name, fds, fds_is_list):
     def _emit_padding_for_alignment(align):
         _emit_request()
 
-        pad_count.append('')
         module.out("let padding%s = &[0; %d][..(%d - (length_so_far %% %d)) %% %d];",
                    len(pad_count), align - 1, align, align, align)
         _emit_add_to_requests("&padding%s" % len(pad_count))
+        pad_count.append('')
 
     # Get the length of all fixed-length parts of the request
     fixed_request_length, has_variable_length = 0, False
@@ -195,11 +192,7 @@ def request_implementation(module, obj, name, fds, fds_is_list):
         trailing_padding = padded_length * 4 - fixed_request_length
         fixed_request_length += trailing_padding
 
-    # This list collects expression that describe the wire length of the
-    # request when summed.
-    request_length = [str(fixed_request_length)]
-
-    # Collect the request length and emit some byte conversions
+    # Emit some byte conversions
     for field in obj.fields:
         if not field.wire:
             continue
@@ -207,7 +200,6 @@ def request_implementation(module, obj, name, fds, fds_is_list):
         if field.type.is_switch:
             field_bytes = module._to_rust_variable(field.field_name + "_bytes")
             module.out("let %s = %s.serialize();", field_bytes, rust_variable)
-            request_length.append("%s.len()" % field_bytes)
         elif field.type.nmemb is None:
             size = field.type.size
             if size is None:
@@ -215,16 +207,11 @@ def request_implementation(module, obj, name, fds, fds_is_list):
                 # xproto::SetFontPath seems to be the only example
                 module.out("let %s_bytes = %s.serialize();",
                            rust_variable, rust_variable)
-                request_length.append("%s_bytes.len()" % rust_variable)
-            else:
-                # Variable length list with fixed sized items
-                request_length.append("%s * %s.len()" % (size, rust_variable))
         elif field.type.size is None:
             # Variable sized element. Only example seems to be RandR's
             # SetMonitor request. MonitorInfo contains a list.
             assert field.type.nmemb is not None
             module.out("let %s_bytes = %s.serialize();", field.field_name, field.field_name)
-            request_length.append("%s_bytes.len()" % field.field_name)
         if hasattr(field, 'lenfield_for_switch'):
             # This our special Aux-argument that represents a <switch>
             if field.lenfield_for_switch.type.bitcases[0].type.is_bitcase:
@@ -233,18 +220,9 @@ def request_implementation(module, obj, name, fds, fds_is_list):
             else:
                 module.out("let %s = %s.%s();", rust_variable,
                            field.lenfield_for_switch.field_name, field.field_name)
-    request_length = " + ".join(request_length)
-
-    if has_variable_length:
-        # This will cause the division by 4 to "round up". Code below
-        # will actually add padding bytes.
-        request_length += " + 3"
-
-    # The "length" variable contains the request length in four byte
-    # quantities. This rounds up to a multiple of four, because we
-    module.out("let length: usize = (%s) / 4;", request_length)
 
     # Now construct the actual request bytes
+    module.out("let length_so_far = 0;")
     for field in obj.fields:
         if not field.wire:
             continue
@@ -307,6 +285,9 @@ def request_implementation(module, obj, name, fds, fds_is_list):
 
                 _emit_request()
                 _emit_add_to_requests("&%s_bytes" % rust_variable)
+        elif field.wire and field_name == "length":
+            assert module._field_type(field) == "u16"
+            request.extend(["0", "0"])
         elif field.wire:
             if hasattr(field, "is_length_field_for"):
                 list_var_name = module._to_rust_variable(field.is_length_field_for.field_name)
@@ -317,7 +298,7 @@ def request_implementation(module, obj, name, fds, fds_is_list):
                     module.out("assert_eq!(0, %s %% %s, \"Argument %s has an incorrect length,"
                                + " must be a multiple of %s\");",
                                length, multiple, field_name, multiple)
-                    module.out("let %s: %s = TryInto::try_into(%s).unwrap();",
+                    module.out("let %s = %s::try_from(%s).unwrap();",
                                rust_variable, module._field_type(field), solved)
                 else:
                     # This is a length field for some list, get the length.
@@ -334,18 +315,11 @@ def request_implementation(module, obj, name, fds, fds_is_list):
                 # already called serialize() to get the bytes.
                 pass
             elif field.type.size is not None:  # Size None was already handled above
-                if field_name == "length":
-                    # This is the request length which we explicitly
-                    # calculated above. If it does not fit into u16,
-                    # Connection::compute_length_field() fixes this.
-                    source = "TryInto::<%s>::try_into(length).unwrap_or(0)" % module._field_type(field)
-                else:
-                    source = rust_variable
                 if code_generator_helpers.module.is_bool(field.type) or \
                         (name == ('xcb', 'InternAtom') and field_name == 'only_if_exists'):
-                    module.out("let %s = (%s as u8).serialize();", field_bytes, source)
+                    module.out("let %s = (%s as u8).serialize();", field_bytes, rust_variable)
                 else:
-                    module.out("let %s = %s.serialize();", field_bytes, source)
+                    module.out("let %s = %s.serialize();", field_bytes, rust_variable)
             if field.type.is_switch or field.type.size is None:
                 # We have a byte array that we can directly send
                 if field.type.is_switch and field.type.expr.op is not None:
@@ -373,9 +347,13 @@ def request_implementation(module, obj, name, fds, fds_is_list):
         # Add zero bytes so that the total length is a multiple of 4
         _emit_padding_for_alignment(4)
 
-    # Emit an assert that checks that the sum of all the byte arrays in
-    # 'requests' is the same as our computed length field
-    module.out("assert_eq!(length_so_far, length * 4);")
+    # The length must be a multiple of 4.
+    module.out("assert_eq!(length_so_far %% 4, 0);")
+
+    # Set the length in the request.
+    # If it does not fit into u16, compute_length_field will use BigRequests.
+    module.out("let length = u16::try_from(length_so_far / 4).unwrap_or(0);")
+    module.out("request0[2..4].copy_from_slice(&length.to_ne_bytes());")
 
     # Now we actually send the request
 
@@ -389,7 +367,7 @@ def request_implementation(module, obj, name, fds, fds_is_list):
             # There may (currently) be only a single list of FDs
             fds, = fds
     else:
-        fds = "Vec::new()"
+        fds = "vec![]"
 
     if name == ('xcb', 'ListFontsWithInfo'):
         assert obj.reply
@@ -452,7 +430,9 @@ def generate_request_code(module, obj, name, function_name):
     module.trait_out("fn %s%s%s(%s) -> Result<%s, ConnectionError>", function_name_prefix,
                      function_name, generics_str, ", ".join(args), result_type_trait)
     if where:
-        module.trait_out("where %s", ", ".join(where))
+        module.trait_out("where")
+        for entry in where:
+            module.trait_out.indent("%s,", entry)
     module.trait_out("{")
     if function_name in arg_names:
         module.trait_out.indent("self::%s(%s)", function_name, ", ".join(arg_names))
@@ -471,7 +451,9 @@ def generate_request_code(module, obj, name, function_name):
     generics_str = "<%s>" % ", ".join(prefix_generics + generics)
     code_generator_helpers.module.emit_doc(module.out, obj.doc)
     module.out("pub fn %s%s(%s) -> Result<%s, ConnectionError>", function_name, generics_str, ", ".join(args), result_type_func)
-    module.out("where %s", ", ".join(['Conn: RequestConnection + ?Sized'] + where))
+    module.out("where")
+    for entry in ['Conn: RequestConnection + ?Sized'] + where:
+        module.out.indent("%s,", entry)
     module.out("{")
     with Indent(module.out):
         request_implementation(module, obj, name, fds, fds_is_list)

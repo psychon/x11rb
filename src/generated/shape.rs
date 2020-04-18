@@ -5,6 +5,7 @@
 #![allow(clippy::identity_op)]
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
+
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -13,11 +14,12 @@ use std::io::IoSlice;
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::Event as _;
-use crate::x11_utils::{TryParse, Serialize};
+#[allow(unused_imports)]
+use crate::x11_utils::{Serialize, TryParse};
 use crate::connection::RequestConnection;
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ParseError, ConnectionError};
+use crate::errors::{ConnectionError, ParseError};
 #[allow(unused_imports)]
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
@@ -94,7 +96,7 @@ impl TryFrom<u8> for SO {
             2 => Ok(SO::Intersect),
             3 => Ok(SO::Subtract),
             4 => Ok(SO::Invert),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -159,7 +161,7 @@ impl TryFrom<u8> for SK {
             0 => Ok(SK::Bounding),
             1 => Ok(SK::Clip),
             2 => Ok(SK::Input),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -230,7 +232,7 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for NotifyEvent {
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let shape_kind = Into::<Kind>::into(input.shape_kind).serialize();
+        let shape_kind = Kind::from(input.shape_kind).serialize();
         let sequence = input.sequence.serialize();
         let affected_window = input.affected_window.serialize();
         let extents_x = input.extents_x.serialize();
@@ -256,21 +258,23 @@ impl From<NotifyEvent> for [u8; 32] {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 pub fn query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
-    let request0 = [
+    let length_so_far = 0;
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_VERSION_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -302,12 +306,15 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 /// Opcode for the Rectangles request
 pub const RECTANGLES_REQUEST: u8 = 1;
 pub fn rectangles<'c, Conn, A, B, C>(conn: &'c Conn, operation: A, destination_kind: B, ordering: C, destination_window: xproto::Window, x_offset: i16, y_offset: i16, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<Op>, B: Into<Kind>, C: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<Op>,
+    B: Into<Kind>,
+    C: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (16 + 8 * rectangles.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let operation = operation.into();
     let operation_bytes = operation.serialize();
     let destination_kind = destination_kind.into();
@@ -318,11 +325,11 @@ where Conn: RequestConnection + ?Sized, A: Into<Op>, B: Into<Kind>, C: Into<u8>
     let x_offset_bytes = x_offset.serialize();
     let y_offset_bytes = y_offset.serialize();
     let rectangles_bytes = rectangles.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         RECTANGLES_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         operation_bytes[0],
         destination_kind_bytes[0],
         ordering_bytes[0],
@@ -336,23 +343,27 @@ where Conn: RequestConnection + ?Sized, A: Into<Op>, B: Into<Kind>, C: Into<u8>
         y_offset_bytes[0],
         y_offset_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&rectangles_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&rectangles_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&rectangles_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the Mask request
 pub const MASK_REQUEST: u8 = 2;
 pub fn mask<Conn, A, B>(conn: &Conn, operation: A, destination_kind: B, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_bitmap: xproto::Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<Op>, B: Into<Kind>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<Op>,
+    B: Into<Kind>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (20) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let operation = operation.into();
     let operation_bytes = operation.serialize();
     let destination_kind = destination_kind.into();
@@ -361,11 +372,11 @@ where Conn: RequestConnection + ?Sized, A: Into<Op>, B: Into<Kind>
     let x_offset_bytes = x_offset.serialize();
     let y_offset_bytes = y_offset.serialize();
     let source_bitmap_bytes = source_bitmap.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         MASK_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         operation_bytes[0],
         destination_kind_bytes[0],
         0,
@@ -383,20 +394,25 @@ where Conn: RequestConnection + ?Sized, A: Into<Op>, B: Into<Kind>
         source_bitmap_bytes[2],
         source_bitmap_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the Combine request
 pub const COMBINE_REQUEST: u8 = 3;
 pub fn combine<Conn, A, B, C>(conn: &Conn, operation: A, destination_kind: B, source_kind: C, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<Op>, B: Into<Kind>, C: Into<Kind>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<Op>,
+    B: Into<Kind>,
+    C: Into<Kind>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (20) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let operation = operation.into();
     let operation_bytes = operation.serialize();
     let destination_kind = destination_kind.into();
@@ -407,11 +423,11 @@ where Conn: RequestConnection + ?Sized, A: Into<Op>, B: Into<Kind>, C: Into<Kind
     let x_offset_bytes = x_offset.serialize();
     let y_offset_bytes = y_offset.serialize();
     let source_window_bytes = source_window.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         COMBINE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         operation_bytes[0],
         destination_kind_bytes[0],
         source_kind_bytes[0],
@@ -429,30 +445,33 @@ where Conn: RequestConnection + ?Sized, A: Into<Op>, B: Into<Kind>, C: Into<Kind
         source_window_bytes[2],
         source_window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the Offset request
 pub const OFFSET_REQUEST: u8 = 4;
 pub fn offset<Conn, A>(conn: &Conn, destination_kind: A, destination_window: xproto::Window, x_offset: i16, y_offset: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<Kind>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<Kind>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let destination_kind = destination_kind.into();
     let destination_kind_bytes = destination_kind.serialize();
     let destination_window_bytes = destination_window.serialize();
     let x_offset_bytes = x_offset.serialize();
     let y_offset_bytes = y_offset.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         OFFSET_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         destination_kind_bytes[0],
         0,
         0,
@@ -466,34 +485,38 @@ where Conn: RequestConnection + ?Sized, A: Into<Kind>
         y_offset_bytes[0],
         y_offset_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the QueryExtents request
 pub const QUERY_EXTENTS_REQUEST: u8 = 5;
 pub fn query_extents<Conn>(conn: &Conn, destination_window: xproto::Window) -> Result<Cookie<'_, Conn, QueryExtentsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let destination_window_bytes = destination_window.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_EXTENTS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         destination_window_bytes[0],
         destination_window_bytes[1],
         destination_window_bytes[2],
         destination_window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryExtentsReply {
@@ -542,19 +565,19 @@ impl TryFrom<&[u8]> for QueryExtentsReply {
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 6;
 pub fn select_input<Conn>(conn: &Conn, destination_window: xproto::Window, enable: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let destination_window_bytes = destination_window.serialize();
     let enable_bytes = (enable as u8).serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         SELECT_INPUT_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         destination_window_bytes[0],
         destination_window_bytes[1],
         destination_window_bytes[2],
@@ -564,34 +587,38 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the InputSelected request
 pub const INPUT_SELECTED_REQUEST: u8 = 7;
 pub fn input_selected<Conn>(conn: &Conn, destination_window: xproto::Window) -> Result<Cookie<'_, Conn, InputSelectedReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let destination_window_bytes = destination_window.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         INPUT_SELECTED_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         destination_window_bytes[0],
         destination_window_bytes[1],
         destination_window_bytes[2],
         destination_window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InputSelectedReply {
@@ -620,20 +647,21 @@ impl TryFrom<&[u8]> for InputSelectedReply {
 /// Opcode for the GetRectangles request
 pub const GET_RECTANGLES_REQUEST: u8 = 8;
 pub fn get_rectangles<Conn, A>(conn: &Conn, window: xproto::Window, source_kind: A) -> Result<Cookie<'_, Conn, GetRectanglesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<Kind>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<Kind>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
     let source_kind = source_kind.into();
     let source_kind_bytes = source_kind.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GET_RECTANGLES_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
@@ -643,9 +671,11 @@ where Conn: RequestConnection + ?Sized, A: Into<Kind>
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetRectanglesReply {
@@ -684,25 +714,34 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn shape_rectangles<'c, A, B, C>(&'c self, operation: A, destination_kind: B, ordering: C, destination_window: xproto::Window, x_offset: i16, y_offset: i16, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<Op>, B: Into<Kind>, C: Into<u8>
+    where
+        A: Into<Op>,
+        B: Into<Kind>,
+        C: Into<u8>,
     {
         self::rectangles(self, operation, destination_kind, ordering, destination_window, x_offset, y_offset, rectangles)
     }
 
     fn shape_mask<A, B>(&self, operation: A, destination_kind: B, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_bitmap: xproto::Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<Op>, B: Into<Kind>
+    where
+        A: Into<Op>,
+        B: Into<Kind>,
     {
         mask(self, operation, destination_kind, destination_window, x_offset, y_offset, source_bitmap)
     }
 
     fn shape_combine<A, B, C>(&self, operation: A, destination_kind: B, source_kind: C, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<Op>, B: Into<Kind>, C: Into<Kind>
+    where
+        A: Into<Op>,
+        B: Into<Kind>,
+        C: Into<Kind>,
     {
         combine(self, operation, destination_kind, source_kind, destination_window, x_offset, y_offset, source_window)
     }
 
     fn shape_offset<A>(&self, destination_kind: A, destination_window: xproto::Window, x_offset: i16, y_offset: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<Kind>
+    where
+        A: Into<Kind>,
     {
         offset(self, destination_kind, destination_window, x_offset, y_offset)
     }
@@ -723,7 +762,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn shape_get_rectangles<A>(&self, window: xproto::Window, source_kind: A) -> Result<Cookie<'_, Self, GetRectanglesReply>, ConnectionError>
-    where A: Into<Kind>
+    where
+        A: Into<Kind>,
     {
         get_rectangles(self, window, source_kind)
     }

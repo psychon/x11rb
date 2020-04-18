@@ -5,6 +5,7 @@
 #![allow(clippy::identity_op)]
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
+
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -13,11 +14,12 @@ use std::io::IoSlice;
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::Event as _;
-use crate::x11_utils::{TryParse, Serialize};
+#[allow(unused_imports)]
+use crate::x11_utils::{Serialize, TryParse};
 use crate::connection::RequestConnection;
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ParseError, ConnectionError};
+use crate::errors::{ConnectionError, ParseError};
 #[allow(unused_imports)]
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
@@ -96,7 +98,7 @@ impl TryFrom<u8> for Type {
             4 => Ok(Type::VideoMask),
             8 => Ok(Type::StillMask),
             16 => Ok(Type::ImageMask),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -160,7 +162,7 @@ impl TryFrom<u8> for ImageFormatInfoType {
         match value {
             0 => Ok(ImageFormatInfoType::RGB),
             1 => Ok(ImageFormatInfoType::YUV),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -222,7 +224,7 @@ impl TryFrom<u8> for ImageFormatInfoFormat {
         match value {
             0 => Ok(ImageFormatInfoFormat::Packed),
             1 => Ok(ImageFormatInfoFormat::Planar),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -284,7 +286,7 @@ impl TryFrom<u8> for AttributeFlag {
         match value {
             1 => Ok(AttributeFlag::Gettable),
             2 => Ok(AttributeFlag::Settable),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -356,7 +358,7 @@ impl TryFrom<u8> for VideoNotifyReason {
             2 => Ok(VideoNotifyReason::Busy),
             3 => Ok(VideoNotifyReason::Preempted),
             4 => Ok(VideoNotifyReason::HardError),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -418,7 +420,7 @@ impl TryFrom<u8> for ScanlineOrder {
         match value {
             0 => Ok(ScanlineOrder::TopToBottom),
             1 => Ok(ScanlineOrder::BottomToTop),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -492,7 +494,7 @@ impl TryFrom<u8> for GrabPortStatus {
             3 => Ok(GrabPortStatus::InvalidTime),
             4 => Ok(GrabPortStatus::BadReply),
             5 => Ok(GrabPortStatus::BadAlloc),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -973,15 +975,15 @@ impl Serialize for ImageFormatInfo {
     type Bytes = [u8; 128];
     fn serialize(&self) -> Self::Bytes {
         let id_bytes = self.id.serialize();
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
-        let byte_order_bytes = Into::<u8>::into(self.byte_order).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
+        let byte_order_bytes = u8::from(self.byte_order).serialize();
         let bpp_bytes = self.bpp.serialize();
         let num_planes_bytes = self.num_planes.serialize();
         let depth_bytes = self.depth.serialize();
         let red_mask_bytes = self.red_mask.serialize();
         let green_mask_bytes = self.green_mask.serialize();
         let blue_mask_bytes = self.blue_mask.serialize();
-        let format_bytes = Into::<u8>::into(self.format).serialize();
+        let format_bytes = u8::from(self.format).serialize();
         let y_sample_bits_bytes = self.y_sample_bits.serialize();
         let u_sample_bits_bytes = self.u_sample_bits.serialize();
         let v_sample_bits_bytes = self.v_sample_bits.serialize();
@@ -991,7 +993,7 @@ impl Serialize for ImageFormatInfo {
         let vvert_y_period_bytes = self.vvert_y_period.serialize();
         let vvert_u_period_bytes = self.vvert_u_period.serialize();
         let vvert_v_period_bytes = self.vvert_v_period.serialize();
-        let vscanline_order_bytes = Into::<u8>::into(self.vscanline_order).serialize();
+        let vscanline_order_bytes = u8::from(self.vscanline_order).serialize();
         [
             id_bytes[0],
             id_bytes[1],
@@ -1126,8 +1128,8 @@ impl Serialize for ImageFormatInfo {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(128);
         self.id.serialize_into(bytes);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
-        Into::<u8>::into(self.byte_order).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
+        u8::from(self.byte_order).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.guid.serialize_into(bytes);
         self.bpp.serialize_into(bytes);
@@ -1138,7 +1140,7 @@ impl Serialize for ImageFormatInfo {
         self.red_mask.serialize_into(bytes);
         self.green_mask.serialize_into(bytes);
         self.blue_mask.serialize_into(bytes);
-        Into::<u8>::into(self.format).serialize_into(bytes);
+        u8::from(self.format).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
         self.y_sample_bits.serialize_into(bytes);
         self.u_sample_bits.serialize_into(bytes);
@@ -1150,7 +1152,7 @@ impl Serialize for ImageFormatInfo {
         self.vvert_u_period.serialize_into(bytes);
         self.vvert_v_period.serialize_into(bytes);
         self.vcomp_order.serialize_into(bytes);
-        Into::<u8>::into(self.vscanline_order).serialize_into(bytes);
+        u8::from(self.vscanline_order).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 11]);
     }
 }
@@ -1356,7 +1358,7 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for VideoNotifyEvent {
 impl From<&VideoNotifyEvent> for [u8; 32] {
     fn from(input: &VideoNotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let reason = Into::<u8>::into(input.reason).serialize();
+        let reason = u8::from(input.reason).serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let drawable = input.drawable.serialize();
@@ -1442,21 +1444,23 @@ impl From<PortNotifyEvent> for [u8; 32] {
 /// Opcode for the QueryExtension request
 pub const QUERY_EXTENSION_REQUEST: u8 = 0;
 pub fn query_extension<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryExtensionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
-    let request0 = [
+    let length_so_far = 0;
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_EXTENSION_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryExtensionReply {
@@ -1488,26 +1492,28 @@ impl TryFrom<&[u8]> for QueryExtensionReply {
 /// Opcode for the QueryAdaptors request
 pub const QUERY_ADAPTORS_REQUEST: u8 = 1;
 pub fn query_adaptors<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, QueryAdaptorsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_ADAPTORS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
         window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryAdaptorsReply {
@@ -1539,26 +1545,28 @@ impl TryFrom<&[u8]> for QueryAdaptorsReply {
 /// Opcode for the QueryEncodings request
 pub const QUERY_ENCODINGS_REQUEST: u8 = 2;
 pub fn query_encodings<Conn>(conn: &Conn, port: Port) -> Result<Cookie<'_, Conn, QueryEncodingsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let port_bytes = port.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_ENCODINGS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         port_bytes[0],
         port_bytes[1],
         port_bytes[2],
         port_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryEncodingsReply {
@@ -1590,19 +1598,19 @@ impl TryFrom<&[u8]> for QueryEncodingsReply {
 /// Opcode for the GrabPort request
 pub const GRAB_PORT_REQUEST: u8 = 3;
 pub fn grab_port<Conn>(conn: &Conn, port: Port, time: xproto::Timestamp) -> Result<Cookie<'_, Conn, GrabPortReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let port_bytes = port.serialize();
     let time_bytes = time.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GRAB_PORT_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         port_bytes[0],
         port_bytes[1],
         port_bytes[2],
@@ -1612,9 +1620,11 @@ where Conn: RequestConnection + ?Sized
         time_bytes[2],
         time_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabPortReply {
@@ -1644,19 +1654,19 @@ impl TryFrom<&[u8]> for GrabPortReply {
 /// Opcode for the UngrabPort request
 pub const UNGRAB_PORT_REQUEST: u8 = 4;
 pub fn ungrab_port<Conn>(conn: &Conn, port: Port, time: xproto::Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let port_bytes = port.serialize();
     let time_bytes = time.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         UNGRAB_PORT_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         port_bytes[0],
         port_bytes[1],
         port_bytes[2],
@@ -1666,20 +1676,22 @@ where Conn: RequestConnection + ?Sized
         time_bytes[2],
         time_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the PutVideo request
 pub const PUT_VIDEO_REQUEST: u8 = 5;
 pub fn put_video<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (32) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let port_bytes = port.serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
@@ -1691,11 +1703,11 @@ where Conn: RequestConnection + ?Sized
     let drw_y_bytes = drw_y.serialize();
     let drw_w_bytes = drw_w.serialize();
     let drw_h_bytes = drw_h.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         PUT_VIDEO_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         port_bytes[0],
         port_bytes[1],
         port_bytes[2],
@@ -1725,20 +1737,22 @@ where Conn: RequestConnection + ?Sized
         drw_h_bytes[0],
         drw_h_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the PutStill request
 pub const PUT_STILL_REQUEST: u8 = 6;
 pub fn put_still<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (32) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let port_bytes = port.serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
@@ -1750,11 +1764,11 @@ where Conn: RequestConnection + ?Sized
     let drw_y_bytes = drw_y.serialize();
     let drw_w_bytes = drw_w.serialize();
     let drw_h_bytes = drw_h.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         PUT_STILL_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         port_bytes[0],
         port_bytes[1],
         port_bytes[2],
@@ -1784,20 +1798,22 @@ where Conn: RequestConnection + ?Sized
         drw_h_bytes[0],
         drw_h_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the GetVideo request
 pub const GET_VIDEO_REQUEST: u8 = 7;
 pub fn get_video<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (32) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let port_bytes = port.serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
@@ -1809,11 +1825,11 @@ where Conn: RequestConnection + ?Sized
     let drw_y_bytes = drw_y.serialize();
     let drw_w_bytes = drw_w.serialize();
     let drw_h_bytes = drw_h.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GET_VIDEO_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         port_bytes[0],
         port_bytes[1],
         port_bytes[2],
@@ -1843,20 +1859,22 @@ where Conn: RequestConnection + ?Sized
         drw_h_bytes[0],
         drw_h_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the GetStill request
 pub const GET_STILL_REQUEST: u8 = 8;
 pub fn get_still<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (32) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let port_bytes = port.serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
@@ -1868,11 +1886,11 @@ where Conn: RequestConnection + ?Sized
     let drw_y_bytes = drw_y.serialize();
     let drw_w_bytes = drw_w.serialize();
     let drw_h_bytes = drw_h.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GET_STILL_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         port_bytes[0],
         port_bytes[1],
         port_bytes[2],
@@ -1902,27 +1920,29 @@ where Conn: RequestConnection + ?Sized
         drw_h_bytes[0],
         drw_h_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the StopVideo request
 pub const STOP_VIDEO_REQUEST: u8 = 9;
 pub fn stop_video<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let port_bytes = port.serialize();
     let drawable_bytes = drawable.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         STOP_VIDEO_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         port_bytes[0],
         port_bytes[1],
         port_bytes[2],
@@ -1932,27 +1952,29 @@ where Conn: RequestConnection + ?Sized
         drawable_bytes[2],
         drawable_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the SelectVideoNotify request
 pub const SELECT_VIDEO_NOTIFY_REQUEST: u8 = 10;
 pub fn select_video_notify<Conn>(conn: &Conn, drawable: xproto::Drawable, onoff: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let onoff_bytes = (onoff as u8).serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         SELECT_VIDEO_NOTIFY_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
@@ -1962,27 +1984,29 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the SelectPortNotify request
 pub const SELECT_PORT_NOTIFY_REQUEST: u8 = 11;
 pub fn select_port_notify<Conn>(conn: &Conn, port: Port, onoff: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let port_bytes = port.serialize();
     let onoff_bytes = (onoff as u8).serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         SELECT_PORT_NOTIFY_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         port_bytes[0],
         port_bytes[1],
         port_bytes[2],
@@ -1992,31 +2016,33 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the QueryBestSize request
 pub const QUERY_BEST_SIZE_REQUEST: u8 = 12;
 pub fn query_best_size<Conn>(conn: &Conn, port: Port, vid_w: u16, vid_h: u16, drw_w: u16, drw_h: u16, motion: bool) -> Result<Cookie<'_, Conn, QueryBestSizeReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (20) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let port_bytes = port.serialize();
     let vid_w_bytes = vid_w.serialize();
     let vid_h_bytes = vid_h.serialize();
     let drw_w_bytes = drw_w.serialize();
     let drw_h_bytes = drw_h.serialize();
     let motion_bytes = (motion as u8).serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_BEST_SIZE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         port_bytes[0],
         port_bytes[1],
         port_bytes[2],
@@ -2034,9 +2060,11 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryBestSizeReply {
@@ -2068,20 +2096,20 @@ impl TryFrom<&[u8]> for QueryBestSizeReply {
 /// Opcode for the SetPortAttribute request
 pub const SET_PORT_ATTRIBUTE_REQUEST: u8 = 13;
 pub fn set_port_attribute<Conn>(conn: &Conn, port: Port, attribute: xproto::Atom, value: i32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let port_bytes = port.serialize();
     let attribute_bytes = attribute.serialize();
     let value_bytes = value.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         SET_PORT_ATTRIBUTE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         port_bytes[0],
         port_bytes[1],
         port_bytes[2],
@@ -2095,27 +2123,29 @@ where Conn: RequestConnection + ?Sized
         value_bytes[2],
         value_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the GetPortAttribute request
 pub const GET_PORT_ATTRIBUTE_REQUEST: u8 = 14;
 pub fn get_port_attribute<Conn>(conn: &Conn, port: Port, attribute: xproto::Atom) -> Result<Cookie<'_, Conn, GetPortAttributeReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let port_bytes = port.serialize();
     let attribute_bytes = attribute.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GET_PORT_ATTRIBUTE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         port_bytes[0],
         port_bytes[1],
         port_bytes[2],
@@ -2125,9 +2155,11 @@ where Conn: RequestConnection + ?Sized
         attribute_bytes[2],
         attribute_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPortAttributeReply {
@@ -2157,26 +2189,28 @@ impl TryFrom<&[u8]> for GetPortAttributeReply {
 /// Opcode for the QueryPortAttributes request
 pub const QUERY_PORT_ATTRIBUTES_REQUEST: u8 = 15;
 pub fn query_port_attributes<Conn>(conn: &Conn, port: Port) -> Result<Cookie<'_, Conn, QueryPortAttributesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let port_bytes = port.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_PORT_ATTRIBUTES_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         port_bytes[0],
         port_bytes[1],
         port_bytes[2],
         port_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryPortAttributesReply {
@@ -2210,26 +2244,28 @@ impl TryFrom<&[u8]> for QueryPortAttributesReply {
 /// Opcode for the ListImageFormats request
 pub const LIST_IMAGE_FORMATS_REQUEST: u8 = 16;
 pub fn list_image_formats<Conn>(conn: &Conn, port: Port) -> Result<Cookie<'_, Conn, ListImageFormatsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let port_bytes = port.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         LIST_IMAGE_FORMATS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         port_bytes[0],
         port_bytes[1],
         port_bytes[2],
         port_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListImageFormatsReply {
@@ -2261,21 +2297,21 @@ impl TryFrom<&[u8]> for ListImageFormatsReply {
 /// Opcode for the QueryImageAttributes request
 pub const QUERY_IMAGE_ATTRIBUTES_REQUEST: u8 = 17;
 pub fn query_image_attributes<Conn>(conn: &Conn, port: Port, id: u32, width: u16, height: u16) -> Result<Cookie<'_, Conn, QueryImageAttributesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let port_bytes = port.serialize();
     let id_bytes = id.serialize();
     let width_bytes = width.serialize();
     let height_bytes = height.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_IMAGE_ATTRIBUTES_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         port_bytes[0],
         port_bytes[1],
         port_bytes[2],
@@ -2289,9 +2325,11 @@ where Conn: RequestConnection + ?Sized
         height_bytes[0],
         height_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryImageAttributesReply {
@@ -2332,12 +2370,12 @@ impl TryFrom<&[u8]> for QueryImageAttributesReply {
 /// Opcode for the PutImage request
 pub const PUT_IMAGE_REQUEST: u8 = 18;
 pub fn put_image<'c, Conn>(conn: &'c Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, id: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (40 + 1 * data.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let port_bytes = port.serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
@@ -2352,11 +2390,11 @@ where Conn: RequestConnection + ?Sized
     let drw_h_bytes = drw_h.serialize();
     let width_bytes = width.serialize();
     let height_bytes = height.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         PUT_IMAGE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         port_bytes[0],
         port_bytes[1],
         port_bytes[2],
@@ -2394,23 +2432,25 @@ where Conn: RequestConnection + ?Sized
         height_bytes[0],
         height_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (data).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(data), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(data), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the ShmPutImage request
 pub const SHM_PUT_IMAGE_REQUEST: u8 = 19;
 pub fn shm_put_image<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, shmseg: shm::Seg, id: u32, offset: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, send_event: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (52) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let port_bytes = port.serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
@@ -2428,11 +2468,11 @@ where Conn: RequestConnection + ?Sized
     let width_bytes = width.serialize();
     let height_bytes = height.serialize();
     let send_event_bytes = send_event.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         SHM_PUT_IMAGE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         port_bytes[0],
         port_bytes[1],
         port_bytes[2],
@@ -2482,9 +2522,11 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Extension trait defining the requests of this extension.

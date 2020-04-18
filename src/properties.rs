@@ -618,7 +618,7 @@ impl Serialize for WmHints {
         }
 
         flags.serialize_into(bytes);
-        Into::<u32>::into(self.input.unwrap_or(false)).serialize_into(bytes);
+        u32::from(self.input.unwrap_or(false)).serialize_into(bytes);
         match self.initial_state {
             Some(WmHintsState::Normal) => 1,
             Some(WmHintsState::Iconic) => 3,

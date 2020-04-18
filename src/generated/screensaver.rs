@@ -5,6 +5,7 @@
 #![allow(clippy::identity_op)]
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
+
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -13,11 +14,12 @@ use std::io::IoSlice;
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::Event as _;
-use crate::x11_utils::{TryParse, Serialize};
+#[allow(unused_imports)]
+use crate::x11_utils::{Serialize, TryParse};
 use crate::connection::RequestConnection;
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ParseError, ConnectionError};
+use crate::errors::{ConnectionError, ParseError};
 #[allow(unused_imports)]
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
@@ -84,7 +86,7 @@ impl TryFrom<u8> for Kind {
             0 => Ok(Kind::Blanked),
             1 => Ok(Kind::Internal),
             2 => Ok(Kind::External),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -146,7 +148,7 @@ impl TryFrom<u8> for Event {
         match value {
             1 => Ok(Event::NotifyMask),
             2 => Ok(Event::CycleMask),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -215,7 +217,7 @@ impl TryFrom<u8> for State {
             1 => Ok(State::On),
             2 => Ok(State::Cycle),
             3 => Ok(State::Disabled),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -235,27 +237,29 @@ impl TryFrom<u32> for State {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 pub fn query_version<Conn>(conn: &Conn, client_major_version: u8, client_minor_version: u8) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let client_major_version_bytes = client_major_version.serialize();
     let client_minor_version_bytes = client_minor_version.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_VERSION_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         client_major_version_bytes[0],
         client_minor_version_bytes[0],
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -288,26 +292,28 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 /// Opcode for the QueryInfo request
 pub const QUERY_INFO_REQUEST: u8 = 1;
 pub fn query_info<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<Cookie<'_, Conn, QueryInfoReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_INFO_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
         drawable_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryInfoReply {
@@ -348,19 +354,19 @@ impl TryFrom<&[u8]> for QueryInfoReply {
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 2;
 pub fn select_input<Conn>(conn: &Conn, drawable: xproto::Drawable, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let event_mask_bytes = event_mask.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         SELECT_INPUT_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
@@ -370,9 +376,11 @@ where Conn: RequestConnection + ?Sized
         event_mask_bytes[2],
         event_mask_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the SetAttributes request
@@ -404,49 +412,49 @@ impl SetAttributesAux {
     fn value_mask(&self) -> u32 {
         let mut mask = 0;
         if self.background_pixmap.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::BackPixmap);
+            mask |= u32::from(xproto::CW::BackPixmap);
         }
         if self.background_pixel.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::BackPixel);
+            mask |= u32::from(xproto::CW::BackPixel);
         }
         if self.border_pixmap.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::BorderPixmap);
+            mask |= u32::from(xproto::CW::BorderPixmap);
         }
         if self.border_pixel.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::BorderPixel);
+            mask |= u32::from(xproto::CW::BorderPixel);
         }
         if self.bit_gravity.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::BitGravity);
+            mask |= u32::from(xproto::CW::BitGravity);
         }
         if self.win_gravity.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::WinGravity);
+            mask |= u32::from(xproto::CW::WinGravity);
         }
         if self.backing_store.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::BackingStore);
+            mask |= u32::from(xproto::CW::BackingStore);
         }
         if self.backing_planes.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::BackingPlanes);
+            mask |= u32::from(xproto::CW::BackingPlanes);
         }
         if self.backing_pixel.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::BackingPixel);
+            mask |= u32::from(xproto::CW::BackingPixel);
         }
         if self.override_redirect.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::OverrideRedirect);
+            mask |= u32::from(xproto::CW::OverrideRedirect);
         }
         if self.save_under.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::SaveUnder);
+            mask |= u32::from(xproto::CW::SaveUnder);
         }
         if self.event_mask.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::EventMask);
+            mask |= u32::from(xproto::CW::EventMask);
         }
         if self.do_not_propogate_mask.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::DontPropagate);
+            mask |= u32::from(xproto::CW::DontPropagate);
         }
         if self.colormap.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::Colormap);
+            mask |= u32::from(xproto::CW::Colormap);
         }
         if self.cursor.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::Cursor);
+            mask |= u32::from(xproto::CW::Cursor);
         }
         mask
     }
@@ -582,14 +590,15 @@ impl Serialize for SetAttributesAux {
     }
 }
 pub fn set_attributes<'c, Conn, A>(conn: &'c Conn, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, depth: u8, visual: xproto::Visualid, value_list: &SetAttributesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
-    let length: usize = (28 + value_list_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let x_bytes = x.serialize();
     let y_bytes = y.serialize();
@@ -601,11 +610,11 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let depth_bytes = depth.serialize();
     let visual_bytes = visual.serialize();
     let value_mask_bytes = value_mask.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         SET_ATTRIBUTES_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
@@ -631,62 +640,68 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
         value_mask_bytes[2],
         value_mask_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&value_list_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the UnsetAttributes request
 pub const UNSET_ATTRIBUTES_REQUEST: u8 = 4;
 pub fn unset_attributes<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         UNSET_ATTRIBUTES_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
         drawable_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the Suspend request
 pub const SUSPEND_REQUEST: u8 = 5;
 pub fn suspend<Conn>(conn: &Conn, suspend: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let suspend_bytes = suspend.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         SUSPEND_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         suspend_bytes[0],
         suspend_bytes[1],
         suspend_bytes[2],
         suspend_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the Notify event
@@ -740,12 +755,12 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for NotifyEvent {
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let state = Into::<u8>::into(input.state).serialize();
+        let state = u8::from(input.state).serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let root = input.root.serialize();
         let window = input.window.serialize();
-        let kind = Into::<u8>::into(input.kind).serialize();
+        let kind = u8::from(input.kind).serialize();
         let forced = input.forced.serialize();
         [
             response_type[0], state[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
@@ -779,7 +794,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn screensaver_set_attributes<'c, A>(&'c self, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, depth: u8, visual: xproto::Visualid, value_list: &SetAttributesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         set_attributes(self, drawable, x, y, width, height, border_width, class, depth, visual, value_list)
     }

@@ -5,6 +5,7 @@
 #![allow(clippy::identity_op)]
 #![allow(clippy::trivially_copy_pass_by_ref)]
 #![allow(clippy::eq_op)]
+
 use std::convert::TryFrom;
 #[allow(unused_imports)]
 use std::convert::TryInto;
@@ -13,11 +14,12 @@ use std::io::IoSlice;
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::Event as _;
-use crate::x11_utils::{TryParse, Serialize};
+#[allow(unused_imports)]
+use crate::x11_utils::{Serialize, TryParse};
 use crate::connection::RequestConnection;
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-use crate::errors::{ParseError, ConnectionError};
+use crate::errors::{ConnectionError, ParseError};
 #[allow(unused_imports)]
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
@@ -39,19 +41,19 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 2);
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 pub fn query_version<Conn>(conn: &Conn, major_version: u32, minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let major_version_bytes = major_version.serialize();
     let minor_version_bytes = minor_version.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_VERSION_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         major_version_bytes[0],
         major_version_bytes[1],
         major_version_bytes[2],
@@ -61,9 +63,11 @@ where Conn: RequestConnection + ?Sized
         minor_version_bytes[2],
         minor_version_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -95,19 +99,19 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 /// Opcode for the Open request
 pub const OPEN_REQUEST: u8 = 1;
 pub fn open<Conn>(conn: &Conn, drawable: xproto::Drawable, provider: u32) -> Result<CookieWithFds<'_, Conn, OpenReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let provider_bytes = provider.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         OPEN_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
@@ -117,9 +121,11 @@ where Conn: RequestConnection + ?Sized
         provider_bytes[2],
         provider_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply_with_fds(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply_with_fds(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, PartialEq, Eq)]
 pub struct OpenReply {
@@ -153,12 +159,13 @@ impl TryFrom<(&[u8], Vec<RawFdContainer>)> for OpenReply {
 /// Opcode for the PixmapFromBuffer request
 pub const PIXMAP_FROM_BUFFER_REQUEST: u8 = 2;
 pub fn pixmap_from_buffer<Conn, A>(conn: &Conn, pixmap: xproto::Pixmap, drawable: xproto::Drawable, size: u32, width: u16, height: u16, stride: u16, depth: u8, bpp: u8, pixmap_fd: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<RawFdContainer>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<RawFdContainer>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (24) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let pixmap_bytes = pixmap.serialize();
     let drawable_bytes = drawable.serialize();
     let size_bytes = size.serialize();
@@ -167,11 +174,11 @@ where Conn: RequestConnection + ?Sized, A: Into<RawFdContainer>
     let stride_bytes = stride.serialize();
     let depth_bytes = depth.serialize();
     let bpp_bytes = bpp.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         PIXMAP_FROM_BUFFER_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         pixmap_bytes[0],
         pixmap_bytes[1],
         pixmap_bytes[2],
@@ -193,8 +200,10 @@ where Conn: RequestConnection + ?Sized, A: Into<RawFdContainer>
         depth_bytes[0],
         bpp_bytes[0],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     let fds = vec!(pixmap_fd.into());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], fds)?)
 }
@@ -202,26 +211,28 @@ where Conn: RequestConnection + ?Sized, A: Into<RawFdContainer>
 /// Opcode for the BufferFromPixmap request
 pub const BUFFER_FROM_PIXMAP_REQUEST: u8 = 3;
 pub fn buffer_from_pixmap<Conn>(conn: &Conn, pixmap: xproto::Pixmap) -> Result<CookieWithFds<'_, Conn, BufferFromPixmapReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let pixmap_bytes = pixmap.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         BUFFER_FROM_PIXMAP_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         pixmap_bytes[0],
         pixmap_bytes[1],
         pixmap_bytes[2],
         pixmap_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply_with_fds(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply_with_fds(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, PartialEq, Eq)]
 pub struct BufferFromPixmapReply {
@@ -267,20 +278,21 @@ impl TryFrom<(&[u8], Vec<RawFdContainer>)> for BufferFromPixmapReply {
 /// Opcode for the FenceFromFD request
 pub const FENCE_FROM_FD_REQUEST: u8 = 4;
 pub fn fence_from_fd<Conn, A>(conn: &Conn, drawable: xproto::Drawable, fence: u32, initially_triggered: bool, fence_fd: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<RawFdContainer>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<RawFdContainer>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let fence_bytes = fence.serialize();
     let initially_triggered_bytes = (initially_triggered as u8).serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         FENCE_FROM_FD_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
@@ -294,8 +306,10 @@ where Conn: RequestConnection + ?Sized, A: Into<RawFdContainer>
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     let fds = vec!(fence_fd.into());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], fds)?)
 }
@@ -303,19 +317,19 @@ where Conn: RequestConnection + ?Sized, A: Into<RawFdContainer>
 /// Opcode for the FDFromFence request
 pub const FD_FROM_FENCE_REQUEST: u8 = 5;
 pub fn fd_from_fence<Conn>(conn: &Conn, drawable: xproto::Drawable, fence: u32) -> Result<CookieWithFds<'_, Conn, FDFromFenceReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let fence_bytes = fence.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         FD_FROM_FENCE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
@@ -325,9 +339,11 @@ where Conn: RequestConnection + ?Sized
         fence_bytes[2],
         fence_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply_with_fds(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply_with_fds(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, PartialEq, Eq)]
 pub struct FDFromFenceReply {
@@ -361,20 +377,20 @@ impl TryFrom<(&[u8], Vec<RawFdContainer>)> for FDFromFenceReply {
 /// Opcode for the GetSupportedModifiers request
 pub const GET_SUPPORTED_MODIFIERS_REQUEST: u8 = 6;
 pub fn get_supported_modifiers<Conn>(conn: &Conn, window: u32, depth: u8, bpp: u8) -> Result<Cookie<'_, Conn, GetSupportedModifiersReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
     let depth_bytes = depth.serialize();
     let bpp_bytes = bpp.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GET_SUPPORTED_MODIFIERS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
@@ -384,9 +400,11 @@ where Conn: RequestConnection + ?Sized
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSupportedModifiersReply {
@@ -421,12 +439,12 @@ impl TryFrom<&[u8]> for GetSupportedModifiersReply {
 /// Opcode for the PixmapFromBuffers request
 pub const PIXMAP_FROM_BUFFERS_REQUEST: u8 = 7;
 pub fn pixmap_from_buffers<'c, Conn>(conn: &'c Conn, pixmap: xproto::Pixmap, window: xproto::Window, width: u16, height: u16, stride0: u32, offset0: u32, stride1: u32, offset1: u32, stride2: u32, offset2: u32, stride3: u32, offset3: u32, depth: u8, bpp: u8, modifier: u64, buffers: Vec<RawFdContainer>) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (64) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let pixmap_bytes = pixmap.serialize();
     let window_bytes = window.serialize();
     let num_buffers: u8 = buffers.len().try_into()?;
@@ -444,11 +462,11 @@ where Conn: RequestConnection + ?Sized
     let depth_bytes = depth.serialize();
     let bpp_bytes = bpp.serialize();
     let modifier_bytes = modifier.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         PIXMAP_FROM_BUFFERS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         pixmap_bytes[0],
         pixmap_bytes[1],
         pixmap_bytes[2],
@@ -510,34 +528,38 @@ where Conn: RequestConnection + ?Sized
         modifier_bytes[6],
         modifier_bytes[7],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], buffers)?)
 }
 
 /// Opcode for the BuffersFromPixmap request
 pub const BUFFERS_FROM_PIXMAP_REQUEST: u8 = 8;
 pub fn buffers_from_pixmap<Conn>(conn: &Conn, pixmap: xproto::Pixmap) -> Result<CookieWithFds<'_, Conn, BuffersFromPixmapReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let pixmap_bytes = pixmap.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         BUFFERS_FROM_PIXMAP_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         pixmap_bytes[0],
         pixmap_bytes[1],
         pixmap_bytes[2],
         pixmap_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply_with_fds(&[IoSlice::new(&request0)], Vec::new())?)
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply_with_fds(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, PartialEq, Eq)]
 pub struct BuffersFromPixmapReply {
@@ -598,7 +620,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn dri3_pixmap_from_buffer<A>(&self, pixmap: xproto::Pixmap, drawable: xproto::Drawable, size: u32, width: u16, height: u16, stride: u16, depth: u8, bpp: u8, pixmap_fd: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<RawFdContainer>
+    where
+        A: Into<RawFdContainer>,
     {
         pixmap_from_buffer(self, pixmap, drawable, size, width, height, stride, depth, bpp, pixmap_fd)
     }
@@ -609,7 +632,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn dri3_fence_from_fd<A>(&self, drawable: xproto::Drawable, fence: u32, initially_triggered: bool, fence_fd: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<RawFdContainer>
+    where
+        A: Into<RawFdContainer>,
     {
         fence_from_fd(self, drawable, fence, initially_triggered, fence_fd)
     }

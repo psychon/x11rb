@@ -1252,7 +1252,7 @@ fn print_modifiers(mask: u16) {
 
     let active = mods
         .iter()
-        .filter(|(m, _)| mask & Into::<u16>::into(*m) != 0) // FIXME: This should be made nicer
+        .filter(|(m, _)| mask & u16::from(*m) != 0) // FIXME: This should be made nicer
         .map(|(_, name)| name)
         .collect::<Vec<_>>();
     println!("Modifier mask: {:?}", active);

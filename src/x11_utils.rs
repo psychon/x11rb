@@ -408,24 +408,24 @@ macro_rules! bitmask_binop {
         impl std::ops::BitOr for $t {
             type Output = $u;
             fn bitor(self, other: Self) -> Self::Output {
-                Into::<Self::Output>::into(self) | Into::<Self::Output>::into(other)
+                Self::Output::from(self) | Self::Output::from(other)
             }
         }
         impl std::ops::BitOr<$u> for $t {
             type Output = $u;
             fn bitor(self, other: $u) -> Self::Output {
-                Into::<Self::Output>::into(self) | other
+                Self::Output::from(self) | other
             }
         }
         impl std::ops::BitOr<$t> for $u {
             type Output = $u;
             fn bitor(self, other: $t) -> Self::Output {
-                self | Into::<Self::Output>::into(other)
+                self | Self::Output::from(other)
             }
         }
         impl std::ops::BitOrAssign<$t> for $u {
             fn bitor_assign(&mut self, other: $t) {
-                *self |= Into::<Self>::into(other)
+                *self |= Self::from(other)
             }
         }
     };
