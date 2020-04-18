@@ -86,11 +86,10 @@ def _errors(out, modules):
                     if not mod_errors or not module.namespace.is_ext:
                         continue
                     mod_name = module.namespace.header
-                    ext_xname = module.namespace.ext_xname
                     variant = _get_module_name_prefix(module)
                     if module.has_feature:
                         out("#[cfg(feature = \"%s\")]", module.namespace.header)
-                    out("Some((\"%s\", ext_info)) => {", ext_xname)
+                    out("Some((%s::X11_EXTENSION_NAME, ext_info)) => {", mod_name)
                     with Indent(out):
                         out("match error_code - ext_info.first_error {")
                         for name, error in mod_errors:
@@ -199,11 +198,10 @@ def _events(out, modules):
                     if not has_normal_events or not module.namespace.is_ext:
                         continue
                     mod_name = module.namespace.header
-                    ext_xname = module.namespace.ext_xname
                     variant = _get_module_name_prefix(module)
                     if module.has_feature:
                         out("#[cfg(feature = \"%s\")]", module.namespace.header)
-                    out("Some((\"%s\", ext_info)) => {", ext_xname)
+                    out("Some((%s::X11_EXTENSION_NAME, ext_info)) => {", mod_name)
                     with Indent(out):
                         if module.namespace.header == 'xkb':
                             out("if event_type != ext_info.first_event {")
@@ -244,11 +242,10 @@ def _events(out, modules):
                     if not has_xge_events or not module.namespace.is_ext:
                         continue
                     mod_name = module.namespace.header
-                    ext_xname = module.namespace.ext_xname
                     variant = _get_module_name_prefix(module)
                     if module.has_feature:
                         out("#[cfg(feature = \"%s\")]", module.namespace.header)
-                    out("Some(\"%s\") => {", ext_xname)
+                    out("Some(%s::X11_EXTENSION_NAME) => {", mod_name)
                     with Indent(out):
                         out("match ge_event.event_type {")
                         for name, event in mod_events:

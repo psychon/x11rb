@@ -211,14 +211,14 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
         let ext_info = ext_info_provider.get_from_error_code(error_code);
         match ext_info {
             #[cfg(feature = "damage")]
-            Some(("DAMAGE", ext_info)) => {
+            Some((damage::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
                     damage::BAD_DAMAGE_ERROR => Ok(Self::DamageBadDamage(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "glx")]
-            Some(("GLX", ext_info)) => {
+            Some((glx::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
                     glx::BAD_CONTEXT_ERROR => Ok(Self::GlxBadContext(error.into())),
                     glx::BAD_CONTEXT_STATE_ERROR => Ok(Self::GlxBadContextState(error.into())),
@@ -238,7 +238,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
                 }
             }
             #[cfg(feature = "randr")]
-            Some(("RANDR", ext_info)) => {
+            Some((randr::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
                     randr::BAD_CRTC_ERROR => Ok(Self::RandrBadCrtc(error.into())),
                     randr::BAD_MODE_ERROR => Ok(Self::RandrBadMode(error.into())),
@@ -248,14 +248,14 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
                 }
             }
             #[cfg(feature = "record")]
-            Some(("RECORD", ext_info)) => {
+            Some((record::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
                     record::BAD_CONTEXT_ERROR => Ok(Self::RecordBadContext(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "render")]
-            Some(("RENDER", ext_info)) => {
+            Some((render::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
                     render::GLYPH_ERROR => Ok(Self::RenderGlyph(error.into())),
                     render::GLYPH_SET_ERROR => Ok(Self::RenderGlyphSet(error.into())),
@@ -266,14 +266,14 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
                 }
             }
             #[cfg(feature = "shm")]
-            Some(("MIT-SHM", ext_info)) => {
+            Some((shm::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
                     shm::BAD_SEG_ERROR => Ok(Self::ShmBadSeg(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "sync")]
-            Some(("SYNC", ext_info)) => {
+            Some((sync::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
                     sync::ALARM_ERROR => Ok(Self::SyncAlarm(error.into())),
                     sync::COUNTER_ERROR => Ok(Self::SyncCounter(error.into())),
@@ -281,7 +281,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
                 }
             }
             #[cfg(feature = "xf86vidmode")]
-            Some(("XFree86-VidModeExtension", ext_info)) => {
+            Some((xf86vidmode::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
                     xf86vidmode::BAD_CLOCK_ERROR => Ok(Self::Xf86vidmodeBadClock(error.into())),
                     xf86vidmode::BAD_H_TIMINGS_ERROR => Ok(Self::Xf86vidmodeBadHTimings(error.into())),
@@ -294,14 +294,14 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
                 }
             }
             #[cfg(feature = "xfixes")]
-            Some(("XFIXES", ext_info)) => {
+            Some((xfixes::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
                     xfixes::BAD_REGION_ERROR => Ok(Self::XfixesBadRegion(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "xinput")]
-            Some(("XInputExtension", ext_info)) => {
+            Some((xinput::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
                     xinput::CLASS_ERROR => Ok(Self::XinputClass(error.into())),
                     xinput::DEVICE_ERROR => Ok(Self::XinputDevice(error.into())),
@@ -312,14 +312,14 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
                 }
             }
             #[cfg(feature = "xkb")]
-            Some(("XKEYBOARD", ext_info)) => {
+            Some((xkb::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
                     xkb::KEYBOARD_ERROR => Ok(Self::XkbKeyboard(error.into())),
                     _ => Ok(Self::Unknown(error))
                 }
             }
             #[cfg(feature = "xprint")]
-            Some(("XpExtension", ext_info)) => {
+            Some((xprint::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
                     xprint::BAD_CONTEXT_ERROR => Ok(Self::XprintBadContext(error.into())),
                     xprint::BAD_SEQUENCE_ERROR => Ok(Self::XprintBadSequence(error.into())),
@@ -327,7 +327,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
                 }
             }
             #[cfg(feature = "xv")]
-            Some(("XVideo", ext_info)) => {
+            Some((xv::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
                     xv::BAD_CONTROL_ERROR => Ok(Self::XvBadControl(error.into())),
                     xv::BAD_ENCODING_ERROR => Ok(Self::XvBadEncoding(error.into())),
@@ -941,14 +941,14 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
         let ext_info = ext_info_provider.get_from_event_code(event_type);
         match ext_info {
             #[cfg(feature = "damage")]
-            Some(("DAMAGE", ext_info)) => {
+            Some((damage::X11_EXTENSION_NAME, ext_info)) => {
                 match event_type - ext_info.first_event {
                     damage::NOTIFY_EVENT => Ok(Self::DamageNotify(event.try_into()?)),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "dri2")]
-            Some(("DRI2", ext_info)) => {
+            Some((dri2::X11_EXTENSION_NAME, ext_info)) => {
                 match event_type - ext_info.first_event {
                     dri2::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::Dri2BufferSwapComplete(event.try_into()?)),
                     dri2::INVALIDATE_BUFFERS_EVENT => Ok(Self::Dri2InvalidateBuffers(event.try_into()?)),
@@ -956,7 +956,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
                 }
             }
             #[cfg(feature = "glx")]
-            Some(("GLX", ext_info)) => {
+            Some((glx::X11_EXTENSION_NAME, ext_info)) => {
                 match event_type - ext_info.first_event {
                     glx::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::GlxBufferSwapComplete(event.try_into()?)),
                     glx::PBUFFER_CLOBBER_EVENT => Ok(Self::GlxPbufferClobber(event.try_into()?)),
@@ -964,14 +964,14 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
                 }
             }
             #[cfg(feature = "present")]
-            Some(("Present", ext_info)) => {
+            Some((present::X11_EXTENSION_NAME, ext_info)) => {
                 match event_type - ext_info.first_event {
                     present::GENERIC_EVENT => Ok(Self::PresentGeneric(event.try_into()?)),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "randr")]
-            Some(("RANDR", ext_info)) => {
+            Some((randr::X11_EXTENSION_NAME, ext_info)) => {
                 match event_type - ext_info.first_event {
                     randr::NOTIFY_EVENT => Ok(Self::RandrNotify(event.try_into()?)),
                     randr::SCREEN_CHANGE_NOTIFY_EVENT => Ok(Self::RandrScreenChangeNotify(event.try_into()?)),
@@ -979,28 +979,28 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
                 }
             }
             #[cfg(feature = "screensaver")]
-            Some(("MIT-SCREEN-SAVER", ext_info)) => {
+            Some((screensaver::X11_EXTENSION_NAME, ext_info)) => {
                 match event_type - ext_info.first_event {
                     screensaver::NOTIFY_EVENT => Ok(Self::ScreensaverNotify(event.try_into()?)),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "shape")]
-            Some(("SHAPE", ext_info)) => {
+            Some((shape::X11_EXTENSION_NAME, ext_info)) => {
                 match event_type - ext_info.first_event {
                     shape::NOTIFY_EVENT => Ok(Self::ShapeNotify(event.try_into()?)),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "shm")]
-            Some(("MIT-SHM", ext_info)) => {
+            Some((shm::X11_EXTENSION_NAME, ext_info)) => {
                 match event_type - ext_info.first_event {
                     shm::COMPLETION_EVENT => Ok(Self::ShmCompletion(event.try_into()?)),
                     _ => Ok(Self::Unknown(event))
                 }
             }
             #[cfg(feature = "sync")]
-            Some(("SYNC", ext_info)) => {
+            Some((sync::X11_EXTENSION_NAME, ext_info)) => {
                 match event_type - ext_info.first_event {
                     sync::ALARM_NOTIFY_EVENT => Ok(Self::SyncAlarmNotify(event.try_into()?)),
                     sync::COUNTER_NOTIFY_EVENT => Ok(Self::SyncCounterNotify(event.try_into()?)),
@@ -1008,7 +1008,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
                 }
             }
             #[cfg(feature = "xfixes")]
-            Some(("XFIXES", ext_info)) => {
+            Some((xfixes::X11_EXTENSION_NAME, ext_info)) => {
                 match event_type - ext_info.first_event {
                     xfixes::CURSOR_NOTIFY_EVENT => Ok(Self::XfixesCursorNotify(event.try_into()?)),
                     xfixes::SELECTION_NOTIFY_EVENT => Ok(Self::XfixesSelectionNotify(event.try_into()?)),
@@ -1016,7 +1016,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
                 }
             }
             #[cfg(feature = "xinput")]
-            Some(("XInputExtension", ext_info)) => {
+            Some((xinput::X11_EXTENSION_NAME, ext_info)) => {
                 match event_type - ext_info.first_event {
                     xinput::CHANGE_DEVICE_NOTIFY_EVENT => Ok(Self::XinputChangeDeviceNotify(event.try_into()?)),
                     xinput::DEVICE_BUTTON_PRESS_EVENT => Ok(Self::XinputDeviceButtonPress(event.try_into()?)),
@@ -1039,7 +1039,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
                 }
             }
             #[cfg(feature = "xkb")]
-            Some(("XKEYBOARD", ext_info)) => {
+            Some((xkb::X11_EXTENSION_NAME, ext_info)) => {
                 if event_type != ext_info.first_event {
                     return Ok(Self::Unknown(event));
                 }
@@ -1060,7 +1060,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
                 }
             }
             #[cfg(feature = "xprint")]
-            Some(("XpExtension", ext_info)) => {
+            Some((xprint::X11_EXTENSION_NAME, ext_info)) => {
                 match event_type - ext_info.first_event {
                     xprint::ATTRIBUT_NOTIFY_EVENT => Ok(Self::XprintAttributNotify(event.try_into()?)),
                     xprint::NOTIFY_EVENT => Ok(Self::XprintNotify(event.try_into()?)),
@@ -1068,7 +1068,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
                 }
             }
             #[cfg(feature = "xv")]
-            Some(("XVideo", ext_info)) => {
+            Some((xv::X11_EXTENSION_NAME, ext_info)) => {
                 match event_type - ext_info.first_event {
                     xv::PORT_NOTIFY_EVENT => Ok(Self::XvPortNotify(event.try_into()?)),
                     xv::VIDEO_NOTIFY_EVENT => Ok(Self::XvVideoNotify(event.try_into()?)),
@@ -1090,7 +1090,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
             .map(|(name, _)| name);
         match ext_name {
             #[cfg(feature = "present")]
-            Some("Present") => {
+            Some(present::X11_EXTENSION_NAME) => {
                 match ge_event.event_type {
                     present::COMPLETE_NOTIFY_EVENT => Ok(Self::PresentCompleteNotify(event.try_into()?)),
                     present::CONFIGURE_NOTIFY_EVENT => Ok(Self::PresentConfigureNotify(event.try_into()?)),
@@ -1100,7 +1100,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
                 }
             }
             #[cfg(feature = "xinput")]
-            Some("XInputExtension") => {
+            Some(xinput::X11_EXTENSION_NAME) => {
                 match ge_event.event_type {
                     xinput::BARRIER_HIT_EVENT => Ok(Self::XinputBarrierHit(event.try_into()?)),
                     xinput::BARRIER_LEAVE_EVENT => Ok(Self::XinputBarrierLeave(event.try_into()?)),
