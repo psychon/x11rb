@@ -256,8 +256,7 @@ impl Serialize for ClientIdValue {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
         self.spec.serialize_into(bytes);
-        let length = self.value.len() as u32;
-        let length = length * 4;
+        let length = self.value.len() as u32 * 4;
         length.serialize_into(bytes);
         self.value.serialize_into(bytes);
     }

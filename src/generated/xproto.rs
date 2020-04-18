@@ -873,8 +873,7 @@ impl Serialize for SetupAuthenticate {
         bytes.reserve(8);
         self.status.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 5]);
-        let length = self.reason.len() as u16;
-        let length = length / 4;
+        let length = self.reason.len() as u16 / 4;
         length.serialize_into(bytes);
         self.reason.serialize_into(bytes);
     }
