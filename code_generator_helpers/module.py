@@ -401,7 +401,7 @@ class Module(object):
                     for (ename, value) in enum.values:
                         self.out.indent("%s => Ok(%s::%s),", _format_literal(value),
                                         rust_name, ename_to_rust(ename))
-                    self.out.indent("_ => Err(ParseError::ParseError)")
+                    self.out.indent("_ => Err(ParseError::ParseError),")
                     self.out("}")
                 self.out("}")
             self.out("}")
@@ -1224,7 +1224,7 @@ class Module(object):
                         self.out("}")
                     self.out("match parse_result {")
                     self.out.indent("None => Err(ParseError::ParseError),")
-                    self.out.indent("Some(result) => Ok((result, outer_remaining))")
+                    self.out.indent("Some(result) => Ok((result, outer_remaining)),")
                     self.out("}")
             self.out("}")
 

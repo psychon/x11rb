@@ -143,7 +143,7 @@ impl TryFrom<u8> for SaveSetMode {
         match value {
             0 => Ok(SaveSetMode::Insert),
             1 => Ok(SaveSetMode::Delete),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -205,7 +205,7 @@ impl TryFrom<u8> for SaveSetTarget {
         match value {
             0 => Ok(SaveSetTarget::Nearest),
             1 => Ok(SaveSetTarget::Root),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -267,7 +267,7 @@ impl TryFrom<u8> for SaveSetMapping {
         match value {
             0 => Ok(SaveSetMapping::Map),
             1 => Ok(SaveSetMapping::Unmap),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -367,7 +367,7 @@ impl TryFrom<u8> for SelectionEvent {
             0 => Ok(SelectionEvent::SetSelectionOwner),
             1 => Ok(SelectionEvent::SelectionWindowDestroy),
             2 => Ok(SelectionEvent::SelectionClientClose),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -432,7 +432,7 @@ impl TryFrom<u8> for SelectionEventMask {
             1 => Ok(SelectionEventMask::SetSelectionOwner),
             2 => Ok(SelectionEventMask::SelectionWindowDestroy),
             4 => Ok(SelectionEventMask::SelectionClientClose),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -598,7 +598,7 @@ impl TryFrom<u8> for CursorNotify {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             0 => Ok(CursorNotify::DisplayCursor),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -657,7 +657,7 @@ impl TryFrom<u8> for CursorNotifyMask {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             1 => Ok(CursorNotifyMask::DisplayCursor),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -928,7 +928,7 @@ impl TryFrom<u8> for RegionEnum {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             0 => Ok(RegionEnum::None),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1914,7 +1914,7 @@ impl TryFrom<u8> for BarrierDirections {
             2 => Ok(BarrierDirections::PositiveY),
             4 => Ok(BarrierDirections::NegativeX),
             8 => Ok(BarrierDirections::NegativeY),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }

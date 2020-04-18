@@ -97,7 +97,7 @@ impl TryFrom<u8> for Type {
             4 => Ok(Type::VideoMask),
             8 => Ok(Type::StillMask),
             16 => Ok(Type::ImageMask),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -161,7 +161,7 @@ impl TryFrom<u8> for ImageFormatInfoType {
         match value {
             0 => Ok(ImageFormatInfoType::RGB),
             1 => Ok(ImageFormatInfoType::YUV),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -223,7 +223,7 @@ impl TryFrom<u8> for ImageFormatInfoFormat {
         match value {
             0 => Ok(ImageFormatInfoFormat::Packed),
             1 => Ok(ImageFormatInfoFormat::Planar),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -285,7 +285,7 @@ impl TryFrom<u8> for AttributeFlag {
         match value {
             1 => Ok(AttributeFlag::Gettable),
             2 => Ok(AttributeFlag::Settable),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -357,7 +357,7 @@ impl TryFrom<u8> for VideoNotifyReason {
             2 => Ok(VideoNotifyReason::Busy),
             3 => Ok(VideoNotifyReason::Preempted),
             4 => Ok(VideoNotifyReason::HardError),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -419,7 +419,7 @@ impl TryFrom<u8> for ScanlineOrder {
         match value {
             0 => Ok(ScanlineOrder::TopToBottom),
             1 => Ok(ScanlineOrder::BottomToTop),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -493,7 +493,7 @@ impl TryFrom<u8> for GrabPortStatus {
             3 => Ok(GrabPortStatus::InvalidTime),
             4 => Ok(GrabPortStatus::BadReply),
             5 => Ok(GrabPortStatus::BadAlloc),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }

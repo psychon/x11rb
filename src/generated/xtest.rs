@@ -133,7 +133,7 @@ impl TryFrom<u8> for Cursor {
         match value {
             0 => Ok(Cursor::None),
             1 => Ok(Cursor::Current),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }

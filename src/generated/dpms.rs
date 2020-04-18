@@ -303,7 +303,7 @@ impl TryFrom<u8> for DPMSMode {
             1 => Ok(DPMSMode::Standby),
             2 => Ok(DPMSMode::Suspend),
             3 => Ok(DPMSMode::Off),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }

@@ -82,7 +82,7 @@ impl TryFrom<u8> for PictType {
         match value {
             0 => Ok(PictType::Indexed),
             1 => Ok(PictType::Direct),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -141,7 +141,7 @@ impl TryFrom<u8> for PictureEnum {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             0 => Ok(PictureEnum::None),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -356,7 +356,7 @@ impl TryFrom<u8> for PictOp {
             60 => Ok(PictOp::HSLSaturation),
             61 => Ok(PictOp::HSLColor),
             62 => Ok(PictOp::HSLLuminosity),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -418,7 +418,7 @@ impl TryFrom<u8> for PolyEdge {
         match value {
             0 => Ok(PolyEdge::Sharp),
             1 => Ok(PolyEdge::Smooth),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -480,7 +480,7 @@ impl TryFrom<u8> for PolyMode {
         match value {
             0 => Ok(PolyMode::Precise),
             1 => Ok(PolyMode::Imprecise),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -565,7 +565,7 @@ impl TryFrom<u16> for CP {
             1024 => Ok(CP::PolyMode),
             2048 => Ok(CP::Dither),
             4096 => Ok(CP::ComponentAlpha),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -634,7 +634,7 @@ impl TryFrom<u8> for SubPixel {
             3 => Ok(SubPixel::VerticalRGB),
             4 => Ok(SubPixel::VerticalBGR),
             5 => Ok(SubPixel::None),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -702,7 +702,7 @@ impl TryFrom<u8> for Repeat {
             1 => Ok(Repeat::Normal),
             2 => Ok(Repeat::Pad),
             3 => Ok(Repeat::Reflect),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }

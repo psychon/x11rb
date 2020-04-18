@@ -96,7 +96,7 @@ impl TryFrom<u8> for EventEnum {
             1 => Ok(EventEnum::CompleteNotify),
             2 => Ok(EventEnum::IdleNotify),
             3 => Ok(EventEnum::RedirectNotify),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -167,7 +167,7 @@ impl TryFrom<u8> for EventMask {
             2 => Ok(EventMask::CompleteNotify),
             4 => Ok(EventMask::IdleNotify),
             8 => Ok(EventMask::RedirectNotify),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -240,7 +240,7 @@ impl TryFrom<u8> for Option {
             2 => Ok(Option::Copy),
             4 => Ok(Option::UST),
             8 => Ok(Option::Suboptimal),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -310,7 +310,7 @@ impl TryFrom<u8> for Capability {
             1 => Ok(Capability::Async),
             2 => Ok(Capability::Fence),
             4 => Ok(Capability::UST),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -373,7 +373,7 @@ impl TryFrom<u8> for CompleteKind {
         match value {
             0 => Ok(CompleteKind::Pixmap),
             1 => Ok(CompleteKind::NotifyMSC),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -441,7 +441,7 @@ impl TryFrom<u8> for CompleteMode {
             1 => Ok(CompleteMode::Flip),
             2 => Ok(CompleteMode::Skip),
             3 => Ok(CompleteMode::SuboptimalCopy),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }

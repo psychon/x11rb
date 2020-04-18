@@ -87,7 +87,7 @@ impl TryFrom<u8> for ALARMSTATE {
             0 => Ok(ALARMSTATE::Active),
             1 => Ok(ALARMSTATE::Inactive),
             2 => Ok(ALARMSTATE::Destroyed),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -159,7 +159,7 @@ impl TryFrom<u8> for TESTTYPE {
             1 => Ok(TESTTYPE::NegativeTransition),
             2 => Ok(TESTTYPE::PositiveComparison),
             3 => Ok(TESTTYPE::NegativeComparison),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -221,7 +221,7 @@ impl TryFrom<u8> for VALUETYPE {
         match value {
             0 => Ok(VALUETYPE::Absolute),
             1 => Ok(VALUETYPE::Relative),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -295,7 +295,7 @@ impl TryFrom<u8> for CA {
             8 => Ok(CA::TestType),
             16 => Ok(CA::Delta),
             32 => Ok(CA::Events),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }

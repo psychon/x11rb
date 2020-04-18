@@ -95,7 +95,7 @@ impl TryFrom<u8> for SO {
             2 => Ok(SO::Intersect),
             3 => Ok(SO::Subtract),
             4 => Ok(SO::Invert),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -160,7 +160,7 @@ impl TryFrom<u8> for SK {
             0 => Ok(SK::Bounding),
             1 => Ok(SK::Clip),
             2 => Ok(SK::Input),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }

@@ -85,7 +85,7 @@ impl TryFrom<u8> for Const {
             255 => Ok(Const::MaxLegalKeyCode),
             32 => Ok(Const::PerKeyBitArraySize),
             4 => Ok(Const::KeyNameLength),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -167,7 +167,7 @@ impl TryFrom<u16> for EventType {
             512 => Ok(EventType::ActionMessage),
             1024 => Ok(EventType::AccessXNotify),
             2048 => Ok(EventType::ExtensionDeviceNotify),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -227,7 +227,7 @@ impl TryFrom<u8> for NKNDetail {
             1 => Ok(NKNDetail::Keycodes),
             2 => Ok(NKNDetail::Geometry),
             4 => Ok(NKNDetail::DeviceID),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -305,7 +305,7 @@ impl TryFrom<u8> for AXNDetail {
             16 => Ok(AXNDetail::BKAccept),
             32 => Ok(AXNDetail::BKReject),
             64 => Ok(AXNDetail::AXKWarning),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -386,7 +386,7 @@ impl TryFrom<u8> for MapPart {
             32 => Ok(MapPart::KeyBehaviors),
             64 => Ok(MapPart::VirtualMods),
             128 => Ok(MapPart::VirtualModMap),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -449,7 +449,7 @@ impl TryFrom<u8> for SetMapFlags {
         match value {
             1 => Ok(SetMapFlags::ResizeTypes),
             2 => Ok(SetMapFlags::RecomputeActions),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -538,7 +538,7 @@ impl TryFrom<u16> for StatePart {
             2048 => Ok(StatePart::LookupMods),
             4096 => Ok(StatePart::CompatLookupMods),
             8192 => Ok(StatePart::PointerButtons),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -618,7 +618,7 @@ impl TryFrom<u16> for BoolCtrl {
             1024 => Ok(BoolCtrl::Overlay1Mask),
             2048 => Ok(BoolCtrl::Overlay2Mask),
             4096 => Ok(BoolCtrl::IgnoreGroupLockMask),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -664,7 +664,7 @@ impl TryFrom<u32> for Control {
             536_870_912 => Ok(Control::IgnoreLockMods),
             1_073_741_824 => Ok(Control::PerKeyRepeat),
             2_147_483_648 => Ok(Control::ControlsEnabled),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -735,7 +735,7 @@ impl TryFrom<u16> for AXOption {
             512 => Ok(AXOption::SKRejectFB),
             1024 => Ok(AXOption::BKRejectFB),
             2048 => Ok(AXOption::DumbBell),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -794,7 +794,7 @@ impl TryFrom<u8> for LedClassResult {
         match value {
             0 => Ok(LedClassResult::KbdFeedbackClass),
             4 => Ok(LedClassResult::LedFeedbackClass),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -852,7 +852,7 @@ impl TryFrom<u16> for LedClass {
             4 => Ok(LedClass::LedFeedbackClass),
             768 => Ok(LedClass::DfltXIClass),
             1280 => Ok(LedClass::AllXIClasses),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -910,7 +910,7 @@ impl TryFrom<u8> for BellClassResult {
         match value {
             0 => Ok(BellClassResult::KbdFeedbackClass),
             5 => Ok(BellClassResult::BellFeedbackClass),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -965,7 +965,7 @@ impl TryFrom<u16> for BellClass {
             0 => Ok(BellClass::KbdFeedbackClass),
             5 => Ok(BellClass::BellFeedbackClass),
             768 => Ok(BellClass::DfltXIClass),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1028,7 +1028,7 @@ impl TryFrom<u16> for ID {
             1280 => Ok(ID::AllXIClass),
             1536 => Ok(ID::AllXIId),
             65280 => Ok(ID::XINone),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1092,7 +1092,7 @@ impl TryFrom<u8> for Group {
             1 => Ok(Group::M2),
             2 => Ok(Group::M3),
             3 => Ok(Group::M4),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1154,7 +1154,7 @@ impl TryFrom<u8> for Groups {
         match value {
             254 => Ok(Groups::Any),
             255 => Ok(Groups::All),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1222,7 +1222,7 @@ impl TryFrom<u8> for SetOfGroup {
             2 => Ok(SetOfGroup::Group2),
             4 => Ok(SetOfGroup::Group3),
             8 => Ok(SetOfGroup::Group4),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1282,7 +1282,7 @@ impl TryFrom<u8> for SetOfGroups {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             128 => Ok(SetOfGroups::Any),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1348,7 +1348,7 @@ impl TryFrom<u8> for GroupsWrap {
             0 => Ok(GroupsWrap::WrapIntoRange),
             64 => Ok(GroupsWrap::ClampIntoRange),
             128 => Ok(GroupsWrap::RedirectIntoRange),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1429,7 +1429,7 @@ impl TryFrom<u8> for VModsHigh {
             4 => Ok(VModsHigh::M10),
             2 => Ok(VModsHigh::M9),
             1 => Ok(VModsHigh::M8),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1510,7 +1510,7 @@ impl TryFrom<u8> for VModsLow {
             4 => Ok(VModsLow::M2),
             2 => Ok(VModsLow::M1),
             1 => Ok(VModsLow::M0),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1605,7 +1605,7 @@ impl TryFrom<u16> for VMod {
             4 => Ok(VMod::M2),
             2 => Ok(VMod::M1),
             1 => Ok(VMod::M0),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1680,7 +1680,7 @@ impl TryFrom<u8> for Explicit {
             4 => Ok(Explicit::KeyType3),
             2 => Ok(Explicit::KeyType2),
             1 => Ok(Explicit::KeyType1),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1752,7 +1752,7 @@ impl TryFrom<u8> for SymInterpretMatch {
             2 => Ok(SymInterpretMatch::AnyOf),
             3 => Ok(SymInterpretMatch::AllOf),
             4 => Ok(SymInterpretMatch::Exactly),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1814,7 +1814,7 @@ impl TryFrom<u8> for SymInterpMatch {
         match value {
             128 => Ok(SymInterpMatch::LevelOneOnly),
             127 => Ok(SymInterpMatch::OpMask),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1879,7 +1879,7 @@ impl TryFrom<u8> for IMFlag {
             128 => Ok(IMFlag::NoExplicit),
             64 => Ok(IMFlag::NoAutomatic),
             32 => Ok(IMFlag::LEDDrivesKB),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1951,7 +1951,7 @@ impl TryFrom<u8> for IMModsWhich {
             4 => Ok(IMModsWhich::UseLocked),
             2 => Ok(IMModsWhich::UseLatched),
             1 => Ok(IMModsWhich::UseBase),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -2023,7 +2023,7 @@ impl TryFrom<u8> for IMGroupsWhich {
             4 => Ok(IMGroupsWhich::UseLocked),
             2 => Ok(IMGroupsWhich::UseLatched),
             1 => Ok(IMGroupsWhich::UseBase),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -2160,7 +2160,7 @@ impl TryFrom<u8> for CMDetail {
         match value {
             1 => Ok(CMDetail::SymInterp),
             2 => Ok(CMDetail::GroupCompat),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -2249,7 +2249,7 @@ impl TryFrom<u16> for NameDetail {
             2048 => Ok(NameDetail::VirtualModNames),
             4096 => Ok(NameDetail::GroupNames),
             8192 => Ok(NameDetail::RGNames),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -2324,7 +2324,7 @@ impl TryFrom<u8> for GBNDetail {
             32 => Ok(GBNDetail::KeyNames),
             64 => Ok(GBNDetail::Geometry),
             128 => Ok(GBNDetail::OtherNames),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -2396,7 +2396,7 @@ impl TryFrom<u8> for XIFeature {
             4 => Ok(XIFeature::IndicatorNames),
             8 => Ok(XIFeature::IndicatorMaps),
             16 => Ok(XIFeature::IndicatorState),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -2468,7 +2468,7 @@ impl TryFrom<u8> for PerClientFlag {
             4 => Ok(PerClientFlag::AutoResetControls),
             8 => Ok(PerClientFlag::LookupStateWhenGrabbed),
             16 => Ok(PerClientFlag::SendEventUsesXKBState),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -3313,7 +3313,7 @@ impl TryFrom<u8> for BehaviorType {
             130 => Ok(BehaviorType::PermamentRadioGroup),
             131 => Ok(BehaviorType::PermamentOverlay1),
             132 => Ok(BehaviorType::PermamentOverlay2),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -3951,7 +3951,7 @@ impl TryFrom<u8> for DoodadType {
             3 => Ok(DoodadType::Text),
             4 => Ok(DoodadType::Indicator),
             5 => Ok(DoodadType::Logo),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -4110,7 +4110,7 @@ impl TryFrom<u8> for Error {
             255 => Ok(Error::BadDevice),
             254 => Ok(Error::BadClass),
             253 => Ok(Error::BadId),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -4335,7 +4335,7 @@ impl TryFrom<u8> for SAType {
             18 => Ok(SAType::DeviceBtn),
             19 => Ok(SAType::LockDeviceBtn),
             20 => Ok(SAType::DeviceValuator),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -4771,7 +4771,7 @@ impl TryFrom<u8> for SAMovePtrFlag {
             1 => Ok(SAMovePtrFlag::NoAcceleration),
             2 => Ok(SAMovePtrFlag::MoveAbsoluteX),
             4 => Ok(SAMovePtrFlag::MoveAbsoluteY),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -4999,7 +4999,7 @@ impl TryFrom<u8> for SASetPtrDfltFlag {
         match value {
             4 => Ok(SASetPtrDfltFlag::DfltBtnAbsolute),
             1 => Ok(SASetPtrDfltFlag::AffectDfltButton),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -5167,7 +5167,7 @@ impl TryFrom<u8> for SAIsoLockNoAffect {
             16 => Ok(SAIsoLockNoAffect::Ptr),
             32 => Ok(SAIsoLockNoAffect::Group),
             64 => Ok(SAIsoLockNoAffect::Mods),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -5338,7 +5338,7 @@ impl TryFrom<u8> for SwitchScreenFlag {
         match value {
             1 => Ok(SwitchScreenFlag::Application),
             4 => Ok(SwitchScreenFlag::Absolute),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -5459,7 +5459,7 @@ impl TryFrom<u8> for BoolCtrlsHigh {
             4 => Ok(BoolCtrlsHigh::Overlay1),
             8 => Ok(BoolCtrlsHigh::Overlay2),
             16 => Ok(BoolCtrlsHigh::IgnoreGroupLock),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -5540,7 +5540,7 @@ impl TryFrom<u8> for BoolCtrlsLow {
             32 => Ok(BoolCtrlsLow::MouseKeysAccel),
             64 => Ok(BoolCtrlsLow::AccessXKeys),
             128 => Ok(BoolCtrlsLow::AccessXTimeout),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -5708,7 +5708,7 @@ impl TryFrom<u8> for ActionMessageFlag {
             1 => Ok(ActionMessageFlag::OnPress),
             2 => Ok(ActionMessageFlag::OnRelease),
             4 => Ok(ActionMessageFlag::GenKeyEvent),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -5954,7 +5954,7 @@ impl TryFrom<u8> for LockDeviceFlags {
         match value {
             1 => Ok(LockDeviceFlags::NoLock),
             2 => Ok(LockDeviceFlags::NoUnlock),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -6084,7 +6084,7 @@ impl TryFrom<u8> for SAValWhat {
             3 => Ok(SAValWhat::SetValMax),
             4 => Ok(SAValWhat::SetValRelative),
             5 => Ok(SAValWhat::SetValAbsolute),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }

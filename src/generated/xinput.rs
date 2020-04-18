@@ -206,7 +206,7 @@ impl TryFrom<u8> for DeviceUse {
             2 => Ok(DeviceUse::IsXExtensionDevice),
             3 => Ok(DeviceUse::IsXExtensionKeyboard),
             4 => Ok(DeviceUse::IsXExtensionPointer),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -283,7 +283,7 @@ impl TryFrom<u8> for InputClass {
             4 => Ok(InputClass::Proximity),
             5 => Ok(InputClass::Focus),
             6 => Ok(InputClass::Other),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -345,7 +345,7 @@ impl TryFrom<u8> for ValuatorMode {
         match value {
             0 => Ok(ValuatorMode::Relative),
             1 => Ok(ValuatorMode::Absolute),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -727,7 +727,7 @@ impl InputInfoInfo {
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, outer_remaining))
+            Some(result) => Ok((result, outer_remaining)),
         }
     }
     pub fn as_key(&self) -> Option<&InputInfoInfoKey> {
@@ -1203,7 +1203,7 @@ impl TryFrom<u8> for PropagateMode {
         match value {
             0 => Ok(PropagateMode::AddToList),
             1 => Ok(PropagateMode::DeleteFromList),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1668,7 +1668,7 @@ impl TryFrom<u8> for ModifierDevice {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             255 => Ok(ModifierDevice::UseXKeyboard),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1920,7 +1920,7 @@ impl TryFrom<u8> for DeviceInputMode {
             3 => Ok(DeviceInputMode::AsyncOtherDevices),
             4 => Ok(DeviceInputMode::AsyncAll),
             5 => Ok(DeviceInputMode::SyncAll),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -2119,7 +2119,7 @@ impl TryFrom<u8> for FeedbackClass {
             3 => Ok(FeedbackClass::Integer),
             4 => Ok(FeedbackClass::Led),
             5 => Ok(FeedbackClass::Bell),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -3068,7 +3068,7 @@ impl FeedbackStateData {
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, outer_remaining))
+            Some(result) => Ok((result, outer_remaining)),
         }
     }
     pub fn as_keyboard(&self) -> Option<&FeedbackStateDataKeyboard> {
@@ -3893,7 +3893,7 @@ impl FeedbackCtlData {
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, outer_remaining))
+            Some(result) => Ok((result, outer_remaining)),
         }
     }
     pub fn as_keyboard(&self) -> Option<&FeedbackCtlDataKeyboard> {
@@ -4739,7 +4739,7 @@ impl TryFrom<u8> for ValuatorStateModeMask {
         match value {
             1 => Ok(ValuatorStateModeMask::DeviceModeAbsolute),
             2 => Ok(ValuatorStateModeMask::OutOfProximity),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -5131,7 +5131,7 @@ impl InputStateData {
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, outer_remaining))
+            Some(result) => Ok((result, outer_remaining)),
         }
     }
     pub fn as_key(&self) -> Option<&InputStateDataKey> {
@@ -5400,7 +5400,7 @@ impl TryFrom<u8> for DeviceControl {
             3 => Ok(DeviceControl::Core),
             4 => Ok(DeviceControl::Enable),
             5 => Ok(DeviceControl::Absarea),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -6040,7 +6040,7 @@ impl DeviceStateData {
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, outer_remaining))
+            Some(result) => Ok((result, outer_remaining)),
         }
     }
     pub fn as_resolution(&self) -> Option<&DeviceStateDataResolution> {
@@ -6775,7 +6775,7 @@ impl DeviceCtlData {
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, outer_remaining))
+            Some(result) => Ok((result, outer_remaining)),
         }
     }
     pub fn as_resolution(&self) -> Option<&DeviceCtlDataResolution> {
@@ -7040,7 +7040,7 @@ impl TryFrom<u8> for PropertyFormat {
             8 => Ok(PropertyFormat::M8Bits),
             16 => Ok(PropertyFormat::M16Bits),
             32 => Ok(PropertyFormat::M32Bits),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -7271,7 +7271,7 @@ impl GetDevicePropertyItems {
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, outer_remaining))
+            Some(result) => Ok((result, outer_remaining)),
         }
     }
     pub fn as_data8(&self) -> Option<&Vec<u8>> {
@@ -7409,7 +7409,7 @@ impl TryFrom<u8> for Device {
         match value {
             0 => Ok(Device::All),
             1 => Ok(Device::AllMaster),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -7751,7 +7751,7 @@ impl TryFrom<u8> for HierarchyChangeType {
             2 => Ok(HierarchyChangeType::RemoveMaster),
             3 => Ok(HierarchyChangeType::AttachSlave),
             4 => Ok(HierarchyChangeType::DetachSlave),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -7813,7 +7813,7 @@ impl TryFrom<u8> for ChangeMode {
         match value {
             1 => Ok(ChangeMode::Attach),
             2 => Ok(ChangeMode::Float),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -8220,7 +8220,7 @@ impl HierarchyChangeData {
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, outer_remaining))
+            Some(result) => Ok((result, outer_remaining)),
         }
     }
     pub fn as_add_master(&self) -> Option<&HierarchyChangeDataAddMaster> {
@@ -8522,7 +8522,7 @@ impl TryFrom<u32> for XIEventMask {
             16_777_216 => Ok(XIEventMask::RawTouchEnd),
             33_554_432 => Ok(XIEventMask::BarrierHit),
             67_108_864 => Ok(XIEventMask::BarrierLeave),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -8706,7 +8706,7 @@ impl TryFrom<u8> for DeviceClassType {
             2 => Ok(DeviceClassType::Valuator),
             3 => Ok(DeviceClassType::Scroll),
             8 => Ok(DeviceClassType::Touch),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -8777,7 +8777,7 @@ impl TryFrom<u8> for DeviceType {
             3 => Ok(DeviceType::SlavePointer),
             4 => Ok(DeviceType::SlaveKeyboard),
             5 => Ok(DeviceType::FloatingSlave),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -8839,7 +8839,7 @@ impl TryFrom<u8> for ScrollFlags {
         match value {
             1 => Ok(ScrollFlags::NoEmulation),
             2 => Ok(ScrollFlags::Preferred),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -8902,7 +8902,7 @@ impl TryFrom<u8> for ScrollType {
         match value {
             1 => Ok(ScrollType::Vertical),
             2 => Ok(ScrollType::Horizontal),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -8964,7 +8964,7 @@ impl TryFrom<u8> for TouchMode {
         match value {
             1 => Ok(TouchMode::Direct),
             2 => Ok(TouchMode::Dependent),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -9625,7 +9625,7 @@ impl DeviceClassData {
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, outer_remaining))
+            Some(result) => Ok((result, outer_remaining)),
         }
     }
     pub fn as_key(&self) -> Option<&DeviceClassDataKey> {
@@ -9961,7 +9961,7 @@ impl TryFrom<u8> for GrabOwner {
         match value {
             0 => Ok(GrabOwner::NoOwner),
             1 => Ok(GrabOwner::Owner),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -10153,7 +10153,7 @@ impl TryFrom<u8> for EventMode {
             5 => Ok(EventMode::SyncPair),
             6 => Ok(EventMode::AcceptTouch),
             7 => Ok(EventMode::RejectTouch),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -10260,7 +10260,7 @@ impl TryFrom<u8> for GrabMode22 {
             0 => Ok(GrabMode22::Sync),
             1 => Ok(GrabMode22::Async),
             2 => Ok(GrabMode22::Touch),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -10331,7 +10331,7 @@ impl TryFrom<u8> for GrabType {
             2 => Ok(GrabType::Enter),
             3 => Ok(GrabType::FocusIn),
             4 => Ok(GrabType::TouchBegin),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -10370,7 +10370,7 @@ impl TryFrom<u32> for ModifierMask {
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
             2_147_483_648 => Ok(ModifierMask::Any),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -10830,7 +10830,7 @@ impl XIGetPropertyItems {
         }
         match parse_result {
             None => Err(ParseError::ParseError),
-            Some(result) => Ok((result, outer_remaining))
+            Some(result) => Ok((result, outer_remaining)),
         }
     }
     pub fn as_data8(&self) -> Option<&Vec<u8>> {
@@ -11179,7 +11179,7 @@ impl TryFrom<u8> for MoreEventsMask {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             128 => Ok(MoreEventsMask::MoreEvents),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -11998,7 +11998,7 @@ impl TryFrom<u8> for ClassesReportedMask {
             4 => Ok(ClassesReportedMask::ReportingValuators),
             2 => Ok(ClassesReportedMask::ReportingButtons),
             1 => Ok(ClassesReportedMask::ReportingKeys),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -12233,7 +12233,7 @@ impl TryFrom<u8> for ChangeDevice {
         match value {
             0 => Ok(ChangeDevice::NewPointer),
             1 => Ok(ChangeDevice::NewKeyboard),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -12595,7 +12595,7 @@ impl TryFrom<u8> for DeviceChange {
             3 => Ok(DeviceChange::Disabled),
             4 => Ok(DeviceChange::Unrecoverable),
             5 => Ok(DeviceChange::ControlChanged),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -12788,7 +12788,7 @@ impl TryFrom<u8> for ChangeReason {
         match value {
             1 => Ok(ChangeReason::SlaveSwitch),
             2 => Ok(ChangeReason::DeviceChange),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -12880,7 +12880,7 @@ impl TryFrom<u32> for KeyEventFlags {
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
             65536 => Ok(KeyEventFlags::KeyRepeat),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -13062,7 +13062,7 @@ impl TryFrom<u32> for PointerEventFlags {
     fn try_from(value: u32) -> Result<Self, Self::Error> {
         match value {
             65536 => Ok(PointerEventFlags::PointerEmulated),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -13356,7 +13356,7 @@ impl TryFrom<u8> for NotifyMode {
             3 => Ok(NotifyMode::WhileGrabbed),
             4 => Ok(NotifyMode::PassiveGrab),
             5 => Ok(NotifyMode::PassiveUngrab),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -13436,7 +13436,7 @@ impl TryFrom<u8> for NotifyDetail {
             5 => Ok(NotifyDetail::Pointer),
             6 => Ok(NotifyDetail::PointerRoot),
             7 => Ok(NotifyDetail::None),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -13824,7 +13824,7 @@ impl TryFrom<u8> for HierarchyMask {
             32 => Ok(HierarchyMask::SlaveDetached),
             64 => Ok(HierarchyMask::DeviceEnabled),
             128 => Ok(HierarchyMask::DeviceDisabled),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -14001,7 +14001,7 @@ impl TryFrom<u8> for PropertyFlag {
             0 => Ok(PropertyFlag::Deleted),
             1 => Ok(PropertyFlag::Created),
             2 => Ok(PropertyFlag::Modified),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -14383,7 +14383,7 @@ impl TryFrom<u32> for TouchEventFlags {
         match value {
             65536 => Ok(TouchEventFlags::TouchPendingEnd),
             131_072 => Ok(TouchEventFlags::TouchEmulatingPointer),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -14662,7 +14662,7 @@ impl TryFrom<u8> for TouchOwnershipFlags {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             0 => Ok(TouchOwnershipFlags::None),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -14957,7 +14957,7 @@ impl TryFrom<u8> for BarrierFlags {
         match value {
             1 => Ok(BarrierFlags::PointerReleased),
             2 => Ok(BarrierFlags::DeviceIsGrabbed),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }

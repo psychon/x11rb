@@ -229,7 +229,7 @@ impl TryFrom<u8> for Datatype {
         match value {
             0 => Ok(Datatype::Unmodified),
             1 => Ok(Datatype::Modified),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }

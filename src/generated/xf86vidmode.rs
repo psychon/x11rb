@@ -107,7 +107,7 @@ impl TryFrom<u16> for ModeFlag {
             1024 => Ok(ModeFlag::Pixmux),
             2048 => Ok(ModeFlag::DoubleClock),
             4096 => Ok(ModeFlag::HalfClock),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -161,7 +161,7 @@ impl TryFrom<u8> for ClockFlag {
     fn try_from(value: u8) -> Result<Self, Self::Error> {
         match value {
             1 => Ok(ClockFlag::Programable),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -224,7 +224,7 @@ impl TryFrom<u8> for Permission {
         match value {
             1 => Ok(Permission::Read),
             2 => Ok(Permission::Write),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }

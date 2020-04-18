@@ -287,7 +287,7 @@ impl TryFrom<u8> for HType {
             1 => Ok(HType::FromServerTime),
             2 => Ok(HType::FromClientTime),
             4 => Ok(HType::FromClientSequence),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -355,7 +355,7 @@ impl TryFrom<u8> for CS {
             1 => Ok(CS::CurrentClients),
             2 => Ok(CS::FutureClients),
             3 => Ok(CS::AllClients),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }

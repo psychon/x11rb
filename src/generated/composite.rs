@@ -88,7 +88,7 @@ impl TryFrom<u8> for Redirect {
         match value {
             0 => Ok(Redirect::Automatic),
             1 => Ok(Redirect::Manual),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }

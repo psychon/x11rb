@@ -166,7 +166,7 @@ impl TryFrom<u8> for ClientIdMask {
         match value {
             1 => Ok(ClientIdMask::ClientXID),
             2 => Ok(ClientIdMask::LocalClientPID),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }

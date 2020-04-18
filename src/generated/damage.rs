@@ -96,7 +96,7 @@ impl TryFrom<u8> for ReportLevel {
             1 => Ok(ReportLevel::DeltaRectangles),
             2 => Ok(ReportLevel::BoundingBox),
             3 => Ok(ReportLevel::NonEmpty),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }

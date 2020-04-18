@@ -1175,7 +1175,7 @@ impl TryFrom<u16> for PBCET {
         match value {
             32791 => Ok(PBCET::Damaged),
             32792 => Ok(PBCET::Saved),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1221,7 +1221,7 @@ impl TryFrom<u16> for PBCDT {
         match value {
             32793 => Ok(PBCDT::Window),
             32794 => Ok(PBCDT::Pbuffer),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -1710,7 +1710,7 @@ impl TryFrom<u32> for GC {
             262_144 => Ok(GC::GL_TEXTURE_BIT),
             524_288 => Ok(GC::GL_SCISSOR_BIT),
             16_777_215 => Ok(GC::GL_ALL_ATTRIB_BITS),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
@@ -3205,7 +3205,7 @@ impl TryFrom<u16> for RM {
             7168 => Ok(RM::GL_RENDER),
             7169 => Ok(RM::GL_FEEDBACK),
             7170 => Ok(RM::GL_SELECT),
-            _ => Err(ParseError::ParseError)
+            _ => Err(ParseError::ParseError),
         }
     }
 }
