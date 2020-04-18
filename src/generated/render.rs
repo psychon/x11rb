@@ -1690,7 +1690,7 @@ where
         client_minor_version_bytes[2],
         client_minor_version_bytes[3],
     ];
-    let length_so_far = length_so_far + (&request0).len();
+    let length_so_far = length_so_far + request0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -1739,7 +1739,7 @@ where
         0,
         0,
     ];
-    let length_so_far = length_so_far + (&request0).len();
+    let length_so_far = length_so_far + request0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -1802,7 +1802,7 @@ where
         format_bytes[2],
         format_bytes[3],
     ];
-    let length_so_far = length_so_far + (&request0).len();
+    let length_so_far = length_so_far + request0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -2052,10 +2052,10 @@ where
         value_mask_bytes[2],
         value_mask_bytes[3],
     ];
-    let length_so_far = length_so_far + (&request0).len();
-    let length_so_far = length_so_far + (&value_list_bytes).len();
+    let length_so_far = length_so_far + request0.len();
+    let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding0).len();
+    let length_so_far = length_so_far + padding0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -2269,10 +2269,10 @@ where
         value_mask_bytes[2],
         value_mask_bytes[3],
     ];
-    let length_so_far = length_so_far + (&request0).len();
-    let length_so_far = length_so_far + (&value_list_bytes).len();
+    let length_so_far = length_so_far + request0.len();
+    let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding0).len();
+    let length_so_far = length_so_far + padding0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -2306,10 +2306,10 @@ where
         clip_y_origin_bytes[0],
         clip_y_origin_bytes[1],
     ];
-    let length_so_far = length_so_far + (&request0).len();
-    let length_so_far = length_so_far + (&rectangles_bytes).len();
+    let length_so_far = length_so_far + request0.len();
+    let length_so_far = length_so_far + rectangles_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding0).len();
+    let length_so_far = length_so_far + padding0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -2336,7 +2336,7 @@ where
         picture_bytes[2],
         picture_bytes[3],
     ];
-    let length_so_far = length_so_far + (&request0).len();
+    let length_so_far = length_so_far + request0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -2404,7 +2404,7 @@ where
         height_bytes[0],
         height_bytes[1],
     ];
-    let length_so_far = length_so_far + (&request0).len();
+    let length_so_far = length_so_far + request0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -2455,10 +2455,10 @@ where
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = length_so_far + (&request0).len();
-    let length_so_far = length_so_far + (&traps_bytes).len();
+    let length_so_far = length_so_far + request0.len();
+    let length_so_far = length_so_far + traps_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding0).len();
+    let length_so_far = length_so_far + padding0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -2509,10 +2509,10 @@ where
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = length_so_far + (&request0).len();
-    let length_so_far = length_so_far + (&triangles_bytes).len();
+    let length_so_far = length_so_far + request0.len();
+    let length_so_far = length_so_far + triangles_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding0).len();
+    let length_so_far = length_so_far + padding0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -2563,10 +2563,10 @@ where
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = length_so_far + (&request0).len();
-    let length_so_far = length_so_far + (&points_bytes).len();
+    let length_so_far = length_so_far + request0.len();
+    let length_so_far = length_so_far + points_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding0).len();
+    let length_so_far = length_so_far + padding0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -2617,10 +2617,10 @@ where
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = length_so_far + (&request0).len();
-    let length_so_far = length_so_far + (&points_bytes).len();
+    let length_so_far = length_so_far + request0.len();
+    let length_so_far = length_so_far + points_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding0).len();
+    let length_so_far = length_so_far + padding0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -2652,7 +2652,7 @@ where
         format_bytes[2],
         format_bytes[3],
     ];
-    let length_so_far = length_so_far + (&request0).len();
+    let length_so_far = length_so_far + request0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -2684,7 +2684,7 @@ where
         existing_bytes[2],
         existing_bytes[3],
     ];
-    let length_so_far = length_so_far + (&request0).len();
+    let length_so_far = length_so_far + request0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -2711,7 +2711,7 @@ where
         glyphset_bytes[2],
         glyphset_bytes[3],
     ];
-    let length_so_far = length_so_far + (&request0).len();
+    let length_so_far = length_so_far + request0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -2745,14 +2745,14 @@ where
         glyphs_len_bytes[2],
         glyphs_len_bytes[3],
     ];
-    let length_so_far = length_so_far + (&request0).len();
-    let length_so_far = length_so_far + (&glyphids_bytes).len();
+    let length_so_far = length_so_far + request0.len();
+    let length_so_far = length_so_far + glyphids_bytes.len();
     assert_eq!(glyphs.len(), glyphs_len as usize, "Argument glyphs has an incorrect length");
     let glyphs_bytes = glyphs.serialize();
-    let length_so_far = length_so_far + (&glyphs_bytes).len();
-    let length_so_far = length_so_far + (data).len();
+    let length_so_far = length_so_far + glyphs_bytes.len();
+    let length_so_far = length_so_far + data.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding0).len();
+    let length_so_far = length_so_far + padding0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -2780,10 +2780,10 @@ where
         glyphset_bytes[2],
         glyphset_bytes[3],
     ];
-    let length_so_far = length_so_far + (&request0).len();
-    let length_so_far = length_so_far + (&glyphs_bytes).len();
+    let length_so_far = length_so_far + request0.len();
+    let length_so_far = length_so_far + glyphs_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding0).len();
+    let length_so_far = length_so_far + padding0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -2838,10 +2838,10 @@ where
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = length_so_far + (&request0).len();
-    let length_so_far = length_so_far + (glyphcmds).len();
+    let length_so_far = length_so_far + request0.len();
+    let length_so_far = length_so_far + glyphcmds.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding0).len();
+    let length_so_far = length_so_far + padding0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -2896,10 +2896,10 @@ where
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = length_so_far + (&request0).len();
-    let length_so_far = length_so_far + (glyphcmds).len();
+    let length_so_far = length_so_far + request0.len();
+    let length_so_far = length_so_far + glyphcmds.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding0).len();
+    let length_so_far = length_so_far + padding0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -2954,10 +2954,10 @@ where
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = length_so_far + (&request0).len();
-    let length_so_far = length_so_far + (glyphcmds).len();
+    let length_so_far = length_so_far + request0.len();
+    let length_so_far = length_so_far + glyphcmds.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding0).len();
+    let length_so_far = length_so_far + padding0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -3001,10 +3001,10 @@ where
         color_bytes[6],
         color_bytes[7],
     ];
-    let length_so_far = length_so_far + (&request0).len();
-    let length_so_far = length_so_far + (&rects_bytes).len();
+    let length_so_far = length_so_far + request0.len();
+    let length_so_far = length_so_far + rects_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding0).len();
+    let length_so_far = length_so_far + padding0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -3042,7 +3042,7 @@ where
         y_bytes[0],
         y_bytes[1],
     ];
-    let length_so_far = length_so_far + (&request0).len();
+    let length_so_far = length_so_far + request0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -3204,7 +3204,7 @@ where
         transform_bytes[34],
         transform_bytes[35],
     ];
-    let length_so_far = length_so_far + (&request0).len();
+    let length_so_far = length_so_far + request0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -3231,7 +3231,7 @@ where
         drawable_bytes[2],
         drawable_bytes[3],
     ];
-    let length_so_far = length_so_far + (&request0).len();
+    let length_so_far = length_so_far + request0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -3293,14 +3293,14 @@ where
         0,
         0,
     ];
-    let length_so_far = length_so_far + (&request0).len();
-    let length_so_far = length_so_far + (filter).len();
+    let length_so_far = length_so_far + request0.len();
+    let length_so_far = length_so_far + filter.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding0).len();
+    let length_so_far = length_so_far + padding0.len();
     let values_bytes = values.serialize();
-    let length_so_far = length_so_far + (&values_bytes).len();
+    let length_so_far = length_so_far + values_bytes.len();
     let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
+    let length_so_far = length_so_far + padding1.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -3370,10 +3370,10 @@ where
         cid_bytes[2],
         cid_bytes[3],
     ];
-    let length_so_far = length_so_far + (&request0).len();
-    let length_so_far = length_so_far + (&cursors_bytes).len();
+    let length_so_far = length_so_far + request0.len();
+    let length_so_far = length_so_far + cursors_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding0).len();
+    let length_so_far = length_so_far + padding0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -3515,10 +3515,10 @@ where
         y_off_bytes[0],
         y_off_bytes[1],
     ];
-    let length_so_far = length_so_far + (&request0).len();
-    let length_so_far = length_so_far + (&traps_bytes).len();
+    let length_so_far = length_so_far + request0.len();
+    let length_so_far = length_so_far + traps_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding0).len();
+    let length_so_far = length_so_far + padding0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -3554,7 +3554,7 @@ where
         color_bytes[6],
         color_bytes[7],
     ];
-    let length_so_far = length_so_far + (&request0).len();
+    let length_so_far = length_so_far + request0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -3606,13 +3606,13 @@ where
         num_stops_bytes[2],
         num_stops_bytes[3],
     ];
-    let length_so_far = length_so_far + (&request0).len();
-    let length_so_far = length_so_far + (&stops_bytes).len();
+    let length_so_far = length_so_far + request0.len();
+    let length_so_far = length_so_far + stops_bytes.len();
     assert_eq!(colors.len(), num_stops as usize, "Argument colors has an incorrect length");
     let colors_bytes = colors.serialize();
-    let length_so_far = length_so_far + (&colors_bytes).len();
+    let length_so_far = length_so_far + colors_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding0).len();
+    let length_so_far = length_so_far + padding0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -3674,13 +3674,13 @@ where
         num_stops_bytes[2],
         num_stops_bytes[3],
     ];
-    let length_so_far = length_so_far + (&request0).len();
-    let length_so_far = length_so_far + (&stops_bytes).len();
+    let length_so_far = length_so_far + request0.len();
+    let length_so_far = length_so_far + stops_bytes.len();
     assert_eq!(colors.len(), num_stops as usize, "Argument colors has an incorrect length");
     let colors_bytes = colors.serialize();
-    let length_so_far = length_so_far + (&colors_bytes).len();
+    let length_so_far = length_so_far + colors_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding0).len();
+    let length_so_far = length_so_far + padding0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
@@ -3728,13 +3728,13 @@ where
         num_stops_bytes[2],
         num_stops_bytes[3],
     ];
-    let length_so_far = length_so_far + (&request0).len();
-    let length_so_far = length_so_far + (&stops_bytes).len();
+    let length_so_far = length_so_far + request0.len();
+    let length_so_far = length_so_far + stops_bytes.len();
     assert_eq!(colors.len(), num_stops as usize, "Argument colors has an incorrect length");
     let colors_bytes = colors.serialize();
-    let length_so_far = length_so_far + (&colors_bytes).len();
+    let length_so_far = length_so_far + colors_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding0).len();
+    let length_so_far = length_so_far + padding0.len();
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());

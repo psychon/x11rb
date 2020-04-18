@@ -145,7 +145,11 @@ def request_implementation(module, obj, name, fds, fds_is_list):
 
     # Add the given byte array to requests
     def _emit_add_to_requests(part):
-        module.out("let length_so_far = length_so_far + (%s).len();", part)
+        if part[0] == "&":
+            part_for_len = part[1:]
+        else:
+            part_for_len = part
+        module.out("let length_so_far = length_so_far + %s.len();", part_for_len)
         requests.append(part)
 
     # This function adds the current 'request' to the list of 'requests'
