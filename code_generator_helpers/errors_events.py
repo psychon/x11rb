@@ -97,10 +97,10 @@ def _errors(out, modules):
                             err_name = name[-1]
                             out.indent("%s::%s => Ok(Self::%s%s(error.into())),",
                                        mod_name, opcode, variant, err_name)
-                        out.indent("_ => Ok(Self::Unknown(error))")
+                        out.indent("_ => Ok(Self::Unknown(error)),")
                         out("}")
                     out("}")
-                out("_ => Ok(Self::Unknown(error))")
+                out("_ => Ok(Self::Unknown(error)),")
             out("}")
         out("}")
         out("")
@@ -217,10 +217,10 @@ def _events(out, modules):
                             event_name = name[-1]
                             out.indent("%s::%s => Ok(Self::%s%s(event.try_into()?)),",
                                        mod_name, opcode, variant, event_name)
-                        out.indent("_ => Ok(Self::Unknown(event))")
+                        out.indent("_ => Ok(Self::Unknown(event)),")
                         out("}")
                     out("}")
-                out("_ => Ok(Self::Unknown(event))")
+                out("_ => Ok(Self::Unknown(event)),")
             out("}")
         out("}")
         out("")
@@ -255,10 +255,10 @@ def _events(out, modules):
                             event_name = name[-1]
                             out.indent("%s::%s => Ok(Self::%s%s(event.try_into()?)),",
                                        mod_name, opcode, variant, event_name)
-                        out.indent("_ => Ok(Self::Unknown(event))")
+                        out.indent("_ => Ok(Self::Unknown(event)),")
                         out("}")
                     out("}")
-                out("_ => Ok(Self::Unknown(event))")
+                out("_ => Ok(Self::Unknown(event)),")
             out("}")
         out("}")
         out("")
