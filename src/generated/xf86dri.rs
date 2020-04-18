@@ -88,7 +88,8 @@ impl Serialize for DrmClipRect {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 pub fn query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -136,7 +137,8 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 /// Opcode for the QueryDirectRenderingCapable request
 pub const QUERY_DIRECT_RENDERING_CAPABLE_REQUEST: u8 = 1;
 pub fn query_direct_rendering_capable<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, QueryDirectRenderingCapableReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -185,7 +187,8 @@ impl TryFrom<&[u8]> for QueryDirectRenderingCapableReply {
 /// Opcode for the OpenConnection request
 pub const OPEN_CONNECTION_REQUEST: u8 = 2;
 pub fn open_connection<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, OpenConnectionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -240,7 +243,8 @@ impl TryFrom<&[u8]> for OpenConnectionReply {
 /// Opcode for the CloseConnection request
 pub const CLOSE_CONNECTION_REQUEST: u8 = 3;
 pub fn close_connection<Conn>(conn: &Conn, screen: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -265,7 +269,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetClientDriverName request
 pub const GET_CLIENT_DRIVER_NAME_REQUEST: u8 = 4;
 pub fn get_client_driver_name<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, GetClientDriverNameReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -322,7 +327,8 @@ impl TryFrom<&[u8]> for GetClientDriverNameReply {
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 5;
 pub fn create_context<Conn>(conn: &Conn, screen: u32, visual: u32, context: u32) -> Result<Cookie<'_, Conn, CreateContextReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -381,7 +387,8 @@ impl TryFrom<&[u8]> for CreateContextReply {
 /// Opcode for the DestroyContext request
 pub const DESTROY_CONTEXT_REQUEST: u8 = 6;
 pub fn destroy_context<Conn>(conn: &Conn, screen: u32, context: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -411,7 +418,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the CreateDrawable request
 pub const CREATE_DRAWABLE_REQUEST: u8 = 7;
 pub fn create_drawable<Conn>(conn: &Conn, screen: u32, drawable: u32) -> Result<Cookie<'_, Conn, CreateDrawableReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -465,7 +473,8 @@ impl TryFrom<&[u8]> for CreateDrawableReply {
 /// Opcode for the DestroyDrawable request
 pub const DESTROY_DRAWABLE_REQUEST: u8 = 8;
 pub fn destroy_drawable<Conn>(conn: &Conn, screen: u32, drawable: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -495,7 +504,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetDrawableInfo request
 pub const GET_DRAWABLE_INFO_REQUEST: u8 = 9;
 pub fn get_drawable_info<Conn>(conn: &Conn, screen: u32, drawable: u32) -> Result<Cookie<'_, Conn, GetDrawableInfoReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -569,7 +579,8 @@ impl TryFrom<&[u8]> for GetDrawableInfoReply {
 /// Opcode for the GetDeviceInfo request
 pub const GET_DEVICE_INFO_REQUEST: u8 = 10;
 pub fn get_device_info<Conn>(conn: &Conn, screen: u32) -> Result<Cookie<'_, Conn, GetDeviceInfoReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -629,7 +640,8 @@ impl TryFrom<&[u8]> for GetDeviceInfoReply {
 /// Opcode for the AuthConnection request
 pub const AUTH_CONNECTION_REQUEST: u8 = 11;
 pub fn auth_connection<Conn>(conn: &Conn, screen: u32, magic: u32) -> Result<Cookie<'_, Conn, AuthConnectionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;

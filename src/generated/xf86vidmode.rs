@@ -371,7 +371,8 @@ impl Serialize for ModeInfo {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 pub fn query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -417,7 +418,8 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 /// Opcode for the GetModeLine request
 pub const GET_MODE_LINE_REQUEST: u8 = 1;
 pub fn get_mode_line<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetModeLineReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -491,7 +493,8 @@ impl TryFrom<&[u8]> for GetModeLineReply {
 /// Opcode for the ModModeLine request
 pub const MOD_MODE_LINE_REQUEST: u8 = 2;
 pub fn mod_mode_line<'c, Conn>(conn: &'c Conn, screen: u32, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -571,7 +574,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the SwitchMode request
 pub const SWITCH_MODE_REQUEST: u8 = 3;
 pub fn switch_mode<Conn>(conn: &Conn, screen: u16, zoom: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -597,7 +601,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetMonitor request
 pub const GET_MONITOR_REQUEST: u8 = 4;
 pub fn get_monitor<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetMonitorReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -659,7 +664,8 @@ impl TryFrom<&[u8]> for GetMonitorReply {
 /// Opcode for the LockModeSwitch request
 pub const LOCK_MODE_SWITCH_REQUEST: u8 = 5;
 pub fn lock_mode_switch<Conn>(conn: &Conn, screen: u16, lock: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -685,7 +691,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetAllModeLines request
 pub const GET_ALL_MODE_LINES_REQUEST: u8 = 6;
 pub fn get_all_mode_lines<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetAllModeLinesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -736,7 +743,8 @@ impl TryFrom<&[u8]> for GetAllModeLinesReply {
 /// Opcode for the AddModeLine request
 pub const ADD_MODE_LINE_REQUEST: u8 = 7;
 pub fn add_mode_line<'c, Conn>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, after_dotclock: Dotclock, after_hdisplay: u16, after_hsyncstart: u16, after_hsyncend: u16, after_htotal: u16, after_hskew: u16, after_vdisplay: u16, after_vsyncstart: u16, after_vsyncend: u16, after_vtotal: u16, after_flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -872,7 +880,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the DeleteModeLine request
 pub const DELETE_MODE_LINE_REQUEST: u8 = 8;
 pub fn delete_mode_line<'c, Conn>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -957,7 +966,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the ValidateModeLine request
 pub const VALIDATE_MODE_LINE_REQUEST: u8 = 9;
 pub fn validate_mode_line<'c, Conn>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<Cookie<'c, Conn, ValidateModeLineReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1067,7 +1077,8 @@ impl TryFrom<&[u8]> for ValidateModeLineReply {
 /// Opcode for the SwitchToMode request
 pub const SWITCH_TO_MODE_REQUEST: u8 = 10;
 pub fn switch_to_mode<'c, Conn>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1152,7 +1163,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetViewPort request
 pub const GET_VIEW_PORT_REQUEST: u8 = 11;
 pub fn get_view_port<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetViewPortReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1204,7 +1216,8 @@ impl TryFrom<&[u8]> for GetViewPortReply {
 /// Opcode for the SetViewPort request
 pub const SET_VIEW_PORT_REQUEST: u8 = 12;
 pub fn set_view_port<Conn>(conn: &Conn, screen: u16, x: u32, y: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1239,7 +1252,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetDotClocks request
 pub const GET_DOT_CLOCKS_REQUEST: u8 = 13;
 pub fn get_dot_clocks<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetDotClocksReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1295,7 +1309,8 @@ impl TryFrom<&[u8]> for GetDotClocksReply {
 /// Opcode for the SetClientVersion request
 pub const SET_CLIENT_VERSION_REQUEST: u8 = 14;
 pub fn set_client_version<Conn>(conn: &Conn, major: u16, minor: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1321,7 +1336,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the SetGamma request
 pub const SET_GAMMA_REQUEST: u8 = 15;
 pub fn set_gamma<Conn>(conn: &Conn, screen: u16, red: u32, green: u32, blue: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1373,7 +1389,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetGamma request
 pub const GET_GAMMA_REQUEST: u8 = 16;
 pub fn get_gamma<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetGammaReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1451,7 +1468,8 @@ impl TryFrom<&[u8]> for GetGammaReply {
 /// Opcode for the GetGammaRamp request
 pub const GET_GAMMA_RAMP_REQUEST: u8 = 17;
 pub fn get_gamma_ramp<Conn>(conn: &Conn, screen: u16, size: u16) -> Result<Cookie<'_, Conn, GetGammaRampReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1508,7 +1526,8 @@ impl TryFrom<&[u8]> for GetGammaRampReply {
 /// Opcode for the SetGammaRamp request
 pub const SET_GAMMA_RAMP_REQUEST: u8 = 18;
 pub fn set_gamma_ramp<'c, Conn>(conn: &'c Conn, screen: u16, size: u16, red: &[u16], green: &[u16], blue: &[u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1545,7 +1564,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetGammaRampSize request
 pub const GET_GAMMA_RAMP_SIZE_REQUEST: u8 = 19;
 pub fn get_gamma_ramp_size<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetGammaRampSizeReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1595,7 +1615,8 @@ impl TryFrom<&[u8]> for GetGammaRampSizeReply {
 /// Opcode for the GetPermissions request
 pub const GET_PERMISSIONS_REQUEST: u8 = 20;
 pub fn get_permissions<Conn>(conn: &Conn, screen: u16) -> Result<Cookie<'_, Conn, GetPermissionsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;

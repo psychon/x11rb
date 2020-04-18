@@ -503,7 +503,8 @@ impl Serialize for Notify {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 pub fn query_version<Conn>(conn: &Conn, major_version: u32, minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -559,7 +560,8 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 /// Opcode for the Pixmap request
 pub const PIXMAP_REQUEST: u8 = 1;
 pub fn pixmap<'c, Conn>(conn: &'c Conn, window: xproto::Window, pixmap: xproto::Pixmap, serial: u32, valid: xfixes::Region, update: xfixes::Region, x_off: i16, y_off: i16, target_crtc: randr::Crtc, wait_fence: sync::Fence, idle_fence: sync::Fence, options: u32, target_msc: u64, divisor: u64, remainder: u64, notifies: &[Notify]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -665,7 +667,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the NotifyMSC request
 pub const NOTIFY_MSC_REQUEST: u8 = 2;
 pub fn notify_msc<Conn>(conn: &Conn, window: xproto::Window, serial: u32, target_msc: u64, divisor: u64, remainder: u64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -728,7 +731,8 @@ pub type Event = u32;
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 3;
 pub fn select_input<Conn>(conn: &Conn, eid: Event, window: xproto::Window, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -763,7 +767,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the QueryCapabilities request
 pub const QUERY_CAPABILITIES_REQUEST: u8 = 4;
 pub fn query_capabilities<Conn>(conn: &Conn, target: u32) -> Result<Cookie<'_, Conn, QueryCapabilitiesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;

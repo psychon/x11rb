@@ -466,7 +466,8 @@ impl From<BadContextError> for [u8; 32] {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 pub fn query_version<Conn>(conn: &Conn, major_version: u16, minor_version: u16) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -518,7 +519,8 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 1;
 pub fn create_context<'c, Conn>(conn: &'c Conn, context: Context, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -566,7 +568,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the RegisterClients request
 pub const REGISTER_CLIENTS_REQUEST: u8 = 2;
 pub fn register_clients<'c, Conn>(conn: &'c Conn, context: Context, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -614,7 +617,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the UnregisterClients request
 pub const UNREGISTER_CLIENTS_REQUEST: u8 = 3;
 pub fn unregister_clients<'c, Conn>(conn: &'c Conn, context: Context, client_specs: &[ClientSpec]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -649,7 +653,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetContext request
 pub const GET_CONTEXT_REQUEST: u8 = 4;
 pub fn get_context<Conn>(conn: &Conn, context: Context) -> Result<Cookie<'_, Conn, GetContextReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -704,7 +709,8 @@ impl TryFrom<&[u8]> for GetContextReply {
 /// Opcode for the EnableContext request
 pub const ENABLE_CONTEXT_REQUEST: u8 = 5;
 pub fn enable_context<Conn>(conn: &Conn, context: Context) -> Result<Cookie<'_, Conn, EnableContextReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -765,7 +771,8 @@ impl TryFrom<&[u8]> for EnableContextReply {
 /// Opcode for the DisableContext request
 pub const DISABLE_CONTEXT_REQUEST: u8 = 6;
 pub fn disable_context<Conn>(conn: &Conn, context: Context) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -790,7 +797,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the FreeContext request
 pub const FREE_CONTEXT_REQUEST: u8 = 7;
 pub fn free_context<Conn>(conn: &Conn, context: Context) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;

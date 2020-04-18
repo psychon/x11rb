@@ -6749,7 +6749,9 @@ impl Serialize for CreateWindowAux {
 /// * MapWindow: request
 /// * xcb_generate_id: function
 pub fn create_window<'c, Conn, A>(conn: &'c Conn, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, visual: Visualid, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u16>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u16>,
 {
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
@@ -7036,7 +7038,8 @@ impl Serialize for ChangeWindowAttributesAux {
 /// * `Value` - TODO: reasons?
 /// * `Window` - The specified `window` does not exist.
 pub fn change_window_attributes<'c, Conn>(conn: &'c Conn, window: Window, value_list: &ChangeWindowAttributesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
@@ -7146,7 +7149,8 @@ pub const GET_WINDOW_ATTRIBUTES_REQUEST: u8 = 3;
 /// * `Drawable` - TODO: reasons?
 /// * `Window` - The specified `window` does not exist.
 pub fn get_window_attributes<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, GetWindowAttributesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -7260,7 +7264,8 @@ pub const DESTROY_WINDOW_REQUEST: u8 = 4;
 /// * MapWindow: request
 /// * UnmapWindow: request
 pub fn destroy_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -7283,7 +7288,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the DestroySubwindows request
 pub const DESTROY_SUBWINDOWS_REQUEST: u8 = 5;
 pub fn destroy_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -7390,7 +7396,9 @@ pub const CHANGE_SAVE_SET_REQUEST: u8 = 6;
 ///
 /// * ReparentWindow: request
 pub fn change_save_set<Conn, A>(conn: &Conn, mode: A, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let length: usize = (8) / 4;
     let mode = mode.into();
@@ -7447,7 +7455,8 @@ pub const REPARENT_WINDOW_REQUEST: u8 = 7;
 /// * ReparentNotify: event
 /// * UnmapWindow: request
 pub fn reparent_window<Conn>(conn: &Conn, window: Window, parent: Window, x: i16, y: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (16) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -7516,7 +7525,8 @@ pub const MAP_WINDOW_REQUEST: u8 = 8;
 /// * MapNotify: event
 /// * UnmapWindow: request
 pub fn map_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -7539,7 +7549,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the MapSubwindows request
 pub const MAP_SUBWINDOWS_REQUEST: u8 = 9;
 pub fn map_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -7583,7 +7594,8 @@ pub const UNMAP_WINDOW_REQUEST: u8 = 10;
 /// * MapWindow: request
 /// * UnmapNotify: event
 pub fn unmap_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -7606,7 +7618,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the UnmapSubwindows request
 pub const UNMAP_SUBWINDOWS_REQUEST: u8 = 11;
 pub fn unmap_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -7936,7 +7949,8 @@ impl Serialize for ConfigureWindowAux {
 /// }
 /// ```
 pub fn configure_window<'c, Conn>(conn: &'c Conn, window: Window, value_list: &ConfigureWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
@@ -8047,7 +8061,9 @@ pub const CIRCULATE_WINDOW_REQUEST: u8 = 13;
 /// * `Value` - The specified `direction` is invalid.
 /// * `Window` - The specified `window` does not exist.
 pub fn circulate_window<Conn, A>(conn: &Conn, direction: A, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let length: usize = (8) / 4;
     let direction = direction.into();
@@ -8108,7 +8124,8 @@ pub const GET_GEOMETRY_REQUEST: u8 = 14;
 /// }
 /// ```
 pub fn get_geometry<Conn>(conn: &Conn, drawable: Drawable) -> Result<Cookie<'_, Conn, GetGeometryReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -8220,7 +8237,8 @@ pub const QUERY_TREE_REQUEST: u8 = 15;
 /// }
 /// ```
 pub fn query_tree<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, QueryTreeReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -8326,7 +8344,8 @@ pub const INTERN_ATOM_REQUEST: u8 = 16;
 /// }
 /// ```
 pub fn intern_atom<'c, Conn>(conn: &'c Conn, only_if_exists: bool, name: &[u8]) -> Result<Cookie<'c, Conn, InternAtomReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8 + 1 * name.len() + 3) / 4;
     let only_if_exists_bytes = (only_if_exists as u8).serialize();
@@ -8378,7 +8397,8 @@ impl TryFrom<&[u8]> for InternAtomReply {
 /// Opcode for the GetAtomName request
 pub const GET_ATOM_NAME_REQUEST: u8 = 17;
 pub fn get_atom_name<Conn>(conn: &Conn, atom: Atom) -> Result<Cookie<'_, Conn, GetAtomNameReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -8554,7 +8574,11 @@ pub const CHANGE_PROPERTY_REQUEST: u8 = 18;
 /// }
 /// ```
 pub fn change_property<'c, Conn, A, B, C>(conn: &'c Conn, mode: A, window: Window, property: B, type_: C, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<Atom>, C: Into<Atom>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
+    B: Into<Atom>,
+    C: Into<Atom>,
 {
     let length: usize = (24 + 1 * data.len() + 3) / 4;
     let mode = mode.into();
@@ -8605,7 +8629,8 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<Atom>, C: Into<Atom
 /// Opcode for the DeleteProperty request
 pub const DELETE_PROPERTY_REQUEST: u8 = 19;
 pub fn delete_property<Conn>(conn: &Conn, window: Window, property: Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (12) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -8925,7 +8950,8 @@ impl GetPropertyReply {
 /// }
 /// ```
 pub fn get_property<Conn>(conn: &Conn, delete: bool, window: Window, property: Atom, type_: Atom, long_offset: u32, long_length: u32) -> Result<Cookie<'_, Conn, GetPropertyReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (24) / 4;
     let delete_bytes = (delete as u8).serialize();
@@ -9014,7 +9040,8 @@ impl TryFrom<&[u8]> for GetPropertyReply {
 /// Opcode for the ListProperties request
 pub const LIST_PROPERTIES_REQUEST: u8 = 21;
 pub fn list_properties<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, ListPropertiesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -9092,7 +9119,8 @@ pub const SET_SELECTION_OWNER_REQUEST: u8 = 22;
 ///
 /// * SetSelectionOwner: request
 pub fn set_selection_owner<Conn>(conn: &Conn, owner: Window, selection: Atom, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (16) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -9142,7 +9170,8 @@ pub const GET_SELECTION_OWNER_REQUEST: u8 = 23;
 ///
 /// * SetSelectionOwner: request
 pub fn get_selection_owner<Conn>(conn: &Conn, selection: Atom) -> Result<Cookie<'_, Conn, GetSelectionOwnerReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -9195,7 +9224,8 @@ impl TryFrom<&[u8]> for GetSelectionOwnerReply {
 /// Opcode for the ConvertSelection request
 pub const CONVERT_SELECTION_REQUEST: u8 = 24;
 pub fn convert_selection<Conn>(conn: &Conn, requestor: Window, selection: Atom, target: Atom, property: Atom, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (24) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -9373,7 +9403,9 @@ pub const SEND_EVENT_REQUEST: u8 = 25;
 /// }
 /// ```
 pub fn send_event<Conn, A>(conn: &Conn, propagate: bool, destination: Window, event_mask: u32, event: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<[u8; 32]>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<[u8; 32]>,
 {
     let length: usize = (44) / 4;
     let propagate_bytes = (propagate as u8).serialize();
@@ -9675,7 +9707,10 @@ pub const GRAB_POINTER_REQUEST: u8 = 26;
 /// }
 /// ```
 pub fn grab_pointer<Conn, A, B>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: A, keyboard_mode: B, confine_to: Window, cursor: Cursor, time: Timestamp) -> Result<Cookie<'_, Conn, GrabPointerReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
+    B: Into<u8>,
 {
     let length: usize = (24) / 4;
     let owner_events_bytes = (owner_events as u8).serialize();
@@ -9770,7 +9805,8 @@ pub const UNGRAB_POINTER_REQUEST: u8 = 27;
 /// * GrabPointer: request
 /// * LeaveNotify: event
 pub fn ungrab_pointer<Conn>(conn: &Conn, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -9942,7 +9978,11 @@ pub const GRAB_BUTTON_REQUEST: u8 = 28;
 /// * `Value` - TODO: reasons?
 /// * `Window` - The specified `window` does not exist.
 pub fn grab_button<Conn, A, B, C>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: A, keyboard_mode: B, confine_to: Window, cursor: Cursor, button: C, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>, C: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
+    B: Into<u8>,
+    C: Into<u8>,
 {
     let length: usize = (24) / 4;
     let owner_events_bytes = (owner_events as u8).serialize();
@@ -9992,7 +10032,9 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>, C: Into<u8>
 /// Opcode for the UngrabButton request
 pub const UNGRAB_BUTTON_REQUEST: u8 = 29;
 pub fn ungrab_button<Conn, A>(conn: &Conn, button: A, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let length: usize = (12) / 4;
     let button = button.into();
@@ -10022,7 +10064,8 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 /// Opcode for the ChangeActivePointerGrab request
 pub const CHANGE_ACTIVE_POINTER_GRAB_REQUEST: u8 = 30;
 pub fn change_active_pointer_grab<Conn>(conn: &Conn, cursor: Cursor, time: Timestamp, event_mask: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (16) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -10115,7 +10158,10 @@ pub const GRAB_KEYBOARD_REQUEST: u8 = 31;
 /// }
 /// ```
 pub fn grab_keyboard<Conn, A, B>(conn: &Conn, owner_events: bool, grab_window: Window, time: Timestamp, pointer_mode: A, keyboard_mode: B) -> Result<Cookie<'_, Conn, GrabKeyboardReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
+    B: Into<u8>,
 {
     let length: usize = (16) / 4;
     let owner_events_bytes = (owner_events as u8).serialize();
@@ -10176,7 +10222,8 @@ impl TryFrom<&[u8]> for GrabKeyboardReply {
 /// Opcode for the UngrabKeyboard request
 pub const UNGRAB_KEYBOARD_REQUEST: u8 = 32;
 pub fn ungrab_keyboard<Conn>(conn: &Conn, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -10316,7 +10363,10 @@ pub const GRAB_KEY_REQUEST: u8 = 33;
 ///
 /// * GrabKeyboard: request
 pub fn grab_key<Conn, A, B>(conn: &Conn, owner_events: bool, grab_window: Window, modifiers: u16, key: Keycode, pointer_mode: A, keyboard_mode: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
+    B: Into<u8>,
 {
     let length: usize = (16) / 4;
     let owner_events_bytes = (owner_events as u8).serialize();
@@ -10379,7 +10429,8 @@ pub const UNGRAB_KEY_REQUEST: u8 = 34;
 /// * GrabKey: request
 /// * xev: program
 pub fn ungrab_key<Conn>(conn: &Conn, key: Keycode, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (12) / 4;
     let key_bytes = key.serialize();
@@ -10567,7 +10618,9 @@ pub const ALLOW_EVENTS_REQUEST: u8 = 35;
 ///
 /// * `Value` - You specified an invalid `mode`.
 pub fn allow_events<Conn, A>(conn: &Conn, mode: A, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let length: usize = (8) / 4;
     let mode = mode.into();
@@ -10592,7 +10645,8 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 /// Opcode for the GrabServer request
 pub const GRAB_SERVER_REQUEST: u8 = 36;
 pub fn grab_server<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (4) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -10610,7 +10664,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the UngrabServer request
 pub const UNGRAB_SERVER_REQUEST: u8 = 37;
 pub fn ungrab_server<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (4) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -10641,7 +10696,8 @@ pub const QUERY_POINTER_REQUEST: u8 = 38;
 ///
 /// * `Window` - The specified `window` does not exist.
 pub fn query_pointer<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, QueryPointerReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -10770,7 +10826,8 @@ impl Serialize for Timecoord {
 /// Opcode for the GetMotionEvents request
 pub const GET_MOTION_EVENTS_REQUEST: u8 = 39;
 pub fn get_motion_events<Conn>(conn: &Conn, window: Window, start: Timestamp, stop: Timestamp) -> Result<Cookie<'_, Conn, GetMotionEventsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (16) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -10829,7 +10886,8 @@ impl TryFrom<&[u8]> for GetMotionEventsReply {
 /// Opcode for the TranslateCoordinates request
 pub const TRANSLATE_COORDINATES_REQUEST: u8 = 40;
 pub fn translate_coordinates<Conn>(conn: &Conn, src_window: Window, dst_window: Window, src_x: i16, src_y: i16) -> Result<Cookie<'_, Conn, TranslateCoordinatesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (16) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -10924,7 +10982,8 @@ pub const WARP_POINTER_REQUEST: u8 = 41;
 ///
 /// * SetInputFocus: request
 pub fn warp_pointer<Conn>(conn: &Conn, src_window: Window, dst_window: Window, src_x: i16, src_y: i16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (24) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -11085,7 +11144,9 @@ pub const SET_INPUT_FOCUS_REQUEST: u8 = 42;
 /// * FocusIn: event
 /// * FocusOut: event
 pub fn set_input_focus<Conn, A>(conn: &Conn, revert_to: A, focus: Window, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let length: usize = (12) / 4;
     let revert_to = revert_to.into();
@@ -11115,7 +11176,8 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 /// Opcode for the GetInputFocus request
 pub const GET_INPUT_FOCUS_REQUEST: u8 = 43;
 pub fn get_input_focus<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetInputFocusReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (4) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -11159,7 +11221,8 @@ impl TryFrom<&[u8]> for GetInputFocusReply {
 /// Opcode for the QueryKeymap request
 pub const QUERY_KEYMAP_REQUEST: u8 = 44;
 pub fn query_keymap<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryKeymapReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (4) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -11286,7 +11349,8 @@ pub const OPEN_FONT_REQUEST: u8 = 45;
 ///
 /// * xcb_generate_id: function
 pub fn open_font<'c, Conn>(conn: &'c Conn, fid: Font, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (12 + 1 * name.len() + 3) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -11318,7 +11382,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the CloseFont request
 pub const CLOSE_FONT_REQUEST: u8 = 46;
 pub fn close_font<Conn>(conn: &Conn, font: Font) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -11514,7 +11579,8 @@ pub const QUERY_FONT_REQUEST: u8 = 47;
 ///
 /// * `font` - The fontable (Font or Graphics Context) to query.
 pub fn query_font<Conn>(conn: &Conn, font: Fontable) -> Result<Cookie<'_, Conn, QueryFontReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -11638,7 +11704,8 @@ pub const QUERY_TEXT_EXTENTS_REQUEST: u8 = 48;
 /// * `Font` - The specified `font` does not exist.
 /// * `GContext` - The specified graphics context does not exist.
 pub fn query_text_extents<'c, Conn>(conn: &'c Conn, font: Fontable, string: &[Char2b]) -> Result<Cookie<'c, Conn, QueryTextExtentsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8 + 2 * string.len() + 3) / 4;
     let string_len: u32 = string.len().try_into()?;
@@ -11754,7 +11821,8 @@ pub const LIST_FONTS_REQUEST: u8 = 49;
 /// not matter.
 /// * `pattern_len` - The length (in bytes) of `pattern`.
 pub fn list_fonts<'c, Conn>(conn: &'c Conn, max_names: u16, pattern: &[u8]) -> Result<Cookie<'c, Conn, ListFontsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8 + 1 * pattern.len() + 3) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -11827,7 +11895,8 @@ pub const LIST_FONTS_WITH_INFO_REQUEST: u8 = 50;
 /// not matter.
 /// * `pattern_len` - The length (in bytes) of `pattern`.
 pub fn list_fonts_with_info<'c, Conn>(conn: &'c Conn, max_names: u16, pattern: &[u8]) -> Result<ListFontsWithInfoCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8 + 1 * pattern.len() + 3) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -11927,7 +11996,8 @@ impl TryFrom<&[u8]> for ListFontsWithInfoReply {
 /// Opcode for the SetFontPath request
 pub const SET_FONT_PATH_REQUEST: u8 = 51;
 pub fn set_font_path<'c, Conn>(conn: &'c Conn, font: &[Str]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let font_bytes = font.serialize();
     let length: usize = (8 + font_bytes.len() + 3) / 4;
@@ -11955,7 +12025,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetFontPath request
 pub const GET_FONT_PATH_REQUEST: u8 = 52;
 pub fn get_font_path<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetFontPathReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (4) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -12022,7 +12093,8 @@ pub const CREATE_PIXMAP_REQUEST: u8 = 53;
 ///
 /// * xcb_generate_id: function
 pub fn create_pixmap<Conn>(conn: &Conn, depth: u8, pid: Pixmap, drawable: Drawable, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (16) / 4;
     let depth_bytes = depth.serialize();
@@ -12069,7 +12141,8 @@ pub const FREE_PIXMAP_REQUEST: u8 = 54;
 ///
 /// * `Pixmap` - The specified pixmap does not exist.
 pub fn free_pixmap<Conn>(conn: &Conn, pixmap: Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -13169,7 +13242,8 @@ impl Serialize for CreateGCAux {
 ///
 /// * xcb_generate_id: function
 pub fn create_gc<'c, Conn>(conn: &'c Conn, cid: Gcontext, drawable: Drawable, value_list: &CreateGCAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
@@ -13551,7 +13625,8 @@ impl Serialize for ChangeGCAux {
 /// }
 /// ```
 pub fn change_gc<'c, Conn>(conn: &'c Conn, gc: Gcontext, value_list: &ChangeGCAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
@@ -13584,7 +13659,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the CopyGC request
 pub const COPY_GC_REQUEST: u8 = 57;
 pub fn copy_gc<Conn>(conn: &Conn, src_gc: Gcontext, dst_gc: Gcontext, value_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (16) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -13617,7 +13693,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the SetDashes request
 pub const SET_DASHES_REQUEST: u8 = 58;
 pub fn set_dashes<'c, Conn>(conn: &'c Conn, gc: Gcontext, dash_offset: u16, dashes: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (12 + 1 * dashes.len() + 3) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -13718,7 +13795,9 @@ impl TryFrom<u32> for ClipOrdering {
 /// Opcode for the SetClipRectangles request
 pub const SET_CLIP_RECTANGLES_REQUEST: u8 = 59;
 pub fn set_clip_rectangles<'c, Conn, A>(conn: &'c Conn, ordering: A, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let length: usize = (12 + 8 * rectangles.len() + 3) / 4;
     let ordering = ordering.into();
@@ -13764,7 +13843,8 @@ pub const FREE_GC_REQUEST: u8 = 60;
 ///
 /// * `GContext` - The specified graphics context does not exist.
 pub fn free_gc<Conn>(conn: &Conn, gc: Gcontext) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -13787,7 +13867,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the ClearArea request
 pub const CLEAR_AREA_REQUEST: u8 = 61;
 pub fn clear_area<Conn>(conn: &Conn, exposures: bool, window: Window, x: i16, y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (16) / 4;
     let exposures_bytes = (exposures as u8).serialize();
@@ -13844,7 +13925,8 @@ pub const COPY_AREA_REQUEST: u8 = 62;
 /// * `GContext` - The specified graphics context does not exist.
 /// * `Match` - `src_drawable` has a different root or depth than `dst_drawable`.
 pub fn copy_area<Conn>(conn: &Conn, src_drawable: Drawable, dst_drawable: Drawable, gc: Gcontext, src_x: i16, src_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (28) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -13895,7 +13977,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the CopyPlane request
 pub const COPY_PLANE_REQUEST: u8 = 63;
 pub fn copy_plane<Conn>(conn: &Conn, src_drawable: Drawable, dst_drawable: Drawable, gc: Gcontext, src_x: i16, src_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16, bit_plane: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (32) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -14020,7 +14103,9 @@ impl TryFrom<u32> for CoordMode {
 /// Opcode for the PolyPoint request
 pub const POLY_POINT_REQUEST: u8 = 64;
 pub fn poly_point<'c, Conn, A>(conn: &'c Conn, coordinate_mode: A, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let length: usize = (12 + 4 * points.len() + 3) / 4;
     let coordinate_mode = coordinate_mode.into();
@@ -14092,7 +14177,9 @@ pub const POLY_LINE_REQUEST: u8 = 65;
 /// }
 /// ```
 pub fn poly_line<'c, Conn, A>(conn: &'c Conn, coordinate_mode: A, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let length: usize = (12 + 4 * points.len() + 3) / 4;
     let coordinate_mode = coordinate_mode.into();
@@ -14202,7 +14289,8 @@ pub const POLY_SEGMENT_REQUEST: u8 = 66;
 /// * `GContext` - The specified `gc` does not exist.
 /// * `Match` - TODO: reasons?
 pub fn poly_segment<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, segments: &[Segment]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (12 + 8 * segments.len() + 3) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -14234,7 +14322,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the PolyRectangle request
 pub const POLY_RECTANGLE_REQUEST: u8 = 67;
 pub fn poly_rectangle<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (12 + 8 * rectangles.len() + 3) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -14266,7 +14355,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the PolyArc request
 pub const POLY_ARC_REQUEST: u8 = 68;
 pub fn poly_arc<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs: &[Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (12 + 12 * arcs.len() + 3) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -14363,7 +14453,10 @@ impl TryFrom<u32> for PolyShape {
 /// Opcode for the FillPoly request
 pub const FILL_POLY_REQUEST: u8 = 69;
 pub fn fill_poly<'c, Conn, A, B>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, shape: A, coordinate_mode: B, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
+    B: Into<u8>,
 {
     let length: usize = (16 + 4 * points.len() + 3) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -14428,7 +14521,8 @@ pub const POLY_FILL_RECTANGLE_REQUEST: u8 = 70;
 /// * `GContext` - The specified graphics context does not exist.
 /// * `Match` - TODO: reasons?
 pub fn poly_fill_rectangle<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (12 + 8 * rectangles.len() + 3) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -14460,7 +14554,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the PolyFillArc request
 pub const POLY_FILL_ARC_REQUEST: u8 = 71;
 pub fn poly_fill_arc<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs: &[Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (12 + 12 * arcs.len() + 3) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -14557,7 +14652,9 @@ impl TryFrom<u32> for ImageFormat {
 /// Opcode for the PutImage request
 pub const PUT_IMAGE_REQUEST: u8 = 72;
 pub fn put_image<'c, Conn, A>(conn: &'c Conn, format: A, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let length: usize = (24 + 1 * data.len() + 3) / 4;
     let format = format.into();
@@ -14608,7 +14705,9 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 /// Opcode for the GetImage request
 pub const GET_IMAGE_REQUEST: u8 = 73;
 pub fn get_image<Conn, A>(conn: &Conn, format: A, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32) -> Result<Cookie<'_, Conn, GetImageReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let length: usize = (20) / 4;
     let format = format.into();
@@ -14677,7 +14776,8 @@ impl TryFrom<&[u8]> for GetImageReply {
 /// Opcode for the PolyText8 request
 pub const POLY_TEXT8_REQUEST: u8 = 74;
 pub fn poly_text8<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (16 + 1 * items.len() + 3) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -14714,7 +14814,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the PolyText16 request
 pub const POLY_TEXT16_REQUEST: u8 = 75;
 pub fn poly_text16<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (16 + 1 * items.len() + 3) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -14785,7 +14886,8 @@ pub const IMAGE_TEXT8_REQUEST: u8 = 76;
 ///
 /// * ImageText16: request
 pub fn image_text8<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (16 + 1 * string.len() + 3) / 4;
     let string_len: u8 = string.len().try_into()?;
@@ -14859,7 +14961,8 @@ pub const IMAGE_TEXT16_REQUEST: u8 = 77;
 ///
 /// * ImageText8: request
 pub fn image_text16<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[Char2b]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (16 + 2 * string.len() + 3) / 4;
     let string_len: u8 = string.len().try_into()?;
@@ -14961,7 +15064,9 @@ impl TryFrom<u32> for ColormapAlloc {
 /// Opcode for the CreateColormap request
 pub const CREATE_COLORMAP_REQUEST: u8 = 78;
 pub fn create_colormap<Conn, A>(conn: &Conn, alloc: A, mid: Colormap, window: Window, visual: Visualid) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let length: usize = (16) / 4;
     let alloc = alloc.into();
@@ -14996,7 +15101,8 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 /// Opcode for the FreeColormap request
 pub const FREE_COLORMAP_REQUEST: u8 = 79;
 pub fn free_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -15019,7 +15125,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the CopyColormapAndFree request
 pub const COPY_COLORMAP_AND_FREE_REQUEST: u8 = 80;
 pub fn copy_colormap_and_free<Conn>(conn: &Conn, mid: Colormap, src_cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (12) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -15047,7 +15154,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the InstallColormap request
 pub const INSTALL_COLORMAP_REQUEST: u8 = 81;
 pub fn install_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -15070,7 +15178,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the UninstallColormap request
 pub const UNINSTALL_COLORMAP_REQUEST: u8 = 82;
 pub fn uninstall_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -15093,7 +15202,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the ListInstalledColormaps request
 pub const LIST_INSTALLED_COLORMAPS_REQUEST: u8 = 83;
 pub fn list_installed_colormaps<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, ListInstalledColormapsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -15160,7 +15270,8 @@ pub const ALLOC_COLOR_REQUEST: u8 = 84;
 ///
 /// * `Colormap` - The specified colormap `cmap` does not exist.
 pub fn alloc_color<Conn>(conn: &Conn, cmap: Colormap, red: u16, green: u16, blue: u16) -> Result<Cookie<'_, Conn, AllocColorReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (16) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -15225,7 +15336,8 @@ impl TryFrom<&[u8]> for AllocColorReply {
 /// Opcode for the AllocNamedColor request
 pub const ALLOC_NAMED_COLOR_REQUEST: u8 = 85;
 pub fn alloc_named_color<'c, Conn>(conn: &'c Conn, cmap: Colormap, name: &[u8]) -> Result<Cookie<'c, Conn, AllocNamedColorReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (12 + 1 * name.len() + 3) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -15293,7 +15405,8 @@ impl TryFrom<&[u8]> for AllocNamedColorReply {
 /// Opcode for the AllocColorCells request
 pub const ALLOC_COLOR_CELLS_REQUEST: u8 = 86;
 pub fn alloc_color_cells<Conn>(conn: &Conn, contiguous: bool, cmap: Colormap, colors: u16, planes: u16) -> Result<Cookie<'_, Conn, AllocColorCellsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (12) / 4;
     let contiguous_bytes = (contiguous as u8).serialize();
@@ -15352,7 +15465,8 @@ impl TryFrom<&[u8]> for AllocColorCellsReply {
 /// Opcode for the AllocColorPlanes request
 pub const ALLOC_COLOR_PLANES_REQUEST: u8 = 87;
 pub fn alloc_color_planes<Conn>(conn: &Conn, contiguous: bool, cmap: Colormap, colors: u16, reds: u16, greens: u16, blues: u16) -> Result<Cookie<'_, Conn, AllocColorPlanesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (16) / 4;
     let contiguous_bytes = (contiguous as u8).serialize();
@@ -15421,7 +15535,8 @@ impl TryFrom<&[u8]> for AllocColorPlanesReply {
 /// Opcode for the FreeColors request
 pub const FREE_COLORS_REQUEST: u8 = 88;
 pub fn free_colors<'c, Conn>(conn: &'c Conn, cmap: Colormap, plane_mask: u32, pixels: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (12 + 4 * pixels.len() + 3) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -15579,7 +15694,8 @@ impl Serialize for Coloritem {
 /// Opcode for the StoreColors request
 pub const STORE_COLORS_REQUEST: u8 = 89;
 pub fn store_colors<'c, Conn>(conn: &'c Conn, cmap: Colormap, items: &[Coloritem]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8 + 12 * items.len() + 3) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -15606,7 +15722,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the StoreNamedColor request
 pub const STORE_NAMED_COLOR_REQUEST: u8 = 90;
 pub fn store_named_color<'c, Conn>(conn: &'c Conn, flags: u8, cmap: Colormap, pixel: u32, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (16 + 1 * name.len() + 3) / 4;
     let flags_bytes = flags.serialize();
@@ -15692,7 +15809,8 @@ impl Serialize for Rgb {
 /// Opcode for the QueryColors request
 pub const QUERY_COLORS_REQUEST: u8 = 91;
 pub fn query_colors<'c, Conn>(conn: &'c Conn, cmap: Colormap, pixels: &[u32]) -> Result<Cookie<'c, Conn, QueryColorsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8 + 4 * pixels.len() + 3) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -15745,7 +15863,8 @@ impl TryFrom<&[u8]> for QueryColorsReply {
 /// Opcode for the LookupColor request
 pub const LOOKUP_COLOR_REQUEST: u8 = 92;
 pub fn lookup_color<'c, Conn>(conn: &'c Conn, cmap: Colormap, name: &[u8]) -> Result<Cookie<'c, Conn, LookupColorReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (12 + 1 * name.len() + 3) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -15870,7 +15989,8 @@ impl TryFrom<u32> for PixmapEnum {
 /// Opcode for the CreateCursor request
 pub const CREATE_CURSOR_REQUEST: u8 = 93;
 pub fn create_cursor<Conn>(conn: &Conn, cid: Cursor, source: Pixmap, mask: Pixmap, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (32) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -16019,7 +16139,8 @@ pub const CREATE_GLYPH_CURSOR_REQUEST: u8 = 94;
 /// * `Font` - The specified `source_font` or `mask_font` does not exist.
 /// * `Value` - Either `source_char` or `mask_char` are not defined in `source_font` or `mask_font`, respectively.
 pub fn create_glyph_cursor<Conn>(conn: &Conn, cid: Cursor, source_font: Font, mask_font: Font, source_char: u16, mask_char: u16, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (32) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -16088,7 +16209,8 @@ pub const FREE_CURSOR_REQUEST: u8 = 95;
 ///
 /// * `Cursor` - The specified cursor does not exist.
 pub fn free_cursor<Conn>(conn: &Conn, cursor: Cursor) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -16111,7 +16233,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the RecolorCursor request
 pub const RECOLOR_CURSOR_REQUEST: u8 = 96;
 pub fn recolor_cursor<Conn>(conn: &Conn, cursor: Cursor, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (20) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -16217,7 +16340,9 @@ impl TryFrom<u32> for QueryShapeOf {
 /// Opcode for the QueryBestSize request
 pub const QUERY_BEST_SIZE_REQUEST: u8 = 97;
 pub fn query_best_size<Conn, A>(conn: &Conn, class: A, drawable: Drawable, width: u16, height: u16) -> Result<Cookie<'_, Conn, QueryBestSizeReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let length: usize = (12) / 4;
     let class = class.into();
@@ -16296,7 +16421,8 @@ pub const QUERY_EXTENSION_REQUEST: u8 = 98;
 /// * xcb_get_extension_data: function
 /// * xdpyinfo: program
 pub fn query_extension<'c, Conn>(conn: &'c Conn, name: &[u8]) -> Result<Cookie<'c, Conn, QueryExtensionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8 + 1 * name.len() + 3) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -16362,7 +16488,8 @@ impl TryFrom<&[u8]> for QueryExtensionReply {
 /// Opcode for the ListExtensions request
 pub const LIST_EXTENSIONS_REQUEST: u8 = 99;
 pub fn list_extensions<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListExtensionsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (4) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -16405,7 +16532,8 @@ impl TryFrom<&[u8]> for ListExtensionsReply {
 /// Opcode for the ChangeKeyboardMapping request
 pub const CHANGE_KEYBOARD_MAPPING_REQUEST: u8 = 100;
 pub fn change_keyboard_mapping<'c, Conn>(conn: &'c Conn, keycode_count: u8, first_keycode: Keycode, keysyms_per_keycode: u8, keysyms: &[Keysym]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8 + 4 * keysyms.len() + 3) / 4;
     let keycode_count_bytes = keycode_count.serialize();
@@ -16435,7 +16563,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetKeyboardMapping request
 pub const GET_KEYBOARD_MAPPING_REQUEST: u8 = 101;
 pub fn get_keyboard_mapping<Conn>(conn: &Conn, first_keycode: Keycode, count: u8) -> Result<Cookie<'_, Conn, GetKeyboardMappingReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -16812,7 +16941,8 @@ impl Serialize for ChangeKeyboardControlAux {
     }
 }
 pub fn change_keyboard_control<'c, Conn>(conn: &'c Conn, value_list: &ChangeKeyboardControlAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
@@ -16840,7 +16970,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetKeyboardControl request
 pub const GET_KEYBOARD_CONTROL_REQUEST: u8 = 103;
 pub fn get_keyboard_control<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetKeyboardControlReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (4) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -16960,7 +17091,8 @@ impl TryFrom<&[u8]> for GetKeyboardControlReply {
 /// Opcode for the Bell request
 pub const BELL_REQUEST: u8 = 104;
 pub fn bell<Conn>(conn: &Conn, percent: i8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (4) / 4;
     let percent_bytes = percent.serialize();
@@ -16979,7 +17111,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the ChangePointerControl request
 pub const CHANGE_POINTER_CONTROL_REQUEST: u8 = 105;
 pub fn change_pointer_control<Conn>(conn: &Conn, acceleration_numerator: i16, acceleration_denominator: i16, threshold: i16, do_acceleration: bool, do_threshold: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (12) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -17010,7 +17143,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetPointerControl request
 pub const GET_POINTER_CONTROL_REQUEST: u8 = 106;
 pub fn get_pointer_control<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPointerControlReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (4) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -17187,7 +17321,10 @@ impl TryFrom<u32> for Exposures {
 /// Opcode for the SetScreenSaver request
 pub const SET_SCREEN_SAVER_REQUEST: u8 = 107;
 pub fn set_screen_saver<Conn, A, B>(conn: &Conn, timeout: i16, interval: i16, prefer_blanking: A, allow_exposures: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
+    B: Into<u8>,
 {
     let length: usize = (12) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -17219,7 +17356,8 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 /// Opcode for the GetScreenSaver request
 pub const GET_SCREEN_SAVER_REQUEST: u8 = 108;
 pub fn get_screen_saver<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetScreenSaverReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (4) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -17403,7 +17541,10 @@ impl TryFrom<u32> for Family {
 /// Opcode for the ChangeHosts request
 pub const CHANGE_HOSTS_REQUEST: u8 = 109;
 pub fn change_hosts<'c, Conn, A, B>(conn: &'c Conn, mode: A, family: B, address: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
+    B: Into<u8>,
 {
     let length: usize = (8 + 1 * address.len() + 3) / 4;
     let mode = mode.into();
@@ -17479,7 +17620,8 @@ impl Serialize for Host {
 /// Opcode for the ListHosts request
 pub const LIST_HOSTS_REQUEST: u8 = 110;
 pub fn list_hosts<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListHostsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (4) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -17587,7 +17729,9 @@ impl TryFrom<u32> for AccessControl {
 /// Opcode for the SetAccessControl request
 pub const SET_ACCESS_CONTROL_REQUEST: u8 = 111;
 pub fn set_access_control<Conn, A>(conn: &Conn, mode: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let length: usize = (4) / 4;
     let mode = mode.into();
@@ -17672,7 +17816,9 @@ impl TryFrom<u32> for CloseDown {
 /// Opcode for the SetCloseDownMode request
 pub const SET_CLOSE_DOWN_MODE_REQUEST: u8 = 112;
 pub fn set_close_down_mode<Conn, A>(conn: &Conn, mode: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let length: usize = (4) / 4;
     let mode = mode.into();
@@ -17770,7 +17916,8 @@ pub const KILL_CLIENT_REQUEST: u8 = 113;
 ///
 /// * xkill: program
 pub fn kill_client<Conn>(conn: &Conn, resource: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (8) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -17793,7 +17940,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the RotateProperties request
 pub const ROTATE_PROPERTIES_REQUEST: u8 = 114;
 pub fn rotate_properties<'c, Conn>(conn: &'c Conn, window: Window, delta: i16, atoms: &[Atom]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (12 + 4 * atoms.len() + 3) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -17889,7 +18037,9 @@ impl TryFrom<u32> for ScreenSaver {
 /// Opcode for the ForceScreenSaver request
 pub const FORCE_SCREEN_SAVER_REQUEST: u8 = 115;
 pub fn force_screen_saver<Conn, A>(conn: &Conn, mode: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let length: usize = (4) / 4;
     let mode = mode.into();
@@ -17974,7 +18124,8 @@ impl TryFrom<u32> for MappingStatus {
 /// Opcode for the SetPointerMapping request
 pub const SET_POINTER_MAPPING_REQUEST: u8 = 116;
 pub fn set_pointer_mapping<'c, Conn>(conn: &'c Conn, map: &[u8]) -> Result<Cookie<'c, Conn, SetPointerMappingReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (4 + 1 * map.len() + 3) / 4;
     let map_len: u8 = map.len().try_into()?;
@@ -18021,7 +18172,8 @@ impl TryFrom<&[u8]> for SetPointerMappingReply {
 /// Opcode for the GetPointerMapping request
 pub const GET_POINTER_MAPPING_REQUEST: u8 = 117;
 pub fn get_pointer_mapping<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPointerMappingReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (4) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -18144,7 +18296,8 @@ impl TryFrom<u32> for MapIndex {
 /// Opcode for the SetModifierMapping request
 pub const SET_MODIFIER_MAPPING_REQUEST: u8 = 118;
 pub fn set_modifier_mapping<'c, Conn>(conn: &'c Conn, keycodes: &[Keycode]) -> Result<Cookie<'c, Conn, SetModifierMappingReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (4 + 1 * keycodes.len() + 3) / 4;
     assert_eq!(0, keycodes.len() % 8, "Argument keycodes_per_modifier has an incorrect length, must be a multiple of 8");
@@ -18192,7 +18345,8 @@ impl TryFrom<&[u8]> for SetModifierMappingReply {
 /// Opcode for the GetModifierMapping request
 pub const GET_MODIFIER_MAPPING_REQUEST: u8 = 119;
 pub fn get_modifier_mapping<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetModifierMappingReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (4) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -18235,7 +18389,8 @@ impl TryFrom<&[u8]> for GetModifierMappingReply {
 /// Opcode for the NoOperation request
 pub const NO_OPERATION_REQUEST: u8 = 127;
 pub fn no_operation<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let length: usize = (4) / 4;
     let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
@@ -18306,7 +18461,8 @@ pub trait ConnectionExt: RequestConnection {
     /// * MapWindow: request
     /// * xcb_generate_id: function
     fn create_window<'c, A>(&'c self, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, visual: Visualid, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u16>
+    where
+        A: Into<u16>,
     {
         create_window(self, depth, wid, parent, x, y, width, height, border_width, class, visual, value_list)
     }
@@ -18408,7 +18564,8 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * ReparentWindow: request
     fn change_save_set<A>(&self, mode: A, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         change_save_set(self, mode, window)
     }
@@ -18598,7 +18755,8 @@ pub trait ConnectionExt: RequestConnection {
     /// * `Value` - The specified `direction` is invalid.
     /// * `Window` - The specified `window` does not exist.
     fn circulate_window<A>(&self, direction: A, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         circulate_window(self, direction, window)
     }
@@ -18792,7 +18950,10 @@ pub trait ConnectionExt: RequestConnection {
     /// }
     /// ```
     fn change_property<'c, A, B, C>(&'c self, mode: A, window: Window, property: B, type_: C, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>, B: Into<Atom>, C: Into<Atom>
+    where
+        A: Into<u8>,
+        B: Into<Atom>,
+        C: Into<Atom>,
     {
         change_property(self, mode, window, property, type_, format, data_len, data)
     }
@@ -19015,7 +19176,8 @@ pub trait ConnectionExt: RequestConnection {
     /// }
     /// ```
     fn send_event<A>(&self, propagate: bool, destination: Window, event_mask: u32, event: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<[u8; 32]>
+    where
+        A: Into<[u8; 32]>,
     {
         send_event(self, propagate, destination, event_mask, event)
     }
@@ -19090,7 +19252,9 @@ pub trait ConnectionExt: RequestConnection {
     /// }
     /// ```
     fn grab_pointer<A, B>(&self, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: A, keyboard_mode: B, confine_to: Window, cursor: Cursor, time: Timestamp) -> Result<Cookie<'_, Self, GrabPointerReply>, ConnectionError>
-    where A: Into<u8>, B: Into<u8>
+    where
+        A: Into<u8>,
+        B: Into<u8>,
     {
         grab_pointer(self, owner_events, grab_window, event_mask, pointer_mode, keyboard_mode, confine_to, cursor, time)
     }
@@ -19188,13 +19352,17 @@ pub trait ConnectionExt: RequestConnection {
     /// * `Value` - TODO: reasons?
     /// * `Window` - The specified `window` does not exist.
     fn grab_button<A, B, C>(&self, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: A, keyboard_mode: B, confine_to: Window, cursor: Cursor, button: C, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>, B: Into<u8>, C: Into<u8>
+    where
+        A: Into<u8>,
+        B: Into<u8>,
+        C: Into<u8>,
     {
         grab_button(self, owner_events, grab_window, event_mask, pointer_mode, keyboard_mode, confine_to, cursor, button, modifiers)
     }
 
     fn ungrab_button<A>(&self, button: A, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         ungrab_button(self, button, grab_window, modifiers)
     }
@@ -19265,7 +19433,9 @@ pub trait ConnectionExt: RequestConnection {
     /// }
     /// ```
     fn grab_keyboard<A, B>(&self, owner_events: bool, grab_window: Window, time: Timestamp, pointer_mode: A, keyboard_mode: B) -> Result<Cookie<'_, Self, GrabKeyboardReply>, ConnectionError>
-    where A: Into<u8>, B: Into<u8>
+    where
+        A: Into<u8>,
+        B: Into<u8>,
     {
         grab_keyboard(self, owner_events, grab_window, time, pointer_mode, keyboard_mode)
     }
@@ -19334,7 +19504,9 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * GrabKeyboard: request
     fn grab_key<A, B>(&self, owner_events: bool, grab_window: Window, modifiers: u16, key: Keycode, pointer_mode: A, keyboard_mode: B) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>, B: Into<u8>
+    where
+        A: Into<u8>,
+        B: Into<u8>,
     {
         grab_key(self, owner_events, grab_window, modifiers, key, pointer_mode, keyboard_mode)
     }
@@ -19387,7 +19559,8 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `Value` - You specified an invalid `mode`.
     fn allow_events<A>(&self, mode: A, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         allow_events(self, mode, time)
     }
@@ -19503,7 +19676,8 @@ pub trait ConnectionExt: RequestConnection {
     /// * FocusIn: event
     /// * FocusOut: event
     fn set_input_focus<A>(&self, revert_to: A, focus: Window, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         set_input_focus(self, revert_to, focus, time)
     }
@@ -19778,7 +19952,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn set_clip_rectangles<'c, A>(&'c self, ordering: A, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         set_clip_rectangles(self, ordering, gc, clip_x_origin, clip_y_origin, rectangles)
     }
@@ -19836,7 +20011,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn poly_point<'c, A>(&'c self, coordinate_mode: A, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         poly_point(self, coordinate_mode, drawable, gc, points)
     }
@@ -19880,7 +20056,8 @@ pub trait ConnectionExt: RequestConnection {
     /// }
     /// ```
     fn poly_line<'c, A>(&'c self, coordinate_mode: A, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         poly_line(self, coordinate_mode, drawable, gc, points)
     }
@@ -19927,7 +20104,9 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn fill_poly<'c, A, B>(&'c self, drawable: Drawable, gc: Gcontext, shape: A, coordinate_mode: B, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>, B: Into<u8>
+    where
+        A: Into<u8>,
+        B: Into<u8>,
     {
         fill_poly(self, drawable, gc, shape, coordinate_mode, points)
     }
@@ -19968,13 +20147,15 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn put_image<'c, A>(&'c self, format: A, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         put_image(self, format, drawable, gc, width, height, dst_x, dst_y, left_pad, depth, data)
     }
 
     fn get_image<A>(&self, format: A, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32) -> Result<Cookie<'_, Self, GetImageReply>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         get_image(self, format, drawable, x, y, width, height, plane_mask)
     }
@@ -20069,7 +20250,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn create_colormap<A>(&self, alloc: A, mid: Colormap, window: Window, visual: Visualid) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         create_colormap(self, alloc, mid, window, visual)
     }
@@ -20228,7 +20410,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn query_best_size<A>(&self, class: A, drawable: Drawable, width: u16, height: u16) -> Result<Cookie<'_, Self, QueryBestSizeReply>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         query_best_size(self, class, drawable, width, height)
     }
@@ -20301,7 +20484,9 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn set_screen_saver<A, B>(&self, timeout: i16, interval: i16, prefer_blanking: A, allow_exposures: B) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>, B: Into<u8>
+    where
+        A: Into<u8>,
+        B: Into<u8>,
     {
         set_screen_saver(self, timeout, interval, prefer_blanking, allow_exposures)
     }
@@ -20312,7 +20497,9 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn change_hosts<'c, A, B>(&'c self, mode: A, family: B, address: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>, B: Into<u8>
+    where
+        A: Into<u8>,
+        B: Into<u8>,
     {
         change_hosts(self, mode, family, address)
     }
@@ -20323,13 +20510,15 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn set_access_control<A>(&self, mode: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         set_access_control(self, mode)
     }
 
     fn set_close_down_mode<A>(&self, mode: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         set_close_down_mode(self, mode)
     }
@@ -20364,7 +20553,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn force_screen_saver<A>(&self, mode: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         force_screen_saver(self, mode)
     }

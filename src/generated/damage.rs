@@ -168,7 +168,8 @@ impl From<BadDamageError> for [u8; 32] {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 pub fn query_version<Conn>(conn: &Conn, client_major_version: u32, client_minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -225,7 +226,9 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 /// Opcode for the Create request
 pub const CREATE_REQUEST: u8 = 1;
 pub fn create<Conn, A>(conn: &Conn, damage: Damage, drawable: xproto::Drawable, level: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -261,7 +264,8 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 /// Opcode for the Destroy request
 pub const DESTROY_REQUEST: u8 = 2;
 pub fn destroy<Conn>(conn: &Conn, damage: Damage) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -286,7 +290,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the Subtract request
 pub const SUBTRACT_REQUEST: u8 = 3;
 pub fn subtract<Conn>(conn: &Conn, damage: Damage, repair: xfixes::Region, parts: xfixes::Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -321,7 +326,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the Add request
 pub const ADD_REQUEST: u8 = 4;
 pub fn add<Conn>(conn: &Conn, drawable: xproto::Drawable, region: xfixes::Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -426,7 +432,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn damage_create<A>(&self, damage: Damage, drawable: xproto::Drawable, level: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         create(self, damage, drawable, level)
     }

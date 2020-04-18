@@ -40,7 +40,8 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 0);
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 pub fn query_version<Conn>(conn: &Conn, client_major: u8, client_minor: u8) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -92,7 +93,8 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 /// Opcode for the SetDeviceCreateContext request
 pub const SET_DEVICE_CREATE_CONTEXT_REQUEST: u8 = 1;
 pub fn set_device_create_context<'c, Conn>(conn: &'c Conn, context: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -121,7 +123,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetDeviceCreateContext request
 pub const GET_DEVICE_CREATE_CONTEXT_REQUEST: u8 = 2;
 pub fn get_device_create_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetDeviceCreateContextReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -167,7 +170,8 @@ impl TryFrom<&[u8]> for GetDeviceCreateContextReply {
 /// Opcode for the SetDeviceContext request
 pub const SET_DEVICE_CONTEXT_REQUEST: u8 = 3;
 pub fn set_device_context<'c, Conn>(conn: &'c Conn, device: u32, context: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -201,7 +205,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetDeviceContext request
 pub const GET_DEVICE_CONTEXT_REQUEST: u8 = 4;
 pub fn get_device_context<Conn>(conn: &Conn, device: u32) -> Result<Cookie<'_, Conn, GetDeviceContextReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -252,7 +257,8 @@ impl TryFrom<&[u8]> for GetDeviceContextReply {
 /// Opcode for the SetWindowCreateContext request
 pub const SET_WINDOW_CREATE_CONTEXT_REQUEST: u8 = 5;
 pub fn set_window_create_context<'c, Conn>(conn: &'c Conn, context: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -281,7 +287,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetWindowCreateContext request
 pub const GET_WINDOW_CREATE_CONTEXT_REQUEST: u8 = 6;
 pub fn get_window_create_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetWindowCreateContextReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -327,7 +334,8 @@ impl TryFrom<&[u8]> for GetWindowCreateContextReply {
 /// Opcode for the GetWindowContext request
 pub const GET_WINDOW_CONTEXT_REQUEST: u8 = 7;
 pub fn get_window_context<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetWindowContextReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -431,7 +439,8 @@ impl Serialize for ListItem {
 /// Opcode for the SetPropertyCreateContext request
 pub const SET_PROPERTY_CREATE_CONTEXT_REQUEST: u8 = 8;
 pub fn set_property_create_context<'c, Conn>(conn: &'c Conn, context: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -460,7 +469,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetPropertyCreateContext request
 pub const GET_PROPERTY_CREATE_CONTEXT_REQUEST: u8 = 9;
 pub fn get_property_create_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPropertyCreateContextReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -506,7 +516,8 @@ impl TryFrom<&[u8]> for GetPropertyCreateContextReply {
 /// Opcode for the SetPropertyUseContext request
 pub const SET_PROPERTY_USE_CONTEXT_REQUEST: u8 = 10;
 pub fn set_property_use_context<'c, Conn>(conn: &'c Conn, context: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -535,7 +546,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetPropertyUseContext request
 pub const GET_PROPERTY_USE_CONTEXT_REQUEST: u8 = 11;
 pub fn get_property_use_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPropertyUseContextReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -581,7 +593,8 @@ impl TryFrom<&[u8]> for GetPropertyUseContextReply {
 /// Opcode for the GetPropertyContext request
 pub const GET_PROPERTY_CONTEXT_REQUEST: u8 = 12;
 pub fn get_property_context<Conn>(conn: &Conn, window: xproto::Window, property: xproto::Atom) -> Result<Cookie<'_, Conn, GetPropertyContextReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -637,7 +650,8 @@ impl TryFrom<&[u8]> for GetPropertyContextReply {
 /// Opcode for the GetPropertyDataContext request
 pub const GET_PROPERTY_DATA_CONTEXT_REQUEST: u8 = 13;
 pub fn get_property_data_context<Conn>(conn: &Conn, window: xproto::Window, property: xproto::Atom) -> Result<Cookie<'_, Conn, GetPropertyDataContextReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -693,7 +707,8 @@ impl TryFrom<&[u8]> for GetPropertyDataContextReply {
 /// Opcode for the ListProperties request
 pub const LIST_PROPERTIES_REQUEST: u8 = 14;
 pub fn list_properties<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, ListPropertiesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -744,7 +759,8 @@ impl TryFrom<&[u8]> for ListPropertiesReply {
 /// Opcode for the SetSelectionCreateContext request
 pub const SET_SELECTION_CREATE_CONTEXT_REQUEST: u8 = 15;
 pub fn set_selection_create_context<'c, Conn>(conn: &'c Conn, context: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -773,7 +789,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetSelectionCreateContext request
 pub const GET_SELECTION_CREATE_CONTEXT_REQUEST: u8 = 16;
 pub fn get_selection_create_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetSelectionCreateContextReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -819,7 +836,8 @@ impl TryFrom<&[u8]> for GetSelectionCreateContextReply {
 /// Opcode for the SetSelectionUseContext request
 pub const SET_SELECTION_USE_CONTEXT_REQUEST: u8 = 17;
 pub fn set_selection_use_context<'c, Conn>(conn: &'c Conn, context: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -848,7 +866,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetSelectionUseContext request
 pub const GET_SELECTION_USE_CONTEXT_REQUEST: u8 = 18;
 pub fn get_selection_use_context<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetSelectionUseContextReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -894,7 +913,8 @@ impl TryFrom<&[u8]> for GetSelectionUseContextReply {
 /// Opcode for the GetSelectionContext request
 pub const GET_SELECTION_CONTEXT_REQUEST: u8 = 19;
 pub fn get_selection_context<Conn>(conn: &Conn, selection: xproto::Atom) -> Result<Cookie<'_, Conn, GetSelectionContextReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -945,7 +965,8 @@ impl TryFrom<&[u8]> for GetSelectionContextReply {
 /// Opcode for the GetSelectionDataContext request
 pub const GET_SELECTION_DATA_CONTEXT_REQUEST: u8 = 20;
 pub fn get_selection_data_context<Conn>(conn: &Conn, selection: xproto::Atom) -> Result<Cookie<'_, Conn, GetSelectionDataContextReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -996,7 +1017,8 @@ impl TryFrom<&[u8]> for GetSelectionDataContextReply {
 /// Opcode for the ListSelections request
 pub const LIST_SELECTIONS_REQUEST: u8 = 21;
 pub fn list_selections<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListSelectionsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1042,7 +1064,8 @@ impl TryFrom<&[u8]> for ListSelectionsReply {
 /// Opcode for the GetClientContext request
 pub const GET_CLIENT_CONTEXT_REQUEST: u8 = 22;
 pub fn get_client_context<Conn>(conn: &Conn, resource: u32) -> Result<Cookie<'_, Conn, GetClientContextReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;

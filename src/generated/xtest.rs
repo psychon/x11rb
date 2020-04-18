@@ -40,7 +40,8 @@ pub const X11_XML_VERSION: (u32, u32) = (2, 2);
 /// Opcode for the GetVersion request
 pub const GET_VERSION_REQUEST: u8 = 0;
 pub fn get_version<Conn>(conn: &Conn, major_version: u8, minor_version: u16) -> Result<Cookie<'_, Conn, GetVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -153,7 +154,8 @@ impl TryFrom<u32> for Cursor {
 /// Opcode for the CompareCursor request
 pub const COMPARE_CURSOR_REQUEST: u8 = 1;
 pub fn compare_cursor<Conn>(conn: &Conn, window: xproto::Window, cursor: xproto::Cursor) -> Result<Cookie<'_, Conn, CompareCursorReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -206,7 +208,8 @@ impl TryFrom<&[u8]> for CompareCursorReply {
 /// Opcode for the FakeInput request
 pub const FAKE_INPUT_REQUEST: u8 = 2;
 pub fn fake_input<Conn>(conn: &Conn, type_: u8, detail: u8, time: u32, root: xproto::Window, root_x: i16, root_y: i16, deviceid: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -265,7 +268,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GrabControl request
 pub const GRAB_CONTROL_REQUEST: u8 = 3;
 pub fn grab_control<Conn>(conn: &Conn, impervious: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;

@@ -44,7 +44,8 @@ pub const X11_XML_VERSION: (u32, u32) = (5, 0);
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 pub fn query_version<Conn>(conn: &Conn, client_major_version: u32, client_minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -287,7 +288,11 @@ impl TryFrom<u32> for SaveSetMapping {
 /// Opcode for the ChangeSaveSet request
 pub const CHANGE_SAVE_SET_REQUEST: u8 = 1;
 pub fn change_save_set<Conn, A, B, C>(conn: &Conn, mode: A, target: B, map: C, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>, C: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
+    B: Into<u8>,
+    C: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -524,7 +529,8 @@ impl From<SelectionNotifyEvent> for [u8; 32] {
 /// Opcode for the SelectSelectionInput request
 pub const SELECT_SELECTION_INPUT_REQUEST: u8 = 2;
 pub fn select_selection_input<Conn>(conn: &Conn, window: xproto::Window, selection: xproto::Atom, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -746,7 +752,8 @@ impl From<CursorNotifyEvent> for [u8; 32] {
 /// Opcode for the SelectCursorInput request
 pub const SELECT_CURSOR_INPUT_REQUEST: u8 = 3;
 pub fn select_cursor_input<Conn>(conn: &Conn, window: xproto::Window, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -776,7 +783,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetCursorImage request
 pub const GET_CURSOR_IMAGE_REQUEST: u8 = 4;
 pub fn get_cursor_image<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetCursorImageReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -948,7 +956,8 @@ impl TryFrom<u32> for RegionEnum {
 /// Opcode for the CreateRegion request
 pub const CREATE_REGION_REQUEST: u8 = 5;
 pub fn create_region<'c, Conn>(conn: &'c Conn, region: Region, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -977,7 +986,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the CreateRegionFromBitmap request
 pub const CREATE_REGION_FROM_BITMAP_REQUEST: u8 = 6;
 pub fn create_region_from_bitmap<Conn>(conn: &Conn, region: Region, bitmap: xproto::Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1007,7 +1017,9 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the CreateRegionFromWindow request
 pub const CREATE_REGION_FROM_WINDOW_REQUEST: u8 = 7;
 pub fn create_region_from_window<Conn, A>(conn: &Conn, region: Region, window: xproto::Window, kind: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<shape::Kind>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<shape::Kind>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1043,7 +1055,8 @@ where Conn: RequestConnection + ?Sized, A: Into<shape::Kind>
 /// Opcode for the CreateRegionFromGC request
 pub const CREATE_REGION_FROM_GC_REQUEST: u8 = 8;
 pub fn create_region_from_gc<Conn>(conn: &Conn, region: Region, gc: xproto::Gcontext) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1073,7 +1086,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the CreateRegionFromPicture request
 pub const CREATE_REGION_FROM_PICTURE_REQUEST: u8 = 9;
 pub fn create_region_from_picture<Conn>(conn: &Conn, region: Region, picture: render::Picture) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1103,7 +1117,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the DestroyRegion request
 pub const DESTROY_REGION_REQUEST: u8 = 10;
 pub fn destroy_region<Conn>(conn: &Conn, region: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1128,7 +1143,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the SetRegion request
 pub const SET_REGION_REQUEST: u8 = 11;
 pub fn set_region<'c, Conn>(conn: &'c Conn, region: Region, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1157,7 +1173,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the CopyRegion request
 pub const COPY_REGION_REQUEST: u8 = 12;
 pub fn copy_region<Conn>(conn: &Conn, source: Region, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1187,7 +1204,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the UnionRegion request
 pub const UNION_REGION_REQUEST: u8 = 13;
 pub fn union_region<Conn>(conn: &Conn, source1: Region, source2: Region, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1222,7 +1240,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the IntersectRegion request
 pub const INTERSECT_REGION_REQUEST: u8 = 14;
 pub fn intersect_region<Conn>(conn: &Conn, source1: Region, source2: Region, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1257,7 +1276,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the SubtractRegion request
 pub const SUBTRACT_REGION_REQUEST: u8 = 15;
 pub fn subtract_region<Conn>(conn: &Conn, source1: Region, source2: Region, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1292,7 +1312,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the InvertRegion request
 pub const INVERT_REGION_REQUEST: u8 = 16;
 pub fn invert_region<Conn>(conn: &Conn, source: Region, bounds: xproto::Rectangle, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1331,7 +1352,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the TranslateRegion request
 pub const TRANSLATE_REGION_REQUEST: u8 = 17;
 pub fn translate_region<Conn>(conn: &Conn, region: Region, dx: i16, dy: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1362,7 +1384,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the RegionExtents request
 pub const REGION_EXTENTS_REQUEST: u8 = 18;
 pub fn region_extents<Conn>(conn: &Conn, source: Region, destination: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1392,7 +1415,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the FetchRegion request
 pub const FETCH_REGION_REQUEST: u8 = 19;
 pub fn fetch_region<Conn>(conn: &Conn, region: Region) -> Result<Cookie<'_, Conn, FetchRegionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1443,7 +1467,8 @@ impl TryFrom<&[u8]> for FetchRegionReply {
 /// Opcode for the SetGCClipRegion request
 pub const SET_GC_CLIP_REGION_REQUEST: u8 = 20;
 pub fn set_gc_clip_region<Conn>(conn: &Conn, gc: xproto::Gcontext, region: Region, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1479,7 +1504,9 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the SetWindowShapeRegion request
 pub const SET_WINDOW_SHAPE_REGION_REQUEST: u8 = 21;
 pub fn set_window_shape_region<Conn, A>(conn: &Conn, dest: xproto::Window, dest_kind: A, x_offset: i16, y_offset: i16, region: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<shape::Kind>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<shape::Kind>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1521,7 +1548,8 @@ where Conn: RequestConnection + ?Sized, A: Into<shape::Kind>
 /// Opcode for the SetPictureClipRegion request
 pub const SET_PICTURE_CLIP_REGION_REQUEST: u8 = 22;
 pub fn set_picture_clip_region<Conn>(conn: &Conn, picture: render::Picture, region: Region, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1557,7 +1585,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the SetCursorName request
 pub const SET_CURSOR_NAME_REQUEST: u8 = 23;
 pub fn set_cursor_name<'c, Conn>(conn: &'c Conn, cursor: xproto::Cursor, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1591,7 +1620,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetCursorName request
 pub const GET_CURSOR_NAME_REQUEST: u8 = 24;
 pub fn get_cursor_name<Conn>(conn: &Conn, cursor: xproto::Cursor) -> Result<Cookie<'_, Conn, GetCursorNameReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1644,7 +1674,8 @@ impl TryFrom<&[u8]> for GetCursorNameReply {
 /// Opcode for the GetCursorImageAndName request
 pub const GET_CURSOR_IMAGE_AND_NAME_REQUEST: u8 = 25;
 pub fn get_cursor_image_and_name<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetCursorImageAndNameReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1708,7 +1739,8 @@ impl TryFrom<&[u8]> for GetCursorImageAndNameReply {
 /// Opcode for the ChangeCursor request
 pub const CHANGE_CURSOR_REQUEST: u8 = 26;
 pub fn change_cursor<Conn>(conn: &Conn, source: xproto::Cursor, destination: xproto::Cursor) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1738,7 +1770,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the ChangeCursorByName request
 pub const CHANGE_CURSOR_BY_NAME_REQUEST: u8 = 27;
 pub fn change_cursor_by_name<'c, Conn>(conn: &'c Conn, src: xproto::Cursor, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1772,7 +1805,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the ExpandRegion request
 pub const EXPAND_REGION_REQUEST: u8 = 28;
 pub fn expand_region<Conn>(conn: &Conn, source: Region, destination: Region, left: u16, right: u16, top: u16, bottom: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1814,7 +1848,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the HideCursor request
 pub const HIDE_CURSOR_REQUEST: u8 = 29;
 pub fn hide_cursor<Conn>(conn: &Conn, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1839,7 +1874,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the ShowCursor request
 pub const SHOW_CURSOR_REQUEST: u8 = 30;
 pub fn show_cursor<Conn>(conn: &Conn, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1935,7 +1971,8 @@ bitmask_binop!(BarrierDirections, u8);
 /// Opcode for the CreatePointerBarrier request
 pub const CREATE_POINTER_BARRIER_REQUEST: u8 = 31;
 pub fn create_pointer_barrier<'c, Conn>(conn: &'c Conn, barrier: Barrier, window: xproto::Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: u32, devices: &[u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1992,7 +2029,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the DeletePointerBarrier request
 pub const DELETE_POINTER_BARRIER_REQUEST: u8 = 32;
 pub fn delete_pointer_barrier<Conn>(conn: &Conn, barrier: Barrier) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2022,7 +2060,10 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xfixes_change_save_set<A, B, C>(&self, mode: A, target: B, map: C, window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>, B: Into<u8>, C: Into<u8>
+    where
+        A: Into<u8>,
+        B: Into<u8>,
+        C: Into<u8>,
     {
         change_save_set(self, mode, target, map, window)
     }
@@ -2053,7 +2094,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xfixes_create_region_from_window<A>(&self, region: Region, window: xproto::Window, kind: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<shape::Kind>
+    where
+        A: Into<shape::Kind>,
     {
         create_region_from_window(self, region, window, kind)
     }
@@ -2124,7 +2166,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xfixes_set_window_shape_region<A>(&self, dest: xproto::Window, dest_kind: A, x_offset: i16, y_offset: i16, region: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<shape::Kind>
+    where
+        A: Into<shape::Kind>,
     {
         set_window_shape_region(self, dest, dest_kind, x_offset, y_offset, region)
     }

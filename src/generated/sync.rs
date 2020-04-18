@@ -651,7 +651,8 @@ impl From<AlarmError> for [u8; 32] {
 /// Opcode for the Initialize request
 pub const INITIALIZE_REQUEST: u8 = 0;
 pub fn initialize<Conn>(conn: &Conn, desired_major_version: u8, desired_minor_version: u8) -> Result<Cookie<'_, Conn, InitializeReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -704,7 +705,8 @@ impl TryFrom<&[u8]> for InitializeReply {
 /// Opcode for the ListSystemCounters request
 pub const LIST_SYSTEM_COUNTERS_REQUEST: u8 = 1;
 pub fn list_system_counters<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListSystemCountersReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -750,7 +752,8 @@ impl TryFrom<&[u8]> for ListSystemCountersReply {
 /// Opcode for the CreateCounter request
 pub const CREATE_COUNTER_REQUEST: u8 = 2;
 pub fn create_counter<Conn>(conn: &Conn, id: Counter, initial_value: Int64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -784,7 +787,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the DestroyCounter request
 pub const DESTROY_COUNTER_REQUEST: u8 = 6;
 pub fn destroy_counter<Conn>(conn: &Conn, counter: Counter) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -809,7 +813,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the QueryCounter request
 pub const QUERY_COUNTER_REQUEST: u8 = 5;
 pub fn query_counter<Conn>(conn: &Conn, counter: Counter) -> Result<Cookie<'_, Conn, QueryCounterReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -858,7 +863,8 @@ impl TryFrom<&[u8]> for QueryCounterReply {
 /// Opcode for the Await request
 pub const AWAIT_REQUEST: u8 = 7;
 pub fn await_<'c, Conn>(conn: &'c Conn, wait_list: &[Waitcondition]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -882,7 +888,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the ChangeCounter request
 pub const CHANGE_COUNTER_REQUEST: u8 = 4;
 pub fn change_counter<Conn>(conn: &Conn, counter: Counter, amount: Int64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -916,7 +923,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the SetCounter request
 pub const SET_COUNTER_REQUEST: u8 = 3;
 pub fn set_counter<Conn>(conn: &Conn, counter: Counter, value: Int64) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1046,7 +1054,8 @@ impl Serialize for CreateAlarmAux {
     }
 }
 pub fn create_alarm<'c, Conn>(conn: &'c Conn, id: Alarm, value_list: &CreateAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1177,7 +1186,8 @@ impl Serialize for ChangeAlarmAux {
     }
 }
 pub fn change_alarm<'c, Conn>(conn: &'c Conn, id: Alarm, value_list: &ChangeAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1212,7 +1222,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the DestroyAlarm request
 pub const DESTROY_ALARM_REQUEST: u8 = 11;
 pub fn destroy_alarm<Conn>(conn: &Conn, alarm: Alarm) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1237,7 +1248,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the QueryAlarm request
 pub const QUERY_ALARM_REQUEST: u8 = 10;
 pub fn query_alarm<Conn>(conn: &Conn, alarm: Alarm) -> Result<Cookie<'_, Conn, QueryAlarmReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1294,7 +1306,8 @@ impl TryFrom<&[u8]> for QueryAlarmReply {
 /// Opcode for the SetPriority request
 pub const SET_PRIORITY_REQUEST: u8 = 12;
 pub fn set_priority<Conn>(conn: &Conn, id: u32, priority: i32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1324,7 +1337,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetPriority request
 pub const GET_PRIORITY_REQUEST: u8 = 13;
 pub fn get_priority<Conn>(conn: &Conn, id: u32) -> Result<Cookie<'_, Conn, GetPriorityReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1373,7 +1387,8 @@ impl TryFrom<&[u8]> for GetPriorityReply {
 /// Opcode for the CreateFence request
 pub const CREATE_FENCE_REQUEST: u8 = 14;
 pub fn create_fence<Conn>(conn: &Conn, drawable: xproto::Drawable, fence: Fence, initially_triggered: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1408,7 +1423,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the TriggerFence request
 pub const TRIGGER_FENCE_REQUEST: u8 = 15;
 pub fn trigger_fence<Conn>(conn: &Conn, fence: Fence) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1433,7 +1449,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the ResetFence request
 pub const RESET_FENCE_REQUEST: u8 = 16;
 pub fn reset_fence<Conn>(conn: &Conn, fence: Fence) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1458,7 +1475,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the DestroyFence request
 pub const DESTROY_FENCE_REQUEST: u8 = 17;
 pub fn destroy_fence<Conn>(conn: &Conn, fence: Fence) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1483,7 +1501,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the QueryFence request
 pub const QUERY_FENCE_REQUEST: u8 = 18;
 pub fn query_fence<Conn>(conn: &Conn, fence: Fence) -> Result<Cookie<'_, Conn, QueryFenceReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1533,7 +1552,8 @@ impl TryFrom<&[u8]> for QueryFenceReply {
 /// Opcode for the AwaitFence request
 pub const AWAIT_FENCE_REQUEST: u8 = 19;
 pub fn await_fence<'c, Conn>(conn: &'c Conn, fence_list: &[Fence]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;

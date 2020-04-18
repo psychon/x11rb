@@ -38,7 +38,8 @@ pub const X11_XML_VERSION: (u32, u32) = (0, 0);
 /// Opcode for the GetVersion request
 pub const GET_VERSION_REQUEST: u8 = 0;
 pub fn get_version<Conn>(conn: &Conn, client_major_version: u16, client_minor_version: u16) -> Result<Cookie<'_, Conn, GetVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -90,7 +91,8 @@ impl TryFrom<&[u8]> for GetVersionReply {
 /// Opcode for the Capable request
 pub const CAPABLE_REQUEST: u8 = 1;
 pub fn capable<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, CapableReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -135,7 +137,8 @@ impl TryFrom<&[u8]> for CapableReply {
 /// Opcode for the GetTimeouts request
 pub const GET_TIMEOUTS_REQUEST: u8 = 2;
 pub fn get_timeouts<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetTimeoutsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -184,7 +187,8 @@ impl TryFrom<&[u8]> for GetTimeoutsReply {
 /// Opcode for the SetTimeouts request
 pub const SET_TIMEOUTS_REQUEST: u8 = 3;
 pub fn set_timeouts<Conn>(conn: &Conn, standby_timeout: u16, suspend_timeout: u16, off_timeout: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -215,7 +219,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the Enable request
 pub const ENABLE_REQUEST: u8 = 4;
 pub fn enable<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -235,7 +240,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the Disable request
 pub const DISABLE_REQUEST: u8 = 5;
 pub fn disable<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -323,7 +329,9 @@ impl TryFrom<u32> for DPMSMode {
 /// Opcode for the ForceLevel request
 pub const FORCE_LEVEL_REQUEST: u8 = 6;
 pub fn force_level<Conn, A>(conn: &Conn, power_level: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u16>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u16>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -349,7 +357,8 @@ where Conn: RequestConnection + ?Sized, A: Into<u16>
 /// Opcode for the Info request
 pub const INFO_REQUEST: u8 = 7;
 pub fn info<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, InfoReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -427,7 +436,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn dpms_force_level<A>(&self, power_level: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u16>
+    where
+        A: Into<u16>,
     {
         force_level(self, power_level)
     }

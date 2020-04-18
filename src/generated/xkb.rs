@@ -6585,7 +6585,8 @@ impl From<u8> for Action {
 /// Opcode for the UseExtension request
 pub const USE_EXTENSION_REQUEST: u8 = 0;
 pub fn use_extension<Conn>(conn: &Conn, wanted_major: u16, wanted_minor: u16) -> Result<Cookie<'_, Conn, UseExtensionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -7054,7 +7055,8 @@ impl Serialize for SelectEventsAux {
     }
 }
 pub fn select_events<'c, Conn>(conn: &'c Conn, device_spec: DeviceSpec, affect_which: u16, clear: u16, select_all: u16, affect_map: u16, map: u16, details: &SelectEventsAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -7098,7 +7100,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the Bell request
 pub const BELL_REQUEST: u8 = 3;
 pub fn bell<Conn>(conn: &Conn, device_spec: DeviceSpec, bell_class: BellClassSpec, bell_id: IDSpec, percent: i8, force_sound: bool, event_only: bool, pitch: i16, duration: i16, name: xproto::Atom, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -7152,7 +7155,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetState request
 pub const GET_STATE_REQUEST: u8 = 4;
 pub fn get_state<Conn>(conn: &Conn, device_spec: DeviceSpec) -> Result<Cookie<'_, Conn, GetStateReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -7232,7 +7236,9 @@ impl TryFrom<&[u8]> for GetStateReply {
 /// Opcode for the LatchLockState request
 pub const LATCH_LOCK_STATE_REQUEST: u8 = 5;
 pub fn latch_lock_state<Conn, A>(conn: &Conn, device_spec: DeviceSpec, affect_mod_locks: u8, mod_locks: u8, lock_group: bool, group_lock: A, affect_mod_latches: u8, latch_group: bool, group_latch: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -7273,7 +7279,8 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 /// Opcode for the GetControls request
 pub const GET_CONTROLS_REQUEST: u8 = 6;
 pub fn get_controls<Conn>(conn: &Conn, device_spec: DeviceSpec) -> Result<Cookie<'_, Conn, GetControlsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -7440,7 +7447,8 @@ impl TryFrom<&[u8]> for GetControlsReply {
 /// Opcode for the SetControls request
 pub const SET_CONTROLS_REQUEST: u8 = 7;
 pub fn set_controls<'c, Conn>(conn: &'c Conn, device_spec: DeviceSpec, affect_internal_real_mods: u8, internal_real_mods: u8, affect_ignore_lock_real_mods: u8, ignore_lock_real_mods: u8, affect_internal_virtual_mods: u16, internal_virtual_mods: u16, affect_ignore_lock_virtual_mods: u16, ignore_lock_virtual_mods: u16, mouse_keys_dflt_btn: u8, groups_wrap: u8, access_x_options: u16, affect_enabled_controls: u32, enabled_controls: u32, change_controls: u32, repeat_delay: u16, repeat_interval: u16, slow_keys_delay: u16, debounce_delay: u16, mouse_keys_delay: u16, mouse_keys_interval: u16, mouse_keys_time_to_max: u16, mouse_keys_max_speed: u16, mouse_keys_curve: i16, access_x_timeout: u16, access_x_timeout_mask: u32, access_x_timeout_values: u32, access_x_timeout_options_mask: u16, access_x_timeout_options_values: u16, per_key_repeat: &[u8; 32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -7554,7 +7562,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetMap request
 pub const GET_MAP_REQUEST: u8 = 8;
 pub fn get_map<Conn>(conn: &Conn, device_spec: DeviceSpec, full: u16, partial: u16, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, first_key_action: xproto::Keycode, n_key_actions: u8, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, virtual_mods: u16, first_key_explicit: xproto::Keycode, n_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8) -> Result<Cookie<'_, Conn, GetMapReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -7962,7 +7971,8 @@ impl Serialize for SetMapAux {
     }
 }
 pub fn set_map<'c, Conn>(conn: &'c Conn, device_spec: DeviceSpec, flags: u16, min_key_code: xproto::Keycode, max_key_code: xproto::Keycode, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, total_syms: u16, first_key_action: xproto::Keycode, n_key_actions: u8, total_actions: u16, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, total_key_behaviors: u8, first_key_explicit: xproto::Keycode, n_key_explicit: u8, total_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, total_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8, total_v_mod_map_keys: u8, virtual_mods: u16, values: &SetMapAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -8045,7 +8055,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetCompatMap request
 pub const GET_COMPAT_MAP_REQUEST: u8 = 10;
 pub fn get_compat_map<Conn>(conn: &Conn, device_spec: DeviceSpec, groups: u8, get_all_si: bool, first_si: u16, n_si: u16) -> Result<Cookie<'_, Conn, GetCompatMapReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -8114,7 +8125,8 @@ impl TryFrom<&[u8]> for GetCompatMapReply {
 /// Opcode for the SetCompatMap request
 pub const SET_COMPAT_MAP_REQUEST: u8 = 11;
 pub fn set_compat_map<'c, Conn>(conn: &'c Conn, device_spec: DeviceSpec, recompute_actions: bool, truncate_si: bool, groups: u8, first_si: u16, si: &[SymInterpret], group_maps: &[ModDef]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -8160,7 +8172,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetIndicatorState request
 pub const GET_INDICATOR_STATE_REQUEST: u8 = 12;
 pub fn get_indicator_state<Conn>(conn: &Conn, device_spec: DeviceSpec) -> Result<Cookie<'_, Conn, GetIndicatorStateReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -8211,7 +8224,8 @@ impl TryFrom<&[u8]> for GetIndicatorStateReply {
 /// Opcode for the GetIndicatorMap request
 pub const GET_INDICATOR_MAP_REQUEST: u8 = 13;
 pub fn get_indicator_map<Conn>(conn: &Conn, device_spec: DeviceSpec, which: u32) -> Result<Cookie<'_, Conn, GetIndicatorMapReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -8273,7 +8287,8 @@ impl TryFrom<&[u8]> for GetIndicatorMapReply {
 /// Opcode for the SetIndicatorMap request
 pub const SET_INDICATOR_MAP_REQUEST: u8 = 14;
 pub fn set_indicator_map<'c, Conn>(conn: &'c Conn, device_spec: DeviceSpec, which: u32, maps: &[IndicatorMap]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -8308,7 +8323,9 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetNamedIndicator request
 pub const GET_NAMED_INDICATOR_REQUEST: u8 = 15;
 pub fn get_named_indicator<Conn, A>(conn: &Conn, device_spec: DeviceSpec, led_class: A, led_id: IDSpec, indicator: xproto::Atom) -> Result<Cookie<'_, Conn, GetNamedIndicatorReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<LedClassSpec>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<LedClassSpec>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -8397,7 +8414,9 @@ impl TryFrom<&[u8]> for GetNamedIndicatorReply {
 /// Opcode for the SetNamedIndicator request
 pub const SET_NAMED_INDICATOR_REQUEST: u8 = 16;
 pub fn set_named_indicator<Conn, A>(conn: &Conn, device_spec: DeviceSpec, led_class: A, led_id: IDSpec, indicator: xproto::Atom, set_state: bool, on: bool, set_map: bool, create_map: bool, map_flags: u8, map_which_groups: u8, map_groups: u8, map_which_mods: u8, map_real_mods: u8, map_vmods: u16, map_ctrls: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<LedClassSpec>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<LedClassSpec>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -8461,7 +8480,8 @@ where Conn: RequestConnection + ?Sized, A: Into<LedClassSpec>
 /// Opcode for the GetNames request
 pub const GET_NAMES_REQUEST: u8 = 17;
 pub fn get_names<Conn>(conn: &Conn, device_spec: DeviceSpec, which: u32) -> Result<Cookie<'_, Conn, GetNamesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -8920,7 +8940,8 @@ impl Serialize for SetNamesAux {
     }
 }
 pub fn set_names<'c, Conn>(conn: &'c Conn, device_spec: DeviceSpec, virtual_mods: u16, first_type: u8, n_types: u8, first_kt_levelt: u8, n_kt_levels: u8, indicators: u32, group_names: u8, n_radio_groups: u8, first_key: xproto::Keycode, n_keys: u8, n_key_aliases: u8, total_kt_level_names: u16, values: &SetNamesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -8983,7 +9004,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the PerClientFlags request
 pub const PER_CLIENT_FLAGS_REQUEST: u8 = 21;
 pub fn per_client_flags<Conn>(conn: &Conn, device_spec: DeviceSpec, change: u32, value: u32, ctrls_to_change: u32, auto_ctrls: u32, auto_ctrls_values: u32) -> Result<Cookie<'_, Conn, PerClientFlagsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -9065,7 +9087,8 @@ impl TryFrom<&[u8]> for PerClientFlagsReply {
 /// Opcode for the ListComponents request
 pub const LIST_COMPONENTS_REQUEST: u8 = 22;
 pub fn list_components<Conn>(conn: &Conn, device_spec: DeviceSpec, max_names: u16) -> Result<Cookie<'_, Conn, ListComponentsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -9139,7 +9162,9 @@ unimplemented!("Not yet supported by the code generator") }
 /// Opcode for the GetDeviceInfo request
 pub const GET_DEVICE_INFO_REQUEST: u8 = 24;
 pub fn get_device_info<Conn, A>(conn: &Conn, device_spec: DeviceSpec, wanted: u16, all_buttons: bool, first_button: u8, n_buttons: u8, led_class: A, led_id: IDSpec) -> Result<Cookie<'_, Conn, GetDeviceInfoReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<LedClassSpec>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<LedClassSpec>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -9239,7 +9264,8 @@ impl TryFrom<&[u8]> for GetDeviceInfoReply {
 /// Opcode for the SetDeviceInfo request
 pub const SET_DEVICE_INFO_REQUEST: u8 = 25;
 pub fn set_device_info<'c, Conn>(conn: &'c Conn, device_spec: DeviceSpec, first_btn: u8, change: u16, btn_actions: &[Action], leds: &[DeviceLedInfo]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -9280,7 +9306,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the SetDebuggingFlags request
 pub const SET_DEBUGGING_FLAGS_REQUEST: u8 = 101;
 pub fn set_debugging_flags<'c, Conn>(conn: &'c Conn, affect_flags: u32, flags: u32, affect_ctrls: u32, ctrls: u32, message: &[String8]) -> Result<Cookie<'c, Conn, SetDebuggingFlagsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -10441,7 +10468,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xkb_latch_lock_state<A>(&self, device_spec: DeviceSpec, affect_mod_locks: u8, mod_locks: u8, lock_group: bool, group_lock: A, affect_mod_latches: u8, latch_group: bool, group_latch: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         latch_lock_state(self, device_spec, affect_mod_locks, mod_locks, lock_group, group_lock, affect_mod_latches, latch_group, group_latch)
     }
@@ -10492,13 +10520,15 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xkb_get_named_indicator<A>(&self, device_spec: DeviceSpec, led_class: A, led_id: IDSpec, indicator: xproto::Atom) -> Result<Cookie<'_, Self, GetNamedIndicatorReply>, ConnectionError>
-    where A: Into<LedClassSpec>
+    where
+        A: Into<LedClassSpec>,
     {
         get_named_indicator(self, device_spec, led_class, led_id, indicator)
     }
 
     fn xkb_set_named_indicator<A>(&self, device_spec: DeviceSpec, led_class: A, led_id: IDSpec, indicator: xproto::Atom, set_state: bool, on: bool, set_map: bool, create_map: bool, map_flags: u8, map_which_groups: u8, map_groups: u8, map_which_mods: u8, map_real_mods: u8, map_vmods: u16, map_ctrls: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<LedClassSpec>
+    where
+        A: Into<LedClassSpec>,
     {
         set_named_indicator(self, device_spec, led_class, led_id, indicator, set_state, on, set_map, create_map, map_flags, map_which_groups, map_groups, map_which_mods, map_real_mods, map_vmods, map_ctrls)
     }
@@ -10525,7 +10555,8 @@ pub trait ConnectionExt: RequestConnection {
 
     fn get_kbd_by_name(&self) { unimplemented!("Not yet supported by the code generator") }
     fn xkb_get_device_info<A>(&self, device_spec: DeviceSpec, wanted: u16, all_buttons: bool, first_button: u8, n_buttons: u8, led_class: A, led_id: IDSpec) -> Result<Cookie<'_, Self, GetDeviceInfoReply>, ConnectionError>
-    where A: Into<LedClassSpec>
+    where
+        A: Into<LedClassSpec>,
     {
         get_device_info(self, device_spec, wanted, all_buttons, first_button, n_buttons, led_class, led_id)
     }

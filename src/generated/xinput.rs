@@ -96,7 +96,8 @@ impl Serialize for Fp3232 {
 /// Opcode for the GetExtensionVersion request
 pub const GET_EXTENSION_VERSION_REQUEST: u8 = 1;
 pub fn get_extension_version<'c, Conn>(conn: &'c Conn, name: &[u8]) -> Result<Cookie<'c, Conn, GetExtensionVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -839,7 +840,8 @@ impl Serialize for DeviceName {
 /// Opcode for the ListInputDevices request
 pub const LIST_INPUT_DEVICES_REQUEST: u8 = 2;
 pub fn list_input_devices<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListInputDevicesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -935,7 +937,8 @@ impl Serialize for InputClassInfo {
 /// Opcode for the OpenDevice request
 pub const OPEN_DEVICE_REQUEST: u8 = 3;
 pub fn open_device<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, OpenDeviceReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -992,7 +995,8 @@ impl TryFrom<&[u8]> for OpenDeviceReply {
 /// Opcode for the CloseDevice request
 pub const CLOSE_DEVICE_REQUEST: u8 = 4;
 pub fn close_device<Conn>(conn: &Conn, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1017,7 +1021,9 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the SetDeviceMode request
 pub const SET_DEVICE_MODE_REQUEST: u8 = 5;
 pub fn set_device_mode<Conn, A>(conn: &Conn, device_id: u8, mode: A) -> Result<Cookie<'_, Conn, SetDeviceModeReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1071,7 +1077,8 @@ impl TryFrom<&[u8]> for SetDeviceModeReply {
 /// Opcode for the SelectExtensionEvent request
 pub const SELECT_EXTENSION_EVENT_REQUEST: u8 = 6;
 pub fn select_extension_event<'c, Conn>(conn: &'c Conn, window: xproto::Window, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1106,7 +1113,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetSelectedExtensionEvents request
 pub const GET_SELECTED_EXTENSION_EVENTS_REQUEST: u8 = 7;
 pub fn get_selected_extension_events<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetSelectedExtensionEventsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1223,7 +1231,9 @@ impl TryFrom<u32> for PropagateMode {
 /// Opcode for the ChangeDeviceDontPropagateList request
 pub const CHANGE_DEVICE_DONT_PROPAGATE_LIST_REQUEST: u8 = 8;
 pub fn change_device_dont_propagate_list<'c, Conn, A>(conn: &'c Conn, window: xproto::Window, mode: A, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1260,7 +1270,8 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 /// Opcode for the GetDeviceDontPropagateList request
 pub const GET_DEVICE_DONT_PROPAGATE_LIST_REQUEST: u8 = 9;
 pub fn get_device_dont_propagate_list<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetDeviceDontPropagateListReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1342,7 +1353,8 @@ impl Serialize for DeviceTimeCoord {
 /// Opcode for the GetDeviceMotionEvents request
 pub const GET_DEVICE_MOTION_EVENTS_REQUEST: u8 = 10;
 pub fn get_device_motion_events<Conn>(conn: &Conn, start: xproto::Timestamp, stop: xproto::Timestamp, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceMotionEventsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1416,7 +1428,8 @@ impl TryFrom<&[u8]> for GetDeviceMotionEventsReply {
 /// Opcode for the ChangeKeyboardDevice request
 pub const CHANGE_KEYBOARD_DEVICE_REQUEST: u8 = 11;
 pub fn change_keyboard_device<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, ChangeKeyboardDeviceReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1468,7 +1481,8 @@ impl TryFrom<&[u8]> for ChangeKeyboardDeviceReply {
 /// Opcode for the ChangePointerDevice request
 pub const CHANGE_POINTER_DEVICE_REQUEST: u8 = 12;
 pub fn change_pointer_device<Conn>(conn: &Conn, x_axis: u8, y_axis: u8, device_id: u8) -> Result<Cookie<'_, Conn, ChangePointerDeviceReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1522,7 +1536,10 @@ impl TryFrom<&[u8]> for ChangePointerDeviceReply {
 /// Opcode for the GrabDevice request
 pub const GRAB_DEVICE_REQUEST: u8 = 13;
 pub fn grab_device<'c, Conn, A, B>(conn: &'c Conn, grab_window: xproto::Window, time: xproto::Timestamp, this_device_mode: A, other_device_mode: B, owner_events: bool, device_id: u8, classes: &[EventClass]) -> Result<Cookie<'c, Conn, GrabDeviceReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
+    B: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1599,7 +1616,8 @@ impl TryFrom<&[u8]> for GrabDeviceReply {
 /// Opcode for the UngrabDevice request
 pub const UNGRAB_DEVICE_REQUEST: u8 = 14;
 pub fn ungrab_device<Conn>(conn: &Conn, time: xproto::Timestamp, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1688,7 +1706,10 @@ impl TryFrom<u32> for ModifierDevice {
 /// Opcode for the GrabDeviceKey request
 pub const GRAB_DEVICE_KEY_REQUEST: u8 = 15;
 pub fn grab_device_key<'c, Conn, A, B>(conn: &'c Conn, grab_window: xproto::Window, modifiers: u16, modifier_device: u8, grabbed_device: u8, key: u8, this_device_mode: A, other_device_mode: B, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
+    B: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1740,7 +1761,8 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 /// Opcode for the UngrabDeviceKey request
 pub const UNGRAB_DEVICE_KEY_REQUEST: u8 = 16;
 pub fn ungrab_device_key<Conn>(conn: &Conn, grab_window: xproto::Window, modifiers: u16, modifier_device: u8, key: u8, grabbed_device: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1777,7 +1799,10 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GrabDeviceButton request
 pub const GRAB_DEVICE_BUTTON_REQUEST: u8 = 17;
 pub fn grab_device_button<'c, Conn, A, B>(conn: &'c Conn, grab_window: xproto::Window, grabbed_device: u8, modifier_device: u8, modifiers: u16, this_device_mode: A, other_device_mode: B, button: u8, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
+    B: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1829,7 +1854,8 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 /// Opcode for the UngrabDeviceButton request
 pub const UNGRAB_DEVICE_BUTTON_REQUEST: u8 = 18;
 pub fn ungrab_device_button<Conn>(conn: &Conn, grab_window: xproto::Window, modifiers: u16, modifier_device: u8, button: u8, grabbed_device: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1940,7 +1966,9 @@ impl TryFrom<u32> for DeviceInputMode {
 /// Opcode for the AllowDeviceEvents request
 pub const ALLOW_DEVICE_EVENTS_REQUEST: u8 = 19;
 pub fn allow_device_events<Conn, A>(conn: &Conn, time: xproto::Timestamp, mode: A, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1972,7 +2000,8 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 /// Opcode for the GetDeviceFocus request
 pub const GET_DEVICE_FOCUS_REQUEST: u8 = 20;
 pub fn get_device_focus<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceFocusReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2028,7 +2057,9 @@ impl TryFrom<&[u8]> for GetDeviceFocusReply {
 /// Opcode for the SetDeviceFocus request
 pub const SET_DEVICE_FOCUS_REQUEST: u8 = 21;
 pub fn set_device_focus<Conn, A>(conn: &Conn, focus: xproto::Window, time: xproto::Timestamp, revert_to: A, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -3174,7 +3205,8 @@ impl Serialize for FeedbackState {
 /// Opcode for the GetFeedbackControl request
 pub const GET_FEEDBACK_CONTROL_REQUEST: u8 = 22;
 pub fn get_feedback_control<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, GetFeedbackControlReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -4061,7 +4093,8 @@ bitmask_binop!(ChangeFeedbackControlMask, u8);
 /// Opcode for the ChangeFeedbackControl request
 pub const CHANGE_FEEDBACK_CONTROL_REQUEST: u8 = 23;
 pub fn change_feedback_control<Conn>(conn: &Conn, mask: u32, device_id: u8, feedback_id: u8, feedback: FeedbackCtl) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -4096,7 +4129,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetDeviceKeyMapping request
 pub const GET_DEVICE_KEY_MAPPING_REQUEST: u8 = 24;
 pub fn get_device_key_mapping<Conn>(conn: &Conn, device_id: u8, first_keycode: KeyCode, count: u8) -> Result<Cookie<'_, Conn, GetDeviceKeyMappingReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -4150,7 +4184,8 @@ impl TryFrom<&[u8]> for GetDeviceKeyMappingReply {
 /// Opcode for the ChangeDeviceKeyMapping request
 pub const CHANGE_DEVICE_KEY_MAPPING_REQUEST: u8 = 25;
 pub fn change_device_key_mapping<'c, Conn>(conn: &'c Conn, device_id: u8, first_keycode: KeyCode, keysyms_per_keycode: u8, keycode_count: u8, keysyms: &[xproto::Keysym]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -4183,7 +4218,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetDeviceModifierMapping request
 pub const GET_DEVICE_MODIFIER_MAPPING_REQUEST: u8 = 26;
 pub fn get_device_modifier_mapping<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceModifierMappingReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -4235,7 +4271,8 @@ impl TryFrom<&[u8]> for GetDeviceModifierMappingReply {
 /// Opcode for the SetDeviceModifierMapping request
 pub const SET_DEVICE_MODIFIER_MAPPING_REQUEST: u8 = 27;
 pub fn set_device_modifier_mapping<'c, Conn>(conn: &'c Conn, device_id: u8, keymaps: &[u8]) -> Result<Cookie<'c, Conn, SetDeviceModifierMappingReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -4293,7 +4330,8 @@ impl TryFrom<&[u8]> for SetDeviceModifierMappingReply {
 /// Opcode for the GetDeviceButtonMapping request
 pub const GET_DEVICE_BUTTON_MAPPING_REQUEST: u8 = 28;
 pub fn get_device_button_mapping<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceButtonMappingReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -4350,7 +4388,8 @@ impl TryFrom<&[u8]> for GetDeviceButtonMappingReply {
 /// Opcode for the SetDeviceButtonMapping request
 pub const SET_DEVICE_BUTTON_MAPPING_REQUEST: u8 = 29;
 pub fn set_device_button_mapping<'c, Conn>(conn: &'c Conn, device_id: u8, map: &[u8]) -> Result<Cookie<'c, Conn, SetDeviceButtonMappingReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -5210,7 +5249,8 @@ impl Serialize for InputState {
 /// Opcode for the QueryDeviceState request
 pub const QUERY_DEVICE_STATE_REQUEST: u8 = 30;
 pub fn query_device_state<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, QueryDeviceStateReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -5262,7 +5302,8 @@ impl TryFrom<&[u8]> for QueryDeviceStateReply {
 /// Opcode for the DeviceBell request
 pub const DEVICE_BELL_REQUEST: u8 = 32;
 pub fn device_bell<Conn>(conn: &Conn, device_id: u8, feedback_id: u8, feedback_class: u8, percent: i8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -5290,7 +5331,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the SetDeviceValuators request
 pub const SET_DEVICE_VALUATORS_REQUEST: u8 = 33;
 pub fn set_device_valuators<'c, Conn>(conn: &'c Conn, device_id: u8, first_valuator: u8, valuators: &[i32]) -> Result<Cookie<'c, Conn, SetDeviceValuatorsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -6143,7 +6185,9 @@ impl Serialize for DeviceState {
 /// Opcode for the GetDeviceControl request
 pub const GET_DEVICE_CONTROL_REQUEST: u8 = 34;
 pub fn get_device_control<Conn, A>(conn: &Conn, control_id: A, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceControlReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u16>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u16>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -6886,7 +6930,9 @@ impl Serialize for DeviceCtl {
 /// Opcode for the ChangeDeviceControl request
 pub const CHANGE_DEVICE_CONTROL_REQUEST: u8 = 35;
 pub fn change_device_control<Conn, A>(conn: &Conn, control_id: A, device_id: u8, control: DeviceCtl) -> Result<Cookie<'_, Conn, ChangeDeviceControlReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u16>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u16>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -6943,7 +6989,8 @@ impl TryFrom<&[u8]> for ChangeDeviceControlReply {
 /// Opcode for the ListDeviceProperties request
 pub const LIST_DEVICE_PROPERTIES_REQUEST: u8 = 36;
 pub fn list_device_properties<Conn>(conn: &Conn, device_id: u8) -> Result<Cookie<'_, Conn, ListDevicePropertiesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -7108,7 +7155,9 @@ impl ChangeDevicePropertyAux {
     }
 }
 pub fn change_device_property<'c, Conn, A>(conn: &'c Conn, property: xproto::Atom, type_: xproto::Atom, device_id: u8, mode: A, num_items: u32, items: &ChangeDevicePropertyAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -7156,7 +7205,8 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 /// Opcode for the DeleteDeviceProperty request
 pub const DELETE_DEVICE_PROPERTY_REQUEST: u8 = 38;
 pub fn delete_device_property<Conn>(conn: &Conn, property: xproto::Atom, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -7186,7 +7236,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetDeviceProperty request
 pub const GET_DEVICE_PROPERTY_REQUEST: u8 = 39;
 pub fn get_device_property<Conn>(conn: &Conn, property: xproto::Atom, type_: xproto::Atom, offset: u32, len: u32, device_id: u8, delete: bool) -> Result<Cookie<'_, Conn, GetDevicePropertyReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -7533,7 +7584,8 @@ impl Serialize for ModifierInfo {
 /// Opcode for the XIQueryPointer request
 pub const XI_QUERY_POINTER_REQUEST: u8 = 40;
 pub fn xi_query_pointer<Conn>(conn: &Conn, window: xproto::Window, deviceid: DeviceId) -> Result<Cookie<'_, Conn, XIQueryPointerReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -7607,7 +7659,8 @@ impl TryFrom<&[u8]> for XIQueryPointerReply {
 /// Opcode for the XIWarpPointer request
 pub const XI_WARP_POINTER_REQUEST: u8 = 41;
 pub fn xi_warp_pointer<Conn>(conn: &Conn, src_win: xproto::Window, dst_win: xproto::Window, src_x: Fp1616, src_y: Fp1616, src_width: u16, src_height: u16, dst_x: Fp1616, dst_y: Fp1616, deviceid: DeviceId) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -7668,7 +7721,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the XIChangeCursor request
 pub const XI_CHANGE_CURSOR_REQUEST: u8 = 42;
 pub fn xi_change_cursor<Conn>(conn: &Conn, window: xproto::Window, cursor: xproto::Cursor, deviceid: DeviceId) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -8315,7 +8369,8 @@ impl Serialize for HierarchyChange {
 /// Opcode for the XIChangeHierarchy request
 pub const XI_CHANGE_HIERARCHY_REQUEST: u8 = 43;
 pub fn xi_change_hierarchy<'c, Conn>(conn: &'c Conn, changes: &[HierarchyChange]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -8345,7 +8400,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the XISetClientPointer request
 pub const XI_SET_CLIENT_POINTER_REQUEST: u8 = 44;
 pub fn xi_set_client_pointer<Conn>(conn: &Conn, window: xproto::Window, deviceid: DeviceId) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -8375,7 +8431,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the XIGetClientPointer request
 pub const XI_GET_CLIENT_POINTER_REQUEST: u8 = 45;
 pub fn xi_get_client_pointer<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, XIGetClientPointerReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -8567,7 +8624,8 @@ impl Serialize for EventMask {
 /// Opcode for the XISelectEvents request
 pub const XI_SELECT_EVENTS_REQUEST: u8 = 46;
 pub fn xi_select_events<'c, Conn>(conn: &'c Conn, window: xproto::Window, masks: &[EventMask]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -8602,7 +8660,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the XIQueryVersion request
 pub const XI_QUERY_VERSION_REQUEST: u8 = 47;
 pub fn xi_query_version<Conn>(conn: &Conn, major_version: u16, minor_version: u16) -> Result<Cookie<'_, Conn, XIQueryVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -9783,7 +9842,8 @@ impl Serialize for XIDeviceInfo {
 /// Opcode for the XIQueryDevice request
 pub const XI_QUERY_DEVICE_REQUEST: u8 = 48;
 pub fn xi_query_device<Conn>(conn: &Conn, deviceid: DeviceId) -> Result<Cookie<'_, Conn, XIQueryDeviceReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -9834,7 +9894,8 @@ impl TryFrom<&[u8]> for XIQueryDeviceReply {
 /// Opcode for the XISetFocus request
 pub const XI_SET_FOCUS_REQUEST: u8 = 49;
 pub fn xi_set_focus<Conn>(conn: &Conn, window: xproto::Window, time: xproto::Timestamp, deviceid: DeviceId) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -9869,7 +9930,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the XIGetFocus request
 pub const XI_GET_FOCUS_REQUEST: u8 = 50;
 pub fn xi_get_focus<Conn>(conn: &Conn, deviceid: DeviceId) -> Result<Cookie<'_, Conn, XIGetFocusReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -9981,7 +10043,11 @@ impl TryFrom<u32> for GrabOwner {
 /// Opcode for the XIGrabDevice request
 pub const XI_GRAB_DEVICE_REQUEST: u8 = 51;
 pub fn xi_grab_device<'c, Conn, A, B, C>(conn: &'c Conn, window: xproto::Window, time: xproto::Timestamp, cursor: xproto::Cursor, deviceid: DeviceId, mode: A, paired_device_mode: B, owner_events: C, mask: &[u32]) -> Result<Cookie<'c, Conn, XIGrabDeviceReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>, C: Into<bool>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
+    B: Into<u8>,
+    C: Into<bool>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -10063,7 +10129,8 @@ impl TryFrom<&[u8]> for XIGrabDeviceReply {
 /// Opcode for the XIUngrabDevice request
 pub const XI_UNGRAB_DEVICE_REQUEST: u8 = 52;
 pub fn xi_ungrab_device<Conn>(conn: &Conn, time: xproto::Timestamp, deviceid: DeviceId) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -10173,7 +10240,9 @@ impl TryFrom<u32> for EventMode {
 /// Opcode for the XIAllowEvents request
 pub const XI_ALLOW_EVENTS_REQUEST: u8 = 53;
 pub fn xi_allow_events<Conn, A>(conn: &Conn, time: xproto::Timestamp, deviceid: DeviceId, event_mode: A, touchid: u32, grab_window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -10424,7 +10493,12 @@ impl Serialize for GrabModifierInfo {
 /// Opcode for the XIPassiveGrabDevice request
 pub const XI_PASSIVE_GRAB_DEVICE_REQUEST: u8 = 54;
 pub fn xi_passive_grab_device<'c, Conn, A, B, C, D>(conn: &'c Conn, time: xproto::Timestamp, grab_window: xproto::Window, cursor: xproto::Cursor, detail: u32, deviceid: DeviceId, grab_type: A, grab_mode: B, paired_device_mode: C, owner_events: D, mask: &[u32], modifiers: &[u32]) -> Result<Cookie<'c, Conn, XIPassiveGrabDeviceReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>, C: Into<u8>, D: Into<bool>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
+    B: Into<u8>,
+    C: Into<u8>,
+    D: Into<bool>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -10521,7 +10595,9 @@ impl TryFrom<&[u8]> for XIPassiveGrabDeviceReply {
 /// Opcode for the XIPassiveUngrabDevice request
 pub const XI_PASSIVE_UNGRAB_DEVICE_REQUEST: u8 = 55;
 pub fn xi_passive_ungrab_device<'c, Conn, A>(conn: &'c Conn, grab_window: xproto::Window, detail: u32, deviceid: DeviceId, grab_type: A, modifiers: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -10568,7 +10644,8 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 /// Opcode for the XIListProperties request
 pub const XI_LIST_PROPERTIES_REQUEST: u8 = 56;
 pub fn xi_list_properties<Conn>(conn: &Conn, deviceid: DeviceId) -> Result<Cookie<'_, Conn, XIListPropertiesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -10667,7 +10744,9 @@ impl XIChangePropertyAux {
     }
 }
 pub fn xi_change_property<'c, Conn, A>(conn: &'c Conn, deviceid: DeviceId, mode: A, property: xproto::Atom, type_: xproto::Atom, num_items: u32, items: &XIChangePropertyAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -10715,7 +10794,8 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 /// Opcode for the XIDeleteProperty request
 pub const XI_DELETE_PROPERTY_REQUEST: u8 = 58;
 pub fn xi_delete_property<Conn>(conn: &Conn, deviceid: DeviceId, property: xproto::Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -10745,7 +10825,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the XIGetProperty request
 pub const XI_GET_PROPERTY_REQUEST: u8 = 59;
 pub fn xi_get_property<Conn>(conn: &Conn, deviceid: DeviceId, delete: bool, property: xproto::Atom, type_: xproto::Atom, offset: u32, len: u32) -> Result<Cookie<'_, Conn, XIGetPropertyReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -10923,7 +11004,8 @@ impl TryFrom<&[u8]> for XIGetPropertyReply {
 /// Opcode for the XIGetSelectedEvents request
 pub const XI_GET_SELECTED_EVENTS_REQUEST: u8 = 60;
 pub fn xi_get_selected_events<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, XIGetSelectedEventsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -11026,7 +11108,8 @@ impl Serialize for BarrierReleasePointerInfo {
 /// Opcode for the XIBarrierReleasePointer request
 pub const XI_BARRIER_RELEASE_POINTER_REQUEST: u8 = 61;
 pub fn xi_barrier_release_pointer<'c, Conn>(conn: &'c Conn, barriers: &[BarrierReleasePointerInfo]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -15309,7 +15392,8 @@ impl From<DevicePresenceNotifyEvent> for EventForSend {
 /// Opcode for the SendExtensionEvent request
 pub const SEND_EXTENSION_EVENT_REQUEST: u8 = 31;
 pub fn send_extension_event<'c, Conn>(conn: &'c Conn, destination: xproto::Window, device_id: u8, propagate: bool, events: &[EventForSend], classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -15634,7 +15718,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_set_device_mode<A>(&self, device_id: u8, mode: A) -> Result<Cookie<'_, Self, SetDeviceModeReply>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         set_device_mode(self, device_id, mode)
     }
@@ -15650,7 +15735,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_change_device_dont_propagate_list<'c, A>(&'c self, window: xproto::Window, mode: A, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         change_device_dont_propagate_list(self, window, mode, classes)
     }
@@ -15676,7 +15762,9 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_grab_device<'c, A, B>(&'c self, grab_window: xproto::Window, time: xproto::Timestamp, this_device_mode: A, other_device_mode: B, owner_events: bool, device_id: u8, classes: &[EventClass]) -> Result<Cookie<'c, Self, GrabDeviceReply>, ConnectionError>
-    where A: Into<u8>, B: Into<u8>
+    where
+        A: Into<u8>,
+        B: Into<u8>,
     {
         grab_device(self, grab_window, time, this_device_mode, other_device_mode, owner_events, device_id, classes)
     }
@@ -15687,7 +15775,9 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_grab_device_key<'c, A, B>(&'c self, grab_window: xproto::Window, modifiers: u16, modifier_device: u8, grabbed_device: u8, key: u8, this_device_mode: A, other_device_mode: B, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>, B: Into<u8>
+    where
+        A: Into<u8>,
+        B: Into<u8>,
     {
         grab_device_key(self, grab_window, modifiers, modifier_device, grabbed_device, key, this_device_mode, other_device_mode, owner_events, classes)
     }
@@ -15698,7 +15788,9 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_grab_device_button<'c, A, B>(&'c self, grab_window: xproto::Window, grabbed_device: u8, modifier_device: u8, modifiers: u16, this_device_mode: A, other_device_mode: B, button: u8, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>, B: Into<u8>
+    where
+        A: Into<u8>,
+        B: Into<u8>,
     {
         grab_device_button(self, grab_window, grabbed_device, modifier_device, modifiers, this_device_mode, other_device_mode, button, owner_events, classes)
     }
@@ -15709,7 +15801,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_allow_device_events<A>(&self, time: xproto::Timestamp, mode: A, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         allow_device_events(self, time, mode, device_id)
     }
@@ -15720,7 +15813,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_set_device_focus<A>(&self, focus: xproto::Window, time: xproto::Timestamp, revert_to: A, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         set_device_focus(self, focus, time, revert_to, device_id)
     }
@@ -15781,13 +15875,15 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_get_device_control<A>(&self, control_id: A, device_id: u8) -> Result<Cookie<'_, Self, GetDeviceControlReply>, ConnectionError>
-    where A: Into<u16>
+    where
+        A: Into<u16>,
     {
         get_device_control(self, control_id, device_id)
     }
 
     fn xinput_change_device_control<A>(&self, control_id: A, device_id: u8, control: DeviceCtl) -> Result<Cookie<'_, Self, ChangeDeviceControlReply>, ConnectionError>
-    where A: Into<u16>
+    where
+        A: Into<u16>,
     {
         change_device_control(self, control_id, device_id, control)
     }
@@ -15798,7 +15894,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_change_device_property<'c, A>(&'c self, property: xproto::Atom, type_: xproto::Atom, device_id: u8, mode: A, num_items: u32, items: &ChangeDevicePropertyAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         change_device_property(self, property, type_, device_id, mode, num_items, items)
     }
@@ -15869,7 +15966,10 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_xi_grab_device<'c, A, B, C>(&'c self, window: xproto::Window, time: xproto::Timestamp, cursor: xproto::Cursor, deviceid: DeviceId, mode: A, paired_device_mode: B, owner_events: C, mask: &[u32]) -> Result<Cookie<'c, Self, XIGrabDeviceReply>, ConnectionError>
-    where A: Into<u8>, B: Into<u8>, C: Into<bool>
+    where
+        A: Into<u8>,
+        B: Into<u8>,
+        C: Into<bool>,
     {
         xi_grab_device(self, window, time, cursor, deviceid, mode, paired_device_mode, owner_events, mask)
     }
@@ -15880,19 +15980,25 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_xi_allow_events<A>(&self, time: xproto::Timestamp, deviceid: DeviceId, event_mode: A, touchid: u32, grab_window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         xi_allow_events(self, time, deviceid, event_mode, touchid, grab_window)
     }
 
     fn xinput_xi_passive_grab_device<'c, A, B, C, D>(&'c self, time: xproto::Timestamp, grab_window: xproto::Window, cursor: xproto::Cursor, detail: u32, deviceid: DeviceId, grab_type: A, grab_mode: B, paired_device_mode: C, owner_events: D, mask: &[u32], modifiers: &[u32]) -> Result<Cookie<'c, Self, XIPassiveGrabDeviceReply>, ConnectionError>
-    where A: Into<u8>, B: Into<u8>, C: Into<u8>, D: Into<bool>
+    where
+        A: Into<u8>,
+        B: Into<u8>,
+        C: Into<u8>,
+        D: Into<bool>,
     {
         xi_passive_grab_device(self, time, grab_window, cursor, detail, deviceid, grab_type, grab_mode, paired_device_mode, owner_events, mask, modifiers)
     }
 
     fn xinput_xi_passive_ungrab_device<'c, A>(&'c self, grab_window: xproto::Window, detail: u32, deviceid: DeviceId, grab_type: A, modifiers: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         xi_passive_ungrab_device(self, grab_window, detail, deviceid, grab_type, modifiers)
     }
@@ -15903,7 +16009,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn xinput_xi_change_property<'c, A>(&'c self, deviceid: DeviceId, mode: A, property: xproto::Atom, type_: xproto::Atom, num_items: u32, items: &XIChangePropertyAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         xi_change_property(self, deviceid, mode, property, type_, num_items, items)
     }

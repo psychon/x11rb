@@ -405,7 +405,8 @@ impl Serialize for ResourceSizeValue {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 pub fn query_version<Conn>(conn: &Conn, client_major: u8, client_minor: u8) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -457,7 +458,8 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 /// Opcode for the QueryClients request
 pub const QUERY_CLIENTS_REQUEST: u8 = 1;
 pub fn query_clients<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryClientsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -503,7 +505,8 @@ impl TryFrom<&[u8]> for QueryClientsReply {
 /// Opcode for the QueryClientResources request
 pub const QUERY_CLIENT_RESOURCES_REQUEST: u8 = 2;
 pub fn query_client_resources<Conn>(conn: &Conn, xid: u32) -> Result<Cookie<'_, Conn, QueryClientResourcesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -554,7 +557,8 @@ impl TryFrom<&[u8]> for QueryClientResourcesReply {
 /// Opcode for the QueryClientPixmapBytes request
 pub const QUERY_CLIENT_PIXMAP_BYTES_REQUEST: u8 = 3;
 pub fn query_client_pixmap_bytes<Conn>(conn: &Conn, xid: u32) -> Result<Cookie<'_, Conn, QueryClientPixmapBytesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -605,7 +609,8 @@ impl TryFrom<&[u8]> for QueryClientPixmapBytesReply {
 /// Opcode for the QueryClientIds request
 pub const QUERY_CLIENT_IDS_REQUEST: u8 = 4;
 pub fn query_client_ids<'c, Conn>(conn: &'c Conn, specs: &[ClientIdSpec]) -> Result<Cookie<'c, Conn, QueryClientIdsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -661,7 +666,8 @@ impl TryFrom<&[u8]> for QueryClientIdsReply {
 /// Opcode for the QueryResourceBytes request
 pub const QUERY_RESOURCE_BYTES_REQUEST: u8 = 5;
 pub fn query_resource_bytes<'c, Conn>(conn: &'c Conn, client: u32, specs: &[ResourceIdSpec]) -> Result<Cookie<'c, Conn, QueryResourceBytesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;

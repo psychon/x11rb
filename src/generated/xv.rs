@@ -1443,7 +1443,8 @@ impl From<PortNotifyEvent> for [u8; 32] {
 /// Opcode for the QueryExtension request
 pub const QUERY_EXTENSION_REQUEST: u8 = 0;
 pub fn query_extension<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryExtensionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1489,7 +1490,8 @@ impl TryFrom<&[u8]> for QueryExtensionReply {
 /// Opcode for the QueryAdaptors request
 pub const QUERY_ADAPTORS_REQUEST: u8 = 1;
 pub fn query_adaptors<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, QueryAdaptorsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1540,7 +1542,8 @@ impl TryFrom<&[u8]> for QueryAdaptorsReply {
 /// Opcode for the QueryEncodings request
 pub const QUERY_ENCODINGS_REQUEST: u8 = 2;
 pub fn query_encodings<Conn>(conn: &Conn, port: Port) -> Result<Cookie<'_, Conn, QueryEncodingsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1591,7 +1594,8 @@ impl TryFrom<&[u8]> for QueryEncodingsReply {
 /// Opcode for the GrabPort request
 pub const GRAB_PORT_REQUEST: u8 = 3;
 pub fn grab_port<Conn>(conn: &Conn, port: Port, time: xproto::Timestamp) -> Result<Cookie<'_, Conn, GrabPortReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1645,7 +1649,8 @@ impl TryFrom<&[u8]> for GrabPortReply {
 /// Opcode for the UngrabPort request
 pub const UNGRAB_PORT_REQUEST: u8 = 4;
 pub fn ungrab_port<Conn>(conn: &Conn, port: Port, time: xproto::Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1675,7 +1680,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the PutVideo request
 pub const PUT_VIDEO_REQUEST: u8 = 5;
 pub fn put_video<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1734,7 +1740,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the PutStill request
 pub const PUT_STILL_REQUEST: u8 = 6;
 pub fn put_still<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1793,7 +1800,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetVideo request
 pub const GET_VIDEO_REQUEST: u8 = 7;
 pub fn get_video<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1852,7 +1860,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetStill request
 pub const GET_STILL_REQUEST: u8 = 8;
 pub fn get_still<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1911,7 +1920,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the StopVideo request
 pub const STOP_VIDEO_REQUEST: u8 = 9;
 pub fn stop_video<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1941,7 +1951,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the SelectVideoNotify request
 pub const SELECT_VIDEO_NOTIFY_REQUEST: u8 = 10;
 pub fn select_video_notify<Conn>(conn: &Conn, drawable: xproto::Drawable, onoff: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1971,7 +1982,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the SelectPortNotify request
 pub const SELECT_PORT_NOTIFY_REQUEST: u8 = 11;
 pub fn select_port_notify<Conn>(conn: &Conn, port: Port, onoff: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2001,7 +2013,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the QueryBestSize request
 pub const QUERY_BEST_SIZE_REQUEST: u8 = 12;
 pub fn query_best_size<Conn>(conn: &Conn, port: Port, vid_w: u16, vid_h: u16, drw_w: u16, drw_h: u16, motion: bool) -> Result<Cookie<'_, Conn, QueryBestSizeReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2069,7 +2082,8 @@ impl TryFrom<&[u8]> for QueryBestSizeReply {
 /// Opcode for the SetPortAttribute request
 pub const SET_PORT_ATTRIBUTE_REQUEST: u8 = 13;
 pub fn set_port_attribute<Conn>(conn: &Conn, port: Port, attribute: xproto::Atom, value: i32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2104,7 +2118,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetPortAttribute request
 pub const GET_PORT_ATTRIBUTE_REQUEST: u8 = 14;
 pub fn get_port_attribute<Conn>(conn: &Conn, port: Port, attribute: xproto::Atom) -> Result<Cookie<'_, Conn, GetPortAttributeReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2158,7 +2173,8 @@ impl TryFrom<&[u8]> for GetPortAttributeReply {
 /// Opcode for the QueryPortAttributes request
 pub const QUERY_PORT_ATTRIBUTES_REQUEST: u8 = 15;
 pub fn query_port_attributes<Conn>(conn: &Conn, port: Port) -> Result<Cookie<'_, Conn, QueryPortAttributesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2211,7 +2227,8 @@ impl TryFrom<&[u8]> for QueryPortAttributesReply {
 /// Opcode for the ListImageFormats request
 pub const LIST_IMAGE_FORMATS_REQUEST: u8 = 16;
 pub fn list_image_formats<Conn>(conn: &Conn, port: Port) -> Result<Cookie<'_, Conn, ListImageFormatsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2262,7 +2279,8 @@ impl TryFrom<&[u8]> for ListImageFormatsReply {
 /// Opcode for the QueryImageAttributes request
 pub const QUERY_IMAGE_ATTRIBUTES_REQUEST: u8 = 17;
 pub fn query_image_attributes<Conn>(conn: &Conn, port: Port, id: u32, width: u16, height: u16) -> Result<Cookie<'_, Conn, QueryImageAttributesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2333,7 +2351,8 @@ impl TryFrom<&[u8]> for QueryImageAttributesReply {
 /// Opcode for the PutImage request
 pub const PUT_IMAGE_REQUEST: u8 = 18;
 pub fn put_image<'c, Conn>(conn: &'c Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, id: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2406,7 +2425,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the ShmPutImage request
 pub const SHM_PUT_IMAGE_REQUEST: u8 = 19;
 pub fn shm_put_image<Conn>(conn: &Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, shmseg: shm::Seg, id: u32, offset: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, send_event: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;

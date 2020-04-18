@@ -236,7 +236,8 @@ impl TryFrom<u32> for State {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 pub fn query_version<Conn>(conn: &Conn, client_major_version: u8, client_minor_version: u8) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -289,7 +290,8 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 /// Opcode for the QueryInfo request
 pub const QUERY_INFO_REQUEST: u8 = 1;
 pub fn query_info<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<Cookie<'_, Conn, QueryInfoReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -349,7 +351,8 @@ impl TryFrom<&[u8]> for QueryInfoReply {
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 2;
 pub fn select_input<Conn>(conn: &Conn, drawable: xproto::Drawable, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -583,7 +586,9 @@ impl Serialize for SetAttributesAux {
     }
 }
 pub fn set_attributes<'c, Conn, A>(conn: &'c Conn, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, depth: u8, visual: xproto::Visualid, value_list: &SetAttributesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -643,7 +648,8 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 /// Opcode for the UnsetAttributes request
 pub const UNSET_ATTRIBUTES_REQUEST: u8 = 4;
 pub fn unset_attributes<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -668,7 +674,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the Suspend request
 pub const SUSPEND_REQUEST: u8 = 5;
 pub fn suspend<Conn>(conn: &Conn, suspend: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -780,7 +787,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn screensaver_set_attributes<'c, A>(&'c self, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, depth: u8, visual: xproto::Visualid, value_list: &SetAttributesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         set_attributes(self, drawable, x, y, width, height, border_width, class, depth, visual, value_list)
     }

@@ -257,7 +257,8 @@ impl From<NotifyEvent> for [u8; 32] {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 pub fn query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -303,7 +304,11 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 /// Opcode for the Rectangles request
 pub const RECTANGLES_REQUEST: u8 = 1;
 pub fn rectangles<'c, Conn, A, B, C>(conn: &'c Conn, operation: A, destination_kind: B, ordering: C, destination_window: xproto::Window, x_offset: i16, y_offset: i16, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<Op>, B: Into<Kind>, C: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<Op>,
+    B: Into<Kind>,
+    C: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -348,7 +353,10 @@ where Conn: RequestConnection + ?Sized, A: Into<Op>, B: Into<Kind>, C: Into<u8>
 /// Opcode for the Mask request
 pub const MASK_REQUEST: u8 = 2;
 pub fn mask<Conn, A, B>(conn: &Conn, operation: A, destination_kind: B, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_bitmap: xproto::Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<Op>, B: Into<Kind>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<Op>,
+    B: Into<Kind>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -392,7 +400,11 @@ where Conn: RequestConnection + ?Sized, A: Into<Op>, B: Into<Kind>
 /// Opcode for the Combine request
 pub const COMBINE_REQUEST: u8 = 3;
 pub fn combine<Conn, A, B, C>(conn: &Conn, operation: A, destination_kind: B, source_kind: C, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<Op>, B: Into<Kind>, C: Into<Kind>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<Op>,
+    B: Into<Kind>,
+    C: Into<Kind>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -438,7 +450,9 @@ where Conn: RequestConnection + ?Sized, A: Into<Op>, B: Into<Kind>, C: Into<Kind
 /// Opcode for the Offset request
 pub const OFFSET_REQUEST: u8 = 4;
 pub fn offset<Conn, A>(conn: &Conn, destination_kind: A, destination_window: xproto::Window, x_offset: i16, y_offset: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<Kind>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<Kind>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -475,7 +489,8 @@ where Conn: RequestConnection + ?Sized, A: Into<Kind>
 /// Opcode for the QueryExtents request
 pub const QUERY_EXTENTS_REQUEST: u8 = 5;
 pub fn query_extents<Conn>(conn: &Conn, destination_window: xproto::Window) -> Result<Cookie<'_, Conn, QueryExtentsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -543,7 +558,8 @@ impl TryFrom<&[u8]> for QueryExtentsReply {
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 6;
 pub fn select_input<Conn>(conn: &Conn, destination_window: xproto::Window, enable: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -573,7 +589,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the InputSelected request
 pub const INPUT_SELECTED_REQUEST: u8 = 7;
 pub fn input_selected<Conn>(conn: &Conn, destination_window: xproto::Window) -> Result<Cookie<'_, Conn, InputSelectedReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -621,7 +638,9 @@ impl TryFrom<&[u8]> for InputSelectedReply {
 /// Opcode for the GetRectangles request
 pub const GET_RECTANGLES_REQUEST: u8 = 8;
 pub fn get_rectangles<Conn, A>(conn: &Conn, window: xproto::Window, source_kind: A) -> Result<Cookie<'_, Conn, GetRectanglesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<Kind>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<Kind>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -685,25 +704,34 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn shape_rectangles<'c, A, B, C>(&'c self, operation: A, destination_kind: B, ordering: C, destination_window: xproto::Window, x_offset: i16, y_offset: i16, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<Op>, B: Into<Kind>, C: Into<u8>
+    where
+        A: Into<Op>,
+        B: Into<Kind>,
+        C: Into<u8>,
     {
         self::rectangles(self, operation, destination_kind, ordering, destination_window, x_offset, y_offset, rectangles)
     }
 
     fn shape_mask<A, B>(&self, operation: A, destination_kind: B, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_bitmap: xproto::Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<Op>, B: Into<Kind>
+    where
+        A: Into<Op>,
+        B: Into<Kind>,
     {
         mask(self, operation, destination_kind, destination_window, x_offset, y_offset, source_bitmap)
     }
 
     fn shape_combine<A, B, C>(&self, operation: A, destination_kind: B, source_kind: C, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<Op>, B: Into<Kind>, C: Into<Kind>
+    where
+        A: Into<Op>,
+        B: Into<Kind>,
+        C: Into<Kind>,
     {
         combine(self, operation, destination_kind, source_kind, destination_window, x_offset, y_offset, source_window)
     }
 
     fn shape_offset<A>(&self, destination_kind: A, destination_window: xproto::Window, x_offset: i16, y_offset: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<Kind>
+    where
+        A: Into<Kind>,
     {
         offset(self, destination_kind, destination_window, x_offset, y_offset)
     }
@@ -724,7 +752,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn shape_get_rectangles<A>(&self, window: xproto::Window, source_kind: A) -> Result<Cookie<'_, Self, GetRectanglesReply>, ConnectionError>
-    where A: Into<Kind>
+    where
+        A: Into<Kind>,
     {
         get_rectangles(self, window, source_kind)
     }

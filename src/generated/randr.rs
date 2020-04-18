@@ -418,7 +418,8 @@ impl Serialize for RefreshRates {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 pub fn query_version<Conn>(conn: &Conn, major_version: u32, minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -543,7 +544,8 @@ impl TryFrom<u32> for SetConfig {
 /// Opcode for the SetScreenConfig request
 pub const SET_SCREEN_CONFIG_REQUEST: u8 = 2;
 pub fn set_screen_config<Conn>(conn: &Conn, window: xproto::Window, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, size_id: u16, rotation: u16, rate: u16) -> Result<Cookie<'_, Conn, SetScreenConfigReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -704,7 +706,8 @@ bitmask_binop!(NotifyMask, u8);
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 4;
 pub fn select_input<Conn>(conn: &Conn, window: xproto::Window, enable: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -734,7 +737,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetScreenInfo request
 pub const GET_SCREEN_INFO_REQUEST: u8 = 5;
 pub fn get_screen_info<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetScreenInfoReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -802,7 +806,8 @@ impl TryFrom<&[u8]> for GetScreenInfoReply {
 /// Opcode for the GetScreenSizeRange request
 pub const GET_SCREEN_SIZE_RANGE_REQUEST: u8 = 6;
 pub fn get_screen_size_range<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetScreenSizeRangeReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -858,7 +863,8 @@ impl TryFrom<&[u8]> for GetScreenSizeRangeReply {
 /// Opcode for the SetScreenSize request
 pub const SET_SCREEN_SIZE_REQUEST: u8 = 7;
 pub fn set_screen_size<Conn>(conn: &Conn, window: xproto::Window, width: u16, height: u16, mm_width: u32, mm_height: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1092,7 +1098,8 @@ impl Serialize for ModeInfo {
 /// Opcode for the GetScreenResources request
 pub const GET_SCREEN_RESOURCES_REQUEST: u8 = 8;
 pub fn get_screen_resources<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetScreenResourcesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1221,7 +1228,8 @@ impl TryFrom<u32> for Connection {
 /// Opcode for the GetOutputInfo request
 pub const GET_OUTPUT_INFO_REQUEST: u8 = 9;
 pub fn get_output_info<Conn>(conn: &Conn, output: Output, config_timestamp: xproto::Timestamp) -> Result<Cookie<'_, Conn, GetOutputInfoReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1303,7 +1311,8 @@ impl TryFrom<&[u8]> for GetOutputInfoReply {
 /// Opcode for the ListOutputProperties request
 pub const LIST_OUTPUT_PROPERTIES_REQUEST: u8 = 10;
 pub fn list_output_properties<Conn>(conn: &Conn, output: Output) -> Result<Cookie<'_, Conn, ListOutputPropertiesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1354,7 +1363,8 @@ impl TryFrom<&[u8]> for ListOutputPropertiesReply {
 /// Opcode for the QueryOutputProperty request
 pub const QUERY_OUTPUT_PROPERTY_REQUEST: u8 = 11;
 pub fn query_output_property<Conn>(conn: &Conn, output: Output, property: xproto::Atom) -> Result<Cookie<'_, Conn, QueryOutputPropertyReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1414,7 +1424,8 @@ impl TryFrom<&[u8]> for QueryOutputPropertyReply {
 /// Opcode for the ConfigureOutputProperty request
 pub const CONFIGURE_OUTPUT_PROPERTY_REQUEST: u8 = 12;
 pub fn configure_output_property<'c, Conn>(conn: &'c Conn, output: Output, property: xproto::Atom, pending: bool, range: bool, values: &[i32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1454,7 +1465,9 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the ChangeOutputProperty request
 pub const CHANGE_OUTPUT_PROPERTY_REQUEST: u8 = 13;
 pub fn change_output_property<'c, Conn, A>(conn: &'c Conn, output: Output, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: A, num_units: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u8>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1505,7 +1518,8 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
 /// Opcode for the DeleteOutputProperty request
 pub const DELETE_OUTPUT_PROPERTY_REQUEST: u8 = 14;
 pub fn delete_output_property<Conn>(conn: &Conn, output: Output, property: xproto::Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1535,7 +1549,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetOutputProperty request
 pub const GET_OUTPUT_PROPERTY_REQUEST: u8 = 15;
 pub fn get_output_property<Conn>(conn: &Conn, output: Output, property: xproto::Atom, type_: xproto::Atom, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Conn, GetOutputPropertyReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1618,7 +1633,8 @@ impl TryFrom<&[u8]> for GetOutputPropertyReply {
 /// Opcode for the CreateMode request
 pub const CREATE_MODE_REQUEST: u8 = 16;
 pub fn create_mode<'c, Conn>(conn: &'c Conn, window: xproto::Window, mode_info: ModeInfo, name: &[u8]) -> Result<Cookie<'c, Conn, CreateModeReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1704,7 +1720,8 @@ impl TryFrom<&[u8]> for CreateModeReply {
 /// Opcode for the DestroyMode request
 pub const DESTROY_MODE_REQUEST: u8 = 17;
 pub fn destroy_mode<Conn>(conn: &Conn, mode: Mode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1729,7 +1746,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the AddOutputMode request
 pub const ADD_OUTPUT_MODE_REQUEST: u8 = 18;
 pub fn add_output_mode<Conn>(conn: &Conn, output: Output, mode: Mode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1759,7 +1777,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the DeleteOutputMode request
 pub const DELETE_OUTPUT_MODE_REQUEST: u8 = 19;
 pub fn delete_output_mode<Conn>(conn: &Conn, output: Output, mode: Mode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1789,7 +1808,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetCrtcInfo request
 pub const GET_CRTC_INFO_REQUEST: u8 = 20;
 pub fn get_crtc_info<Conn>(conn: &Conn, crtc: Crtc, config_timestamp: xproto::Timestamp) -> Result<Cookie<'_, Conn, GetCrtcInfoReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1865,7 +1885,8 @@ impl TryFrom<&[u8]> for GetCrtcInfoReply {
 /// Opcode for the SetCrtcConfig request
 pub const SET_CRTC_CONFIG_REQUEST: u8 = 21;
 pub fn set_crtc_config<'c, Conn>(conn: &'c Conn, crtc: Crtc, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, x: i16, y: i16, mode: Mode, rotation: u16, outputs: &[Output]) -> Result<Cookie<'c, Conn, SetCrtcConfigReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1947,7 +1968,8 @@ impl TryFrom<&[u8]> for SetCrtcConfigReply {
 /// Opcode for the GetCrtcGammaSize request
 pub const GET_CRTC_GAMMA_SIZE_REQUEST: u8 = 22;
 pub fn get_crtc_gamma_size<Conn>(conn: &Conn, crtc: Crtc) -> Result<Cookie<'_, Conn, GetCrtcGammaSizeReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1997,7 +2019,8 @@ impl TryFrom<&[u8]> for GetCrtcGammaSizeReply {
 /// Opcode for the GetCrtcGamma request
 pub const GET_CRTC_GAMMA_REQUEST: u8 = 23;
 pub fn get_crtc_gamma<Conn>(conn: &Conn, crtc: Crtc) -> Result<Cookie<'_, Conn, GetCrtcGammaReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2053,7 +2076,8 @@ impl TryFrom<&[u8]> for GetCrtcGammaReply {
 /// Opcode for the SetCrtcGamma request
 pub const SET_CRTC_GAMMA_REQUEST: u8 = 24;
 pub fn set_crtc_gamma<'c, Conn>(conn: &'c Conn, crtc: Crtc, size: u16, red: &[u16], green: &[u16], blue: &[u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2094,7 +2118,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetScreenResourcesCurrent request
 pub const GET_SCREEN_RESOURCES_CURRENT_REQUEST: u8 = 25;
 pub fn get_screen_resources_current<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetScreenResourcesCurrentReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2227,7 +2252,8 @@ bitmask_binop!(Transform, u8);
 /// Opcode for the SetCrtcTransform request
 pub const SET_CRTC_TRANSFORM_REQUEST: u8 = 26;
 pub fn set_crtc_transform<'c, Conn>(conn: &'c Conn, crtc: Crtc, transform: render::Transform, filter_name: &[u8], filter_params: &[render::Fixed]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2302,7 +2328,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetCrtcTransform request
 pub const GET_CRTC_TRANSFORM_REQUEST: u8 = 27;
 pub fn get_crtc_transform<Conn>(conn: &Conn, crtc: Crtc) -> Result<Cookie<'_, Conn, GetCrtcTransformReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2378,7 +2405,8 @@ impl TryFrom<&[u8]> for GetCrtcTransformReply {
 /// Opcode for the GetPanning request
 pub const GET_PANNING_REQUEST: u8 = 28;
 pub fn get_panning<Conn>(conn: &Conn, crtc: Crtc) -> Result<Cookie<'_, Conn, GetPanningReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2453,7 +2481,8 @@ impl TryFrom<&[u8]> for GetPanningReply {
 /// Opcode for the SetPanning request
 pub const SET_PANNING_REQUEST: u8 = 29;
 pub fn set_panning<Conn>(conn: &Conn, crtc: Crtc, timestamp: xproto::Timestamp, left: u16, top: u16, width: u16, height: u16, track_left: u16, track_top: u16, track_width: u16, track_height: u16, border_left: i16, border_top: i16, border_right: i16, border_bottom: i16) -> Result<Cookie<'_, Conn, SetPanningReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2545,7 +2574,8 @@ impl TryFrom<&[u8]> for SetPanningReply {
 /// Opcode for the SetOutputPrimary request
 pub const SET_OUTPUT_PRIMARY_REQUEST: u8 = 30;
 pub fn set_output_primary<Conn>(conn: &Conn, window: xproto::Window, output: Output) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2575,7 +2605,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetOutputPrimary request
 pub const GET_OUTPUT_PRIMARY_REQUEST: u8 = 31;
 pub fn get_output_primary<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetOutputPrimaryReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2624,7 +2655,8 @@ impl TryFrom<&[u8]> for GetOutputPrimaryReply {
 /// Opcode for the GetProviders request
 pub const GET_PROVIDERS_REQUEST: u8 = 32;
 pub fn get_providers<Conn>(conn: &Conn, window: xproto::Window) -> Result<Cookie<'_, Conn, GetProvidersReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2746,7 +2778,8 @@ bitmask_binop!(ProviderCapability, u8);
 /// Opcode for the GetProviderInfo request
 pub const GET_PROVIDER_INFO_REQUEST: u8 = 33;
 pub fn get_provider_info<Conn>(conn: &Conn, provider: Provider, config_timestamp: xproto::Timestamp) -> Result<Cookie<'_, Conn, GetProviderInfoReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2819,7 +2852,8 @@ impl TryFrom<&[u8]> for GetProviderInfoReply {
 /// Opcode for the SetProviderOffloadSink request
 pub const SET_PROVIDER_OFFLOAD_SINK_REQUEST: u8 = 34;
 pub fn set_provider_offload_sink<Conn>(conn: &Conn, provider: Provider, sink_provider: Provider, config_timestamp: xproto::Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2854,7 +2888,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the SetProviderOutputSource request
 pub const SET_PROVIDER_OUTPUT_SOURCE_REQUEST: u8 = 35;
 pub fn set_provider_output_source<Conn>(conn: &Conn, provider: Provider, source_provider: Provider, config_timestamp: xproto::Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2889,7 +2924,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the ListProviderProperties request
 pub const LIST_PROVIDER_PROPERTIES_REQUEST: u8 = 36;
 pub fn list_provider_properties<Conn>(conn: &Conn, provider: Provider) -> Result<Cookie<'_, Conn, ListProviderPropertiesReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -2940,7 +2976,8 @@ impl TryFrom<&[u8]> for ListProviderPropertiesReply {
 /// Opcode for the QueryProviderProperty request
 pub const QUERY_PROVIDER_PROPERTY_REQUEST: u8 = 37;
 pub fn query_provider_property<Conn>(conn: &Conn, provider: Provider, property: xproto::Atom) -> Result<Cookie<'_, Conn, QueryProviderPropertyReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -3000,7 +3037,8 @@ impl TryFrom<&[u8]> for QueryProviderPropertyReply {
 /// Opcode for the ConfigureProviderProperty request
 pub const CONFIGURE_PROVIDER_PROPERTY_REQUEST: u8 = 38;
 pub fn configure_provider_property<'c, Conn>(conn: &'c Conn, provider: Provider, property: xproto::Atom, pending: bool, range: bool, values: &[i32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -3040,7 +3078,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the ChangeProviderProperty request
 pub const CHANGE_PROVIDER_PROPERTY_REQUEST: u8 = 39;
 pub fn change_provider_property<'c, Conn>(conn: &'c Conn, provider: Provider, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: u8, num_items: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -3090,7 +3129,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the DeleteProviderProperty request
 pub const DELETE_PROVIDER_PROPERTY_REQUEST: u8 = 40;
 pub fn delete_provider_property<Conn>(conn: &Conn, provider: Provider, property: xproto::Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -3120,7 +3160,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetProviderProperty request
 pub const GET_PROVIDER_PROPERTY_REQUEST: u8 = 41;
 pub fn get_provider_property<Conn>(conn: &Conn, provider: Provider, property: xproto::Atom, type_: xproto::Atom, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Conn, GetProviderPropertyReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -3894,7 +3935,8 @@ impl Serialize for MonitorInfo {
 /// Opcode for the GetMonitors request
 pub const GET_MONITORS_REQUEST: u8 = 42;
 pub fn get_monitors<Conn>(conn: &Conn, window: xproto::Window, get_active: bool) -> Result<Cookie<'_, Conn, GetMonitorsReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -3954,7 +3996,8 @@ impl TryFrom<&[u8]> for GetMonitorsReply {
 /// Opcode for the SetMonitor request
 pub const SET_MONITOR_REQUEST: u8 = 43;
 pub fn set_monitor<Conn>(conn: &Conn, window: xproto::Window, monitorinfo: MonitorInfo) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -3983,7 +4026,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the DeleteMonitor request
 pub const DELETE_MONITOR_REQUEST: u8 = 44;
 pub fn delete_monitor<Conn>(conn: &Conn, window: xproto::Window, name: xproto::Atom) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -4013,7 +4057,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the CreateLease request
 pub const CREATE_LEASE_REQUEST: u8 = 45;
 pub fn create_lease<'c, Conn>(conn: &'c Conn, window: xproto::Window, lid: Lease, crtcs: &[Crtc], outputs: &[Output]) -> Result<CookieWithFds<'c, Conn, CreateLeaseReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -4085,7 +4130,8 @@ impl TryFrom<(&[u8], Vec<RawFdContainer>)> for CreateLeaseReply {
 /// Opcode for the FreeLease request
 pub const FREE_LEASE_REQUEST: u8 = 46;
 pub fn free_lease<Conn>(conn: &Conn, lid: Lease, terminate: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -4415,7 +4461,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn randr_change_output_property<'c, A>(&'c self, output: Output, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: A, num_units: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where A: Into<u8>
+    where
+        A: Into<u8>,
     {
         change_output_property(self, output, property, type_, format, mode, num_units, data)
     }

@@ -38,7 +38,8 @@ pub const X11_XML_VERSION: (u32, u32) = (1, 1);
 /// Opcode for the GetVersion request
 pub const GET_VERSION_REQUEST: u8 = 0;
 pub fn get_version<Conn>(conn: &Conn, client_major_version: u16, client_minor_version: u16) -> Result<Cookie<'_, Conn, GetVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -90,7 +91,8 @@ impl TryFrom<&[u8]> for GetVersionReply {
 /// Opcode for the GetXIDRange request
 pub const GET_XID_RANGE_REQUEST: u8 = 1;
 pub fn get_xid_range<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetXIDRangeReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -136,7 +138,8 @@ impl TryFrom<&[u8]> for GetXIDRangeReply {
 /// Opcode for the GetXIDList request
 pub const GET_XID_LIST_REQUEST: u8 = 2;
 pub fn get_xid_list<Conn>(conn: &Conn, count: u32) -> Result<Cookie<'_, Conn, GetXIDListReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;

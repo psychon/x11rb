@@ -367,7 +367,8 @@ impl Serialize for AttachFormat {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 pub fn query_version<Conn>(conn: &Conn, major_version: u32, minor_version: u32) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -423,7 +424,9 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 /// Opcode for the Connect request
 pub const CONNECT_REQUEST: u8 = 1;
 pub fn connect<Conn, A>(conn: &Conn, window: xproto::Window, driver_type: A) -> Result<Cookie<'_, Conn, ConnectReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<u32>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<u32>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -485,7 +488,8 @@ impl TryFrom<&[u8]> for ConnectReply {
 /// Opcode for the Authenticate request
 pub const AUTHENTICATE_REQUEST: u8 = 2;
 pub fn authenticate<Conn>(conn: &Conn, window: xproto::Window, magic: u32) -> Result<Cookie<'_, Conn, AuthenticateReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -539,7 +543,8 @@ impl TryFrom<&[u8]> for AuthenticateReply {
 /// Opcode for the CreateDrawable request
 pub const CREATE_DRAWABLE_REQUEST: u8 = 3;
 pub fn create_drawable<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -564,7 +569,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the DestroyDrawable request
 pub const DESTROY_DRAWABLE_REQUEST: u8 = 4;
 pub fn destroy_drawable<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -589,7 +595,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetBuffers request
 pub const GET_BUFFERS_REQUEST: u8 = 5;
 pub fn get_buffers<'c, Conn>(conn: &'c Conn, drawable: xproto::Drawable, count: u32, attachments: &[u32]) -> Result<Cookie<'c, Conn, GetBuffersReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -653,7 +660,8 @@ impl TryFrom<&[u8]> for GetBuffersReply {
 /// Opcode for the CopyRegion request
 pub const COPY_REGION_REQUEST: u8 = 6;
 pub fn copy_region<Conn>(conn: &Conn, drawable: xproto::Drawable, region: u32, dest: u32, src: u32) -> Result<Cookie<'_, Conn, CopyRegionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -715,7 +723,8 @@ impl TryFrom<&[u8]> for CopyRegionReply {
 /// Opcode for the GetBuffersWithFormat request
 pub const GET_BUFFERS_WITH_FORMAT_REQUEST: u8 = 7;
 pub fn get_buffers_with_format<'c, Conn>(conn: &'c Conn, drawable: xproto::Drawable, count: u32, attachments: &[AttachFormat]) -> Result<Cookie<'c, Conn, GetBuffersWithFormatReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -779,7 +788,8 @@ impl TryFrom<&[u8]> for GetBuffersWithFormatReply {
 /// Opcode for the SwapBuffers request
 pub const SWAP_BUFFERS_REQUEST: u8 = 8;
 pub fn swap_buffers<Conn>(conn: &Conn, drawable: xproto::Drawable, target_msc_hi: u32, target_msc_lo: u32, divisor_hi: u32, divisor_lo: u32, remainder_hi: u32, remainder_lo: u32) -> Result<Cookie<'_, Conn, SwapBuffersReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -860,7 +870,8 @@ impl TryFrom<&[u8]> for SwapBuffersReply {
 /// Opcode for the GetMSC request
 pub const GET_MSC_REQUEST: u8 = 9;
 pub fn get_msc<Conn>(conn: &Conn, drawable: xproto::Drawable) -> Result<Cookie<'_, Conn, GetMSCReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -919,7 +930,8 @@ impl TryFrom<&[u8]> for GetMSCReply {
 /// Opcode for the WaitMSC request
 pub const WAIT_MSC_REQUEST: u8 = 10;
 pub fn wait_msc<Conn>(conn: &Conn, drawable: xproto::Drawable, target_msc_hi: u32, target_msc_lo: u32, divisor_hi: u32, divisor_lo: u32, remainder_hi: u32, remainder_lo: u32) -> Result<Cookie<'_, Conn, WaitMSCReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1008,7 +1020,8 @@ impl TryFrom<&[u8]> for WaitMSCReply {
 /// Opcode for the WaitSBC request
 pub const WAIT_SBC_REQUEST: u8 = 11;
 pub fn wait_sbc<Conn>(conn: &Conn, drawable: xproto::Drawable, target_sbc_hi: u32, target_sbc_lo: u32) -> Result<Cookie<'_, Conn, WaitSBCReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1077,7 +1090,8 @@ impl TryFrom<&[u8]> for WaitSBCReply {
 /// Opcode for the SwapInterval request
 pub const SWAP_INTERVAL_REQUEST: u8 = 12;
 pub fn swap_interval<Conn>(conn: &Conn, drawable: xproto::Drawable, interval: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1107,7 +1121,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetParam request
 pub const GET_PARAM_REQUEST: u8 = 13;
 pub fn get_param<Conn>(conn: &Conn, drawable: xproto::Drawable, param: u32) -> Result<Cookie<'_, Conn, GetParamReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1299,7 +1314,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn dri2_connect<A>(&self, window: xproto::Window, driver_type: A) -> Result<Cookie<'_, Self, ConnectReply>, ConnectionError>
-    where A: Into<u32>
+    where
+        A: Into<u32>,
     {
         connect(self, window, driver_type)
     }

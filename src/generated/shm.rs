@@ -172,7 +172,8 @@ impl From<BadSegError> for [u8; 32] {
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
 pub fn query_version<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryVersionReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -226,7 +227,8 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 /// Opcode for the Attach request
 pub const ATTACH_REQUEST: u8 = 1;
 pub fn attach<Conn>(conn: &Conn, shmseg: Seg, shmid: u32, read_only: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -261,7 +263,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the Detach request
 pub const DETACH_REQUEST: u8 = 2;
 pub fn detach<Conn>(conn: &Conn, shmseg: Seg) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -286,7 +289,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the PutImage request
 pub const PUT_IMAGE_REQUEST: u8 = 3;
 pub fn put_image<Conn>(conn: &Conn, drawable: xproto::Drawable, gc: xproto::Gcontext, total_width: u16, total_height: u16, src_x: u16, src_y: u16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16, depth: u8, format: u8, send_event: bool, shmseg: Seg, offset: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -357,7 +361,8 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the GetImage request
 pub const GET_IMAGE_REQUEST: u8 = 4;
 pub fn get_image<Conn>(conn: &Conn, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32, format: u8, shmseg: Seg, offset: u32) -> Result<Cookie<'_, Conn, GetImageReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -441,7 +446,8 @@ impl TryFrom<&[u8]> for GetImageReply {
 /// Opcode for the CreatePixmap request
 pub const CREATE_PIXMAP_REQUEST: u8 = 5;
 pub fn create_pixmap<Conn>(conn: &Conn, pid: xproto::Pixmap, drawable: xproto::Drawable, width: u16, height: u16, depth: u8, shmseg: Seg, offset: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -492,7 +498,9 @@ where Conn: RequestConnection + ?Sized
 /// Opcode for the AttachFd request
 pub const ATTACH_FD_REQUEST: u8 = 6;
 pub fn attach_fd<Conn, A>(conn: &Conn, shmseg: Seg, shm_fd: A, read_only: bool) -> Result<VoidCookie<'_, Conn>, ConnectionError>
-where Conn: RequestConnection + ?Sized, A: Into<RawFdContainer>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<RawFdContainer>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -523,7 +531,8 @@ where Conn: RequestConnection + ?Sized, A: Into<RawFdContainer>
 /// Opcode for the CreateSegment request
 pub const CREATE_SEGMENT_REQUEST: u8 = 7;
 pub fn create_segment<Conn>(conn: &Conn, shmseg: Seg, size: u32, read_only: bool) -> Result<CookieWithFds<'_, Conn, CreateSegmentReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -616,7 +625,8 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn shm_attach_fd<A>(&self, shmseg: Seg, shm_fd: A, read_only: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where A: Into<RawFdContainer>
+    where
+        A: Into<RawFdContainer>,
     {
         attach_fd(self, shmseg, shm_fd, read_only)
     }

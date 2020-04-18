@@ -452,7 +452,9 @@ def generate_request_code(module, obj, name, function_name):
     module.trait_out("fn %s%s%s(%s) -> Result<%s, ConnectionError>", function_name_prefix,
                      function_name, generics_str, ", ".join(args), result_type_trait)
     if where:
-        module.trait_out("where %s", ", ".join(where))
+        module.trait_out("where")
+        for entry in where:
+            module.trait_out.indent("%s,", entry)
     module.trait_out("{")
     if function_name in arg_names:
         module.trait_out.indent("self::%s(%s)", function_name, ", ".join(arg_names))
@@ -471,7 +473,9 @@ def generate_request_code(module, obj, name, function_name):
     generics_str = "<%s>" % ", ".join(prefix_generics + generics)
     code_generator_helpers.module.emit_doc(module.out, obj.doc)
     module.out("pub fn %s%s(%s) -> Result<%s, ConnectionError>", function_name, generics_str, ", ".join(args), result_type_func)
-    module.out("where %s", ", ".join(['Conn: RequestConnection + ?Sized'] + where))
+    module.out("where")
+    for entry in ['Conn: RequestConnection + ?Sized'] + where:
+        module.out.indent("%s,", entry)
     module.out("{")
     with Indent(module.out):
         request_implementation(module, obj, name, fds, fds_is_list)

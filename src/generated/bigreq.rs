@@ -38,7 +38,8 @@ pub const X11_XML_VERSION: (u32, u32) = (0, 0);
 /// Opcode for the Enable request
 pub const ENABLE_REQUEST: u8 = 0;
 pub fn enable<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, EnableReply>, ConnectionError>
-where Conn: RequestConnection + ?Sized
+where
+    Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
