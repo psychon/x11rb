@@ -14,6 +14,7 @@ use std::io::IoSlice;
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::Event as _;
+#[allow(unused_imports)]
 use crate::x11_utils::{Serialize, TryParse};
 use crate::connection::RequestConnection;
 #[allow(unused_imports)]
@@ -93,16 +94,17 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (4) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
-    let request0 = [
+    let length_so_far = 0;
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_VERSION_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -142,21 +144,22 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let screen_bytes = screen.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_DIRECT_RENDERING_CAPABLE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         screen_bytes[0],
         screen_bytes[1],
         screen_bytes[2],
         screen_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -192,21 +195,22 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let screen_bytes = screen.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         OPEN_CONNECTION_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         screen_bytes[0],
         screen_bytes[1],
         screen_bytes[2],
         screen_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -248,21 +252,22 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let screen_bytes = screen.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CLOSE_CONNECTION_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         screen_bytes[0],
         screen_bytes[1],
         screen_bytes[2],
         screen_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -274,21 +279,22 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let screen_bytes = screen.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GET_CLIENT_DRIVER_NAME_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         screen_bytes[0],
         screen_bytes[1],
         screen_bytes[2],
         screen_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -332,16 +338,15 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (16) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let screen_bytes = screen.serialize();
     let visual_bytes = visual.serialize();
     let context_bytes = context.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CREATE_CONTEXT_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         screen_bytes[0],
         screen_bytes[1],
         screen_bytes[2],
@@ -355,8 +360,10 @@ where
         context_bytes[2],
         context_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -392,15 +399,14 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let screen_bytes = screen.serialize();
     let context_bytes = context.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         DESTROY_CONTEXT_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         screen_bytes[0],
         screen_bytes[1],
         screen_bytes[2],
@@ -410,8 +416,10 @@ where
         context_bytes[2],
         context_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -423,15 +431,14 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let screen_bytes = screen.serialize();
     let drawable_bytes = drawable.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CREATE_DRAWABLE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         screen_bytes[0],
         screen_bytes[1],
         screen_bytes[2],
@@ -441,8 +448,10 @@ where
         drawable_bytes[2],
         drawable_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -478,15 +487,14 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let screen_bytes = screen.serialize();
     let drawable_bytes = drawable.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         DESTROY_DRAWABLE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         screen_bytes[0],
         screen_bytes[1],
         screen_bytes[2],
@@ -496,8 +504,10 @@ where
         drawable_bytes[2],
         drawable_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -509,15 +519,14 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let screen_bytes = screen.serialize();
     let drawable_bytes = drawable.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GET_DRAWABLE_INFO_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         screen_bytes[0],
         screen_bytes[1],
         screen_bytes[2],
@@ -527,8 +536,10 @@ where
         drawable_bytes[2],
         drawable_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -584,21 +595,22 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let screen_bytes = screen.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         GET_DEVICE_INFO_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         screen_bytes[0],
         screen_bytes[1],
         screen_bytes[2],
         screen_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -645,15 +657,14 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let screen_bytes = screen.serialize();
     let magic_bytes = magic.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         AUTH_CONNECTION_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         screen_bytes[0],
         screen_bytes[1],
         screen_bytes[2],
@@ -663,8 +674,10 @@ where
         magic_bytes[2],
         magic_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

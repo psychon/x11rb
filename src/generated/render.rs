@@ -14,6 +14,7 @@ use std::io::IoSlice;
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::Event as _;
+#[allow(unused_imports)]
 use crate::x11_utils::{Serialize, TryParse};
 use crate::connection::RequestConnection;
 #[allow(unused_imports)]
@@ -1672,15 +1673,14 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let client_major_version_bytes = client_major_version.serialize();
     let client_minor_version_bytes = client_minor_version.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_VERSION_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         client_major_version_bytes[0],
         client_major_version_bytes[1],
         client_major_version_bytes[2],
@@ -1690,8 +1690,10 @@ where
         client_minor_version_bytes[2],
         client_minor_version_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1730,16 +1732,17 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (4) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
-    let request0 = [
+    let length_so_far = 0;
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_PICT_FORMATS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -1787,21 +1790,22 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let format_bytes = format.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_PICT_INDEX_VALUES_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         format_bytes[0],
         format_bytes[1],
         format_bytes[2],
         format_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -2021,17 +2025,16 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
-    let length: usize = (20 + value_list_bytes.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let pid_bytes = pid.serialize();
     let drawable_bytes = drawable.serialize();
     let format_bytes = format.serialize();
     let value_mask_bytes = value_mask.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CREATE_PICTURE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         pid_bytes[0],
         pid_bytes[1],
         pid_bytes[2],
@@ -2049,12 +2052,14 @@ where
         value_mask_bytes[2],
         value_mask_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&value_list_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the ChangePicture request
@@ -2247,15 +2252,14 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
-    let length: usize = (12 + value_list_bytes.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let picture_bytes = picture.serialize();
     let value_mask_bytes = value_mask.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CHANGE_PICTURE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         picture_bytes[0],
         picture_bytes[1],
         picture_bytes[2],
@@ -2265,12 +2269,14 @@ where
         value_mask_bytes[2],
         value_mask_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&value_list_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the SetPictureClipRectangles request
@@ -2281,17 +2287,16 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12 + 8 * rectangles.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let picture_bytes = picture.serialize();
     let clip_x_origin_bytes = clip_x_origin.serialize();
     let clip_y_origin_bytes = clip_y_origin.serialize();
     let rectangles_bytes = rectangles.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         SET_PICTURE_CLIP_RECTANGLES_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         picture_bytes[0],
         picture_bytes[1],
         picture_bytes[2],
@@ -2301,12 +2306,14 @@ where
         clip_y_origin_bytes[0],
         clip_y_origin_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&rectangles_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&rectangles_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&rectangles_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the FreePicture request
@@ -2317,21 +2324,22 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let picture_bytes = picture.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         FREE_PICTURE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         picture_bytes[0],
         picture_bytes[1],
         picture_bytes[2],
         picture_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -2344,8 +2352,7 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (36) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let op = op.into();
     let op_bytes = op.serialize();
     let src_bytes = src.serialize();
@@ -2359,11 +2366,11 @@ where
     let dst_y_bytes = dst_y.serialize();
     let width_bytes = width.serialize();
     let height_bytes = height.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         COMPOSITE_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         op_bytes[0],
         0,
         0,
@@ -2397,8 +2404,10 @@ where
         height_bytes[0],
         height_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -2411,8 +2420,7 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (24 + 40 * traps.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let op = op.into();
     let op_bytes = op.serialize();
     let src_bytes = src.serialize();
@@ -2421,11 +2429,11 @@ where
     let src_x_bytes = src_x.serialize();
     let src_y_bytes = src_y.serialize();
     let traps_bytes = traps.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         TRAPEZOIDS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         op_bytes[0],
         0,
         0,
@@ -2447,12 +2455,14 @@ where
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&traps_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&traps_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&traps_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the Triangles request
@@ -2464,8 +2474,7 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (24 + 24 * triangles.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let op = op.into();
     let op_bytes = op.serialize();
     let src_bytes = src.serialize();
@@ -2474,11 +2483,11 @@ where
     let src_x_bytes = src_x.serialize();
     let src_y_bytes = src_y.serialize();
     let triangles_bytes = triangles.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         TRIANGLES_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         op_bytes[0],
         0,
         0,
@@ -2500,12 +2509,14 @@ where
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&triangles_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&triangles_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&triangles_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the TriStrip request
@@ -2517,8 +2528,7 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (24 + 8 * points.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let op = op.into();
     let op_bytes = op.serialize();
     let src_bytes = src.serialize();
@@ -2527,11 +2537,11 @@ where
     let src_x_bytes = src_x.serialize();
     let src_y_bytes = src_y.serialize();
     let points_bytes = points.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         TRI_STRIP_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         op_bytes[0],
         0,
         0,
@@ -2553,12 +2563,14 @@ where
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&points_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&points_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&points_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the TriFan request
@@ -2570,8 +2582,7 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (24 + 8 * points.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let op = op.into();
     let op_bytes = op.serialize();
     let src_bytes = src.serialize();
@@ -2580,11 +2591,11 @@ where
     let src_x_bytes = src_x.serialize();
     let src_y_bytes = src_y.serialize();
     let points_bytes = points.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         TRI_FAN_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         op_bytes[0],
         0,
         0,
@@ -2606,12 +2617,14 @@ where
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&points_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&points_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&points_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the CreateGlyphSet request
@@ -2622,15 +2635,14 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let gsid_bytes = gsid.serialize();
     let format_bytes = format.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CREATE_GLYPH_SET_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         gsid_bytes[0],
         gsid_bytes[1],
         gsid_bytes[2],
@@ -2640,8 +2652,10 @@ where
         format_bytes[2],
         format_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -2653,15 +2667,14 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let gsid_bytes = gsid.serialize();
     let existing_bytes = existing.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         REFERENCE_GLYPH_SET_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         gsid_bytes[0],
         gsid_bytes[1],
         gsid_bytes[2],
@@ -2671,8 +2684,10 @@ where
         existing_bytes[2],
         existing_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -2684,21 +2699,22 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let glyphset_bytes = glyphset.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         FREE_GLYPH_SET_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         glyphset_bytes[0],
         glyphset_bytes[1],
         glyphset_bytes[2],
         glyphset_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -2710,17 +2726,16 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12 + 4 * glyphids.len() + 12 * glyphs.len() + 1 * data.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let glyphset_bytes = glyphset.serialize();
     let glyphs_len_bytes = glyphs_len.serialize();
     assert_eq!(glyphids.len(), glyphs_len as usize, "Argument glyphids has an incorrect length");
     let glyphids_bytes = glyphids.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         ADD_GLYPHS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         glyphset_bytes[0],
         glyphset_bytes[1],
         glyphset_bytes[2],
@@ -2730,16 +2745,18 @@ where
         glyphs_len_bytes[2],
         glyphs_len_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&glyphids_bytes).len();
     assert_eq!(glyphs.len(), glyphs_len as usize, "Argument glyphs has an incorrect length");
     let glyphs_bytes = glyphs.serialize();
     let length_so_far = length_so_far + (&glyphs_bytes).len();
     let length_so_far = length_so_far + (data).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&glyphids_bytes), IoSlice::new(&glyphs_bytes), IoSlice::new(data), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&glyphids_bytes), IoSlice::new(&glyphs_bytes), IoSlice::new(data), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the FreeGlyphs request
@@ -2750,26 +2767,27 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8 + 4 * glyphs.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let glyphset_bytes = glyphset.serialize();
     let glyphs_bytes = glyphs.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         FREE_GLYPHS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         glyphset_bytes[0],
         glyphset_bytes[1],
         glyphset_bytes[2],
         glyphset_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&glyphs_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&glyphs_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&glyphs_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the CompositeGlyphs8 request
@@ -2781,8 +2799,7 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (28 + 1 * glyphcmds.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let op = op.into();
     let op_bytes = op.serialize();
     let src_bytes = src.serialize();
@@ -2791,11 +2808,11 @@ where
     let glyphset_bytes = glyphset.serialize();
     let src_x_bytes = src_x.serialize();
     let src_y_bytes = src_y.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         COMPOSITE_GLYPHS8_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         op_bytes[0],
         0,
         0,
@@ -2821,12 +2838,14 @@ where
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (glyphcmds).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(glyphcmds), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(glyphcmds), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the CompositeGlyphs16 request
@@ -2838,8 +2857,7 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (28 + 1 * glyphcmds.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let op = op.into();
     let op_bytes = op.serialize();
     let src_bytes = src.serialize();
@@ -2848,11 +2866,11 @@ where
     let glyphset_bytes = glyphset.serialize();
     let src_x_bytes = src_x.serialize();
     let src_y_bytes = src_y.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         COMPOSITE_GLYPHS16_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         op_bytes[0],
         0,
         0,
@@ -2878,12 +2896,14 @@ where
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (glyphcmds).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(glyphcmds), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(glyphcmds), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the CompositeGlyphs32 request
@@ -2895,8 +2915,7 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (28 + 1 * glyphcmds.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let op = op.into();
     let op_bytes = op.serialize();
     let src_bytes = src.serialize();
@@ -2905,11 +2924,11 @@ where
     let glyphset_bytes = glyphset.serialize();
     let src_x_bytes = src_x.serialize();
     let src_y_bytes = src_y.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         COMPOSITE_GLYPHS32_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         op_bytes[0],
         0,
         0,
@@ -2935,12 +2954,14 @@ where
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (glyphcmds).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(glyphcmds), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(glyphcmds), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the FillRectangles request
@@ -2952,18 +2973,17 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (20 + 8 * rects.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let op = op.into();
     let op_bytes = op.serialize();
     let dst_bytes = dst.serialize();
     let color_bytes = color.serialize();
     let rects_bytes = rects.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         FILL_RECTANGLES_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         op_bytes[0],
         0,
         0,
@@ -2981,12 +3001,14 @@ where
         color_bytes[6],
         color_bytes[7],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&rects_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&rects_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&rects_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the CreateCursor request
@@ -2997,17 +3019,16 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (16) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let cid_bytes = cid.serialize();
     let source_bytes = source.serialize();
     let x_bytes = x.serialize();
     let y_bytes = y.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CREATE_CURSOR_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cid_bytes[0],
         cid_bytes[1],
         cid_bytes[2],
@@ -3021,8 +3042,10 @@ where
         y_bytes[0],
         y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -3132,15 +3155,14 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (44) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let picture_bytes = picture.serialize();
     let transform_bytes = transform.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         SET_PICTURE_TRANSFORM_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         picture_bytes[0],
         picture_bytes[1],
         picture_bytes[2],
@@ -3182,8 +3204,10 @@ where
         transform_bytes[34],
         transform_bytes[35],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -3195,21 +3219,22 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         QUERY_FILTERS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
         drawable_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -3250,16 +3275,15 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12 + 1 * filter.len() + 4 * values.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let picture_bytes = picture.serialize();
     let filter_len: u16 = filter.len().try_into()?;
     let filter_len_bytes = filter_len.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         SET_PICTURE_FILTER_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         picture_bytes[0],
         picture_bytes[1],
         picture_bytes[2],
@@ -3269,16 +3293,18 @@ where
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (filter).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
     let values_bytes = values.serialize();
     let length_so_far = length_so_far + (&values_bytes).len();
-    let padding2 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding2).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(filter), IoSlice::new(&padding1), IoSlice::new(&values_bytes), IoSlice::new(&padding2)], Vec::new())?)
+    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding1).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(filter), IoSlice::new(&padding0), IoSlice::new(&values_bytes), IoSlice::new(&padding1)], Vec::new())?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -3331,26 +3357,27 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (8 + 8 * cursors.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let cid_bytes = cid.serialize();
     let cursors_bytes = cursors.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CREATE_ANIM_CURSOR_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cid_bytes[0],
         cid_bytes[1],
         cid_bytes[2],
         cid_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&cursors_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&cursors_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&cursors_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -3469,17 +3496,16 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (12 + 24 * traps.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let picture_bytes = picture.serialize();
     let x_off_bytes = x_off.serialize();
     let y_off_bytes = y_off.serialize();
     let traps_bytes = traps.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         ADD_TRAPS_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         picture_bytes[0],
         picture_bytes[1],
         picture_bytes[2],
@@ -3489,12 +3515,14 @@ where
         y_off_bytes[0],
         y_off_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&traps_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&traps_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&traps_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the CreateSolidFill request
@@ -3505,15 +3533,14 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (16) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let picture_bytes = picture.serialize();
     let color_bytes = color.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CREATE_SOLID_FILL_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         picture_bytes[0],
         picture_bytes[1],
         picture_bytes[2],
@@ -3527,8 +3554,10 @@ where
         color_bytes[6],
         color_bytes[7],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -3540,19 +3569,18 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (28 + 4 * stops.len() + 8 * colors.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let picture_bytes = picture.serialize();
     let p1_bytes = p1.serialize();
     let p2_bytes = p2.serialize();
     let num_stops_bytes = num_stops.serialize();
     assert_eq!(stops.len(), num_stops as usize, "Argument stops has an incorrect length");
     let stops_bytes = stops.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CREATE_LINEAR_GRADIENT_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         picture_bytes[0],
         picture_bytes[1],
         picture_bytes[2],
@@ -3578,15 +3606,17 @@ where
         num_stops_bytes[2],
         num_stops_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&stops_bytes).len();
     assert_eq!(colors.len(), num_stops as usize, "Argument colors has an incorrect length");
     let colors_bytes = colors.serialize();
     let length_so_far = length_so_far + (&colors_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&stops_bytes), IoSlice::new(&colors_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&stops_bytes), IoSlice::new(&colors_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the CreateRadialGradient request
@@ -3597,8 +3627,7 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (36 + 4 * stops.len() + 8 * colors.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let picture_bytes = picture.serialize();
     let inner_bytes = inner.serialize();
     let outer_bytes = outer.serialize();
@@ -3607,11 +3636,11 @@ where
     let num_stops_bytes = num_stops.serialize();
     assert_eq!(stops.len(), num_stops as usize, "Argument stops has an incorrect length");
     let stops_bytes = stops.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CREATE_RADIAL_GRADIENT_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         picture_bytes[0],
         picture_bytes[1],
         picture_bytes[2],
@@ -3645,15 +3674,17 @@ where
         num_stops_bytes[2],
         num_stops_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&stops_bytes).len();
     assert_eq!(colors.len(), num_stops as usize, "Argument colors has an incorrect length");
     let colors_bytes = colors.serialize();
     let length_so_far = length_so_far + (&colors_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&stops_bytes), IoSlice::new(&colors_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&stops_bytes), IoSlice::new(&colors_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the CreateConicalGradient request
@@ -3664,19 +3695,18 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let length: usize = (24 + 4 * stops.len() + 8 * colors.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let picture_bytes = picture.serialize();
     let center_bytes = center.serialize();
     let angle_bytes = angle.serialize();
     let num_stops_bytes = num_stops.serialize();
     assert_eq!(stops.len(), num_stops as usize, "Argument stops has an incorrect length");
     let stops_bytes = stops.serialize();
-    let request0 = [
+    let mut request0 = [
         extension_information.major_opcode,
         CREATE_CONICAL_GRADIENT_REQUEST,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         picture_bytes[0],
         picture_bytes[1],
         picture_bytes[2],
@@ -3698,15 +3728,17 @@ where
         num_stops_bytes[2],
         num_stops_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&stops_bytes).len();
     assert_eq!(colors.len(), num_stops as usize, "Argument colors has an incorrect length");
     let colors_bytes = colors.serialize();
     let length_so_far = length_so_far + (&colors_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&stops_bytes), IoSlice::new(&colors_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&stops_bytes), IoSlice::new(&colors_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Extension trait defining the requests of this extension.

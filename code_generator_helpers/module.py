@@ -255,6 +255,7 @@ class Module(object):
         self.out("use crate::utils::RawFdContainer;")
         self.out("#[allow(unused_imports)]")
         self.out("use crate::x11_utils::Event as _;")
+        self.out("#[allow(unused_imports)]")
         self.out("use crate::x11_utils::{Serialize, TryParse};")
         self.out("use crate::connection::RequestConnection;")
         self.out("#[allow(unused_imports)]")

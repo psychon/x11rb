@@ -14,6 +14,7 @@ use std::io::IoSlice;
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
 use crate::x11_utils::Event as _;
+#[allow(unused_imports)]
 use crate::x11_utils::{Serialize, TryParse};
 use crate::connection::RequestConnection;
 #[allow(unused_imports)]
@@ -6755,9 +6756,8 @@ where
 {
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
-    let length: usize = (32 + value_list_bytes.len() + 3) / 4;
+    let length_so_far = 0;
     let depth_bytes = depth.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let wid_bytes = wid.serialize();
     let parent_bytes = parent.serialize();
     let x_bytes = x.serialize();
@@ -6769,11 +6769,11 @@ where
     let class_bytes = class.serialize();
     let visual_bytes = visual.serialize();
     let value_mask_bytes = value_mask.serialize();
-    let request0 = [
+    let mut request0 = [
         CREATE_WINDOW_REQUEST,
         depth_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         wid_bytes[0],
         wid_bytes[1],
         wid_bytes[2],
@@ -6803,12 +6803,14 @@ where
         value_mask_bytes[2],
         value_mask_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&value_list_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the ChangeWindowAttributes request
@@ -7043,15 +7045,14 @@ where
 {
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
-    let length: usize = (12 + value_list_bytes.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
     let value_mask_bytes = value_mask.serialize();
-    let request0 = [
+    let mut request0 = [
         CHANGE_WINDOW_ATTRIBUTES_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
@@ -7061,12 +7062,14 @@ where
         value_mask_bytes[2],
         value_mask_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&value_list_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -7152,21 +7155,22 @@ pub fn get_window_attributes<Conn>(conn: &Conn, window: Window) -> Result<Cookie
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
-    let request0 = [
+    let mut request0 = [
         GET_WINDOW_ATTRIBUTES_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
         window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 /// BRIEF DESCRIPTION MISSING.
@@ -7267,21 +7271,22 @@ pub fn destroy_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
-    let request0 = [
+    let mut request0 = [
         DESTROY_WINDOW_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
         window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -7291,21 +7296,22 @@ pub fn destroy_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCooki
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
-    let request0 = [
+    let mut request0 = [
         DESTROY_SUBWINDOWS_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
         window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -7400,23 +7406,24 @@ where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
 {
-    let length: usize = (8) / 4;
+    let length_so_far = 0;
     let mode = mode.into();
     let mode_bytes = mode.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
-    let request0 = [
+    let mut request0 = [
         CHANGE_SAVE_SET_REQUEST,
         mode_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
         window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -7458,17 +7465,16 @@ pub fn reparent_window<Conn>(conn: &Conn, window: Window, parent: Window, x: i16
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (16) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
     let parent_bytes = parent.serialize();
     let x_bytes = x.serialize();
     let y_bytes = y.serialize();
-    let request0 = [
+    let mut request0 = [
         REPARENT_WINDOW_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
@@ -7482,8 +7488,10 @@ where
         y_bytes[0],
         y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -7528,21 +7536,22 @@ pub fn map_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Co
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
-    let request0 = [
+    let mut request0 = [
         MAP_WINDOW_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
         window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -7552,21 +7561,22 @@ pub fn map_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
-    let request0 = [
+    let mut request0 = [
         MAP_SUBWINDOWS_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
         window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -7597,21 +7607,22 @@ pub fn unmap_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, 
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
-    let request0 = [
+    let mut request0 = [
         UNMAP_WINDOW_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
         window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -7621,21 +7632,22 @@ pub fn unmap_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
-    let request0 = [
+    let mut request0 = [
         UNMAP_SUBWINDOWS_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
         window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -7954,15 +7966,14 @@ where
 {
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
-    let length: usize = (12 + value_list_bytes.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
     let value_mask_bytes = value_mask.serialize();
-    let request0 = [
+    let mut request0 = [
         CONFIGURE_WINDOW_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
@@ -7972,12 +7983,14 @@ where
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&value_list_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -8065,23 +8078,24 @@ where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
 {
-    let length: usize = (8) / 4;
+    let length_so_far = 0;
     let direction = direction.into();
     let direction_bytes = direction.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
-    let request0 = [
+    let mut request0 = [
         CIRCULATE_WINDOW_REQUEST,
         direction_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
         window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -8127,21 +8141,22 @@ pub fn get_geometry<Conn>(conn: &Conn, drawable: Drawable) -> Result<Cookie<'_, 
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
-    let request0 = [
+    let mut request0 = [
         GET_GEOMETRY_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
         drawable_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 /// BRIEF DESCRIPTION MISSING.
@@ -8240,21 +8255,22 @@ pub fn query_tree<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, 
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
-    let request0 = [
+    let mut request0 = [
         QUERY_TREE_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
         window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 /// BRIEF DESCRIPTION MISSING.
@@ -8347,27 +8363,28 @@ pub fn intern_atom<'c, Conn>(conn: &'c Conn, only_if_exists: bool, name: &[u8]) 
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8 + 1 * name.len() + 3) / 4;
+    let length_so_far = 0;
     let only_if_exists_bytes = (only_if_exists as u8).serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let name_len: u16 = name.len().try_into()?;
     let name_len_bytes = name_len.serialize();
-    let request0 = [
+    let mut request0 = [
         INTERN_ATOM_REQUEST,
         only_if_exists_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         name_len_bytes[0],
         name_len_bytes[1],
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (name).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InternAtomReply {
@@ -8400,21 +8417,22 @@ pub fn get_atom_name<Conn>(conn: &Conn, atom: Atom) -> Result<Cookie<'_, Conn, G
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let atom_bytes = atom.serialize();
-    let request0 = [
+    let mut request0 = [
         GET_ATOM_NAME_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         atom_bytes[0],
         atom_bytes[1],
         atom_bytes[2],
         atom_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -8580,10 +8598,9 @@ where
     B: Into<Atom>,
     C: Into<Atom>,
 {
-    let length: usize = (24 + 1 * data.len() + 3) / 4;
+    let length_so_far = 0;
     let mode = mode.into();
     let mode_bytes = mode.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let property = property.into();
     let property_bytes = property.serialize();
@@ -8592,11 +8609,11 @@ where
     let format_bytes = format.serialize();
     let data_len_bytes = data_len.serialize();
     assert_eq!(data.len(), ((data_len as usize) * (format as usize)) / (8), "Argument data has an incorrect length");
-    let request0 = [
+    let mut request0 = [
         CHANGE_PROPERTY_REQUEST,
         mode_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
@@ -8618,12 +8635,14 @@ where
         data_len_bytes[2],
         data_len_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (data).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(data), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(data), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the DeleteProperty request
@@ -8632,15 +8651,14 @@ pub fn delete_property<Conn>(conn: &Conn, window: Window, property: Atom) -> Res
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (12) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
     let property_bytes = property.serialize();
-    let request0 = [
+    let mut request0 = [
         DELETE_PROPERTY_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
@@ -8650,8 +8668,10 @@ where
         property_bytes[2],
         property_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -8953,19 +8973,18 @@ pub fn get_property<Conn>(conn: &Conn, delete: bool, window: Window, property: A
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (24) / 4;
+    let length_so_far = 0;
     let delete_bytes = (delete as u8).serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let property_bytes = property.serialize();
     let type_bytes = type_.serialize();
     let long_offset_bytes = long_offset.serialize();
     let long_length_bytes = long_length.serialize();
-    let request0 = [
+    let mut request0 = [
         GET_PROPERTY_REQUEST,
         delete_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
@@ -8987,8 +9006,10 @@ where
         long_length_bytes[2],
         long_length_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 /// BRIEF DESCRIPTION MISSING.
@@ -9043,21 +9064,22 @@ pub fn list_properties<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, C
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
-    let request0 = [
+    let mut request0 = [
         LIST_PROPERTIES_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
         window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -9122,16 +9144,15 @@ pub fn set_selection_owner<Conn>(conn: &Conn, owner: Window, selection: Atom, ti
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (16) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let owner_bytes = owner.serialize();
     let selection_bytes = selection.serialize();
     let time_bytes = time.serialize();
-    let request0 = [
+    let mut request0 = [
         SET_SELECTION_OWNER_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         owner_bytes[0],
         owner_bytes[1],
         owner_bytes[2],
@@ -9145,8 +9166,10 @@ where
         time_bytes[2],
         time_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -9173,21 +9196,22 @@ pub fn get_selection_owner<Conn>(conn: &Conn, selection: Atom) -> Result<Cookie<
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let selection_bytes = selection.serialize();
-    let request0 = [
+    let mut request0 = [
         GET_SELECTION_OWNER_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         selection_bytes[0],
         selection_bytes[1],
         selection_bytes[2],
         selection_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 /// BRIEF DESCRIPTION MISSING.
@@ -9227,18 +9251,17 @@ pub fn convert_selection<Conn>(conn: &Conn, requestor: Window, selection: Atom, 
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (24) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let requestor_bytes = requestor.serialize();
     let selection_bytes = selection.serialize();
     let target_bytes = target.serialize();
     let property_bytes = property.serialize();
     let time_bytes = time.serialize();
-    let request0 = [
+    let mut request0 = [
         CONVERT_SELECTION_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         requestor_bytes[0],
         requestor_bytes[1],
         requestor_bytes[2],
@@ -9260,8 +9283,10 @@ where
         time_bytes[2],
         time_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -9407,18 +9432,17 @@ where
     Conn: RequestConnection + ?Sized,
     A: Into<[u8; 32]>,
 {
-    let length: usize = (44) / 4;
+    let length_so_far = 0;
     let propagate_bytes = (propagate as u8).serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let destination_bytes = destination.serialize();
     let event_mask_bytes = event_mask.serialize();
     let event = event.into();
     let event = &event;
-    let request0 = [
+    let mut request0 = [
         SEND_EVENT_REQUEST,
         propagate_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         destination_bytes[0],
         destination_bytes[1],
         destination_bytes[2],
@@ -9428,9 +9452,11 @@ where
         event_mask_bytes[2],
         event_mask_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (event).len();
-    assert_eq!(length_so_far, length * 4);
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(event)], Vec::new())?)
 }
 
@@ -9712,9 +9738,8 @@ where
     A: Into<u8>,
     B: Into<u8>,
 {
-    let length: usize = (24) / 4;
+    let length_so_far = 0;
     let owner_events_bytes = (owner_events as u8).serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let grab_window_bytes = grab_window.serialize();
     let event_mask_bytes = event_mask.serialize();
     let pointer_mode = pointer_mode.into();
@@ -9724,11 +9749,11 @@ where
     let confine_to_bytes = confine_to.serialize();
     let cursor_bytes = cursor.serialize();
     let time_bytes = time.serialize();
-    let request0 = [
+    let mut request0 = [
         GRAB_POINTER_REQUEST,
         owner_events_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         grab_window_bytes[0],
         grab_window_bytes[1],
         grab_window_bytes[2],
@@ -9750,8 +9775,10 @@ where
         time_bytes[2],
         time_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -9808,21 +9835,22 @@ pub fn ungrab_pointer<Conn>(conn: &Conn, time: Timestamp) -> Result<VoidCookie<'
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let time_bytes = time.serialize();
-    let request0 = [
+    let mut request0 = [
         UNGRAB_POINTER_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         time_bytes[0],
         time_bytes[1],
         time_bytes[2],
         time_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -9984,9 +10012,8 @@ where
     B: Into<u8>,
     C: Into<u8>,
 {
-    let length: usize = (24) / 4;
+    let length_so_far = 0;
     let owner_events_bytes = (owner_events as u8).serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let grab_window_bytes = grab_window.serialize();
     let event_mask_bytes = event_mask.serialize();
     let pointer_mode = pointer_mode.into();
@@ -9998,11 +10025,11 @@ where
     let button = button.into();
     let button_bytes = button.serialize();
     let modifiers_bytes = modifiers.serialize();
-    let request0 = [
+    let mut request0 = [
         GRAB_BUTTON_REQUEST,
         owner_events_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         grab_window_bytes[0],
         grab_window_bytes[1],
         grab_window_bytes[2],
@@ -10024,8 +10051,10 @@ where
         modifiers_bytes[0],
         modifiers_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -10036,17 +10065,16 @@ where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
 {
-    let length: usize = (12) / 4;
+    let length_so_far = 0;
     let button = button.into();
     let button_bytes = button.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let grab_window_bytes = grab_window.serialize();
     let modifiers_bytes = modifiers.serialize();
-    let request0 = [
+    let mut request0 = [
         UNGRAB_BUTTON_REQUEST,
         button_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         grab_window_bytes[0],
         grab_window_bytes[1],
         grab_window_bytes[2],
@@ -10056,8 +10084,10 @@ where
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -10067,16 +10097,15 @@ pub fn change_active_pointer_grab<Conn>(conn: &Conn, cursor: Cursor, time: Times
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (16) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let cursor_bytes = cursor.serialize();
     let time_bytes = time.serialize();
     let event_mask_bytes = event_mask.serialize();
-    let request0 = [
+    let mut request0 = [
         CHANGE_ACTIVE_POINTER_GRAB_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cursor_bytes[0],
         cursor_bytes[1],
         cursor_bytes[2],
@@ -10090,8 +10119,10 @@ where
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -10163,20 +10194,19 @@ where
     A: Into<u8>,
     B: Into<u8>,
 {
-    let length: usize = (16) / 4;
+    let length_so_far = 0;
     let owner_events_bytes = (owner_events as u8).serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let grab_window_bytes = grab_window.serialize();
     let time_bytes = time.serialize();
     let pointer_mode = pointer_mode.into();
     let pointer_mode_bytes = pointer_mode.serialize();
     let keyboard_mode = keyboard_mode.into();
     let keyboard_mode_bytes = keyboard_mode.serialize();
-    let request0 = [
+    let mut request0 = [
         GRAB_KEYBOARD_REQUEST,
         owner_events_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         grab_window_bytes[0],
         grab_window_bytes[1],
         grab_window_bytes[2],
@@ -10190,8 +10220,10 @@ where
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -10225,21 +10257,22 @@ pub fn ungrab_keyboard<Conn>(conn: &Conn, time: Timestamp) -> Result<VoidCookie<
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let time_bytes = time.serialize();
-    let request0 = [
+    let mut request0 = [
         UNGRAB_KEYBOARD_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         time_bytes[0],
         time_bytes[1],
         time_bytes[2],
         time_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -10368,9 +10401,8 @@ where
     A: Into<u8>,
     B: Into<u8>,
 {
-    let length: usize = (16) / 4;
+    let length_so_far = 0;
     let owner_events_bytes = (owner_events as u8).serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let grab_window_bytes = grab_window.serialize();
     let modifiers_bytes = modifiers.serialize();
     let key_bytes = key.serialize();
@@ -10378,11 +10410,11 @@ where
     let pointer_mode_bytes = pointer_mode.serialize();
     let keyboard_mode = keyboard_mode.into();
     let keyboard_mode_bytes = keyboard_mode.serialize();
-    let request0 = [
+    let mut request0 = [
         GRAB_KEY_REQUEST,
         owner_events_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         grab_window_bytes[0],
         grab_window_bytes[1],
         grab_window_bytes[2],
@@ -10396,8 +10428,10 @@ where
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -10432,16 +10466,15 @@ pub fn ungrab_key<Conn>(conn: &Conn, key: Keycode, grab_window: Window, modifier
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (12) / 4;
+    let length_so_far = 0;
     let key_bytes = key.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let grab_window_bytes = grab_window.serialize();
     let modifiers_bytes = modifiers.serialize();
-    let request0 = [
+    let mut request0 = [
         UNGRAB_KEY_REQUEST,
         key_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         grab_window_bytes[0],
         grab_window_bytes[1],
         grab_window_bytes[2],
@@ -10451,8 +10484,10 @@ where
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -10622,23 +10657,24 @@ where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
 {
-    let length: usize = (8) / 4;
+    let length_so_far = 0;
     let mode = mode.into();
     let mode_bytes = mode.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let time_bytes = time.serialize();
-    let request0 = [
+    let mut request0 = [
         ALLOW_EVENTS_REQUEST,
         mode_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         time_bytes[0],
         time_bytes[1],
         time_bytes[2],
         time_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -10648,16 +10684,17 @@ pub fn grab_server<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, Connection
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (4) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
-    let request0 = [
+    let length_so_far = 0;
+    let mut request0 = [
         GRAB_SERVER_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -10667,16 +10704,17 @@ pub fn ungrab_server<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, Connecti
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (4) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
-    let request0 = [
+    let length_so_far = 0;
+    let mut request0 = [
         UNGRAB_SERVER_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -10699,21 +10737,22 @@ pub fn query_pointer<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Con
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
-    let request0 = [
+    let mut request0 = [
         QUERY_POINTER_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
         window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 /// BRIEF DESCRIPTION MISSING.
@@ -10829,16 +10868,15 @@ pub fn get_motion_events<Conn>(conn: &Conn, window: Window, start: Timestamp, st
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (16) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
     let start_bytes = start.serialize();
     let stop_bytes = stop.serialize();
-    let request0 = [
+    let mut request0 = [
         GET_MOTION_EVENTS_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
@@ -10852,8 +10890,10 @@ where
         stop_bytes[2],
         stop_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -10889,17 +10929,16 @@ pub fn translate_coordinates<Conn>(conn: &Conn, src_window: Window, dst_window: 
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (16) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let src_window_bytes = src_window.serialize();
     let dst_window_bytes = dst_window.serialize();
     let src_x_bytes = src_x.serialize();
     let src_y_bytes = src_y.serialize();
-    let request0 = [
+    let mut request0 = [
         TRANSLATE_COORDINATES_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         src_window_bytes[0],
         src_window_bytes[1],
         src_window_bytes[2],
@@ -10913,8 +10952,10 @@ where
         src_y_bytes[0],
         src_y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -10985,8 +11026,7 @@ pub fn warp_pointer<Conn>(conn: &Conn, src_window: Window, dst_window: Window, s
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (24) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let src_window_bytes = src_window.serialize();
     let dst_window_bytes = dst_window.serialize();
     let src_x_bytes = src_x.serialize();
@@ -10995,11 +11035,11 @@ where
     let src_height_bytes = src_height.serialize();
     let dst_x_bytes = dst_x.serialize();
     let dst_y_bytes = dst_y.serialize();
-    let request0 = [
+    let mut request0 = [
         WARP_POINTER_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         src_window_bytes[0],
         src_window_bytes[1],
         src_window_bytes[2],
@@ -11021,8 +11061,10 @@ where
         dst_y_bytes[0],
         dst_y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -11148,17 +11190,16 @@ where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
 {
-    let length: usize = (12) / 4;
+    let length_so_far = 0;
     let revert_to = revert_to.into();
     let revert_to_bytes = revert_to.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let focus_bytes = focus.serialize();
     let time_bytes = time.serialize();
-    let request0 = [
+    let mut request0 = [
         SET_INPUT_FOCUS_REQUEST,
         revert_to_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         focus_bytes[0],
         focus_bytes[1],
         focus_bytes[2],
@@ -11168,8 +11209,10 @@ where
         time_bytes[2],
         time_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -11179,16 +11222,17 @@ pub fn get_input_focus<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetInputFoc
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (4) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
-    let request0 = [
+    let length_so_far = 0;
+    let mut request0 = [
         GET_INPUT_FOCUS_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -11224,16 +11268,17 @@ pub fn query_keymap<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryKeymapRep
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (4) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
-    let request0 = [
+    let length_so_far = 0;
+    let mut request0 = [
         QUERY_KEYMAP_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -11352,16 +11397,15 @@ pub fn open_font<'c, Conn>(conn: &'c Conn, fid: Font, name: &[u8]) -> Result<Voi
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (12 + 1 * name.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let fid_bytes = fid.serialize();
     let name_len: u16 = name.len().try_into()?;
     let name_len_bytes = name_len.serialize();
-    let request0 = [
+    let mut request0 = [
         OPEN_FONT_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         fid_bytes[0],
         fid_bytes[1],
         fid_bytes[2],
@@ -11371,12 +11415,14 @@ where
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (name).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the CloseFont request
@@ -11385,21 +11431,22 @@ pub fn close_font<Conn>(conn: &Conn, font: Font) -> Result<VoidCookie<'_, Conn>,
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let font_bytes = font.serialize();
-    let request0 = [
+    let mut request0 = [
         CLOSE_FONT_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         font_bytes[0],
         font_bytes[1],
         font_bytes[2],
         font_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -11582,21 +11629,22 @@ pub fn query_font<Conn>(conn: &Conn, font: Fontable) -> Result<Cookie<'_, Conn, 
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let font_bytes = font.serialize();
-    let request0 = [
+    let mut request0 = [
         QUERY_FONT_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         font_bytes[0],
         font_bytes[1],
         font_bytes[2],
         font_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 /// BRIEF DESCRIPTION MISSING.
@@ -11707,31 +11755,32 @@ pub fn query_text_extents<'c, Conn>(conn: &'c Conn, font: Fontable, string: &[Ch
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8 + 2 * string.len() + 3) / 4;
+    let length_so_far = 0;
     let string_len: u32 = string.len().try_into()?;
     // The following unwrap cannot fail since the value
     // is either 0 or 1. Both fit into an u8.
     let odd_length: u8 = ((string_len) & (1)).try_into().unwrap();
     let odd_length_bytes = odd_length.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let font_bytes = font.serialize();
     let string_bytes = string.serialize();
-    let request0 = [
+    let mut request0 = [
         QUERY_TEXT_EXTENTS_REQUEST,
         odd_length_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         font_bytes[0],
         font_bytes[1],
         font_bytes[2],
         font_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&string_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&string_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&string_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryTextExtentsReply {
@@ -11824,27 +11873,28 @@ pub fn list_fonts<'c, Conn>(conn: &'c Conn, max_names: u16, pattern: &[u8]) -> R
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8 + 1 * pattern.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let max_names_bytes = max_names.serialize();
     let pattern_len: u16 = pattern.len().try_into()?;
     let pattern_len_bytes = pattern_len.serialize();
-    let request0 = [
+    let mut request0 = [
         LIST_FONTS_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         max_names_bytes[0],
         max_names_bytes[1],
         pattern_len_bytes[0],
         pattern_len_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (pattern).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(pattern), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(pattern), IoSlice::new(&padding0)], Vec::new())?)
 }
 /// BRIEF DESCRIPTION MISSING.
 ///
@@ -11898,27 +11948,28 @@ pub fn list_fonts_with_info<'c, Conn>(conn: &'c Conn, max_names: u16, pattern: &
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8 + 1 * pattern.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let max_names_bytes = max_names.serialize();
     let pattern_len: u16 = pattern.len().try_into()?;
     let pattern_len_bytes = pattern_len.serialize();
-    let request0 = [
+    let mut request0 = [
         LIST_FONTS_WITH_INFO_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         max_names_bytes[0],
         max_names_bytes[1],
         pattern_len_bytes[0],
         pattern_len_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (pattern).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(ListFontsWithInfoCookie::new(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(pattern), IoSlice::new(&padding1)], Vec::new())?))
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(ListFontsWithInfoCookie::new(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(pattern), IoSlice::new(&padding0)], Vec::new())?))
 }
 /// BRIEF DESCRIPTION MISSING.
 ///
@@ -12000,26 +12051,27 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let font_bytes = font.serialize();
-    let length: usize = (8 + font_bytes.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let font_qty: u16 = font.len().try_into()?;
     let font_qty_bytes = font_qty.serialize();
-    let request0 = [
+    let mut request0 = [
         SET_FONT_PATH_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         font_qty_bytes[0],
         font_qty_bytes[1],
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&font_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&font_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&font_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the GetFontPath request
@@ -12028,16 +12080,17 @@ pub fn get_font_path<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetFontPathRe
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (4) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
-    let request0 = [
+    let length_so_far = 0;
+    let mut request0 = [
         GET_FONT_PATH_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -12096,18 +12149,17 @@ pub fn create_pixmap<Conn>(conn: &Conn, depth: u8, pid: Pixmap, drawable: Drawab
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (16) / 4;
+    let length_so_far = 0;
     let depth_bytes = depth.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let pid_bytes = pid.serialize();
     let drawable_bytes = drawable.serialize();
     let width_bytes = width.serialize();
     let height_bytes = height.serialize();
-    let request0 = [
+    let mut request0 = [
         CREATE_PIXMAP_REQUEST,
         depth_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         pid_bytes[0],
         pid_bytes[1],
         pid_bytes[2],
@@ -12121,8 +12173,10 @@ where
         height_bytes[0],
         height_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -12144,21 +12198,22 @@ pub fn free_pixmap<Conn>(conn: &Conn, pixmap: Pixmap) -> Result<VoidCookie<'_, C
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let pixmap_bytes = pixmap.serialize();
-    let request0 = [
+    let mut request0 = [
         FREE_PIXMAP_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         pixmap_bytes[0],
         pixmap_bytes[1],
         pixmap_bytes[2],
         pixmap_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -13247,16 +13302,15 @@ where
 {
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
-    let length: usize = (16 + value_list_bytes.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let cid_bytes = cid.serialize();
     let drawable_bytes = drawable.serialize();
     let value_mask_bytes = value_mask.serialize();
-    let request0 = [
+    let mut request0 = [
         CREATE_GC_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cid_bytes[0],
         cid_bytes[1],
         cid_bytes[2],
@@ -13270,12 +13324,14 @@ where
         value_mask_bytes[2],
         value_mask_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&value_list_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the ChangeGC request
@@ -13630,15 +13686,14 @@ where
 {
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
-    let length: usize = (12 + value_list_bytes.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let gc_bytes = gc.serialize();
     let value_mask_bytes = value_mask.serialize();
-    let request0 = [
+    let mut request0 = [
         CHANGE_GC_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         gc_bytes[0],
         gc_bytes[1],
         gc_bytes[2],
@@ -13648,12 +13703,14 @@ where
         value_mask_bytes[2],
         value_mask_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&value_list_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the CopyGC request
@@ -13662,16 +13719,15 @@ pub fn copy_gc<Conn>(conn: &Conn, src_gc: Gcontext, dst_gc: Gcontext, value_mask
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (16) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let src_gc_bytes = src_gc.serialize();
     let dst_gc_bytes = dst_gc.serialize();
     let value_mask_bytes = value_mask.serialize();
-    let request0 = [
+    let mut request0 = [
         COPY_GC_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         src_gc_bytes[0],
         src_gc_bytes[1],
         src_gc_bytes[2],
@@ -13685,8 +13741,10 @@ where
         value_mask_bytes[2],
         value_mask_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -13696,17 +13754,16 @@ pub fn set_dashes<'c, Conn>(conn: &'c Conn, gc: Gcontext, dash_offset: u16, dash
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (12 + 1 * dashes.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let gc_bytes = gc.serialize();
     let dash_offset_bytes = dash_offset.serialize();
     let dashes_len: u16 = dashes.len().try_into()?;
     let dashes_len_bytes = dashes_len.serialize();
-    let request0 = [
+    let mut request0 = [
         SET_DASHES_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         gc_bytes[0],
         gc_bytes[1],
         gc_bytes[2],
@@ -13716,12 +13773,14 @@ where
         dashes_len_bytes[0],
         dashes_len_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (dashes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(dashes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(dashes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -13799,19 +13858,18 @@ where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
 {
-    let length: usize = (12 + 8 * rectangles.len() + 3) / 4;
+    let length_so_far = 0;
     let ordering = ordering.into();
     let ordering_bytes = ordering.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let gc_bytes = gc.serialize();
     let clip_x_origin_bytes = clip_x_origin.serialize();
     let clip_y_origin_bytes = clip_y_origin.serialize();
     let rectangles_bytes = rectangles.serialize();
-    let request0 = [
+    let mut request0 = [
         SET_CLIP_RECTANGLES_REQUEST,
         ordering_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         gc_bytes[0],
         gc_bytes[1],
         gc_bytes[2],
@@ -13821,12 +13879,14 @@ where
         clip_y_origin_bytes[0],
         clip_y_origin_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&rectangles_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&rectangles_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&rectangles_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the FreeGC request
@@ -13846,21 +13906,22 @@ pub fn free_gc<Conn>(conn: &Conn, gc: Gcontext) -> Result<VoidCookie<'_, Conn>, 
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let gc_bytes = gc.serialize();
-    let request0 = [
+    let mut request0 = [
         FREE_GC_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         gc_bytes[0],
         gc_bytes[1],
         gc_bytes[2],
         gc_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -13870,19 +13931,18 @@ pub fn clear_area<Conn>(conn: &Conn, exposures: bool, window: Window, x: i16, y:
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (16) / 4;
+    let length_so_far = 0;
     let exposures_bytes = (exposures as u8).serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let x_bytes = x.serialize();
     let y_bytes = y.serialize();
     let width_bytes = width.serialize();
     let height_bytes = height.serialize();
-    let request0 = [
+    let mut request0 = [
         CLEAR_AREA_REQUEST,
         exposures_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
@@ -13896,8 +13956,10 @@ where
         height_bytes[0],
         height_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -13928,8 +13990,7 @@ pub fn copy_area<Conn>(conn: &Conn, src_drawable: Drawable, dst_drawable: Drawab
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (28) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let src_drawable_bytes = src_drawable.serialize();
     let dst_drawable_bytes = dst_drawable.serialize();
     let gc_bytes = gc.serialize();
@@ -13939,11 +14000,11 @@ where
     let dst_y_bytes = dst_y.serialize();
     let width_bytes = width.serialize();
     let height_bytes = height.serialize();
-    let request0 = [
+    let mut request0 = [
         COPY_AREA_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         src_drawable_bytes[0],
         src_drawable_bytes[1],
         src_drawable_bytes[2],
@@ -13969,8 +14030,10 @@ where
         height_bytes[0],
         height_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -13980,8 +14043,7 @@ pub fn copy_plane<Conn>(conn: &Conn, src_drawable: Drawable, dst_drawable: Drawa
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (32) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let src_drawable_bytes = src_drawable.serialize();
     let dst_drawable_bytes = dst_drawable.serialize();
     let gc_bytes = gc.serialize();
@@ -13992,11 +14054,11 @@ where
     let width_bytes = width.serialize();
     let height_bytes = height.serialize();
     let bit_plane_bytes = bit_plane.serialize();
-    let request0 = [
+    let mut request0 = [
         COPY_PLANE_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         src_drawable_bytes[0],
         src_drawable_bytes[1],
         src_drawable_bytes[2],
@@ -14026,8 +14088,10 @@ where
         bit_plane_bytes[2],
         bit_plane_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -14107,18 +14171,17 @@ where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
 {
-    let length: usize = (12 + 4 * points.len() + 3) / 4;
+    let length_so_far = 0;
     let coordinate_mode = coordinate_mode.into();
     let coordinate_mode_bytes = coordinate_mode.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let points_bytes = points.serialize();
-    let request0 = [
+    let mut request0 = [
         POLY_POINT_REQUEST,
         coordinate_mode_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
@@ -14128,12 +14191,14 @@ where
         gc_bytes[2],
         gc_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&points_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&points_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&points_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the PolyLine request
@@ -14181,18 +14246,17 @@ where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
 {
-    let length: usize = (12 + 4 * points.len() + 3) / 4;
+    let length_so_far = 0;
     let coordinate_mode = coordinate_mode.into();
     let coordinate_mode_bytes = coordinate_mode.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let points_bytes = points.serialize();
-    let request0 = [
+    let mut request0 = [
         POLY_LINE_REQUEST,
         coordinate_mode_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
@@ -14202,12 +14266,14 @@ where
         gc_bytes[2],
         gc_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&points_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&points_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&points_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -14292,16 +14358,15 @@ pub fn poly_segment<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, 
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (12 + 8 * segments.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let segments_bytes = segments.serialize();
-    let request0 = [
+    let mut request0 = [
         POLY_SEGMENT_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
@@ -14311,12 +14376,14 @@ where
         gc_bytes[2],
         gc_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&segments_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&segments_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&segments_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the PolyRectangle request
@@ -14325,16 +14392,15 @@ pub fn poly_rectangle<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (12 + 8 * rectangles.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let rectangles_bytes = rectangles.serialize();
-    let request0 = [
+    let mut request0 = [
         POLY_RECTANGLE_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
@@ -14344,12 +14410,14 @@ where
         gc_bytes[2],
         gc_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&rectangles_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&rectangles_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&rectangles_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the PolyArc request
@@ -14358,16 +14426,15 @@ pub fn poly_arc<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (12 + 12 * arcs.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let arcs_bytes = arcs.serialize();
-    let request0 = [
+    let mut request0 = [
         POLY_ARC_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
@@ -14377,12 +14444,14 @@ where
         gc_bytes[2],
         gc_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&arcs_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&arcs_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&arcs_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -14458,8 +14527,7 @@ where
     A: Into<u8>,
     B: Into<u8>,
 {
-    let length: usize = (16 + 4 * points.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let shape = shape.into();
@@ -14467,11 +14535,11 @@ where
     let coordinate_mode = coordinate_mode.into();
     let coordinate_mode_bytes = coordinate_mode.serialize();
     let points_bytes = points.serialize();
-    let request0 = [
+    let mut request0 = [
         FILL_POLY_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
@@ -14485,12 +14553,14 @@ where
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&points_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&points_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&points_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the PolyFillRectangle request
@@ -14524,16 +14594,15 @@ pub fn poly_fill_rectangle<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gco
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (12 + 8 * rectangles.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let rectangles_bytes = rectangles.serialize();
-    let request0 = [
+    let mut request0 = [
         POLY_FILL_RECTANGLE_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
@@ -14543,12 +14612,14 @@ where
         gc_bytes[2],
         gc_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&rectangles_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&rectangles_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&rectangles_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the PolyFillArc request
@@ -14557,16 +14628,15 @@ pub fn poly_fill_arc<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext,
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (12 + 12 * arcs.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let arcs_bytes = arcs.serialize();
-    let request0 = [
+    let mut request0 = [
         POLY_FILL_ARC_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
@@ -14576,12 +14646,14 @@ where
         gc_bytes[2],
         gc_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&arcs_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&arcs_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&arcs_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -14656,10 +14728,9 @@ where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
 {
-    let length: usize = (24 + 1 * data.len() + 3) / 4;
+    let length_so_far = 0;
     let format = format.into();
     let format_bytes = format.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let width_bytes = width.serialize();
@@ -14668,11 +14739,11 @@ where
     let dst_y_bytes = dst_y.serialize();
     let left_pad_bytes = left_pad.serialize();
     let depth_bytes = depth.serialize();
-    let request0 = [
+    let mut request0 = [
         PUT_IMAGE_REQUEST,
         format_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
@@ -14694,12 +14765,14 @@ where
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (data).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(data), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(data), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the GetImage request
@@ -14709,21 +14782,20 @@ where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
 {
-    let length: usize = (20) / 4;
+    let length_so_far = 0;
     let format = format.into();
     let format_bytes = format.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let x_bytes = x.serialize();
     let y_bytes = y.serialize();
     let width_bytes = width.serialize();
     let height_bytes = height.serialize();
     let plane_mask_bytes = plane_mask.serialize();
-    let request0 = [
+    let mut request0 = [
         GET_IMAGE_REQUEST,
         format_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
@@ -14741,8 +14813,10 @@ where
         plane_mask_bytes[2],
         plane_mask_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -14779,17 +14853,16 @@ pub fn poly_text8<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x:
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (16 + 1 * items.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let x_bytes = x.serialize();
     let y_bytes = y.serialize();
-    let request0 = [
+    let mut request0 = [
         POLY_TEXT8_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
@@ -14803,12 +14876,14 @@ where
         y_bytes[0],
         y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (items).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(items), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(items), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the PolyText16 request
@@ -14817,17 +14892,16 @@ pub fn poly_text16<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (16 + 1 * items.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let x_bytes = x.serialize();
     let y_bytes = y.serialize();
-    let request0 = [
+    let mut request0 = [
         POLY_TEXT16_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
@@ -14841,12 +14915,14 @@ where
         y_bytes[0],
         y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (items).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(items), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(items), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the ImageText8 request
@@ -14889,19 +14965,18 @@ pub fn image_text8<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (16 + 1 * string.len() + 3) / 4;
+    let length_so_far = 0;
     let string_len: u8 = string.len().try_into()?;
     let string_len_bytes = string_len.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let x_bytes = x.serialize();
     let y_bytes = y.serialize();
-    let request0 = [
+    let mut request0 = [
         IMAGE_TEXT8_REQUEST,
         string_len_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
@@ -14915,12 +14990,14 @@ where
         y_bytes[0],
         y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (string).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(string), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(string), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the ImageText16 request
@@ -14964,20 +15041,19 @@ pub fn image_text16<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, 
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (16 + 2 * string.len() + 3) / 4;
+    let length_so_far = 0;
     let string_len: u8 = string.len().try_into()?;
     let string_len_bytes = string_len.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let x_bytes = x.serialize();
     let y_bytes = y.serialize();
     let string_bytes = string.serialize();
-    let request0 = [
+    let mut request0 = [
         IMAGE_TEXT16_REQUEST,
         string_len_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
@@ -14991,12 +15067,14 @@ where
         y_bytes[0],
         y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&string_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&string_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&string_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -15068,18 +15146,17 @@ where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
 {
-    let length: usize = (16) / 4;
+    let length_so_far = 0;
     let alloc = alloc.into();
     let alloc_bytes = alloc.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let mid_bytes = mid.serialize();
     let window_bytes = window.serialize();
     let visual_bytes = visual.serialize();
-    let request0 = [
+    let mut request0 = [
         CREATE_COLORMAP_REQUEST,
         alloc_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         mid_bytes[0],
         mid_bytes[1],
         mid_bytes[2],
@@ -15093,8 +15170,10 @@ where
         visual_bytes[2],
         visual_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -15104,21 +15183,22 @@ pub fn free_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_,
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let cmap_bytes = cmap.serialize();
-    let request0 = [
+    let mut request0 = [
         FREE_COLORMAP_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cmap_bytes[0],
         cmap_bytes[1],
         cmap_bytes[2],
         cmap_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -15128,15 +15208,14 @@ pub fn copy_colormap_and_free<Conn>(conn: &Conn, mid: Colormap, src_cmap: Colorm
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (12) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let mid_bytes = mid.serialize();
     let src_cmap_bytes = src_cmap.serialize();
-    let request0 = [
+    let mut request0 = [
         COPY_COLORMAP_AND_FREE_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         mid_bytes[0],
         mid_bytes[1],
         mid_bytes[2],
@@ -15146,8 +15225,10 @@ where
         src_cmap_bytes[2],
         src_cmap_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -15157,21 +15238,22 @@ pub fn install_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let cmap_bytes = cmap.serialize();
-    let request0 = [
+    let mut request0 = [
         INSTALL_COLORMAP_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cmap_bytes[0],
         cmap_bytes[1],
         cmap_bytes[2],
         cmap_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -15181,21 +15263,22 @@ pub fn uninstall_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCooki
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let cmap_bytes = cmap.serialize();
-    let request0 = [
+    let mut request0 = [
         UNINSTALL_COLORMAP_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cmap_bytes[0],
         cmap_bytes[1],
         cmap_bytes[2],
         cmap_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -15205,21 +15288,22 @@ pub fn list_installed_colormaps<Conn>(conn: &Conn, window: Window) -> Result<Coo
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
-    let request0 = [
+    let mut request0 = [
         LIST_INSTALLED_COLORMAPS_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
         window_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -15273,17 +15357,16 @@ pub fn alloc_color<Conn>(conn: &Conn, cmap: Colormap, red: u16, green: u16, blue
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (16) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let cmap_bytes = cmap.serialize();
     let red_bytes = red.serialize();
     let green_bytes = green.serialize();
     let blue_bytes = blue.serialize();
-    let request0 = [
+    let mut request0 = [
         ALLOC_COLOR_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cmap_bytes[0],
         cmap_bytes[1],
         cmap_bytes[2],
@@ -15297,8 +15380,10 @@ where
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -15339,16 +15424,15 @@ pub fn alloc_named_color<'c, Conn>(conn: &'c Conn, cmap: Colormap, name: &[u8]) 
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (12 + 1 * name.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let cmap_bytes = cmap.serialize();
     let name_len: u16 = name.len().try_into()?;
     let name_len_bytes = name_len.serialize();
-    let request0 = [
+    let mut request0 = [
         ALLOC_NAMED_COLOR_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cmap_bytes[0],
         cmap_bytes[1],
         cmap_bytes[2],
@@ -15358,12 +15442,14 @@ where
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (name).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AllocNamedColorReply {
@@ -15408,17 +15494,16 @@ pub fn alloc_color_cells<Conn>(conn: &Conn, contiguous: bool, cmap: Colormap, co
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (12) / 4;
+    let length_so_far = 0;
     let contiguous_bytes = (contiguous as u8).serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let cmap_bytes = cmap.serialize();
     let colors_bytes = colors.serialize();
     let planes_bytes = planes.serialize();
-    let request0 = [
+    let mut request0 = [
         ALLOC_COLOR_CELLS_REQUEST,
         contiguous_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cmap_bytes[0],
         cmap_bytes[1],
         cmap_bytes[2],
@@ -15428,8 +15513,10 @@ where
         planes_bytes[0],
         planes_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -15468,19 +15555,18 @@ pub fn alloc_color_planes<Conn>(conn: &Conn, contiguous: bool, cmap: Colormap, c
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (16) / 4;
+    let length_so_far = 0;
     let contiguous_bytes = (contiguous as u8).serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let cmap_bytes = cmap.serialize();
     let colors_bytes = colors.serialize();
     let reds_bytes = reds.serialize();
     let greens_bytes = greens.serialize();
     let blues_bytes = blues.serialize();
-    let request0 = [
+    let mut request0 = [
         ALLOC_COLOR_PLANES_REQUEST,
         contiguous_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cmap_bytes[0],
         cmap_bytes[1],
         cmap_bytes[2],
@@ -15494,8 +15580,10 @@ where
         blues_bytes[0],
         blues_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -15538,16 +15626,15 @@ pub fn free_colors<'c, Conn>(conn: &'c Conn, cmap: Colormap, plane_mask: u32, pi
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (12 + 4 * pixels.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let cmap_bytes = cmap.serialize();
     let plane_mask_bytes = plane_mask.serialize();
     let pixels_bytes = pixels.serialize();
-    let request0 = [
+    let mut request0 = [
         FREE_COLORS_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cmap_bytes[0],
         cmap_bytes[1],
         cmap_bytes[2],
@@ -15557,12 +15644,14 @@ where
         plane_mask_bytes[2],
         plane_mask_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&pixels_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&pixels_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&pixels_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -15697,26 +15786,27 @@ pub fn store_colors<'c, Conn>(conn: &'c Conn, cmap: Colormap, items: &[Coloritem
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8 + 12 * items.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let cmap_bytes = cmap.serialize();
     let items_bytes = items.serialize();
-    let request0 = [
+    let mut request0 = [
         STORE_COLORS_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cmap_bytes[0],
         cmap_bytes[1],
         cmap_bytes[2],
         cmap_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&items_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&items_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&items_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the StoreNamedColor request
@@ -15725,18 +15815,17 @@ pub fn store_named_color<'c, Conn>(conn: &'c Conn, flags: u8, cmap: Colormap, pi
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (16 + 1 * name.len() + 3) / 4;
+    let length_so_far = 0;
     let flags_bytes = flags.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let cmap_bytes = cmap.serialize();
     let pixel_bytes = pixel.serialize();
     let name_len: u16 = name.len().try_into()?;
     let name_len_bytes = name_len.serialize();
-    let request0 = [
+    let mut request0 = [
         STORE_NAMED_COLOR_REQUEST,
         flags_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cmap_bytes[0],
         cmap_bytes[1],
         cmap_bytes[2],
@@ -15750,12 +15839,14 @@ where
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (name).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -15812,26 +15903,27 @@ pub fn query_colors<'c, Conn>(conn: &'c Conn, cmap: Colormap, pixels: &[u32]) ->
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8 + 4 * pixels.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let cmap_bytes = cmap.serialize();
     let pixels_bytes = pixels.serialize();
-    let request0 = [
+    let mut request0 = [
         QUERY_COLORS_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cmap_bytes[0],
         cmap_bytes[1],
         cmap_bytes[2],
         cmap_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&pixels_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&pixels_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&pixels_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryColorsReply {
@@ -15866,16 +15958,15 @@ pub fn lookup_color<'c, Conn>(conn: &'c Conn, cmap: Colormap, name: &[u8]) -> Re
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (12 + 1 * name.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let cmap_bytes = cmap.serialize();
     let name_len: u16 = name.len().try_into()?;
     let name_len_bytes = name_len.serialize();
-    let request0 = [
+    let mut request0 = [
         LOOKUP_COLOR_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cmap_bytes[0],
         cmap_bytes[1],
         cmap_bytes[2],
@@ -15885,12 +15976,14 @@ where
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (name).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LookupColorReply {
@@ -15992,8 +16085,7 @@ pub fn create_cursor<Conn>(conn: &Conn, cid: Cursor, source: Pixmap, mask: Pixma
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (32) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let cid_bytes = cid.serialize();
     let source_bytes = source.serialize();
     let mask_bytes = mask.serialize();
@@ -16005,11 +16097,11 @@ where
     let back_blue_bytes = back_blue.serialize();
     let x_bytes = x.serialize();
     let y_bytes = y.serialize();
-    let request0 = [
+    let mut request0 = [
         CREATE_CURSOR_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cid_bytes[0],
         cid_bytes[1],
         cid_bytes[2],
@@ -16039,8 +16131,10 @@ where
         y_bytes[0],
         y_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -16142,8 +16236,7 @@ pub fn create_glyph_cursor<Conn>(conn: &Conn, cid: Cursor, source_font: Font, ma
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (32) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let cid_bytes = cid.serialize();
     let source_font_bytes = source_font.serialize();
     let mask_font_bytes = mask_font.serialize();
@@ -16155,11 +16248,11 @@ where
     let back_red_bytes = back_red.serialize();
     let back_green_bytes = back_green.serialize();
     let back_blue_bytes = back_blue.serialize();
-    let request0 = [
+    let mut request0 = [
         CREATE_GLYPH_CURSOR_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cid_bytes[0],
         cid_bytes[1],
         cid_bytes[2],
@@ -16189,8 +16282,10 @@ where
         back_blue_bytes[0],
         back_blue_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -16212,21 +16307,22 @@ pub fn free_cursor<Conn>(conn: &Conn, cursor: Cursor) -> Result<VoidCookie<'_, C
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let cursor_bytes = cursor.serialize();
-    let request0 = [
+    let mut request0 = [
         FREE_CURSOR_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cursor_bytes[0],
         cursor_bytes[1],
         cursor_bytes[2],
         cursor_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -16236,8 +16332,7 @@ pub fn recolor_cursor<Conn>(conn: &Conn, cursor: Cursor, fore_red: u16, fore_gre
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (20) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let cursor_bytes = cursor.serialize();
     let fore_red_bytes = fore_red.serialize();
     let fore_green_bytes = fore_green.serialize();
@@ -16245,11 +16340,11 @@ where
     let back_red_bytes = back_red.serialize();
     let back_green_bytes = back_green.serialize();
     let back_blue_bytes = back_blue.serialize();
-    let request0 = [
+    let mut request0 = [
         RECOLOR_CURSOR_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         cursor_bytes[0],
         cursor_bytes[1],
         cursor_bytes[2],
@@ -16267,8 +16362,10 @@ where
         back_blue_bytes[0],
         back_blue_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -16344,18 +16441,17 @@ where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
 {
-    let length: usize = (12) / 4;
+    let length_so_far = 0;
     let class = class.into();
     let class_bytes = class.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let width_bytes = width.serialize();
     let height_bytes = height.serialize();
-    let request0 = [
+    let mut request0 = [
         QUERY_BEST_SIZE_REQUEST,
         class_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         drawable_bytes[0],
         drawable_bytes[1],
         drawable_bytes[2],
@@ -16365,8 +16461,10 @@ where
         height_bytes[0],
         height_bytes[1],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -16424,26 +16522,27 @@ pub fn query_extension<'c, Conn>(conn: &'c Conn, name: &[u8]) -> Result<Cookie<'
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8 + 1 * name.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let name_len: u16 = name.len().try_into()?;
     let name_len_bytes = name_len.serialize();
-    let request0 = [
+    let mut request0 = [
         QUERY_EXTENSION_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         name_len_bytes[0],
         name_len_bytes[1],
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (name).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], Vec::new())?)
 }
 /// BRIEF DESCRIPTION MISSING.
 ///
@@ -16491,16 +16590,17 @@ pub fn list_extensions<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListExtensi
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (4) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
-    let request0 = [
+    let length_so_far = 0;
+    let mut request0 = [
         LIST_EXTENSIONS_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -16535,29 +16635,30 @@ pub fn change_keyboard_mapping<'c, Conn>(conn: &'c Conn, keycode_count: u8, firs
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8 + 4 * keysyms.len() + 3) / 4;
+    let length_so_far = 0;
     let keycode_count_bytes = keycode_count.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let first_keycode_bytes = first_keycode.serialize();
     let keysyms_per_keycode_bytes = keysyms_per_keycode.serialize();
     assert_eq!(keysyms.len(), (keycode_count as usize) * (keysyms_per_keycode as usize), "Argument keysyms has an incorrect length");
     let keysyms_bytes = keysyms.serialize();
-    let request0 = [
+    let mut request0 = [
         CHANGE_KEYBOARD_MAPPING_REQUEST,
         keycode_count_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         first_keycode_bytes[0],
         keysyms_per_keycode_bytes[0],
         0,
         0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&keysyms_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&keysyms_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&keysyms_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the GetKeyboardMapping request
@@ -16566,22 +16667,23 @@ pub fn get_keyboard_mapping<Conn>(conn: &Conn, first_keycode: Keycode, count: u8
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let first_keycode_bytes = first_keycode.serialize();
     let count_bytes = count.serialize();
-    let request0 = [
+    let mut request0 = [
         GET_KEYBOARD_MAPPING_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         first_keycode_bytes[0],
         count_bytes[0],
         0 /* trailing padding */,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -16946,25 +17048,26 @@ where
 {
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
-    let length: usize = (8 + value_list_bytes.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let value_mask_bytes = value_mask.serialize();
-    let request0 = [
+    let mut request0 = [
         CHANGE_KEYBOARD_CONTROL_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         value_mask_bytes[0],
         value_mask_bytes[1],
         value_mask_bytes[2],
         value_mask_bytes[3],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&value_list_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&value_list_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 /// Opcode for the GetKeyboardControl request
@@ -16973,16 +17076,17 @@ pub fn get_keyboard_control<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetKey
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (4) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
-    let request0 = [
+    let length_so_far = 0;
+    let mut request0 = [
         GET_KEYBOARD_CONTROL_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -17094,17 +17198,18 @@ pub fn bell<Conn>(conn: &Conn, percent: i8) -> Result<VoidCookie<'_, Conn>, Conn
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (4) / 4;
+    let length_so_far = 0;
     let percent_bytes = percent.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
-    let request0 = [
+    let mut request0 = [
         BELL_REQUEST,
         percent_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -17114,18 +17219,17 @@ pub fn change_pointer_control<Conn>(conn: &Conn, acceleration_numerator: i16, ac
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (12) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let acceleration_numerator_bytes = acceleration_numerator.serialize();
     let acceleration_denominator_bytes = acceleration_denominator.serialize();
     let threshold_bytes = threshold.serialize();
     let do_acceleration_bytes = (do_acceleration as u8).serialize();
     let do_threshold_bytes = (do_threshold as u8).serialize();
-    let request0 = [
+    let mut request0 = [
         CHANGE_POINTER_CONTROL_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         acceleration_numerator_bytes[0],
         acceleration_numerator_bytes[1],
         acceleration_denominator_bytes[0],
@@ -17135,8 +17239,10 @@ where
         do_acceleration_bytes[0],
         do_threshold_bytes[0],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -17146,16 +17252,17 @@ pub fn get_pointer_control<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPoin
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (4) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
-    let request0 = [
+    let length_so_far = 0;
+    let mut request0 = [
         GET_POINTER_CONTROL_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -17326,19 +17433,18 @@ where
     A: Into<u8>,
     B: Into<u8>,
 {
-    let length: usize = (12) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let timeout_bytes = timeout.serialize();
     let interval_bytes = interval.serialize();
     let prefer_blanking = prefer_blanking.into();
     let prefer_blanking_bytes = prefer_blanking.serialize();
     let allow_exposures = allow_exposures.into();
     let allow_exposures_bytes = allow_exposures.serialize();
-    let request0 = [
+    let mut request0 = [
         SET_SCREEN_SAVER_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         timeout_bytes[0],
         timeout_bytes[1],
         interval_bytes[0],
@@ -17348,8 +17454,10 @@ where
         0 /* trailing padding */,
         0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -17359,16 +17467,17 @@ pub fn get_screen_saver<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetScreenS
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (4) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
-    let request0 = [
+    let length_so_far = 0;
+    let mut request0 = [
         GET_SCREEN_SAVER_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -17546,30 +17655,31 @@ where
     A: Into<u8>,
     B: Into<u8>,
 {
-    let length: usize = (8 + 1 * address.len() + 3) / 4;
+    let length_so_far = 0;
     let mode = mode.into();
     let mode_bytes = mode.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let family = family.into();
     let family_bytes = family.serialize();
     let address_len: u16 = address.len().try_into()?;
     let address_len_bytes = address_len.serialize();
-    let request0 = [
+    let mut request0 = [
         CHANGE_HOSTS_REQUEST,
         mode_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         family_bytes[0],
         0,
         address_len_bytes[0],
         address_len_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (address).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(address), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(address), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -17623,16 +17733,17 @@ pub fn list_hosts<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListHostsReply>,
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (4) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
-    let request0 = [
+    let length_so_far = 0;
+    let mut request0 = [
         LIST_HOSTS_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -17733,18 +17844,19 @@ where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
 {
-    let length: usize = (4) / 4;
+    let length_so_far = 0;
     let mode = mode.into();
     let mode_bytes = mode.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
-    let request0 = [
+    let mut request0 = [
         SET_ACCESS_CONTROL_REQUEST,
         mode_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -17820,18 +17932,19 @@ where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
 {
-    let length: usize = (4) / 4;
+    let length_so_far = 0;
     let mode = mode.into();
     let mode_bytes = mode.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
-    let request0 = [
+    let mut request0 = [
         SET_CLOSE_DOWN_MODE_REQUEST,
         mode_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -17919,21 +18032,22 @@ pub fn kill_client<Conn>(conn: &Conn, resource: u32) -> Result<VoidCookie<'_, Co
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (8) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let resource_bytes = resource.serialize();
-    let request0 = [
+    let mut request0 = [
         KILL_CLIENT_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         resource_bytes[0],
         resource_bytes[1],
         resource_bytes[2],
         resource_bytes[3],
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -17943,18 +18057,17 @@ pub fn rotate_properties<'c, Conn>(conn: &'c Conn, window: Window, delta: i16, a
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (12 + 4 * atoms.len() + 3) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
+    let length_so_far = 0;
     let window_bytes = window.serialize();
     let atoms_len: u16 = atoms.len().try_into()?;
     let atoms_len_bytes = atoms_len.serialize();
     let delta_bytes = delta.serialize();
     let atoms_bytes = atoms.serialize();
-    let request0 = [
+    let mut request0 = [
         ROTATE_PROPERTIES_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
         window_bytes[0],
         window_bytes[1],
         window_bytes[2],
@@ -17964,12 +18077,14 @@ where
         delta_bytes[0],
         delta_bytes[1],
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (&atoms_bytes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&atoms_bytes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&atoms_bytes), IoSlice::new(&padding0)], Vec::new())?)
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -18041,18 +18156,19 @@ where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
 {
-    let length: usize = (4) / 4;
+    let length_so_far = 0;
     let mode = mode.into();
     let mode_bytes = mode.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
-    let request0 = [
+    let mut request0 = [
         FORCE_SCREEN_SAVER_REQUEST,
         mode_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
@@ -18127,22 +18243,23 @@ pub fn set_pointer_mapping<'c, Conn>(conn: &'c Conn, map: &[u8]) -> Result<Cooki
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (4 + 1 * map.len() + 3) / 4;
+    let length_so_far = 0;
     let map_len: u8 = map.len().try_into()?;
     let map_len_bytes = map_len.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
-    let request0 = [
+    let mut request0 = [
         SET_POINTER_MAPPING_REQUEST,
         map_len_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (map).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(map), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(map), IoSlice::new(&padding0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetPointerMappingReply {
@@ -18175,16 +18292,17 @@ pub fn get_pointer_mapping<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPoin
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (4) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
-    let request0 = [
+    let length_so_far = 0;
+    let mut request0 = [
         GET_POINTER_MAPPING_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -18299,23 +18417,24 @@ pub fn set_modifier_mapping<'c, Conn>(conn: &'c Conn, keycodes: &[Keycode]) -> R
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (4 + 1 * keycodes.len() + 3) / 4;
+    let length_so_far = 0;
     assert_eq!(0, keycodes.len() % 8, "Argument keycodes_per_modifier has an incorrect length, must be a multiple of 8");
     let keycodes_per_modifier = u8::try_from(keycodes.len() / 8).unwrap();
     let keycodes_per_modifier_bytes = keycodes_per_modifier.serialize();
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
-    let request0 = [
+    let mut request0 = [
         SET_MODIFIER_MAPPING_REQUEST,
         keycodes_per_modifier_bytes[0],
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
+    let length_so_far = length_so_far + (&request0).len();
     let length_so_far = length_so_far + (keycodes).len();
-    let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
-    let length_so_far = length_so_far + (&padding1).len();
-    assert_eq!(length_so_far, length * 4);
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(keycodes), IoSlice::new(&padding1)], Vec::new())?)
+    let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
+    let length_so_far = length_so_far + (&padding0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(keycodes), IoSlice::new(&padding0)], Vec::new())?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetModifierMappingReply {
@@ -18348,16 +18467,17 @@ pub fn get_modifier_mapping<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetMod
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (4) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
-    let request0 = [
+    let length_so_far = 0;
+    let mut request0 = [
         GET_MODIFIER_MAPPING_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -18392,16 +18512,17 @@ pub fn no_operation<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, Connectio
 where
     Conn: RequestConnection + ?Sized,
 {
-    let length: usize = (4) / 4;
-    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
-    let request0 = [
+    let length_so_far = 0;
+    let mut request0 = [
         NO_OPERATION_REQUEST,
         0,
-        length_bytes[0],
-        length_bytes[1],
+        0,
+        0,
     ];
-    let length_so_far = (&request0).len();
-    assert_eq!(length_so_far, length * 4);
+    let length_so_far = length_so_far + (&request0).len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
 }
 
