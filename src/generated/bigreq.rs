@@ -43,7 +43,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         extension_information.major_opcode,
         ENABLE_REQUEST,

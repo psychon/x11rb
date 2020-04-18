@@ -429,9 +429,9 @@ impl Serialize for Trigger {
     type Bytes = [u8; 20];
     fn serialize(&self) -> Self::Bytes {
         let counter_bytes = self.counter.serialize();
-        let wait_type_bytes = Into::<u32>::into(self.wait_type).serialize();
+        let wait_type_bytes = u32::from(self.wait_type).serialize();
         let wait_value_bytes = self.wait_value.serialize();
-        let test_type_bytes = Into::<u32>::into(self.test_type).serialize();
+        let test_type_bytes = u32::from(self.test_type).serialize();
         [
             counter_bytes[0],
             counter_bytes[1],
@@ -458,9 +458,9 @@ impl Serialize for Trigger {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(20);
         self.counter.serialize_into(bytes);
-        Into::<u32>::into(self.wait_type).serialize_into(bytes);
+        u32::from(self.wait_type).serialize_into(bytes);
         self.wait_value.serialize_into(bytes);
-        Into::<u32>::into(self.test_type).serialize_into(bytes);
+        u32::from(self.test_type).serialize_into(bytes);
     }
 }
 
@@ -656,7 +656,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let desired_major_version_bytes = desired_major_version.serialize();
     let desired_minor_version_bytes = desired_minor_version.serialize();
     let request0 = [
@@ -709,7 +709,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         extension_information.major_opcode,
         LIST_SYSTEM_COUNTERS_REQUEST,
@@ -755,7 +755,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let id_bytes = id.serialize();
     let initial_value_bytes = initial_value.serialize();
     let request0 = [
@@ -789,7 +789,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let counter_bytes = counter.serialize();
     let request0 = [
         extension_information.major_opcode,
@@ -814,7 +814,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let counter_bytes = counter.serialize();
     let request0 = [
         extension_information.major_opcode,
@@ -863,7 +863,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (4 + 28 * wait_list.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let wait_list_bytes = wait_list.serialize();
     let request0 = [
         extension_information.major_opcode,
@@ -887,7 +887,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let counter_bytes = counter.serialize();
     let amount_bytes = amount.serialize();
     let request0 = [
@@ -921,7 +921,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let counter_bytes = counter.serialize();
     let value_bytes = value.serialize();
     let request0 = [
@@ -967,22 +967,22 @@ impl CreateAlarmAux {
     fn value_mask(&self) -> u32 {
         let mut mask = 0;
         if self.counter.is_some() {
-            mask |= Into::<u32>::into(CA::Counter);
+            mask |= u32::from(CA::Counter);
         }
         if self.value_type.is_some() {
-            mask |= Into::<u32>::into(CA::ValueType);
+            mask |= u32::from(CA::ValueType);
         }
         if self.value.is_some() {
-            mask |= Into::<u32>::into(CA::Value);
+            mask |= u32::from(CA::Value);
         }
         if self.test_type.is_some() {
-            mask |= Into::<u32>::into(CA::TestType);
+            mask |= u32::from(CA::TestType);
         }
         if self.delta.is_some() {
-            mask |= Into::<u32>::into(CA::Delta);
+            mask |= u32::from(CA::Delta);
         }
         if self.events.is_some() {
-            mask |= Into::<u32>::into(CA::Events);
+            mask |= u32::from(CA::Events);
         }
         mask
     }
@@ -1053,7 +1053,7 @@ where Conn: RequestConnection + ?Sized
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
     let length: usize = (12 + value_list_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let id_bytes = id.serialize();
     let value_mask_bytes = value_mask.serialize();
     let request0 = [
@@ -1098,22 +1098,22 @@ impl ChangeAlarmAux {
     fn value_mask(&self) -> u32 {
         let mut mask = 0;
         if self.counter.is_some() {
-            mask |= Into::<u32>::into(CA::Counter);
+            mask |= u32::from(CA::Counter);
         }
         if self.value_type.is_some() {
-            mask |= Into::<u32>::into(CA::ValueType);
+            mask |= u32::from(CA::ValueType);
         }
         if self.value.is_some() {
-            mask |= Into::<u32>::into(CA::Value);
+            mask |= u32::from(CA::Value);
         }
         if self.test_type.is_some() {
-            mask |= Into::<u32>::into(CA::TestType);
+            mask |= u32::from(CA::TestType);
         }
         if self.delta.is_some() {
-            mask |= Into::<u32>::into(CA::Delta);
+            mask |= u32::from(CA::Delta);
         }
         if self.events.is_some() {
-            mask |= Into::<u32>::into(CA::Events);
+            mask |= u32::from(CA::Events);
         }
         mask
     }
@@ -1184,7 +1184,7 @@ where Conn: RequestConnection + ?Sized
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
     let length: usize = (12 + value_list_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let id_bytes = id.serialize();
     let value_mask_bytes = value_mask.serialize();
     let request0 = [
@@ -1217,7 +1217,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let alarm_bytes = alarm.serialize();
     let request0 = [
         extension_information.major_opcode,
@@ -1242,7 +1242,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let alarm_bytes = alarm.serialize();
     let request0 = [
         extension_information.major_opcode,
@@ -1299,7 +1299,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let id_bytes = id.serialize();
     let priority_bytes = priority.serialize();
     let request0 = [
@@ -1329,7 +1329,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let id_bytes = id.serialize();
     let request0 = [
         extension_information.major_opcode,
@@ -1378,7 +1378,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let fence_bytes = fence.serialize();
     let initially_triggered_bytes = (initially_triggered as u8).serialize();
@@ -1413,7 +1413,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let fence_bytes = fence.serialize();
     let request0 = [
         extension_information.major_opcode,
@@ -1438,7 +1438,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let fence_bytes = fence.serialize();
     let request0 = [
         extension_information.major_opcode,
@@ -1463,7 +1463,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let fence_bytes = fence.serialize();
     let request0 = [
         extension_information.major_opcode,
@@ -1488,7 +1488,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let fence_bytes = fence.serialize();
     let request0 = [
         extension_information.major_opcode,
@@ -1538,7 +1538,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (4 + 4 * fence_list.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let fence_list_bytes = fence_list.serialize();
     let request0 = [
         extension_information.major_opcode,
@@ -1683,7 +1683,7 @@ impl From<&AlarmNotifyEvent> for [u8; 32] {
         let counter_value = input.counter_value.serialize();
         let alarm_value = input.alarm_value.serialize();
         let timestamp = input.timestamp.serialize();
-        let state = Into::<u8>::into(input.state).serialize();
+        let state = u8::from(input.state).serialize();
         [
             response_type[0], kind[0], sequence[0], sequence[1], alarm[0], alarm[1], alarm[2], alarm[3],
             counter_value[0], counter_value[1], counter_value[2], counter_value[3], counter_value[4], counter_value[5], counter_value[6], counter_value[7],

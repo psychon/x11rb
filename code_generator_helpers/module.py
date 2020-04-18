@@ -485,7 +485,7 @@ class Module(object):
                         else:
                             # Turn the enum into the right on-the-wire-type
                             wire_field_type = self._to_complex_owned_rust_type(field)
-                            self.out("let %s = Into::<%s>::into(self.%s).serialize();",
+                            self.out("let %s = %s::from(self.%s).serialize();",
                                      field_name_bytes, wire_field_type, field_name)
                         # ...then copy to the output.
                         for i in range(field.type.size):
@@ -510,7 +510,7 @@ class Module(object):
                             self.out("self.%s.serialize_into(bytes);", field_name)
                         else:
                             wire_field_type = self._to_complex_owned_rust_type(field)
-                            self.out("Into::<%s>::into(self.%s).serialize_into(bytes);",
+                            self.out("%s::from(self.%s).serialize_into(bytes);",
                                      wire_field_type, field_name)
             self.out("}")
         self.out("}")
@@ -570,7 +570,7 @@ class Module(object):
                                 source = "self.%s" % field_name
                             else:
                                 wire_field_type = self._to_complex_owned_rust_type(field)
-                                source = "Into::<%s>::into(self.%s)" % (wire_field_type, field_name)
+                                source = "%s::from(self.%s)" % (wire_field_type, field_name)
                         self.out("%s.serialize_into(bytes);", source)
             self.out("}")
         self.out("}")
@@ -659,7 +659,7 @@ class Module(object):
                             self.out("];")
                     self.out.indent("Self(value)")
                 elif union.is_eventstruct:
-                    self.out.indent("Self(Into::<[u8; 32]>::into(value))")
+                    self.out.indent("Self(<[u8; 32]>::from(value))")
                 else:
                     field_size = field.type.get_total_size()
                     assert field_size <= union_size
@@ -786,7 +786,7 @@ class Module(object):
                                 # This field was interpreted as an enum. Turn it
                                 # back into something like u8.
                                 wire_field_type = self._to_complex_owned_rust_type(field)
-                                self.out("let %s = Into::<%s>::into(input.%s).serialize();",
+                                self.out("let %s = %s::from(input.%s).serialize();",
                                          field_name, wire_field_type, field_name)
                             for i in range(field.type.size):
                                 parts.append("%s[%d]" % (field_name, i))
@@ -1165,7 +1165,7 @@ class Module(object):
                         else:
                             field_name = self._to_rust_variable(case.only_field.field_name)
                             field_type = self._to_complex_owned_rust_type(case.only_field)
-                        self.out("let %s = if %s & Into::<%s>::into(%s::%s) != 0 {",
+                        self.out("let %s = if %s & %s::from(%s::%s) != 0 {",
                                  field_name, switch_field_name,
                                  self._name(switch_field_type.field_type),
                                  self._name(expr.lenfield_type.name),
@@ -1200,7 +1200,7 @@ class Module(object):
                         else:
                             field_name = self._to_rust_variable(case.only_field.field_name)
                             field_type = self._to_complex_owned_rust_type(case.only_field)
-                        self.out("if %s == Into::<%s>::into(%s::%s) {", switch_field_name,
+                        self.out("if %s == %s::from(%s::%s) {", switch_field_name,
                                  self._name(switch_field_type.field_type),
                                  self._name(expr.lenfield_type.name),
                                  ename_to_rust(expr.lenfield_name))
@@ -1370,7 +1370,7 @@ class Module(object):
                         field = case.only_field
                         field_name = self._aux_field_name(field)
                     self.out("if self.%s.is_some() {", field_name)
-                    self.out.indent("mask |= Into::<%s>::into(%s::%s);", mask_field_type,
+                    self.out.indent("mask |= %s::from(%s::%s);", mask_field_type,
                                     enum_name, ename_to_rust(expr.lenfield_name))
                     self.out("}")
                 self.out("mask")
@@ -1558,14 +1558,14 @@ class Module(object):
                     else:
                         assert e.rhs is None
                         inner = "x.%s" % e.lenfield_name
-                return "%s.iter().map(|x| TryInto::<%s>::try_into(%s).unwrap()).sum()" % \
+                return "%s.iter().map(|x| %s::try_from(%s).unwrap()).sum()" % \
                        (field_name, type, inner)
             if e.op == 'popcount':
                 assert e.lhs is None
                 assert e.rhs.op is None
                 assert e.rhs.nmemb is None
                 field_name = e.rhs.lenfield_name
-                return "TryInto::<%s>::try_into(%s.count_ones()).unwrap()" % (type, self._lower_snake_name((field_name,)),)
+                return "%s::try_from(%s.count_ones()).unwrap()" % (type, self._lower_snake_name((field_name,)),)
             if e.op == '~':
                 assert e.lhs is None
                 return "!(%s)" % self.expr_to_str(e.rhs, type)

@@ -241,7 +241,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let client_major_version_bytes = client_major_version.serialize();
     let client_minor_version_bytes = client_minor_version.serialize();
     let request0 = [
@@ -294,7 +294,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let request0 = [
         extension_information.major_opcode,
@@ -354,7 +354,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let event_mask_bytes = event_mask.serialize();
     let request0 = [
@@ -405,49 +405,49 @@ impl SetAttributesAux {
     fn value_mask(&self) -> u32 {
         let mut mask = 0;
         if self.background_pixmap.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::BackPixmap);
+            mask |= u32::from(xproto::CW::BackPixmap);
         }
         if self.background_pixel.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::BackPixel);
+            mask |= u32::from(xproto::CW::BackPixel);
         }
         if self.border_pixmap.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::BorderPixmap);
+            mask |= u32::from(xproto::CW::BorderPixmap);
         }
         if self.border_pixel.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::BorderPixel);
+            mask |= u32::from(xproto::CW::BorderPixel);
         }
         if self.bit_gravity.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::BitGravity);
+            mask |= u32::from(xproto::CW::BitGravity);
         }
         if self.win_gravity.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::WinGravity);
+            mask |= u32::from(xproto::CW::WinGravity);
         }
         if self.backing_store.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::BackingStore);
+            mask |= u32::from(xproto::CW::BackingStore);
         }
         if self.backing_planes.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::BackingPlanes);
+            mask |= u32::from(xproto::CW::BackingPlanes);
         }
         if self.backing_pixel.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::BackingPixel);
+            mask |= u32::from(xproto::CW::BackingPixel);
         }
         if self.override_redirect.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::OverrideRedirect);
+            mask |= u32::from(xproto::CW::OverrideRedirect);
         }
         if self.save_under.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::SaveUnder);
+            mask |= u32::from(xproto::CW::SaveUnder);
         }
         if self.event_mask.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::EventMask);
+            mask |= u32::from(xproto::CW::EventMask);
         }
         if self.do_not_propogate_mask.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::DontPropagate);
+            mask |= u32::from(xproto::CW::DontPropagate);
         }
         if self.colormap.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::Colormap);
+            mask |= u32::from(xproto::CW::Colormap);
         }
         if self.cursor.is_some() {
-            mask |= Into::<u32>::into(xproto::CW::Cursor);
+            mask |= u32::from(xproto::CW::Cursor);
         }
         mask
     }
@@ -590,7 +590,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
     let length: usize = (28 + value_list_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let x_bytes = x.serialize();
     let y_bytes = y.serialize();
@@ -648,7 +648,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let request0 = [
         extension_information.major_opcode,
@@ -673,7 +673,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let suspend_bytes = suspend.serialize();
     let request0 = [
         extension_information.major_opcode,
@@ -741,12 +741,12 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for NotifyEvent {
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let state = Into::<u8>::into(input.state).serialize();
+        let state = u8::from(input.state).serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let root = input.root.serialize();
         let window = input.window.serialize();
-        let kind = Into::<u8>::into(input.kind).serialize();
+        let kind = u8::from(input.kind).serialize();
         let forced = input.forced.serialize();
         [
             response_type[0], state[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],

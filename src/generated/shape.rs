@@ -231,7 +231,7 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for NotifyEvent {
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let shape_kind = Into::<Kind>::into(input.shape_kind).serialize();
+        let shape_kind = Kind::from(input.shape_kind).serialize();
         let sequence = input.sequence.serialize();
         let affected_window = input.affected_window.serialize();
         let extents_x = input.extents_x.serialize();
@@ -262,7 +262,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         extension_information.major_opcode,
         QUERY_VERSION_REQUEST,
@@ -308,7 +308,7 @@ where Conn: RequestConnection + ?Sized, A: Into<Op>, B: Into<Kind>, C: Into<u8>
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (16 + 8 * rectangles.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let operation = operation.into();
     let operation_bytes = operation.serialize();
     let destination_kind = destination_kind.into();
@@ -353,7 +353,7 @@ where Conn: RequestConnection + ?Sized, A: Into<Op>, B: Into<Kind>
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (20) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let operation = operation.into();
     let operation_bytes = operation.serialize();
     let destination_kind = destination_kind.into();
@@ -397,7 +397,7 @@ where Conn: RequestConnection + ?Sized, A: Into<Op>, B: Into<Kind>, C: Into<Kind
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (20) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let operation = operation.into();
     let operation_bytes = operation.serialize();
     let destination_kind = destination_kind.into();
@@ -443,7 +443,7 @@ where Conn: RequestConnection + ?Sized, A: Into<Kind>
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let destination_kind = destination_kind.into();
     let destination_kind_bytes = destination_kind.serialize();
     let destination_window_bytes = destination_window.serialize();
@@ -480,7 +480,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let destination_window_bytes = destination_window.serialize();
     let request0 = [
         extension_information.major_opcode,
@@ -548,7 +548,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let destination_window_bytes = destination_window.serialize();
     let enable_bytes = (enable as u8).serialize();
     let request0 = [
@@ -578,7 +578,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let destination_window_bytes = destination_window.serialize();
     let request0 = [
         extension_information.major_opcode,
@@ -626,7 +626,7 @@ where Conn: RequestConnection + ?Sized, A: Into<Kind>
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let source_kind = source_kind.into();
     let source_kind_bytes = source_kind.serialize();

@@ -400,7 +400,7 @@ impl Serialize for Visualtype {
     type Bytes = [u8; 24];
     fn serialize(&self) -> Self::Bytes {
         let visual_id_bytes = self.visual_id.serialize();
-        let class_bytes = Into::<u8>::into(self.class).serialize();
+        let class_bytes = u8::from(self.class).serialize();
         let bits_per_rgb_value_bytes = self.bits_per_rgb_value.serialize();
         let colormap_entries_bytes = self.colormap_entries.serialize();
         let red_mask_bytes = self.red_mask.serialize();
@@ -436,7 +436,7 @@ impl Serialize for Visualtype {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(24);
         self.visual_id.serialize_into(bytes);
-        Into::<u8>::into(self.class).serialize_into(bytes);
+        u8::from(self.class).serialize_into(bytes);
         self.bits_per_rgb_value.serialize_into(bytes);
         self.colormap_entries.serialize_into(bytes);
         self.red_mask.serialize_into(bytes);
@@ -724,7 +724,7 @@ impl Serialize for Screen {
         self.min_installed_maps.serialize_into(bytes);
         self.max_installed_maps.serialize_into(bytes);
         self.root_visual.serialize_into(bytes);
-        Into::<u8>::into(self.backing_stores).serialize_into(bytes);
+        u8::from(self.backing_stores).serialize_into(bytes);
         self.save_unders.serialize_into(bytes);
         self.root_depth.serialize_into(bytes);
         let allowed_depths_len = self.allowed_depths.len() as u8;
@@ -1030,8 +1030,8 @@ impl Serialize for Setup {
         roots_len.serialize_into(bytes);
         let pixmap_formats_len = self.pixmap_formats.len() as u8;
         pixmap_formats_len.serialize_into(bytes);
-        Into::<u8>::into(self.image_byte_order).serialize_into(bytes);
-        Into::<u8>::into(self.bitmap_format_bit_order).serialize_into(bytes);
+        u8::from(self.image_byte_order).serialize_into(bytes);
+        u8::from(self.bitmap_format_bit_order).serialize_into(bytes);
         self.bitmap_format_scanline_unit.serialize_into(bytes);
         self.bitmap_format_scanline_pad.serialize_into(bytes);
         self.min_keycode.serialize_into(bytes);
@@ -1897,7 +1897,7 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for MotionNotifyEvent {
 impl From<&MotionNotifyEvent> for [u8; 32] {
     fn from(input: &MotionNotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let detail = Into::<u8>::into(input.detail).serialize();
+        let detail = u8::from(input.detail).serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let root = input.root.serialize();
@@ -2148,7 +2148,7 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for EnterNotifyEvent {
 impl From<&EnterNotifyEvent> for [u8; 32] {
     fn from(input: &EnterNotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let detail = Into::<u8>::into(input.detail).serialize();
+        let detail = u8::from(input.detail).serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let root = input.root.serialize();
@@ -2159,7 +2159,7 @@ impl From<&EnterNotifyEvent> for [u8; 32] {
         let event_x = input.event_x.serialize();
         let event_y = input.event_y.serialize();
         let state = input.state.serialize();
-        let mode = Into::<u8>::into(input.mode).serialize();
+        let mode = u8::from(input.mode).serialize();
         let same_screen_focus = input.same_screen_focus.serialize();
         [
             response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
@@ -2252,7 +2252,7 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for LeaveNotifyEvent {
 impl From<&LeaveNotifyEvent> for [u8; 32] {
     fn from(input: &LeaveNotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let detail = Into::<u8>::into(input.detail).serialize();
+        let detail = u8::from(input.detail).serialize();
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let root = input.root.serialize();
@@ -2263,7 +2263,7 @@ impl From<&LeaveNotifyEvent> for [u8; 32] {
         let event_x = input.event_x.serialize();
         let event_y = input.event_y.serialize();
         let state = input.state.serialize();
-        let mode = Into::<u8>::into(input.mode).serialize();
+        let mode = u8::from(input.mode).serialize();
         let same_screen_focus = input.same_screen_focus.serialize();
         [
             response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
@@ -2331,10 +2331,10 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for FocusInEvent {
 impl From<&FocusInEvent> for [u8; 32] {
     fn from(input: &FocusInEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let detail = Into::<u8>::into(input.detail).serialize();
+        let detail = u8::from(input.detail).serialize();
         let sequence = input.sequence.serialize();
         let event = input.event.serialize();
-        let mode = Into::<u8>::into(input.mode).serialize();
+        let mode = u8::from(input.mode).serialize();
         [
             response_type[0], detail[0], sequence[0], sequence[1], event[0], event[1], event[2], event[3],
             mode[0], 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
@@ -2401,10 +2401,10 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for FocusOutEvent {
 impl From<&FocusOutEvent> for [u8; 32] {
     fn from(input: &FocusOutEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let detail = Into::<u8>::into(input.detail).serialize();
+        let detail = u8::from(input.detail).serialize();
         let sequence = input.sequence.serialize();
         let event = input.event.serialize();
-        let mode = Into::<u8>::into(input.mode).serialize();
+        let mode = u8::from(input.mode).serialize();
         [
             response_type[0], detail[0], sequence[0], sequence[1], event[0], event[1], event[2], event[3],
             mode[0], 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
@@ -2868,7 +2868,7 @@ impl From<&VisibilityNotifyEvent> for [u8; 32] {
         let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
         let window = input.window.serialize();
-        let state = Into::<u8>::into(input.state).serialize();
+        let state = u8::from(input.state).serialize();
         [
             response_type[0], 0, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
             state[0], 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
@@ -3481,7 +3481,7 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ConfigureRequestEvent {
 impl From<&ConfigureRequestEvent> for [u8; 32] {
     fn from(input: &ConfigureRequestEvent) -> Self {
         let response_type = input.response_type.serialize();
-        let stack_mode = Into::<u8>::into(input.stack_mode).serialize();
+        let stack_mode = u8::from(input.stack_mode).serialize();
         let sequence = input.sequence.serialize();
         let parent = input.parent.serialize();
         let window = input.window.serialize();
@@ -3761,7 +3761,7 @@ impl From<&CirculateNotifyEvent> for [u8; 32] {
         let sequence = input.sequence.serialize();
         let event = input.event.serialize();
         let window = input.window.serialize();
-        let place = Into::<u8>::into(input.place).serialize();
+        let place = u8::from(input.place).serialize();
         [
             response_type[0], 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
             window[0], window[1], window[2], window[3], 0, 0, 0, 0,
@@ -3837,7 +3837,7 @@ impl From<&CirculateRequestEvent> for [u8; 32] {
         let sequence = input.sequence.serialize();
         let event = input.event.serialize();
         let window = input.window.serialize();
-        let place = Into::<u8>::into(input.place).serialize();
+        let place = u8::from(input.place).serialize();
         [
             response_type[0], 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
             window[0], window[1], window[2], window[3], 0, 0, 0, 0,
@@ -3977,7 +3977,7 @@ impl From<&PropertyNotifyEvent> for [u8; 32] {
         let window = input.window.serialize();
         let atom = input.atom.serialize();
         let time = input.time.serialize();
-        let state = Into::<u8>::into(input.state).serialize();
+        let state = u8::from(input.state).serialize();
         [
             response_type[0], 0, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
             atom[0], atom[1], atom[2], atom[3], time[0], time[1], time[2], time[3],
@@ -4617,7 +4617,7 @@ impl From<&ColormapNotifyEvent> for [u8; 32] {
         let window = input.window.serialize();
         let colormap = input.colormap.serialize();
         let new = input.new.serialize();
-        let state = Into::<u8>::into(input.state).serialize();
+        let state = u8::from(input.state).serialize();
         [
             response_type[0], 0, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
             colormap[0], colormap[1], colormap[2], colormap[3], new[0], state[0], 0, 0,
@@ -5025,7 +5025,7 @@ impl From<&MappingNotifyEvent> for [u8; 32] {
     fn from(input: &MappingNotifyEvent) -> Self {
         let response_type = input.response_type.serialize();
         let sequence = input.sequence.serialize();
-        let request = Into::<u8>::into(input.request).serialize();
+        let request = u8::from(input.request).serialize();
         let first_keycode = input.first_keycode.serialize();
         let count = input.count.serialize();
         [
@@ -6519,49 +6519,49 @@ impl CreateWindowAux {
     fn value_mask(&self) -> u32 {
         let mut mask = 0;
         if self.background_pixmap.is_some() {
-            mask |= Into::<u32>::into(CW::BackPixmap);
+            mask |= u32::from(CW::BackPixmap);
         }
         if self.background_pixel.is_some() {
-            mask |= Into::<u32>::into(CW::BackPixel);
+            mask |= u32::from(CW::BackPixel);
         }
         if self.border_pixmap.is_some() {
-            mask |= Into::<u32>::into(CW::BorderPixmap);
+            mask |= u32::from(CW::BorderPixmap);
         }
         if self.border_pixel.is_some() {
-            mask |= Into::<u32>::into(CW::BorderPixel);
+            mask |= u32::from(CW::BorderPixel);
         }
         if self.bit_gravity.is_some() {
-            mask |= Into::<u32>::into(CW::BitGravity);
+            mask |= u32::from(CW::BitGravity);
         }
         if self.win_gravity.is_some() {
-            mask |= Into::<u32>::into(CW::WinGravity);
+            mask |= u32::from(CW::WinGravity);
         }
         if self.backing_store.is_some() {
-            mask |= Into::<u32>::into(CW::BackingStore);
+            mask |= u32::from(CW::BackingStore);
         }
         if self.backing_planes.is_some() {
-            mask |= Into::<u32>::into(CW::BackingPlanes);
+            mask |= u32::from(CW::BackingPlanes);
         }
         if self.backing_pixel.is_some() {
-            mask |= Into::<u32>::into(CW::BackingPixel);
+            mask |= u32::from(CW::BackingPixel);
         }
         if self.override_redirect.is_some() {
-            mask |= Into::<u32>::into(CW::OverrideRedirect);
+            mask |= u32::from(CW::OverrideRedirect);
         }
         if self.save_under.is_some() {
-            mask |= Into::<u32>::into(CW::SaveUnder);
+            mask |= u32::from(CW::SaveUnder);
         }
         if self.event_mask.is_some() {
-            mask |= Into::<u32>::into(CW::EventMask);
+            mask |= u32::from(CW::EventMask);
         }
         if self.do_not_propogate_mask.is_some() {
-            mask |= Into::<u32>::into(CW::DontPropagate);
+            mask |= u32::from(CW::DontPropagate);
         }
         if self.colormap.is_some() {
-            mask |= Into::<u32>::into(CW::Colormap);
+            mask |= u32::from(CW::Colormap);
         }
         if self.cursor.is_some() {
-            mask |= Into::<u32>::into(CW::Cursor);
+            mask |= u32::from(CW::Cursor);
         }
         mask
     }
@@ -6756,7 +6756,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u16>
     let value_list_bytes = value_list.serialize();
     let length: usize = (32 + value_list_bytes.len() + 3) / 4;
     let depth_bytes = depth.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let wid_bytes = wid.serialize();
     let parent_bytes = parent.serialize();
     let x_bytes = x.serialize();
@@ -6839,49 +6839,49 @@ impl ChangeWindowAttributesAux {
     fn value_mask(&self) -> u32 {
         let mut mask = 0;
         if self.background_pixmap.is_some() {
-            mask |= Into::<u32>::into(CW::BackPixmap);
+            mask |= u32::from(CW::BackPixmap);
         }
         if self.background_pixel.is_some() {
-            mask |= Into::<u32>::into(CW::BackPixel);
+            mask |= u32::from(CW::BackPixel);
         }
         if self.border_pixmap.is_some() {
-            mask |= Into::<u32>::into(CW::BorderPixmap);
+            mask |= u32::from(CW::BorderPixmap);
         }
         if self.border_pixel.is_some() {
-            mask |= Into::<u32>::into(CW::BorderPixel);
+            mask |= u32::from(CW::BorderPixel);
         }
         if self.bit_gravity.is_some() {
-            mask |= Into::<u32>::into(CW::BitGravity);
+            mask |= u32::from(CW::BitGravity);
         }
         if self.win_gravity.is_some() {
-            mask |= Into::<u32>::into(CW::WinGravity);
+            mask |= u32::from(CW::WinGravity);
         }
         if self.backing_store.is_some() {
-            mask |= Into::<u32>::into(CW::BackingStore);
+            mask |= u32::from(CW::BackingStore);
         }
         if self.backing_planes.is_some() {
-            mask |= Into::<u32>::into(CW::BackingPlanes);
+            mask |= u32::from(CW::BackingPlanes);
         }
         if self.backing_pixel.is_some() {
-            mask |= Into::<u32>::into(CW::BackingPixel);
+            mask |= u32::from(CW::BackingPixel);
         }
         if self.override_redirect.is_some() {
-            mask |= Into::<u32>::into(CW::OverrideRedirect);
+            mask |= u32::from(CW::OverrideRedirect);
         }
         if self.save_under.is_some() {
-            mask |= Into::<u32>::into(CW::SaveUnder);
+            mask |= u32::from(CW::SaveUnder);
         }
         if self.event_mask.is_some() {
-            mask |= Into::<u32>::into(CW::EventMask);
+            mask |= u32::from(CW::EventMask);
         }
         if self.do_not_propogate_mask.is_some() {
-            mask |= Into::<u32>::into(CW::DontPropagate);
+            mask |= u32::from(CW::DontPropagate);
         }
         if self.colormap.is_some() {
-            mask |= Into::<u32>::into(CW::Colormap);
+            mask |= u32::from(CW::Colormap);
         }
         if self.cursor.is_some() {
-            mask |= Into::<u32>::into(CW::Cursor);
+            mask |= u32::from(CW::Cursor);
         }
         mask
     }
@@ -7042,7 +7042,7 @@ where Conn: RequestConnection + ?Sized
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
     let length: usize = (12 + value_list_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let value_mask_bytes = value_mask.serialize();
     let request0 = [
@@ -7150,7 +7150,7 @@ pub fn get_window_attributes<Conn>(conn: &Conn, window: Window) -> Result<Cookie
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let request0 = [
         GET_WINDOW_ATTRIBUTES_REQUEST,
@@ -7264,7 +7264,7 @@ pub fn destroy_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let request0 = [
         DESTROY_WINDOW_REQUEST,
@@ -7287,7 +7287,7 @@ pub fn destroy_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCooki
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let request0 = [
         DESTROY_SUBWINDOWS_REQUEST,
@@ -7396,7 +7396,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let length: usize = (8) / 4;
     let mode = mode.into();
     let mode_bytes = mode.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let request0 = [
         CHANGE_SAVE_SET_REQUEST,
@@ -7451,7 +7451,7 @@ pub fn reparent_window<Conn>(conn: &Conn, window: Window, parent: Window, x: i16
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let parent_bytes = parent.serialize();
     let x_bytes = x.serialize();
@@ -7520,7 +7520,7 @@ pub fn map_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Co
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let request0 = [
         MAP_WINDOW_REQUEST,
@@ -7543,7 +7543,7 @@ pub fn map_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let request0 = [
         MAP_SUBWINDOWS_REQUEST,
@@ -7587,7 +7587,7 @@ pub fn unmap_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, 
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let request0 = [
         UNMAP_WINDOW_REQUEST,
@@ -7610,7 +7610,7 @@ pub fn unmap_subwindows<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let request0 = [
         UNMAP_SUBWINDOWS_REQUEST,
@@ -7797,25 +7797,25 @@ impl ConfigureWindowAux {
     fn value_mask(&self) -> u16 {
         let mut mask = 0;
         if self.x.is_some() {
-            mask |= Into::<u16>::into(ConfigWindow::X);
+            mask |= u16::from(ConfigWindow::X);
         }
         if self.y.is_some() {
-            mask |= Into::<u16>::into(ConfigWindow::Y);
+            mask |= u16::from(ConfigWindow::Y);
         }
         if self.width.is_some() {
-            mask |= Into::<u16>::into(ConfigWindow::Width);
+            mask |= u16::from(ConfigWindow::Width);
         }
         if self.height.is_some() {
-            mask |= Into::<u16>::into(ConfigWindow::Height);
+            mask |= u16::from(ConfigWindow::Height);
         }
         if self.border_width.is_some() {
-            mask |= Into::<u16>::into(ConfigWindow::BorderWidth);
+            mask |= u16::from(ConfigWindow::BorderWidth);
         }
         if self.sibling.is_some() {
-            mask |= Into::<u16>::into(ConfigWindow::Sibling);
+            mask |= u16::from(ConfigWindow::Sibling);
         }
         if self.stack_mode.is_some() {
-            mask |= Into::<u16>::into(ConfigWindow::StackMode);
+            mask |= u16::from(ConfigWindow::StackMode);
         }
         mask
     }
@@ -7942,7 +7942,7 @@ where Conn: RequestConnection + ?Sized
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
     let length: usize = (12 + value_list_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let value_mask_bytes = value_mask.serialize();
     let request0 = [
@@ -8053,7 +8053,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let length: usize = (8) / 4;
     let direction = direction.into();
     let direction_bytes = direction.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let request0 = [
         CIRCULATE_WINDOW_REQUEST,
@@ -8112,7 +8112,7 @@ pub fn get_geometry<Conn>(conn: &Conn, drawable: Drawable) -> Result<Cookie<'_, 
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let request0 = [
         GET_GEOMETRY_REQUEST,
@@ -8224,7 +8224,7 @@ pub fn query_tree<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, 
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let request0 = [
         QUERY_TREE_REQUEST,
@@ -8331,7 +8331,7 @@ where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8 + 1 * name.len() + 3) / 4;
     let only_if_exists_bytes = (only_if_exists as u8).serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let name_len: u16 = name.len().try_into()?;
     let name_len_bytes = name_len.serialize();
     let request0 = [
@@ -8382,7 +8382,7 @@ pub fn get_atom_name<Conn>(conn: &Conn, atom: Atom) -> Result<Cookie<'_, Conn, G
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let atom_bytes = atom.serialize();
     let request0 = [
         GET_ATOM_NAME_REQUEST,
@@ -8560,7 +8560,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<Atom>, C: Into<Atom
     let length: usize = (24 + 1 * data.len() + 3) / 4;
     let mode = mode.into();
     let mode_bytes = mode.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let property = property.into();
     let property_bytes = property.serialize();
@@ -8609,7 +8609,7 @@ pub fn delete_property<Conn>(conn: &Conn, window: Window, property: Atom) -> Res
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let property_bytes = property.serialize();
     let request0 = [
@@ -8930,7 +8930,7 @@ where Conn: RequestConnection + ?Sized
 {
     let length: usize = (24) / 4;
     let delete_bytes = (delete as u8).serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let property_bytes = property.serialize();
     let type_bytes = type_.serialize();
@@ -9018,7 +9018,7 @@ pub fn list_properties<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, C
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let request0 = [
         LIST_PROPERTIES_REQUEST,
@@ -9096,7 +9096,7 @@ pub fn set_selection_owner<Conn>(conn: &Conn, owner: Window, selection: Atom, ti
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let owner_bytes = owner.serialize();
     let selection_bytes = selection.serialize();
     let time_bytes = time.serialize();
@@ -9146,7 +9146,7 @@ pub fn get_selection_owner<Conn>(conn: &Conn, selection: Atom) -> Result<Cookie<
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let selection_bytes = selection.serialize();
     let request0 = [
         GET_SELECTION_OWNER_REQUEST,
@@ -9199,7 +9199,7 @@ pub fn convert_selection<Conn>(conn: &Conn, requestor: Window, selection: Atom, 
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (24) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let requestor_bytes = requestor.serialize();
     let selection_bytes = selection.serialize();
     let target_bytes = target.serialize();
@@ -9378,7 +9378,7 @@ where Conn: RequestConnection + ?Sized, A: Into<[u8; 32]>
 {
     let length: usize = (44) / 4;
     let propagate_bytes = (propagate as u8).serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let destination_bytes = destination.serialize();
     let event_mask_bytes = event_mask.serialize();
     let event = event.into();
@@ -9680,7 +9680,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 {
     let length: usize = (24) / 4;
     let owner_events_bytes = (owner_events as u8).serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let grab_window_bytes = grab_window.serialize();
     let event_mask_bytes = event_mask.serialize();
     let pointer_mode = pointer_mode.into();
@@ -9774,7 +9774,7 @@ pub fn ungrab_pointer<Conn>(conn: &Conn, time: Timestamp) -> Result<VoidCookie<'
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let time_bytes = time.serialize();
     let request0 = [
         UNGRAB_POINTER_REQUEST,
@@ -9947,7 +9947,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>, C: Into<u8>
 {
     let length: usize = (24) / 4;
     let owner_events_bytes = (owner_events as u8).serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let grab_window_bytes = grab_window.serialize();
     let event_mask_bytes = event_mask.serialize();
     let pointer_mode = pointer_mode.into();
@@ -9998,7 +9998,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let length: usize = (12) / 4;
     let button = button.into();
     let button_bytes = button.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let grab_window_bytes = grab_window.serialize();
     let modifiers_bytes = modifiers.serialize();
     let request0 = [
@@ -10026,7 +10026,7 @@ pub fn change_active_pointer_grab<Conn>(conn: &Conn, cursor: Cursor, time: Times
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let cursor_bytes = cursor.serialize();
     let time_bytes = time.serialize();
     let event_mask_bytes = event_mask.serialize();
@@ -10120,7 +10120,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 {
     let length: usize = (16) / 4;
     let owner_events_bytes = (owner_events as u8).serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let grab_window_bytes = grab_window.serialize();
     let time_bytes = time.serialize();
     let pointer_mode = pointer_mode.into();
@@ -10180,7 +10180,7 @@ pub fn ungrab_keyboard<Conn>(conn: &Conn, time: Timestamp) -> Result<VoidCookie<
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let time_bytes = time.serialize();
     let request0 = [
         UNGRAB_KEYBOARD_REQUEST,
@@ -10321,7 +10321,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 {
     let length: usize = (16) / 4;
     let owner_events_bytes = (owner_events as u8).serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let grab_window_bytes = grab_window.serialize();
     let modifiers_bytes = modifiers.serialize();
     let key_bytes = key.serialize();
@@ -10384,7 +10384,7 @@ where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12) / 4;
     let key_bytes = key.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let grab_window_bytes = grab_window.serialize();
     let modifiers_bytes = modifiers.serialize();
     let request0 = [
@@ -10573,7 +10573,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let length: usize = (8) / 4;
     let mode = mode.into();
     let mode_bytes = mode.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let time_bytes = time.serialize();
     let request0 = [
         ALLOW_EVENTS_REQUEST,
@@ -10596,7 +10596,7 @@ pub fn grab_server<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, Connection
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         GRAB_SERVER_REQUEST,
         0,
@@ -10614,7 +10614,7 @@ pub fn ungrab_server<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, Connecti
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         UNGRAB_SERVER_REQUEST,
         0,
@@ -10645,7 +10645,7 @@ pub fn query_pointer<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Con
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let request0 = [
         QUERY_POINTER_REQUEST,
@@ -10774,7 +10774,7 @@ pub fn get_motion_events<Conn>(conn: &Conn, window: Window, start: Timestamp, st
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let start_bytes = start.serialize();
     let stop_bytes = stop.serialize();
@@ -10833,7 +10833,7 @@ pub fn translate_coordinates<Conn>(conn: &Conn, src_window: Window, dst_window: 
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let src_window_bytes = src_window.serialize();
     let dst_window_bytes = dst_window.serialize();
     let src_x_bytes = src_x.serialize();
@@ -10928,7 +10928,7 @@ pub fn warp_pointer<Conn>(conn: &Conn, src_window: Window, dst_window: Window, s
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (24) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let src_window_bytes = src_window.serialize();
     let dst_window_bytes = dst_window.serialize();
     let src_x_bytes = src_x.serialize();
@@ -11091,7 +11091,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let length: usize = (12) / 4;
     let revert_to = revert_to.into();
     let revert_to_bytes = revert_to.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let focus_bytes = focus.serialize();
     let time_bytes = time.serialize();
     let request0 = [
@@ -11119,7 +11119,7 @@ pub fn get_input_focus<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetInputFoc
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         GET_INPUT_FOCUS_REQUEST,
         0,
@@ -11163,7 +11163,7 @@ pub fn query_keymap<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, QueryKeymapRep
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         QUERY_KEYMAP_REQUEST,
         0,
@@ -11290,7 +11290,7 @@ pub fn open_font<'c, Conn>(conn: &'c Conn, fid: Font, name: &[u8]) -> Result<Voi
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 1 * name.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let fid_bytes = fid.serialize();
     let name_len: u16 = name.len().try_into()?;
     let name_len_bytes = name_len.serialize();
@@ -11322,7 +11322,7 @@ pub fn close_font<Conn>(conn: &Conn, font: Font) -> Result<VoidCookie<'_, Conn>,
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let font_bytes = font.serialize();
     let request0 = [
         CLOSE_FONT_REQUEST,
@@ -11518,7 +11518,7 @@ pub fn query_font<Conn>(conn: &Conn, font: Fontable) -> Result<Cookie<'_, Conn, 
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let font_bytes = font.serialize();
     let request0 = [
         QUERY_FONT_REQUEST,
@@ -11647,7 +11647,7 @@ where Conn: RequestConnection + ?Sized
     // is either 0 or 1. Both fit into an u8.
     let odd_length: u8 = ((string_len) & (1)).try_into().unwrap();
     let odd_length_bytes = odd_length.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let font_bytes = font.serialize();
     let string_bytes = string.serialize();
     let request0 = [
@@ -11758,7 +11758,7 @@ pub fn list_fonts<'c, Conn>(conn: &'c Conn, max_names: u16, pattern: &[u8]) -> R
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8 + 1 * pattern.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let max_names_bytes = max_names.serialize();
     let pattern_len: u16 = pattern.len().try_into()?;
     let pattern_len_bytes = pattern_len.serialize();
@@ -11831,7 +11831,7 @@ pub fn list_fonts_with_info<'c, Conn>(conn: &'c Conn, max_names: u16, pattern: &
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8 + 1 * pattern.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let max_names_bytes = max_names.serialize();
     let pattern_len: u16 = pattern.len().try_into()?;
     let pattern_len_bytes = pattern_len.serialize();
@@ -11932,7 +11932,7 @@ where Conn: RequestConnection + ?Sized
 {
     let font_bytes = font.serialize();
     let length: usize = (8 + font_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let font_qty: u16 = font.len().try_into()?;
     let font_qty_bytes = font_qty.serialize();
     let request0 = [
@@ -11959,7 +11959,7 @@ pub fn get_font_path<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetFontPathRe
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         GET_FONT_PATH_REQUEST,
         0,
@@ -12027,7 +12027,7 @@ where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16) / 4;
     let depth_bytes = depth.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let pid_bytes = pid.serialize();
     let drawable_bytes = drawable.serialize();
     let width_bytes = width.serialize();
@@ -12073,7 +12073,7 @@ pub fn free_pixmap<Conn>(conn: &Conn, pixmap: Pixmap) -> Result<VoidCookie<'_, C
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let pixmap_bytes = pixmap.serialize();
     let request0 = [
         FREE_PIXMAP_REQUEST,
@@ -12881,73 +12881,73 @@ impl CreateGCAux {
     fn value_mask(&self) -> u32 {
         let mut mask = 0;
         if self.function.is_some() {
-            mask |= Into::<u32>::into(GC::Function);
+            mask |= u32::from(GC::Function);
         }
         if self.plane_mask.is_some() {
-            mask |= Into::<u32>::into(GC::PlaneMask);
+            mask |= u32::from(GC::PlaneMask);
         }
         if self.foreground.is_some() {
-            mask |= Into::<u32>::into(GC::Foreground);
+            mask |= u32::from(GC::Foreground);
         }
         if self.background.is_some() {
-            mask |= Into::<u32>::into(GC::Background);
+            mask |= u32::from(GC::Background);
         }
         if self.line_width.is_some() {
-            mask |= Into::<u32>::into(GC::LineWidth);
+            mask |= u32::from(GC::LineWidth);
         }
         if self.line_style.is_some() {
-            mask |= Into::<u32>::into(GC::LineStyle);
+            mask |= u32::from(GC::LineStyle);
         }
         if self.cap_style.is_some() {
-            mask |= Into::<u32>::into(GC::CapStyle);
+            mask |= u32::from(GC::CapStyle);
         }
         if self.join_style.is_some() {
-            mask |= Into::<u32>::into(GC::JoinStyle);
+            mask |= u32::from(GC::JoinStyle);
         }
         if self.fill_style.is_some() {
-            mask |= Into::<u32>::into(GC::FillStyle);
+            mask |= u32::from(GC::FillStyle);
         }
         if self.fill_rule.is_some() {
-            mask |= Into::<u32>::into(GC::FillRule);
+            mask |= u32::from(GC::FillRule);
         }
         if self.tile.is_some() {
-            mask |= Into::<u32>::into(GC::Tile);
+            mask |= u32::from(GC::Tile);
         }
         if self.stipple.is_some() {
-            mask |= Into::<u32>::into(GC::Stipple);
+            mask |= u32::from(GC::Stipple);
         }
         if self.tile_stipple_x_origin.is_some() {
-            mask |= Into::<u32>::into(GC::TileStippleOriginX);
+            mask |= u32::from(GC::TileStippleOriginX);
         }
         if self.tile_stipple_y_origin.is_some() {
-            mask |= Into::<u32>::into(GC::TileStippleOriginY);
+            mask |= u32::from(GC::TileStippleOriginY);
         }
         if self.font.is_some() {
-            mask |= Into::<u32>::into(GC::Font);
+            mask |= u32::from(GC::Font);
         }
         if self.subwindow_mode.is_some() {
-            mask |= Into::<u32>::into(GC::SubwindowMode);
+            mask |= u32::from(GC::SubwindowMode);
         }
         if self.graphics_exposures.is_some() {
-            mask |= Into::<u32>::into(GC::GraphicsExposures);
+            mask |= u32::from(GC::GraphicsExposures);
         }
         if self.clip_x_origin.is_some() {
-            mask |= Into::<u32>::into(GC::ClipOriginX);
+            mask |= u32::from(GC::ClipOriginX);
         }
         if self.clip_y_origin.is_some() {
-            mask |= Into::<u32>::into(GC::ClipOriginY);
+            mask |= u32::from(GC::ClipOriginY);
         }
         if self.clip_mask.is_some() {
-            mask |= Into::<u32>::into(GC::ClipMask);
+            mask |= u32::from(GC::ClipMask);
         }
         if self.dash_offset.is_some() {
-            mask |= Into::<u32>::into(GC::DashOffset);
+            mask |= u32::from(GC::DashOffset);
         }
         if self.dashes.is_some() {
-            mask |= Into::<u32>::into(GC::DashList);
+            mask |= u32::from(GC::DashList);
         }
         if self.arc_mode.is_some() {
-            mask |= Into::<u32>::into(GC::ArcMode);
+            mask |= u32::from(GC::ArcMode);
         }
         mask
     }
@@ -13175,7 +13175,7 @@ where Conn: RequestConnection + ?Sized
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
     let length: usize = (16 + value_list_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let cid_bytes = cid.serialize();
     let drawable_bytes = drawable.serialize();
     let value_mask_bytes = value_mask.serialize();
@@ -13242,73 +13242,73 @@ impl ChangeGCAux {
     fn value_mask(&self) -> u32 {
         let mut mask = 0;
         if self.function.is_some() {
-            mask |= Into::<u32>::into(GC::Function);
+            mask |= u32::from(GC::Function);
         }
         if self.plane_mask.is_some() {
-            mask |= Into::<u32>::into(GC::PlaneMask);
+            mask |= u32::from(GC::PlaneMask);
         }
         if self.foreground.is_some() {
-            mask |= Into::<u32>::into(GC::Foreground);
+            mask |= u32::from(GC::Foreground);
         }
         if self.background.is_some() {
-            mask |= Into::<u32>::into(GC::Background);
+            mask |= u32::from(GC::Background);
         }
         if self.line_width.is_some() {
-            mask |= Into::<u32>::into(GC::LineWidth);
+            mask |= u32::from(GC::LineWidth);
         }
         if self.line_style.is_some() {
-            mask |= Into::<u32>::into(GC::LineStyle);
+            mask |= u32::from(GC::LineStyle);
         }
         if self.cap_style.is_some() {
-            mask |= Into::<u32>::into(GC::CapStyle);
+            mask |= u32::from(GC::CapStyle);
         }
         if self.join_style.is_some() {
-            mask |= Into::<u32>::into(GC::JoinStyle);
+            mask |= u32::from(GC::JoinStyle);
         }
         if self.fill_style.is_some() {
-            mask |= Into::<u32>::into(GC::FillStyle);
+            mask |= u32::from(GC::FillStyle);
         }
         if self.fill_rule.is_some() {
-            mask |= Into::<u32>::into(GC::FillRule);
+            mask |= u32::from(GC::FillRule);
         }
         if self.tile.is_some() {
-            mask |= Into::<u32>::into(GC::Tile);
+            mask |= u32::from(GC::Tile);
         }
         if self.stipple.is_some() {
-            mask |= Into::<u32>::into(GC::Stipple);
+            mask |= u32::from(GC::Stipple);
         }
         if self.tile_stipple_x_origin.is_some() {
-            mask |= Into::<u32>::into(GC::TileStippleOriginX);
+            mask |= u32::from(GC::TileStippleOriginX);
         }
         if self.tile_stipple_y_origin.is_some() {
-            mask |= Into::<u32>::into(GC::TileStippleOriginY);
+            mask |= u32::from(GC::TileStippleOriginY);
         }
         if self.font.is_some() {
-            mask |= Into::<u32>::into(GC::Font);
+            mask |= u32::from(GC::Font);
         }
         if self.subwindow_mode.is_some() {
-            mask |= Into::<u32>::into(GC::SubwindowMode);
+            mask |= u32::from(GC::SubwindowMode);
         }
         if self.graphics_exposures.is_some() {
-            mask |= Into::<u32>::into(GC::GraphicsExposures);
+            mask |= u32::from(GC::GraphicsExposures);
         }
         if self.clip_x_origin.is_some() {
-            mask |= Into::<u32>::into(GC::ClipOriginX);
+            mask |= u32::from(GC::ClipOriginX);
         }
         if self.clip_y_origin.is_some() {
-            mask |= Into::<u32>::into(GC::ClipOriginY);
+            mask |= u32::from(GC::ClipOriginY);
         }
         if self.clip_mask.is_some() {
-            mask |= Into::<u32>::into(GC::ClipMask);
+            mask |= u32::from(GC::ClipMask);
         }
         if self.dash_offset.is_some() {
-            mask |= Into::<u32>::into(GC::DashOffset);
+            mask |= u32::from(GC::DashOffset);
         }
         if self.dashes.is_some() {
-            mask |= Into::<u32>::into(GC::DashList);
+            mask |= u32::from(GC::DashList);
         }
         if self.arc_mode.is_some() {
-            mask |= Into::<u32>::into(GC::ArcMode);
+            mask |= u32::from(GC::ArcMode);
         }
         mask
     }
@@ -13557,7 +13557,7 @@ where Conn: RequestConnection + ?Sized
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
     let length: usize = (12 + value_list_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let gc_bytes = gc.serialize();
     let value_mask_bytes = value_mask.serialize();
     let request0 = [
@@ -13588,7 +13588,7 @@ pub fn copy_gc<Conn>(conn: &Conn, src_gc: Gcontext, dst_gc: Gcontext, value_mask
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let src_gc_bytes = src_gc.serialize();
     let dst_gc_bytes = dst_gc.serialize();
     let value_mask_bytes = value_mask.serialize();
@@ -13621,7 +13621,7 @@ pub fn set_dashes<'c, Conn>(conn: &'c Conn, gc: Gcontext, dash_offset: u16, dash
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 1 * dashes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let gc_bytes = gc.serialize();
     let dash_offset_bytes = dash_offset.serialize();
     let dashes_len: u16 = dashes.len().try_into()?;
@@ -13724,7 +13724,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let length: usize = (12 + 8 * rectangles.len() + 3) / 4;
     let ordering = ordering.into();
     let ordering_bytes = ordering.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let gc_bytes = gc.serialize();
     let clip_x_origin_bytes = clip_x_origin.serialize();
     let clip_y_origin_bytes = clip_y_origin.serialize();
@@ -13768,7 +13768,7 @@ pub fn free_gc<Conn>(conn: &Conn, gc: Gcontext) -> Result<VoidCookie<'_, Conn>, 
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let gc_bytes = gc.serialize();
     let request0 = [
         FREE_GC_REQUEST,
@@ -13792,7 +13792,7 @@ where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16) / 4;
     let exposures_bytes = (exposures as u8).serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let x_bytes = x.serialize();
     let y_bytes = y.serialize();
@@ -13848,7 +13848,7 @@ pub fn copy_area<Conn>(conn: &Conn, src_drawable: Drawable, dst_drawable: Drawab
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (28) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let src_drawable_bytes = src_drawable.serialize();
     let dst_drawable_bytes = dst_drawable.serialize();
     let gc_bytes = gc.serialize();
@@ -13899,7 +13899,7 @@ pub fn copy_plane<Conn>(conn: &Conn, src_drawable: Drawable, dst_drawable: Drawa
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (32) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let src_drawable_bytes = src_drawable.serialize();
     let dst_drawable_bytes = dst_drawable.serialize();
     let gc_bytes = gc.serialize();
@@ -14026,7 +14026,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let length: usize = (12 + 4 * points.len() + 3) / 4;
     let coordinate_mode = coordinate_mode.into();
     let coordinate_mode_bytes = coordinate_mode.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let points_bytes = points.serialize();
@@ -14098,7 +14098,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let length: usize = (12 + 4 * points.len() + 3) / 4;
     let coordinate_mode = coordinate_mode.into();
     let coordinate_mode_bytes = coordinate_mode.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let points_bytes = points.serialize();
@@ -14206,7 +14206,7 @@ pub fn poly_segment<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, 
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 8 * segments.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let segments_bytes = segments.serialize();
@@ -14238,7 +14238,7 @@ pub fn poly_rectangle<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 8 * rectangles.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let rectangles_bytes = rectangles.serialize();
@@ -14270,7 +14270,7 @@ pub fn poly_arc<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 12 * arcs.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let arcs_bytes = arcs.serialize();
@@ -14367,7 +14367,7 @@ pub fn fill_poly<'c, Conn, A, B>(conn: &'c Conn, drawable: Drawable, gc: Gcontex
 where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 {
     let length: usize = (16 + 4 * points.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let shape = shape.into();
@@ -14432,7 +14432,7 @@ pub fn poly_fill_rectangle<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gco
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 8 * rectangles.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let rectangles_bytes = rectangles.serialize();
@@ -14464,7 +14464,7 @@ pub fn poly_fill_arc<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext,
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 12 * arcs.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let arcs_bytes = arcs.serialize();
@@ -14563,7 +14563,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let length: usize = (24 + 1 * data.len() + 3) / 4;
     let format = format.into();
     let format_bytes = format.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let width_bytes = width.serialize();
@@ -14614,7 +14614,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let length: usize = (20) / 4;
     let format = format.into();
     let format_bytes = format.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let x_bytes = x.serialize();
     let y_bytes = y.serialize();
@@ -14681,7 +14681,7 @@ pub fn poly_text8<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x:
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16 + 1 * items.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let x_bytes = x.serialize();
@@ -14718,7 +14718,7 @@ pub fn poly_text16<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16 + 1 * items.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let x_bytes = x.serialize();
@@ -14791,7 +14791,7 @@ where Conn: RequestConnection + ?Sized
     let length: usize = (16 + 1 * string.len() + 3) / 4;
     let string_len: u8 = string.len().try_into()?;
     let string_len_bytes = string_len.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let x_bytes = x.serialize();
@@ -14865,7 +14865,7 @@ where Conn: RequestConnection + ?Sized
     let length: usize = (16 + 2 * string.len() + 3) / 4;
     let string_len: u8 = string.len().try_into()?;
     let string_len_bytes = string_len.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let x_bytes = x.serialize();
@@ -14967,7 +14967,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let length: usize = (16) / 4;
     let alloc = alloc.into();
     let alloc_bytes = alloc.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let mid_bytes = mid.serialize();
     let window_bytes = window.serialize();
     let visual_bytes = visual.serialize();
@@ -15000,7 +15000,7 @@ pub fn free_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<'_,
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let cmap_bytes = cmap.serialize();
     let request0 = [
         FREE_COLORMAP_REQUEST,
@@ -15023,7 +15023,7 @@ pub fn copy_colormap_and_free<Conn>(conn: &Conn, mid: Colormap, src_cmap: Colorm
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let mid_bytes = mid.serialize();
     let src_cmap_bytes = src_cmap.serialize();
     let request0 = [
@@ -15051,7 +15051,7 @@ pub fn install_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCookie<
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let cmap_bytes = cmap.serialize();
     let request0 = [
         INSTALL_COLORMAP_REQUEST,
@@ -15074,7 +15074,7 @@ pub fn uninstall_colormap<Conn>(conn: &Conn, cmap: Colormap) -> Result<VoidCooki
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let cmap_bytes = cmap.serialize();
     let request0 = [
         UNINSTALL_COLORMAP_REQUEST,
@@ -15097,7 +15097,7 @@ pub fn list_installed_colormaps<Conn>(conn: &Conn, window: Window) -> Result<Coo
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let request0 = [
         LIST_INSTALLED_COLORMAPS_REQUEST,
@@ -15164,7 +15164,7 @@ pub fn alloc_color<Conn>(conn: &Conn, cmap: Colormap, red: u16, green: u16, blue
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let cmap_bytes = cmap.serialize();
     let red_bytes = red.serialize();
     let green_bytes = green.serialize();
@@ -15229,7 +15229,7 @@ pub fn alloc_named_color<'c, Conn>(conn: &'c Conn, cmap: Colormap, name: &[u8]) 
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 1 * name.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let cmap_bytes = cmap.serialize();
     let name_len: u16 = name.len().try_into()?;
     let name_len_bytes = name_len.serialize();
@@ -15298,7 +15298,7 @@ where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12) / 4;
     let contiguous_bytes = (contiguous as u8).serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let cmap_bytes = cmap.serialize();
     let colors_bytes = colors.serialize();
     let planes_bytes = planes.serialize();
@@ -15357,7 +15357,7 @@ where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16) / 4;
     let contiguous_bytes = (contiguous as u8).serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let cmap_bytes = cmap.serialize();
     let colors_bytes = colors.serialize();
     let reds_bytes = reds.serialize();
@@ -15425,7 +15425,7 @@ pub fn free_colors<'c, Conn>(conn: &'c Conn, cmap: Colormap, plane_mask: u32, pi
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 4 * pixels.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let cmap_bytes = cmap.serialize();
     let plane_mask_bytes = plane_mask.serialize();
     let pixels_bytes = pixels.serialize();
@@ -15583,7 +15583,7 @@ pub fn store_colors<'c, Conn>(conn: &'c Conn, cmap: Colormap, items: &[Coloritem
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8 + 12 * items.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let cmap_bytes = cmap.serialize();
     let items_bytes = items.serialize();
     let request0 = [
@@ -15611,7 +15611,7 @@ where Conn: RequestConnection + ?Sized
 {
     let length: usize = (16 + 1 * name.len() + 3) / 4;
     let flags_bytes = flags.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let cmap_bytes = cmap.serialize();
     let pixel_bytes = pixel.serialize();
     let name_len: u16 = name.len().try_into()?;
@@ -15696,7 +15696,7 @@ pub fn query_colors<'c, Conn>(conn: &'c Conn, cmap: Colormap, pixels: &[u32]) ->
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8 + 4 * pixels.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let cmap_bytes = cmap.serialize();
     let pixels_bytes = pixels.serialize();
     let request0 = [
@@ -15749,7 +15749,7 @@ pub fn lookup_color<'c, Conn>(conn: &'c Conn, cmap: Colormap, name: &[u8]) -> Re
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 1 * name.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let cmap_bytes = cmap.serialize();
     let name_len: u16 = name.len().try_into()?;
     let name_len_bytes = name_len.serialize();
@@ -15874,7 +15874,7 @@ pub fn create_cursor<Conn>(conn: &Conn, cid: Cursor, source: Pixmap, mask: Pixma
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (32) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let cid_bytes = cid.serialize();
     let source_bytes = source.serialize();
     let mask_bytes = mask.serialize();
@@ -16023,7 +16023,7 @@ pub fn create_glyph_cursor<Conn>(conn: &Conn, cid: Cursor, source_font: Font, ma
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (32) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let cid_bytes = cid.serialize();
     let source_font_bytes = source_font.serialize();
     let mask_font_bytes = mask_font.serialize();
@@ -16092,7 +16092,7 @@ pub fn free_cursor<Conn>(conn: &Conn, cursor: Cursor) -> Result<VoidCookie<'_, C
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let cursor_bytes = cursor.serialize();
     let request0 = [
         FREE_CURSOR_REQUEST,
@@ -16115,7 +16115,7 @@ pub fn recolor_cursor<Conn>(conn: &Conn, cursor: Cursor, fore_red: u16, fore_gre
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (20) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let cursor_bytes = cursor.serialize();
     let fore_red_bytes = fore_red.serialize();
     let fore_green_bytes = fore_green.serialize();
@@ -16223,7 +16223,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let length: usize = (12) / 4;
     let class = class.into();
     let class_bytes = class.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let drawable_bytes = drawable.serialize();
     let width_bytes = width.serialize();
     let height_bytes = height.serialize();
@@ -16300,7 +16300,7 @@ pub fn query_extension<'c, Conn>(conn: &'c Conn, name: &[u8]) -> Result<Cookie<'
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8 + 1 * name.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let name_len: u16 = name.len().try_into()?;
     let name_len_bytes = name_len.serialize();
     let request0 = [
@@ -16366,7 +16366,7 @@ pub fn list_extensions<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListExtensi
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         LIST_EXTENSIONS_REQUEST,
         0,
@@ -16410,7 +16410,7 @@ where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8 + 4 * keysyms.len() + 3) / 4;
     let keycode_count_bytes = keycode_count.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let first_keycode_bytes = first_keycode.serialize();
     let keysyms_per_keycode_bytes = keysyms_per_keycode.serialize();
     assert_eq!(keysyms.len(), (keycode_count as usize) * (keysyms_per_keycode as usize), "Argument keysyms has an incorrect length");
@@ -16439,7 +16439,7 @@ pub fn get_keyboard_mapping<Conn>(conn: &Conn, first_keycode: Keycode, count: u8
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let first_keycode_bytes = first_keycode.serialize();
     let count_bytes = count.serialize();
     let request0 = [
@@ -16712,28 +16712,28 @@ impl ChangeKeyboardControlAux {
     fn value_mask(&self) -> u32 {
         let mut mask = 0;
         if self.key_click_percent.is_some() {
-            mask |= Into::<u32>::into(KB::KeyClickPercent);
+            mask |= u32::from(KB::KeyClickPercent);
         }
         if self.bell_percent.is_some() {
-            mask |= Into::<u32>::into(KB::BellPercent);
+            mask |= u32::from(KB::BellPercent);
         }
         if self.bell_pitch.is_some() {
-            mask |= Into::<u32>::into(KB::BellPitch);
+            mask |= u32::from(KB::BellPitch);
         }
         if self.bell_duration.is_some() {
-            mask |= Into::<u32>::into(KB::BellDuration);
+            mask |= u32::from(KB::BellDuration);
         }
         if self.led.is_some() {
-            mask |= Into::<u32>::into(KB::Led);
+            mask |= u32::from(KB::Led);
         }
         if self.led_mode.is_some() {
-            mask |= Into::<u32>::into(KB::LedMode);
+            mask |= u32::from(KB::LedMode);
         }
         if self.key.is_some() {
-            mask |= Into::<u32>::into(KB::Key);
+            mask |= u32::from(KB::Key);
         }
         if self.auto_repeat_mode.is_some() {
-            mask |= Into::<u32>::into(KB::AutoRepeatMode);
+            mask |= u32::from(KB::AutoRepeatMode);
         }
         mask
     }
@@ -16818,7 +16818,7 @@ where Conn: RequestConnection + ?Sized
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
     let length: usize = (8 + value_list_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let value_mask_bytes = value_mask.serialize();
     let request0 = [
         CHANGE_KEYBOARD_CONTROL_REQUEST,
@@ -16844,7 +16844,7 @@ pub fn get_keyboard_control<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetKey
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         GET_KEYBOARD_CONTROL_REQUEST,
         0,
@@ -16965,7 +16965,7 @@ where Conn: RequestConnection + ?Sized
 {
     let length: usize = (4) / 4;
     let percent_bytes = percent.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         BELL_REQUEST,
         percent_bytes[0],
@@ -16983,7 +16983,7 @@ pub fn change_pointer_control<Conn>(conn: &Conn, acceleration_numerator: i16, ac
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let acceleration_numerator_bytes = acceleration_numerator.serialize();
     let acceleration_denominator_bytes = acceleration_denominator.serialize();
     let threshold_bytes = threshold.serialize();
@@ -17014,7 +17014,7 @@ pub fn get_pointer_control<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPoin
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         GET_POINTER_CONTROL_REQUEST,
         0,
@@ -17191,7 +17191,7 @@ pub fn set_screen_saver<Conn, A, B>(conn: &Conn, timeout: i16, interval: i16, pr
 where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
 {
     let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let timeout_bytes = timeout.serialize();
     let interval_bytes = interval.serialize();
     let prefer_blanking = prefer_blanking.into();
@@ -17223,7 +17223,7 @@ pub fn get_screen_saver<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetScreenS
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         GET_SCREEN_SAVER_REQUEST,
         0,
@@ -17409,7 +17409,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>, B: Into<u8>
     let length: usize = (8 + 1 * address.len() + 3) / 4;
     let mode = mode.into();
     let mode_bytes = mode.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let family = family.into();
     let family_bytes = family.serialize();
     let address_len: u16 = address.len().try_into()?;
@@ -17468,7 +17468,7 @@ impl Serialize for Host {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        Into::<u8>::into(self.family).serialize_into(bytes);
+        u8::from(self.family).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         let address_len = self.address.len() as u16;
         address_len.serialize_into(bytes);
@@ -17483,7 +17483,7 @@ pub fn list_hosts<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, ListHostsReply>,
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         LIST_HOSTS_REQUEST,
         0,
@@ -17593,7 +17593,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let length: usize = (4) / 4;
     let mode = mode.into();
     let mode_bytes = mode.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         SET_ACCESS_CONTROL_REQUEST,
         mode_bytes[0],
@@ -17678,7 +17678,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let length: usize = (4) / 4;
     let mode = mode.into();
     let mode_bytes = mode.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         SET_CLOSE_DOWN_MODE_REQUEST,
         mode_bytes[0],
@@ -17774,7 +17774,7 @@ pub fn kill_client<Conn>(conn: &Conn, resource: u32) -> Result<VoidCookie<'_, Co
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let resource_bytes = resource.serialize();
     let request0 = [
         KILL_CLIENT_REQUEST,
@@ -17797,7 +17797,7 @@ pub fn rotate_properties<'c, Conn>(conn: &'c Conn, window: Window, delta: i16, a
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (12 + 4 * atoms.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let window_bytes = window.serialize();
     let atoms_len: u16 = atoms.len().try_into()?;
     let atoms_len_bytes = atoms_len.serialize();
@@ -17895,7 +17895,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let length: usize = (4) / 4;
     let mode = mode.into();
     let mode_bytes = mode.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         FORCE_SCREEN_SAVER_REQUEST,
         mode_bytes[0],
@@ -17980,7 +17980,7 @@ where Conn: RequestConnection + ?Sized
     let length: usize = (4 + 1 * map.len() + 3) / 4;
     let map_len: u8 = map.len().try_into()?;
     let map_len_bytes = map_len.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         SET_POINTER_MAPPING_REQUEST,
         map_len_bytes[0],
@@ -18025,7 +18025,7 @@ pub fn get_pointer_mapping<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetPoin
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         GET_POINTER_MAPPING_REQUEST,
         0,
@@ -18149,9 +18149,9 @@ where Conn: RequestConnection + ?Sized
 {
     let length: usize = (4 + 1 * keycodes.len() + 3) / 4;
     assert_eq!(0, keycodes.len() % 8, "Argument keycodes_per_modifier has an incorrect length, must be a multiple of 8");
-    let keycodes_per_modifier: u8 = TryInto::try_into(keycodes.len() / 8).unwrap();
+    let keycodes_per_modifier = u8::try_from(keycodes.len() / 8).unwrap();
     let keycodes_per_modifier_bytes = keycodes_per_modifier.serialize();
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         SET_MODIFIER_MAPPING_REQUEST,
         keycodes_per_modifier_bytes[0],
@@ -18196,7 +18196,7 @@ pub fn get_modifier_mapping<Conn>(conn: &Conn) -> Result<Cookie<'_, Conn, GetMod
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         GET_MODIFIER_MAPPING_REQUEST,
         0,
@@ -18239,7 +18239,7 @@ pub fn no_operation<Conn>(conn: &Conn) -> Result<VoidCookie<'_, Conn>, Connectio
 where Conn: RequestConnection + ?Sized
 {
     let length: usize = (4) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let request0 = [
         NO_OPERATION_REQUEST,
         0,

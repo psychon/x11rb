@@ -2079,10 +2079,10 @@ impl TryFrom<&[u8]> for IndicatorMap {
 impl Serialize for IndicatorMap {
     type Bytes = [u8; 12];
     fn serialize(&self) -> Self::Bytes {
-        let flags_bytes = Into::<u8>::into(self.flags).serialize();
-        let which_groups_bytes = Into::<u8>::into(self.which_groups).serialize();
-        let groups_bytes = Into::<u8>::into(self.groups).serialize();
-        let which_mods_bytes = Into::<u8>::into(self.which_mods).serialize();
+        let flags_bytes = u8::from(self.flags).serialize();
+        let which_groups_bytes = u8::from(self.which_groups).serialize();
+        let groups_bytes = u8::from(self.groups).serialize();
+        let which_mods_bytes = u8::from(self.which_mods).serialize();
         let mods_bytes = self.mods.serialize();
         let real_mods_bytes = self.real_mods.serialize();
         let vmods_bytes = self.vmods.serialize();
@@ -2104,10 +2104,10 @@ impl Serialize for IndicatorMap {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
-        Into::<u8>::into(self.flags).serialize_into(bytes);
-        Into::<u8>::into(self.which_groups).serialize_into(bytes);
-        Into::<u8>::into(self.groups).serialize_into(bytes);
-        Into::<u8>::into(self.which_mods).serialize_into(bytes);
+        u8::from(self.flags).serialize_into(bytes);
+        u8::from(self.which_groups).serialize_into(bytes);
+        u8::from(self.groups).serialize_into(bytes);
+        u8::from(self.which_mods).serialize_into(bytes);
         self.mods.serialize_into(bytes);
         self.real_mods.serialize_into(bytes);
         self.vmods.serialize_into(bytes);
@@ -4029,8 +4029,8 @@ impl TryParse for DeviceLedInfo {
         let (maps_present, remaining) = u32::try_parse(remaining)?;
         let (phys_indicators, remaining) = u32::try_parse(remaining)?;
         let (state, remaining) = u32::try_parse(remaining)?;
-        let (names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, TryInto::<usize>::try_into(names_present.count_ones()).unwrap())?;
-        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, TryInto::<usize>::try_into(maps_present.count_ones()).unwrap())?;
+        let (names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from(names_present.count_ones()).unwrap())?;
+        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, usize::try_from(maps_present.count_ones()).unwrap())?;
         let led_class = led_class.try_into()?;
         let result = DeviceLedInfo { led_class, led_id, names_present, maps_present, phys_indicators, state, names, maps };
         Ok((result, remaining))
@@ -4051,7 +4051,7 @@ impl Serialize for DeviceLedInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(20);
-        Into::<LedClassSpec>::into(self.led_class).serialize_into(bytes);
+        LedClassSpec::from(self.led_class).serialize_into(bytes);
         self.led_id.serialize_into(bytes);
         self.names_present.serialize_into(bytes);
         self.maps_present.serialize_into(bytes);
@@ -4374,7 +4374,7 @@ impl TryFrom<&[u8]> for SANoAction {
 impl Serialize for SANoAction {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         [
             type_bytes[0],
             0,
@@ -4388,7 +4388,7 @@ impl Serialize for SANoAction {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 7]);
     }
 }
@@ -4425,7 +4425,7 @@ impl TryFrom<&[u8]> for SASetMods {
 impl Serialize for SASetMods {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let mask_bytes = self.mask.serialize();
         let real_mods_bytes = self.real_mods.serialize();
@@ -4444,7 +4444,7 @@ impl Serialize for SASetMods {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.mask.serialize_into(bytes);
         self.real_mods.serialize_into(bytes);
@@ -4486,7 +4486,7 @@ impl TryFrom<&[u8]> for SALatchMods {
 impl Serialize for SALatchMods {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let mask_bytes = self.mask.serialize();
         let real_mods_bytes = self.real_mods.serialize();
@@ -4505,7 +4505,7 @@ impl Serialize for SALatchMods {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.mask.serialize_into(bytes);
         self.real_mods.serialize_into(bytes);
@@ -4547,7 +4547,7 @@ impl TryFrom<&[u8]> for SALockMods {
 impl Serialize for SALockMods {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let mask_bytes = self.mask.serialize();
         let real_mods_bytes = self.real_mods.serialize();
@@ -4566,7 +4566,7 @@ impl Serialize for SALockMods {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.mask.serialize_into(bytes);
         self.real_mods.serialize_into(bytes);
@@ -4602,7 +4602,7 @@ impl TryFrom<&[u8]> for SASetGroup {
 impl Serialize for SASetGroup {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let group_bytes = self.group.serialize();
         [
@@ -4618,7 +4618,7 @@ impl Serialize for SASetGroup {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.group.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 5]);
@@ -4651,7 +4651,7 @@ impl TryFrom<&[u8]> for SALatchGroup {
 impl Serialize for SALatchGroup {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let group_bytes = self.group.serialize();
         [
@@ -4667,7 +4667,7 @@ impl Serialize for SALatchGroup {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.group.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 5]);
@@ -4700,7 +4700,7 @@ impl TryFrom<&[u8]> for SALockGroup {
 impl Serialize for SALockGroup {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let group_bytes = self.group.serialize();
         [
@@ -4716,7 +4716,7 @@ impl Serialize for SALockGroup {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.group.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 5]);
@@ -4821,7 +4821,7 @@ impl TryFrom<&[u8]> for SAMovePtr {
 impl Serialize for SAMovePtr {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let x_high_bytes = self.x_high.serialize();
         let x_low_bytes = self.x_low.serialize();
@@ -4840,7 +4840,7 @@ impl Serialize for SAMovePtr {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.x_high.serialize_into(bytes);
         self.x_low.serialize_into(bytes);
@@ -4878,7 +4878,7 @@ impl TryFrom<&[u8]> for SAPtrBtn {
 impl Serialize for SAPtrBtn {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let count_bytes = self.count.serialize();
         let button_bytes = self.button.serialize();
@@ -4895,7 +4895,7 @@ impl Serialize for SAPtrBtn {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.count.serialize_into(bytes);
         self.button.serialize_into(bytes);
@@ -4930,7 +4930,7 @@ impl TryFrom<&[u8]> for SALockPtrBtn {
 impl Serialize for SALockPtrBtn {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let button_bytes = self.button.serialize();
         [
@@ -4946,7 +4946,7 @@ impl Serialize for SALockPtrBtn {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         self.button.serialize_into(bytes);
@@ -5045,7 +5045,7 @@ impl TryFrom<&[u8]> for SASetPtrDflt {
 impl Serialize for SASetPtrDflt {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let affect_bytes = self.affect.serialize();
         let value_bytes = self.value.serialize();
@@ -5062,7 +5062,7 @@ impl Serialize for SASetPtrDflt {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.affect.serialize_into(bytes);
         self.value.serialize_into(bytes);
@@ -5220,7 +5220,7 @@ impl TryFrom<&[u8]> for SAIsoLock {
 impl Serialize for SAIsoLock {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let mask_bytes = self.mask.serialize();
         let real_mods_bytes = self.real_mods.serialize();
@@ -5241,7 +5241,7 @@ impl Serialize for SAIsoLock {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.mask.serialize_into(bytes);
         self.real_mods.serialize_into(bytes);
@@ -5274,7 +5274,7 @@ impl TryFrom<&[u8]> for SATerminate {
 impl Serialize for SATerminate {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         [
             type_bytes[0],
             0,
@@ -5288,7 +5288,7 @@ impl Serialize for SATerminate {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 7]);
     }
 }
@@ -5382,7 +5382,7 @@ impl TryFrom<&[u8]> for SASwitchScreen {
 impl Serialize for SASwitchScreen {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let new_screen_bytes = self.new_screen.serialize();
         [
@@ -5398,7 +5398,7 @@ impl Serialize for SASwitchScreen {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.new_screen.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 5]);
@@ -5585,7 +5585,7 @@ impl TryFrom<&[u8]> for SASetControls {
 impl Serialize for SASetControls {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let bool_ctrls_high_bytes = self.bool_ctrls_high.serialize();
         let bool_ctrls_low_bytes = self.bool_ctrls_low.serialize();
         [
@@ -5601,7 +5601,7 @@ impl Serialize for SASetControls {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
         self.bool_ctrls_high.serialize_into(bytes);
         self.bool_ctrls_low.serialize_into(bytes);
@@ -5636,7 +5636,7 @@ impl TryFrom<&[u8]> for SALockControls {
 impl Serialize for SALockControls {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let bool_ctrls_high_bytes = self.bool_ctrls_high.serialize();
         let bool_ctrls_low_bytes = self.bool_ctrls_low.serialize();
         [
@@ -5652,7 +5652,7 @@ impl Serialize for SALockControls {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
         self.bool_ctrls_high.serialize_into(bytes);
         self.bool_ctrls_low.serialize_into(bytes);
@@ -5764,7 +5764,7 @@ impl TryFrom<&[u8]> for SAActionMessage {
 impl Serialize for SAActionMessage {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         [
             type_bytes[0],
@@ -5779,7 +5779,7 @@ impl Serialize for SAActionMessage {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.message.serialize_into(bytes);
     }
@@ -5820,7 +5820,7 @@ impl TryFrom<&[u8]> for SARedirectKey {
 impl Serialize for SARedirectKey {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let newkey_bytes = self.newkey.serialize();
         let mask_bytes = self.mask.serialize();
         let real_modifiers_bytes = self.real_modifiers.serialize();
@@ -5841,7 +5841,7 @@ impl Serialize for SARedirectKey {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.newkey.serialize_into(bytes);
         self.mask.serialize_into(bytes);
         self.real_modifiers.serialize_into(bytes);
@@ -5882,7 +5882,7 @@ impl TryFrom<&[u8]> for SADeviceBtn {
 impl Serialize for SADeviceBtn {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let count_bytes = self.count.serialize();
         let button_bytes = self.button.serialize();
@@ -5900,7 +5900,7 @@ impl Serialize for SADeviceBtn {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         self.count.serialize_into(bytes);
         self.button.serialize_into(bytes);
@@ -6001,7 +6001,7 @@ impl TryFrom<&[u8]> for SALockDeviceBtn {
 impl Serialize for SALockDeviceBtn {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let button_bytes = self.button.serialize();
         let device_bytes = self.device.serialize();
@@ -6018,7 +6018,7 @@ impl Serialize for SALockDeviceBtn {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.flags.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         self.button.serialize_into(bytes);
@@ -6138,12 +6138,12 @@ impl TryFrom<&[u8]> for SADeviceValuator {
 impl Serialize for SADeviceValuator {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         let device_bytes = self.device.serialize();
-        let val1what_bytes = Into::<u8>::into(self.val1what).serialize();
+        let val1what_bytes = u8::from(self.val1what).serialize();
         let val1index_bytes = self.val1index.serialize();
         let val1value_bytes = self.val1value.serialize();
-        let val2what_bytes = Into::<u8>::into(self.val2what).serialize();
+        let val2what_bytes = u8::from(self.val2what).serialize();
         let val2index_bytes = self.val2index.serialize();
         let val2value_bytes = self.val2value.serialize();
         [
@@ -6159,12 +6159,12 @@ impl Serialize for SADeviceValuator {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.device.serialize_into(bytes);
-        Into::<u8>::into(self.val1what).serialize_into(bytes);
+        u8::from(self.val1what).serialize_into(bytes);
         self.val1index.serialize_into(bytes);
         self.val1value.serialize_into(bytes);
-        Into::<u8>::into(self.val2what).serialize_into(bytes);
+        u8::from(self.val2what).serialize_into(bytes);
         self.val2index.serialize_into(bytes);
         self.val2value.serialize_into(bytes);
     }
@@ -6208,7 +6208,7 @@ impl TryFrom<&[u8]> for SIAction {
 impl Serialize for SIAction {
     type Bytes = [u8; 8];
     fn serialize(&self) -> Self::Bytes {
-        let type_bytes = Into::<u8>::into(self.type_).serialize();
+        let type_bytes = u8::from(self.type_).serialize();
         [
             type_bytes[0],
             self.data[0],
@@ -6222,7 +6222,7 @@ impl Serialize for SIAction {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        Into::<u8>::into(self.type_).serialize_into(bytes);
+        u8::from(self.type_).serialize_into(bytes);
         self.data.serialize_into(bytes);
     }
 }
@@ -6590,7 +6590,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let wanted_major_bytes = wanted_major.serialize();
     let wanted_minor_bytes = wanted_minor.serialize();
     let request0 = [
@@ -6920,37 +6920,37 @@ impl SelectEventsAux {
     fn value_mask(&self) -> u16 {
         let mut mask = 0;
         if self.bitcase1.is_some() {
-            mask |= Into::<u16>::into(EventType::NewKeyboardNotify);
+            mask |= u16::from(EventType::NewKeyboardNotify);
         }
         if self.bitcase2.is_some() {
-            mask |= Into::<u16>::into(EventType::StateNotify);
+            mask |= u16::from(EventType::StateNotify);
         }
         if self.bitcase3.is_some() {
-            mask |= Into::<u16>::into(EventType::ControlsNotify);
+            mask |= u16::from(EventType::ControlsNotify);
         }
         if self.bitcase4.is_some() {
-            mask |= Into::<u16>::into(EventType::IndicatorStateNotify);
+            mask |= u16::from(EventType::IndicatorStateNotify);
         }
         if self.bitcase5.is_some() {
-            mask |= Into::<u16>::into(EventType::IndicatorMapNotify);
+            mask |= u16::from(EventType::IndicatorMapNotify);
         }
         if self.bitcase6.is_some() {
-            mask |= Into::<u16>::into(EventType::NamesNotify);
+            mask |= u16::from(EventType::NamesNotify);
         }
         if self.bitcase7.is_some() {
-            mask |= Into::<u16>::into(EventType::CompatMapNotify);
+            mask |= u16::from(EventType::CompatMapNotify);
         }
         if self.bitcase8.is_some() {
-            mask |= Into::<u16>::into(EventType::BellNotify);
+            mask |= u16::from(EventType::BellNotify);
         }
         if self.bitcase9.is_some() {
-            mask |= Into::<u16>::into(EventType::ActionMessage);
+            mask |= u16::from(EventType::ActionMessage);
         }
         if self.bitcase10.is_some() {
-            mask |= Into::<u16>::into(EventType::AccessXNotify);
+            mask |= u16::from(EventType::AccessXNotify);
         }
         if self.bitcase11.is_some() {
-            mask |= Into::<u16>::into(EventType::ExtensionDeviceNotify);
+            mask |= u16::from(EventType::ExtensionDeviceNotify);
         }
         mask
     }
@@ -7060,7 +7060,7 @@ where Conn: RequestConnection + ?Sized
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let details_bytes = details.serialize();
     let length: usize = (16 + details_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let device_spec_bytes = device_spec.serialize();
     let affect_which_bytes = affect_which.serialize();
     let clear_bytes = clear.serialize();
@@ -7103,7 +7103,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (28) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let device_spec_bytes = device_spec.serialize();
     let bell_class_bytes = bell_class.serialize();
     let bell_id_bytes = bell_id.serialize();
@@ -7157,7 +7157,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let device_spec_bytes = device_spec.serialize();
     let request0 = [
         extension_information.major_opcode,
@@ -7237,7 +7237,7 @@ where Conn: RequestConnection + ?Sized, A: Into<u8>
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let device_spec_bytes = device_spec.serialize();
     let affect_mod_locks_bytes = affect_mod_locks.serialize();
     let mod_locks_bytes = mod_locks.serialize();
@@ -7278,7 +7278,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let device_spec_bytes = device_spec.serialize();
     let request0 = [
         extension_information.major_opcode,
@@ -7445,7 +7445,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (100) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let device_spec_bytes = device_spec.serialize();
     let affect_internal_real_mods_bytes = affect_internal_real_mods.serialize();
     let internal_real_mods_bytes = internal_real_mods.serialize();
@@ -7559,7 +7559,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (28) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let device_spec_bytes = device_spec.serialize();
     let full_bytes = full.serialize();
     let partial_bytes = partial.serialize();
@@ -7659,7 +7659,7 @@ pub struct GetMapMap {
 impl GetMapMap {
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
         let mut outer_remaining = value;
-        let types_rtrn = if present & Into::<u16>::into(MapPart::KeyTypes) != 0 {
+        let types_rtrn = if present & u16::from(MapPart::KeyTypes) != 0 {
             let remaining = outer_remaining;
             let (types_rtrn, remaining) = crate::x11_utils::parse_list::<KeyType>(remaining, n_types as usize)?;
             outer_remaining = remaining;
@@ -7667,7 +7667,7 @@ impl GetMapMap {
         } else {
             None
         };
-        let syms_rtrn = if present & Into::<u16>::into(MapPart::KeySyms) != 0 {
+        let syms_rtrn = if present & u16::from(MapPart::KeySyms) != 0 {
             let remaining = outer_remaining;
             let (syms_rtrn, remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms as usize)?;
             outer_remaining = remaining;
@@ -7675,14 +7675,14 @@ impl GetMapMap {
         } else {
             None
         };
-        let bitcase3 = if present & Into::<u16>::into(MapPart::KeyActions) != 0 {
+        let bitcase3 = if present & u16::from(MapPart::KeyActions) != 0 {
             let (bitcase3, new_remaining) = GetMapMapBitcase3::try_parse(outer_remaining, n_key_actions, total_actions)?;
             outer_remaining = new_remaining;
             Some(bitcase3)
         } else {
             None
         };
-        let behaviors_rtrn = if present & Into::<u16>::into(MapPart::KeyBehaviors) != 0 {
+        let behaviors_rtrn = if present & u16::from(MapPart::KeyBehaviors) != 0 {
             let remaining = outer_remaining;
             let (behaviors_rtrn, remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors as usize)?;
             outer_remaining = remaining;
@@ -7690,10 +7690,10 @@ impl GetMapMap {
         } else {
             None
         };
-        let vmods_rtrn = if present & Into::<u16>::into(MapPart::VirtualMods) != 0 {
+        let vmods_rtrn = if present & u16::from(MapPart::VirtualMods) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
-            let (vmods_rtrn, remaining) = crate::x11_utils::parse_list::<u8>(remaining, TryInto::<usize>::try_into(virtual_mods.count_ones()).unwrap())?;
+            let (vmods_rtrn, remaining) = crate::x11_utils::parse_list::<u8>(remaining, usize::try_from(virtual_mods.count_ones()).unwrap())?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
@@ -7703,7 +7703,7 @@ impl GetMapMap {
         } else {
             None
         };
-        let explicit_rtrn = if present & Into::<u16>::into(MapPart::ExplicitComponents) != 0 {
+        let explicit_rtrn = if present & u16::from(MapPart::ExplicitComponents) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
             let (explicit_rtrn, remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit as usize)?;
@@ -7716,7 +7716,7 @@ impl GetMapMap {
         } else {
             None
         };
-        let modmap_rtrn = if present & Into::<u16>::into(MapPart::ModifierMap) != 0 {
+        let modmap_rtrn = if present & u16::from(MapPart::ModifierMap) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
             let (modmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys as usize)?;
@@ -7729,7 +7729,7 @@ impl GetMapMap {
         } else {
             None
         };
-        let vmodmap_rtrn = if present & Into::<u16>::into(MapPart::VirtualModMap) != 0 {
+        let vmodmap_rtrn = if present & u16::from(MapPart::VirtualModMap) != 0 {
             let remaining = outer_remaining;
             let (vmodmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys as usize)?;
             outer_remaining = remaining;
@@ -7860,28 +7860,28 @@ impl SetMapAux {
     fn value_mask(&self) -> u16 {
         let mut mask = 0;
         if self.types.is_some() {
-            mask |= Into::<u16>::into(MapPart::KeyTypes);
+            mask |= u16::from(MapPart::KeyTypes);
         }
         if self.syms.is_some() {
-            mask |= Into::<u16>::into(MapPart::KeySyms);
+            mask |= u16::from(MapPart::KeySyms);
         }
         if self.bitcase3.is_some() {
-            mask |= Into::<u16>::into(MapPart::KeyActions);
+            mask |= u16::from(MapPart::KeyActions);
         }
         if self.behaviors.is_some() {
-            mask |= Into::<u16>::into(MapPart::KeyBehaviors);
+            mask |= u16::from(MapPart::KeyBehaviors);
         }
         if self.vmods.is_some() {
-            mask |= Into::<u16>::into(MapPart::VirtualMods);
+            mask |= u16::from(MapPart::VirtualMods);
         }
         if self.explicit.is_some() {
-            mask |= Into::<u16>::into(MapPart::ExplicitComponents);
+            mask |= u16::from(MapPart::ExplicitComponents);
         }
         if self.modmap.is_some() {
-            mask |= Into::<u16>::into(MapPart::ModifierMap);
+            mask |= u16::from(MapPart::ModifierMap);
         }
         if self.vmodmap.is_some() {
-            mask |= Into::<u16>::into(MapPart::VirtualModMap);
+            mask |= u16::from(MapPart::VirtualModMap);
         }
         mask
     }
@@ -7969,7 +7969,7 @@ where Conn: RequestConnection + ?Sized
     let present = values.value_mask();
     let values_bytes = values.serialize();
     let length: usize = (36 + values_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let device_spec_bytes = device_spec.serialize();
     let present_bytes = present.serialize();
     let flags_bytes = flags.serialize();
@@ -8050,7 +8050,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let device_spec_bytes = device_spec.serialize();
     let groups_bytes = groups.serialize();
     let get_all_si_bytes = (get_all_si as u8).serialize();
@@ -8099,7 +8099,7 @@ impl GetCompatMapReply {
         let (n_total_si, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
         let (si_rtrn, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si_rtrn as usize)?;
-        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, TryInto::<usize>::try_into(groups_rtrn.count_ones()).unwrap())?;
+        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, usize::try_from(groups_rtrn.count_ones()).unwrap())?;
         let result = GetCompatMapReply { response_type, device_id, sequence, length, groups_rtrn, first_si_rtrn, n_total_si, si_rtrn, group_rtrn };
         Ok((result, remaining))
     }
@@ -8119,7 +8119,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (16 + 16 * si.len() + 4 * group_maps.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let device_spec_bytes = device_spec.serialize();
     let recompute_actions_bytes = (recompute_actions as u8).serialize();
     let truncate_si_bytes = (truncate_si as u8).serialize();
@@ -8148,7 +8148,7 @@ where Conn: RequestConnection + ?Sized
     ];
     let length_so_far = (&request0).len();
     let length_so_far = length_so_far + (&si_bytes).len();
-    assert_eq!(group_maps.len(), TryInto::<usize>::try_into(groups.count_ones()).unwrap(), "Argument groupMaps has an incorrect length");
+    assert_eq!(group_maps.len(), usize::try_from(groups.count_ones()).unwrap(), "Argument groupMaps has an incorrect length");
     let group_maps_bytes = group_maps.serialize();
     let length_so_far = length_so_far + (&group_maps_bytes).len();
     let padding1 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
@@ -8165,7 +8165,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let device_spec_bytes = device_spec.serialize();
     let request0 = [
         extension_information.major_opcode,
@@ -8216,7 +8216,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let device_spec_bytes = device_spec.serialize();
     let which_bytes = which.serialize();
     let request0 = [
@@ -8258,7 +8258,7 @@ impl GetIndicatorMapReply {
         let (real_indicators, remaining) = u32::try_parse(remaining)?;
         let (n_indicators, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(15..).ok_or(ParseError::ParseError)?;
-        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, TryInto::<usize>::try_into(which.count_ones()).unwrap())?;
+        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, usize::try_from(which.count_ones()).unwrap())?;
         let result = GetIndicatorMapReply { response_type, device_id, sequence, length, which, real_indicators, n_indicators, maps };
         Ok((result, remaining))
     }
@@ -8278,10 +8278,10 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (12 + 12 * maps.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let device_spec_bytes = device_spec.serialize();
     let which_bytes = which.serialize();
-    assert_eq!(maps.len(), TryInto::<usize>::try_into(which.count_ones()).unwrap(), "Argument maps has an incorrect length");
+    assert_eq!(maps.len(), usize::try_from(which.count_ones()).unwrap(), "Argument maps has an incorrect length");
     let maps_bytes = maps.serialize();
     let request0 = [
         extension_information.major_opcode,
@@ -8313,7 +8313,7 @@ where Conn: RequestConnection + ?Sized, A: Into<LedClassSpec>
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let device_spec_bytes = device_spec.serialize();
     let led_class = led_class.into();
     let led_class_bytes = led_class.serialize();
@@ -8402,7 +8402,7 @@ where Conn: RequestConnection + ?Sized, A: Into<LedClassSpec>
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (32) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let device_spec_bytes = device_spec.serialize();
     let led_class = led_class.into();
     let led_class_bytes = led_class.serialize();
@@ -8466,7 +8466,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (12) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let device_spec_bytes = device_spec.serialize();
     let which_bytes = which.serialize();
     let request0 = [
@@ -8500,7 +8500,7 @@ impl GetNamesValueListBitcase8 {
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let (kt_level_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_levels_per_type.iter().map(|x| TryInto::<usize>::try_into(*x).unwrap()).sum())?;
+        let (kt_level_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_levels_per_type.iter().map(|x| usize::try_from(*x).unwrap()).sum())?;
         let result = GetNamesValueListBitcase8 { n_levels_per_type, kt_level_names };
         Ok((result, remaining))
     }
@@ -8540,7 +8540,7 @@ pub struct GetNamesValueList {
 impl GetNamesValueList {
     fn try_parse(value: &[u8], which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Result<(Self, &[u8]), ParseError> {
         let mut outer_remaining = value;
-        let keycodes_name = if which & Into::<u32>::into(NameDetail::Keycodes) != 0 {
+        let keycodes_name = if which & u32::from(NameDetail::Keycodes) != 0 {
             let remaining = outer_remaining;
             let (keycodes_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -8548,7 +8548,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let geometry_name = if which & Into::<u32>::into(NameDetail::Geometry) != 0 {
+        let geometry_name = if which & u32::from(NameDetail::Geometry) != 0 {
             let remaining = outer_remaining;
             let (geometry_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -8556,7 +8556,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let symbols_name = if which & Into::<u32>::into(NameDetail::Symbols) != 0 {
+        let symbols_name = if which & u32::from(NameDetail::Symbols) != 0 {
             let remaining = outer_remaining;
             let (symbols_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -8564,7 +8564,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let phys_symbols_name = if which & Into::<u32>::into(NameDetail::PhysSymbols) != 0 {
+        let phys_symbols_name = if which & u32::from(NameDetail::PhysSymbols) != 0 {
             let remaining = outer_remaining;
             let (phys_symbols_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -8572,7 +8572,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let types_name = if which & Into::<u32>::into(NameDetail::Types) != 0 {
+        let types_name = if which & u32::from(NameDetail::Types) != 0 {
             let remaining = outer_remaining;
             let (types_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -8580,7 +8580,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let compat_name = if which & Into::<u32>::into(NameDetail::Compat) != 0 {
+        let compat_name = if which & u32::from(NameDetail::Compat) != 0 {
             let remaining = outer_remaining;
             let (compat_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -8588,7 +8588,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let type_names = if which & Into::<u32>::into(NameDetail::KeyTypeNames) != 0 {
+        let type_names = if which & u32::from(NameDetail::KeyTypeNames) != 0 {
             let remaining = outer_remaining;
             let (type_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_types as usize)?;
             outer_remaining = remaining;
@@ -8596,38 +8596,38 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let bitcase8 = if which & Into::<u32>::into(NameDetail::KTLevelNames) != 0 {
+        let bitcase8 = if which & u32::from(NameDetail::KTLevelNames) != 0 {
             let (bitcase8, new_remaining) = GetNamesValueListBitcase8::try_parse(outer_remaining, n_types)?;
             outer_remaining = new_remaining;
             Some(bitcase8)
         } else {
             None
         };
-        let indicator_names = if which & Into::<u32>::into(NameDetail::IndicatorNames) != 0 {
+        let indicator_names = if which & u32::from(NameDetail::IndicatorNames) != 0 {
             let remaining = outer_remaining;
-            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, TryInto::<usize>::try_into(indicators.count_ones()).unwrap())?;
+            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from(indicators.count_ones()).unwrap())?;
             outer_remaining = remaining;
             Some(indicator_names)
         } else {
             None
         };
-        let virtual_mod_names = if which & Into::<u32>::into(NameDetail::VirtualModNames) != 0 {
+        let virtual_mod_names = if which & u32::from(NameDetail::VirtualModNames) != 0 {
             let remaining = outer_remaining;
-            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, TryInto::<usize>::try_into(virtual_mods.count_ones()).unwrap())?;
+            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from(virtual_mods.count_ones()).unwrap())?;
             outer_remaining = remaining;
             Some(virtual_mod_names)
         } else {
             None
         };
-        let groups = if which & Into::<u32>::into(NameDetail::GroupNames) != 0 {
+        let groups = if which & u32::from(NameDetail::GroupNames) != 0 {
             let remaining = outer_remaining;
-            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, TryInto::<usize>::try_into(group_names.count_ones()).unwrap())?;
+            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from(group_names.count_ones()).unwrap())?;
             outer_remaining = remaining;
             Some(groups)
         } else {
             None
         };
-        let key_names = if which & Into::<u32>::into(NameDetail::KeyNames) != 0 {
+        let key_names = if which & u32::from(NameDetail::KeyNames) != 0 {
             let remaining = outer_remaining;
             let (key_names, remaining) = crate::x11_utils::parse_list::<KeyName>(remaining, n_keys as usize)?;
             outer_remaining = remaining;
@@ -8635,7 +8635,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let key_aliases = if which & Into::<u32>::into(NameDetail::KeyAliases) != 0 {
+        let key_aliases = if which & u32::from(NameDetail::KeyAliases) != 0 {
             let remaining = outer_remaining;
             let (key_aliases, remaining) = crate::x11_utils::parse_list::<KeyAlias>(remaining, n_key_aliases as usize)?;
             outer_remaining = remaining;
@@ -8643,7 +8643,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let radio_group_names = if which & Into::<u32>::into(NameDetail::RGNames) != 0 {
+        let radio_group_names = if which & u32::from(NameDetail::RGNames) != 0 {
             let remaining = outer_remaining;
             let (radio_group_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_radio_groups as usize)?;
             outer_remaining = remaining;
@@ -8753,46 +8753,46 @@ impl SetNamesAux {
     fn value_mask(&self) -> u32 {
         let mut mask = 0;
         if self.keycodes_name.is_some() {
-            mask |= Into::<u32>::into(NameDetail::Keycodes);
+            mask |= u32::from(NameDetail::Keycodes);
         }
         if self.geometry_name.is_some() {
-            mask |= Into::<u32>::into(NameDetail::Geometry);
+            mask |= u32::from(NameDetail::Geometry);
         }
         if self.symbols_name.is_some() {
-            mask |= Into::<u32>::into(NameDetail::Symbols);
+            mask |= u32::from(NameDetail::Symbols);
         }
         if self.phys_symbols_name.is_some() {
-            mask |= Into::<u32>::into(NameDetail::PhysSymbols);
+            mask |= u32::from(NameDetail::PhysSymbols);
         }
         if self.types_name.is_some() {
-            mask |= Into::<u32>::into(NameDetail::Types);
+            mask |= u32::from(NameDetail::Types);
         }
         if self.compat_name.is_some() {
-            mask |= Into::<u32>::into(NameDetail::Compat);
+            mask |= u32::from(NameDetail::Compat);
         }
         if self.type_names.is_some() {
-            mask |= Into::<u32>::into(NameDetail::KeyTypeNames);
+            mask |= u32::from(NameDetail::KeyTypeNames);
         }
         if self.bitcase8.is_some() {
-            mask |= Into::<u32>::into(NameDetail::KTLevelNames);
+            mask |= u32::from(NameDetail::KTLevelNames);
         }
         if self.indicator_names.is_some() {
-            mask |= Into::<u32>::into(NameDetail::IndicatorNames);
+            mask |= u32::from(NameDetail::IndicatorNames);
         }
         if self.virtual_mod_names.is_some() {
-            mask |= Into::<u32>::into(NameDetail::VirtualModNames);
+            mask |= u32::from(NameDetail::VirtualModNames);
         }
         if self.groups.is_some() {
-            mask |= Into::<u32>::into(NameDetail::GroupNames);
+            mask |= u32::from(NameDetail::GroupNames);
         }
         if self.key_names.is_some() {
-            mask |= Into::<u32>::into(NameDetail::KeyNames);
+            mask |= u32::from(NameDetail::KeyNames);
         }
         if self.key_aliases.is_some() {
-            mask |= Into::<u32>::into(NameDetail::KeyAliases);
+            mask |= u32::from(NameDetail::KeyAliases);
         }
         if self.radio_group_names.is_some() {
-            mask |= Into::<u32>::into(NameDetail::RGNames);
+            mask |= u32::from(NameDetail::RGNames);
         }
         mask
     }
@@ -8927,7 +8927,7 @@ where Conn: RequestConnection + ?Sized
     let which = values.value_mask();
     let values_bytes = values.serialize();
     let length: usize = (28 + values_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let device_spec_bytes = device_spec.serialize();
     let virtual_mods_bytes = virtual_mods.serialize();
     let which_bytes = which.serialize();
@@ -8988,7 +8988,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (28) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let device_spec_bytes = device_spec.serialize();
     let change_bytes = change.serialize();
     let value_bytes = value.serialize();
@@ -9070,7 +9070,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (8) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let device_spec_bytes = device_spec.serialize();
     let max_names_bytes = max_names.serialize();
     let request0 = [
@@ -9144,7 +9144,7 @@ where Conn: RequestConnection + ?Sized, A: Into<LedClassSpec>
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (16) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let device_spec_bytes = device_spec.serialize();
     let wanted_bytes = wanted.serialize();
     let all_buttons_bytes = (all_buttons as u8).serialize();
@@ -9245,7 +9245,7 @@ where Conn: RequestConnection + ?Sized
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let leds_bytes = leds.serialize();
     let length: usize = (12 + 8 * btn_actions.len() + leds_bytes.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let device_spec_bytes = device_spec.serialize();
     let first_btn_bytes = first_btn.serialize();
     let n_btns: u8 = btn_actions.len().try_into()?;
@@ -9285,7 +9285,7 @@ where Conn: RequestConnection + ?Sized
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length: usize = (24 + 1 * message.len() + 3) / 4;
-    let length_bytes = TryInto::<u16>::try_into(length).unwrap_or(0).serialize();
+    let length_bytes = u16::try_from(length).unwrap_or(0).serialize();
     let msg_length: u16 = message.len().try_into()?;
     let msg_length_bytes = msg_length.serialize();
     let affect_flags_bytes = affect_flags.serialize();
@@ -9650,10 +9650,10 @@ impl From<&StateNotifyEvent> for [u8; 32] {
         let base_mods = input.base_mods.serialize();
         let latched_mods = input.latched_mods.serialize();
         let locked_mods = input.locked_mods.serialize();
-        let group = Into::<u8>::into(input.group).serialize();
+        let group = u8::from(input.group).serialize();
         let base_group = input.base_group.serialize();
         let latched_group = input.latched_group.serialize();
-        let locked_group = Into::<u8>::into(input.locked_group).serialize();
+        let locked_group = u8::from(input.locked_group).serialize();
         let compat_state = input.compat_state.serialize();
         let grab_mods = input.grab_mods.serialize();
         let compat_grab_mods = input.compat_grab_mods.serialize();
@@ -10137,7 +10137,7 @@ impl From<&BellNotifyEvent> for [u8; 32] {
         let sequence = input.sequence.serialize();
         let time = input.time.serialize();
         let device_id = input.device_id.serialize();
-        let bell_class = Into::<u8>::into(input.bell_class).serialize();
+        let bell_class = u8::from(input.bell_class).serialize();
         let bell_id = input.bell_id.serialize();
         let percent = input.percent.serialize();
         let pitch = input.pitch.serialize();
@@ -10240,7 +10240,7 @@ impl From<&ActionMessageEvent> for [u8; 32] {
         let press = input.press.serialize();
         let key_event_follows = input.key_event_follows.serialize();
         let mods = input.mods.serialize();
-        let group = Into::<u8>::into(input.group).serialize();
+        let group = u8::from(input.group).serialize();
         [
             response_type[0], xkb_type[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
             device_id[0], keycode[0], press[0], key_event_follows[0], mods[0], group[0], input.message[0], input.message[1],
@@ -10396,7 +10396,7 @@ impl From<&ExtensionDeviceNotifyEvent> for [u8; 32] {
         let time = input.time.serialize();
         let device_id = input.device_id.serialize();
         let reason = input.reason.serialize();
-        let led_class = Into::<u16>::into(input.led_class).serialize();
+        let led_class = u16::from(input.led_class).serialize();
         let led_id = input.led_id.serialize();
         let leds_defined = input.leds_defined.serialize();
         let led_state = input.led_state.serialize();

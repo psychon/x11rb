@@ -317,7 +317,7 @@ def request_implementation(module, obj, name, fds, fds_is_list):
                     module.out("assert_eq!(0, %s %% %s, \"Argument %s has an incorrect length,"
                                + " must be a multiple of %s\");",
                                length, multiple, field_name, multiple)
-                    module.out("let %s: %s = TryInto::try_into(%s).unwrap();",
+                    module.out("let %s = %s::try_from(%s).unwrap();",
                                rust_variable, module._field_type(field), solved)
                 else:
                     # This is a length field for some list, get the length.
@@ -338,7 +338,7 @@ def request_implementation(module, obj, name, fds, fds_is_list):
                     # This is the request length which we explicitly
                     # calculated above. If it does not fit into u16,
                     # Connection::compute_length_field() fixes this.
-                    source = "TryInto::<%s>::try_into(length).unwrap_or(0)" % module._field_type(field)
+                    source = "%s::try_from(length).unwrap_or(0)" % module._field_type(field)
                 else:
                     source = rust_variable
                 if code_generator_helpers.module.is_bool(field.type) or \
