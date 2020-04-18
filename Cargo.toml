@@ -13,6 +13,7 @@ exclude = [
     "/Makefile",
     "/rs_code_generator.py",
     "/code_generator_helpers",
+    "/.mergify.yml",
 ]
 
 [dependencies]
