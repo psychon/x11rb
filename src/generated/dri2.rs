@@ -394,7 +394,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -454,7 +454,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ConnectReply {
@@ -517,7 +517,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AuthenticateReply {
@@ -568,7 +568,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the DestroyDrawable request
@@ -595,7 +595,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the GetBuffers request
@@ -631,7 +631,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&attachments_bytes), IoSlice::new(&padding0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&attachments_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetBuffersReply {
@@ -703,7 +703,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CopyRegionReply {
@@ -761,7 +761,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&attachments_bytes), IoSlice::new(&padding0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&attachments_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetBuffersWithFormatReply {
@@ -848,7 +848,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SwapBuffersReply {
@@ -901,7 +901,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetMSCReply {
@@ -992,7 +992,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WaitMSCReply {
@@ -1063,7 +1063,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WaitSBCReply {
@@ -1129,7 +1129,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the GetParam request
@@ -1161,7 +1161,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetParamReply {

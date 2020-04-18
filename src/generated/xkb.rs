@@ -6608,7 +6608,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UseExtensionReply {
@@ -7097,7 +7097,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&details_bytes), IoSlice::new(&padding0)], Vec::new())?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&details_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the Bell request
@@ -7153,7 +7153,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the GetState request
@@ -7180,7 +7180,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetStateReply {
@@ -7279,7 +7279,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the GetControls request
@@ -7306,7 +7306,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetControlsReply {
@@ -7564,7 +7564,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(per_key_repeat)], Vec::new())?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(per_key_repeat)], vec![])?)
 }
 
 /// Opcode for the GetMap request
@@ -7628,7 +7628,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone)]
 pub struct GetMapMapBitcase3 {
@@ -8059,7 +8059,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&values_bytes), IoSlice::new(&padding0)], Vec::new())?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&values_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the GetCompatMap request
@@ -8094,7 +8094,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCompatMapReply {
@@ -8178,7 +8178,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&si_bytes), IoSlice::new(&group_maps_bytes), IoSlice::new(&padding0)], Vec::new())?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&si_bytes), IoSlice::new(&group_maps_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the GetIndicatorState request
@@ -8205,7 +8205,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetIndicatorStateReply {
@@ -8263,7 +8263,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetIndicatorMapReply {
@@ -8332,7 +8332,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&maps_bytes), IoSlice::new(&padding0)], Vec::new())?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&maps_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the GetNamedIndicator request
@@ -8372,7 +8372,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetNamedIndicatorReply {
@@ -8491,7 +8491,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the GetNames request
@@ -8523,7 +8523,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetNamesValueListBitcase8 {
@@ -9017,7 +9017,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&values_bytes), IoSlice::new(&padding0)], Vec::new())?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&values_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the PerClientFlags request
@@ -9069,7 +9069,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PerClientFlagsReply {
@@ -9129,7 +9129,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListComponentsReply {
@@ -9220,7 +9220,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone)]
 pub struct GetDeviceInfoReply {
@@ -9323,7 +9323,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&btn_actions_bytes), IoSlice::new(&leds_bytes), IoSlice::new(&padding0)], Vec::new())?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&btn_actions_bytes), IoSlice::new(&leds_bytes), IoSlice::new(&padding0)], vec![])?)
 }
 
 /// Opcode for the SetDebuggingFlags request
@@ -9374,7 +9374,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(message), IoSlice::new(&padding0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(message), IoSlice::new(&padding0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDebuggingFlagsReply {

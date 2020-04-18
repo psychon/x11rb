@@ -367,7 +367,7 @@ def request_implementation(module, obj, name, fds, fds_is_list):
             # There may (currently) be only a single list of FDs
             fds, = fds
     else:
-        fds = "Vec::new()"
+        fds = "vec![]"
 
     if name == ('xcb', 'ListFontsWithInfo'):
         assert obj.reply

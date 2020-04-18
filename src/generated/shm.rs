@@ -189,7 +189,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
@@ -260,7 +260,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the Detach request
@@ -287,7 +287,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the PutImage request
@@ -360,7 +360,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the GetImage request
@@ -419,7 +419,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetImageReply {
@@ -499,7 +499,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
 /// Opcode for the AttachFd request
@@ -570,7 +570,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply_with_fds(&[IoSlice::new(&request0)], Vec::new())?)
+    Ok(conn.send_request_with_reply_with_fds(&[IoSlice::new(&request0)], vec![])?)
 }
 #[derive(Debug, PartialEq, Eq)]
 pub struct CreateSegmentReply {
