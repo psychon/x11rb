@@ -8200,10 +8200,9 @@ impl CreateWindowAux {
 /// * `CreateNotify`: event
 /// * `MapWindow`: request
 /// * `xcb_generate_id`: function
-pub fn create_window<'c, Conn, A>(conn: &'c Conn, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, visual: Visualid, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_window<'c, Conn>(conn: &'c Conn, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u16>,
 {
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
@@ -8216,8 +8215,7 @@ where
     let width_bytes = width.serialize();
     let height_bytes = height.serialize();
     let border_width_bytes = border_width.serialize();
-    let class = class.into();
-    let class_bytes = class.serialize();
+    let class_bytes = u16::from(class).serialize();
     let visual_bytes = visual.serialize();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
@@ -8851,14 +8849,12 @@ pub const CHANGE_SAVE_SET_REQUEST: u8 = 6;
 /// # See
 ///
 /// * `ReparentWindow`: request
-pub fn change_save_set<Conn, A>(conn: &Conn, mode: A, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn change_save_set<Conn>(conn: &Conn, mode: SetMode, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
+    let mode_bytes = u8::from(mode).serialize();
     let window_bytes = window.serialize();
     let mut request0 = [
         CHANGE_SAVE_SET_REQUEST,
@@ -9523,14 +9519,12 @@ pub const CIRCULATE_WINDOW_REQUEST: u8 = 13;
 ///
 /// * `Value` - The specified `direction` is invalid.
 /// * `Window` - The specified `window` does not exist.
-pub fn circulate_window<Conn, A>(conn: &Conn, direction: A, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn circulate_window<Conn>(conn: &Conn, direction: Circulate, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let direction = direction.into();
-    let direction_bytes = direction.serialize();
+    let direction_bytes = u8::from(direction).serialize();
     let window_bytes = window.serialize();
     let mut request0 = [
         CIRCULATE_WINDOW_REQUEST,
@@ -10038,16 +10032,14 @@ pub const CHANGE_PROPERTY_REQUEST: u8 = 18;
 ///     xcb_flush(conn);
 /// }
 /// ```
-pub fn change_property<'c, Conn, A, B, C>(conn: &'c Conn, mode: A, window: Window, property: B, type_: C, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_property<'c, Conn, A, B>(conn: &'c Conn, mode: PropMode, window: Window, property: A, type_: B, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
+    A: Into<Atom>,
     B: Into<Atom>,
-    C: Into<Atom>,
 {
     let length_so_far = 0;
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
+    let mode_bytes = u8::from(mode).serialize();
     let window_bytes = window.serialize();
     let property = property.into();
     let property_bytes = property.serialize();
@@ -11176,20 +11168,16 @@ pub const GRAB_POINTER_REQUEST: u8 = 26;
 ///     }
 /// }
 /// ```
-pub fn grab_pointer<Conn, A, B>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: A, keyboard_mode: B, confine_to: Window, cursor: Cursor, time: Timestamp) -> Result<Cookie<'_, Conn, GrabPointerReply>, ConnectionError>
+pub fn grab_pointer<Conn>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: Window, cursor: Cursor, time: Timestamp) -> Result<Cookie<'_, Conn, GrabPointerReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
-    B: Into<u8>,
 {
     let length_so_far = 0;
     let owner_events_bytes = (owner_events as u8).serialize();
     let grab_window_bytes = grab_window.serialize();
     let event_mask_bytes = event_mask.serialize();
-    let pointer_mode = pointer_mode.into();
-    let pointer_mode_bytes = pointer_mode.serialize();
-    let keyboard_mode = keyboard_mode.into();
-    let keyboard_mode_bytes = keyboard_mode.serialize();
+    let pointer_mode_bytes = u8::from(pointer_mode).serialize();
+    let keyboard_mode_bytes = u8::from(keyboard_mode).serialize();
     let confine_to_bytes = confine_to.serialize();
     let cursor_bytes = cursor.serialize();
     let time_bytes = time.serialize();
@@ -11448,25 +11436,19 @@ pub const GRAB_BUTTON_REQUEST: u8 = 28;
 /// * `Cursor` - The specified `cursor` does not exist.
 /// * `Value` - TODO: reasons?
 /// * `Window` - The specified `window` does not exist.
-pub fn grab_button<Conn, A, B, C>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: A, keyboard_mode: B, confine_to: Window, cursor: Cursor, button: C, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn grab_button<Conn>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: Window, cursor: Cursor, button: ButtonIndex, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
-    B: Into<u8>,
-    C: Into<u8>,
 {
     let length_so_far = 0;
     let owner_events_bytes = (owner_events as u8).serialize();
     let grab_window_bytes = grab_window.serialize();
     let event_mask_bytes = event_mask.serialize();
-    let pointer_mode = pointer_mode.into();
-    let pointer_mode_bytes = pointer_mode.serialize();
-    let keyboard_mode = keyboard_mode.into();
-    let keyboard_mode_bytes = keyboard_mode.serialize();
+    let pointer_mode_bytes = u8::from(pointer_mode).serialize();
+    let keyboard_mode_bytes = u8::from(keyboard_mode).serialize();
     let confine_to_bytes = confine_to.serialize();
     let cursor_bytes = cursor.serialize();
-    let button = button.into();
-    let button_bytes = button.serialize();
+    let button_bytes = u8::from(button).serialize();
     let modifiers_bytes = modifiers.serialize();
     let mut request0 = [
         GRAB_BUTTON_REQUEST,
@@ -11503,14 +11485,12 @@ where
 
 /// Opcode for the UngrabButton request
 pub const UNGRAB_BUTTON_REQUEST: u8 = 29;
-pub fn ungrab_button<Conn, A>(conn: &Conn, button: A, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn ungrab_button<Conn>(conn: &Conn, button: ButtonIndex, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let button = button.into();
-    let button_bytes = button.serialize();
+    let button_bytes = u8::from(button).serialize();
     let grab_window_bytes = grab_window.serialize();
     let modifiers_bytes = modifiers.serialize();
     let mut request0 = [
@@ -11631,20 +11611,16 @@ pub const GRAB_KEYBOARD_REQUEST: u8 = 31;
 ///     }
 /// }
 /// ```
-pub fn grab_keyboard<Conn, A, B>(conn: &Conn, owner_events: bool, grab_window: Window, time: Timestamp, pointer_mode: A, keyboard_mode: B) -> Result<Cookie<'_, Conn, GrabKeyboardReply>, ConnectionError>
+pub fn grab_keyboard<Conn>(conn: &Conn, owner_events: bool, grab_window: Window, time: Timestamp, pointer_mode: GrabMode, keyboard_mode: GrabMode) -> Result<Cookie<'_, Conn, GrabKeyboardReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
-    B: Into<u8>,
 {
     let length_so_far = 0;
     let owner_events_bytes = (owner_events as u8).serialize();
     let grab_window_bytes = grab_window.serialize();
     let time_bytes = time.serialize();
-    let pointer_mode = pointer_mode.into();
-    let pointer_mode_bytes = pointer_mode.serialize();
-    let keyboard_mode = keyboard_mode.into();
-    let keyboard_mode_bytes = keyboard_mode.serialize();
+    let pointer_mode_bytes = u8::from(pointer_mode).serialize();
+    let keyboard_mode_bytes = u8::from(keyboard_mode).serialize();
     let mut request0 = [
         GRAB_KEYBOARD_REQUEST,
         owner_events_bytes[0],
@@ -11838,21 +11814,17 @@ pub const GRAB_KEY_REQUEST: u8 = 33;
 /// # See
 ///
 /// * `GrabKeyboard`: request
-pub fn grab_key<Conn, A, B>(conn: &Conn, owner_events: bool, grab_window: Window, modifiers: u16, key: Keycode, pointer_mode: A, keyboard_mode: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn grab_key<Conn>(conn: &Conn, owner_events: bool, grab_window: Window, modifiers: u16, key: Keycode, pointer_mode: GrabMode, keyboard_mode: GrabMode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
-    B: Into<u8>,
 {
     let length_so_far = 0;
     let owner_events_bytes = (owner_events as u8).serialize();
     let grab_window_bytes = grab_window.serialize();
     let modifiers_bytes = modifiers.serialize();
     let key_bytes = key.serialize();
-    let pointer_mode = pointer_mode.into();
-    let pointer_mode_bytes = pointer_mode.serialize();
-    let keyboard_mode = keyboard_mode.into();
-    let keyboard_mode_bytes = keyboard_mode.serialize();
+    let pointer_mode_bytes = u8::from(pointer_mode).serialize();
+    let keyboard_mode_bytes = u8::from(keyboard_mode).serialize();
     let mut request0 = [
         GRAB_KEY_REQUEST,
         owner_events_bytes[0],
@@ -12094,14 +12066,12 @@ pub const ALLOW_EVENTS_REQUEST: u8 = 35;
 /// # Errors
 ///
 /// * `Value` - You specified an invalid `mode`.
-pub fn allow_events<Conn, A>(conn: &Conn, mode: A, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn allow_events<Conn>(conn: &Conn, mode: Allow, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
+    let mode_bytes = u8::from(mode).serialize();
     let time_bytes = time.serialize();
     let mut request0 = [
         ALLOW_EVENTS_REQUEST,
@@ -12625,14 +12595,12 @@ pub const SET_INPUT_FOCUS_REQUEST: u8 = 42;
 ///
 /// * `FocusIn`: event
 /// * `FocusOut`: event
-pub fn set_input_focus<Conn, A>(conn: &Conn, revert_to: A, focus: Window, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_input_focus<Conn>(conn: &Conn, revert_to: InputFocus, focus: Window, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let revert_to = revert_to.into();
-    let revert_to_bytes = revert_to.serialize();
+    let revert_to_bytes = u8::from(revert_to).serialize();
     let focus_bytes = focus.serialize();
     let time_bytes = time.serialize();
     let mut request0 = [
@@ -15289,14 +15257,12 @@ impl TryFrom<u32> for ClipOrdering {
 
 /// Opcode for the SetClipRectangles request
 pub const SET_CLIP_RECTANGLES_REQUEST: u8 = 59;
-pub fn set_clip_rectangles<'c, Conn, A>(conn: &'c Conn, ordering: A, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_clip_rectangles<'c, Conn>(conn: &'c Conn, ordering: ClipOrdering, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let ordering = ordering.into();
-    let ordering_bytes = ordering.serialize();
+    let ordering_bytes = u8::from(ordering).serialize();
     let gc_bytes = gc.serialize();
     let clip_x_origin_bytes = clip_x_origin.serialize();
     let clip_y_origin_bytes = clip_y_origin.serialize();
@@ -15601,14 +15567,12 @@ impl TryFrom<u32> for CoordMode {
 
 /// Opcode for the PolyPoint request
 pub const POLY_POINT_REQUEST: u8 = 64;
-pub fn poly_point<'c, Conn, A>(conn: &'c Conn, coordinate_mode: A, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_point<'c, Conn>(conn: &'c Conn, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let coordinate_mode = coordinate_mode.into();
-    let coordinate_mode_bytes = coordinate_mode.serialize();
+    let coordinate_mode_bytes = u8::from(coordinate_mode).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let points_bytes = points.serialize();
@@ -15676,14 +15640,12 @@ pub const POLY_LINE_REQUEST: u8 = 65;
 ///     xcb_flush(conn);
 /// }
 /// ```
-pub fn poly_line<'c, Conn, A>(conn: &'c Conn, coordinate_mode: A, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_line<'c, Conn>(conn: &'c Conn, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let coordinate_mode = coordinate_mode.into();
-    let coordinate_mode_bytes = coordinate_mode.serialize();
+    let coordinate_mode_bytes = u8::from(coordinate_mode).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let points_bytes = points.serialize();
@@ -15956,19 +15918,15 @@ impl TryFrom<u32> for PolyShape {
 
 /// Opcode for the FillPoly request
 pub const FILL_POLY_REQUEST: u8 = 69;
-pub fn fill_poly<'c, Conn, A, B>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, shape: A, coordinate_mode: B, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn fill_poly<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, shape: PolyShape, coordinate_mode: CoordMode, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
-    B: Into<u8>,
 {
     let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
-    let shape = shape.into();
-    let shape_bytes = shape.serialize();
-    let coordinate_mode = coordinate_mode.into();
-    let coordinate_mode_bytes = coordinate_mode.serialize();
+    let shape_bytes = u8::from(shape).serialize();
+    let coordinate_mode_bytes = u8::from(coordinate_mode).serialize();
     let points_bytes = points.serialize();
     let mut request0 = [
         FILL_POLY_REQUEST,
@@ -16158,14 +16116,12 @@ impl TryFrom<u32> for ImageFormat {
 
 /// Opcode for the PutImage request
 pub const PUT_IMAGE_REQUEST: u8 = 72;
-pub fn put_image<'c, Conn, A>(conn: &'c Conn, format: A, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn put_image<'c, Conn>(conn: &'c Conn, format: ImageFormat, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let format = format.into();
-    let format_bytes = format.serialize();
+    let format_bytes = u8::from(format).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let width_bytes = width.serialize();
@@ -16212,14 +16168,12 @@ where
 
 /// Opcode for the GetImage request
 pub const GET_IMAGE_REQUEST: u8 = 73;
-pub fn get_image<Conn, A>(conn: &Conn, format: A, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32) -> Result<Cookie<'_, Conn, GetImageReply>, ConnectionError>
+pub fn get_image<Conn>(conn: &Conn, format: ImageFormat, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32) -> Result<Cookie<'_, Conn, GetImageReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let format = format.into();
-    let format_bytes = format.serialize();
+    let format_bytes = u8::from(format).serialize();
     let drawable_bytes = drawable.serialize();
     let x_bytes = x.serialize();
     let y_bytes = y.serialize();
@@ -16576,14 +16530,12 @@ impl TryFrom<u32> for ColormapAlloc {
 
 /// Opcode for the CreateColormap request
 pub const CREATE_COLORMAP_REQUEST: u8 = 78;
-pub fn create_colormap<Conn, A>(conn: &Conn, alloc: A, mid: Colormap, window: Window, visual: Visualid) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_colormap<Conn>(conn: &Conn, alloc: ColormapAlloc, mid: Colormap, window: Window, visual: Visualid) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let alloc = alloc.into();
-    let alloc_bytes = alloc.serialize();
+    let alloc_bytes = u8::from(alloc).serialize();
     let mid_bytes = mid.serialize();
     let window_bytes = window.serialize();
     let visual_bytes = visual.serialize();
@@ -17871,14 +17823,12 @@ impl TryFrom<u32> for QueryShapeOf {
 
 /// Opcode for the QueryBestSize request
 pub const QUERY_BEST_SIZE_REQUEST: u8 = 97;
-pub fn query_best_size<Conn, A>(conn: &Conn, class: A, drawable: Drawable, width: u16, height: u16) -> Result<Cookie<'_, Conn, QueryBestSizeReply>, ConnectionError>
+pub fn query_best_size<Conn>(conn: &Conn, class: QueryShapeOf, drawable: Drawable, width: u16, height: u16) -> Result<Cookie<'_, Conn, QueryBestSizeReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let class = class.into();
-    let class_bytes = class.serialize();
+    let class_bytes = u8::from(class).serialize();
     let drawable_bytes = drawable.serialize();
     let width_bytes = width.serialize();
     let height_bytes = height.serialize();
@@ -18861,19 +18811,15 @@ impl TryFrom<u32> for Exposures {
 
 /// Opcode for the SetScreenSaver request
 pub const SET_SCREEN_SAVER_REQUEST: u8 = 107;
-pub fn set_screen_saver<Conn, A, B>(conn: &Conn, timeout: i16, interval: i16, prefer_blanking: A, allow_exposures: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_screen_saver<Conn>(conn: &Conn, timeout: i16, interval: i16, prefer_blanking: Blanking, allow_exposures: Exposures) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
-    B: Into<u8>,
 {
     let length_so_far = 0;
     let timeout_bytes = timeout.serialize();
     let interval_bytes = interval.serialize();
-    let prefer_blanking = prefer_blanking.into();
-    let prefer_blanking_bytes = prefer_blanking.serialize();
-    let allow_exposures = allow_exposures.into();
-    let allow_exposures_bytes = allow_exposures.serialize();
+    let prefer_blanking_bytes = u8::from(prefer_blanking).serialize();
+    let allow_exposures_bytes = u8::from(allow_exposures).serialize();
     let mut request0 = [
         SET_SCREEN_SAVER_REQUEST,
         0,
@@ -19083,17 +19029,13 @@ impl TryFrom<u32> for Family {
 
 /// Opcode for the ChangeHosts request
 pub const CHANGE_HOSTS_REQUEST: u8 = 109;
-pub fn change_hosts<'c, Conn, A, B>(conn: &'c Conn, mode: A, family: B, address: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_hosts<'c, Conn>(conn: &'c Conn, mode: HostMode, family: Family, address: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
-    B: Into<u8>,
 {
     let length_so_far = 0;
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
-    let family = family.into();
-    let family_bytes = family.serialize();
+    let mode_bytes = u8::from(mode).serialize();
+    let family_bytes = u8::from(family).serialize();
     let address_len: u16 = address.len().try_into()?;
     let address_len_bytes = address_len.serialize();
     let mut request0 = [
@@ -19273,14 +19215,12 @@ impl TryFrom<u32> for AccessControl {
 
 /// Opcode for the SetAccessControl request
 pub const SET_ACCESS_CONTROL_REQUEST: u8 = 111;
-pub fn set_access_control<Conn, A>(conn: &Conn, mode: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_access_control<Conn>(conn: &Conn, mode: AccessControl) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
+    let mode_bytes = u8::from(mode).serialize();
     let mut request0 = [
         SET_ACCESS_CONTROL_REQUEST,
         mode_bytes[0],
@@ -19361,14 +19301,12 @@ impl TryFrom<u32> for CloseDown {
 
 /// Opcode for the SetCloseDownMode request
 pub const SET_CLOSE_DOWN_MODE_REQUEST: u8 = 112;
-pub fn set_close_down_mode<Conn, A>(conn: &Conn, mode: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_close_down_mode<Conn>(conn: &Conn, mode: CloseDown) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
+    let mode_bytes = u8::from(mode).serialize();
     let mut request0 = [
         SET_CLOSE_DOWN_MODE_REQUEST,
         mode_bytes[0],
@@ -19585,14 +19523,12 @@ impl TryFrom<u32> for ScreenSaver {
 
 /// Opcode for the ForceScreenSaver request
 pub const FORCE_SCREEN_SAVER_REQUEST: u8 = 115;
-pub fn force_screen_saver<Conn, A>(conn: &Conn, mode: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn force_screen_saver<Conn>(conn: &Conn, mode: ScreenSaver) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
+    let mode_bytes = u8::from(mode).serialize();
     let mut request0 = [
         FORCE_SCREEN_SAVER_REQUEST,
         mode_bytes[0],
@@ -20015,9 +19951,7 @@ pub trait ConnectionExt: RequestConnection {
     /// * `CreateNotify`: event
     /// * `MapWindow`: request
     /// * `xcb_generate_id`: function
-    fn create_window<'c, A>(&'c self, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, visual: Visualid, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u16>,
+    fn create_window<'c>(&'c self, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_window(self, depth, wid, parent, x, y, width, height, border_width, class, visual, value_list)
     }
@@ -20118,9 +20052,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * `ReparentWindow`: request
-    fn change_save_set<A>(&self, mode: A, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn change_save_set(&self, mode: SetMode, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         change_save_set(self, mode, window)
     }
@@ -20309,9 +20241,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `Value` - The specified `direction` is invalid.
     /// * `Window` - The specified `window` does not exist.
-    fn circulate_window<A>(&self, direction: A, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn circulate_window(&self, direction: Circulate, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         circulate_window(self, direction, window)
     }
@@ -20504,11 +20434,10 @@ pub trait ConnectionExt: RequestConnection {
     ///     xcb_flush(conn);
     /// }
     /// ```
-    fn change_property<'c, A, B, C>(&'c self, mode: A, window: Window, property: B, type_: C, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn change_property<'c, A, B>(&'c self, mode: PropMode, window: Window, property: A, type_: B, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
-        A: Into<u8>,
+        A: Into<Atom>,
         B: Into<Atom>,
-        C: Into<Atom>,
     {
         change_property(self, mode, window, property, type_, format, data_len, data)
     }
@@ -20806,10 +20735,7 @@ pub trait ConnectionExt: RequestConnection {
     ///     }
     /// }
     /// ```
-    fn grab_pointer<A, B>(&self, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: A, keyboard_mode: B, confine_to: Window, cursor: Cursor, time: Timestamp) -> Result<Cookie<'_, Self, GrabPointerReply>, ConnectionError>
-    where
-        A: Into<u8>,
-        B: Into<u8>,
+    fn grab_pointer(&self, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: Window, cursor: Cursor, time: Timestamp) -> Result<Cookie<'_, Self, GrabPointerReply>, ConnectionError>
     {
         grab_pointer(self, owner_events, grab_window, event_mask, pointer_mode, keyboard_mode, confine_to, cursor, time)
     }
@@ -20906,18 +20832,12 @@ pub trait ConnectionExt: RequestConnection {
     /// * `Cursor` - The specified `cursor` does not exist.
     /// * `Value` - TODO: reasons?
     /// * `Window` - The specified `window` does not exist.
-    fn grab_button<A, B, C>(&self, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: A, keyboard_mode: B, confine_to: Window, cursor: Cursor, button: C, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
-        B: Into<u8>,
-        C: Into<u8>,
+    fn grab_button(&self, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: Window, cursor: Cursor, button: ButtonIndex, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         grab_button(self, owner_events, grab_window, event_mask, pointer_mode, keyboard_mode, confine_to, cursor, button, modifiers)
     }
 
-    fn ungrab_button<A>(&self, button: A, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn ungrab_button(&self, button: ButtonIndex, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_button(self, button, grab_window, modifiers)
     }
@@ -20987,10 +20907,7 @@ pub trait ConnectionExt: RequestConnection {
     ///     }
     /// }
     /// ```
-    fn grab_keyboard<A, B>(&self, owner_events: bool, grab_window: Window, time: Timestamp, pointer_mode: A, keyboard_mode: B) -> Result<Cookie<'_, Self, GrabKeyboardReply>, ConnectionError>
-    where
-        A: Into<u8>,
-        B: Into<u8>,
+    fn grab_keyboard(&self, owner_events: bool, grab_window: Window, time: Timestamp, pointer_mode: GrabMode, keyboard_mode: GrabMode) -> Result<Cookie<'_, Self, GrabKeyboardReply>, ConnectionError>
     {
         grab_keyboard(self, owner_events, grab_window, time, pointer_mode, keyboard_mode)
     }
@@ -21058,10 +20975,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * `GrabKeyboard`: request
-    fn grab_key<A, B>(&self, owner_events: bool, grab_window: Window, modifiers: u16, key: Keycode, pointer_mode: A, keyboard_mode: B) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
-        B: Into<u8>,
+    fn grab_key(&self, owner_events: bool, grab_window: Window, modifiers: u16, key: Keycode, pointer_mode: GrabMode, keyboard_mode: GrabMode) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         grab_key(self, owner_events, grab_window, modifiers, key, pointer_mode, keyboard_mode)
     }
@@ -21113,9 +21027,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # Errors
     ///
     /// * `Value` - You specified an invalid `mode`.
-    fn allow_events<A>(&self, mode: A, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn allow_events(&self, mode: Allow, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         allow_events(self, mode, time)
     }
@@ -21230,9 +21142,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `FocusIn`: event
     /// * `FocusOut`: event
-    fn set_input_focus<A>(&self, revert_to: A, focus: Window, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn set_input_focus(&self, revert_to: InputFocus, focus: Window, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_input_focus(self, revert_to, focus, time)
     }
@@ -21506,9 +21416,7 @@ pub trait ConnectionExt: RequestConnection {
         set_dashes(self, gc, dash_offset, dashes)
     }
 
-    fn set_clip_rectangles<'c, A>(&'c self, ordering: A, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn set_clip_rectangles<'c>(&'c self, ordering: ClipOrdering, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_clip_rectangles(self, ordering, gc, clip_x_origin, clip_y_origin, rectangles)
     }
@@ -21565,9 +21473,7 @@ pub trait ConnectionExt: RequestConnection {
         copy_plane(self, src_drawable, dst_drawable, gc, src_x, src_y, dst_x, dst_y, width, height, bit_plane)
     }
 
-    fn poly_point<'c, A>(&'c self, coordinate_mode: A, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn poly_point<'c>(&'c self, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_point(self, coordinate_mode, drawable, gc, points)
     }
@@ -21610,9 +21516,7 @@ pub trait ConnectionExt: RequestConnection {
     ///     xcb_flush(conn);
     /// }
     /// ```
-    fn poly_line<'c, A>(&'c self, coordinate_mode: A, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn poly_line<'c>(&'c self, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_line(self, coordinate_mode, drawable, gc, points)
     }
@@ -21658,10 +21562,7 @@ pub trait ConnectionExt: RequestConnection {
         poly_arc(self, drawable, gc, arcs)
     }
 
-    fn fill_poly<'c, A, B>(&'c self, drawable: Drawable, gc: Gcontext, shape: A, coordinate_mode: B, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
-        B: Into<u8>,
+    fn fill_poly<'c>(&'c self, drawable: Drawable, gc: Gcontext, shape: PolyShape, coordinate_mode: CoordMode, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         fill_poly(self, drawable, gc, shape, coordinate_mode, points)
     }
@@ -21701,16 +21602,12 @@ pub trait ConnectionExt: RequestConnection {
         poly_fill_arc(self, drawable, gc, arcs)
     }
 
-    fn put_image<'c, A>(&'c self, format: A, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn put_image<'c>(&'c self, format: ImageFormat, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         put_image(self, format, drawable, gc, width, height, dst_x, dst_y, left_pad, depth, data)
     }
 
-    fn get_image<A>(&self, format: A, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32) -> Result<Cookie<'_, Self, GetImageReply>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn get_image(&self, format: ImageFormat, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32) -> Result<Cookie<'_, Self, GetImageReply>, ConnectionError>
     {
         get_image(self, format, drawable, x, y, width, height, plane_mask)
     }
@@ -21804,9 +21701,7 @@ pub trait ConnectionExt: RequestConnection {
         image_text16(self, drawable, gc, x, y, string)
     }
 
-    fn create_colormap<A>(&self, alloc: A, mid: Colormap, window: Window, visual: Visualid) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn create_colormap(&self, alloc: ColormapAlloc, mid: Colormap, window: Window, visual: Visualid) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_colormap(self, alloc, mid, window, visual)
     }
@@ -21964,9 +21859,7 @@ pub trait ConnectionExt: RequestConnection {
         recolor_cursor(self, cursor, fore_red, fore_green, fore_blue, back_red, back_green, back_blue)
     }
 
-    fn query_best_size<A>(&self, class: A, drawable: Drawable, width: u16, height: u16) -> Result<Cookie<'_, Self, QueryBestSizeReply>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn query_best_size(&self, class: QueryShapeOf, drawable: Drawable, width: u16, height: u16) -> Result<Cookie<'_, Self, QueryBestSizeReply>, ConnectionError>
     {
         query_best_size(self, class, drawable, width, height)
     }
@@ -22038,10 +21931,7 @@ pub trait ConnectionExt: RequestConnection {
         get_pointer_control(self)
     }
 
-    fn set_screen_saver<A, B>(&self, timeout: i16, interval: i16, prefer_blanking: A, allow_exposures: B) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
-        B: Into<u8>,
+    fn set_screen_saver(&self, timeout: i16, interval: i16, prefer_blanking: Blanking, allow_exposures: Exposures) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_screen_saver(self, timeout, interval, prefer_blanking, allow_exposures)
     }
@@ -22051,10 +21941,7 @@ pub trait ConnectionExt: RequestConnection {
         get_screen_saver(self)
     }
 
-    fn change_hosts<'c, A, B>(&'c self, mode: A, family: B, address: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
-        B: Into<u8>,
+    fn change_hosts<'c>(&'c self, mode: HostMode, family: Family, address: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_hosts(self, mode, family, address)
     }
@@ -22064,16 +21951,12 @@ pub trait ConnectionExt: RequestConnection {
         list_hosts(self)
     }
 
-    fn set_access_control<A>(&self, mode: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn set_access_control(&self, mode: AccessControl) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_access_control(self, mode)
     }
 
-    fn set_close_down_mode<A>(&self, mode: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn set_close_down_mode(&self, mode: CloseDown) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_close_down_mode(self, mode)
     }
@@ -22107,9 +21990,7 @@ pub trait ConnectionExt: RequestConnection {
         rotate_properties(self, window, delta, atoms)
     }
 
-    fn force_screen_saver<A>(&self, mode: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn force_screen_saver(&self, mode: ScreenSaver) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         force_screen_saver(self, mode)
     }

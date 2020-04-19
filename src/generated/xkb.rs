@@ -7268,10 +7268,9 @@ impl TryFrom<&[u8]> for GetStateReply {
 
 /// Opcode for the LatchLockState request
 pub const LATCH_LOCK_STATE_REQUEST: u8 = 5;
-pub fn latch_lock_state<Conn, A>(conn: &Conn, device_spec: DeviceSpec, affect_mod_locks: u8, mod_locks: u8, lock_group: bool, group_lock: A, affect_mod_latches: u8, latch_group: bool, group_latch: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn latch_lock_state<Conn>(conn: &Conn, device_spec: DeviceSpec, affect_mod_locks: u8, mod_locks: u8, lock_group: bool, group_lock: Group, affect_mod_latches: u8, latch_group: bool, group_latch: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -7280,8 +7279,7 @@ where
     let affect_mod_locks_bytes = affect_mod_locks.serialize();
     let mod_locks_bytes = mod_locks.serialize();
     let lock_group_bytes = (lock_group as u8).serialize();
-    let group_lock = group_lock.into();
-    let group_lock_bytes = group_lock.serialize();
+    let group_lock_bytes = u8::from(group_lock).serialize();
     let affect_mod_latches_bytes = affect_mod_latches.serialize();
     let latch_group_bytes = (latch_group as u8).serialize();
     let group_latch_bytes = group_latch.serialize();
@@ -8365,17 +8363,15 @@ where
 
 /// Opcode for the GetNamedIndicator request
 pub const GET_NAMED_INDICATOR_REQUEST: u8 = 15;
-pub fn get_named_indicator<Conn, A>(conn: &Conn, device_spec: DeviceSpec, led_class: A, led_id: IDSpec, indicator: xproto::Atom) -> Result<Cookie<'_, Conn, GetNamedIndicatorReply>, ConnectionError>
+pub fn get_named_indicator<Conn>(conn: &Conn, device_spec: DeviceSpec, led_class: LedClass, led_id: IDSpec, indicator: xproto::Atom) -> Result<Cookie<'_, Conn, GetNamedIndicatorReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<LedClassSpec>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let device_spec_bytes = device_spec.serialize();
-    let led_class = led_class.into();
-    let led_class_bytes = led_class.serialize();
+    let led_class_bytes = LedClassSpec::from(led_class).serialize();
     let led_id_bytes = led_id.serialize();
     let indicator_bytes = indicator.serialize();
     let mut request0 = [
@@ -8457,17 +8453,15 @@ impl TryFrom<&[u8]> for GetNamedIndicatorReply {
 
 /// Opcode for the SetNamedIndicator request
 pub const SET_NAMED_INDICATOR_REQUEST: u8 = 16;
-pub fn set_named_indicator<Conn, A>(conn: &Conn, device_spec: DeviceSpec, led_class: A, led_id: IDSpec, indicator: xproto::Atom, set_state: bool, on: bool, set_map: bool, create_map: bool, map_flags: u8, map_which_groups: u8, map_groups: u8, map_which_mods: u8, map_real_mods: u8, map_vmods: u16, map_ctrls: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_named_indicator<Conn>(conn: &Conn, device_spec: DeviceSpec, led_class: LedClass, led_id: IDSpec, indicator: xproto::Atom, set_state: bool, on: bool, set_map: bool, create_map: bool, map_flags: u8, map_which_groups: u8, map_groups: u8, map_which_mods: u8, map_real_mods: u8, map_vmods: u16, map_ctrls: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<LedClassSpec>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let device_spec_bytes = device_spec.serialize();
-    let led_class = led_class.into();
-    let led_class_bytes = led_class.serialize();
+    let led_class_bytes = LedClassSpec::from(led_class).serialize();
     let led_id_bytes = led_id.serialize();
     let indicator_bytes = indicator.serialize();
     let set_state_bytes = (set_state as u8).serialize();
@@ -9210,10 +9204,9 @@ pub fn get_kbd_by_name<Conn>(_conn: &Conn) where Conn: RequestConnection + ?Size
 unimplemented!("Not yet supported by the code generator") }
 /// Opcode for the GetDeviceInfo request
 pub const GET_DEVICE_INFO_REQUEST: u8 = 24;
-pub fn get_device_info<Conn, A>(conn: &Conn, device_spec: DeviceSpec, wanted: u16, all_buttons: bool, first_button: u8, n_buttons: u8, led_class: A, led_id: IDSpec) -> Result<Cookie<'_, Conn, GetDeviceInfoReply>, ConnectionError>
+pub fn get_device_info<Conn>(conn: &Conn, device_spec: DeviceSpec, wanted: u16, all_buttons: bool, first_button: u8, n_buttons: u8, led_class: LedClass, led_id: IDSpec) -> Result<Cookie<'_, Conn, GetDeviceInfoReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<LedClassSpec>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -9223,8 +9216,7 @@ where
     let all_buttons_bytes = (all_buttons as u8).serialize();
     let first_button_bytes = first_button.serialize();
     let n_buttons_bytes = n_buttons.serialize();
-    let led_class = led_class.into();
-    let led_class_bytes = led_class.serialize();
+    let led_class_bytes = LedClassSpec::from(led_class).serialize();
     let led_id_bytes = led_id.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -10867,9 +10859,7 @@ pub trait ConnectionExt: RequestConnection {
         get_state(self, device_spec)
     }
 
-    fn xkb_latch_lock_state<A>(&self, device_spec: DeviceSpec, affect_mod_locks: u8, mod_locks: u8, lock_group: bool, group_lock: A, affect_mod_latches: u8, latch_group: bool, group_latch: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn xkb_latch_lock_state(&self, device_spec: DeviceSpec, affect_mod_locks: u8, mod_locks: u8, lock_group: bool, group_lock: Group, affect_mod_latches: u8, latch_group: bool, group_latch: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         latch_lock_state(self, device_spec, affect_mod_locks, mod_locks, lock_group, group_lock, affect_mod_latches, latch_group, group_latch)
     }
@@ -10919,16 +10909,12 @@ pub trait ConnectionExt: RequestConnection {
         set_indicator_map(self, device_spec, which, maps)
     }
 
-    fn xkb_get_named_indicator<A>(&self, device_spec: DeviceSpec, led_class: A, led_id: IDSpec, indicator: xproto::Atom) -> Result<Cookie<'_, Self, GetNamedIndicatorReply>, ConnectionError>
-    where
-        A: Into<LedClassSpec>,
+    fn xkb_get_named_indicator(&self, device_spec: DeviceSpec, led_class: LedClass, led_id: IDSpec, indicator: xproto::Atom) -> Result<Cookie<'_, Self, GetNamedIndicatorReply>, ConnectionError>
     {
         get_named_indicator(self, device_spec, led_class, led_id, indicator)
     }
 
-    fn xkb_set_named_indicator<A>(&self, device_spec: DeviceSpec, led_class: A, led_id: IDSpec, indicator: xproto::Atom, set_state: bool, on: bool, set_map: bool, create_map: bool, map_flags: u8, map_which_groups: u8, map_groups: u8, map_which_mods: u8, map_real_mods: u8, map_vmods: u16, map_ctrls: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<LedClassSpec>,
+    fn xkb_set_named_indicator(&self, device_spec: DeviceSpec, led_class: LedClass, led_id: IDSpec, indicator: xproto::Atom, set_state: bool, on: bool, set_map: bool, create_map: bool, map_flags: u8, map_which_groups: u8, map_groups: u8, map_which_mods: u8, map_real_mods: u8, map_vmods: u16, map_ctrls: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_named_indicator(self, device_spec, led_class, led_id, indicator, set_state, on, set_map, create_map, map_flags, map_which_groups, map_groups, map_which_mods, map_real_mods, map_vmods, map_ctrls)
     }
@@ -10954,9 +10940,7 @@ pub trait ConnectionExt: RequestConnection {
     }
 
     fn get_kbd_by_name(&self) { unimplemented!("Not yet supported by the code generator") }
-    fn xkb_get_device_info<A>(&self, device_spec: DeviceSpec, wanted: u16, all_buttons: bool, first_button: u8, n_buttons: u8, led_class: A, led_id: IDSpec) -> Result<Cookie<'_, Self, GetDeviceInfoReply>, ConnectionError>
-    where
-        A: Into<LedClassSpec>,
+    fn xkb_get_device_info(&self, device_spec: DeviceSpec, wanted: u16, all_buttons: bool, first_button: u8, n_buttons: u8, led_class: LedClass, led_id: IDSpec) -> Result<Cookie<'_, Self, GetDeviceInfoReply>, ConnectionError>
     {
         get_device_info(self, device_spec, wanted, all_buttons, first_button, n_buttons, led_class, led_id)
     }

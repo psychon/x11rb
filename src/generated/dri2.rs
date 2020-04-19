@@ -425,17 +425,15 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 /// Opcode for the Connect request
 pub const CONNECT_REQUEST: u8 = 1;
-pub fn connect<Conn, A>(conn: &Conn, window: xproto::Window, driver_type: A) -> Result<Cookie<'_, Conn, ConnectReply>, ConnectionError>
+pub fn connect<Conn>(conn: &Conn, window: xproto::Window, driver_type: DriverType) -> Result<Cookie<'_, Conn, ConnectReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u32>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let window_bytes = window.serialize();
-    let driver_type = driver_type.into();
-    let driver_type_bytes = driver_type.serialize();
+    let driver_type_bytes = u32::from(driver_type).serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CONNECT_REQUEST,
@@ -1387,9 +1385,7 @@ pub trait ConnectionExt: RequestConnection {
         query_version(self, major_version, minor_version)
     }
 
-    fn dri2_connect<A>(&self, window: xproto::Window, driver_type: A) -> Result<Cookie<'_, Self, ConnectReply>, ConnectionError>
-    where
-        A: Into<u32>,
+    fn dri2_connect(&self, window: xproto::Window, driver_type: DriverType) -> Result<Cookie<'_, Self, ConnectReply>, ConnectionError>
     {
         connect(self, window, driver_type)
     }

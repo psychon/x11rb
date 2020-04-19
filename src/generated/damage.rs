@@ -256,18 +256,16 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 /// Opcode for the Create request
 pub const CREATE_REQUEST: u8 = 1;
-pub fn create<Conn, A>(conn: &Conn, damage: Damage, drawable: xproto::Drawable, level: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create<Conn>(conn: &Conn, damage: Damage, drawable: xproto::Drawable, level: ReportLevel) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let damage_bytes = damage.serialize();
     let drawable_bytes = drawable.serialize();
-    let level = level.into();
-    let level_bytes = level.serialize();
+    let level_bytes = u8::from(level).serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_REQUEST,
@@ -495,9 +493,7 @@ pub trait ConnectionExt: RequestConnection {
         query_version(self, client_major_version, client_minor_version)
     }
 
-    fn damage_create<A>(&self, damage: Damage, drawable: xproto::Drawable, level: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn damage_create(&self, damage: Damage, drawable: xproto::Drawable, level: ReportLevel) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create(self, damage, drawable, level)
     }

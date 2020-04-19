@@ -589,10 +589,9 @@ impl SetAttributesAux {
         self
     }
 }
-pub fn set_attributes<'c, Conn, A>(conn: &'c Conn, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, depth: u8, visual: xproto::Visualid, value_list: &SetAttributesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_attributes<'c, Conn>(conn: &'c Conn, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: xproto::WindowClass, depth: u8, visual: xproto::Visualid, value_list: &SetAttributesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -605,8 +604,7 @@ where
     let width_bytes = width.serialize();
     let height_bytes = height.serialize();
     let border_width_bytes = border_width.serialize();
-    let class = class.into();
-    let class_bytes = class.serialize();
+    let class_bytes = u8::from(class).serialize();
     let depth_bytes = depth.serialize();
     let visual_bytes = visual.serialize();
     let value_mask_bytes = value_mask.serialize();
@@ -822,9 +820,7 @@ pub trait ConnectionExt: RequestConnection {
         select_input(self, drawable, event_mask)
     }
 
-    fn screensaver_set_attributes<'c, A>(&'c self, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, depth: u8, visual: xproto::Visualid, value_list: &SetAttributesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn screensaver_set_attributes<'c>(&'c self, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: xproto::WindowClass, depth: u8, visual: xproto::Visualid, value_list: &SetAttributesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_attributes(self, drawable, x, y, width, height, border_width, class, depth, visual, value_list)
     }

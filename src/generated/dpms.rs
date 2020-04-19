@@ -335,16 +335,14 @@ impl TryFrom<u32> for DPMSMode {
 
 /// Opcode for the ForceLevel request
 pub const FORCE_LEVEL_REQUEST: u8 = 6;
-pub fn force_level<Conn, A>(conn: &Conn, power_level: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn force_level<Conn>(conn: &Conn, power_level: DPMSMode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u16>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let power_level = power_level.into();
-    let power_level_bytes = power_level.serialize();
+    let power_level_bytes = u16::from(power_level).serialize();
     let mut request0 = [
         extension_information.major_opcode,
         FORCE_LEVEL_REQUEST,
@@ -444,9 +442,7 @@ pub trait ConnectionExt: RequestConnection {
         disable(self)
     }
 
-    fn dpms_force_level<A>(&self, power_level: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u16>,
+    fn dpms_force_level(&self, power_level: DPMSMode) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         force_level(self, power_level)
     }

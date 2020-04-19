@@ -167,17 +167,15 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 /// Opcode for the RedirectWindow request
 pub const REDIRECT_WINDOW_REQUEST: u8 = 1;
-pub fn redirect_window<Conn, A>(conn: &Conn, window: xproto::Window, update: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn redirect_window<Conn>(conn: &Conn, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let window_bytes = window.serialize();
-    let update = update.into();
-    let update_bytes = update.serialize();
+    let update_bytes = u8::from(update).serialize();
     let mut request0 = [
         extension_information.major_opcode,
         REDIRECT_WINDOW_REQUEST,
@@ -201,17 +199,15 @@ where
 
 /// Opcode for the RedirectSubwindows request
 pub const REDIRECT_SUBWINDOWS_REQUEST: u8 = 2;
-pub fn redirect_subwindows<Conn, A>(conn: &Conn, window: xproto::Window, update: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn redirect_subwindows<Conn>(conn: &Conn, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let window_bytes = window.serialize();
-    let update = update.into();
-    let update_bytes = update.serialize();
+    let update_bytes = u8::from(update).serialize();
     let mut request0 = [
         extension_information.major_opcode,
         REDIRECT_SUBWINDOWS_REQUEST,
@@ -235,17 +231,15 @@ where
 
 /// Opcode for the UnredirectWindow request
 pub const UNREDIRECT_WINDOW_REQUEST: u8 = 3;
-pub fn unredirect_window<Conn, A>(conn: &Conn, window: xproto::Window, update: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn unredirect_window<Conn>(conn: &Conn, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let window_bytes = window.serialize();
-    let update = update.into();
-    let update_bytes = update.serialize();
+    let update_bytes = u8::from(update).serialize();
     let mut request0 = [
         extension_information.major_opcode,
         UNREDIRECT_WINDOW_REQUEST,
@@ -269,17 +263,15 @@ where
 
 /// Opcode for the UnredirectSubwindows request
 pub const UNREDIRECT_SUBWINDOWS_REQUEST: u8 = 4;
-pub fn unredirect_subwindows<Conn, A>(conn: &Conn, window: xproto::Window, update: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn unredirect_subwindows<Conn>(conn: &Conn, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let window_bytes = window.serialize();
-    let update = update.into();
-    let update_bytes = update.serialize();
+    let update_bytes = u8::from(update).serialize();
     let mut request0 = [
         extension_information.major_opcode,
         UNREDIRECT_SUBWINDOWS_REQUEST,
@@ -451,30 +443,22 @@ pub trait ConnectionExt: RequestConnection {
         query_version(self, client_major_version, client_minor_version)
     }
 
-    fn composite_redirect_window<A>(&self, window: xproto::Window, update: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn composite_redirect_window(&self, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         redirect_window(self, window, update)
     }
 
-    fn composite_redirect_subwindows<A>(&self, window: xproto::Window, update: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn composite_redirect_subwindows(&self, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         redirect_subwindows(self, window, update)
     }
 
-    fn composite_unredirect_window<A>(&self, window: xproto::Window, update: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn composite_unredirect_window(&self, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         unredirect_window(self, window, update)
     }
 
-    fn composite_unredirect_subwindows<A>(&self, window: xproto::Window, update: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn composite_unredirect_subwindows(&self, window: xproto::Window, update: Redirect) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         unredirect_subwindows(self, window, update)
     }

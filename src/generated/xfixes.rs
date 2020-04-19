@@ -289,22 +289,16 @@ impl TryFrom<u32> for SaveSetMapping {
 
 /// Opcode for the ChangeSaveSet request
 pub const CHANGE_SAVE_SET_REQUEST: u8 = 1;
-pub fn change_save_set<Conn, A, B, C>(conn: &Conn, mode: A, target: B, map: C, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn change_save_set<Conn>(conn: &Conn, mode: SaveSetMode, target: SaveSetTarget, map: SaveSetMapping, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
-    B: Into<u8>,
-    C: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
-    let target = target.into();
-    let target_bytes = target.serialize();
-    let map = map.into();
-    let map_bytes = map.serialize();
+    let mode_bytes = u8::from(mode).serialize();
+    let target_bytes = u8::from(target).serialize();
+    let map_bytes = u8::from(map).serialize();
     let window_bytes = window.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -1111,18 +1105,16 @@ where
 
 /// Opcode for the CreateRegionFromWindow request
 pub const CREATE_REGION_FROM_WINDOW_REQUEST: u8 = 7;
-pub fn create_region_from_window<Conn, A>(conn: &Conn, region: Region, window: xproto::Window, kind: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_region_from_window<Conn>(conn: &Conn, region: Region, window: xproto::Window, kind: shape::SK) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<shape::Kind>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let region_bytes = region.serialize();
     let window_bytes = window.serialize();
-    let kind = kind.into();
-    let kind_bytes = kind.serialize();
+    let kind_bytes = shape::Kind::from(kind).serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_REGION_FROM_WINDOW_REQUEST,
@@ -1612,17 +1604,15 @@ where
 
 /// Opcode for the SetWindowShapeRegion request
 pub const SET_WINDOW_SHAPE_REGION_REQUEST: u8 = 21;
-pub fn set_window_shape_region<Conn, A>(conn: &Conn, dest: xproto::Window, dest_kind: A, x_offset: i16, y_offset: i16, region: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_window_shape_region<Conn>(conn: &Conn, dest: xproto::Window, dest_kind: shape::SK, x_offset: i16, y_offset: i16, region: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<shape::Kind>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let dest_bytes = dest.serialize();
-    let dest_kind = dest_kind.into();
-    let dest_kind_bytes = dest_kind.serialize();
+    let dest_kind_bytes = shape::Kind::from(dest_kind).serialize();
     let x_offset_bytes = x_offset.serialize();
     let y_offset_bytes = y_offset.serialize();
     let region_bytes = region.serialize();
@@ -2180,11 +2170,7 @@ pub trait ConnectionExt: RequestConnection {
         query_version(self, client_major_version, client_minor_version)
     }
 
-    fn xfixes_change_save_set<A, B, C>(&self, mode: A, target: B, map: C, window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
-        B: Into<u8>,
-        C: Into<u8>,
+    fn xfixes_change_save_set(&self, mode: SaveSetMode, target: SaveSetTarget, map: SaveSetMapping, window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         change_save_set(self, mode, target, map, window)
     }
@@ -2214,9 +2200,7 @@ pub trait ConnectionExt: RequestConnection {
         create_region_from_bitmap(self, region, bitmap)
     }
 
-    fn xfixes_create_region_from_window<A>(&self, region: Region, window: xproto::Window, kind: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<shape::Kind>,
+    fn xfixes_create_region_from_window(&self, region: Region, window: xproto::Window, kind: shape::SK) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_region_from_window(self, region, window, kind)
     }
@@ -2286,9 +2270,7 @@ pub trait ConnectionExt: RequestConnection {
         set_gc_clip_region(self, gc, region, x_origin, y_origin)
     }
 
-    fn xfixes_set_window_shape_region<A>(&self, dest: xproto::Window, dest_kind: A, x_offset: i16, y_offset: i16, region: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<shape::Kind>,
+    fn xfixes_set_window_shape_region(&self, dest: xproto::Window, dest_kind: shape::SK, x_offset: i16, y_offset: i16, region: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_window_shape_region(self, dest, dest_kind, x_offset, y_offset, region)
     }

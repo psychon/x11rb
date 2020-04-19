@@ -2490,16 +2490,14 @@ where
 
 /// Opcode for the Composite request
 pub const COMPOSITE_REQUEST: u8 = 8;
-pub fn composite<Conn, A>(conn: &Conn, op: A, src: Picture, mask: Picture, dst: Picture, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn composite<Conn>(conn: &Conn, op: PictOp, src: Picture, mask: Picture, dst: Picture, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let op = op.into();
-    let op_bytes = op.serialize();
+    let op_bytes = u8::from(op).serialize();
     let src_bytes = src.serialize();
     let mask_bytes = mask.serialize();
     let dst_bytes = dst.serialize();
@@ -2558,16 +2556,14 @@ where
 
 /// Opcode for the Trapezoids request
 pub const TRAPEZOIDS_REQUEST: u8 = 10;
-pub fn trapezoids<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, traps: &[Trapezoid]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn trapezoids<'c, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, traps: &[Trapezoid]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let op = op.into();
-    let op_bytes = op.serialize();
+    let op_bytes = u8::from(op).serialize();
     let src_bytes = src.serialize();
     let dst_bytes = dst.serialize();
     let mask_format_bytes = mask_format.serialize();
@@ -2612,16 +2608,14 @@ where
 
 /// Opcode for the Triangles request
 pub const TRIANGLES_REQUEST: u8 = 11;
-pub fn triangles<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, triangles: &[Triangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn triangles<'c, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, triangles: &[Triangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let op = op.into();
-    let op_bytes = op.serialize();
+    let op_bytes = u8::from(op).serialize();
     let src_bytes = src.serialize();
     let dst_bytes = dst.serialize();
     let mask_format_bytes = mask_format.serialize();
@@ -2666,16 +2660,14 @@ where
 
 /// Opcode for the TriStrip request
 pub const TRI_STRIP_REQUEST: u8 = 12;
-pub fn tri_strip<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn tri_strip<'c, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let op = op.into();
-    let op_bytes = op.serialize();
+    let op_bytes = u8::from(op).serialize();
     let src_bytes = src.serialize();
     let dst_bytes = dst.serialize();
     let mask_format_bytes = mask_format.serialize();
@@ -2720,16 +2712,14 @@ where
 
 /// Opcode for the TriFan request
 pub const TRI_FAN_REQUEST: u8 = 13;
-pub fn tri_fan<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn tri_fan<'c, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let op = op.into();
-    let op_bytes = op.serialize();
+    let op_bytes = u8::from(op).serialize();
     let src_bytes = src.serialize();
     let dst_bytes = dst.serialize();
     let mask_format_bytes = mask_format.serialize();
@@ -2937,16 +2927,14 @@ where
 
 /// Opcode for the CompositeGlyphs8 request
 pub const COMPOSITE_GLYPHS8_REQUEST: u8 = 23;
-pub fn composite_glyphs8<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn composite_glyphs8<'c, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let op = op.into();
-    let op_bytes = op.serialize();
+    let op_bytes = u8::from(op).serialize();
     let src_bytes = src.serialize();
     let dst_bytes = dst.serialize();
     let mask_format_bytes = mask_format.serialize();
@@ -2995,16 +2983,14 @@ where
 
 /// Opcode for the CompositeGlyphs16 request
 pub const COMPOSITE_GLYPHS16_REQUEST: u8 = 24;
-pub fn composite_glyphs16<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn composite_glyphs16<'c, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let op = op.into();
-    let op_bytes = op.serialize();
+    let op_bytes = u8::from(op).serialize();
     let src_bytes = src.serialize();
     let dst_bytes = dst.serialize();
     let mask_format_bytes = mask_format.serialize();
@@ -3053,16 +3039,14 @@ where
 
 /// Opcode for the CompositeGlyphs32 request
 pub const COMPOSITE_GLYPHS32_REQUEST: u8 = 25;
-pub fn composite_glyphs32<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn composite_glyphs32<'c, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let op = op.into();
-    let op_bytes = op.serialize();
+    let op_bytes = u8::from(op).serialize();
     let src_bytes = src.serialize();
     let dst_bytes = dst.serialize();
     let mask_format_bytes = mask_format.serialize();
@@ -3111,16 +3095,14 @@ where
 
 /// Opcode for the FillRectangles request
 pub const FILL_RECTANGLES_REQUEST: u8 = 26;
-pub fn fill_rectangles<'c, Conn, A>(conn: &'c Conn, op: A, dst: Picture, color: Color, rects: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn fill_rectangles<'c, Conn>(conn: &'c Conn, op: PictOp, dst: Picture, color: Color, rects: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let op = op.into();
-    let op_bytes = op.serialize();
+    let op_bytes = u8::from(op).serialize();
     let dst_bytes = dst.serialize();
     let color_bytes = color.serialize();
     let rects_bytes = rects.serialize();
@@ -3923,37 +3905,27 @@ pub trait ConnectionExt: RequestConnection {
         free_picture(self, picture)
     }
 
-    fn render_composite<A>(&self, op: A, src: Picture, mask: Picture, dst: Picture, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn render_composite(&self, op: PictOp, src: Picture, mask: Picture, dst: Picture, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         composite(self, op, src, mask, dst, src_x, src_y, mask_x, mask_y, dst_x, dst_y, width, height)
     }
 
-    fn render_trapezoids<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, traps: &[Trapezoid]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn render_trapezoids<'c>(&'c self, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, traps: &[Trapezoid]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         trapezoids(self, op, src, dst, mask_format, src_x, src_y, traps)
     }
 
-    fn render_triangles<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, triangles: &[Triangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn render_triangles<'c>(&'c self, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, triangles: &[Triangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         self::triangles(self, op, src, dst, mask_format, src_x, src_y, triangles)
     }
 
-    fn render_tri_strip<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn render_tri_strip<'c>(&'c self, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         tri_strip(self, op, src, dst, mask_format, src_x, src_y, points)
     }
 
-    fn render_tri_fan<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn render_tri_fan<'c>(&'c self, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         tri_fan(self, op, src, dst, mask_format, src_x, src_y, points)
     }
@@ -3983,30 +3955,22 @@ pub trait ConnectionExt: RequestConnection {
         free_glyphs(self, glyphset, glyphs)
     }
 
-    fn render_composite_glyphs8<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn render_composite_glyphs8<'c>(&'c self, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         composite_glyphs8(self, op, src, dst, mask_format, glyphset, src_x, src_y, glyphcmds)
     }
 
-    fn render_composite_glyphs16<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn render_composite_glyphs16<'c>(&'c self, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         composite_glyphs16(self, op, src, dst, mask_format, glyphset, src_x, src_y, glyphcmds)
     }
 
-    fn render_composite_glyphs32<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn render_composite_glyphs32<'c>(&'c self, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         composite_glyphs32(self, op, src, dst, mask_format, glyphset, src_x, src_y, glyphcmds)
     }
 
-    fn render_fill_rectangles<'c, A>(&'c self, op: A, dst: Picture, color: Color, rects: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn render_fill_rectangles<'c>(&'c self, op: PictOp, dst: Picture, color: Color, rects: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         fill_rectangles(self, op, dst, color, rects)
     }

@@ -1592,10 +1592,9 @@ where
 
 /// Opcode for the ChangeOutputProperty request
 pub const CHANGE_OUTPUT_PROPERTY_REQUEST: u8 = 13;
-pub fn change_output_property<'c, Conn, A>(conn: &'c Conn, output: Output, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: A, num_units: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_output_property<'c, Conn>(conn: &'c Conn, output: Output, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: xproto::PropMode, num_units: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1604,8 +1603,7 @@ where
     let property_bytes = property.serialize();
     let type_bytes = type_.serialize();
     let format_bytes = format.serialize();
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
+    let mode_bytes = u8::from(mode).serialize();
     let num_units_bytes = num_units.serialize();
     assert_eq!(data.len(), ((num_units as usize) * (format as usize)) / (8), "Argument data has an incorrect length");
     let mut request0 = [
@@ -4680,9 +4678,7 @@ pub trait ConnectionExt: RequestConnection {
         configure_output_property(self, output, property, pending, range, values)
     }
 
-    fn randr_change_output_property<'c, A>(&'c self, output: Output, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: A, num_units: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn randr_change_output_property<'c>(&'c self, output: Output, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: xproto::PropMode, num_units: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_output_property(self, output, property, type_, format, mode, num_units, data)
     }
