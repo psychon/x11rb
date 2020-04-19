@@ -418,8 +418,8 @@ pub struct BadContextError {
     pub sequence: u16,
     pub invalid_record: u32,
 }
-impl BadContextError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadContextError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;

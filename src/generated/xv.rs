@@ -1165,8 +1165,8 @@ pub struct BadPortError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl BadPortError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadPortError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1246,8 +1246,8 @@ pub struct BadEncodingError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl BadEncodingError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadEncodingError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1327,8 +1327,8 @@ pub struct BadControlError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl BadControlError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadControlError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1411,8 +1411,8 @@ pub struct VideoNotifyEvent {
     pub drawable: xproto::Drawable,
     pub port: Port,
 }
-impl VideoNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for VideoNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (reason, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1504,8 +1504,8 @@ pub struct PortNotifyEvent {
     pub attribute: xproto::Atom,
     pub value: i32,
 }
-impl PortNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PortNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;

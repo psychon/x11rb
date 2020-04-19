@@ -65,8 +65,8 @@ pub struct GenericError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl GenericError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GenericError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -155,8 +155,8 @@ pub struct BadContextError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadContextError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadContextError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -245,8 +245,8 @@ pub struct BadContextStateError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadContextStateError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadContextStateError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -335,8 +335,8 @@ pub struct BadDrawableError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadDrawableError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadDrawableError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -425,8 +425,8 @@ pub struct BadPixmapError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadPixmapError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadPixmapError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -515,8 +515,8 @@ pub struct BadContextTagError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadContextTagError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadContextTagError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -605,8 +605,8 @@ pub struct BadCurrentWindowError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadCurrentWindowError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadCurrentWindowError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -695,8 +695,8 @@ pub struct BadRenderRequestError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadRenderRequestError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadRenderRequestError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -785,8 +785,8 @@ pub struct BadLargeRequestError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadLargeRequestError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadLargeRequestError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -875,8 +875,8 @@ pub struct UnsupportedPrivateRequestError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl UnsupportedPrivateRequestError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for UnsupportedPrivateRequestError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -965,8 +965,8 @@ pub struct BadFBConfigError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadFBConfigError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadFBConfigError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1055,8 +1055,8 @@ pub struct BadPbufferError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadPbufferError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadPbufferError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1145,8 +1145,8 @@ pub struct BadCurrentDrawableError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadCurrentDrawableError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadCurrentDrawableError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1235,8 +1235,8 @@ pub struct BadWindowError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadWindowError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadWindowError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1325,8 +1325,8 @@ pub struct GLXBadProfileARBError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl GLXBadProfileARBError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GLXBadProfileARBError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1421,8 +1421,8 @@ pub struct PbufferClobberEvent {
     pub height: u16,
     pub count: u16,
 }
-impl PbufferClobberEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PbufferClobberEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1529,8 +1529,8 @@ pub struct BufferSwapCompleteEvent {
     pub msc_lo: u32,
     pub sbc: u32,
 }
-impl BufferSwapCompleteEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BufferSwapCompleteEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;

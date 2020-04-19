@@ -4139,8 +4139,8 @@ pub struct KeyboardError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl KeyboardError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for KeyboardError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -9454,8 +9454,8 @@ pub struct NewKeyboardNotifyEvent {
     pub request_minor: u8,
     pub changed: u16,
 }
-impl NewKeyboardNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for NewKeyboardNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -9578,8 +9578,8 @@ pub struct MapNotifyEvent {
     pub n_v_mod_map_keys: u8,
     pub virtual_mods: u16,
 }
-impl MapNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for MapNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -9724,8 +9724,8 @@ pub struct StateNotifyEvent {
     pub request_major: u8,
     pub request_minor: u8,
 }
-impl StateNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for StateNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -9860,8 +9860,8 @@ pub struct ControlsNotifyEvent {
     pub request_major: u8,
     pub request_minor: u8,
 }
-impl ControlsNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ControlsNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -9968,8 +9968,8 @@ pub struct IndicatorStateNotifyEvent {
     pub state: u32,
     pub state_changed: u32,
 }
-impl IndicatorStateNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for IndicatorStateNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10064,8 +10064,8 @@ pub struct IndicatorMapNotifyEvent {
     pub state: u32,
     pub map_changed: u32,
 }
-impl IndicatorMapNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for IndicatorMapNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10170,8 +10170,8 @@ pub struct NamesNotifyEvent {
     pub n_keys: u8,
     pub changed_indicators: u32,
 }
-impl NamesNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for NamesNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10289,8 +10289,8 @@ pub struct CompatMapNotifyEvent {
     pub n_si: u16,
     pub n_total_si: u16,
 }
-impl CompatMapNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for CompatMapNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10394,8 +10394,8 @@ pub struct BellNotifyEvent {
     pub window: xproto::Window,
     pub event_only: bool,
 }
-impl BellNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BellNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10506,8 +10506,8 @@ pub struct ActionMessageEvent {
     pub group: Group,
     pub message: [String8; 8],
 }
-impl ActionMessageEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ActionMessageEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10628,8 +10628,8 @@ pub struct AccessXNotifyEvent {
     pub slow_keys_delay: u16,
     pub debounce_delay: u16,
 }
-impl AccessXNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for AccessXNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10734,8 +10734,8 @@ pub struct ExtensionDeviceNotifyEvent {
     pub supported: u16,
     pub unsupported: u16,
 }
-impl ExtensionDeviceNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ExtensionDeviceNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xkb_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;

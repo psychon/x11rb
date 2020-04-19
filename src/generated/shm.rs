@@ -52,8 +52,8 @@ pub struct CompletionEvent {
     pub shmseg: Seg,
     pub offset: u32,
 }
-impl CompletionEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for CompletionEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -148,8 +148,8 @@ pub struct BadSegError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadSegError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadSegError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;

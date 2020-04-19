@@ -471,8 +471,8 @@ pub struct SelectionNotifyEvent {
     pub timestamp: xproto::Timestamp,
     pub selection_timestamp: xproto::Timestamp,
 }
-impl SelectionNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for SelectionNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (subtype, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -725,8 +725,8 @@ pub struct CursorNotifyEvent {
     pub timestamp: xproto::Timestamp,
     pub name: xproto::Atom,
 }
-impl CursorNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for CursorNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (subtype, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -912,8 +912,8 @@ pub struct BadRegionError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl BadRegionError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadRegionError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;

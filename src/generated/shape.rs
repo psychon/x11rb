@@ -193,8 +193,8 @@ pub struct NotifyEvent {
     pub server_time: xproto::Timestamp,
     pub shaped: bool,
 }
-impl NotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for NotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (shape_kind, remaining) = Kind::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;

@@ -708,7 +708,7 @@ class Module(object):
 
         self.emit_opcode(name, 'Event', opcode_type, event.opcodes[name])
         emit_doc(self.out, event.doc)
-        self.complex_type(event, self._name(name) + 'Event', False, [])
+        self.complex_type(event, self._name(name) + 'Event', True, [])
 
         self._emit_tryfrom_generic(name, self.generic_event_name, 'Event')
         if not event.is_ge_event:
@@ -718,7 +718,7 @@ class Module(object):
     def error(self, error, name):
         assert not hasattr(error, "doc")
         self.emit_opcode(name, 'Error', 'u8', error.opcodes[name])
-        self.complex_type(error, self._name(name) + 'Error', False, [])
+        self.complex_type(error, self._name(name) + 'Error', True, [])
         self._emit_from_generic(name, self.generic_error_name, 'Error')
         self._emit_serialize(error, name, 'Error')
         self.out("")

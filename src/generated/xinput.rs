@@ -11209,8 +11209,8 @@ pub struct DeviceValuatorEvent {
     pub first_valuator: u8,
     pub valuators: [i32; 6],
 }
-impl DeviceValuatorEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceValuatorEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11388,8 +11388,8 @@ pub struct DeviceKeyPressEvent {
     pub same_screen: bool,
     pub device_id: u8,
 }
-impl DeviceKeyPressEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceKeyPressEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11503,8 +11503,8 @@ pub struct DeviceKeyReleaseEvent {
     pub same_screen: bool,
     pub device_id: u8,
 }
-impl DeviceKeyReleaseEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceKeyReleaseEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11618,8 +11618,8 @@ pub struct DeviceButtonPressEvent {
     pub same_screen: bool,
     pub device_id: u8,
 }
-impl DeviceButtonPressEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceButtonPressEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11733,8 +11733,8 @@ pub struct DeviceButtonReleaseEvent {
     pub same_screen: bool,
     pub device_id: u8,
 }
-impl DeviceButtonReleaseEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceButtonReleaseEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11848,8 +11848,8 @@ pub struct DeviceMotionNotifyEvent {
     pub same_screen: bool,
     pub device_id: u8,
 }
-impl DeviceMotionNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceMotionNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11956,8 +11956,8 @@ pub struct DeviceFocusInEvent {
     pub mode: xproto::NotifyMode,
     pub device_id: u8,
 }
-impl DeviceFocusInEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceFocusInEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12053,8 +12053,8 @@ pub struct DeviceFocusOutEvent {
     pub mode: xproto::NotifyMode,
     pub device_id: u8,
 }
-impl DeviceFocusOutEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceFocusOutEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12157,8 +12157,8 @@ pub struct ProximityInEvent {
     pub same_screen: bool,
     pub device_id: u8,
 }
-impl ProximityInEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ProximityInEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12272,8 +12272,8 @@ pub struct ProximityOutEvent {
     pub same_screen: bool,
     pub device_id: u8,
 }
-impl ProximityOutEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ProximityOutEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12456,8 +12456,8 @@ pub struct DeviceStateNotifyEvent {
     pub keys: [u8; 4],
     pub valuators: [u32; 3],
 }
-impl DeviceStateNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceStateNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12583,8 +12583,8 @@ pub struct DeviceMappingNotifyEvent {
     pub count: u8,
     pub time: xproto::Timestamp,
 }
-impl DeviceMappingNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceMappingNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12740,8 +12740,8 @@ pub struct ChangeDeviceNotifyEvent {
     pub time: xproto::Timestamp,
     pub request: ChangeDevice,
 }
-impl ChangeDeviceNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ChangeDeviceNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12829,8 +12829,8 @@ pub struct DeviceKeyStateNotifyEvent {
     pub sequence: u16,
     pub keys: [u8; 28],
 }
-impl DeviceKeyStateNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceKeyStateNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12970,8 +12970,8 @@ pub struct DeviceButtonStateNotifyEvent {
     pub sequence: u16,
     pub buttons: [u8; 28],
 }
-impl DeviceButtonStateNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceButtonStateNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13187,8 +13187,8 @@ pub struct DevicePresenceNotifyEvent {
     pub device_id: u8,
     pub control: u16,
 }
-impl DevicePresenceNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DevicePresenceNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13281,8 +13281,8 @@ pub struct DevicePropertyNotifyEvent {
     pub property: xproto::Atom,
     pub device_id: u8,
 }
-impl DevicePropertyNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DevicePropertyNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13440,8 +13440,8 @@ pub struct DeviceChangedEvent {
     pub reason: ChangeReason,
     pub classes: Vec<DeviceClass>,
 }
-impl DeviceChangedEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceChangedEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13533,8 +13533,8 @@ pub struct KeyPressEvent {
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
 }
-impl KeyPressEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for KeyPressEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13610,8 +13610,8 @@ pub struct KeyReleaseEvent {
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
 }
-impl KeyReleaseEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for KeyReleaseEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13715,8 +13715,8 @@ pub struct ButtonPressEvent {
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
 }
-impl ButtonPressEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ButtonPressEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13792,8 +13792,8 @@ pub struct ButtonReleaseEvent {
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
 }
-impl ButtonReleaseEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ButtonReleaseEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13869,8 +13869,8 @@ pub struct MotionEvent {
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
 }
-impl MotionEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for MotionEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14100,8 +14100,8 @@ pub struct EnterEvent {
     pub group: GroupInfo,
     pub buttons: Vec<u32>,
 }
-impl EnterEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for EnterEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14177,8 +14177,8 @@ pub struct LeaveEvent {
     pub group: GroupInfo,
     pub buttons: Vec<u32>,
 }
-impl LeaveEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for LeaveEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14254,8 +14254,8 @@ pub struct FocusInEvent {
     pub group: GroupInfo,
     pub buttons: Vec<u32>,
 }
-impl FocusInEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for FocusInEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14331,8 +14331,8 @@ pub struct FocusOutEvent {
     pub group: GroupInfo,
     pub buttons: Vec<u32>,
 }
-impl FocusOutEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for FocusOutEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14537,8 +14537,8 @@ pub struct HierarchyEvent {
     pub flags: u32,
     pub infos: Vec<HierarchyInfo>,
 }
-impl HierarchyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for HierarchyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14652,8 +14652,8 @@ pub struct PropertyEvent {
     pub property: xproto::Atom,
     pub what: PropertyFlag,
 }
-impl PropertyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PropertyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14706,8 +14706,8 @@ pub struct RawKeyPressEvent {
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
 }
-impl RawKeyPressEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for RawKeyPressEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14764,8 +14764,8 @@ pub struct RawKeyReleaseEvent {
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
 }
-impl RawKeyReleaseEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for RawKeyReleaseEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14822,8 +14822,8 @@ pub struct RawButtonPressEvent {
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
 }
-impl RawButtonPressEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for RawButtonPressEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14880,8 +14880,8 @@ pub struct RawButtonReleaseEvent {
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
 }
-impl RawButtonReleaseEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for RawButtonReleaseEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14938,8 +14938,8 @@ pub struct RawMotionEvent {
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
 }
-impl RawMotionEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for RawMotionEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15036,8 +15036,8 @@ pub struct TouchBeginEvent {
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
 }
-impl TouchBeginEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for TouchBeginEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15113,8 +15113,8 @@ pub struct TouchUpdateEvent {
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
 }
-impl TouchUpdateEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for TouchUpdateEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15190,8 +15190,8 @@ pub struct TouchEndEvent {
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
 }
-impl TouchEndEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for TouchEndEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15317,8 +15317,8 @@ pub struct TouchOwnershipEvent {
     pub sourceid: DeviceId,
     pub flags: TouchOwnershipFlags,
 }
-impl TouchOwnershipEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for TouchOwnershipEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15376,8 +15376,8 @@ pub struct RawTouchBeginEvent {
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
 }
-impl RawTouchBeginEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for RawTouchBeginEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15434,8 +15434,8 @@ pub struct RawTouchUpdateEvent {
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
 }
-impl RawTouchUpdateEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for RawTouchUpdateEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15492,8 +15492,8 @@ pub struct RawTouchEndEvent {
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
 }
-impl RawTouchEndEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for RawTouchEndEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15618,8 +15618,8 @@ pub struct BarrierHitEvent {
     pub dx: Fp3232,
     pub dy: Fp3232,
 }
-impl BarrierHitEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BarrierHitEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15685,8 +15685,8 @@ pub struct BarrierLeaveEvent {
     pub dx: Fp3232,
     pub dy: Fp3232,
 }
-impl BarrierLeaveEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BarrierLeaveEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15981,8 +15981,8 @@ pub struct DeviceError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl DeviceError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -16062,8 +16062,8 @@ pub struct EventError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl EventError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for EventError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -16143,8 +16143,8 @@ pub struct ModeError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl ModeError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ModeError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -16224,8 +16224,8 @@ pub struct DeviceBusyError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl DeviceBusyError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceBusyError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -16305,8 +16305,8 @@ pub struct ClassError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl ClassError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ClassError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
