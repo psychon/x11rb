@@ -852,6 +852,7 @@ impl TryFrom<&[u8]> for GenericEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<crate::x11_utils::GenericEvent<B>> for GenericEvent {
     type Error = ParseError;
+
     fn try_from(value: crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -965,6 +966,7 @@ impl TryFrom<&[u8]> for ConfigureNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<crate::x11_utils::GenericEvent<B>> for ConfigureNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1021,6 +1023,7 @@ impl TryFrom<&[u8]> for CompleteNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<crate::x11_utils::GenericEvent<B>> for CompleteNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1072,6 +1075,7 @@ impl TryFrom<&[u8]> for IdleNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<crate::x11_utils::GenericEvent<B>> for IdleNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1161,6 +1165,7 @@ impl TryFrom<&[u8]> for RedirectNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<crate::x11_utils::GenericEvent<B>> for RedirectNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }

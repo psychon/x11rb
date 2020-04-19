@@ -144,8 +144,8 @@ def emit_doc(out, doc):
     if doc is None:
         return
     out("/// %s.", doc.brief)
-    out("///")
     if doc.description:
+        out("///")
         out.with_prefix("/// ", doc.description)
 
     if doc.fields:
@@ -169,7 +169,7 @@ def emit_doc(out, doc):
         out("/// # See")
         out("///")
         for (see, text) in sorted(doc.see.items()):
-            out("/// * %s: %s", see, text)
+            out("/// * `%s`: %s", see, text)
 
     if doc.example:
         out("///")
@@ -747,6 +747,7 @@ class Module(object):
         self.out("impl<B: AsRef<[u8]>> TryFrom<%s<B>> for %s%s {", from_generic_type, self._name(name), extra_name)
         with Indent(self.out):
             self.out("type Error = ParseError;")
+            self.out("")
             self.out("fn try_from(value: %s<B>) -> Result<Self, Self::Error> {", from_generic_type)
             self.out.indent("Self::try_from(value.raw_bytes())")
             self.out("}")

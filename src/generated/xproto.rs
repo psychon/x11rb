@@ -1255,7 +1255,6 @@ impl TryFrom<u32> for WindowEnum {
 pub const KEY_PRESS_EVENT: u8 = 2;
 /// a key was pressed/released.
 ///
-///
 /// # Fields
 ///
 /// * `detail` - The keycode (a number representing a physical key on the keyboard) of the key
@@ -1276,8 +1275,8 @@ pub const KEY_PRESS_EVENT: u8 = 2;
 ///
 /// # See
 ///
-/// * GrabKey: request
-/// * GrabKeyboard: request
+/// * `GrabKey`: request
+/// * `GrabKeyboard`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct KeyPressEvent {
     pub response_type: u8,
@@ -1322,6 +1321,7 @@ impl TryFrom<&[u8]> for KeyPressEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for KeyPressEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1393,7 +1393,6 @@ impl From<KeyPressEvent> for [u8; 32] {
 pub const KEY_RELEASE_EVENT: u8 = 3;
 /// a key was pressed/released.
 ///
-///
 /// # Fields
 ///
 /// * `detail` - The keycode (a number representing a physical key on the keyboard) of the key
@@ -1414,8 +1413,8 @@ pub const KEY_RELEASE_EVENT: u8 = 3;
 ///
 /// # See
 ///
-/// * GrabKey: request
-/// * GrabKeyboard: request
+/// * `GrabKey`: request
+/// * `GrabKeyboard`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct KeyReleaseEvent {
     pub response_type: u8,
@@ -1460,6 +1459,7 @@ impl TryFrom<&[u8]> for KeyReleaseEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for KeyReleaseEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1590,7 +1590,6 @@ bitmask_binop!(ButtonMask, u16);
 pub const BUTTON_PRESS_EVENT: u8 = 4;
 /// a mouse button was pressed/released.
 ///
-///
 /// # Fields
 ///
 /// * `detail` - The keycode (a number representing a physical key on the keyboard) of the key
@@ -1611,8 +1610,8 @@ pub const BUTTON_PRESS_EVENT: u8 = 4;
 ///
 /// # See
 ///
-/// * GrabButton: request
-/// * GrabPointer: request
+/// * `GrabButton`: request
+/// * `GrabPointer`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ButtonPressEvent {
     pub response_type: u8,
@@ -1657,6 +1656,7 @@ impl TryFrom<&[u8]> for ButtonPressEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ButtonPressEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1728,7 +1728,6 @@ impl From<ButtonPressEvent> for [u8; 32] {
 pub const BUTTON_RELEASE_EVENT: u8 = 5;
 /// a mouse button was pressed/released.
 ///
-///
 /// # Fields
 ///
 /// * `detail` - The keycode (a number representing a physical key on the keyboard) of the key
@@ -1749,8 +1748,8 @@ pub const BUTTON_RELEASE_EVENT: u8 = 5;
 ///
 /// # See
 ///
-/// * GrabButton: request
-/// * GrabPointer: request
+/// * `GrabButton`: request
+/// * `GrabPointer`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ButtonReleaseEvent {
     pub response_type: u8,
@@ -1795,6 +1794,7 @@ impl TryFrom<&[u8]> for ButtonReleaseEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ButtonReleaseEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1928,7 +1928,6 @@ impl TryFrom<u32> for Motion {
 pub const MOTION_NOTIFY_EVENT: u8 = 6;
 /// a key was pressed.
 ///
-///
 /// # Fields
 ///
 /// * `detail` - The keycode (a number representing a physical key on the keyboard) of the key
@@ -1949,8 +1948,8 @@ pub const MOTION_NOTIFY_EVENT: u8 = 6;
 ///
 /// # See
 ///
-/// * GrabKey: request
-/// * GrabKeyboard: request
+/// * `GrabKey`: request
+/// * `GrabKeyboard`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MotionNotifyEvent {
     pub response_type: u8,
@@ -1996,6 +1995,7 @@ impl TryFrom<&[u8]> for MotionNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for MotionNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -2215,7 +2215,6 @@ impl TryFrom<u32> for NotifyMode {
 pub const ENTER_NOTIFY_EVENT: u8 = 7;
 /// the pointer is in a different window.
 ///
-///
 /// # Fields
 ///
 /// * `child` - If the `event` window has subwindows and the final pointer position is in one
@@ -2275,6 +2274,7 @@ impl TryFrom<&[u8]> for EnterNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for EnterNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -2347,7 +2347,6 @@ impl From<EnterNotifyEvent> for [u8; 32] {
 pub const LEAVE_NOTIFY_EVENT: u8 = 8;
 /// the pointer is in a different window.
 ///
-///
 /// # Fields
 ///
 /// * `child` - If the `event` window has subwindows and the final pointer position is in one
@@ -2407,6 +2406,7 @@ impl TryFrom<&[u8]> for LeaveNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for LeaveNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -2479,7 +2479,6 @@ impl From<LeaveNotifyEvent> for [u8; 32] {
 pub const FOCUS_IN_EVENT: u8 = 9;
 /// NOT YET DOCUMENTED.
 ///
-///
 /// # Fields
 ///
 /// * `event` - The window on which the focus event was generated. This is the window used by
@@ -2514,6 +2513,7 @@ impl TryFrom<&[u8]> for FocusInEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for FocusInEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -2578,7 +2578,6 @@ impl From<FocusInEvent> for [u8; 32] {
 pub const FOCUS_OUT_EVENT: u8 = 10;
 /// NOT YET DOCUMENTED.
 ///
-///
 /// # Fields
 ///
 /// * `event` - The window on which the focus event was generated. This is the window used by
@@ -2613,6 +2612,7 @@ impl TryFrom<&[u8]> for FocusOutEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for FocusOutEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -2759,6 +2759,7 @@ impl TryFrom<&[u8]> for KeymapNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for KeymapNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -2818,7 +2819,6 @@ impl From<KeymapNotifyEvent> for [u8; 32] {
 pub const EXPOSE_EVENT: u8 = 12;
 /// NOT YET DOCUMENTED.
 ///
-///
 /// # Fields
 ///
 /// * `count` - The amount of `Expose` events following this one. Simple applications that do
@@ -2867,6 +2867,7 @@ impl TryFrom<&[u8]> for ExposeEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ExposeEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -2971,6 +2972,7 @@ impl TryFrom<&[u8]> for GraphicsExposureEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for GraphicsExposureEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3067,6 +3069,7 @@ impl TryFrom<&[u8]> for NoExposureEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for NoExposureEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3222,6 +3225,7 @@ impl TryFrom<&[u8]> for VisibilityNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for VisibilityNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3322,6 +3326,7 @@ impl TryFrom<&[u8]> for CreateNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for CreateNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3391,7 +3396,6 @@ impl From<CreateNotifyEvent> for [u8; 32] {
 pub const DESTROY_NOTIFY_EVENT: u8 = 17;
 /// a window is destroyed.
 ///
-///
 /// # Fields
 ///
 /// * `event` - The reconfigured window or its parent, depending on whether `StructureNotify`
@@ -3400,7 +3404,7 @@ pub const DESTROY_NOTIFY_EVENT: u8 = 17;
 ///
 /// # See
 ///
-/// * DestroyWindow: request
+/// * `DestroyWindow`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DestroyNotifyEvent {
     pub response_type: u8,
@@ -3427,6 +3431,7 @@ impl TryFrom<&[u8]> for DestroyNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DestroyNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3490,7 +3495,6 @@ impl From<DestroyNotifyEvent> for [u8; 32] {
 pub const UNMAP_NOTIFY_EVENT: u8 = 18;
 /// a window is unmapped.
 ///
-///
 /// # Fields
 ///
 /// * `event` - The reconfigured window or its parent, depending on whether `StructureNotify`
@@ -3501,7 +3505,7 @@ pub const UNMAP_NOTIFY_EVENT: u8 = 18;
 ///
 /// # See
 ///
-/// * UnmapWindow: request
+/// * `UnmapWindow`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UnmapNotifyEvent {
     pub response_type: u8,
@@ -3531,6 +3535,7 @@ impl TryFrom<&[u8]> for UnmapNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for UnmapNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3595,7 +3600,6 @@ impl From<UnmapNotifyEvent> for [u8; 32] {
 pub const MAP_NOTIFY_EVENT: u8 = 19;
 /// a window was mapped.
 ///
-///
 /// # Fields
 ///
 /// * `event` - The window which was mapped or its parent, depending on whether
@@ -3605,7 +3609,7 @@ pub const MAP_NOTIFY_EVENT: u8 = 19;
 ///
 /// # See
 ///
-/// * MapWindow: request
+/// * `MapWindow`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MapNotifyEvent {
     pub response_type: u8,
@@ -3635,6 +3639,7 @@ impl TryFrom<&[u8]> for MapNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for MapNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3699,7 +3704,6 @@ impl From<MapNotifyEvent> for [u8; 32] {
 pub const MAP_REQUEST_EVENT: u8 = 20;
 /// window wants to be mapped.
 ///
-///
 /// # Fields
 ///
 /// * `parent` - The parent of `window`.
@@ -3707,7 +3711,7 @@ pub const MAP_REQUEST_EVENT: u8 = 20;
 ///
 /// # See
 ///
-/// * MapWindow: request
+/// * `MapWindow`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MapRequestEvent {
     pub response_type: u8,
@@ -3734,6 +3738,7 @@ impl TryFrom<&[u8]> for MapRequestEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for MapRequestEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3830,6 +3835,7 @@ impl TryFrom<&[u8]> for ReparentNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ReparentNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3897,7 +3903,6 @@ impl From<ReparentNotifyEvent> for [u8; 32] {
 pub const CONFIGURE_NOTIFY_EVENT: u8 = 22;
 /// NOT YET DOCUMENTED.
 ///
-///
 /// # Fields
 ///
 /// * `above_sibling` - If `XCB_NONE`, the `window` is on the bottom of the stack with respect to
@@ -3917,7 +3922,7 @@ pub const CONFIGURE_NOTIFY_EVENT: u8 = 22;
 ///
 /// # See
 ///
-/// * FreeColormap: request
+/// * `FreeColormap`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ConfigureNotifyEvent {
     pub response_type: u8,
@@ -3959,6 +3964,7 @@ impl TryFrom<&[u8]> for ConfigureNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ConfigureNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -4069,6 +4075,7 @@ impl TryFrom<&[u8]> for ConfigureRequestEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ConfigureRequestEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -4168,6 +4175,7 @@ impl TryFrom<&[u8]> for GravityNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for GravityNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -4259,6 +4267,7 @@ impl TryFrom<&[u8]> for ResizeRequestEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ResizeRequestEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -4320,7 +4329,6 @@ impl From<ResizeRequestEvent> for [u8; 32] {
 }
 
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -4392,7 +4400,6 @@ impl TryFrom<u32> for Place {
 pub const CIRCULATE_NOTIFY_EVENT: u8 = 26;
 /// NOT YET DOCUMENTED.
 ///
-///
 /// # Fields
 ///
 /// * `event` - Either the restacked window or its parent, depending on whether
@@ -4401,7 +4408,7 @@ pub const CIRCULATE_NOTIFY_EVENT: u8 = 26;
 ///
 /// # See
 ///
-/// * CirculateWindow: request
+/// * `CirculateWindow`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CirculateNotifyEvent {
     pub response_type: u8,
@@ -4433,6 +4440,7 @@ impl TryFrom<&[u8]> for CirculateNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for CirculateNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -4497,7 +4505,6 @@ impl From<CirculateNotifyEvent> for [u8; 32] {
 pub const CIRCULATE_REQUEST_EVENT: u8 = 27;
 /// NOT YET DOCUMENTED.
 ///
-///
 /// # Fields
 ///
 /// * `event` - Either the restacked window or its parent, depending on whether
@@ -4506,7 +4513,7 @@ pub const CIRCULATE_REQUEST_EVENT: u8 = 27;
 ///
 /// # See
 ///
-/// * CirculateWindow: request
+/// * `CirculateWindow`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CirculateRequestEvent {
     pub response_type: u8,
@@ -4538,6 +4545,7 @@ impl TryFrom<&[u8]> for CirculateRequestEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for CirculateRequestEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -4664,7 +4672,6 @@ impl TryFrom<u32> for Property {
 pub const PROPERTY_NOTIFY_EVENT: u8 = 28;
 /// a window property changed.
 ///
-///
 /// # Fields
 ///
 /// * `atom` - The property's atom, to indicate which property was changed.
@@ -4673,7 +4680,7 @@ pub const PROPERTY_NOTIFY_EVENT: u8 = 28;
 ///
 /// # See
 ///
-/// * ChangeProperty: request
+/// * `ChangeProperty`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PropertyNotifyEvent {
     pub response_type: u8,
@@ -4706,6 +4713,7 @@ impl TryFrom<&[u8]> for PropertyNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for PropertyNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -4797,6 +4805,7 @@ impl TryFrom<&[u8]> for SelectionClearEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for SelectionClearEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -5128,6 +5137,7 @@ impl TryFrom<&[u8]> for SelectionRequestEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for SelectionRequestEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -5225,6 +5235,7 @@ impl TryFrom<&[u8]> for SelectionNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for SelectionNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -5288,7 +5299,6 @@ impl From<SelectionNotifyEvent> for [u8; 32] {
 }
 
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -5419,7 +5429,6 @@ impl TryFrom<u32> for ColormapEnum {
 pub const COLORMAP_NOTIFY_EVENT: u8 = 32;
 /// the colormap for some window changed.
 ///
-///
 /// # Fields
 ///
 /// * `_new` - Indicates whether the colormap was changed (1) or installed/uninstalled (0).
@@ -5429,7 +5438,7 @@ pub const COLORMAP_NOTIFY_EVENT: u8 = 32;
 ///
 /// # See
 ///
-/// * FreeColormap: request
+/// * `FreeColormap`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ColormapNotifyEvent {
     pub response_type: u8,
@@ -5462,6 +5471,7 @@ impl TryFrom<&[u8]> for ColormapNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ColormapNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -5736,7 +5746,7 @@ pub const CLIENT_MESSAGE_EVENT: u8 = 33;
 ///
 /// # See
 ///
-/// * SendEvent: request
+/// * `SendEvent`: request
 #[derive(Debug, Clone, Copy)]
 pub struct ClientMessageEvent {
     pub response_type: u8,
@@ -5766,6 +5776,7 @@ impl TryFrom<&[u8]> for ClientMessageEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ClientMessageEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -5895,7 +5906,6 @@ impl TryFrom<u32> for Mapping {
 pub const MAPPING_NOTIFY_EVENT: u8 = 34;
 /// keyboard mapping changed.
 ///
-///
 /// # Fields
 ///
 /// * `count` - The number of keycodes altered.
@@ -5930,6 +5940,7 @@ impl TryFrom<&[u8]> for MappingNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for MappingNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -5994,7 +6005,6 @@ impl From<MappingNotifyEvent> for [u8; 32] {
 pub const GE_GENERIC_EVENT: u8 = 35;
 /// generic event (with length).
 ///
-///
 /// # Fields
 ///
 /// * `evtype` - The extension-specific event type
@@ -6028,6 +6038,7 @@ impl TryFrom<&[u8]> for GeGenericEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for GeGenericEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -7653,7 +7664,6 @@ impl TryFrom<u32> for WindowClass {
 
 /// BRIEF DESCRIPTION MISSING.
 ///
-///
 /// # Fields
 ///
 /// * `BackPixel` - Overrides `BackPixmap`. A pixmap of undefined size filled with the specified
@@ -8187,9 +8197,9 @@ impl Serialize for CreateWindowAux {
 ///
 /// # See
 ///
-/// * CreateNotify: event
-/// * MapWindow: request
-/// * xcb_generate_id: function
+/// * `CreateNotify`: event
+/// * `MapWindow`: request
+/// * `xcb_generate_id`: function
 pub fn create_window<'c, Conn, A>(conn: &'c Conn, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, visual: Visualid, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -8616,7 +8626,6 @@ where
 }
 /// BRIEF DESCRIPTION MISSING.
 ///
-///
 /// # Fields
 ///
 /// * `all_event_masks` - Set of events all people have interest in.
@@ -8705,9 +8714,9 @@ pub const DESTROY_WINDOW_REQUEST: u8 = 4;
 ///
 /// # See
 ///
-/// * DestroyNotify: event
-/// * MapWindow: request
-/// * UnmapWindow: request
+/// * `DestroyNotify`: event
+/// * `MapWindow`: request
+/// * `UnmapWindow`: request
 pub fn destroy_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -8841,7 +8850,7 @@ pub const CHANGE_SAVE_SET_REQUEST: u8 = 6;
 ///
 /// # See
 ///
-/// * ReparentWindow: request
+/// * `ReparentWindow`: request
 pub fn change_save_set<Conn, A>(conn: &Conn, mode: A, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -8899,9 +8908,9 @@ pub const REPARENT_WINDOW_REQUEST: u8 = 7;
 ///
 /// # See
 ///
-/// * MapWindow: request
-/// * ReparentNotify: event
-/// * UnmapWindow: request
+/// * `MapWindow`: request
+/// * `ReparentNotify`: event
+/// * `UnmapWindow`: request
 pub fn reparent_window<Conn>(conn: &Conn, window: Window, parent: Window, x: i16, y: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -8970,9 +8979,9 @@ pub const MAP_WINDOW_REQUEST: u8 = 8;
 ///
 /// # See
 ///
-/// * Expose: event
-/// * MapNotify: event
-/// * UnmapWindow: request
+/// * `Expose`: event
+/// * `MapNotify`: event
+/// * `UnmapWindow`: request
 pub fn map_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -9041,9 +9050,9 @@ pub const UNMAP_WINDOW_REQUEST: u8 = 10;
 ///
 /// # See
 ///
-/// * Expose: event
-/// * MapWindow: request
-/// * UnmapNotify: event
+/// * `Expose`: event
+/// * `MapWindow`: request
+/// * `UnmapNotify`: event
 pub fn unmap_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -9371,8 +9380,8 @@ impl Serialize for ConfigureWindowAux {
 ///
 /// # See
 ///
-/// * Expose: event
-/// * MapNotify: event
+/// * `Expose`: event
+/// * `MapNotify`: event
 ///
 /// # Example
 ///
@@ -9557,7 +9566,7 @@ pub const GET_GEOMETRY_REQUEST: u8 = 14;
 ///
 /// # See
 ///
-/// * xwininfo: program
+/// * `xwininfo`: program
 ///
 /// # Example
 ///
@@ -9601,7 +9610,6 @@ where
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -9666,7 +9674,7 @@ pub const QUERY_TREE_REQUEST: u8 = 15;
 ///
 /// # See
 ///
-/// * xwininfo: program
+/// * `xwininfo`: program
 ///
 /// # Example
 ///
@@ -9715,7 +9723,6 @@ where
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -9778,8 +9785,8 @@ pub const INTERN_ATOM_REQUEST: u8 = 16;
 ///
 /// # See
 ///
-/// * GetAtomName: request
-/// * xlsatoms: program
+/// * `GetAtomName`: request
+/// * `xlsatoms`: program
 ///
 /// # Example
 ///
@@ -9905,7 +9912,6 @@ impl TryFrom<&[u8]> for GetAtomNameReply {
 
 /// BRIEF DESCRIPTION MISSING.
 ///
-///
 /// # Fields
 ///
 /// * `Append` - Insert the new data after the beginning of existing data. The `format` must
@@ -10010,8 +10016,8 @@ pub const CHANGE_PROPERTY_REQUEST: u8 = 18;
 ///
 /// # See
 ///
-/// * InternAtom: request
-/// * xprop: program
+/// * `InternAtom`: request
+/// * `xprop`: program
 ///
 /// # Example
 ///
@@ -10377,8 +10383,8 @@ impl GetPropertyReply {
 ///
 /// # See
 ///
-/// * InternAtom: request
-/// * xprop: program
+/// * `InternAtom`: request
+/// * `xprop`: program
 ///
 /// # Example
 ///
@@ -10454,7 +10460,6 @@ where
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -10580,7 +10585,7 @@ pub const SET_SELECTION_OWNER_REQUEST: u8 = 22;
 ///
 /// # See
 ///
-/// * SetSelectionOwner: request
+/// * `SetSelectionOwner`: request
 pub fn set_selection_owner<Conn>(conn: &Conn, owner: Window, selection: Atom, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -10632,7 +10637,7 @@ pub const GET_SELECTION_OWNER_REQUEST: u8 = 23;
 ///
 /// # See
 ///
-/// * SetSelectionOwner: request
+/// * `SetSelectionOwner`: request
 pub fn get_selection_owner<Conn>(conn: &Conn, selection: Atom) -> Result<Cookie<'_, Conn, GetSelectionOwnerReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -10656,7 +10661,6 @@ where
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -10834,7 +10838,7 @@ pub const SEND_EVENT_REQUEST: u8 = 25;
 ///
 /// # See
 ///
-/// * ConfigureNotify: event
+/// * `ConfigureNotify`: event
 ///
 /// # Example
 ///
@@ -10902,7 +10906,6 @@ where
 }
 
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -11141,7 +11144,7 @@ pub const GRAB_POINTER_REQUEST: u8 = 26;
 ///
 /// # See
 ///
-/// * GrabKeyboard: request
+/// * `GrabKeyboard`: request
 ///
 /// # Example
 ///
@@ -11268,10 +11271,10 @@ pub const UNGRAB_POINTER_REQUEST: u8 = 27;
 ///
 /// # See
 ///
-/// * EnterNotify: event
-/// * GrabButton: request
-/// * GrabPointer: request
-/// * LeaveNotify: event
+/// * `EnterNotify`: event
+/// * `GrabButton`: request
+/// * `GrabPointer`: request
+/// * `LeaveNotify`: event
 pub fn ungrab_pointer<Conn>(conn: &Conn, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -11296,7 +11299,6 @@ where
 }
 
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -11599,7 +11601,7 @@ pub const GRAB_KEYBOARD_REQUEST: u8 = 31;
 ///
 /// # See
 ///
-/// * GrabPointer: request
+/// * `GrabPointer`: request
 ///
 /// # Example
 ///
@@ -11835,7 +11837,7 @@ pub const GRAB_KEY_REQUEST: u8 = 33;
 ///
 /// # See
 ///
-/// * GrabKeyboard: request
+/// * `GrabKeyboard`: request
 pub fn grab_key<Conn, A, B>(conn: &Conn, owner_events: bool, grab_window: Window, modifiers: u16, key: Keycode, pointer_mode: A, keyboard_mode: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -11901,8 +11903,8 @@ pub const UNGRAB_KEY_REQUEST: u8 = 34;
 ///
 /// # See
 ///
-/// * GrabKey: request
-/// * xev: program
+/// * `GrabKey`: request
+/// * `xev`: program
 pub fn ungrab_key<Conn>(conn: &Conn, key: Keycode, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -11933,7 +11935,6 @@ where
 }
 
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -12198,7 +12199,6 @@ where
 }
 /// BRIEF DESCRIPTION MISSING.
 ///
-///
 /// # Fields
 ///
 /// * `child` - The child window containing the pointer, if any, if `same_screen` is true. If
@@ -12462,7 +12462,7 @@ pub const WARP_POINTER_REQUEST: u8 = 41;
 ///
 /// # See
 ///
-/// * SetInputFocus: request
+/// * `SetInputFocus`: request
 pub fn warp_pointer<Conn>(conn: &Conn, src_window: Window, dst_window: Window, src_x: i16, src_y: i16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -12510,7 +12510,6 @@ where
 }
 
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -12624,8 +12623,8 @@ pub const SET_INPUT_FOCUS_REQUEST: u8 = 42;
 ///
 /// # See
 ///
-/// * FocusIn: event
-/// * FocusOut: event
+/// * `FocusIn`: event
+/// * `FocusOut`: event
 pub fn set_input_focus<Conn, A>(conn: &Conn, revert_to: A, focus: Window, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -12833,7 +12832,7 @@ pub const OPEN_FONT_REQUEST: u8 = 45;
 ///
 /// # See
 ///
-/// * xcb_generate_id: function
+/// * `xcb_generate_id`: function
 pub fn open_font<'c, Conn>(conn: &'c Conn, fid: Font, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -13090,7 +13089,6 @@ where
 }
 /// BRIEF DESCRIPTION MISSING.
 ///
-///
 /// # Fields
 ///
 /// * `all_chars_exist` - flag if all characters have nonzero size
@@ -13339,7 +13337,6 @@ where
 }
 /// BRIEF DESCRIPTION MISSING.
 ///
-///
 /// # Fields
 ///
 /// * `names_len` - The number of font names.
@@ -13413,7 +13410,6 @@ where
     Ok(ListFontsWithInfoCookie::new(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(pattern), IoSlice::new(&padding0)], vec![])?))
 }
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -13585,7 +13581,7 @@ pub const CREATE_PIXMAP_REQUEST: u8 = 53;
 ///
 /// # See
 ///
-/// * xcb_generate_id: function
+/// * `xcb_generate_id`: function
 pub fn create_pixmap<Conn>(conn: &Conn, depth: u8, pid: Pixmap, drawable: Drawable, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -13659,7 +13655,6 @@ where
 }
 
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -14736,7 +14731,7 @@ impl Serialize for CreateGCAux {
 ///
 /// # See
 ///
-/// * xcb_generate_id: function
+/// * `xcb_generate_id`: function
 pub fn create_gc<'c, Conn>(conn: &'c Conn, cid: Gcontext, drawable: Drawable, value_list: &CreateGCAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -15537,7 +15532,6 @@ where
 }
 
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -16401,7 +16395,7 @@ pub const IMAGE_TEXT8_REQUEST: u8 = 76;
 ///
 /// # See
 ///
-/// * ImageText16: request
+/// * `ImageText16`: request
 pub fn image_text8<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -16477,7 +16471,7 @@ pub const IMAGE_TEXT16_REQUEST: u8 = 77;
 ///
 /// # See
 ///
-/// * ImageText8: request
+/// * `ImageText8`: request
 pub fn image_text16<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[Char2b]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -17957,8 +17951,8 @@ pub const QUERY_EXTENSION_REQUEST: u8 = 98;
 ///
 /// # See
 ///
-/// * xcb_get_extension_data: function
-/// * xdpyinfo: program
+/// * `xcb_get_extension_data`: function
+/// * `xdpyinfo`: program
 pub fn query_extension<'c, Conn>(conn: &'c Conn, name: &[u8]) -> Result<Cookie<'c, Conn, QueryExtensionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -17986,7 +17980,6 @@ where
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
 }
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -19468,7 +19461,7 @@ pub const KILL_CLIENT_REQUEST: u8 = 113;
 ///
 /// # See
 ///
-/// * xkill: program
+/// * `xkill`: program
 pub fn kill_client<Conn>(conn: &Conn, resource: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -20019,9 +20012,9 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * CreateNotify: event
-    /// * MapWindow: request
-    /// * xcb_generate_id: function
+    /// * `CreateNotify`: event
+    /// * `MapWindow`: request
+    /// * `xcb_generate_id`: function
     fn create_window<'c, A>(&'c self, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, visual: Visualid, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u16>,
@@ -20090,9 +20083,9 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * DestroyNotify: event
-    /// * MapWindow: request
-    /// * UnmapWindow: request
+    /// * `DestroyNotify`: event
+    /// * `MapWindow`: request
+    /// * `UnmapWindow`: request
     fn destroy_window(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_window(self, window)
@@ -20124,7 +20117,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * ReparentWindow: request
+    /// * `ReparentWindow`: request
     fn change_save_set<A>(&self, mode: A, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
         A: Into<u8>,
@@ -20161,9 +20154,9 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * MapWindow: request
-    /// * ReparentNotify: event
-    /// * UnmapWindow: request
+    /// * `MapWindow`: request
+    /// * `ReparentNotify`: event
+    /// * `UnmapWindow`: request
     fn reparent_window(&self, window: Window, parent: Window, x: i16, y: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         reparent_window(self, window, parent, x, y)
@@ -20201,9 +20194,9 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * Expose: event
-    /// * MapNotify: event
-    /// * UnmapWindow: request
+    /// * `Expose`: event
+    /// * `MapNotify`: event
+    /// * `UnmapWindow`: request
     fn map_window(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         map_window(self, window)
@@ -20232,9 +20225,9 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * Expose: event
-    /// * MapWindow: request
-    /// * UnmapNotify: event
+    /// * `Expose`: event
+    /// * `MapWindow`: request
+    /// * `UnmapNotify`: event
     fn unmap_window(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         unmap_window(self, window)
@@ -20265,8 +20258,8 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * Expose: event
-    /// * MapNotify: event
+    /// * `Expose`: event
+    /// * `MapNotify`: event
     ///
     /// # Example
     ///
@@ -20338,7 +20331,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * xwininfo: program
+    /// * `xwininfo`: program
     ///
     /// # Example
     ///
@@ -20375,7 +20368,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * xwininfo: program
+    /// * `xwininfo`: program
     ///
     /// # Example
     ///
@@ -20429,8 +20422,8 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * GetAtomName: request
-    /// * xlsatoms: program
+    /// * `GetAtomName`: request
+    /// * `xlsatoms`: program
     ///
     /// # Example
     ///
@@ -20489,8 +20482,8 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * InternAtom: request
-    /// * xprop: program
+    /// * `InternAtom`: request
+    /// * `xprop`: program
     ///
     /// # Example
     ///
@@ -20560,8 +20553,8 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * InternAtom: request
-    /// * xprop: program
+    /// * `InternAtom`: request
+    /// * `xprop`: program
     ///
     /// # Example
     ///
@@ -20631,7 +20624,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * SetSelectionOwner: request
+    /// * `SetSelectionOwner`: request
     fn set_selection_owner(&self, owner: Window, selection: Atom, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_selection_owner(self, owner, selection, time)
@@ -20653,7 +20646,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * SetSelectionOwner: request
+    /// * `SetSelectionOwner`: request
     fn get_selection_owner(&self, selection: Atom) -> Result<Cookie<'_, Self, GetSelectionOwnerReply>, ConnectionError>
     {
         get_selection_owner(self, selection)
@@ -20703,7 +20696,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * ConfigureNotify: event
+    /// * `ConfigureNotify`: event
     ///
     /// # Example
     ///
@@ -20781,7 +20774,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * GrabKeyboard: request
+    /// * `GrabKeyboard`: request
     ///
     /// # Example
     ///
@@ -20840,10 +20833,10 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * EnterNotify: event
-    /// * GrabButton: request
-    /// * GrabPointer: request
-    /// * LeaveNotify: event
+    /// * `EnterNotify`: event
+    /// * `GrabButton`: request
+    /// * `GrabPointer`: request
+    /// * `LeaveNotify`: event
     fn ungrab_pointer(&self, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_pointer(self, time)
@@ -20964,7 +20957,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * GrabPointer: request
+    /// * `GrabPointer`: request
     ///
     /// # Example
     ///
@@ -21064,7 +21057,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * GrabKeyboard: request
+    /// * `GrabKeyboard`: request
     fn grab_key<A, B>(&self, owner_events: bool, grab_window: Window, modifiers: u16, key: Keycode, pointer_mode: A, keyboard_mode: B) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
         A: Into<u8>,
@@ -21096,8 +21089,8 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * GrabKey: request
-    /// * xev: program
+    /// * `GrabKey`: request
+    /// * `xev`: program
     fn ungrab_key(&self, key: Keycode, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_key(self, key, grab_window, modifiers)
@@ -21196,7 +21189,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * SetInputFocus: request
+    /// * `SetInputFocus`: request
     fn warp_pointer(&self, src_window: Window, dst_window: Window, src_x: i16, src_y: i16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         warp_pointer(self, src_window, dst_window, src_x, src_y, src_width, src_height, dst_x, dst_y)
@@ -21235,8 +21228,8 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * FocusIn: event
-    /// * FocusOut: event
+    /// * `FocusIn`: event
+    /// * `FocusOut`: event
     fn set_input_focus<A>(&self, revert_to: A, focus: Window, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
         A: Into<u8>,
@@ -21273,7 +21266,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * xcb_generate_id: function
+    /// * `xcb_generate_id`: function
     fn open_font<'c>(&'c self, fid: Font, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         open_font(self, fid, name)
@@ -21403,7 +21396,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * xcb_generate_id: function
+    /// * `xcb_generate_id`: function
     fn create_pixmap(&self, depth: u8, pid: Pixmap, drawable: Drawable, width: u16, height: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_pixmap(self, depth, pid, drawable, width, height)
@@ -21448,7 +21441,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * xcb_generate_id: function
+    /// * `xcb_generate_id`: function
     fn create_gc<'c>(&'c self, cid: Gcontext, drawable: Drawable, value_list: &CreateGCAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_gc(self, cid, drawable, value_list)
@@ -21765,7 +21758,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * ImageText16: request
+    /// * `ImageText16`: request
     fn image_text8<'c>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         image_text8(self, drawable, gc, x, y, string)
@@ -21805,7 +21798,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * ImageText8: request
+    /// * `ImageText8`: request
     fn image_text16<'c>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[Char2b]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         image_text16(self, drawable, gc, x, y, string)
@@ -21998,8 +21991,8 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * xcb_get_extension_data: function
-    /// * xdpyinfo: program
+    /// * `xcb_get_extension_data`: function
+    /// * `xdpyinfo`: program
     fn query_extension<'c>(&'c self, name: &[u8]) -> Result<Cookie<'c, Self, QueryExtensionReply>, ConnectionError>
     {
         query_extension(self, name)
@@ -22103,7 +22096,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * xkill: program
+    /// * `xkill`: program
     fn kill_client(&self, resource: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         kill_client(self, resource)

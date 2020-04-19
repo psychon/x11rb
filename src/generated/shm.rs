@@ -75,6 +75,7 @@ impl TryFrom<&[u8]> for CompletionEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for CompletionEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }

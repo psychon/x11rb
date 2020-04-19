@@ -1231,6 +1231,7 @@ impl TryFrom<&[u8]> for BufferSwapCompleteEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for BufferSwapCompleteEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1320,6 +1321,7 @@ impl TryFrom<&[u8]> for InvalidateBuffersEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for InvalidateBuffersEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }

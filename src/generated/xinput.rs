@@ -11243,6 +11243,7 @@ impl TryFrom<&[u8]> for DeviceValuatorEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceValuatorEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -11416,6 +11417,7 @@ impl TryFrom<&[u8]> for DeviceKeyPressEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceKeyPressEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -11531,6 +11533,7 @@ impl TryFrom<&[u8]> for DeviceKeyReleaseEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceKeyReleaseEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -11646,6 +11649,7 @@ impl TryFrom<&[u8]> for DeviceButtonPressEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceButtonPressEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -11761,6 +11765,7 @@ impl TryFrom<&[u8]> for DeviceButtonReleaseEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceButtonReleaseEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -11876,6 +11881,7 @@ impl TryFrom<&[u8]> for DeviceMotionNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceMotionNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -11980,6 +11986,7 @@ impl TryFrom<&[u8]> for DeviceFocusInEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceFocusInEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -12077,6 +12084,7 @@ impl TryFrom<&[u8]> for DeviceFocusOutEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceFocusOutEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -12185,6 +12193,7 @@ impl TryFrom<&[u8]> for ProximityInEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ProximityInEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -12300,6 +12309,7 @@ impl TryFrom<&[u8]> for ProximityOutEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ProximityOutEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -12506,6 +12516,7 @@ impl TryFrom<&[u8]> for DeviceStateNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceStateNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -12607,6 +12618,7 @@ impl TryFrom<&[u8]> for DeviceMappingNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceMappingNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -12761,6 +12773,7 @@ impl TryFrom<&[u8]> for ChangeDeviceNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ChangeDeviceNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -12904,6 +12917,7 @@ impl TryFrom<&[u8]> for DeviceKeyStateNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceKeyStateNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -13045,6 +13059,7 @@ impl TryFrom<&[u8]> for DeviceButtonStateNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceButtonStateNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -13210,6 +13225,7 @@ impl TryFrom<&[u8]> for DevicePresenceNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DevicePresenceNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -13303,6 +13319,7 @@ impl TryFrom<&[u8]> for DevicePropertyNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DevicePropertyNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -13467,6 +13484,7 @@ impl TryFrom<&[u8]> for DeviceChangedEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceChangedEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -13572,6 +13590,7 @@ impl TryFrom<&[u8]> for KeyPressEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for KeyPressEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -13649,6 +13668,7 @@ impl TryFrom<&[u8]> for KeyReleaseEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for KeyReleaseEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -13754,6 +13774,7 @@ impl TryFrom<&[u8]> for ButtonPressEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ButtonPressEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -13831,6 +13852,7 @@ impl TryFrom<&[u8]> for ButtonReleaseEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ButtonReleaseEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -13908,6 +13930,7 @@ impl TryFrom<&[u8]> for MotionEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for MotionEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14139,6 +14162,7 @@ impl TryFrom<&[u8]> for EnterEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for EnterEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14216,6 +14240,7 @@ impl TryFrom<&[u8]> for LeaveEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for LeaveEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14293,6 +14318,7 @@ impl TryFrom<&[u8]> for FocusInEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for FocusInEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14370,6 +14396,7 @@ impl TryFrom<&[u8]> for FocusOutEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for FocusOutEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14562,6 +14589,7 @@ impl TryFrom<&[u8]> for HierarchyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for HierarchyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14677,6 +14705,7 @@ impl TryFrom<&[u8]> for PropertyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for PropertyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14735,6 +14764,7 @@ impl TryFrom<&[u8]> for RawKeyPressEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for RawKeyPressEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14793,6 +14823,7 @@ impl TryFrom<&[u8]> for RawKeyReleaseEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for RawKeyReleaseEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14851,6 +14882,7 @@ impl TryFrom<&[u8]> for RawButtonPressEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for RawButtonPressEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14909,6 +14941,7 @@ impl TryFrom<&[u8]> for RawButtonReleaseEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for RawButtonReleaseEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14967,6 +15000,7 @@ impl TryFrom<&[u8]> for RawMotionEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for RawMotionEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -15075,6 +15109,7 @@ impl TryFrom<&[u8]> for TouchBeginEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for TouchBeginEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -15152,6 +15187,7 @@ impl TryFrom<&[u8]> for TouchUpdateEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for TouchUpdateEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -15229,6 +15265,7 @@ impl TryFrom<&[u8]> for TouchEndEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for TouchEndEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -15347,6 +15384,7 @@ impl TryFrom<&[u8]> for TouchOwnershipEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for TouchOwnershipEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -15405,6 +15443,7 @@ impl TryFrom<&[u8]> for RawTouchBeginEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for RawTouchBeginEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -15463,6 +15502,7 @@ impl TryFrom<&[u8]> for RawTouchUpdateEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for RawTouchUpdateEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -15521,6 +15561,7 @@ impl TryFrom<&[u8]> for RawTouchEndEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for RawTouchEndEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -15651,6 +15692,7 @@ impl TryFrom<&[u8]> for BarrierHitEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for BarrierHitEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -15718,6 +15760,7 @@ impl TryFrom<&[u8]> for BarrierLeaveEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for BarrierLeaveEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
