@@ -290,7 +290,7 @@ where
     let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let fence_bytes = fence.serialize();
-    let initially_triggered_bytes = (initially_triggered as u8).serialize();
+    let initially_triggered_bytes = initially_triggered.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         FENCE_FROM_FD_REQUEST,

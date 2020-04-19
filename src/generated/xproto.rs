@@ -9809,7 +9809,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
-    let only_if_exists_bytes = (only_if_exists as u8).serialize();
+    let only_if_exists_bytes = only_if_exists.serialize();
     let name_len: u16 = name.len().try_into()?;
     let name_len_bytes = name_len.serialize();
     let mut request0 = [
@@ -10418,7 +10418,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
-    let delete_bytes = (delete as u8).serialize();
+    let delete_bytes = delete.serialize();
     let window_bytes = window.serialize();
     let property_bytes = property.serialize();
     let type_bytes = type_.serialize();
@@ -10878,7 +10878,7 @@ where
     A: Into<[u8; 32]>,
 {
     let length_so_far = 0;
-    let propagate_bytes = (propagate as u8).serialize();
+    let propagate_bytes = propagate.serialize();
     let destination_bytes = destination.serialize();
     let event_mask_bytes = event_mask.serialize();
     let event = event.into();
@@ -11181,7 +11181,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
-    let owner_events_bytes = (owner_events as u8).serialize();
+    let owner_events_bytes = owner_events.serialize();
     let grab_window_bytes = grab_window.serialize();
     let event_mask_bytes = event_mask.serialize();
     let pointer_mode_bytes = u8::from(pointer_mode).serialize();
@@ -11450,7 +11450,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
-    let owner_events_bytes = (owner_events as u8).serialize();
+    let owner_events_bytes = owner_events.serialize();
     let grab_window_bytes = grab_window.serialize();
     let event_mask_bytes = event_mask.serialize();
     let pointer_mode_bytes = u8::from(pointer_mode).serialize();
@@ -11625,7 +11625,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
-    let owner_events_bytes = (owner_events as u8).serialize();
+    let owner_events_bytes = owner_events.serialize();
     let grab_window_bytes = grab_window.serialize();
     let time_bytes = time.serialize();
     let pointer_mode_bytes = u8::from(pointer_mode).serialize();
@@ -11829,7 +11829,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
-    let owner_events_bytes = (owner_events as u8).serialize();
+    let owner_events_bytes = owner_events.serialize();
     let grab_window_bytes = grab_window.serialize();
     let modifiers_bytes = modifiers.serialize();
     let key_bytes = key.serialize();
@@ -15354,7 +15354,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
-    let exposures_bytes = (exposures as u8).serialize();
+    let exposures_bytes = exposures.serialize();
     let window_bytes = window.serialize();
     let x_bytes = x.serialize();
     let y_bytes = y.serialize();
@@ -16906,7 +16906,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
-    let contiguous_bytes = (contiguous as u8).serialize();
+    let contiguous_bytes = contiguous.serialize();
     let cmap_bytes = cmap.serialize();
     let colors_bytes = colors.serialize();
     let planes_bytes = planes.serialize();
@@ -16968,7 +16968,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
-    let contiguous_bytes = (contiguous as u8).serialize();
+    let contiguous_bytes = contiguous.serialize();
     let cmap_bytes = cmap.serialize();
     let colors_bytes = colors.serialize();
     let reds_bytes = reds.serialize();
@@ -18640,8 +18640,8 @@ where
     let acceleration_numerator_bytes = acceleration_numerator.serialize();
     let acceleration_denominator_bytes = acceleration_denominator.serialize();
     let threshold_bytes = threshold.serialize();
-    let do_acceleration_bytes = (do_acceleration as u8).serialize();
-    let do_threshold_bytes = (do_threshold as u8).serialize();
+    let do_acceleration_bytes = do_acceleration.serialize();
+    let do_threshold_bytes = do_threshold.serialize();
     let mut request0 = [
         CHANGE_POINTER_CONTROL_REQUEST,
         0,

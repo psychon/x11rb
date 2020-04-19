@@ -1796,7 +1796,7 @@ where
     let visual_bytes = visual.serialize();
     let screen_bytes = screen.serialize();
     let share_list_bytes = share_list.serialize();
-    let is_direct_bytes = (is_direct as u8).serialize();
+    let is_direct_bytes = is_direct.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_CONTEXT_REQUEST,
@@ -2873,7 +2873,7 @@ where
     let screen_bytes = screen.serialize();
     let render_type_bytes = render_type.serialize();
     let share_list_bytes = share_list.serialize();
-    let is_direct_bytes = (is_direct as u8).serialize();
+    let is_direct_bytes = is_direct.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_NEW_CONTEXT_REQUEST,
@@ -3350,7 +3350,7 @@ where
     let fbconfig_bytes = fbconfig.serialize();
     let screen_bytes = screen.serialize();
     let share_list_bytes = share_list.serialize();
-    let is_direct_bytes = (is_direct as u8).serialize();
+    let is_direct_bytes = is_direct.serialize();
     assert_eq!(0, attribs.len() % 2, "Argument num_attribs has an incorrect length, must be a multiple of 2");
     let num_attribs = u32::try_from(attribs.len() / 2).unwrap();
     let num_attribs_bytes = num_attribs.serialize();
@@ -3932,8 +3932,8 @@ where
     let height_bytes = height.serialize();
     let format_bytes = format.serialize();
     let type_bytes = type_.serialize();
-    let swap_bytes_bytes = (swap_bytes as u8).serialize();
-    let lsb_first_bytes = (lsb_first as u8).serialize();
+    let swap_bytes_bytes = swap_bytes.serialize();
+    let lsb_first_bytes = lsb_first.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         READ_PIXELS_REQUEST,
@@ -5026,7 +5026,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let context_tag_bytes = context_tag.serialize();
-    let lsb_first_bytes = (lsb_first as u8).serialize();
+    let lsb_first_bytes = lsb_first.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_POLYGON_STIPPLE_REQUEST,
@@ -5482,7 +5482,7 @@ where
     let level_bytes = level.serialize();
     let format_bytes = format.serialize();
     let type_bytes = type_.serialize();
-    let swap_bytes_bytes = (swap_bytes as u8).serialize();
+    let swap_bytes_bytes = swap_bytes.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_TEX_IMAGE_REQUEST,
@@ -6199,7 +6199,7 @@ where
     let target_bytes = target.serialize();
     let format_bytes = format.serialize();
     let type_bytes = type_.serialize();
-    let swap_bytes_bytes = (swap_bytes as u8).serialize();
+    let swap_bytes_bytes = swap_bytes.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_COLOR_TABLE_REQUEST,
@@ -6408,7 +6408,7 @@ where
     let target_bytes = target.serialize();
     let format_bytes = format.serialize();
     let type_bytes = type_.serialize();
-    let swap_bytes_bytes = (swap_bytes as u8).serialize();
+    let swap_bytes_bytes = swap_bytes.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_CONVOLUTION_FILTER_REQUEST,
@@ -6619,7 +6619,7 @@ where
     let target_bytes = target.serialize();
     let format_bytes = format.serialize();
     let type_bytes = type_.serialize();
-    let swap_bytes_bytes = (swap_bytes as u8).serialize();
+    let swap_bytes_bytes = swap_bytes.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_SEPARABLE_FILTER_REQUEST,
@@ -6696,8 +6696,8 @@ where
     let target_bytes = target.serialize();
     let format_bytes = format.serialize();
     let type_bytes = type_.serialize();
-    let swap_bytes_bytes = (swap_bytes as u8).serialize();
-    let reset_bytes = (reset as u8).serialize();
+    let swap_bytes_bytes = swap_bytes.serialize();
+    let reset_bytes = reset.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_HISTOGRAM_REQUEST,
@@ -6906,8 +6906,8 @@ where
     let target_bytes = target.serialize();
     let format_bytes = format.serialize();
     let type_bytes = type_.serialize();
-    let swap_bytes_bytes = (swap_bytes as u8).serialize();
-    let reset_bytes = (reset as u8).serialize();
+    let swap_bytes_bytes = swap_bytes.serialize();
+    let reset_bytes = reset.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_MINMAX_REQUEST,

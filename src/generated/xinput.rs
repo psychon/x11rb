@@ -1567,7 +1567,7 @@ where
     let num_classes_bytes = num_classes.serialize();
     let this_device_mode_bytes = u8::from(this_device_mode).serialize();
     let other_device_mode_bytes = u8::from(other_device_mode).serialize();
-    let owner_events_bytes = (owner_events as u8).serialize();
+    let owner_events_bytes = owner_events.serialize();
     let device_id_bytes = device_id.serialize();
     let classes_bytes = classes.serialize();
     let mut request0 = [
@@ -1739,7 +1739,7 @@ where
     let key_bytes = key.serialize();
     let this_device_mode_bytes = u8::from(this_device_mode).serialize();
     let other_device_mode_bytes = u8::from(other_device_mode).serialize();
-    let owner_events_bytes = (owner_events as u8).serialize();
+    let owner_events_bytes = owner_events.serialize();
     let classes_bytes = classes.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -1830,7 +1830,7 @@ where
     let this_device_mode_bytes = u8::from(this_device_mode).serialize();
     let other_device_mode_bytes = u8::from(other_device_mode).serialize();
     let button_bytes = button.serialize();
-    let owner_events_bytes = (owner_events as u8).serialize();
+    let owner_events_bytes = owner_events.serialize();
     let classes_bytes = classes.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -7287,7 +7287,7 @@ where
     let offset_bytes = offset.serialize();
     let len_bytes = len.serialize();
     let device_id_bytes = device_id.serialize();
-    let delete_bytes = (delete as u8).serialize();
+    let delete_bytes = delete.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_DEVICE_PROPERTY_REQUEST,
@@ -10116,7 +10116,7 @@ where
     let deviceid_bytes = deviceid.serialize();
     let mode_bytes = u8::from(mode).serialize();
     let paired_device_mode_bytes = u8::from(paired_device_mode).serialize();
-    let owner_events_bytes = (owner_events as u8).serialize();
+    let owner_events_bytes = u8::from(owner_events).serialize();
     let mask_len: u16 = mask.len().try_into()?;
     let mask_len_bytes = mask_len.serialize();
     let mask_bytes = mask.serialize();
@@ -10568,7 +10568,7 @@ where
     let grab_type_bytes = u8::from(grab_type).serialize();
     let grab_mode_bytes = u8::from(grab_mode).serialize();
     let paired_device_mode_bytes = u8::from(paired_device_mode).serialize();
-    let owner_events_bytes = (owner_events as u8).serialize();
+    let owner_events_bytes = u8::from(owner_events).serialize();
     let mask_bytes = mask.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -10884,7 +10884,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let deviceid_bytes = deviceid.serialize();
-    let delete_bytes = (delete as u8).serialize();
+    let delete_bytes = delete.serialize();
     let property_bytes = property.serialize();
     let type_bytes = type_.serialize();
     let offset_bytes = offset.serialize();
@@ -15977,7 +15977,7 @@ where
     let length_so_far = 0;
     let destination_bytes = destination.serialize();
     let device_id_bytes = device_id.serialize();
-    let propagate_bytes = (propagate as u8).serialize();
+    let propagate_bytes = propagate.serialize();
     let num_classes: u16 = classes.len().try_into()?;
     let num_classes_bytes = num_classes.serialize();
     let num_events: u8 = events.len().try_into()?;

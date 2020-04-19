@@ -2120,7 +2120,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
-    let onoff_bytes = (onoff as u8).serialize();
+    let onoff_bytes = onoff.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         SELECT_VIDEO_NOTIFY_REQUEST,
@@ -2152,7 +2152,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let port_bytes = port.serialize();
-    let onoff_bytes = (onoff as u8).serialize();
+    let onoff_bytes = onoff.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         SELECT_PORT_NOTIFY_REQUEST,
@@ -2188,7 +2188,7 @@ where
     let vid_h_bytes = vid_h.serialize();
     let drw_w_bytes = drw_w.serialize();
     let drw_h_bytes = drw_h.serialize();
-    let motion_bytes = (motion as u8).serialize();
+    let motion_bytes = motion.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         QUERY_BEST_SIZE_REQUEST,

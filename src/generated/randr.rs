@@ -1567,8 +1567,8 @@ where
     let length_so_far = 0;
     let output_bytes = output.serialize();
     let property_bytes = property.serialize();
-    let pending_bytes = (pending as u8).serialize();
-    let range_bytes = (range as u8).serialize();
+    let pending_bytes = pending.serialize();
+    let range_bytes = range.serialize();
     let values_bytes = values.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -1696,8 +1696,8 @@ where
     let type_bytes = type_.serialize();
     let long_offset_bytes = long_offset.serialize();
     let long_length_bytes = long_length.serialize();
-    let delete_bytes = (delete as u8).serialize();
-    let pending_bytes = (pending as u8).serialize();
+    let delete_bytes = delete.serialize();
+    let pending_bytes = pending.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_OUTPUT_PROPERTY_REQUEST,
@@ -3219,8 +3219,8 @@ where
     let length_so_far = 0;
     let provider_bytes = provider.serialize();
     let property_bytes = property.serialize();
-    let pending_bytes = (pending as u8).serialize();
-    let range_bytes = (range as u8).serialize();
+    let pending_bytes = pending.serialize();
+    let range_bytes = range.serialize();
     let values_bytes = values.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -3348,8 +3348,8 @@ where
     let type_bytes = type_.serialize();
     let long_offset_bytes = long_offset.serialize();
     let long_length_bytes = long_length.serialize();
-    let delete_bytes = (delete as u8).serialize();
-    let pending_bytes = (pending as u8).serialize();
+    let delete_bytes = delete.serialize();
+    let pending_bytes = pending.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_PROVIDER_PROPERTY_REQUEST,
@@ -4150,7 +4150,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let window_bytes = window.serialize();
-    let get_active_bytes = (get_active as u8).serialize();
+    let get_active_bytes = get_active.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_MONITORS_REQUEST,

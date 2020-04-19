@@ -280,7 +280,7 @@ where
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let impervious_bytes = (impervious as u8).serialize();
+    let impervious_bytes = impervious.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GRAB_CONTROL_REQUEST,

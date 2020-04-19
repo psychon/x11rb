@@ -734,7 +734,7 @@ where
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let cancel_bytes = (cancel as u8).serialize();
+    let cancel_bytes = cancel.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         PRINT_END_JOB_REQUEST,
@@ -788,7 +788,7 @@ where
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let cancel_bytes = (cancel as u8).serialize();
+    let cancel_bytes = cancel.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         PRINT_END_DOC_REQUEST,
@@ -951,7 +951,7 @@ where
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let cancel_bytes = (cancel as u8).serialize();
+    let cancel_bytes = cancel.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         PRINT_END_PAGE_REQUEST,

@@ -585,7 +585,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let destination_window_bytes = destination_window.serialize();
-    let enable_bytes = (enable as u8).serialize();
+    let enable_bytes = enable.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         SELECT_INPUT_REQUEST,

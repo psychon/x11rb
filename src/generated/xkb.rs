@@ -7142,8 +7142,8 @@ where
     let bell_class_bytes = bell_class.serialize();
     let bell_id_bytes = bell_id.serialize();
     let percent_bytes = percent.serialize();
-    let force_sound_bytes = (force_sound as u8).serialize();
-    let event_only_bytes = (event_only as u8).serialize();
+    let force_sound_bytes = force_sound.serialize();
+    let event_only_bytes = event_only.serialize();
     let pitch_bytes = pitch.serialize();
     let duration_bytes = duration.serialize();
     let name_bytes = name.serialize();
@@ -7280,10 +7280,10 @@ where
     let device_spec_bytes = device_spec.serialize();
     let affect_mod_locks_bytes = affect_mod_locks.serialize();
     let mod_locks_bytes = mod_locks.serialize();
-    let lock_group_bytes = (lock_group as u8).serialize();
+    let lock_group_bytes = lock_group.serialize();
     let group_lock_bytes = u8::from(group_lock).serialize();
     let affect_mod_latches_bytes = affect_mod_latches.serialize();
-    let latch_group_bytes = (latch_group as u8).serialize();
+    let latch_group_bytes = latch_group.serialize();
     let group_latch_bytes = group_latch.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -8104,7 +8104,7 @@ where
     let length_so_far = 0;
     let device_spec_bytes = device_spec.serialize();
     let groups_bytes = groups.serialize();
-    let get_all_si_bytes = (get_all_si as u8).serialize();
+    let get_all_si_bytes = get_all_si.serialize();
     let first_si_bytes = first_si.serialize();
     let n_si_bytes = n_si.serialize();
     let mut request0 = [
@@ -8175,8 +8175,8 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let device_spec_bytes = device_spec.serialize();
-    let recompute_actions_bytes = (recompute_actions as u8).serialize();
-    let truncate_si_bytes = (truncate_si as u8).serialize();
+    let recompute_actions_bytes = recompute_actions.serialize();
+    let truncate_si_bytes = truncate_si.serialize();
     let groups_bytes = groups.serialize();
     let first_si_bytes = first_si.serialize();
     let n_si: u16 = si.len().try_into()?;
@@ -8473,10 +8473,10 @@ where
     let led_class_bytes = LedClassSpec::from(led_class).serialize();
     let led_id_bytes = led_id.serialize();
     let indicator_bytes = indicator.serialize();
-    let set_state_bytes = (set_state as u8).serialize();
-    let on_bytes = (on as u8).serialize();
-    let set_map_bytes = (set_map as u8).serialize();
-    let create_map_bytes = (create_map as u8).serialize();
+    let set_state_bytes = set_state.serialize();
+    let on_bytes = on.serialize();
+    let set_map_bytes = set_map.serialize();
+    let create_map_bytes = create_map.serialize();
     let map_flags_bytes = map_flags.serialize();
     let map_which_groups_bytes = map_which_groups.serialize();
     let map_groups_bytes = map_groups.serialize();
@@ -9226,7 +9226,7 @@ where
     let length_so_far = 0;
     let device_spec_bytes = device_spec.serialize();
     let wanted_bytes = wanted.serialize();
-    let all_buttons_bytes = (all_buttons as u8).serialize();
+    let all_buttons_bytes = all_buttons.serialize();
     let first_button_bytes = first_button.serialize();
     let n_buttons_bytes = n_buttons.serialize();
     let led_class_bytes = LedClassSpec::from(led_class).serialize();

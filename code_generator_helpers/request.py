@@ -320,11 +320,10 @@ def request_implementation(module, obj, name, fds, fds_is_list):
                 # already called serialize() to get the bytes.
                 pass
             elif field.type.size is not None:  # Size None was already handled above
-                if code_generator_helpers.module.is_bool(field.type) or \
-                        (name == ('xcb', 'InternAtom') and field_name == 'only_if_exists'):
-                    module.out("let %s = (%s as u8).serialize();", field_bytes, rust_variable)
-                elif field.enum is not None and not hasattr(field, 'lenfield_for_switch'):
+                if field.enum is not None and not hasattr(field, 'lenfield_for_switch'):
                     field_type = module._field_type(field)
+                    if field_type == "bool":
+                        field_type = "u8"
                     module.out("let %s = %s::from(%s).serialize();", field_bytes, field_type, rust_variable)
                 else:
                     module.out("let %s = %s.serialize();", field_bytes, rust_variable)

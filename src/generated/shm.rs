@@ -297,7 +297,7 @@ where
     let length_so_far = 0;
     let shmseg_bytes = shmseg.serialize();
     let shmid_bytes = shmid.serialize();
-    let read_only_bytes = (read_only as u8).serialize();
+    let read_only_bytes = read_only.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         ATTACH_REQUEST,
@@ -371,7 +371,7 @@ where
     let dst_y_bytes = dst_y.serialize();
     let depth_bytes = depth.serialize();
     let format_bytes = format.serialize();
-    let send_event_bytes = (send_event as u8).serialize();
+    let send_event_bytes = send_event.serialize();
     let shmseg_bytes = shmseg.serialize();
     let offset_bytes = offset.serialize();
     let mut request0 = [
@@ -574,7 +574,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let shmseg_bytes = shmseg.serialize();
-    let read_only_bytes = (read_only as u8).serialize();
+    let read_only_bytes = read_only.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         ATTACH_FD_REQUEST,
@@ -608,7 +608,7 @@ where
     let length_so_far = 0;
     let shmseg_bytes = shmseg.serialize();
     let size_bytes = size.serialize();
-    let read_only_bytes = (read_only as u8).serialize();
+    let read_only_bytes = read_only.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_SEGMENT_REQUEST,
