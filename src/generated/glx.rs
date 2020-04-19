@@ -96,15 +96,15 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for GenericError {
 }
 impl From<&GenericError> for [u8; 32] {
     fn from(input: &GenericError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], bad_value_bytes[0], bad_value_bytes[1], bad_value_bytes[2], bad_value_bytes[3],
+            minor_opcode_bytes[0], minor_opcode_bytes[1], major_opcode_bytes[0], 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -158,15 +158,15 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadContextErro
 }
 impl From<&BadContextError> for [u8; 32] {
     fn from(input: &BadContextError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], bad_value_bytes[0], bad_value_bytes[1], bad_value_bytes[2], bad_value_bytes[3],
+            minor_opcode_bytes[0], minor_opcode_bytes[1], major_opcode_bytes[0], 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -220,15 +220,15 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadContextStat
 }
 impl From<&BadContextStateError> for [u8; 32] {
     fn from(input: &BadContextStateError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], bad_value_bytes[0], bad_value_bytes[1], bad_value_bytes[2], bad_value_bytes[3],
+            minor_opcode_bytes[0], minor_opcode_bytes[1], major_opcode_bytes[0], 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -282,15 +282,15 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadDrawableErr
 }
 impl From<&BadDrawableError> for [u8; 32] {
     fn from(input: &BadDrawableError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], bad_value_bytes[0], bad_value_bytes[1], bad_value_bytes[2], bad_value_bytes[3],
+            minor_opcode_bytes[0], minor_opcode_bytes[1], major_opcode_bytes[0], 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -344,15 +344,15 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadPixmapError
 }
 impl From<&BadPixmapError> for [u8; 32] {
     fn from(input: &BadPixmapError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], bad_value_bytes[0], bad_value_bytes[1], bad_value_bytes[2], bad_value_bytes[3],
+            minor_opcode_bytes[0], minor_opcode_bytes[1], major_opcode_bytes[0], 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -406,15 +406,15 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadContextTagE
 }
 impl From<&BadContextTagError> for [u8; 32] {
     fn from(input: &BadContextTagError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], bad_value_bytes[0], bad_value_bytes[1], bad_value_bytes[2], bad_value_bytes[3],
+            minor_opcode_bytes[0], minor_opcode_bytes[1], major_opcode_bytes[0], 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -468,15 +468,15 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadCurrentWind
 }
 impl From<&BadCurrentWindowError> for [u8; 32] {
     fn from(input: &BadCurrentWindowError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], bad_value_bytes[0], bad_value_bytes[1], bad_value_bytes[2], bad_value_bytes[3],
+            minor_opcode_bytes[0], minor_opcode_bytes[1], major_opcode_bytes[0], 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -530,15 +530,15 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadRenderReque
 }
 impl From<&BadRenderRequestError> for [u8; 32] {
     fn from(input: &BadRenderRequestError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], bad_value_bytes[0], bad_value_bytes[1], bad_value_bytes[2], bad_value_bytes[3],
+            minor_opcode_bytes[0], minor_opcode_bytes[1], major_opcode_bytes[0], 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -592,15 +592,15 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadLargeReques
 }
 impl From<&BadLargeRequestError> for [u8; 32] {
     fn from(input: &BadLargeRequestError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], bad_value_bytes[0], bad_value_bytes[1], bad_value_bytes[2], bad_value_bytes[3],
+            minor_opcode_bytes[0], minor_opcode_bytes[1], major_opcode_bytes[0], 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -654,15 +654,15 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for UnsupportedPri
 }
 impl From<&UnsupportedPrivateRequestError> for [u8; 32] {
     fn from(input: &UnsupportedPrivateRequestError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], bad_value_bytes[0], bad_value_bytes[1], bad_value_bytes[2], bad_value_bytes[3],
+            minor_opcode_bytes[0], minor_opcode_bytes[1], major_opcode_bytes[0], 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -716,15 +716,15 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadFBConfigErr
 }
 impl From<&BadFBConfigError> for [u8; 32] {
     fn from(input: &BadFBConfigError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], bad_value_bytes[0], bad_value_bytes[1], bad_value_bytes[2], bad_value_bytes[3],
+            minor_opcode_bytes[0], minor_opcode_bytes[1], major_opcode_bytes[0], 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -778,15 +778,15 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadPbufferErro
 }
 impl From<&BadPbufferError> for [u8; 32] {
     fn from(input: &BadPbufferError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], bad_value_bytes[0], bad_value_bytes[1], bad_value_bytes[2], bad_value_bytes[3],
+            minor_opcode_bytes[0], minor_opcode_bytes[1], major_opcode_bytes[0], 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -840,15 +840,15 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadCurrentDraw
 }
 impl From<&BadCurrentDrawableError> for [u8; 32] {
     fn from(input: &BadCurrentDrawableError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], bad_value_bytes[0], bad_value_bytes[1], bad_value_bytes[2], bad_value_bytes[3],
+            minor_opcode_bytes[0], minor_opcode_bytes[1], major_opcode_bytes[0], 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -902,15 +902,15 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadWindowError
 }
 impl From<&BadWindowError> for [u8; 32] {
     fn from(input: &BadWindowError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], bad_value_bytes[0], bad_value_bytes[1], bad_value_bytes[2], bad_value_bytes[3],
+            minor_opcode_bytes[0], minor_opcode_bytes[1], major_opcode_bytes[0], 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -964,15 +964,15 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for GLXBadProfileA
 }
 impl From<&GLXBadProfileARBError> for [u8; 32] {
     fn from(input: &GLXBadProfileARBError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], bad_value_bytes[0], bad_value_bytes[1], bad_value_bytes[2], bad_value_bytes[3],
+            minor_opcode_bytes[0], minor_opcode_bytes[1], major_opcode_bytes[0], 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -1041,23 +1041,23 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for PbufferClobberEvent {
 }
 impl From<&PbufferClobberEvent> for [u8; 32] {
     fn from(input: &PbufferClobberEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let event_type = input.event_type.serialize();
-        let draw_type = input.draw_type.serialize();
-        let drawable = input.drawable.serialize();
-        let b_mask = input.b_mask.serialize();
-        let aux_buffer = input.aux_buffer.serialize();
-        let x = input.x.serialize();
-        let y = input.y.serialize();
-        let width = input.width.serialize();
-        let height = input.height.serialize();
-        let count = input.count.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let event_type_bytes = input.event_type.serialize();
+        let draw_type_bytes = input.draw_type.serialize();
+        let drawable_bytes = input.drawable.serialize();
+        let b_mask_bytes = input.b_mask.serialize();
+        let aux_buffer_bytes = input.aux_buffer.serialize();
+        let x_bytes = input.x.serialize();
+        let y_bytes = input.y.serialize();
+        let width_bytes = input.width.serialize();
+        let height_bytes = input.height.serialize();
+        let count_bytes = input.count.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], event_type[0], event_type[1], draw_type[0], draw_type[1],
-            drawable[0], drawable[1], drawable[2], drawable[3], b_mask[0], b_mask[1], b_mask[2], b_mask[3],
-            aux_buffer[0], aux_buffer[1], x[0], x[1], y[0], y[1], width[0], width[1],
-            height[0], height[1], count[0], count[1], 0, 0, 0, 0
+            response_type_bytes[0], 0, sequence_bytes[0], sequence_bytes[1], event_type_bytes[0], event_type_bytes[1], draw_type_bytes[0], draw_type_bytes[1],
+            drawable_bytes[0], drawable_bytes[1], drawable_bytes[2], drawable_bytes[3], b_mask_bytes[0], b_mask_bytes[1], b_mask_bytes[2], b_mask_bytes[3],
+            aux_buffer_bytes[0], aux_buffer_bytes[1], x_bytes[0], x_bytes[1], y_bytes[0], y_bytes[1], width_bytes[0], width_bytes[1],
+            height_bytes[0], height_bytes[1], count_bytes[0], count_bytes[1], 0, 0, 0, 0
         ]
     }
 }
@@ -1118,20 +1118,20 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for BufferSwapCompleteEvent {
 }
 impl From<&BufferSwapCompleteEvent> for [u8; 32] {
     fn from(input: &BufferSwapCompleteEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let event_type = input.event_type.serialize();
-        let drawable = input.drawable.serialize();
-        let ust_hi = input.ust_hi.serialize();
-        let ust_lo = input.ust_lo.serialize();
-        let msc_hi = input.msc_hi.serialize();
-        let msc_lo = input.msc_lo.serialize();
-        let sbc = input.sbc.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let event_type_bytes = input.event_type.serialize();
+        let drawable_bytes = input.drawable.serialize();
+        let ust_hi_bytes = input.ust_hi.serialize();
+        let ust_lo_bytes = input.ust_lo.serialize();
+        let msc_hi_bytes = input.msc_hi.serialize();
+        let msc_lo_bytes = input.msc_lo.serialize();
+        let sbc_bytes = input.sbc.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], event_type[0], event_type[1], 0, 0,
-            drawable[0], drawable[1], drawable[2], drawable[3], ust_hi[0], ust_hi[1], ust_hi[2], ust_hi[3],
-            ust_lo[0], ust_lo[1], ust_lo[2], ust_lo[3], msc_hi[0], msc_hi[1], msc_hi[2], msc_hi[3],
-            msc_lo[0], msc_lo[1], msc_lo[2], msc_lo[3], sbc[0], sbc[1], sbc[2], sbc[3]
+            response_type_bytes[0], 0, sequence_bytes[0], sequence_bytes[1], event_type_bytes[0], event_type_bytes[1], 0, 0,
+            drawable_bytes[0], drawable_bytes[1], drawable_bytes[2], drawable_bytes[3], ust_hi_bytes[0], ust_hi_bytes[1], ust_hi_bytes[2], ust_hi_bytes[3],
+            ust_lo_bytes[0], ust_lo_bytes[1], ust_lo_bytes[2], ust_lo_bytes[3], msc_hi_bytes[0], msc_hi_bytes[1], msc_hi_bytes[2], msc_hi_bytes[3],
+            msc_lo_bytes[0], msc_lo_bytes[1], msc_lo_bytes[2], msc_lo_bytes[3], sbc_bytes[0], sbc_bytes[1], sbc_bytes[2], sbc_bytes[3]
         ]
     }
 }

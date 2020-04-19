@@ -87,17 +87,17 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for CompletionEvent {
 }
 impl From<&CompletionEvent> for [u8; 32] {
     fn from(input: &CompletionEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let drawable = input.drawable.serialize();
-        let minor_event = input.minor_event.serialize();
-        let major_event = input.major_event.serialize();
-        let shmseg = input.shmseg.serialize();
-        let offset = input.offset.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let drawable_bytes = input.drawable.serialize();
+        let minor_event_bytes = input.minor_event.serialize();
+        let major_event_bytes = input.major_event.serialize();
+        let shmseg_bytes = input.shmseg.serialize();
+        let offset_bytes = input.offset.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], drawable[0], drawable[1], drawable[2], drawable[3],
-            minor_event[0], minor_event[1], major_event[0], 0, shmseg[0], shmseg[1], shmseg[2], shmseg[3],
-            offset[0], offset[1], offset[2], offset[3], /* trailing padding */ 0, 0, 0, 0,
+            response_type_bytes[0], 0, sequence_bytes[0], sequence_bytes[1], drawable_bytes[0], drawable_bytes[1], drawable_bytes[2], drawable_bytes[3],
+            minor_event_bytes[0], minor_event_bytes[1], major_event_bytes[0], 0, shmseg_bytes[0], shmseg_bytes[1], shmseg_bytes[2], shmseg_bytes[3],
+            offset_bytes[0], offset_bytes[1], offset_bytes[2], offset_bytes[3], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
     }
@@ -150,15 +150,15 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadSegError {
 }
 impl From<&BadSegError> for [u8; 32] {
     fn from(input: &BadSegError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], bad_value_bytes[0], bad_value_bytes[1], bad_value_bytes[2], bad_value_bytes[3],
+            minor_opcode_bytes[0], minor_opcode_bytes[1], major_opcode_bytes[0], 0, /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]

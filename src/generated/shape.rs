@@ -231,20 +231,20 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for NotifyEvent {
 }
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let shape_kind = Kind::from(input.shape_kind).serialize();
-        let sequence = input.sequence.serialize();
-        let affected_window = input.affected_window.serialize();
-        let extents_x = input.extents_x.serialize();
-        let extents_y = input.extents_y.serialize();
-        let extents_width = input.extents_width.serialize();
-        let extents_height = input.extents_height.serialize();
-        let server_time = input.server_time.serialize();
-        let shaped = input.shaped.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let shape_kind_bytes = Kind::from(input.shape_kind).serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let affected_window_bytes = input.affected_window.serialize();
+        let extents_x_bytes = input.extents_x.serialize();
+        let extents_y_bytes = input.extents_y.serialize();
+        let extents_width_bytes = input.extents_width.serialize();
+        let extents_height_bytes = input.extents_height.serialize();
+        let server_time_bytes = input.server_time.serialize();
+        let shaped_bytes = input.shaped.serialize();
         [
-            response_type[0], shape_kind[0], sequence[0], sequence[1], affected_window[0], affected_window[1], affected_window[2], affected_window[3],
-            extents_x[0], extents_x[1], extents_y[0], extents_y[1], extents_width[0], extents_width[1], extents_height[0], extents_height[1],
-            server_time[0], server_time[1], server_time[2], server_time[3], shaped[0], 0, 0, 0,
+            response_type_bytes[0], shape_kind_bytes[0], sequence_bytes[0], sequence_bytes[1], affected_window_bytes[0], affected_window_bytes[1], affected_window_bytes[2], affected_window_bytes[3],
+            extents_x_bytes[0], extents_x_bytes[1], extents_y_bytes[0], extents_y_bytes[1], extents_width_bytes[0], extents_width_bytes[1], extents_height_bytes[0], extents_height_bytes[1],
+            server_time_bytes[0], server_time_bytes[1], server_time_bytes[2], server_time_bytes[3], shaped_bytes[0], 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
     }

@@ -1473,14 +1473,14 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for NotifyEvent {
 }
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let context = input.context.serialize();
-        let cancel = input.cancel.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let context_bytes = input.context.serialize();
+        let cancel_bytes = input.cancel.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], context[0], context[1], context[2], context[3],
-            cancel[0], /* trailing padding */ 0, 0, 0, 0, 0, 0, 0,
+            response_type_bytes[0], detail_bytes[0], sequence_bytes[0], sequence_bytes[1], context_bytes[0], context_bytes[1], context_bytes[2], context_bytes[3],
+            cancel_bytes[0], /* trailing padding */ 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -1531,12 +1531,12 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for AttributNotifyEvent {
 }
 impl From<&AttributNotifyEvent> for [u8; 32] {
     fn from(input: &AttributNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let context = input.context.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let context_bytes = input.context.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], context[0], context[1], context[2], context[3],
+            response_type_bytes[0], detail_bytes[0], sequence_bytes[0], sequence_bytes[1], context_bytes[0], context_bytes[1], context_bytes[2], context_bytes[3],
             /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -1584,11 +1584,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadContextError {
 }
 impl From<&BadContextError> for [u8; 32] {
     fn from(input: &BadContextError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -1636,11 +1636,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadSequenceError {
 }
 impl From<&BadSequenceError> for [u8; 32] {
     fn from(input: &BadSequenceError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0

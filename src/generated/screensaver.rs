@@ -754,18 +754,18 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for NotifyEvent {
 }
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let state = u8::from(input.state).serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let window = input.window.serialize();
-        let kind = u8::from(input.kind).serialize();
-        let forced = input.forced.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let state_bytes = u8::from(input.state).serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let window_bytes = input.window.serialize();
+        let kind_bytes = u8::from(input.kind).serialize();
+        let forced_bytes = input.forced.serialize();
         [
-            response_type[0], state[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], window[0], window[1], window[2], window[3],
-            kind[0], forced[0], 0, 0, 0, 0, 0, 0,
+            response_type_bytes[0], state_bytes[0], sequence_bytes[0], sequence_bytes[1], time_bytes[0], time_bytes[1], time_bytes[2], time_bytes[3],
+            root_bytes[0], root_bytes[1], root_bytes[2], root_bytes[3], window_bytes[0], window_bytes[1], window_bytes[2], window_bytes[3],
+            kind_bytes[0], forced_bytes[0], 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
     }

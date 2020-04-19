@@ -782,16 +782,20 @@ class Module(object):
                                     for n in range(field.type.size):
                                         parts.append("%s_%d[%d]" % (field_name, i, n))
                         else:
+                            if field_name[-1] == "_":
+                                field_bytes = field_name + "bytes"
+                            else:
+                                field_bytes = field_name + "_bytes"
                             if not hasattr(field, "has_enum_type"):
-                                self.out("let %s = input.%s.serialize();", field_name, field_name)
+                                self.out("let %s = input.%s.serialize();", field_bytes, field_name)
                             else:
                                 # This field was interpreted as an enum. Turn it
                                 # back into something like u8.
                                 wire_field_type = self._to_complex_owned_rust_type(field)
                                 self.out("let %s = %s::from(input.%s).serialize();",
-                                         field_name, wire_field_type, field_name)
+                                         field_bytes, wire_field_type, field_name)
                             for i in range(field.type.size):
-                                parts.append("%s[%d]" % (field_name, i))
+                                parts.append("%s[%d]" % (field_bytes, i))
 
                 assert len(parts) <= 32
                 if len(parts) < 32:

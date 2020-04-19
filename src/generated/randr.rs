@@ -85,11 +85,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadOutputError {
 }
 impl From<&BadOutputError> for [u8; 32] {
     fn from(input: &BadOutputError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -137,11 +137,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadCrtcError {
 }
 impl From<&BadCrtcError> for [u8; 32] {
     fn from(input: &BadCrtcError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -189,11 +189,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadModeError {
 }
 impl From<&BadModeError> for [u8; 32] {
     fn from(input: &BadModeError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -241,11 +241,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadProviderError {
 }
 impl From<&BadProviderError> for [u8; 32] {
     fn from(input: &BadProviderError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -3340,24 +3340,24 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ScreenChangeNotifyEvent {
 }
 impl From<&ScreenChangeNotifyEvent> for [u8; 32] {
     fn from(input: &ScreenChangeNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let rotation = input.rotation.serialize();
-        let sequence = input.sequence.serialize();
-        let timestamp = input.timestamp.serialize();
-        let config_timestamp = input.config_timestamp.serialize();
-        let root = input.root.serialize();
-        let request_window = input.request_window.serialize();
-        let size_id = input.size_id.serialize();
-        let subpixel_order = u16::from(input.subpixel_order).serialize();
-        let width = input.width.serialize();
-        let height = input.height.serialize();
-        let mwidth = input.mwidth.serialize();
-        let mheight = input.mheight.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let rotation_bytes = input.rotation.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let timestamp_bytes = input.timestamp.serialize();
+        let config_timestamp_bytes = input.config_timestamp.serialize();
+        let root_bytes = input.root.serialize();
+        let request_window_bytes = input.request_window.serialize();
+        let size_id_bytes = input.size_id.serialize();
+        let subpixel_order_bytes = u16::from(input.subpixel_order).serialize();
+        let width_bytes = input.width.serialize();
+        let height_bytes = input.height.serialize();
+        let mwidth_bytes = input.mwidth.serialize();
+        let mheight_bytes = input.mheight.serialize();
         [
-            response_type[0], rotation[0], sequence[0], sequence[1], timestamp[0], timestamp[1], timestamp[2], timestamp[3],
-            config_timestamp[0], config_timestamp[1], config_timestamp[2], config_timestamp[3], root[0], root[1], root[2], root[3],
-            request_window[0], request_window[1], request_window[2], request_window[3], size_id[0], size_id[1], subpixel_order[0], subpixel_order[1],
-            width[0], width[1], height[0], height[1], mwidth[0], mwidth[1], mheight[0], mheight[1]
+            response_type_bytes[0], rotation_bytes[0], sequence_bytes[0], sequence_bytes[1], timestamp_bytes[0], timestamp_bytes[1], timestamp_bytes[2], timestamp_bytes[3],
+            config_timestamp_bytes[0], config_timestamp_bytes[1], config_timestamp_bytes[2], config_timestamp_bytes[3], root_bytes[0], root_bytes[1], root_bytes[2], root_bytes[3],
+            request_window_bytes[0], request_window_bytes[1], request_window_bytes[2], request_window_bytes[3], size_id_bytes[0], size_id_bytes[1], subpixel_order_bytes[0], subpixel_order_bytes[1],
+            width_bytes[0], width_bytes[1], height_bytes[0], height_bytes[1], mwidth_bytes[0], mwidth_bytes[1], mheight_bytes[0], mheight_bytes[1]
         ]
     }
 }
@@ -4431,15 +4431,15 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for NotifyEvent {
 }
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sub_code = u8::from(input.sub_code).serialize();
-        let sequence = input.sequence.serialize();
-        let u = input.u.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sub_code_bytes = u8::from(input.sub_code).serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let u_bytes = input.u.serialize();
         [
-            response_type[0], sub_code[0], sequence[0], sequence[1], u[0], u[1], u[2], u[3],
-            u[4], u[5], u[6], u[7], u[8], u[9], u[10], u[11],
-            u[12], u[13], u[14], u[15], u[16], u[17], u[18], u[19],
-            u[20], u[21], u[22], u[23], u[24], u[25], u[26], u[27]
+            response_type_bytes[0], sub_code_bytes[0], sequence_bytes[0], sequence_bytes[1], u_bytes[0], u_bytes[1], u_bytes[2], u_bytes[3],
+            u_bytes[4], u_bytes[5], u_bytes[6], u_bytes[7], u_bytes[8], u_bytes[9], u_bytes[10], u_bytes[11],
+            u_bytes[12], u_bytes[13], u_bytes[14], u_bytes[15], u_bytes[16], u_bytes[17], u_bytes[18], u_bytes[19],
+            u_bytes[20], u_bytes[21], u_bytes[22], u_bytes[23], u_bytes[24], u_bytes[25], u_bytes[26], u_bytes[27]
         ]
     }
 }

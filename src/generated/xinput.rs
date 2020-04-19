@@ -11255,12 +11255,12 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceValuatorEvent {
 }
 impl From<&DeviceValuatorEvent> for [u8; 32] {
     fn from(input: &DeviceValuatorEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let device_id = input.device_id.serialize();
-        let sequence = input.sequence.serialize();
-        let device_state = input.device_state.serialize();
-        let num_valuators = input.num_valuators.serialize();
-        let first_valuator = input.first_valuator.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let device_id_bytes = input.device_id.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let device_state_bytes = input.device_state.serialize();
+        let num_valuators_bytes = input.num_valuators.serialize();
+        let first_valuator_bytes = input.first_valuator.serialize();
         let valuators_0 = input.valuators[0].serialize();
         let valuators_1 = input.valuators[1].serialize();
         let valuators_2 = input.valuators[2].serialize();
@@ -11268,7 +11268,7 @@ impl From<&DeviceValuatorEvent> for [u8; 32] {
         let valuators_4 = input.valuators[4].serialize();
         let valuators_5 = input.valuators[5].serialize();
         [
-            response_type[0], device_id[0], sequence[0], sequence[1], device_state[0], device_state[1], num_valuators[0], first_valuator[0],
+            response_type_bytes[0], device_id_bytes[0], sequence_bytes[0], sequence_bytes[1], device_state_bytes[0], device_state_bytes[1], num_valuators_bytes[0], first_valuator_bytes[0],
             valuators_0[0], valuators_0[1], valuators_0[2], valuators_0[3], valuators_1[0], valuators_1[1], valuators_1[2], valuators_1[3],
             valuators_2[0], valuators_2[1], valuators_2[2], valuators_2[3], valuators_3[0], valuators_3[1], valuators_3[2], valuators_3[3],
             valuators_4[0], valuators_4[1], valuators_4[2], valuators_4[3], valuators_5[0], valuators_5[1], valuators_5[2], valuators_5[3]
@@ -11400,25 +11400,25 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceKeyPressEvent {
 }
 impl From<&DeviceKeyPressEvent> for [u8; 32] {
     fn from(input: &DeviceKeyPressEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let event = input.event.serialize();
-        let child = input.child.serialize();
-        let root_x = input.root_x.serialize();
-        let root_y = input.root_y.serialize();
-        let event_x = input.event_x.serialize();
-        let event_y = input.event_y.serialize();
-        let state = input.state.serialize();
-        let same_screen = input.same_screen.serialize();
-        let device_id = input.device_id.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let event_bytes = input.event.serialize();
+        let child_bytes = input.child.serialize();
+        let root_x_bytes = input.root_x.serialize();
+        let root_y_bytes = input.root_y.serialize();
+        let event_x_bytes = input.event_x.serialize();
+        let event_y_bytes = input.event_y.serialize();
+        let state_bytes = input.state.serialize();
+        let same_screen_bytes = input.same_screen.serialize();
+        let device_id_bytes = input.device_id.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
-            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], device_id[0]
+            response_type_bytes[0], detail_bytes[0], sequence_bytes[0], sequence_bytes[1], time_bytes[0], time_bytes[1], time_bytes[2], time_bytes[3],
+            root_bytes[0], root_bytes[1], root_bytes[2], root_bytes[3], event_bytes[0], event_bytes[1], event_bytes[2], event_bytes[3],
+            child_bytes[0], child_bytes[1], child_bytes[2], child_bytes[3], root_x_bytes[0], root_x_bytes[1], root_y_bytes[0], root_y_bytes[1],
+            event_x_bytes[0], event_x_bytes[1], event_y_bytes[0], event_y_bytes[1], state_bytes[0], state_bytes[1], same_screen_bytes[0], device_id_bytes[0]
         ]
     }
 }
@@ -11487,25 +11487,25 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceKeyReleaseEvent {
 }
 impl From<&DeviceKeyReleaseEvent> for [u8; 32] {
     fn from(input: &DeviceKeyReleaseEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let event = input.event.serialize();
-        let child = input.child.serialize();
-        let root_x = input.root_x.serialize();
-        let root_y = input.root_y.serialize();
-        let event_x = input.event_x.serialize();
-        let event_y = input.event_y.serialize();
-        let state = input.state.serialize();
-        let same_screen = input.same_screen.serialize();
-        let device_id = input.device_id.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let event_bytes = input.event.serialize();
+        let child_bytes = input.child.serialize();
+        let root_x_bytes = input.root_x.serialize();
+        let root_y_bytes = input.root_y.serialize();
+        let event_x_bytes = input.event_x.serialize();
+        let event_y_bytes = input.event_y.serialize();
+        let state_bytes = input.state.serialize();
+        let same_screen_bytes = input.same_screen.serialize();
+        let device_id_bytes = input.device_id.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
-            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], device_id[0]
+            response_type_bytes[0], detail_bytes[0], sequence_bytes[0], sequence_bytes[1], time_bytes[0], time_bytes[1], time_bytes[2], time_bytes[3],
+            root_bytes[0], root_bytes[1], root_bytes[2], root_bytes[3], event_bytes[0], event_bytes[1], event_bytes[2], event_bytes[3],
+            child_bytes[0], child_bytes[1], child_bytes[2], child_bytes[3], root_x_bytes[0], root_x_bytes[1], root_y_bytes[0], root_y_bytes[1],
+            event_x_bytes[0], event_x_bytes[1], event_y_bytes[0], event_y_bytes[1], state_bytes[0], state_bytes[1], same_screen_bytes[0], device_id_bytes[0]
         ]
     }
 }
@@ -11574,25 +11574,25 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceButtonPressEvent {
 }
 impl From<&DeviceButtonPressEvent> for [u8; 32] {
     fn from(input: &DeviceButtonPressEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let event = input.event.serialize();
-        let child = input.child.serialize();
-        let root_x = input.root_x.serialize();
-        let root_y = input.root_y.serialize();
-        let event_x = input.event_x.serialize();
-        let event_y = input.event_y.serialize();
-        let state = input.state.serialize();
-        let same_screen = input.same_screen.serialize();
-        let device_id = input.device_id.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let event_bytes = input.event.serialize();
+        let child_bytes = input.child.serialize();
+        let root_x_bytes = input.root_x.serialize();
+        let root_y_bytes = input.root_y.serialize();
+        let event_x_bytes = input.event_x.serialize();
+        let event_y_bytes = input.event_y.serialize();
+        let state_bytes = input.state.serialize();
+        let same_screen_bytes = input.same_screen.serialize();
+        let device_id_bytes = input.device_id.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
-            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], device_id[0]
+            response_type_bytes[0], detail_bytes[0], sequence_bytes[0], sequence_bytes[1], time_bytes[0], time_bytes[1], time_bytes[2], time_bytes[3],
+            root_bytes[0], root_bytes[1], root_bytes[2], root_bytes[3], event_bytes[0], event_bytes[1], event_bytes[2], event_bytes[3],
+            child_bytes[0], child_bytes[1], child_bytes[2], child_bytes[3], root_x_bytes[0], root_x_bytes[1], root_y_bytes[0], root_y_bytes[1],
+            event_x_bytes[0], event_x_bytes[1], event_y_bytes[0], event_y_bytes[1], state_bytes[0], state_bytes[1], same_screen_bytes[0], device_id_bytes[0]
         ]
     }
 }
@@ -11661,25 +11661,25 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceButtonReleaseEvent {
 }
 impl From<&DeviceButtonReleaseEvent> for [u8; 32] {
     fn from(input: &DeviceButtonReleaseEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let event = input.event.serialize();
-        let child = input.child.serialize();
-        let root_x = input.root_x.serialize();
-        let root_y = input.root_y.serialize();
-        let event_x = input.event_x.serialize();
-        let event_y = input.event_y.serialize();
-        let state = input.state.serialize();
-        let same_screen = input.same_screen.serialize();
-        let device_id = input.device_id.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let event_bytes = input.event.serialize();
+        let child_bytes = input.child.serialize();
+        let root_x_bytes = input.root_x.serialize();
+        let root_y_bytes = input.root_y.serialize();
+        let event_x_bytes = input.event_x.serialize();
+        let event_y_bytes = input.event_y.serialize();
+        let state_bytes = input.state.serialize();
+        let same_screen_bytes = input.same_screen.serialize();
+        let device_id_bytes = input.device_id.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
-            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], device_id[0]
+            response_type_bytes[0], detail_bytes[0], sequence_bytes[0], sequence_bytes[1], time_bytes[0], time_bytes[1], time_bytes[2], time_bytes[3],
+            root_bytes[0], root_bytes[1], root_bytes[2], root_bytes[3], event_bytes[0], event_bytes[1], event_bytes[2], event_bytes[3],
+            child_bytes[0], child_bytes[1], child_bytes[2], child_bytes[3], root_x_bytes[0], root_x_bytes[1], root_y_bytes[0], root_y_bytes[1],
+            event_x_bytes[0], event_x_bytes[1], event_y_bytes[0], event_y_bytes[1], state_bytes[0], state_bytes[1], same_screen_bytes[0], device_id_bytes[0]
         ]
     }
 }
@@ -11748,25 +11748,25 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceMotionNotifyEvent {
 }
 impl From<&DeviceMotionNotifyEvent> for [u8; 32] {
     fn from(input: &DeviceMotionNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let event = input.event.serialize();
-        let child = input.child.serialize();
-        let root_x = input.root_x.serialize();
-        let root_y = input.root_y.serialize();
-        let event_x = input.event_x.serialize();
-        let event_y = input.event_y.serialize();
-        let state = input.state.serialize();
-        let same_screen = input.same_screen.serialize();
-        let device_id = input.device_id.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let event_bytes = input.event.serialize();
+        let child_bytes = input.child.serialize();
+        let root_x_bytes = input.root_x.serialize();
+        let root_y_bytes = input.root_y.serialize();
+        let event_x_bytes = input.event_x.serialize();
+        let event_y_bytes = input.event_y.serialize();
+        let state_bytes = input.state.serialize();
+        let same_screen_bytes = input.same_screen.serialize();
+        let device_id_bytes = input.device_id.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
-            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], device_id[0]
+            response_type_bytes[0], detail_bytes[0], sequence_bytes[0], sequence_bytes[1], time_bytes[0], time_bytes[1], time_bytes[2], time_bytes[3],
+            root_bytes[0], root_bytes[1], root_bytes[2], root_bytes[3], event_bytes[0], event_bytes[1], event_bytes[2], event_bytes[3],
+            child_bytes[0], child_bytes[1], child_bytes[2], child_bytes[3], root_x_bytes[0], root_x_bytes[1], root_y_bytes[0], root_y_bytes[1],
+            event_x_bytes[0], event_x_bytes[1], event_y_bytes[0], event_y_bytes[1], state_bytes[0], state_bytes[1], same_screen_bytes[0], device_id_bytes[0]
         ]
     }
 }
@@ -11824,16 +11824,16 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceFocusInEvent {
 }
 impl From<&DeviceFocusInEvent> for [u8; 32] {
     fn from(input: &DeviceFocusInEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = u8::from(input.detail).serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let window = input.window.serialize();
-        let mode = u8::from(input.mode).serialize();
-        let device_id = input.device_id.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = u8::from(input.detail).serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let window_bytes = input.window.serialize();
+        let mode_bytes = u8::from(input.mode).serialize();
+        let device_id_bytes = input.device_id.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            window[0], window[1], window[2], window[3], mode[0], device_id[0], 0, 0,
+            response_type_bytes[0], detail_bytes[0], sequence_bytes[0], sequence_bytes[1], time_bytes[0], time_bytes[1], time_bytes[2], time_bytes[3],
+            window_bytes[0], window_bytes[1], window_bytes[2], window_bytes[3], mode_bytes[0], device_id_bytes[0], 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -11893,16 +11893,16 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceFocusOutEvent {
 }
 impl From<&DeviceFocusOutEvent> for [u8; 32] {
     fn from(input: &DeviceFocusOutEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = u8::from(input.detail).serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let window = input.window.serialize();
-        let mode = u8::from(input.mode).serialize();
-        let device_id = input.device_id.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = u8::from(input.detail).serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let window_bytes = input.window.serialize();
+        let mode_bytes = u8::from(input.mode).serialize();
+        let device_id_bytes = input.device_id.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            window[0], window[1], window[2], window[3], mode[0], device_id[0], 0, 0,
+            response_type_bytes[0], detail_bytes[0], sequence_bytes[0], sequence_bytes[1], time_bytes[0], time_bytes[1], time_bytes[2], time_bytes[3],
+            window_bytes[0], window_bytes[1], window_bytes[2], window_bytes[3], mode_bytes[0], device_id_bytes[0], 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -11973,25 +11973,25 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ProximityInEvent {
 }
 impl From<&ProximityInEvent> for [u8; 32] {
     fn from(input: &ProximityInEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let event = input.event.serialize();
-        let child = input.child.serialize();
-        let root_x = input.root_x.serialize();
-        let root_y = input.root_y.serialize();
-        let event_x = input.event_x.serialize();
-        let event_y = input.event_y.serialize();
-        let state = input.state.serialize();
-        let same_screen = input.same_screen.serialize();
-        let device_id = input.device_id.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let event_bytes = input.event.serialize();
+        let child_bytes = input.child.serialize();
+        let root_x_bytes = input.root_x.serialize();
+        let root_y_bytes = input.root_y.serialize();
+        let event_x_bytes = input.event_x.serialize();
+        let event_y_bytes = input.event_y.serialize();
+        let state_bytes = input.state.serialize();
+        let same_screen_bytes = input.same_screen.serialize();
+        let device_id_bytes = input.device_id.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
-            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], device_id[0]
+            response_type_bytes[0], detail_bytes[0], sequence_bytes[0], sequence_bytes[1], time_bytes[0], time_bytes[1], time_bytes[2], time_bytes[3],
+            root_bytes[0], root_bytes[1], root_bytes[2], root_bytes[3], event_bytes[0], event_bytes[1], event_bytes[2], event_bytes[3],
+            child_bytes[0], child_bytes[1], child_bytes[2], child_bytes[3], root_x_bytes[0], root_x_bytes[1], root_y_bytes[0], root_y_bytes[1],
+            event_x_bytes[0], event_x_bytes[1], event_y_bytes[0], event_y_bytes[1], state_bytes[0], state_bytes[1], same_screen_bytes[0], device_id_bytes[0]
         ]
     }
 }
@@ -12060,25 +12060,25 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ProximityOutEvent {
 }
 impl From<&ProximityOutEvent> for [u8; 32] {
     fn from(input: &ProximityOutEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let event = input.event.serialize();
-        let child = input.child.serialize();
-        let root_x = input.root_x.serialize();
-        let root_y = input.root_y.serialize();
-        let event_x = input.event_x.serialize();
-        let event_y = input.event_y.serialize();
-        let state = input.state.serialize();
-        let same_screen = input.same_screen.serialize();
-        let device_id = input.device_id.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let event_bytes = input.event.serialize();
+        let child_bytes = input.child.serialize();
+        let root_x_bytes = input.root_x.serialize();
+        let root_y_bytes = input.root_y.serialize();
+        let event_x_bytes = input.event_x.serialize();
+        let event_y_bytes = input.event_y.serialize();
+        let state_bytes = input.state.serialize();
+        let same_screen_bytes = input.same_screen.serialize();
+        let device_id_bytes = input.device_id.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
-            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], device_id[0]
+            response_type_bytes[0], detail_bytes[0], sequence_bytes[0], sequence_bytes[1], time_bytes[0], time_bytes[1], time_bytes[2], time_bytes[3],
+            root_bytes[0], root_bytes[1], root_bytes[2], root_bytes[3], event_bytes[0], event_bytes[1], event_bytes[2], event_bytes[3],
+            child_bytes[0], child_bytes[1], child_bytes[2], child_bytes[3], root_x_bytes[0], root_x_bytes[1], root_y_bytes[0], root_y_bytes[1],
+            event_x_bytes[0], event_x_bytes[1], event_y_bytes[0], event_y_bytes[1], state_bytes[0], state_bytes[1], same_screen_bytes[0], device_id_bytes[0]
         ]
     }
 }
@@ -12238,20 +12238,20 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceStateNotifyEvent {
 }
 impl From<&DeviceStateNotifyEvent> for [u8; 32] {
     fn from(input: &DeviceStateNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let device_id = input.device_id.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let num_keys = input.num_keys.serialize();
-        let num_buttons = input.num_buttons.serialize();
-        let num_valuators = input.num_valuators.serialize();
-        let classes_reported = input.classes_reported.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let device_id_bytes = input.device_id.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let num_keys_bytes = input.num_keys.serialize();
+        let num_buttons_bytes = input.num_buttons.serialize();
+        let num_valuators_bytes = input.num_valuators.serialize();
+        let classes_reported_bytes = input.classes_reported.serialize();
         let valuators_0 = input.valuators[0].serialize();
         let valuators_1 = input.valuators[1].serialize();
         let valuators_2 = input.valuators[2].serialize();
         [
-            response_type[0], device_id[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            num_keys[0], num_buttons[0], num_valuators[0], classes_reported[0], input.buttons[0], input.buttons[1], input.buttons[2], input.buttons[3],
+            response_type_bytes[0], device_id_bytes[0], sequence_bytes[0], sequence_bytes[1], time_bytes[0], time_bytes[1], time_bytes[2], time_bytes[3],
+            num_keys_bytes[0], num_buttons_bytes[0], num_valuators_bytes[0], classes_reported_bytes[0], input.buttons[0], input.buttons[1], input.buttons[2], input.buttons[3],
             input.keys[0], input.keys[1], input.keys[2], input.keys[3], valuators_0[0], valuators_0[1], valuators_0[2], valuators_0[3],
             valuators_1[0], valuators_1[1], valuators_1[2], valuators_1[3], valuators_2[0], valuators_2[1], valuators_2[2], valuators_2[3]
         ]
@@ -12311,16 +12311,16 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceMappingNotifyEvent {
 }
 impl From<&DeviceMappingNotifyEvent> for [u8; 32] {
     fn from(input: &DeviceMappingNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let device_id = input.device_id.serialize();
-        let sequence = input.sequence.serialize();
-        let request = u8::from(input.request).serialize();
-        let first_keycode = input.first_keycode.serialize();
-        let count = input.count.serialize();
-        let time = input.time.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let device_id_bytes = input.device_id.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let request_bytes = u8::from(input.request).serialize();
+        let first_keycode_bytes = input.first_keycode.serialize();
+        let count_bytes = input.count.serialize();
+        let time_bytes = input.time.serialize();
         [
-            response_type[0], device_id[0], sequence[0], sequence[1], request[0], first_keycode[0], count[0], 0,
-            time[0], time[1], time[2], time[3], 0, 0, 0, 0,
+            response_type_bytes[0], device_id_bytes[0], sequence_bytes[0], sequence_bytes[1], request_bytes[0], first_keycode_bytes[0], count_bytes[0], 0,
+            time_bytes[0], time_bytes[1], time_bytes[2], time_bytes[3], 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -12437,14 +12437,14 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ChangeDeviceNotifyEvent {
 }
 impl From<&ChangeDeviceNotifyEvent> for [u8; 32] {
     fn from(input: &ChangeDeviceNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let device_id = input.device_id.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let request = u8::from(input.request).serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let device_id_bytes = input.device_id.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let request_bytes = u8::from(input.request).serialize();
         [
-            response_type[0], device_id[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            request[0], 0, 0, 0, 0, 0, 0, 0,
+            response_type_bytes[0], device_id_bytes[0], sequence_bytes[0], sequence_bytes[1], time_bytes[0], time_bytes[1], time_bytes[2], time_bytes[3],
+            request_bytes[0], 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -12552,11 +12552,11 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceKeyStateNotifyEvent {
 }
 impl From<&DeviceKeyStateNotifyEvent> for [u8; 32] {
     fn from(input: &DeviceKeyStateNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let device_id = input.device_id.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let device_id_bytes = input.device_id.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], device_id[0], sequence[0], sequence[1], input.keys[0], input.keys[1], input.keys[2], input.keys[3],
+            response_type_bytes[0], device_id_bytes[0], sequence_bytes[0], sequence_bytes[1], input.keys[0], input.keys[1], input.keys[2], input.keys[3],
             input.keys[4], input.keys[5], input.keys[6], input.keys[7], input.keys[8], input.keys[9], input.keys[10], input.keys[11],
             input.keys[12], input.keys[13], input.keys[14], input.keys[15], input.keys[16], input.keys[17], input.keys[18], input.keys[19],
             input.keys[20], input.keys[21], input.keys[22], input.keys[23], input.keys[24], input.keys[25], input.keys[26], input.keys[27]
@@ -12665,11 +12665,11 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceButtonStateNotifyEvent 
 }
 impl From<&DeviceButtonStateNotifyEvent> for [u8; 32] {
     fn from(input: &DeviceButtonStateNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let device_id = input.device_id.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let device_id_bytes = input.device_id.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], device_id[0], sequence[0], sequence[1], input.buttons[0], input.buttons[1], input.buttons[2], input.buttons[3],
+            response_type_bytes[0], device_id_bytes[0], sequence_bytes[0], sequence_bytes[1], input.buttons[0], input.buttons[1], input.buttons[2], input.buttons[3],
             input.buttons[4], input.buttons[5], input.buttons[6], input.buttons[7], input.buttons[8], input.buttons[9], input.buttons[10], input.buttons[11],
             input.buttons[12], input.buttons[13], input.buttons[14], input.buttons[15], input.buttons[16], input.buttons[17], input.buttons[18], input.buttons[19],
             input.buttons[20], input.buttons[21], input.buttons[22], input.buttons[23], input.buttons[24], input.buttons[25], input.buttons[26], input.buttons[27]
@@ -12802,15 +12802,15 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DevicePresenceNotifyEvent {
 }
 impl From<&DevicePresenceNotifyEvent> for [u8; 32] {
     fn from(input: &DevicePresenceNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let devchange = u8::from(input.devchange).serialize();
-        let device_id = input.device_id.serialize();
-        let control = input.control.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let devchange_bytes = u8::from(input.devchange).serialize();
+        let device_id_bytes = input.device_id.serialize();
+        let control_bytes = input.control.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            devchange[0], device_id[0], control[0], control[1], 0, 0, 0, 0,
+            response_type_bytes[0], 0, sequence_bytes[0], sequence_bytes[1], time_bytes[0], time_bytes[1], time_bytes[2], time_bytes[3],
+            devchange_bytes[0], device_id_bytes[0], control_bytes[0], control_bytes[1], 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
         ]
@@ -12867,17 +12867,17 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DevicePropertyNotifyEvent {
 }
 impl From<&DevicePropertyNotifyEvent> for [u8; 32] {
     fn from(input: &DevicePropertyNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let state = u8::from(input.state).serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let property = input.property.serialize();
-        let device_id = input.device_id.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let state_bytes = u8::from(input.state).serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let property_bytes = input.property.serialize();
+        let device_id_bytes = input.device_id.serialize();
         [
-            response_type[0], state[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            property[0], property[1], property[2], property[3], 0, 0, 0, 0,
+            response_type_bytes[0], state_bytes[0], sequence_bytes[0], sequence_bytes[1], time_bytes[0], time_bytes[1], time_bytes[2], time_bytes[3],
+            property_bytes[0], property_bytes[1], property_bytes[2], property_bytes[3], 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, device_id[0]
+            0, 0, 0, 0, 0, 0, 0, device_id_bytes[0]
         ]
     }
 }
@@ -15532,11 +15532,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for DeviceError {
 }
 impl From<&DeviceError> for [u8; 32] {
     fn from(input: &DeviceError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -15584,11 +15584,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for EventError {
 }
 impl From<&EventError> for [u8; 32] {
     fn from(input: &EventError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -15636,11 +15636,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for ModeError {
 }
 impl From<&ModeError> for [u8; 32] {
     fn from(input: &ModeError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -15688,11 +15688,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for DeviceBusyError {
 }
 impl From<&DeviceBusyError> for [u8; 32] {
     fn from(input: &DeviceBusyError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
@@ -15740,11 +15740,11 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for ClassError {
 }
 impl From<&ClassError> for [u8; 32] {
     fn from(input: &ClassError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
+            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], /* trailing padding */ 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0

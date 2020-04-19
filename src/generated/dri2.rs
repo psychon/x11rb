@@ -1243,20 +1243,20 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for BufferSwapCompleteEvent {
 }
 impl From<&BufferSwapCompleteEvent> for [u8; 32] {
     fn from(input: &BufferSwapCompleteEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let event_type = u16::from(input.event_type).serialize();
-        let drawable = input.drawable.serialize();
-        let ust_hi = input.ust_hi.serialize();
-        let ust_lo = input.ust_lo.serialize();
-        let msc_hi = input.msc_hi.serialize();
-        let msc_lo = input.msc_lo.serialize();
-        let sbc = input.sbc.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let event_type_bytes = u16::from(input.event_type).serialize();
+        let drawable_bytes = input.drawable.serialize();
+        let ust_hi_bytes = input.ust_hi.serialize();
+        let ust_lo_bytes = input.ust_lo.serialize();
+        let msc_hi_bytes = input.msc_hi.serialize();
+        let msc_lo_bytes = input.msc_lo.serialize();
+        let sbc_bytes = input.sbc.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], event_type[0], event_type[1], 0, 0,
-            drawable[0], drawable[1], drawable[2], drawable[3], ust_hi[0], ust_hi[1], ust_hi[2], ust_hi[3],
-            ust_lo[0], ust_lo[1], ust_lo[2], ust_lo[3], msc_hi[0], msc_hi[1], msc_hi[2], msc_hi[3],
-            msc_lo[0], msc_lo[1], msc_lo[2], msc_lo[3], sbc[0], sbc[1], sbc[2], sbc[3]
+            response_type_bytes[0], 0, sequence_bytes[0], sequence_bytes[1], event_type_bytes[0], event_type_bytes[1], 0, 0,
+            drawable_bytes[0], drawable_bytes[1], drawable_bytes[2], drawable_bytes[3], ust_hi_bytes[0], ust_hi_bytes[1], ust_hi_bytes[2], ust_hi_bytes[3],
+            ust_lo_bytes[0], ust_lo_bytes[1], ust_lo_bytes[2], ust_lo_bytes[3], msc_hi_bytes[0], msc_hi_bytes[1], msc_hi_bytes[2], msc_hi_bytes[3],
+            msc_lo_bytes[0], msc_lo_bytes[1], msc_lo_bytes[2], msc_lo_bytes[3], sbc_bytes[0], sbc_bytes[1], sbc_bytes[2], sbc_bytes[3]
         ]
     }
 }
@@ -1304,11 +1304,11 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for InvalidateBuffersEvent {
 }
 impl From<&InvalidateBuffersEvent> for [u8; 32] {
     fn from(input: &InvalidateBuffersEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let drawable = input.drawable.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let drawable_bytes = input.drawable.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], drawable[0], drawable[1], drawable[2], drawable[3],
+            response_type_bytes[0], 0, sequence_bytes[0], sequence_bytes[1], drawable_bytes[0], drawable_bytes[1], drawable_bytes[2], drawable_bytes[3],
             /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
