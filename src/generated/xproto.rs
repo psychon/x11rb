@@ -7964,7 +7964,7 @@ pub struct CreateWindowAux {
 }
 impl Serialize for CreateWindowAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+    fn serialize(&self) -> Self::Bytes {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -8287,7 +8287,7 @@ pub struct ChangeWindowAttributesAux {
 }
 impl Serialize for ChangeWindowAttributesAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+    fn serialize(&self) -> Self::Bytes {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -9265,7 +9265,7 @@ pub struct ConfigureWindowAux {
 }
 impl Serialize for ConfigureWindowAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+    fn serialize(&self) -> Self::Bytes {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -14438,7 +14438,7 @@ pub struct CreateGCAux {
 }
 impl Serialize for CreateGCAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+    fn serialize(&self) -> Self::Bytes {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -14801,7 +14801,7 @@ pub struct ChangeGCAux {
 }
 impl Serialize for ChangeGCAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+    fn serialize(&self) -> Self::Bytes {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -18370,7 +18370,7 @@ pub struct ChangeKeyboardControlAux {
 }
 impl Serialize for ChangeKeyboardControlAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+    fn serialize(&self) -> Self::Bytes {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result

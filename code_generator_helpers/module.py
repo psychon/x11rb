@@ -1359,7 +1359,7 @@ class Module(object):
         self.out("impl Serialize for %s {", name)
         with Indent(self.out):
             self.out("type Bytes = Vec<u8>;")
-            self.out("fn serialize(&self) -> Vec<u8> {")
+            self.out("fn serialize(&self) -> Self::Bytes {")
             with Indent(self.out):
                 self.out("let mut result = Vec::new();")
                 self.out("self.serialize_into(&mut result);")

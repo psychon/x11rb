@@ -1036,7 +1036,7 @@ pub struct CreateAlarmAux {
 }
 impl Serialize for CreateAlarmAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+    fn serialize(&self) -> Self::Bytes {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -1169,7 +1169,7 @@ pub struct ChangeAlarmAux {
 }
 impl Serialize for ChangeAlarmAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+    fn serialize(&self) -> Self::Bytes {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result

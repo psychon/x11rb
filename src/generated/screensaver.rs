@@ -406,7 +406,7 @@ pub struct SetAttributesAux {
 }
 impl Serialize for SetAttributesAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+    fn serialize(&self) -> Self::Bytes {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result

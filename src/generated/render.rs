@@ -2001,7 +2001,7 @@ pub struct CreatePictureAux {
 }
 impl Serialize for CreatePictureAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+    fn serialize(&self) -> Self::Bytes {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -2228,7 +2228,7 @@ pub struct ChangePictureAux {
 }
 impl Serialize for ChangePictureAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+    fn serialize(&self) -> Self::Bytes {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result

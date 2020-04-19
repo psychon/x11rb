@@ -6945,7 +6945,7 @@ pub struct SelectEventsAux {
 }
 impl Serialize for SelectEventsAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+    fn serialize(&self) -> Self::Bytes {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -7900,7 +7900,7 @@ pub struct SetMapAux {
 }
 impl Serialize for SetMapAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+    fn serialize(&self) -> Self::Bytes {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -8813,7 +8813,7 @@ pub struct SetNamesAux {
 }
 impl Serialize for SetNamesAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+    fn serialize(&self) -> Self::Bytes {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
