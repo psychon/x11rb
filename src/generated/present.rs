@@ -1150,8 +1150,8 @@ impl TryParse for RedirectNotifyEvent {
         let mut notifies = Vec::new();
         while !remaining.is_empty() {
             let (v, new_remaining) = Notify::try_parse(remaining)?;
-            notifies.push(v);
             remaining = new_remaining;
+            notifies.push(v);
         }
         let result = RedirectNotifyEvent { response_type, extension, sequence, length, event_type, update_window, event, event_window, window, pixmap, serial, valid_region, update_region, valid_rect, update_rect, x_off, y_off, target_crtc, wait_fence, idle_fence, options, target_msc, divisor, remainder, notifies };
         Ok((result, remaining))

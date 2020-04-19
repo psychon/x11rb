@@ -1417,8 +1417,8 @@ impl TryParse for GetDeviceMotionEventsReply {
         let mut events = Vec::with_capacity(list_length);
         for _ in 0..list_length {
             let (v, new_remaining) = DeviceTimeCoord::try_parse(remaining, num_axes)?;
-            events.push(v);
             remaining = new_remaining;
+            events.push(v);
         }
         let device_mode = device_mode.try_into()?;
         let result = GetDeviceMotionEventsReply { response_type, xi_reply_type, sequence, length, num_axes, device_mode, events };

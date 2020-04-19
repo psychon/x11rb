@@ -898,8 +898,8 @@ class Module(object):
 
                     with Indent(self.out):
                         self.out("let (v, new_remaining) = %s::try_parse(%s)?;", rust_type, ", ".join(try_parse_args))
-                        self.out("%s.push(v);", field_name)
                         self.out("remaining = new_remaining;")
+                        self.out("%s.push(v);", field_name)
                     self.out("}")
 
                 parts.append(field_name)
