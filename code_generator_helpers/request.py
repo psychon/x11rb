@@ -323,7 +323,7 @@ def request_implementation(module, obj, name, fds, fds_is_list):
                 if code_generator_helpers.module.is_bool(field.type) or \
                         (name == ('xcb', 'InternAtom') and field_name == 'only_if_exists'):
                     module.out("let %s = (%s as u8).serialize();", field_bytes, rust_variable)
-                elif field.enum is not None:
+                elif field.enum is not None and not hasattr(field, 'lenfield_for_switch'):
                     field_type = module._field_type(field)
                     module.out("let %s = %s::from(%s).serialize();", field_bytes, field_type, rust_variable)
                 else:

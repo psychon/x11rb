@@ -7206,7 +7206,7 @@ where
     let property_bytes = property.serialize();
     let type_bytes = type_.serialize();
     let device_id_bytes = device_id.serialize();
-    let format_bytes = u8::from(format).serialize();
+    let format_bytes = format.serialize();
     let mode_bytes = u8::from(mode).serialize();
     let num_items_bytes = num_items.serialize();
     let mut request0 = [
@@ -10806,7 +10806,7 @@ where
     let length_so_far = 0;
     let deviceid_bytes = deviceid.serialize();
     let mode_bytes = u8::from(mode).serialize();
-    let format_bytes = u8::from(format).serialize();
+    let format_bytes = format.serialize();
     let property_bytes = property.serialize();
     let type_bytes = type_.serialize();
     let num_items_bytes = num_items.serialize();
