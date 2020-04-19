@@ -7952,7 +7952,7 @@ pub struct CreateWindowAux {
     pub border_pixel: Option<u32>,
     pub bit_gravity: Option<u32>,
     pub win_gravity: Option<u32>,
-    pub backing_store: Option<u32>,
+    pub backing_store: Option<BackingStore>,
     pub backing_planes: Option<u32>,
     pub backing_pixel: Option<u32>,
     pub override_redirect: Option<Bool32>,
@@ -7989,7 +7989,7 @@ impl Serialize for CreateWindowAux {
             value.serialize_into(bytes);
         }
         if let Some(ref value) = self.backing_store {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.backing_planes {
             value.serialize_into(bytes);
@@ -8102,7 +8102,7 @@ impl CreateWindowAux {
         self
     }
     /// Set the `backing_store` field of this structure.
-    pub fn backing_store<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn backing_store<I>(mut self, value: I) -> Self where I: Into<Option<BackingStore>> {
         self.backing_store = value.into();
         self
     }
@@ -8275,7 +8275,7 @@ pub struct ChangeWindowAttributesAux {
     pub border_pixel: Option<u32>,
     pub bit_gravity: Option<u32>,
     pub win_gravity: Option<u32>,
-    pub backing_store: Option<u32>,
+    pub backing_store: Option<BackingStore>,
     pub backing_planes: Option<u32>,
     pub backing_pixel: Option<u32>,
     pub override_redirect: Option<Bool32>,
@@ -8312,7 +8312,7 @@ impl Serialize for ChangeWindowAttributesAux {
             value.serialize_into(bytes);
         }
         if let Some(ref value) = self.backing_store {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.backing_planes {
             value.serialize_into(bytes);
@@ -8425,7 +8425,7 @@ impl ChangeWindowAttributesAux {
         self
     }
     /// Set the `backing_store` field of this structure.
-    pub fn backing_store<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn backing_store<I>(mut self, value: I) -> Self where I: Into<Option<BackingStore>> {
         self.backing_store = value.into();
         self
     }
@@ -9261,7 +9261,7 @@ pub struct ConfigureWindowAux {
     pub height: Option<u32>,
     pub border_width: Option<u32>,
     pub sibling: Option<Window>,
-    pub stack_mode: Option<u32>,
+    pub stack_mode: Option<StackMode>,
 }
 impl Serialize for ConfigureWindowAux {
     type Bytes = Vec<u8>;
@@ -9290,7 +9290,7 @@ impl Serialize for ConfigureWindowAux {
             value.serialize_into(bytes);
         }
         if let Some(ref value) = self.stack_mode {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
     }
 }
@@ -9355,7 +9355,7 @@ impl ConfigureWindowAux {
         self
     }
     /// Set the `stack_mode` field of this structure.
-    pub fn stack_mode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn stack_mode<I>(mut self, value: I) -> Self where I: Into<Option<StackMode>> {
         self.stack_mode = value.into();
         self
     }
@@ -14412,29 +14412,29 @@ pub const CREATE_GC_REQUEST: u8 = 55;
 /// Auxiliary and optional information for the `create_gc` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct CreateGCAux {
-    pub function: Option<u32>,
+    pub function: Option<GX>,
     pub plane_mask: Option<u32>,
     pub foreground: Option<u32>,
     pub background: Option<u32>,
     pub line_width: Option<u32>,
-    pub line_style: Option<u32>,
-    pub cap_style: Option<u32>,
-    pub join_style: Option<u32>,
-    pub fill_style: Option<u32>,
-    pub fill_rule: Option<u32>,
+    pub line_style: Option<LineStyle>,
+    pub cap_style: Option<CapStyle>,
+    pub join_style: Option<JoinStyle>,
+    pub fill_style: Option<FillStyle>,
+    pub fill_rule: Option<FillRule>,
     pub tile: Option<Pixmap>,
     pub stipple: Option<Pixmap>,
     pub tile_stipple_x_origin: Option<i32>,
     pub tile_stipple_y_origin: Option<i32>,
     pub font: Option<Font>,
-    pub subwindow_mode: Option<u32>,
+    pub subwindow_mode: Option<SubwindowMode>,
     pub graphics_exposures: Option<Bool32>,
     pub clip_x_origin: Option<i32>,
     pub clip_y_origin: Option<i32>,
     pub clip_mask: Option<Pixmap>,
     pub dash_offset: Option<u32>,
     pub dashes: Option<u32>,
-    pub arc_mode: Option<u32>,
+    pub arc_mode: Option<ArcMode>,
 }
 impl Serialize for CreateGCAux {
     type Bytes = Vec<u8>;
@@ -14445,7 +14445,7 @@ impl Serialize for CreateGCAux {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         if let Some(ref value) = self.function {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.plane_mask {
             value.serialize_into(bytes);
@@ -14460,19 +14460,19 @@ impl Serialize for CreateGCAux {
             value.serialize_into(bytes);
         }
         if let Some(ref value) = self.line_style {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.cap_style {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.join_style {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.fill_style {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.fill_rule {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.tile {
             value.serialize_into(bytes);
@@ -14490,7 +14490,7 @@ impl Serialize for CreateGCAux {
             value.serialize_into(bytes);
         }
         if let Some(ref value) = self.subwindow_mode {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.graphics_exposures {
             value.serialize_into(bytes);
@@ -14511,7 +14511,7 @@ impl Serialize for CreateGCAux {
             value.serialize_into(bytes);
         }
         if let Some(ref value) = self.arc_mode {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
     }
 }
@@ -14594,7 +14594,7 @@ impl CreateGCAux {
         mask
     }
     /// Set the `function` field of this structure.
-    pub fn function<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn function<I>(mut self, value: I) -> Self where I: Into<Option<GX>> {
         self.function = value.into();
         self
     }
@@ -14619,27 +14619,27 @@ impl CreateGCAux {
         self
     }
     /// Set the `line_style` field of this structure.
-    pub fn line_style<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn line_style<I>(mut self, value: I) -> Self where I: Into<Option<LineStyle>> {
         self.line_style = value.into();
         self
     }
     /// Set the `cap_style` field of this structure.
-    pub fn cap_style<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn cap_style<I>(mut self, value: I) -> Self where I: Into<Option<CapStyle>> {
         self.cap_style = value.into();
         self
     }
     /// Set the `join_style` field of this structure.
-    pub fn join_style<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn join_style<I>(mut self, value: I) -> Self where I: Into<Option<JoinStyle>> {
         self.join_style = value.into();
         self
     }
     /// Set the `fill_style` field of this structure.
-    pub fn fill_style<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn fill_style<I>(mut self, value: I) -> Self where I: Into<Option<FillStyle>> {
         self.fill_style = value.into();
         self
     }
     /// Set the `fill_rule` field of this structure.
-    pub fn fill_rule<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn fill_rule<I>(mut self, value: I) -> Self where I: Into<Option<FillRule>> {
         self.fill_rule = value.into();
         self
     }
@@ -14669,7 +14669,7 @@ impl CreateGCAux {
         self
     }
     /// Set the `subwindow_mode` field of this structure.
-    pub fn subwindow_mode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn subwindow_mode<I>(mut self, value: I) -> Self where I: Into<Option<SubwindowMode>> {
         self.subwindow_mode = value.into();
         self
     }
@@ -14704,7 +14704,7 @@ impl CreateGCAux {
         self
     }
     /// Set the `arc_mode` field of this structure.
-    pub fn arc_mode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn arc_mode<I>(mut self, value: I) -> Self where I: Into<Option<ArcMode>> {
         self.arc_mode = value.into();
         self
     }
@@ -14775,29 +14775,29 @@ pub const CHANGE_GC_REQUEST: u8 = 56;
 /// Auxiliary and optional information for the `change_gc` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ChangeGCAux {
-    pub function: Option<u32>,
+    pub function: Option<GX>,
     pub plane_mask: Option<u32>,
     pub foreground: Option<u32>,
     pub background: Option<u32>,
     pub line_width: Option<u32>,
-    pub line_style: Option<u32>,
-    pub cap_style: Option<u32>,
-    pub join_style: Option<u32>,
-    pub fill_style: Option<u32>,
-    pub fill_rule: Option<u32>,
+    pub line_style: Option<LineStyle>,
+    pub cap_style: Option<CapStyle>,
+    pub join_style: Option<JoinStyle>,
+    pub fill_style: Option<FillStyle>,
+    pub fill_rule: Option<FillRule>,
     pub tile: Option<Pixmap>,
     pub stipple: Option<Pixmap>,
     pub tile_stipple_x_origin: Option<i32>,
     pub tile_stipple_y_origin: Option<i32>,
     pub font: Option<Font>,
-    pub subwindow_mode: Option<u32>,
+    pub subwindow_mode: Option<SubwindowMode>,
     pub graphics_exposures: Option<Bool32>,
     pub clip_x_origin: Option<i32>,
     pub clip_y_origin: Option<i32>,
     pub clip_mask: Option<Pixmap>,
     pub dash_offset: Option<u32>,
     pub dashes: Option<u32>,
-    pub arc_mode: Option<u32>,
+    pub arc_mode: Option<ArcMode>,
 }
 impl Serialize for ChangeGCAux {
     type Bytes = Vec<u8>;
@@ -14808,7 +14808,7 @@ impl Serialize for ChangeGCAux {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         if let Some(ref value) = self.function {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.plane_mask {
             value.serialize_into(bytes);
@@ -14823,19 +14823,19 @@ impl Serialize for ChangeGCAux {
             value.serialize_into(bytes);
         }
         if let Some(ref value) = self.line_style {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.cap_style {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.join_style {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.fill_style {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.fill_rule {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.tile {
             value.serialize_into(bytes);
@@ -14853,7 +14853,7 @@ impl Serialize for ChangeGCAux {
             value.serialize_into(bytes);
         }
         if let Some(ref value) = self.subwindow_mode {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.graphics_exposures {
             value.serialize_into(bytes);
@@ -14874,7 +14874,7 @@ impl Serialize for ChangeGCAux {
             value.serialize_into(bytes);
         }
         if let Some(ref value) = self.arc_mode {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
     }
 }
@@ -14957,7 +14957,7 @@ impl ChangeGCAux {
         mask
     }
     /// Set the `function` field of this structure.
-    pub fn function<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn function<I>(mut self, value: I) -> Self where I: Into<Option<GX>> {
         self.function = value.into();
         self
     }
@@ -14982,27 +14982,27 @@ impl ChangeGCAux {
         self
     }
     /// Set the `line_style` field of this structure.
-    pub fn line_style<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn line_style<I>(mut self, value: I) -> Self where I: Into<Option<LineStyle>> {
         self.line_style = value.into();
         self
     }
     /// Set the `cap_style` field of this structure.
-    pub fn cap_style<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn cap_style<I>(mut self, value: I) -> Self where I: Into<Option<CapStyle>> {
         self.cap_style = value.into();
         self
     }
     /// Set the `join_style` field of this structure.
-    pub fn join_style<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn join_style<I>(mut self, value: I) -> Self where I: Into<Option<JoinStyle>> {
         self.join_style = value.into();
         self
     }
     /// Set the `fill_style` field of this structure.
-    pub fn fill_style<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn fill_style<I>(mut self, value: I) -> Self where I: Into<Option<FillStyle>> {
         self.fill_style = value.into();
         self
     }
     /// Set the `fill_rule` field of this structure.
-    pub fn fill_rule<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn fill_rule<I>(mut self, value: I) -> Self where I: Into<Option<FillRule>> {
         self.fill_rule = value.into();
         self
     }
@@ -15032,7 +15032,7 @@ impl ChangeGCAux {
         self
     }
     /// Set the `subwindow_mode` field of this structure.
-    pub fn subwindow_mode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn subwindow_mode<I>(mut self, value: I) -> Self where I: Into<Option<SubwindowMode>> {
         self.subwindow_mode = value.into();
         self
     }
@@ -15067,7 +15067,7 @@ impl ChangeGCAux {
         self
     }
     /// Set the `arc_mode` field of this structure.
-    pub fn arc_mode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn arc_mode<I>(mut self, value: I) -> Self where I: Into<Option<ArcMode>> {
         self.arc_mode = value.into();
         self
     }
@@ -18364,9 +18364,9 @@ pub struct ChangeKeyboardControlAux {
     pub bell_pitch: Option<i32>,
     pub bell_duration: Option<i32>,
     pub led: Option<u32>,
-    pub led_mode: Option<u32>,
+    pub led_mode: Option<LedMode>,
     pub key: Option<Keycode32>,
-    pub auto_repeat_mode: Option<u32>,
+    pub auto_repeat_mode: Option<AutoRepeatMode>,
 }
 impl Serialize for ChangeKeyboardControlAux {
     type Bytes = Vec<u8>;
@@ -18392,13 +18392,13 @@ impl Serialize for ChangeKeyboardControlAux {
             value.serialize_into(bytes);
         }
         if let Some(ref value) = self.led_mode {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.key {
             value.serialize_into(bytes);
         }
         if let Some(ref value) = self.auto_repeat_mode {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
     }
 }
@@ -18461,7 +18461,7 @@ impl ChangeKeyboardControlAux {
         self
     }
     /// Set the `led_mode` field of this structure.
-    pub fn led_mode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn led_mode<I>(mut self, value: I) -> Self where I: Into<Option<LedMode>> {
         self.led_mode = value.into();
         self
     }
@@ -18471,7 +18471,7 @@ impl ChangeKeyboardControlAux {
         self
     }
     /// Set the `auto_repeat_mode` field of this structure.
-    pub fn auto_repeat_mode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn auto_repeat_mode<I>(mut self, value: I) -> Self where I: Into<Option<AutoRepeatMode>> {
         self.auto_repeat_mode = value.into();
         self
     }

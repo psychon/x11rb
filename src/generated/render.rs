@@ -1985,7 +1985,7 @@ pub const CREATE_PICTURE_REQUEST: u8 = 4;
 /// Auxiliary and optional information for the `create_picture` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct CreatePictureAux {
-    pub repeat: Option<u32>,
+    pub repeat: Option<Repeat>,
     pub alphamap: Option<Picture>,
     pub alphaxorigin: Option<i32>,
     pub alphayorigin: Option<i32>,
@@ -1993,9 +1993,9 @@ pub struct CreatePictureAux {
     pub clipyorigin: Option<i32>,
     pub clipmask: Option<xproto::Pixmap>,
     pub graphicsexposure: Option<u32>,
-    pub subwindowmode: Option<u32>,
-    pub polyedge: Option<u32>,
-    pub polymode: Option<u32>,
+    pub subwindowmode: Option<xproto::SubwindowMode>,
+    pub polyedge: Option<PolyEdge>,
+    pub polymode: Option<PolyMode>,
     pub dither: Option<xproto::Atom>,
     pub componentalpha: Option<u32>,
 }
@@ -2008,7 +2008,7 @@ impl Serialize for CreatePictureAux {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         if let Some(ref value) = self.repeat {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.alphamap {
             value.serialize_into(bytes);
@@ -2032,13 +2032,13 @@ impl Serialize for CreatePictureAux {
             value.serialize_into(bytes);
         }
         if let Some(ref value) = self.subwindowmode {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.polyedge {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.polymode {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.dither {
             value.serialize_into(bytes);
@@ -2097,7 +2097,7 @@ impl CreatePictureAux {
         mask
     }
     /// Set the `repeat` field of this structure.
-    pub fn repeat<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn repeat<I>(mut self, value: I) -> Self where I: Into<Option<Repeat>> {
         self.repeat = value.into();
         self
     }
@@ -2137,17 +2137,17 @@ impl CreatePictureAux {
         self
     }
     /// Set the `subwindowmode` field of this structure.
-    pub fn subwindowmode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn subwindowmode<I>(mut self, value: I) -> Self where I: Into<Option<xproto::SubwindowMode>> {
         self.subwindowmode = value.into();
         self
     }
     /// Set the `polyedge` field of this structure.
-    pub fn polyedge<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn polyedge<I>(mut self, value: I) -> Self where I: Into<Option<PolyEdge>> {
         self.polyedge = value.into();
         self
     }
     /// Set the `polymode` field of this structure.
-    pub fn polymode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn polymode<I>(mut self, value: I) -> Self where I: Into<Option<PolyMode>> {
         self.polymode = value.into();
         self
     }
@@ -2212,7 +2212,7 @@ pub const CHANGE_PICTURE_REQUEST: u8 = 5;
 /// Auxiliary and optional information for the `change_picture` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ChangePictureAux {
-    pub repeat: Option<u32>,
+    pub repeat: Option<Repeat>,
     pub alphamap: Option<Picture>,
     pub alphaxorigin: Option<i32>,
     pub alphayorigin: Option<i32>,
@@ -2220,9 +2220,9 @@ pub struct ChangePictureAux {
     pub clipyorigin: Option<i32>,
     pub clipmask: Option<xproto::Pixmap>,
     pub graphicsexposure: Option<u32>,
-    pub subwindowmode: Option<u32>,
-    pub polyedge: Option<u32>,
-    pub polymode: Option<u32>,
+    pub subwindowmode: Option<xproto::SubwindowMode>,
+    pub polyedge: Option<PolyEdge>,
+    pub polymode: Option<PolyMode>,
     pub dither: Option<xproto::Atom>,
     pub componentalpha: Option<u32>,
 }
@@ -2235,7 +2235,7 @@ impl Serialize for ChangePictureAux {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         if let Some(ref value) = self.repeat {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.alphamap {
             value.serialize_into(bytes);
@@ -2259,13 +2259,13 @@ impl Serialize for ChangePictureAux {
             value.serialize_into(bytes);
         }
         if let Some(ref value) = self.subwindowmode {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.polyedge {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.polymode {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.dither {
             value.serialize_into(bytes);
@@ -2324,7 +2324,7 @@ impl ChangePictureAux {
         mask
     }
     /// Set the `repeat` field of this structure.
-    pub fn repeat<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn repeat<I>(mut self, value: I) -> Self where I: Into<Option<Repeat>> {
         self.repeat = value.into();
         self
     }
@@ -2364,17 +2364,17 @@ impl ChangePictureAux {
         self
     }
     /// Set the `subwindowmode` field of this structure.
-    pub fn subwindowmode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn subwindowmode<I>(mut self, value: I) -> Self where I: Into<Option<xproto::SubwindowMode>> {
         self.subwindowmode = value.into();
         self
     }
     /// Set the `polyedge` field of this structure.
-    pub fn polyedge<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn polyedge<I>(mut self, value: I) -> Self where I: Into<Option<PolyEdge>> {
         self.polyedge = value.into();
         self
     }
     /// Set the `polymode` field of this structure.
-    pub fn polymode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn polymode<I>(mut self, value: I) -> Self where I: Into<Option<PolyMode>> {
         self.polymode = value.into();
         self
     }

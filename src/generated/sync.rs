@@ -1028,9 +1028,9 @@ pub const CREATE_ALARM_REQUEST: u8 = 8;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct CreateAlarmAux {
     pub counter: Option<Counter>,
-    pub value_type: Option<u32>,
+    pub value_type: Option<VALUETYPE>,
     pub value: Option<Int64>,
-    pub test_type: Option<u32>,
+    pub test_type: Option<TESTTYPE>,
     pub delta: Option<Int64>,
     pub events: Option<u32>,
 }
@@ -1046,13 +1046,13 @@ impl Serialize for CreateAlarmAux {
             value.serialize_into(bytes);
         }
         if let Some(ref value) = self.value_type {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.value {
             value.serialize_into(bytes);
         }
         if let Some(ref value) = self.test_type {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.delta {
             value.serialize_into(bytes);
@@ -1095,7 +1095,7 @@ impl CreateAlarmAux {
         self
     }
     /// Set the `valueType` field of this structure.
-    pub fn value_type<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn value_type<I>(mut self, value: I) -> Self where I: Into<Option<VALUETYPE>> {
         self.value_type = value.into();
         self
     }
@@ -1105,7 +1105,7 @@ impl CreateAlarmAux {
         self
     }
     /// Set the `testType` field of this structure.
-    pub fn test_type<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn test_type<I>(mut self, value: I) -> Self where I: Into<Option<TESTTYPE>> {
         self.test_type = value.into();
         self
     }
@@ -1161,9 +1161,9 @@ pub const CHANGE_ALARM_REQUEST: u8 = 9;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ChangeAlarmAux {
     pub counter: Option<Counter>,
-    pub value_type: Option<u32>,
+    pub value_type: Option<VALUETYPE>,
     pub value: Option<Int64>,
-    pub test_type: Option<u32>,
+    pub test_type: Option<TESTTYPE>,
     pub delta: Option<Int64>,
     pub events: Option<u32>,
 }
@@ -1179,13 +1179,13 @@ impl Serialize for ChangeAlarmAux {
             value.serialize_into(bytes);
         }
         if let Some(ref value) = self.value_type {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.value {
             value.serialize_into(bytes);
         }
         if let Some(ref value) = self.test_type {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.delta {
             value.serialize_into(bytes);
@@ -1228,7 +1228,7 @@ impl ChangeAlarmAux {
         self
     }
     /// Set the `valueType` field of this structure.
-    pub fn value_type<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn value_type<I>(mut self, value: I) -> Self where I: Into<Option<VALUETYPE>> {
         self.value_type = value.into();
         self
     }
@@ -1238,7 +1238,7 @@ impl ChangeAlarmAux {
         self
     }
     /// Set the `testType` field of this structure.
-    pub fn test_type<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn test_type<I>(mut self, value: I) -> Self where I: Into<Option<TESTTYPE>> {
         self.test_type = value.into();
         self
     }

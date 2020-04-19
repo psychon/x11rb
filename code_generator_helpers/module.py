@@ -1107,7 +1107,17 @@ class Module(object):
                 else:
                     field = case.only_field
                     field_type = self._to_complex_owned_rust_type(field)
-                    self.out.indent("pub %s: %s<%s>,", self._aux_field_name(field), self.option_name, field_type)
+                    enum_name = None
+                    if field.enum is not None:
+                        enum_name = self.outer_module.get_type(field.enum).name
+                    if enum_name is None or enum_name == ("xcb", "Gravity"):
+                        self.out.indent("pub %s: %s<%s>,", self._aux_field_name(field), self.option_name, field_type)
+                        field.rust_enum_name = None
+                    else:
+                        enum_name = self._name(enum_name)
+                        self.out.indent("pub %s: %s<%s>,", self._aux_field_name(field),
+                                        self.option_name, enum_name)
+                        field.rust_enum_name = enum_name
         else:
             self.out("pub enum %s {", name)
             for case in switch_type.bitcases:
@@ -1380,7 +1390,12 @@ class Module(object):
                             for field in case.type.fields:
                                 if field.visible:
                                     assert field == case.only_field, field
-                                    self.out("value.serialize_into(bytes);")
+                                    if field.rust_enum_name is None:
+                                        self.out("value.serialize_into(bytes);")
+                                    else:
+                                        field_type = self._to_complex_owned_rust_type(field)
+                                        self.out("%s::from(*value).serialize_into(bytes);",
+                                                 field_type)
                                 else:
                                     serialise_align_pad(self.out, field, "bytes")
                         self.out("}")
@@ -1423,7 +1438,10 @@ class Module(object):
                     field = case.only_field
                     aux_name = self._aux_field_name(field)
                     field_name = field.field_name
-                    field_type = self._to_complex_owned_rust_type(field)
+                    if field.rust_enum_name is None:
+                        field_type = self._to_complex_owned_rust_type(field)
+                    else:
+                        field_type = field.rust_enum_name
                 self.out("/// Set the `%s` field of this structure.", field_name)
                 self.out("pub fn %s<I>(mut self, value: I) -> Self where I: Into<Option<%s>> {",
                          aux_name, field_type)

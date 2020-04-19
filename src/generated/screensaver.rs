@@ -394,7 +394,7 @@ pub struct SetAttributesAux {
     pub border_pixel: Option<u32>,
     pub bit_gravity: Option<u32>,
     pub win_gravity: Option<u32>,
-    pub backing_store: Option<u32>,
+    pub backing_store: Option<xproto::BackingStore>,
     pub backing_planes: Option<u32>,
     pub backing_pixel: Option<u32>,
     pub override_redirect: Option<xproto::Bool32>,
@@ -431,7 +431,7 @@ impl Serialize for SetAttributesAux {
             value.serialize_into(bytes);
         }
         if let Some(ref value) = self.backing_store {
-            value.serialize_into(bytes);
+            u32::from(*value).serialize_into(bytes);
         }
         if let Some(ref value) = self.backing_planes {
             value.serialize_into(bytes);
@@ -544,7 +544,7 @@ impl SetAttributesAux {
         self
     }
     /// Set the `backing_store` field of this structure.
-    pub fn backing_store<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn backing_store<I>(mut self, value: I) -> Self where I: Into<Option<xproto::BackingStore>> {
         self.backing_store = value.into();
         self
     }
