@@ -602,7 +602,8 @@ class Module(object):
                 result_type = self._to_complex_rust_type(field, None, '')
                 if union.is_eventstruct:
                     result_type += "Event"
-                self.out("pub fn as_%s(&self) -> %s {", self._lower_snake_name(('xcb', field.field_name)), result_type)
+                variant_name = camel_case_to_lower_snake(field.field_name)
+                self.out("pub fn as_%s(&self) -> %s {", variant_name, result_type)
                 with Indent(self.out):
                     self.out("fn do_the_parse(remaining: &[u8]) -> Result<%s, ParseError> {", result_type)
                     with Indent(self.out):

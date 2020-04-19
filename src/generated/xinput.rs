@@ -15772,7 +15772,7 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for BarrierLeaveEvent {
 #[derive(Debug, Copy, Clone)]
 pub struct EventForSend([u8; 32]);
 impl EventForSend {
-    pub fn as_xproto_device_valuator(&self) -> DeviceValuatorEvent {
+    pub fn as_device_valuator(&self) -> DeviceValuatorEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceValuatorEvent, ParseError> {
             let (event, remaining) = DeviceValuatorEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15780,7 +15780,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_key_press(&self) -> DeviceKeyPressEvent {
+    pub fn as_device_key_press(&self) -> DeviceKeyPressEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceKeyPressEvent, ParseError> {
             let (event, remaining) = DeviceKeyPressEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15788,7 +15788,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_key_release(&self) -> DeviceKeyReleaseEvent {
+    pub fn as_device_key_release(&self) -> DeviceKeyReleaseEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceKeyReleaseEvent, ParseError> {
             let (event, remaining) = DeviceKeyReleaseEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15796,7 +15796,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_button_press(&self) -> DeviceButtonPressEvent {
+    pub fn as_device_button_press(&self) -> DeviceButtonPressEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceButtonPressEvent, ParseError> {
             let (event, remaining) = DeviceButtonPressEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15804,7 +15804,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_button_release(&self) -> DeviceButtonReleaseEvent {
+    pub fn as_device_button_release(&self) -> DeviceButtonReleaseEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceButtonReleaseEvent, ParseError> {
             let (event, remaining) = DeviceButtonReleaseEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15812,7 +15812,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_motion_notify(&self) -> DeviceMotionNotifyEvent {
+    pub fn as_device_motion_notify(&self) -> DeviceMotionNotifyEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceMotionNotifyEvent, ParseError> {
             let (event, remaining) = DeviceMotionNotifyEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15820,7 +15820,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_focus_in(&self) -> DeviceFocusInEvent {
+    pub fn as_device_focus_in(&self) -> DeviceFocusInEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceFocusInEvent, ParseError> {
             let (event, remaining) = DeviceFocusInEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15828,7 +15828,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_focus_out(&self) -> DeviceFocusOutEvent {
+    pub fn as_device_focus_out(&self) -> DeviceFocusOutEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceFocusOutEvent, ParseError> {
             let (event, remaining) = DeviceFocusOutEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15836,7 +15836,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_proximity_in(&self) -> ProximityInEvent {
+    pub fn as_proximity_in(&self) -> ProximityInEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<ProximityInEvent, ParseError> {
             let (event, remaining) = ProximityInEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15844,7 +15844,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_proximity_out(&self) -> ProximityOutEvent {
+    pub fn as_proximity_out(&self) -> ProximityOutEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<ProximityOutEvent, ParseError> {
             let (event, remaining) = ProximityOutEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15852,7 +15852,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_state_notify(&self) -> DeviceStateNotifyEvent {
+    pub fn as_device_state_notify(&self) -> DeviceStateNotifyEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceStateNotifyEvent, ParseError> {
             let (event, remaining) = DeviceStateNotifyEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15860,7 +15860,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_mapping_notify(&self) -> DeviceMappingNotifyEvent {
+    pub fn as_device_mapping_notify(&self) -> DeviceMappingNotifyEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceMappingNotifyEvent, ParseError> {
             let (event, remaining) = DeviceMappingNotifyEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15868,7 +15868,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_change_device_notify(&self) -> ChangeDeviceNotifyEvent {
+    pub fn as_change_device_notify(&self) -> ChangeDeviceNotifyEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<ChangeDeviceNotifyEvent, ParseError> {
             let (event, remaining) = ChangeDeviceNotifyEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15876,7 +15876,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_key_state_notify(&self) -> DeviceKeyStateNotifyEvent {
+    pub fn as_device_key_state_notify(&self) -> DeviceKeyStateNotifyEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceKeyStateNotifyEvent, ParseError> {
             let (event, remaining) = DeviceKeyStateNotifyEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15884,7 +15884,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_button_state_notify(&self) -> DeviceButtonStateNotifyEvent {
+    pub fn as_device_button_state_notify(&self) -> DeviceButtonStateNotifyEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceButtonStateNotifyEvent, ParseError> {
             let (event, remaining) = DeviceButtonStateNotifyEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15892,7 +15892,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_presence_notify(&self) -> DevicePresenceNotifyEvent {
+    pub fn as_device_presence_notify(&self) -> DevicePresenceNotifyEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DevicePresenceNotifyEvent, ParseError> {
             let (event, remaining) = DevicePresenceNotifyEvent::try_parse(remaining)?;
             let _ = remaining;

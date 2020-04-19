@@ -3110,7 +3110,7 @@ impl Serialize for PermamentOverlayBehavior {
 #[derive(Debug, Copy, Clone)]
 pub struct Behavior([u8; 2]);
 impl Behavior {
-    pub fn as_xproto_common(&self) -> CommonBehavior {
+    pub fn as_common(&self) -> CommonBehavior {
         fn do_the_parse(remaining: &[u8]) -> Result<CommonBehavior, ParseError> {
             let (common, remaining) = CommonBehavior::try_parse(remaining)?;
             let _ = remaining;
@@ -3118,7 +3118,7 @@ impl Behavior {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_default(&self) -> DefaultBehavior {
+    pub fn as_default(&self) -> DefaultBehavior {
         fn do_the_parse(remaining: &[u8]) -> Result<DefaultBehavior, ParseError> {
             let (default, remaining) = DefaultBehavior::try_parse(remaining)?;
             let _ = remaining;
@@ -3126,7 +3126,7 @@ impl Behavior {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_lock(&self) -> LockBehavior {
+    pub fn as_lock(&self) -> LockBehavior {
         fn do_the_parse(remaining: &[u8]) -> Result<LockBehavior, ParseError> {
             let (lock, remaining) = LockBehavior::try_parse(remaining)?;
             let _ = remaining;
@@ -3134,7 +3134,7 @@ impl Behavior {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_radio_group(&self) -> RadioGroupBehavior {
+    pub fn as_radio_group(&self) -> RadioGroupBehavior {
         fn do_the_parse(remaining: &[u8]) -> Result<RadioGroupBehavior, ParseError> {
             let (radio_group, remaining) = RadioGroupBehavior::try_parse(remaining)?;
             let _ = remaining;
@@ -3142,7 +3142,7 @@ impl Behavior {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_overlay1(&self) -> OverlayBehavior {
+    pub fn as_overlay1(&self) -> OverlayBehavior {
         fn do_the_parse(remaining: &[u8]) -> Result<OverlayBehavior, ParseError> {
             let (overlay1, remaining) = OverlayBehavior::try_parse(remaining)?;
             let _ = remaining;
@@ -3150,7 +3150,7 @@ impl Behavior {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_overlay2(&self) -> OverlayBehavior {
+    pub fn as_overlay2(&self) -> OverlayBehavior {
         fn do_the_parse(remaining: &[u8]) -> Result<OverlayBehavior, ParseError> {
             let (overlay2, remaining) = OverlayBehavior::try_parse(remaining)?;
             let _ = remaining;
@@ -3158,7 +3158,7 @@ impl Behavior {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_permament_lock(&self) -> PermamentLockBehavior {
+    pub fn as_permament_lock(&self) -> PermamentLockBehavior {
         fn do_the_parse(remaining: &[u8]) -> Result<PermamentLockBehavior, ParseError> {
             let (permament_lock, remaining) = PermamentLockBehavior::try_parse(remaining)?;
             let _ = remaining;
@@ -3166,7 +3166,7 @@ impl Behavior {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_permament_radio_group(&self) -> PermamentRadioGroupBehavior {
+    pub fn as_permament_radio_group(&self) -> PermamentRadioGroupBehavior {
         fn do_the_parse(remaining: &[u8]) -> Result<PermamentRadioGroupBehavior, ParseError> {
             let (permament_radio_group, remaining) = PermamentRadioGroupBehavior::try_parse(remaining)?;
             let _ = remaining;
@@ -3174,7 +3174,7 @@ impl Behavior {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_permament_overlay1(&self) -> PermamentOverlayBehavior {
+    pub fn as_permament_overlay1(&self) -> PermamentOverlayBehavior {
         fn do_the_parse(remaining: &[u8]) -> Result<PermamentOverlayBehavior, ParseError> {
             let (permament_overlay1, remaining) = PermamentOverlayBehavior::try_parse(remaining)?;
             let _ = remaining;
@@ -3182,7 +3182,7 @@ impl Behavior {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_permament_overlay2(&self) -> PermamentOverlayBehavior {
+    pub fn as_permament_overlay2(&self) -> PermamentOverlayBehavior {
         fn do_the_parse(remaining: &[u8]) -> Result<PermamentOverlayBehavior, ParseError> {
             let (permament_overlay2, remaining) = PermamentOverlayBehavior::try_parse(remaining)?;
             let _ = remaining;
@@ -3190,7 +3190,7 @@ impl Behavior {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_type(&self) -> u8 {
+    pub fn as_type(&self) -> u8 {
         fn do_the_parse(remaining: &[u8]) -> Result<u8, ParseError> {
             let (type_, remaining) = u8::try_parse(remaining)?;
             let _ = remaining;
@@ -6325,7 +6325,7 @@ impl Serialize for SymInterpret {
 #[derive(Debug, Copy, Clone)]
 pub struct Action([u8; 8]);
 impl Action {
-    pub fn as_xproto_noaction(&self) -> SANoAction {
+    pub fn as_noaction(&self) -> SANoAction {
         fn do_the_parse(remaining: &[u8]) -> Result<SANoAction, ParseError> {
             let (noaction, remaining) = SANoAction::try_parse(remaining)?;
             let _ = remaining;
@@ -6333,7 +6333,7 @@ impl Action {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_setmods(&self) -> SASetMods {
+    pub fn as_setmods(&self) -> SASetMods {
         fn do_the_parse(remaining: &[u8]) -> Result<SASetMods, ParseError> {
             let (setmods, remaining) = SASetMods::try_parse(remaining)?;
             let _ = remaining;
@@ -6341,7 +6341,7 @@ impl Action {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_latchmods(&self) -> SALatchMods {
+    pub fn as_latchmods(&self) -> SALatchMods {
         fn do_the_parse(remaining: &[u8]) -> Result<SALatchMods, ParseError> {
             let (latchmods, remaining) = SALatchMods::try_parse(remaining)?;
             let _ = remaining;
@@ -6349,7 +6349,7 @@ impl Action {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_lockmods(&self) -> SALockMods {
+    pub fn as_lockmods(&self) -> SALockMods {
         fn do_the_parse(remaining: &[u8]) -> Result<SALockMods, ParseError> {
             let (lockmods, remaining) = SALockMods::try_parse(remaining)?;
             let _ = remaining;
@@ -6357,7 +6357,7 @@ impl Action {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_setgroup(&self) -> SASetGroup {
+    pub fn as_setgroup(&self) -> SASetGroup {
         fn do_the_parse(remaining: &[u8]) -> Result<SASetGroup, ParseError> {
             let (setgroup, remaining) = SASetGroup::try_parse(remaining)?;
             let _ = remaining;
@@ -6365,7 +6365,7 @@ impl Action {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_latchgroup(&self) -> SALatchGroup {
+    pub fn as_latchgroup(&self) -> SALatchGroup {
         fn do_the_parse(remaining: &[u8]) -> Result<SALatchGroup, ParseError> {
             let (latchgroup, remaining) = SALatchGroup::try_parse(remaining)?;
             let _ = remaining;
@@ -6373,7 +6373,7 @@ impl Action {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_lockgroup(&self) -> SALockGroup {
+    pub fn as_lockgroup(&self) -> SALockGroup {
         fn do_the_parse(remaining: &[u8]) -> Result<SALockGroup, ParseError> {
             let (lockgroup, remaining) = SALockGroup::try_parse(remaining)?;
             let _ = remaining;
@@ -6381,7 +6381,7 @@ impl Action {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_moveptr(&self) -> SAMovePtr {
+    pub fn as_moveptr(&self) -> SAMovePtr {
         fn do_the_parse(remaining: &[u8]) -> Result<SAMovePtr, ParseError> {
             let (moveptr, remaining) = SAMovePtr::try_parse(remaining)?;
             let _ = remaining;
@@ -6389,7 +6389,7 @@ impl Action {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_ptrbtn(&self) -> SAPtrBtn {
+    pub fn as_ptrbtn(&self) -> SAPtrBtn {
         fn do_the_parse(remaining: &[u8]) -> Result<SAPtrBtn, ParseError> {
             let (ptrbtn, remaining) = SAPtrBtn::try_parse(remaining)?;
             let _ = remaining;
@@ -6397,7 +6397,7 @@ impl Action {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_lockptrbtn(&self) -> SALockPtrBtn {
+    pub fn as_lockptrbtn(&self) -> SALockPtrBtn {
         fn do_the_parse(remaining: &[u8]) -> Result<SALockPtrBtn, ParseError> {
             let (lockptrbtn, remaining) = SALockPtrBtn::try_parse(remaining)?;
             let _ = remaining;
@@ -6405,7 +6405,7 @@ impl Action {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_setptrdflt(&self) -> SASetPtrDflt {
+    pub fn as_setptrdflt(&self) -> SASetPtrDflt {
         fn do_the_parse(remaining: &[u8]) -> Result<SASetPtrDflt, ParseError> {
             let (setptrdflt, remaining) = SASetPtrDflt::try_parse(remaining)?;
             let _ = remaining;
@@ -6413,7 +6413,7 @@ impl Action {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_isolock(&self) -> SAIsoLock {
+    pub fn as_isolock(&self) -> SAIsoLock {
         fn do_the_parse(remaining: &[u8]) -> Result<SAIsoLock, ParseError> {
             let (isolock, remaining) = SAIsoLock::try_parse(remaining)?;
             let _ = remaining;
@@ -6421,7 +6421,7 @@ impl Action {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_terminate(&self) -> SATerminate {
+    pub fn as_terminate(&self) -> SATerminate {
         fn do_the_parse(remaining: &[u8]) -> Result<SATerminate, ParseError> {
             let (terminate, remaining) = SATerminate::try_parse(remaining)?;
             let _ = remaining;
@@ -6429,7 +6429,7 @@ impl Action {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_switchscreen(&self) -> SASwitchScreen {
+    pub fn as_switchscreen(&self) -> SASwitchScreen {
         fn do_the_parse(remaining: &[u8]) -> Result<SASwitchScreen, ParseError> {
             let (switchscreen, remaining) = SASwitchScreen::try_parse(remaining)?;
             let _ = remaining;
@@ -6437,7 +6437,7 @@ impl Action {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_setcontrols(&self) -> SASetControls {
+    pub fn as_setcontrols(&self) -> SASetControls {
         fn do_the_parse(remaining: &[u8]) -> Result<SASetControls, ParseError> {
             let (setcontrols, remaining) = SASetControls::try_parse(remaining)?;
             let _ = remaining;
@@ -6445,7 +6445,7 @@ impl Action {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_lockcontrols(&self) -> SALockControls {
+    pub fn as_lockcontrols(&self) -> SALockControls {
         fn do_the_parse(remaining: &[u8]) -> Result<SALockControls, ParseError> {
             let (lockcontrols, remaining) = SALockControls::try_parse(remaining)?;
             let _ = remaining;
@@ -6453,7 +6453,7 @@ impl Action {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_message(&self) -> SAActionMessage {
+    pub fn as_message(&self) -> SAActionMessage {
         fn do_the_parse(remaining: &[u8]) -> Result<SAActionMessage, ParseError> {
             let (message, remaining) = SAActionMessage::try_parse(remaining)?;
             let _ = remaining;
@@ -6461,7 +6461,7 @@ impl Action {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_redirect(&self) -> SARedirectKey {
+    pub fn as_redirect(&self) -> SARedirectKey {
         fn do_the_parse(remaining: &[u8]) -> Result<SARedirectKey, ParseError> {
             let (redirect, remaining) = SARedirectKey::try_parse(remaining)?;
             let _ = remaining;
@@ -6469,7 +6469,7 @@ impl Action {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_devbtn(&self) -> SADeviceBtn {
+    pub fn as_devbtn(&self) -> SADeviceBtn {
         fn do_the_parse(remaining: &[u8]) -> Result<SADeviceBtn, ParseError> {
             let (devbtn, remaining) = SADeviceBtn::try_parse(remaining)?;
             let _ = remaining;
@@ -6477,7 +6477,7 @@ impl Action {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_lockdevbtn(&self) -> SALockDeviceBtn {
+    pub fn as_lockdevbtn(&self) -> SALockDeviceBtn {
         fn do_the_parse(remaining: &[u8]) -> Result<SALockDeviceBtn, ParseError> {
             let (lockdevbtn, remaining) = SALockDeviceBtn::try_parse(remaining)?;
             let _ = remaining;
@@ -6485,7 +6485,7 @@ impl Action {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_devval(&self) -> SADeviceValuator {
+    pub fn as_devval(&self) -> SADeviceValuator {
         fn do_the_parse(remaining: &[u8]) -> Result<SADeviceValuator, ParseError> {
             let (devval, remaining) = SADeviceValuator::try_parse(remaining)?;
             let _ = remaining;
@@ -6493,7 +6493,7 @@ impl Action {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_type(&self) -> u8 {
+    pub fn as_type(&self) -> u8 {
         fn do_the_parse(remaining: &[u8]) -> Result<u8, ParseError> {
             let (type_, remaining) = u8::try_parse(remaining)?;
             let _ = remaining;

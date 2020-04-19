@@ -4448,7 +4448,7 @@ impl Serialize for LeaseNotify {
 #[derive(Debug, Copy, Clone)]
 pub struct NotifyData([u8; 28]);
 impl NotifyData {
-    pub fn as_xproto_cc(&self) -> CrtcChange {
+    pub fn as_cc(&self) -> CrtcChange {
         fn do_the_parse(remaining: &[u8]) -> Result<CrtcChange, ParseError> {
             let (cc, remaining) = CrtcChange::try_parse(remaining)?;
             let _ = remaining;
@@ -4456,7 +4456,7 @@ impl NotifyData {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_oc(&self) -> OutputChange {
+    pub fn as_oc(&self) -> OutputChange {
         fn do_the_parse(remaining: &[u8]) -> Result<OutputChange, ParseError> {
             let (oc, remaining) = OutputChange::try_parse(remaining)?;
             let _ = remaining;
@@ -4464,7 +4464,7 @@ impl NotifyData {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_op(&self) -> OutputProperty {
+    pub fn as_op(&self) -> OutputProperty {
         fn do_the_parse(remaining: &[u8]) -> Result<OutputProperty, ParseError> {
             let (op, remaining) = OutputProperty::try_parse(remaining)?;
             let _ = remaining;
@@ -4472,7 +4472,7 @@ impl NotifyData {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_pc(&self) -> ProviderChange {
+    pub fn as_pc(&self) -> ProviderChange {
         fn do_the_parse(remaining: &[u8]) -> Result<ProviderChange, ParseError> {
             let (pc, remaining) = ProviderChange::try_parse(remaining)?;
             let _ = remaining;
@@ -4480,7 +4480,7 @@ impl NotifyData {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_pp(&self) -> ProviderProperty {
+    pub fn as_pp(&self) -> ProviderProperty {
         fn do_the_parse(remaining: &[u8]) -> Result<ProviderProperty, ParseError> {
             let (pp, remaining) = ProviderProperty::try_parse(remaining)?;
             let _ = remaining;
@@ -4488,7 +4488,7 @@ impl NotifyData {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_rc(&self) -> ResourceChange {
+    pub fn as_rc(&self) -> ResourceChange {
         fn do_the_parse(remaining: &[u8]) -> Result<ResourceChange, ParseError> {
             let (rc, remaining) = ResourceChange::try_parse(remaining)?;
             let _ = remaining;
@@ -4496,7 +4496,7 @@ impl NotifyData {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_lc(&self) -> LeaseNotify {
+    pub fn as_lc(&self) -> LeaseNotify {
         fn do_the_parse(remaining: &[u8]) -> Result<LeaseNotify, ParseError> {
             let (lc, remaining) = LeaseNotify::try_parse(remaining)?;
             let _ = remaining;
