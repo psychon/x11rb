@@ -73,6 +73,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -858,6 +859,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCursorImageReply {
     pub response_type: u8,
@@ -1537,6 +1539,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FetchRegionReply {
     pub response_type: u8,
@@ -1745,6 +1748,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCursorNameReply {
     pub response_type: u8,
@@ -1795,6 +1799,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCursorImageAndNameReply {
     pub response_type: u8,
@@ -2169,166 +2174,134 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, client_major_version, client_minor_version)
     }
-
     fn xfixes_change_save_set(&self, mode: SaveSetMode, target: SaveSetTarget, map: SaveSetMapping, window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         change_save_set(self, mode, target, map, window)
     }
-
     fn xfixes_select_selection_input(&self, window: xproto::Window, selection: xproto::Atom, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_selection_input(self, window, selection, event_mask)
     }
-
     fn xfixes_select_cursor_input(&self, window: xproto::Window, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_cursor_input(self, window, event_mask)
     }
-
     fn xfixes_get_cursor_image(&self) -> Result<Cookie<'_, Self, GetCursorImageReply>, ConnectionError>
     {
         get_cursor_image(self)
     }
-
     fn xfixes_create_region<'c>(&'c self, region: Region, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_region(self, region, rectangles)
     }
-
     fn xfixes_create_region_from_bitmap(&self, region: Region, bitmap: xproto::Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_region_from_bitmap(self, region, bitmap)
     }
-
     fn xfixes_create_region_from_window(&self, region: Region, window: xproto::Window, kind: shape::SK) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_region_from_window(self, region, window, kind)
     }
-
     fn xfixes_create_region_from_gc(&self, region: Region, gc: xproto::Gcontext) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_region_from_gc(self, region, gc)
     }
-
     fn xfixes_create_region_from_picture(&self, region: Region, picture: render::Picture) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_region_from_picture(self, region, picture)
     }
-
     fn xfixes_destroy_region(&self, region: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_region(self, region)
     }
-
     fn xfixes_set_region<'c>(&'c self, region: Region, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_region(self, region, rectangles)
     }
-
     fn xfixes_copy_region(&self, source: Region, destination: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         copy_region(self, source, destination)
     }
-
     fn xfixes_union_region(&self, source1: Region, source2: Region, destination: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         union_region(self, source1, source2, destination)
     }
-
     fn xfixes_intersect_region(&self, source1: Region, source2: Region, destination: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         intersect_region(self, source1, source2, destination)
     }
-
     fn xfixes_subtract_region(&self, source1: Region, source2: Region, destination: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         subtract_region(self, source1, source2, destination)
     }
-
     fn xfixes_invert_region(&self, source: Region, bounds: xproto::Rectangle, destination: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         invert_region(self, source, bounds, destination)
     }
-
     fn xfixes_translate_region(&self, region: Region, dx: i16, dy: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         translate_region(self, region, dx, dy)
     }
-
     fn xfixes_region_extents(&self, source: Region, destination: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         region_extents(self, source, destination)
     }
-
     fn xfixes_fetch_region(&self, region: Region) -> Result<Cookie<'_, Self, FetchRegionReply>, ConnectionError>
     {
         fetch_region(self, region)
     }
-
     fn xfixes_set_gc_clip_region(&self, gc: xproto::Gcontext, region: Region, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_gc_clip_region(self, gc, region, x_origin, y_origin)
     }
-
     fn xfixes_set_window_shape_region(&self, dest: xproto::Window, dest_kind: shape::SK, x_offset: i16, y_offset: i16, region: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_window_shape_region(self, dest, dest_kind, x_offset, y_offset, region)
     }
-
     fn xfixes_set_picture_clip_region(&self, picture: render::Picture, region: Region, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_picture_clip_region(self, picture, region, x_origin, y_origin)
     }
-
     fn xfixes_set_cursor_name<'c>(&'c self, cursor: xproto::Cursor, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_cursor_name(self, cursor, name)
     }
-
     fn xfixes_get_cursor_name(&self, cursor: xproto::Cursor) -> Result<Cookie<'_, Self, GetCursorNameReply>, ConnectionError>
     {
         get_cursor_name(self, cursor)
     }
-
     fn xfixes_get_cursor_image_and_name(&self) -> Result<Cookie<'_, Self, GetCursorImageAndNameReply>, ConnectionError>
     {
         get_cursor_image_and_name(self)
     }
-
     fn xfixes_change_cursor(&self, source: xproto::Cursor, destination: xproto::Cursor) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         change_cursor(self, source, destination)
     }
-
     fn xfixes_change_cursor_by_name<'c>(&'c self, src: xproto::Cursor, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_cursor_by_name(self, src, name)
     }
-
     fn xfixes_expand_region(&self, source: Region, destination: Region, left: u16, right: u16, top: u16, bottom: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         expand_region(self, source, destination, left, right, top, bottom)
     }
-
     fn xfixes_hide_cursor(&self, window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         hide_cursor(self, window)
     }
-
     fn xfixes_show_cursor(&self, window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         show_cursor(self, window)
     }
-
     fn xfixes_create_pointer_barrier<'c>(&'c self, barrier: Barrier, window: xproto::Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: u32, devices: &[u16]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_pointer_barrier(self, barrier, window, x1, y1, x2, y2, directions, devices)
     }
-
     fn xfixes_delete_pointer_barrier(&self, barrier: Barrier) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_pointer_barrier(self, barrier)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

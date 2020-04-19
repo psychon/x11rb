@@ -447,7 +447,6 @@ def generate_request_code(module, obj, name, function_name):
     else:
         module.trait_out.indent("%s(%s)", function_name, ", ".join(arg_names))
     module.trait_out("}")
-    module.trait_out("")
 
     # Then emit the global function that actually does all the work
     if need_lifetime:
@@ -468,6 +467,7 @@ def generate_request_code(module, obj, name, function_name):
     module.out("}")
 
     if obj.reply:
+        module.out("")
         has_fds = any(field.isfd for field in obj.reply.fields)
         code_generator_helpers.module.emit_doc(module.out, obj.reply.doc)
         module.complex_type(obj.reply, module._name(name) + 'Reply', not has_fds, [])

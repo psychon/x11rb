@@ -734,6 +734,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InitializeReply {
     pub response_type: u8,
@@ -783,6 +784,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListSystemCountersReply {
     pub response_type: u8,
@@ -899,6 +901,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryCounterReply {
     pub response_type: u8,
@@ -1341,6 +1344,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryAlarmReply {
     pub response_type: u8,
@@ -1432,6 +1436,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPriorityReply {
     pub response_type: u8,
@@ -1601,6 +1606,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryFenceReply {
     pub response_type: u8,
@@ -1861,101 +1867,82 @@ pub trait ConnectionExt: RequestConnection {
     {
         initialize(self, desired_major_version, desired_minor_version)
     }
-
     fn sync_list_system_counters(&self) -> Result<Cookie<'_, Self, ListSystemCountersReply>, ConnectionError>
     {
         list_system_counters(self)
     }
-
     fn sync_create_counter(&self, id: Counter, initial_value: Int64) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_counter(self, id, initial_value)
     }
-
     fn sync_destroy_counter(&self, counter: Counter) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_counter(self, counter)
     }
-
     fn sync_query_counter(&self, counter: Counter) -> Result<Cookie<'_, Self, QueryCounterReply>, ConnectionError>
     {
         query_counter(self, counter)
     }
-
     fn sync_await_<'c>(&'c self, wait_list: &[Waitcondition]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         await_(self, wait_list)
     }
-
     fn sync_change_counter(&self, counter: Counter, amount: Int64) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         change_counter(self, counter, amount)
     }
-
     fn sync_set_counter(&self, counter: Counter, value: Int64) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_counter(self, counter, value)
     }
-
     fn sync_create_alarm<'c>(&'c self, id: Alarm, value_list: &CreateAlarmAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_alarm(self, id, value_list)
     }
-
     fn sync_change_alarm<'c>(&'c self, id: Alarm, value_list: &ChangeAlarmAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_alarm(self, id, value_list)
     }
-
     fn sync_destroy_alarm(&self, alarm: Alarm) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_alarm(self, alarm)
     }
-
     fn sync_query_alarm(&self, alarm: Alarm) -> Result<Cookie<'_, Self, QueryAlarmReply>, ConnectionError>
     {
         query_alarm(self, alarm)
     }
-
     fn sync_set_priority(&self, id: u32, priority: i32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_priority(self, id, priority)
     }
-
     fn sync_get_priority(&self, id: u32) -> Result<Cookie<'_, Self, GetPriorityReply>, ConnectionError>
     {
         get_priority(self, id)
     }
-
     fn sync_create_fence(&self, drawable: xproto::Drawable, fence: Fence, initially_triggered: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_fence(self, drawable, fence, initially_triggered)
     }
-
     fn sync_trigger_fence(&self, fence: Fence) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         trigger_fence(self, fence)
     }
-
     fn sync_reset_fence(&self, fence: Fence) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         reset_fence(self, fence)
     }
-
     fn sync_destroy_fence(&self, fence: Fence) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_fence(self, fence)
     }
-
     fn sync_query_fence(&self, fence: Fence) -> Result<Cookie<'_, Self, QueryFenceReply>, ConnectionError>
     {
         query_fence(self, fence)
     }
-
     fn sync_await_fence<'c>(&'c self, fence_list: &[Fence]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         await_fence(self, fence_list)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

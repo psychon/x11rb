@@ -430,6 +430,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -478,6 +479,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryClientsReply {
     pub response_type: u8,
@@ -531,6 +533,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryClientResourcesReply {
     pub response_type: u8,
@@ -584,6 +587,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryClientPixmapBytesReply {
     pub response_type: u8,
@@ -642,6 +646,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&specs_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryClientIdsReply {
     pub response_type: u8,
@@ -705,6 +710,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&specs_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryResourceBytesReply {
     pub response_type: u8,
@@ -738,31 +744,26 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, client_major, client_minor)
     }
-
     fn res_query_clients(&self) -> Result<Cookie<'_, Self, QueryClientsReply>, ConnectionError>
     {
         query_clients(self)
     }
-
     fn res_query_client_resources(&self, xid: u32) -> Result<Cookie<'_, Self, QueryClientResourcesReply>, ConnectionError>
     {
         query_client_resources(self, xid)
     }
-
     fn res_query_client_pixmap_bytes(&self, xid: u32) -> Result<Cookie<'_, Self, QueryClientPixmapBytesReply>, ConnectionError>
     {
         query_client_pixmap_bytes(self, xid)
     }
-
     fn res_query_client_ids<'c>(&'c self, specs: &[ClientIdSpec]) -> Result<Cookie<'c, Self, QueryClientIdsReply>, ConnectionError>
     {
         query_client_ids(self, specs)
     }
-
     fn res_query_resource_bytes<'c>(&'c self, client: u32, specs: &[ResourceIdSpec]) -> Result<Cookie<'c, Self, QueryResourceBytesReply>, ConnectionError>
     {
         query_resource_bytes(self, client, specs)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

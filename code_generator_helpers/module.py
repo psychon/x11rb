@@ -307,6 +307,7 @@ class Module(object):
         with Indent(self.out):
             self.out.copy_from(self.trait_out)
         self.out("}")
+        self.out("")
         self.out("impl<C: RequestConnection + ?Sized> ConnectionExt for C {}")
 
     def enum(self, enum, name):

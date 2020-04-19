@@ -63,6 +63,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetVersionReply {
     pub response_type: u8,
@@ -111,6 +112,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetXIDRangeReply {
     pub response_type: u8,
@@ -164,6 +166,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetXIDListReply {
     pub response_type: u8,
@@ -197,16 +200,14 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_version(self, client_major_version, client_minor_version)
     }
-
     fn xc_misc_get_xid_range(&self) -> Result<Cookie<'_, Self, GetXIDRangeReply>, ConnectionError>
     {
         get_xid_range(self)
     }
-
     fn xc_misc_get_xid_list(&self, count: u32) -> Result<Cookie<'_, Self, GetXIDListReply>, ConnectionError>
     {
         get_xid_list(self, count)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

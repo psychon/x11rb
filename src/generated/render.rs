@@ -1841,6 +1841,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -1890,6 +1891,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryPictFormatsReply {
     pub response_type: u8,
@@ -1953,6 +1955,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryPictIndexValuesReply {
     pub response_type: u8,
@@ -3364,6 +3367,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryFiltersReply {
     pub response_type: u8,
@@ -3874,156 +3878,126 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, client_major_version, client_minor_version)
     }
-
     fn render_query_pict_formats(&self) -> Result<Cookie<'_, Self, QueryPictFormatsReply>, ConnectionError>
     {
         query_pict_formats(self)
     }
-
     fn render_query_pict_index_values(&self, format: Pictformat) -> Result<Cookie<'_, Self, QueryPictIndexValuesReply>, ConnectionError>
     {
         query_pict_index_values(self, format)
     }
-
     fn render_create_picture<'c>(&'c self, pid: Picture, drawable: xproto::Drawable, format: Pictformat, value_list: &CreatePictureAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_picture(self, pid, drawable, format, value_list)
     }
-
     fn render_change_picture<'c>(&'c self, picture: Picture, value_list: &ChangePictureAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_picture(self, picture, value_list)
     }
-
     fn render_set_picture_clip_rectangles<'c>(&'c self, picture: Picture, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_picture_clip_rectangles(self, picture, clip_x_origin, clip_y_origin, rectangles)
     }
-
     fn render_free_picture(&self, picture: Picture) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         free_picture(self, picture)
     }
-
     fn render_composite(&self, op: PictOp, src: Picture, mask: Picture, dst: Picture, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         composite(self, op, src, mask, dst, src_x, src_y, mask_x, mask_y, dst_x, dst_y, width, height)
     }
-
     fn render_trapezoids<'c>(&'c self, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, traps: &[Trapezoid]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         trapezoids(self, op, src, dst, mask_format, src_x, src_y, traps)
     }
-
     fn render_triangles<'c>(&'c self, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, triangles: &[Triangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         self::triangles(self, op, src, dst, mask_format, src_x, src_y, triangles)
     }
-
     fn render_tri_strip<'c>(&'c self, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         tri_strip(self, op, src, dst, mask_format, src_x, src_y, points)
     }
-
     fn render_tri_fan<'c>(&'c self, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         tri_fan(self, op, src, dst, mask_format, src_x, src_y, points)
     }
-
     fn render_create_glyph_set(&self, gsid: Glyphset, format: Pictformat) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_glyph_set(self, gsid, format)
     }
-
     fn render_reference_glyph_set(&self, gsid: Glyphset, existing: Glyphset) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         reference_glyph_set(self, gsid, existing)
     }
-
     fn render_free_glyph_set(&self, glyphset: Glyphset) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         free_glyph_set(self, glyphset)
     }
-
     fn render_add_glyphs<'c>(&'c self, glyphset: Glyphset, glyphs_len: u32, glyphids: &[u32], glyphs: &[Glyphinfo], data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         add_glyphs(self, glyphset, glyphs_len, glyphids, glyphs, data)
     }
-
     fn render_free_glyphs<'c>(&'c self, glyphset: Glyphset, glyphs: &[Glyph]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         free_glyphs(self, glyphset, glyphs)
     }
-
     fn render_composite_glyphs8<'c>(&'c self, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         composite_glyphs8(self, op, src, dst, mask_format, glyphset, src_x, src_y, glyphcmds)
     }
-
     fn render_composite_glyphs16<'c>(&'c self, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         composite_glyphs16(self, op, src, dst, mask_format, glyphset, src_x, src_y, glyphcmds)
     }
-
     fn render_composite_glyphs32<'c>(&'c self, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         composite_glyphs32(self, op, src, dst, mask_format, glyphset, src_x, src_y, glyphcmds)
     }
-
     fn render_fill_rectangles<'c>(&'c self, op: PictOp, dst: Picture, color: Color, rects: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         fill_rectangles(self, op, dst, color, rects)
     }
-
     fn render_create_cursor(&self, cid: xproto::Cursor, source: Picture, x: u16, y: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_cursor(self, cid, source, x, y)
     }
-
     fn render_set_picture_transform(&self, picture: Picture, transform: Transform) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_picture_transform(self, picture, transform)
     }
-
     fn render_query_filters(&self, drawable: xproto::Drawable) -> Result<Cookie<'_, Self, QueryFiltersReply>, ConnectionError>
     {
         query_filters(self, drawable)
     }
-
     fn render_set_picture_filter<'c>(&'c self, picture: Picture, filter: &[u8], values: &[Fixed]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_picture_filter(self, picture, filter, values)
     }
-
     fn render_create_anim_cursor<'c>(&'c self, cid: xproto::Cursor, cursors: &[Animcursorelt]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_anim_cursor(self, cid, cursors)
     }
-
     fn render_add_traps<'c>(&'c self, picture: Picture, x_off: i16, y_off: i16, traps: &[Trap]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         add_traps(self, picture, x_off, y_off, traps)
     }
-
     fn render_create_solid_fill(&self, picture: Picture, color: Color) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_solid_fill(self, picture, color)
     }
-
     fn render_create_linear_gradient<'c>(&'c self, picture: Picture, p1: Pointfix, p2: Pointfix, num_stops: u32, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_linear_gradient(self, picture, p1, p2, num_stops, stops, colors)
     }
-
     fn render_create_radial_gradient<'c>(&'c self, picture: Picture, inner: Pointfix, outer: Pointfix, inner_radius: Fixed, outer_radius: Fixed, num_stops: u32, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_radial_gradient(self, picture, inner, outer, inner_radius, outer_radius, num_stops, stops, colors)
     }
-
     fn render_create_conical_gradient<'c>(&'c self, picture: Picture, center: Pointfix, angle: Fixed, num_stops: u32, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_conical_gradient(self, picture, center, angle, num_stops, stops, colors)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

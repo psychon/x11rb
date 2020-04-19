@@ -124,6 +124,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetExtensionVersionReply {
     pub response_type: u8,
@@ -861,6 +862,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListInputDevicesReply {
     pub response_type: u8,
@@ -964,6 +966,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OpenDeviceReply {
     pub response_type: u8,
@@ -1051,6 +1054,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceModeReply {
     pub response_type: u8,
@@ -1142,6 +1146,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSelectedExtensionEventsReply {
     pub response_type: u8,
@@ -1299,6 +1304,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceDontPropagateListReply {
     pub response_type: u8,
@@ -1393,6 +1399,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceMotionEventsReply {
     pub response_type: u8,
@@ -1459,6 +1466,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangeKeyboardDeviceReply {
     pub response_type: u8,
@@ -1515,6 +1523,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangePointerDeviceReply {
     pub response_type: u8,
@@ -1592,6 +1601,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&classes_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabDeviceReply {
     pub response_type: u8,
@@ -2026,6 +2036,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetDeviceFocusReply {
     pub response_type: u8,
@@ -3232,6 +3243,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetFeedbackControlReply {
     pub response_type: u8,
@@ -4161,6 +4173,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceKeyMappingReply {
     pub response_type: u8,
@@ -4250,6 +4263,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceModifierMappingReply {
     pub response_type: u8,
@@ -4310,6 +4324,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(keymaps), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceModifierMappingReply {
     pub response_type: u8,
@@ -4364,6 +4379,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceButtonMappingReply {
     pub response_type: u8,
@@ -4428,6 +4444,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(map), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceButtonMappingReply {
     pub response_type: u8,
@@ -5286,6 +5303,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryDeviceStateReply {
     pub response_type: u8,
@@ -5377,6 +5395,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&valuators_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceValuatorsReply {
     pub response_type: u8,
@@ -6227,6 +6246,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceControlReply {
     pub response_type: u8,
@@ -6976,6 +6996,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&control_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangeDeviceControlReply {
     pub response_type: u8,
@@ -7029,6 +7050,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListDevicePropertiesReply {
     pub response_type: u8,
@@ -7298,6 +7320,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum GetDevicePropertyItems {
     Data8(Vec<u8>),
@@ -7632,6 +7655,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIQueryPointerReply {
     pub response_type: u8,
@@ -8480,6 +8504,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIGetClientPointerReply {
     pub response_type: u8,
@@ -8712,6 +8737,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIQueryVersionReply {
     pub response_type: u8,
@@ -9895,6 +9921,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIQueryDeviceReply {
     pub response_type: u8,
@@ -9985,6 +10012,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIGetFocusReply {
     pub response_type: u8,
@@ -10127,6 +10155,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&mask_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIGrabDeviceReply {
     pub response_type: u8,
@@ -10586,6 +10615,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&mask_bytes), IoSlice::new(&modifiers_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIPassiveGrabDeviceReply {
     pub response_type: u8,
@@ -10687,6 +10717,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIListPropertiesReply {
     pub response_type: u8,
@@ -10890,6 +10921,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum XIGetPropertyItems {
     Data8(Vec<u8>),
@@ -11050,6 +11082,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIGetSelectedEventsReply {
     pub response_type: u8,
@@ -16391,306 +16424,246 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_extension_version(self, name)
     }
-
     fn xinput_list_input_devices(&self) -> Result<Cookie<'_, Self, ListInputDevicesReply>, ConnectionError>
     {
         list_input_devices(self)
     }
-
     fn xinput_open_device(&self, device_id: u8) -> Result<Cookie<'_, Self, OpenDeviceReply>, ConnectionError>
     {
         open_device(self, device_id)
     }
-
     fn xinput_close_device(&self, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         close_device(self, device_id)
     }
-
     fn xinput_set_device_mode(&self, device_id: u8, mode: ValuatorMode) -> Result<Cookie<'_, Self, SetDeviceModeReply>, ConnectionError>
     {
         set_device_mode(self, device_id, mode)
     }
-
     fn xinput_select_extension_event<'c>(&'c self, window: xproto::Window, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         select_extension_event(self, window, classes)
     }
-
     fn xinput_get_selected_extension_events(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetSelectedExtensionEventsReply>, ConnectionError>
     {
         get_selected_extension_events(self, window)
     }
-
     fn xinput_change_device_dont_propagate_list<'c>(&'c self, window: xproto::Window, mode: PropagateMode, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_device_dont_propagate_list(self, window, mode, classes)
     }
-
     fn xinput_get_device_dont_propagate_list(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetDeviceDontPropagateListReply>, ConnectionError>
     {
         get_device_dont_propagate_list(self, window)
     }
-
     fn xinput_get_device_motion_events(&self, start: xproto::Timestamp, stop: xproto::Timestamp, device_id: u8) -> Result<Cookie<'_, Self, GetDeviceMotionEventsReply>, ConnectionError>
     {
         get_device_motion_events(self, start, stop, device_id)
     }
-
     fn xinput_change_keyboard_device(&self, device_id: u8) -> Result<Cookie<'_, Self, ChangeKeyboardDeviceReply>, ConnectionError>
     {
         change_keyboard_device(self, device_id)
     }
-
     fn xinput_change_pointer_device(&self, x_axis: u8, y_axis: u8, device_id: u8) -> Result<Cookie<'_, Self, ChangePointerDeviceReply>, ConnectionError>
     {
         change_pointer_device(self, x_axis, y_axis, device_id)
     }
-
     fn xinput_grab_device<'c>(&'c self, grab_window: xproto::Window, time: xproto::Timestamp, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, owner_events: bool, device_id: u8, classes: &[EventClass]) -> Result<Cookie<'c, Self, GrabDeviceReply>, ConnectionError>
     {
         grab_device(self, grab_window, time, this_device_mode, other_device_mode, owner_events, device_id, classes)
     }
-
     fn xinput_ungrab_device(&self, time: xproto::Timestamp, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_device(self, time, device_id)
     }
-
     fn xinput_grab_device_key<'c>(&'c self, grab_window: xproto::Window, modifiers: u16, modifier_device: u8, grabbed_device: u8, key: u8, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         grab_device_key(self, grab_window, modifiers, modifier_device, grabbed_device, key, this_device_mode, other_device_mode, owner_events, classes)
     }
-
     fn xinput_ungrab_device_key(&self, grab_window: xproto::Window, modifiers: u16, modifier_device: u8, key: u8, grabbed_device: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_device_key(self, grab_window, modifiers, modifier_device, key, grabbed_device)
     }
-
     fn xinput_grab_device_button<'c>(&'c self, grab_window: xproto::Window, grabbed_device: u8, modifier_device: u8, modifiers: u16, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, button: u8, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         grab_device_button(self, grab_window, grabbed_device, modifier_device, modifiers, this_device_mode, other_device_mode, button, owner_events, classes)
     }
-
     fn xinput_ungrab_device_button(&self, grab_window: xproto::Window, modifiers: u16, modifier_device: u8, button: u8, grabbed_device: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_device_button(self, grab_window, modifiers, modifier_device, button, grabbed_device)
     }
-
     fn xinput_allow_device_events(&self, time: xproto::Timestamp, mode: DeviceInputMode, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         allow_device_events(self, time, mode, device_id)
     }
-
     fn xinput_get_device_focus(&self, device_id: u8) -> Result<Cookie<'_, Self, GetDeviceFocusReply>, ConnectionError>
     {
         get_device_focus(self, device_id)
     }
-
     fn xinput_set_device_focus(&self, focus: xproto::Window, time: xproto::Timestamp, revert_to: xproto::InputFocus, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_device_focus(self, focus, time, revert_to, device_id)
     }
-
     fn xinput_get_feedback_control(&self, device_id: u8) -> Result<Cookie<'_, Self, GetFeedbackControlReply>, ConnectionError>
     {
         get_feedback_control(self, device_id)
     }
-
     fn xinput_change_feedback_control(&self, mask: u32, device_id: u8, feedback_id: u8, feedback: FeedbackCtl) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         change_feedback_control(self, mask, device_id, feedback_id, feedback)
     }
-
     fn xinput_get_device_key_mapping(&self, device_id: u8, first_keycode: KeyCode, count: u8) -> Result<Cookie<'_, Self, GetDeviceKeyMappingReply>, ConnectionError>
     {
         get_device_key_mapping(self, device_id, first_keycode, count)
     }
-
     fn xinput_change_device_key_mapping<'c>(&'c self, device_id: u8, first_keycode: KeyCode, keysyms_per_keycode: u8, keycode_count: u8, keysyms: &[xproto::Keysym]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_device_key_mapping(self, device_id, first_keycode, keysyms_per_keycode, keycode_count, keysyms)
     }
-
     fn xinput_get_device_modifier_mapping(&self, device_id: u8) -> Result<Cookie<'_, Self, GetDeviceModifierMappingReply>, ConnectionError>
     {
         get_device_modifier_mapping(self, device_id)
     }
-
     fn xinput_set_device_modifier_mapping<'c>(&'c self, device_id: u8, keymaps: &[u8]) -> Result<Cookie<'c, Self, SetDeviceModifierMappingReply>, ConnectionError>
     {
         set_device_modifier_mapping(self, device_id, keymaps)
     }
-
     fn xinput_get_device_button_mapping(&self, device_id: u8) -> Result<Cookie<'_, Self, GetDeviceButtonMappingReply>, ConnectionError>
     {
         get_device_button_mapping(self, device_id)
     }
-
     fn xinput_set_device_button_mapping<'c>(&'c self, device_id: u8, map: &[u8]) -> Result<Cookie<'c, Self, SetDeviceButtonMappingReply>, ConnectionError>
     {
         set_device_button_mapping(self, device_id, map)
     }
-
     fn xinput_query_device_state(&self, device_id: u8) -> Result<Cookie<'_, Self, QueryDeviceStateReply>, ConnectionError>
     {
         query_device_state(self, device_id)
     }
-
     fn xinput_device_bell(&self, device_id: u8, feedback_id: u8, feedback_class: u8, percent: i8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         device_bell(self, device_id, feedback_id, feedback_class, percent)
     }
-
     fn xinput_set_device_valuators<'c>(&'c self, device_id: u8, first_valuator: u8, valuators: &[i32]) -> Result<Cookie<'c, Self, SetDeviceValuatorsReply>, ConnectionError>
     {
         set_device_valuators(self, device_id, first_valuator, valuators)
     }
-
     fn xinput_get_device_control(&self, control_id: DeviceControl, device_id: u8) -> Result<Cookie<'_, Self, GetDeviceControlReply>, ConnectionError>
     {
         get_device_control(self, control_id, device_id)
     }
-
     fn xinput_change_device_control(&self, control_id: DeviceControl, device_id: u8, control: DeviceCtl) -> Result<Cookie<'_, Self, ChangeDeviceControlReply>, ConnectionError>
     {
         change_device_control(self, control_id, device_id, control)
     }
-
     fn xinput_list_device_properties(&self, device_id: u8) -> Result<Cookie<'_, Self, ListDevicePropertiesReply>, ConnectionError>
     {
         list_device_properties(self, device_id)
     }
-
     fn xinput_change_device_property<'c>(&'c self, property: xproto::Atom, type_: xproto::Atom, device_id: u8, mode: xproto::PropMode, num_items: u32, items: &ChangeDevicePropertyAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_device_property(self, property, type_, device_id, mode, num_items, items)
     }
-
     fn xinput_delete_device_property(&self, property: xproto::Atom, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_device_property(self, property, device_id)
     }
-
     fn xinput_get_device_property(&self, property: xproto::Atom, type_: xproto::Atom, offset: u32, len: u32, device_id: u8, delete: bool) -> Result<Cookie<'_, Self, GetDevicePropertyReply>, ConnectionError>
     {
         get_device_property(self, property, type_, offset, len, device_id, delete)
     }
-
     fn xinput_xi_query_pointer(&self, window: xproto::Window, deviceid: DeviceId) -> Result<Cookie<'_, Self, XIQueryPointerReply>, ConnectionError>
     {
         xi_query_pointer(self, window, deviceid)
     }
-
     fn xinput_xi_warp_pointer(&self, src_win: xproto::Window, dst_win: xproto::Window, src_x: Fp1616, src_y: Fp1616, src_width: u16, src_height: u16, dst_x: Fp1616, dst_y: Fp1616, deviceid: DeviceId) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         xi_warp_pointer(self, src_win, dst_win, src_x, src_y, src_width, src_height, dst_x, dst_y, deviceid)
     }
-
     fn xinput_xi_change_cursor(&self, window: xproto::Window, cursor: xproto::Cursor, deviceid: DeviceId) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         xi_change_cursor(self, window, cursor, deviceid)
     }
-
     fn xinput_xi_change_hierarchy<'c>(&'c self, changes: &[HierarchyChange]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         xi_change_hierarchy(self, changes)
     }
-
     fn xinput_xi_set_client_pointer(&self, window: xproto::Window, deviceid: DeviceId) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         xi_set_client_pointer(self, window, deviceid)
     }
-
     fn xinput_xi_get_client_pointer(&self, window: xproto::Window) -> Result<Cookie<'_, Self, XIGetClientPointerReply>, ConnectionError>
     {
         xi_get_client_pointer(self, window)
     }
-
     fn xinput_xi_select_events<'c>(&'c self, window: xproto::Window, masks: &[EventMask]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         xi_select_events(self, window, masks)
     }
-
     fn xinput_xi_query_version(&self, major_version: u16, minor_version: u16) -> Result<Cookie<'_, Self, XIQueryVersionReply>, ConnectionError>
     {
         xi_query_version(self, major_version, minor_version)
     }
-
     fn xinput_xi_query_device(&self, deviceid: DeviceId) -> Result<Cookie<'_, Self, XIQueryDeviceReply>, ConnectionError>
     {
         xi_query_device(self, deviceid)
     }
-
     fn xinput_xi_set_focus(&self, window: xproto::Window, time: xproto::Timestamp, deviceid: DeviceId) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         xi_set_focus(self, window, time, deviceid)
     }
-
     fn xinput_xi_get_focus(&self, deviceid: DeviceId) -> Result<Cookie<'_, Self, XIGetFocusReply>, ConnectionError>
     {
         xi_get_focus(self, deviceid)
     }
-
     fn xinput_xi_grab_device<'c>(&'c self, window: xproto::Window, time: xproto::Timestamp, cursor: xproto::Cursor, deviceid: DeviceId, mode: xproto::GrabMode, paired_device_mode: xproto::GrabMode, owner_events: GrabOwner, mask: &[u32]) -> Result<Cookie<'c, Self, XIGrabDeviceReply>, ConnectionError>
     {
         xi_grab_device(self, window, time, cursor, deviceid, mode, paired_device_mode, owner_events, mask)
     }
-
     fn xinput_xi_ungrab_device(&self, time: xproto::Timestamp, deviceid: DeviceId) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         xi_ungrab_device(self, time, deviceid)
     }
-
     fn xinput_xi_allow_events(&self, time: xproto::Timestamp, deviceid: DeviceId, event_mode: EventMode, touchid: u32, grab_window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         xi_allow_events(self, time, deviceid, event_mode, touchid, grab_window)
     }
-
     fn xinput_xi_passive_grab_device<'c>(&'c self, time: xproto::Timestamp, grab_window: xproto::Window, cursor: xproto::Cursor, detail: u32, deviceid: DeviceId, grab_type: GrabType, grab_mode: GrabMode22, paired_device_mode: xproto::GrabMode, owner_events: GrabOwner, mask: &[u32], modifiers: &[u32]) -> Result<Cookie<'c, Self, XIPassiveGrabDeviceReply>, ConnectionError>
     {
         xi_passive_grab_device(self, time, grab_window, cursor, detail, deviceid, grab_type, grab_mode, paired_device_mode, owner_events, mask, modifiers)
     }
-
     fn xinput_xi_passive_ungrab_device<'c>(&'c self, grab_window: xproto::Window, detail: u32, deviceid: DeviceId, grab_type: GrabType, modifiers: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         xi_passive_ungrab_device(self, grab_window, detail, deviceid, grab_type, modifiers)
     }
-
     fn xinput_xi_list_properties(&self, deviceid: DeviceId) -> Result<Cookie<'_, Self, XIListPropertiesReply>, ConnectionError>
     {
         xi_list_properties(self, deviceid)
     }
-
     fn xinput_xi_change_property<'c>(&'c self, deviceid: DeviceId, mode: xproto::PropMode, property: xproto::Atom, type_: xproto::Atom, num_items: u32, items: &XIChangePropertyAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         xi_change_property(self, deviceid, mode, property, type_, num_items, items)
     }
-
     fn xinput_xi_delete_property(&self, deviceid: DeviceId, property: xproto::Atom) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         xi_delete_property(self, deviceid, property)
     }
-
     fn xinput_xi_get_property(&self, deviceid: DeviceId, delete: bool, property: xproto::Atom, type_: xproto::Atom, offset: u32, len: u32) -> Result<Cookie<'_, Self, XIGetPropertyReply>, ConnectionError>
     {
         xi_get_property(self, deviceid, delete, property, type_, offset, len)
     }
-
     fn xinput_xi_get_selected_events(&self, window: xproto::Window) -> Result<Cookie<'_, Self, XIGetSelectedEventsReply>, ConnectionError>
     {
         xi_get_selected_events(self, window)
     }
-
     fn xinput_xi_barrier_release_pointer<'c>(&'c self, barriers: &[BarrierReleasePointerInfo]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         xi_barrier_release_pointer(self, barriers)
     }
-
     fn xinput_send_extension_event<'c>(&'c self, destination: xproto::Window, device_id: u8, propagate: bool, events: &[EventForSend], classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         send_extension_event(self, destination, device_id, propagate, events, classes)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

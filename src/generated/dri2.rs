@@ -396,6 +396,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -454,6 +455,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ConnectReply {
     pub response_type: u8,
@@ -517,6 +519,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AuthenticateReply {
     pub response_type: u8,
@@ -631,6 +634,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&attachments_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetBuffersReply {
     pub response_type: u8,
@@ -703,6 +707,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CopyRegionReply {
     pub response_type: u8,
@@ -761,6 +766,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&attachments_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetBuffersWithFormatReply {
     pub response_type: u8,
@@ -848,6 +854,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SwapBuffersReply {
     pub response_type: u8,
@@ -901,6 +908,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetMSCReply {
     pub response_type: u8,
@@ -992,6 +1000,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WaitMSCReply {
     pub response_type: u8,
@@ -1063,6 +1072,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WaitSBCReply {
     pub response_type: u8,
@@ -1161,6 +1171,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetParamReply {
     pub response_type: u8,
@@ -1384,71 +1395,58 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, major_version, minor_version)
     }
-
     fn dri2_connect(&self, window: xproto::Window, driver_type: DriverType) -> Result<Cookie<'_, Self, ConnectReply>, ConnectionError>
     {
         connect(self, window, driver_type)
     }
-
     fn dri2_authenticate(&self, window: xproto::Window, magic: u32) -> Result<Cookie<'_, Self, AuthenticateReply>, ConnectionError>
     {
         authenticate(self, window, magic)
     }
-
     fn dri2_create_drawable(&self, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_drawable(self, drawable)
     }
-
     fn dri2_destroy_drawable(&self, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_drawable(self, drawable)
     }
-
     fn dri2_get_buffers<'c>(&'c self, drawable: xproto::Drawable, count: u32, attachments: &[u32]) -> Result<Cookie<'c, Self, GetBuffersReply>, ConnectionError>
     {
         get_buffers(self, drawable, count, attachments)
     }
-
     fn dri2_copy_region(&self, drawable: xproto::Drawable, region: u32, dest: u32, src: u32) -> Result<Cookie<'_, Self, CopyRegionReply>, ConnectionError>
     {
         copy_region(self, drawable, region, dest, src)
     }
-
     fn dri2_get_buffers_with_format<'c>(&'c self, drawable: xproto::Drawable, count: u32, attachments: &[AttachFormat]) -> Result<Cookie<'c, Self, GetBuffersWithFormatReply>, ConnectionError>
     {
         get_buffers_with_format(self, drawable, count, attachments)
     }
-
     fn dri2_swap_buffers(&self, drawable: xproto::Drawable, target_msc_hi: u32, target_msc_lo: u32, divisor_hi: u32, divisor_lo: u32, remainder_hi: u32, remainder_lo: u32) -> Result<Cookie<'_, Self, SwapBuffersReply>, ConnectionError>
     {
         swap_buffers(self, drawable, target_msc_hi, target_msc_lo, divisor_hi, divisor_lo, remainder_hi, remainder_lo)
     }
-
     fn dri2_get_msc(&self, drawable: xproto::Drawable) -> Result<Cookie<'_, Self, GetMSCReply>, ConnectionError>
     {
         get_msc(self, drawable)
     }
-
     fn dri2_wait_msc(&self, drawable: xproto::Drawable, target_msc_hi: u32, target_msc_lo: u32, divisor_hi: u32, divisor_lo: u32, remainder_hi: u32, remainder_lo: u32) -> Result<Cookie<'_, Self, WaitMSCReply>, ConnectionError>
     {
         wait_msc(self, drawable, target_msc_hi, target_msc_lo, divisor_hi, divisor_lo, remainder_hi, remainder_lo)
     }
-
     fn dri2_wait_sbc(&self, drawable: xproto::Drawable, target_sbc_hi: u32, target_sbc_lo: u32) -> Result<Cookie<'_, Self, WaitSBCReply>, ConnectionError>
     {
         wait_sbc(self, drawable, target_sbc_hi, target_sbc_lo)
     }
-
     fn dri2_swap_interval(&self, drawable: xproto::Drawable, interval: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         swap_interval(self, drawable, interval)
     }
-
     fn dri2_get_param(&self, drawable: xproto::Drawable, param: u32) -> Result<Cookie<'_, Self, GetParamReply>, ConnectionError>
     {
         get_param(self, drawable, param)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

@@ -261,6 +261,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -315,6 +316,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryInfoReply {
     pub response_type: u8,
@@ -809,31 +811,26 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, client_major_version, client_minor_version)
     }
-
     fn screensaver_query_info(&self, drawable: xproto::Drawable) -> Result<Cookie<'_, Self, QueryInfoReply>, ConnectionError>
     {
         query_info(self, drawable)
     }
-
     fn screensaver_select_input(&self, drawable: xproto::Drawable, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_input(self, drawable, event_mask)
     }
-
     fn screensaver_set_attributes<'c>(&'c self, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: xproto::WindowClass, depth: u8, visual: xproto::Visualid, value_list: &SetAttributesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_attributes(self, drawable, x, y, width, height, border_width, class, depth, visual, value_list)
     }
-
     fn screensaver_unset_attributes(&self, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         unset_attributes(self, drawable)
     }
-
     fn screensaver_suspend(&self, suspend: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         self::suspend(self, suspend)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

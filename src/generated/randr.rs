@@ -563,6 +563,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -706,6 +707,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetScreenConfigReply {
     pub response_type: u8,
@@ -880,6 +882,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetScreenInfoReply {
     pub response_type: u8,
@@ -950,6 +953,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetScreenSizeRangeReply {
     pub response_type: u8,
@@ -1244,6 +1248,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetScreenResourcesReply {
     pub response_type: u8,
@@ -1380,6 +1385,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetOutputInfoReply {
     pub response_type: u8,
@@ -1459,6 +1465,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListOutputPropertiesReply {
     pub response_type: u8,
@@ -1517,6 +1524,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryOutputPropertyReply {
     pub response_type: u8,
@@ -1726,6 +1734,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetOutputPropertyReply {
     pub response_type: u8,
@@ -1821,6 +1830,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateModeReply {
     pub response_type: u8,
@@ -1969,6 +1979,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCrtcInfoReply {
     pub response_type: u8,
@@ -2072,6 +2083,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&outputs_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetCrtcConfigReply {
     pub response_type: u8,
@@ -2126,6 +2138,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetCrtcGammaSizeReply {
     pub response_type: u8,
@@ -2178,6 +2191,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCrtcGammaReply {
     pub response_type: u8,
@@ -2279,6 +2293,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetScreenResourcesCurrentReply {
     pub response_type: u8,
@@ -2491,6 +2506,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCrtcTransformReply {
     pub response_type: u8,
@@ -2569,6 +2585,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPanningReply {
     pub response_type: u8,
@@ -2687,6 +2704,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetPanningReply {
     pub response_type: u8,
@@ -2772,6 +2790,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetOutputPrimaryReply {
     pub response_type: u8,
@@ -2823,6 +2842,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetProvidersReply {
     pub response_type: u8,
@@ -2952,6 +2972,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetProviderInfoReply {
     pub response_type: u8,
@@ -3096,6 +3117,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListProviderPropertiesReply {
     pub response_type: u8,
@@ -3154,6 +3176,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryProviderPropertyReply {
     pub response_type: u8,
@@ -3363,6 +3386,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetProviderPropertyReply {
     pub response_type: u8,
@@ -4147,6 +4171,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMonitorsReply {
     pub response_type: u8,
@@ -4286,6 +4311,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply_with_fds(&[IoSlice::new(&request0), IoSlice::new(&crtcs_bytes), IoSlice::new(&outputs_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, PartialEq, Eq)]
 pub struct CreateLeaseReply {
     pub response_type: u8,
@@ -4627,226 +4653,182 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, major_version, minor_version)
     }
-
     fn randr_set_screen_config(&self, window: xproto::Window, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, size_id: u16, rotation: u16, rate: u16) -> Result<Cookie<'_, Self, SetScreenConfigReply>, ConnectionError>
     {
         set_screen_config(self, window, timestamp, config_timestamp, size_id, rotation, rate)
     }
-
     fn randr_select_input(&self, window: xproto::Window, enable: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_input(self, window, enable)
     }
-
     fn randr_get_screen_info(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetScreenInfoReply>, ConnectionError>
     {
         get_screen_info(self, window)
     }
-
     fn randr_get_screen_size_range(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetScreenSizeRangeReply>, ConnectionError>
     {
         get_screen_size_range(self, window)
     }
-
     fn randr_set_screen_size(&self, window: xproto::Window, width: u16, height: u16, mm_width: u32, mm_height: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_screen_size(self, window, width, height, mm_width, mm_height)
     }
-
     fn randr_get_screen_resources(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetScreenResourcesReply>, ConnectionError>
     {
         get_screen_resources(self, window)
     }
-
     fn randr_get_output_info(&self, output: Output, config_timestamp: xproto::Timestamp) -> Result<Cookie<'_, Self, GetOutputInfoReply>, ConnectionError>
     {
         get_output_info(self, output, config_timestamp)
     }
-
     fn randr_list_output_properties(&self, output: Output) -> Result<Cookie<'_, Self, ListOutputPropertiesReply>, ConnectionError>
     {
         list_output_properties(self, output)
     }
-
     fn randr_query_output_property(&self, output: Output, property: xproto::Atom) -> Result<Cookie<'_, Self, QueryOutputPropertyReply>, ConnectionError>
     {
         query_output_property(self, output, property)
     }
-
     fn randr_configure_output_property<'c>(&'c self, output: Output, property: xproto::Atom, pending: bool, range: bool, values: &[i32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         configure_output_property(self, output, property, pending, range, values)
     }
-
     fn randr_change_output_property<'c>(&'c self, output: Output, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: xproto::PropMode, num_units: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_output_property(self, output, property, type_, format, mode, num_units, data)
     }
-
     fn randr_delete_output_property(&self, output: Output, property: xproto::Atom) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_output_property(self, output, property)
     }
-
     fn randr_get_output_property(&self, output: Output, property: xproto::Atom, type_: xproto::Atom, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Self, GetOutputPropertyReply>, ConnectionError>
     {
         get_output_property(self, output, property, type_, long_offset, long_length, delete, pending)
     }
-
     fn randr_create_mode<'c>(&'c self, window: xproto::Window, mode_info: ModeInfo, name: &[u8]) -> Result<Cookie<'c, Self, CreateModeReply>, ConnectionError>
     {
         create_mode(self, window, mode_info, name)
     }
-
     fn randr_destroy_mode(&self, mode: Mode) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_mode(self, mode)
     }
-
     fn randr_add_output_mode(&self, output: Output, mode: Mode) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         add_output_mode(self, output, mode)
     }
-
     fn randr_delete_output_mode(&self, output: Output, mode: Mode) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_output_mode(self, output, mode)
     }
-
     fn randr_get_crtc_info(&self, crtc: Crtc, config_timestamp: xproto::Timestamp) -> Result<Cookie<'_, Self, GetCrtcInfoReply>, ConnectionError>
     {
         get_crtc_info(self, crtc, config_timestamp)
     }
-
     fn randr_set_crtc_config<'c>(&'c self, crtc: Crtc, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, x: i16, y: i16, mode: Mode, rotation: u16, outputs: &[Output]) -> Result<Cookie<'c, Self, SetCrtcConfigReply>, ConnectionError>
     {
         set_crtc_config(self, crtc, timestamp, config_timestamp, x, y, mode, rotation, outputs)
     }
-
     fn randr_get_crtc_gamma_size(&self, crtc: Crtc) -> Result<Cookie<'_, Self, GetCrtcGammaSizeReply>, ConnectionError>
     {
         get_crtc_gamma_size(self, crtc)
     }
-
     fn randr_get_crtc_gamma(&self, crtc: Crtc) -> Result<Cookie<'_, Self, GetCrtcGammaReply>, ConnectionError>
     {
         get_crtc_gamma(self, crtc)
     }
-
     fn randr_set_crtc_gamma<'c>(&'c self, crtc: Crtc, size: u16, red: &[u16], green: &[u16], blue: &[u16]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_crtc_gamma(self, crtc, size, red, green, blue)
     }
-
     fn randr_get_screen_resources_current(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetScreenResourcesCurrentReply>, ConnectionError>
     {
         get_screen_resources_current(self, window)
     }
-
     fn randr_set_crtc_transform<'c>(&'c self, crtc: Crtc, transform: render::Transform, filter_name: &[u8], filter_params: &[render::Fixed]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_crtc_transform(self, crtc, transform, filter_name, filter_params)
     }
-
     fn randr_get_crtc_transform(&self, crtc: Crtc) -> Result<Cookie<'_, Self, GetCrtcTransformReply>, ConnectionError>
     {
         get_crtc_transform(self, crtc)
     }
-
     fn randr_get_panning(&self, crtc: Crtc) -> Result<Cookie<'_, Self, GetPanningReply>, ConnectionError>
     {
         get_panning(self, crtc)
     }
-
     fn randr_set_panning(&self, crtc: Crtc, timestamp: xproto::Timestamp, left: u16, top: u16, width: u16, height: u16, track_left: u16, track_top: u16, track_width: u16, track_height: u16, border_left: i16, border_top: i16, border_right: i16, border_bottom: i16) -> Result<Cookie<'_, Self, SetPanningReply>, ConnectionError>
     {
         set_panning(self, crtc, timestamp, left, top, width, height, track_left, track_top, track_width, track_height, border_left, border_top, border_right, border_bottom)
     }
-
     fn randr_set_output_primary(&self, window: xproto::Window, output: Output) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_output_primary(self, window, output)
     }
-
     fn randr_get_output_primary(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetOutputPrimaryReply>, ConnectionError>
     {
         get_output_primary(self, window)
     }
-
     fn randr_get_providers(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetProvidersReply>, ConnectionError>
     {
         get_providers(self, window)
     }
-
     fn randr_get_provider_info(&self, provider: Provider, config_timestamp: xproto::Timestamp) -> Result<Cookie<'_, Self, GetProviderInfoReply>, ConnectionError>
     {
         get_provider_info(self, provider, config_timestamp)
     }
-
     fn randr_set_provider_offload_sink(&self, provider: Provider, sink_provider: Provider, config_timestamp: xproto::Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_provider_offload_sink(self, provider, sink_provider, config_timestamp)
     }
-
     fn randr_set_provider_output_source(&self, provider: Provider, source_provider: Provider, config_timestamp: xproto::Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_provider_output_source(self, provider, source_provider, config_timestamp)
     }
-
     fn randr_list_provider_properties(&self, provider: Provider) -> Result<Cookie<'_, Self, ListProviderPropertiesReply>, ConnectionError>
     {
         list_provider_properties(self, provider)
     }
-
     fn randr_query_provider_property(&self, provider: Provider, property: xproto::Atom) -> Result<Cookie<'_, Self, QueryProviderPropertyReply>, ConnectionError>
     {
         query_provider_property(self, provider, property)
     }
-
     fn randr_configure_provider_property<'c>(&'c self, provider: Provider, property: xproto::Atom, pending: bool, range: bool, values: &[i32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         configure_provider_property(self, provider, property, pending, range, values)
     }
-
     fn randr_change_provider_property<'c>(&'c self, provider: Provider, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: u8, num_items: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_provider_property(self, provider, property, type_, format, mode, num_items, data)
     }
-
     fn randr_delete_provider_property(&self, provider: Provider, property: xproto::Atom) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_provider_property(self, provider, property)
     }
-
     fn randr_get_provider_property(&self, provider: Provider, property: xproto::Atom, type_: xproto::Atom, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Self, GetProviderPropertyReply>, ConnectionError>
     {
         get_provider_property(self, provider, property, type_, long_offset, long_length, delete, pending)
     }
-
     fn randr_get_monitors(&self, window: xproto::Window, get_active: bool) -> Result<Cookie<'_, Self, GetMonitorsReply>, ConnectionError>
     {
         get_monitors(self, window, get_active)
     }
-
     fn randr_set_monitor(&self, window: xproto::Window, monitorinfo: MonitorInfo) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_monitor(self, window, monitorinfo)
     }
-
     fn randr_delete_monitor(&self, window: xproto::Window, name: xproto::Atom) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_monitor(self, window, name)
     }
-
     fn randr_create_lease<'c>(&'c self, window: xproto::Window, lid: Lease, crtcs: &[Crtc], outputs: &[Output]) -> Result<CookieWithFds<'c, Self, CreateLeaseReply>, ConnectionError>
     {
         create_lease(self, window, lid, crtcs, outputs)
     }
-
     fn randr_free_lease(&self, lid: Lease, terminate: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         free_lease(self, lid, terminate)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

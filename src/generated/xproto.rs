@@ -8622,6 +8622,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 /// BRIEF DESCRIPTION MISSING.
 ///
 /// # Fields
@@ -9603,6 +9604,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 /// BRIEF DESCRIPTION MISSING.
 ///
 /// # Fields
@@ -9716,6 +9718,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 /// BRIEF DESCRIPTION MISSING.
 ///
 /// # Fields
@@ -9828,6 +9831,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InternAtomReply {
     pub response_type: u8,
@@ -9877,6 +9881,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetAtomNameReply {
     pub response_type: u8,
@@ -10451,6 +10456,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 /// BRIEF DESCRIPTION MISSING.
 ///
 /// # Fields
@@ -10520,6 +10526,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListPropertiesReply {
     pub response_type: u8,
@@ -10652,6 +10659,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 /// BRIEF DESCRIPTION MISSING.
 ///
 /// # Fields
@@ -11213,6 +11221,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabPointerReply {
     pub response_type: u8,
@@ -11645,6 +11654,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabKeyboardReply {
     pub response_type: u8,
@@ -12167,6 +12177,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 /// BRIEF DESCRIPTION MISSING.
 ///
 /// # Fields
@@ -12307,6 +12318,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMotionEventsReply {
     pub response_type: u8,
@@ -12369,6 +12381,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TranslateCoordinatesReply {
     pub response_type: u8,
@@ -12643,6 +12656,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetInputFocusReply {
     pub response_type: u8,
@@ -12689,6 +12703,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryKeymapReply {
     pub response_type: u8,
@@ -13055,6 +13070,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 /// BRIEF DESCRIPTION MISSING.
 ///
 /// # Fields
@@ -13189,6 +13205,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&string_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryTextExtentsReply {
     pub response_type: u8,
@@ -13303,6 +13320,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(pattern), IoSlice::new(&padding0)], vec![])?)
 }
+
 /// BRIEF DESCRIPTION MISSING.
 ///
 /// # Fields
@@ -13377,6 +13395,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(ListFontsWithInfoCookie::new(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(pattern), IoSlice::new(&padding0)], vec![])?))
 }
+
 /// BRIEF DESCRIPTION MISSING.
 ///
 /// # Fields
@@ -13498,6 +13517,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetFontPathReply {
     pub response_type: u8,
@@ -16208,6 +16228,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetImageReply {
     pub response_type: u8,
@@ -16693,6 +16714,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListInstalledColormapsReply {
     pub response_type: u8,
@@ -16773,6 +16795,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AllocColorReply {
     pub response_type: u8,
@@ -16838,6 +16861,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AllocNamedColorReply {
     pub response_type: u8,
@@ -16906,6 +16930,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AllocColorCellsReply {
     pub response_type: u8,
@@ -16973,6 +16998,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AllocColorPlanesReply {
     pub response_type: u8,
@@ -17312,6 +17338,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&pixels_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryColorsReply {
     pub response_type: u8,
@@ -17372,6 +17399,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LookupColorReply {
     pub response_type: u8,
@@ -17852,6 +17880,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryBestSizeReply {
     pub response_type: u8,
@@ -17929,6 +17958,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
 }
+
 /// BRIEF DESCRIPTION MISSING.
 ///
 /// # Fields
@@ -17987,6 +18017,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListExtensionsReply {
     pub response_type: u8,
@@ -18070,6 +18101,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetKeyboardMappingReply {
     pub response_type: u8,
@@ -18473,6 +18505,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetKeyboardControlReply {
     pub response_type: u8,
@@ -18649,6 +18682,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPointerControlReply {
     pub response_type: u8,
@@ -18860,6 +18894,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetScreenSaverReply {
     pub response_type: u8,
@@ -19122,6 +19157,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListHostsReply {
     pub response_type: u8,
@@ -19631,6 +19667,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(map), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetPointerMappingReply {
     pub response_type: u8,
@@ -19675,6 +19712,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPointerMappingReply {
     pub response_type: u8,
@@ -19806,6 +19844,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(keycodes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetModifierMappingReply {
     pub response_type: u8,
@@ -19850,6 +19889,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetModifierMappingReply {
     pub response_type: u8,
@@ -19955,7 +19995,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         create_window(self, depth, wid, parent, x, y, width, height, border_width, class, visual, value_list)
     }
-
     /// change window attributes.
     ///
     /// Changes the attributes specified by `value_mask` for the specified `window`.
@@ -19980,7 +20019,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         change_window_attributes(self, window, value_list)
     }
-
     /// Gets window attributes.
     ///
     /// Gets the current attributes for the specified `window`.
@@ -19997,7 +20035,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_window_attributes(self, window)
     }
-
     /// Destroys a window.
     ///
     /// Destroys the specified window and all of its subwindows. A DestroyNotify event
@@ -20024,12 +20061,10 @@ pub trait ConnectionExt: RequestConnection {
     {
         destroy_window(self, window)
     }
-
     fn destroy_subwindows(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_subwindows(self, window)
     }
-
     /// Changes a client's save set.
     ///
     /// TODO: explain what the save set is for.
@@ -20056,7 +20091,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         change_save_set(self, mode, window)
     }
-
     /// Reparents a window.
     ///
     /// Makes the specified window a child of the specified parent window. If the
@@ -20093,7 +20127,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         reparent_window(self, window, parent, x, y)
     }
-
     /// Makes a window visible.
     ///
     /// Maps the specified window. This means making the window visible (as long as its
@@ -20133,12 +20166,10 @@ pub trait ConnectionExt: RequestConnection {
     {
         map_window(self, window)
     }
-
     fn map_subwindows(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         map_subwindows(self, window)
     }
-
     /// Makes a window invisible.
     ///
     /// Unmaps the specified window. This means making the window invisible (and all
@@ -20164,12 +20195,10 @@ pub trait ConnectionExt: RequestConnection {
     {
         unmap_window(self, window)
     }
-
     fn unmap_subwindows(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         unmap_subwindows(self, window)
     }
-
     /// Configures window attributes.
     ///
     /// Configures a window's size, position, border width and stacking order.
@@ -20224,7 +20253,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         configure_window(self, window, value_list)
     }
-
     /// Change window stacking order.
     ///
     /// If `direction` is `XCB_CIRCULATE_RAISE_LOWEST`, the lowest mapped child (if
@@ -20245,7 +20273,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         circulate_window(self, direction, window)
     }
-
     /// Get current window geometry.
     ///
     /// Gets the current geometry of the specified drawable (either `Window` or `Pixmap`).
@@ -20286,7 +20313,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_geometry(self, drawable)
     }
-
     /// query the window tree.
     ///
     /// Gets the root window ID, parent window ID and list of children windows for the
@@ -20328,7 +20354,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_tree(self, window)
     }
-
     /// Get atom identifier by name.
     ///
     /// Retrieves the identifier (xcb_atom_t TODO) for the atom with the specified
@@ -20378,12 +20403,10 @@ pub trait ConnectionExt: RequestConnection {
     {
         intern_atom(self, only_if_exists, name)
     }
-
     fn get_atom_name(&self, atom: Atom) -> Result<Cookie<'_, Self, GetAtomNameReply>, ConnectionError>
     {
         get_atom_name(self, atom)
     }
-
     /// Changes a window property.
     ///
     /// Sets or updates a property on the specified `window`. Properties are for
@@ -20441,12 +20464,10 @@ pub trait ConnectionExt: RequestConnection {
     {
         change_property(self, mode, window, property, type_, format, data_len, data)
     }
-
     fn delete_property(&self, window: Window, property: Atom) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_property(self, window, property)
     }
-
     /// Gets a window property.
     ///
     /// Gets the specified `property` from the specified `window`. Properties are for
@@ -20519,12 +20540,10 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_property(self, delete, window, property, type_, long_offset, long_length)
     }
-
     fn list_properties(&self, window: Window) -> Result<Cookie<'_, Self, ListPropertiesReply>, ConnectionError>
     {
         list_properties(self, window)
     }
-
     /// Sets the owner of a selection.
     ///
     /// Makes `window` the owner of the selection `selection` and updates the
@@ -20558,7 +20577,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         set_selection_owner(self, owner, selection, time)
     }
-
     /// Gets the owner of a selection.
     ///
     /// Gets the owner of the specified selection.
@@ -20580,12 +20598,10 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_selection_owner(self, selection)
     }
-
     fn convert_selection(&self, requestor: Window, selection: Atom, target: Atom, property: Atom, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         convert_selection(self, requestor, selection, target, property, time)
     }
-
     /// send an event.
     ///
     /// Identifies the `destination` window, determines which clients should receive
@@ -20665,7 +20681,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         send_event(self, propagate, destination, event_mask, event)
     }
-
     /// Grab the pointer.
     ///
     /// Actively grabs control of the pointer. Further pointer events are reported only to the grabbing client. Overrides any active pointer grab by this client.
@@ -20739,7 +20754,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         grab_pointer(self, owner_events, grab_window, event_mask, pointer_mode, keyboard_mode, confine_to, cursor, time)
     }
-
     /// release the pointer.
     ///
     /// Releases the pointer and any queued events if you actively grabbed the pointer
@@ -20767,7 +20781,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         ungrab_pointer(self, time)
     }
-
     /// Grab pointer button(s).
     ///
     /// This request establishes a passive grab. The pointer is actively grabbed as
@@ -20836,17 +20849,14 @@ pub trait ConnectionExt: RequestConnection {
     {
         grab_button(self, owner_events, grab_window, event_mask, pointer_mode, keyboard_mode, confine_to, cursor, button, modifiers)
     }
-
     fn ungrab_button(&self, button: ButtonIndex, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_button(self, button, grab_window, modifiers)
     }
-
     fn change_active_pointer_grab(&self, cursor: Cursor, time: Timestamp, event_mask: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         change_active_pointer_grab(self, cursor, time, event_mask)
     }
-
     /// Grab the keyboard.
     ///
     /// Actively grabs control of the keyboard and generates FocusIn and FocusOut
@@ -20911,12 +20921,10 @@ pub trait ConnectionExt: RequestConnection {
     {
         grab_keyboard(self, owner_events, grab_window, time, pointer_mode, keyboard_mode)
     }
-
     fn ungrab_keyboard(&self, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_keyboard(self, time)
     }
-
     /// Grab keyboard key(s).
     ///
     /// Establishes a passive grab on the keyboard. In the future, the keyboard is
@@ -20979,7 +20987,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         grab_key(self, owner_events, grab_window, modifiers, key, pointer_mode, keyboard_mode)
     }
-
     /// release a key combination.
     ///
     /// Releases the key combination on `grab_window` if you grabbed it using
@@ -21009,7 +21016,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         ungrab_key(self, key, grab_window, modifiers)
     }
-
     /// release queued events.
     ///
     /// Releases queued events if the client has caused a device (pointer/keyboard) to
@@ -21031,17 +21037,14 @@ pub trait ConnectionExt: RequestConnection {
     {
         allow_events(self, mode, time)
     }
-
     fn grab_server(&self) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         grab_server(self)
     }
-
     fn ungrab_server(&self) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_server(self)
     }
-
     /// get pointer coordinates.
     ///
     /// Gets the root window the pointer is logically on and the pointer coordinates
@@ -21059,17 +21062,14 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_pointer(self, window)
     }
-
     fn get_motion_events(&self, window: Window, start: Timestamp, stop: Timestamp) -> Result<Cookie<'_, Self, GetMotionEventsReply>, ConnectionError>
     {
         get_motion_events(self, window, start, stop)
     }
-
     fn translate_coordinates(&self, src_window: Window, dst_window: Window, src_x: i16, src_y: i16) -> Result<Cookie<'_, Self, TranslateCoordinatesReply>, ConnectionError>
     {
         translate_coordinates(self, src_window, dst_window, src_x, src_y)
     }
-
     /// move mouse pointer.
     ///
     /// Moves the mouse pointer to the specified position.
@@ -21106,7 +21106,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         warp_pointer(self, src_window, dst_window, src_x, src_y, src_width, src_height, dst_x, dst_y)
     }
-
     /// Sets input focus.
     ///
     /// Changes the input focus and the last-focus-change time. If the specified `time`
@@ -21146,17 +21145,14 @@ pub trait ConnectionExt: RequestConnection {
     {
         set_input_focus(self, revert_to, focus, time)
     }
-
     fn get_input_focus(&self) -> Result<Cookie<'_, Self, GetInputFocusReply>, ConnectionError>
     {
         get_input_focus(self)
     }
-
     fn query_keymap(&self) -> Result<Cookie<'_, Self, QueryKeymapReply>, ConnectionError>
     {
         query_keymap(self)
     }
-
     /// opens a font.
     ///
     /// Opens any X core font matching the given `name` (for example "-misc-fixed-*").
@@ -21181,12 +21177,10 @@ pub trait ConnectionExt: RequestConnection {
     {
         open_font(self, fid, name)
     }
-
     fn close_font(&self, font: Font) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         close_font(self, font)
     }
-
     /// query font metrics.
     ///
     /// Queries information associated with the font.
@@ -21198,7 +21192,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_font(self, font)
     }
-
     /// get text extents.
     ///
     /// Query text extents from the X11 server. This request returns the bounding box
@@ -21237,7 +21230,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_text_extents(self, font, string)
     }
-
     /// get matching font names.
     ///
     /// Gets a list of available font names which match the given `pattern`.
@@ -21255,7 +21247,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         list_fonts(self, max_names, pattern)
     }
-
     /// get matching font names and information.
     ///
     /// Gets a list of available font names which match the given `pattern`.
@@ -21273,17 +21264,14 @@ pub trait ConnectionExt: RequestConnection {
     {
         list_fonts_with_info(self, max_names, pattern)
     }
-
     fn set_font_path<'c>(&'c self, font: &[Str]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_font_path(self, font)
     }
-
     fn get_font_path(&self) -> Result<Cookie<'_, Self, GetFontPathReply>, ConnectionError>
     {
         get_font_path(self)
     }
-
     /// Creates a pixmap.
     ///
     /// Creates a pixmap. The pixmap can only be used on the same screen as `drawable`
@@ -21311,7 +21299,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         create_pixmap(self, depth, pid, drawable, width, height)
     }
-
     /// Destroys a pixmap.
     ///
     /// Deletes the association between the pixmap ID and the pixmap. The pixmap
@@ -21328,7 +21315,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         free_pixmap(self, pixmap)
     }
-
     /// Creates a graphics context.
     ///
     /// Creates a graphics context. The graphics context can be used with any drawable
@@ -21356,7 +21342,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         create_gc(self, cid, drawable, value_list)
     }
-
     /// change graphics context components.
     ///
     /// Changes the components specified by `value_mask` for the specified graphics context.
@@ -21405,22 +21390,18 @@ pub trait ConnectionExt: RequestConnection {
     {
         change_gc(self, gc, value_list)
     }
-
     fn copy_gc(&self, src_gc: Gcontext, dst_gc: Gcontext, value_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         copy_gc(self, src_gc, dst_gc, value_mask)
     }
-
     fn set_dashes<'c>(&'c self, gc: Gcontext, dash_offset: u16, dashes: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_dashes(self, gc, dash_offset, dashes)
     }
-
     fn set_clip_rectangles<'c>(&'c self, ordering: ClipOrdering, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_clip_rectangles(self, ordering, gc, clip_x_origin, clip_y_origin, rectangles)
     }
-
     /// Destroys a graphics context.
     ///
     /// Destroys the specified `gc` and all associated storage.
@@ -21436,12 +21417,10 @@ pub trait ConnectionExt: RequestConnection {
     {
         free_gc(self, gc)
     }
-
     fn clear_area(&self, exposures: bool, window: Window, x: i16, y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         clear_area(self, exposures, window, x, y, width, height)
     }
-
     /// copy areas.
     ///
     /// Copies the specified rectangle from `src_drawable` to `dst_drawable`.
@@ -21467,17 +21446,14 @@ pub trait ConnectionExt: RequestConnection {
     {
         copy_area(self, src_drawable, dst_drawable, gc, src_x, src_y, dst_x, dst_y, width, height)
     }
-
     fn copy_plane(&self, src_drawable: Drawable, dst_drawable: Drawable, gc: Gcontext, src_x: i16, src_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16, bit_plane: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         copy_plane(self, src_drawable, dst_drawable, gc, src_x, src_y, dst_x, dst_y, width, height, bit_plane)
     }
-
     fn poly_point<'c>(&'c self, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_point(self, coordinate_mode, drawable, gc, points)
     }
-
     /// draw lines.
     ///
     /// Draws `points_len`-1 lines between each pair of points (point[i], point[i+1])
@@ -21520,7 +21496,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         poly_line(self, coordinate_mode, drawable, gc, points)
     }
-
     /// draw lines.
     ///
     /// Draws multiple, unconnected lines. For each segment, a line is drawn between
@@ -21551,22 +21526,18 @@ pub trait ConnectionExt: RequestConnection {
     {
         poly_segment(self, drawable, gc, segments)
     }
-
     fn poly_rectangle<'c>(&'c self, drawable: Drawable, gc: Gcontext, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_rectangle(self, drawable, gc, rectangles)
     }
-
     fn poly_arc<'c>(&'c self, drawable: Drawable, gc: Gcontext, arcs: &[Arc]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_arc(self, drawable, gc, arcs)
     }
-
     fn fill_poly<'c>(&'c self, drawable: Drawable, gc: Gcontext, shape: PolyShape, coordinate_mode: CoordMode, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         fill_poly(self, drawable, gc, shape, coordinate_mode, points)
     }
-
     /// Fills rectangles.
     ///
     /// Fills the specified rectangle(s) in the order listed in the array. For any
@@ -21596,32 +21567,26 @@ pub trait ConnectionExt: RequestConnection {
     {
         poly_fill_rectangle(self, drawable, gc, rectangles)
     }
-
     fn poly_fill_arc<'c>(&'c self, drawable: Drawable, gc: Gcontext, arcs: &[Arc]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_fill_arc(self, drawable, gc, arcs)
     }
-
     fn put_image<'c>(&'c self, format: ImageFormat, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         put_image(self, format, drawable, gc, width, height, dst_x, dst_y, left_pad, depth, data)
     }
-
     fn get_image(&self, format: ImageFormat, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32) -> Result<Cookie<'_, Self, GetImageReply>, ConnectionError>
     {
         get_image(self, format, drawable, x, y, width, height, plane_mask)
     }
-
     fn poly_text8<'c>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_text8(self, drawable, gc, x, y, items)
     }
-
     fn poly_text16<'c>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_text16(self, drawable, gc, x, y, items)
     }
-
     /// Draws text.
     ///
     /// Fills the destination rectangle with the background pixel from `gc`, then
@@ -21660,7 +21625,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         image_text8(self, drawable, gc, x, y, string)
     }
-
     /// Draws text.
     ///
     /// Fills the destination rectangle with the background pixel from `gc`, then
@@ -21700,37 +21664,30 @@ pub trait ConnectionExt: RequestConnection {
     {
         image_text16(self, drawable, gc, x, y, string)
     }
-
     fn create_colormap(&self, alloc: ColormapAlloc, mid: Colormap, window: Window, visual: Visualid) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_colormap(self, alloc, mid, window, visual)
     }
-
     fn free_colormap(&self, cmap: Colormap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         free_colormap(self, cmap)
     }
-
     fn copy_colormap_and_free(&self, mid: Colormap, src_cmap: Colormap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         copy_colormap_and_free(self, mid, src_cmap)
     }
-
     fn install_colormap(&self, cmap: Colormap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         install_colormap(self, cmap)
     }
-
     fn uninstall_colormap(&self, cmap: Colormap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         uninstall_colormap(self, cmap)
     }
-
     fn list_installed_colormaps(&self, window: Window) -> Result<Cookie<'_, Self, ListInstalledColormapsReply>, ConnectionError>
     {
         list_installed_colormaps(self, window)
     }
-
     /// Allocate a color.
     ///
     /// Allocates a read-only colormap entry corresponding to the closest RGB value
@@ -21753,52 +21710,42 @@ pub trait ConnectionExt: RequestConnection {
     {
         alloc_color(self, cmap, red, green, blue)
     }
-
     fn alloc_named_color<'c>(&'c self, cmap: Colormap, name: &[u8]) -> Result<Cookie<'c, Self, AllocNamedColorReply>, ConnectionError>
     {
         alloc_named_color(self, cmap, name)
     }
-
     fn alloc_color_cells(&self, contiguous: bool, cmap: Colormap, colors: u16, planes: u16) -> Result<Cookie<'_, Self, AllocColorCellsReply>, ConnectionError>
     {
         alloc_color_cells(self, contiguous, cmap, colors, planes)
     }
-
     fn alloc_color_planes(&self, contiguous: bool, cmap: Colormap, colors: u16, reds: u16, greens: u16, blues: u16) -> Result<Cookie<'_, Self, AllocColorPlanesReply>, ConnectionError>
     {
         alloc_color_planes(self, contiguous, cmap, colors, reds, greens, blues)
     }
-
     fn free_colors<'c>(&'c self, cmap: Colormap, plane_mask: u32, pixels: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         free_colors(self, cmap, plane_mask, pixels)
     }
-
     fn store_colors<'c>(&'c self, cmap: Colormap, items: &[Coloritem]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         store_colors(self, cmap, items)
     }
-
     fn store_named_color<'c>(&'c self, flags: u8, cmap: Colormap, pixel: u32, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         store_named_color(self, flags, cmap, pixel, name)
     }
-
     fn query_colors<'c>(&'c self, cmap: Colormap, pixels: &[u32]) -> Result<Cookie<'c, Self, QueryColorsReply>, ConnectionError>
     {
         query_colors(self, cmap, pixels)
     }
-
     fn lookup_color<'c>(&'c self, cmap: Colormap, name: &[u8]) -> Result<Cookie<'c, Self, LookupColorReply>, ConnectionError>
     {
         lookup_color(self, cmap, name)
     }
-
     fn create_cursor(&self, cid: Cursor, source: Pixmap, mask: Pixmap, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_cursor(self, cid, source, mask, fore_red, fore_green, fore_blue, back_red, back_green, back_blue, x, y)
     }
-
     /// create cursor.
     ///
     /// Creates a cursor from a font glyph. X provides a set of standard cursor shapes
@@ -21836,7 +21783,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         create_glyph_cursor(self, cid, source_font, mask_font, source_char, mask_char, fore_red, fore_green, fore_blue, back_red, back_green, back_blue)
     }
-
     /// Deletes a cursor.
     ///
     /// Deletes the association between the cursor resource ID and the specified
@@ -21853,17 +21799,14 @@ pub trait ConnectionExt: RequestConnection {
     {
         free_cursor(self, cursor)
     }
-
     fn recolor_cursor(&self, cursor: Cursor, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         recolor_cursor(self, cursor, fore_red, fore_green, fore_blue, back_red, back_green, back_blue)
     }
-
     fn query_best_size(&self, class: QueryShapeOf, drawable: Drawable, width: u16, height: u16) -> Result<Cookie<'_, Self, QueryBestSizeReply>, ConnectionError>
     {
         query_best_size(self, class, drawable, width, height)
     }
-
     /// check if extension is present.
     ///
     /// Determines if the specified extension is present on this X11 server.
@@ -21890,77 +21833,62 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_extension(self, name)
     }
-
     fn list_extensions(&self) -> Result<Cookie<'_, Self, ListExtensionsReply>, ConnectionError>
     {
         list_extensions(self)
     }
-
     fn change_keyboard_mapping<'c>(&'c self, keycode_count: u8, first_keycode: Keycode, keysyms_per_keycode: u8, keysyms: &[Keysym]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_keyboard_mapping(self, keycode_count, first_keycode, keysyms_per_keycode, keysyms)
     }
-
     fn get_keyboard_mapping(&self, first_keycode: Keycode, count: u8) -> Result<Cookie<'_, Self, GetKeyboardMappingReply>, ConnectionError>
     {
         get_keyboard_mapping(self, first_keycode, count)
     }
-
     fn change_keyboard_control<'c>(&'c self, value_list: &ChangeKeyboardControlAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_keyboard_control(self, value_list)
     }
-
     fn get_keyboard_control(&self) -> Result<Cookie<'_, Self, GetKeyboardControlReply>, ConnectionError>
     {
         get_keyboard_control(self)
     }
-
     fn bell(&self, percent: i8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         bell(self, percent)
     }
-
     fn change_pointer_control(&self, acceleration_numerator: i16, acceleration_denominator: i16, threshold: i16, do_acceleration: bool, do_threshold: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         change_pointer_control(self, acceleration_numerator, acceleration_denominator, threshold, do_acceleration, do_threshold)
     }
-
     fn get_pointer_control(&self) -> Result<Cookie<'_, Self, GetPointerControlReply>, ConnectionError>
     {
         get_pointer_control(self)
     }
-
     fn set_screen_saver(&self, timeout: i16, interval: i16, prefer_blanking: Blanking, allow_exposures: Exposures) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_screen_saver(self, timeout, interval, prefer_blanking, allow_exposures)
     }
-
     fn get_screen_saver(&self) -> Result<Cookie<'_, Self, GetScreenSaverReply>, ConnectionError>
     {
         get_screen_saver(self)
     }
-
     fn change_hosts<'c>(&'c self, mode: HostMode, family: Family, address: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_hosts(self, mode, family, address)
     }
-
     fn list_hosts(&self) -> Result<Cookie<'_, Self, ListHostsReply>, ConnectionError>
     {
         list_hosts(self)
     }
-
     fn set_access_control(&self, mode: AccessControl) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_access_control(self, mode)
     }
-
     fn set_close_down_mode(&self, mode: CloseDown) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_close_down_mode(self, mode)
     }
-
     /// kills a client.
     ///
     /// Forces a close down of the client that created the specified `resource`.
@@ -21984,41 +21912,34 @@ pub trait ConnectionExt: RequestConnection {
     {
         kill_client(self, resource)
     }
-
     fn rotate_properties<'c>(&'c self, window: Window, delta: i16, atoms: &[Atom]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         rotate_properties(self, window, delta, atoms)
     }
-
     fn force_screen_saver(&self, mode: ScreenSaver) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         force_screen_saver(self, mode)
     }
-
     fn set_pointer_mapping<'c>(&'c self, map: &[u8]) -> Result<Cookie<'c, Self, SetPointerMappingReply>, ConnectionError>
     {
         set_pointer_mapping(self, map)
     }
-
     fn get_pointer_mapping(&self) -> Result<Cookie<'_, Self, GetPointerMappingReply>, ConnectionError>
     {
         get_pointer_mapping(self)
     }
-
     fn set_modifier_mapping<'c>(&'c self, keycodes: &[Keycode]) -> Result<Cookie<'c, Self, SetModifierMappingReply>, ConnectionError>
     {
         set_modifier_mapping(self, keycodes)
     }
-
     fn get_modifier_mapping(&self) -> Result<Cookie<'_, Self, GetModifierMappingReply>, ConnectionError>
     {
         get_modifier_mapping(self)
     }
-
     fn no_operation(&self) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         no_operation(self)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

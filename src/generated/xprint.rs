@@ -392,6 +392,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintQueryVersionReply {
     pub response_type: u8,
@@ -456,6 +457,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(printer_name), IoSlice::new(locale), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetPrinterListReply {
     pub response_type: u8,
@@ -596,6 +598,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetContextReply {
     pub response_type: u8,
@@ -669,6 +672,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetScreenOfContextReply {
     pub response_type: u8,
@@ -879,6 +883,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetDocumentDataReply {
     pub response_type: u8,
@@ -1022,6 +1027,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintInputSelectedReply {
     pub response_type: u8,
@@ -1080,6 +1086,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetAttributesReply {
     pub response_type: u8,
@@ -1147,6 +1154,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetOneAttributesReply {
     pub response_type: u8,
@@ -1241,6 +1249,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetPageDimensionsReply {
     pub response_type: u8,
@@ -1297,6 +1306,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintQueryScreensReply {
     pub response_type: u8,
@@ -1355,6 +1365,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintSetImageResolutionReply {
     pub response_type: u8,
@@ -1407,6 +1418,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetImageResolutionReply {
     pub response_type: u8,
@@ -1777,126 +1789,102 @@ pub trait ConnectionExt: RequestConnection {
     {
         print_query_version(self)
     }
-
     fn xprint_print_get_printer_list<'c>(&'c self, printer_name: &[String8], locale: &[String8]) -> Result<Cookie<'c, Self, PrintGetPrinterListReply>, ConnectionError>
     {
         print_get_printer_list(self, printer_name, locale)
     }
-
     fn xprint_print_rehash_printer_list(&self) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_rehash_printer_list(self)
     }
-
     fn xprint_create_context<'c>(&'c self, context_id: u32, printer_name: &[String8], locale: &[String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_context(self, context_id, printer_name, locale)
     }
-
     fn xprint_print_set_context(&self, context: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_set_context(self, context)
     }
-
     fn xprint_print_get_context(&self) -> Result<Cookie<'_, Self, PrintGetContextReply>, ConnectionError>
     {
         print_get_context(self)
     }
-
     fn xprint_print_destroy_context(&self, context: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_destroy_context(self, context)
     }
-
     fn xprint_print_get_screen_of_context(&self) -> Result<Cookie<'_, Self, PrintGetScreenOfContextReply>, ConnectionError>
     {
         print_get_screen_of_context(self)
     }
-
     fn xprint_print_start_job(&self, output_mode: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_start_job(self, output_mode)
     }
-
     fn xprint_print_end_job(&self, cancel: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_end_job(self, cancel)
     }
-
     fn xprint_print_start_doc(&self, driver_mode: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_start_doc(self, driver_mode)
     }
-
     fn xprint_print_end_doc(&self, cancel: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_end_doc(self, cancel)
     }
-
     fn xprint_print_put_document_data<'c>(&'c self, drawable: xproto::Drawable, data: &[u8], doc_format: &[String8], options: &[String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         print_put_document_data(self, drawable, data, doc_format, options)
     }
-
     fn xprint_print_get_document_data(&self, context: Pcontext, max_bytes: u32) -> Result<Cookie<'_, Self, PrintGetDocumentDataReply>, ConnectionError>
     {
         print_get_document_data(self, context, max_bytes)
     }
-
     fn xprint_print_start_page(&self, window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_start_page(self, window)
     }
-
     fn xprint_print_end_page(&self, cancel: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_end_page(self, cancel)
     }
-
     fn xprint_print_select_input(&self, context: Pcontext, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_select_input(self, context, event_mask)
     }
-
     fn xprint_print_input_selected(&self, context: Pcontext) -> Result<Cookie<'_, Self, PrintInputSelectedReply>, ConnectionError>
     {
         print_input_selected(self, context)
     }
-
     fn xprint_print_get_attributes(&self, context: Pcontext, pool: u8) -> Result<Cookie<'_, Self, PrintGetAttributesReply>, ConnectionError>
     {
         print_get_attributes(self, context, pool)
     }
-
     fn xprint_print_get_one_attributes<'c>(&'c self, context: Pcontext, pool: u8, name: &[String8]) -> Result<Cookie<'c, Self, PrintGetOneAttributesReply>, ConnectionError>
     {
         print_get_one_attributes(self, context, pool, name)
     }
-
     fn xprint_print_set_attributes<'c>(&'c self, context: Pcontext, string_len: u32, pool: u8, rule: u8, attributes: &[String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         print_set_attributes(self, context, string_len, pool, rule, attributes)
     }
-
     fn xprint_print_get_page_dimensions(&self, context: Pcontext) -> Result<Cookie<'_, Self, PrintGetPageDimensionsReply>, ConnectionError>
     {
         print_get_page_dimensions(self, context)
     }
-
     fn xprint_print_query_screens(&self) -> Result<Cookie<'_, Self, PrintQueryScreensReply>, ConnectionError>
     {
         print_query_screens(self)
     }
-
     fn xprint_print_set_image_resolution(&self, context: Pcontext, image_resolution: u16) -> Result<Cookie<'_, Self, PrintSetImageResolutionReply>, ConnectionError>
     {
         print_set_image_resolution(self, context, image_resolution)
     }
-
     fn xprint_print_get_image_resolution(&self, context: Pcontext) -> Result<Cookie<'_, Self, PrintGetImageResolutionReply>, ConnectionError>
     {
         print_get_image_resolution(self, context)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

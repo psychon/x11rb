@@ -57,6 +57,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EnableReply {
     pub response_type: u8,
@@ -88,6 +89,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         enable(self)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

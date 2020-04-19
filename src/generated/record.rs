@@ -520,6 +520,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -710,6 +711,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetContextReply {
     pub response_type: u8,
@@ -767,6 +769,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EnableContextReply {
     pub response_type: u8,
@@ -864,41 +867,34 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, major_version, minor_version)
     }
-
     fn record_create_context<'c>(&'c self, context: Context, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_context(self, context, element_header, client_specs, ranges)
     }
-
     fn record_register_clients<'c>(&'c self, context: Context, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         register_clients(self, context, element_header, client_specs, ranges)
     }
-
     fn record_unregister_clients<'c>(&'c self, context: Context, client_specs: &[ClientSpec]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         unregister_clients(self, context, client_specs)
     }
-
     fn record_get_context(&self, context: Context) -> Result<Cookie<'_, Self, GetContextReply>, ConnectionError>
     {
         get_context(self, context)
     }
-
     fn record_enable_context(&self, context: Context) -> Result<Cookie<'_, Self, EnableContextReply>, ConnectionError>
     {
         enable_context(self, context)
     }
-
     fn record_disable_context(&self, context: Context) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         disable_context(self, context)
     }
-
     fn record_free_context(&self, context: Context) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         free_context(self, context)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

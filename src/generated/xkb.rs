@@ -6638,6 +6638,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UseExtensionReply {
     pub response_type: u8,
@@ -7210,6 +7211,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetStateReply {
     pub response_type: u8,
@@ -7334,6 +7336,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetControlsReply {
     pub response_type: u8,
@@ -7656,6 +7659,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone)]
 pub struct GetMapMapBitcase3 {
     pub acts_rtrn_count: Vec<u8>,
@@ -8123,6 +8127,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCompatMapReply {
     pub response_type: u8,
@@ -8234,6 +8239,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetIndicatorStateReply {
     pub response_type: u8,
@@ -8292,6 +8298,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetIndicatorMapReply {
     pub response_type: u8,
@@ -8399,6 +8406,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetNamedIndicatorReply {
     pub response_type: u8,
@@ -8548,6 +8556,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetNamesValueListBitcase8 {
     pub n_levels_per_type: Vec<u8>,
@@ -9095,6 +9104,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PerClientFlagsReply {
     pub response_type: u8,
@@ -9155,6 +9165,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListComponentsReply {
     pub response_type: u8,
@@ -9244,6 +9255,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone)]
 pub struct GetDeviceInfoReply {
     pub response_type: u8,
@@ -9398,6 +9410,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(message), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDebuggingFlagsReply {
     pub response_type: u8,
@@ -10845,117 +10858,95 @@ pub trait ConnectionExt: RequestConnection {
     {
         use_extension(self, wanted_major, wanted_minor)
     }
-
     fn xkb_select_events<'c>(&'c self, device_spec: DeviceSpec, affect_which: u16, clear: u16, select_all: u16, affect_map: u16, map: u16, details: &SelectEventsAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         select_events(self, device_spec, affect_which, clear, select_all, affect_map, map, details)
     }
-
     fn xkb_bell(&self, device_spec: DeviceSpec, bell_class: BellClassSpec, bell_id: IDSpec, percent: i8, force_sound: bool, event_only: bool, pitch: i16, duration: i16, name: xproto::Atom, window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         bell(self, device_spec, bell_class, bell_id, percent, force_sound, event_only, pitch, duration, name, window)
     }
-
     fn xkb_get_state(&self, device_spec: DeviceSpec) -> Result<Cookie<'_, Self, GetStateReply>, ConnectionError>
     {
         get_state(self, device_spec)
     }
-
     fn xkb_latch_lock_state(&self, device_spec: DeviceSpec, affect_mod_locks: u8, mod_locks: u8, lock_group: bool, group_lock: Group, affect_mod_latches: u8, latch_group: bool, group_latch: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         latch_lock_state(self, device_spec, affect_mod_locks, mod_locks, lock_group, group_lock, affect_mod_latches, latch_group, group_latch)
     }
-
     fn xkb_get_controls(&self, device_spec: DeviceSpec) -> Result<Cookie<'_, Self, GetControlsReply>, ConnectionError>
     {
         get_controls(self, device_spec)
     }
-
     fn xkb_set_controls<'c>(&'c self, device_spec: DeviceSpec, affect_internal_real_mods: u8, internal_real_mods: u8, affect_ignore_lock_real_mods: u8, ignore_lock_real_mods: u8, affect_internal_virtual_mods: u16, internal_virtual_mods: u16, affect_ignore_lock_virtual_mods: u16, ignore_lock_virtual_mods: u16, mouse_keys_dflt_btn: u8, groups_wrap: u8, access_x_options: u16, affect_enabled_controls: u32, enabled_controls: u32, change_controls: u32, repeat_delay: u16, repeat_interval: u16, slow_keys_delay: u16, debounce_delay: u16, mouse_keys_delay: u16, mouse_keys_interval: u16, mouse_keys_time_to_max: u16, mouse_keys_max_speed: u16, mouse_keys_curve: i16, access_x_timeout: u16, access_x_timeout_mask: u32, access_x_timeout_values: u32, access_x_timeout_options_mask: u16, access_x_timeout_options_values: u16, per_key_repeat: &[u8; 32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_controls(self, device_spec, affect_internal_real_mods, internal_real_mods, affect_ignore_lock_real_mods, ignore_lock_real_mods, affect_internal_virtual_mods, internal_virtual_mods, affect_ignore_lock_virtual_mods, ignore_lock_virtual_mods, mouse_keys_dflt_btn, groups_wrap, access_x_options, affect_enabled_controls, enabled_controls, change_controls, repeat_delay, repeat_interval, slow_keys_delay, debounce_delay, mouse_keys_delay, mouse_keys_interval, mouse_keys_time_to_max, mouse_keys_max_speed, mouse_keys_curve, access_x_timeout, access_x_timeout_mask, access_x_timeout_values, access_x_timeout_options_mask, access_x_timeout_options_values, per_key_repeat)
     }
-
     fn xkb_get_map(&self, device_spec: DeviceSpec, full: u16, partial: u16, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, first_key_action: xproto::Keycode, n_key_actions: u8, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, virtual_mods: u16, first_key_explicit: xproto::Keycode, n_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8) -> Result<Cookie<'_, Self, GetMapReply>, ConnectionError>
     {
         get_map(self, device_spec, full, partial, first_type, n_types, first_key_sym, n_key_syms, first_key_action, n_key_actions, first_key_behavior, n_key_behaviors, virtual_mods, first_key_explicit, n_key_explicit, first_mod_map_key, n_mod_map_keys, first_v_mod_map_key, n_v_mod_map_keys)
     }
-
     fn xkb_set_map<'c>(&'c self, device_spec: DeviceSpec, flags: u16, min_key_code: xproto::Keycode, max_key_code: xproto::Keycode, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, total_syms: u16, first_key_action: xproto::Keycode, n_key_actions: u8, total_actions: u16, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, total_key_behaviors: u8, first_key_explicit: xproto::Keycode, n_key_explicit: u8, total_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, total_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8, total_v_mod_map_keys: u8, virtual_mods: u16, values: &SetMapAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_map(self, device_spec, flags, min_key_code, max_key_code, first_type, n_types, first_key_sym, n_key_syms, total_syms, first_key_action, n_key_actions, total_actions, first_key_behavior, n_key_behaviors, total_key_behaviors, first_key_explicit, n_key_explicit, total_key_explicit, first_mod_map_key, n_mod_map_keys, total_mod_map_keys, first_v_mod_map_key, n_v_mod_map_keys, total_v_mod_map_keys, virtual_mods, values)
     }
-
     fn xkb_get_compat_map(&self, device_spec: DeviceSpec, groups: u8, get_all_si: bool, first_si: u16, n_si: u16) -> Result<Cookie<'_, Self, GetCompatMapReply>, ConnectionError>
     {
         get_compat_map(self, device_spec, groups, get_all_si, first_si, n_si)
     }
-
     fn xkb_set_compat_map<'c>(&'c self, device_spec: DeviceSpec, recompute_actions: bool, truncate_si: bool, groups: u8, first_si: u16, si: &[SymInterpret], group_maps: &[ModDef]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_compat_map(self, device_spec, recompute_actions, truncate_si, groups, first_si, si, group_maps)
     }
-
     fn xkb_get_indicator_state(&self, device_spec: DeviceSpec) -> Result<Cookie<'_, Self, GetIndicatorStateReply>, ConnectionError>
     {
         get_indicator_state(self, device_spec)
     }
-
     fn xkb_get_indicator_map(&self, device_spec: DeviceSpec, which: u32) -> Result<Cookie<'_, Self, GetIndicatorMapReply>, ConnectionError>
     {
         get_indicator_map(self, device_spec, which)
     }
-
     fn xkb_set_indicator_map<'c>(&'c self, device_spec: DeviceSpec, which: u32, maps: &[IndicatorMap]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_indicator_map(self, device_spec, which, maps)
     }
-
     fn xkb_get_named_indicator(&self, device_spec: DeviceSpec, led_class: LedClass, led_id: IDSpec, indicator: xproto::Atom) -> Result<Cookie<'_, Self, GetNamedIndicatorReply>, ConnectionError>
     {
         get_named_indicator(self, device_spec, led_class, led_id, indicator)
     }
-
     fn xkb_set_named_indicator(&self, device_spec: DeviceSpec, led_class: LedClass, led_id: IDSpec, indicator: xproto::Atom, set_state: bool, on: bool, set_map: bool, create_map: bool, map_flags: u8, map_which_groups: u8, map_groups: u8, map_which_mods: u8, map_real_mods: u8, map_vmods: u16, map_ctrls: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_named_indicator(self, device_spec, led_class, led_id, indicator, set_state, on, set_map, create_map, map_flags, map_which_groups, map_groups, map_which_mods, map_real_mods, map_vmods, map_ctrls)
     }
-
     fn xkb_get_names(&self, device_spec: DeviceSpec, which: u32) -> Result<Cookie<'_, Self, GetNamesReply>, ConnectionError>
     {
         get_names(self, device_spec, which)
     }
-
     fn xkb_set_names<'c>(&'c self, device_spec: DeviceSpec, virtual_mods: u16, first_type: u8, n_types: u8, first_kt_levelt: u8, n_kt_levels: u8, indicators: u32, group_names: u8, n_radio_groups: u8, first_key: xproto::Keycode, n_keys: u8, n_key_aliases: u8, total_kt_level_names: u16, values: &SetNamesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_names(self, device_spec, virtual_mods, first_type, n_types, first_kt_levelt, n_kt_levels, indicators, group_names, n_radio_groups, first_key, n_keys, n_key_aliases, total_kt_level_names, values)
     }
-
     fn xkb_per_client_flags(&self, device_spec: DeviceSpec, change: u32, value: u32, ctrls_to_change: u32, auto_ctrls: u32, auto_ctrls_values: u32) -> Result<Cookie<'_, Self, PerClientFlagsReply>, ConnectionError>
     {
         per_client_flags(self, device_spec, change, value, ctrls_to_change, auto_ctrls, auto_ctrls_values)
     }
-
     fn xkb_list_components(&self, device_spec: DeviceSpec, max_names: u16) -> Result<Cookie<'_, Self, ListComponentsReply>, ConnectionError>
     {
         list_components(self, device_spec, max_names)
     }
-
     fn get_kbd_by_name(&self) { unimplemented!("Not yet supported by the code generator") }
     fn xkb_get_device_info(&self, device_spec: DeviceSpec, wanted: u16, all_buttons: bool, first_button: u8, n_buttons: u8, led_class: LedClass, led_id: IDSpec) -> Result<Cookie<'_, Self, GetDeviceInfoReply>, ConnectionError>
     {
         get_device_info(self, device_spec, wanted, all_buttons, first_button, n_buttons, led_class, led_id)
     }
-
     fn xkb_set_device_info<'c>(&'c self, device_spec: DeviceSpec, first_btn: u8, change: u16, btn_actions: &[Action], leds: &[DeviceLedInfo]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_device_info(self, device_spec, first_btn, change, btn_actions, leds)
     }
-
     fn xkb_set_debugging_flags<'c>(&'c self, affect_flags: u32, flags: u32, affect_ctrls: u32, ctrls: u32, message: &[String8]) -> Result<Cookie<'c, Self, SetDebuggingFlagsReply>, ConnectionError>
     {
         set_debugging_flags(self, affect_flags, flags, affect_ctrls, ctrls, message)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

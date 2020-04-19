@@ -63,6 +63,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetVersionReply {
     pub response_type: u8,
@@ -111,6 +112,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CapableReply {
     pub response_type: u8,
@@ -158,6 +160,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetTimeoutsReply {
     pub response_type: u8,
@@ -381,6 +384,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InfoReply {
     pub response_type: u8,
@@ -416,41 +420,34 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_version(self, client_major_version, client_minor_version)
     }
-
     fn dpms_capable(&self) -> Result<Cookie<'_, Self, CapableReply>, ConnectionError>
     {
         capable(self)
     }
-
     fn dpms_get_timeouts(&self) -> Result<Cookie<'_, Self, GetTimeoutsReply>, ConnectionError>
     {
         get_timeouts(self)
     }
-
     fn dpms_set_timeouts(&self, standby_timeout: u16, suspend_timeout: u16, off_timeout: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_timeouts(self, standby_timeout, suspend_timeout, off_timeout)
     }
-
     fn dpms_enable(&self) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         enable(self)
     }
-
     fn dpms_disable(&self) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         disable(self)
     }
-
     fn dpms_force_level(&self, power_level: DPMSMode) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         force_level(self, power_level)
     }
-
     fn dpms_info(&self) -> Result<Cookie<'_, Self, InfoReply>, ConnectionError>
     {
         info(self)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

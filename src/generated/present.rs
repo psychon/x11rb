@@ -532,6 +532,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -795,6 +796,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryCapabilitiesReply {
     pub response_type: u8,
@@ -1183,26 +1185,22 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, major_version, minor_version)
     }
-
     fn present_pixmap<'c>(&'c self, window: xproto::Window, pixmap: xproto::Pixmap, serial: u32, valid: xfixes::Region, update: xfixes::Region, x_off: i16, y_off: i16, target_crtc: randr::Crtc, wait_fence: sync::Fence, idle_fence: sync::Fence, options: u32, target_msc: u64, divisor: u64, remainder: u64, notifies: &[Notify]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         self::pixmap(self, window, pixmap, serial, valid, update, x_off, y_off, target_crtc, wait_fence, idle_fence, options, target_msc, divisor, remainder, notifies)
     }
-
     fn present_notify_msc(&self, window: xproto::Window, serial: u32, target_msc: u64, divisor: u64, remainder: u64) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         notify_msc(self, window, serial, target_msc, divisor, remainder)
     }
-
     fn present_select_input(&self, eid: Event, window: xproto::Window, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_input(self, eid, window, event_mask)
     }
-
     fn present_query_capabilities(&self, target: u32) -> Result<Cookie<'_, Self, QueryCapabilitiesReply>, ConnectionError>
     {
         query_capabilities(self, target)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

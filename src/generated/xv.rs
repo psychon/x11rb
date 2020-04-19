@@ -1609,6 +1609,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryExtensionReply {
     pub response_type: u8,
@@ -1662,6 +1663,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryAdaptorsReply {
     pub response_type: u8,
@@ -1715,6 +1717,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryEncodingsReply {
     pub response_type: u8,
@@ -1773,6 +1776,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabPortReply {
     pub response_type: u8,
@@ -2213,6 +2217,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryBestSizeReply {
     pub response_type: u8,
@@ -2308,6 +2313,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPortAttributeReply {
     pub response_type: u8,
@@ -2359,6 +2365,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryPortAttributesReply {
     pub response_type: u8,
@@ -2414,6 +2421,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListImageFormatsReply {
     pub response_type: u8,
@@ -2478,6 +2486,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryImageAttributesReply {
     pub response_type: u8,
@@ -2682,101 +2691,82 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_extension(self)
     }
-
     fn xv_query_adaptors(&self, window: xproto::Window) -> Result<Cookie<'_, Self, QueryAdaptorsReply>, ConnectionError>
     {
         query_adaptors(self, window)
     }
-
     fn xv_query_encodings(&self, port: Port) -> Result<Cookie<'_, Self, QueryEncodingsReply>, ConnectionError>
     {
         query_encodings(self, port)
     }
-
     fn xv_grab_port(&self, port: Port, time: xproto::Timestamp) -> Result<Cookie<'_, Self, GrabPortReply>, ConnectionError>
     {
         grab_port(self, port, time)
     }
-
     fn xv_ungrab_port(&self, port: Port, time: xproto::Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_port(self, port, time)
     }
-
     fn xv_put_video(&self, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         put_video(self, port, drawable, gc, vid_x, vid_y, vid_w, vid_h, drw_x, drw_y, drw_w, drw_h)
     }
-
     fn xv_put_still(&self, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         put_still(self, port, drawable, gc, vid_x, vid_y, vid_w, vid_h, drw_x, drw_y, drw_w, drw_h)
     }
-
     fn xv_get_video(&self, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         get_video(self, port, drawable, gc, vid_x, vid_y, vid_w, vid_h, drw_x, drw_y, drw_w, drw_h)
     }
-
     fn xv_get_still(&self, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         get_still(self, port, drawable, gc, vid_x, vid_y, vid_w, vid_h, drw_x, drw_y, drw_w, drw_h)
     }
-
     fn xv_stop_video(&self, port: Port, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         stop_video(self, port, drawable)
     }
-
     fn xv_select_video_notify(&self, drawable: xproto::Drawable, onoff: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_video_notify(self, drawable, onoff)
     }
-
     fn xv_select_port_notify(&self, port: Port, onoff: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_port_notify(self, port, onoff)
     }
-
     fn xv_query_best_size(&self, port: Port, vid_w: u16, vid_h: u16, drw_w: u16, drw_h: u16, motion: bool) -> Result<Cookie<'_, Self, QueryBestSizeReply>, ConnectionError>
     {
         query_best_size(self, port, vid_w, vid_h, drw_w, drw_h, motion)
     }
-
     fn xv_set_port_attribute(&self, port: Port, attribute: xproto::Atom, value: i32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_port_attribute(self, port, attribute, value)
     }
-
     fn xv_get_port_attribute(&self, port: Port, attribute: xproto::Atom) -> Result<Cookie<'_, Self, GetPortAttributeReply>, ConnectionError>
     {
         get_port_attribute(self, port, attribute)
     }
-
     fn xv_query_port_attributes(&self, port: Port) -> Result<Cookie<'_, Self, QueryPortAttributesReply>, ConnectionError>
     {
         query_port_attributes(self, port)
     }
-
     fn xv_list_image_formats(&self, port: Port) -> Result<Cookie<'_, Self, ListImageFormatsReply>, ConnectionError>
     {
         list_image_formats(self, port)
     }
-
     fn xv_query_image_attributes(&self, port: Port, id: u32, width: u16, height: u16) -> Result<Cookie<'_, Self, QueryImageAttributesReply>, ConnectionError>
     {
         query_image_attributes(self, port, id, width, height)
     }
-
     fn xv_put_image<'c>(&'c self, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, id: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         put_image(self, port, drawable, gc, id, src_x, src_y, src_w, src_h, drw_x, drw_y, drw_w, drw_h, width, height, data)
     }
-
     fn xv_shm_put_image(&self, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, shmseg: shm::Seg, id: u32, offset: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, send_event: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         shm_put_image(self, port, drawable, gc, shmseg, id, offset, src_x, src_y, src_w, src_h, drw_x, drw_y, drw_w, drw_h, width, height, send_event)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

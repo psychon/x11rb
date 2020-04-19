@@ -1893,6 +1893,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MakeCurrentReply {
     pub response_type: u8,
@@ -1945,6 +1946,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsDirectReply {
     pub response_type: u8,
@@ -2002,6 +2004,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -2361,6 +2364,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetVisualConfigsReply {
     pub response_type: u8,
@@ -2486,6 +2490,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(data), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VendorPrivateWithReplyReply {
     pub response_type: u8,
@@ -2589,6 +2594,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryExtensionsStringReply {
     pub response_type: u8,
@@ -2647,6 +2653,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryServerStringReply {
     pub response_type: u8,
@@ -2742,6 +2749,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetFBConfigsReply {
     pub response_type: u8,
@@ -2929,6 +2937,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryContextReply {
     pub response_type: u8,
@@ -2997,6 +3006,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MakeContextCurrentReply {
     pub response_type: u8,
@@ -3124,6 +3134,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDrawableAttributesReply {
     pub response_type: u8,
@@ -3573,6 +3584,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GenListsReply {
     pub response_type: u8,
@@ -3698,6 +3710,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RenderModeReply {
     pub response_type: u8,
@@ -3805,6 +3818,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FinishReply {
     pub response_type: u8,
@@ -3964,6 +3978,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ReadPixelsReply {
     pub response_type: u8,
@@ -4020,6 +4035,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetBooleanvReply {
     pub response_type: u8,
@@ -4081,6 +4097,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetClipPlaneReply {
     pub response_type: u8,
@@ -4137,6 +4154,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetDoublevReply {
     pub response_type: u8,
@@ -4193,6 +4211,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetErrorReply {
     pub response_type: u8,
@@ -4249,6 +4268,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetFloatvReply {
     pub response_type: u8,
@@ -4310,6 +4330,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetIntegervReply {
     pub response_type: u8,
@@ -4376,6 +4397,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetLightfvReply {
     pub response_type: u8,
@@ -4442,6 +4464,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetLightivReply {
     pub response_type: u8,
@@ -4508,6 +4531,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetMapdvReply {
     pub response_type: u8,
@@ -4574,6 +4598,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetMapfvReply {
     pub response_type: u8,
@@ -4640,6 +4665,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMapivReply {
     pub response_type: u8,
@@ -4706,6 +4732,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetMaterialfvReply {
     pub response_type: u8,
@@ -4772,6 +4799,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMaterialivReply {
     pub response_type: u8,
@@ -4833,6 +4861,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetPixelMapfvReply {
     pub response_type: u8,
@@ -4894,6 +4923,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPixelMapuivReply {
     pub response_type: u8,
@@ -4955,6 +4985,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPixelMapusvReply {
     pub response_type: u8,
@@ -5016,6 +5047,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPolygonStippleReply {
     pub response_type: u8,
@@ -5072,6 +5104,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetStringReply {
     pub response_type: u8,
@@ -5136,6 +5169,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetTexEnvfvReply {
     pub response_type: u8,
@@ -5202,6 +5236,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetTexEnvivReply {
     pub response_type: u8,
@@ -5268,6 +5303,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetTexGendvReply {
     pub response_type: u8,
@@ -5334,6 +5370,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetTexGenfvReply {
     pub response_type: u8,
@@ -5400,6 +5437,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetTexGenivReply {
     pub response_type: u8,
@@ -5481,6 +5519,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetTexImageReply {
     pub response_type: u8,
@@ -5549,6 +5588,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetTexParameterfvReply {
     pub response_type: u8,
@@ -5615,6 +5655,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetTexParameterivReply {
     pub response_type: u8,
@@ -5686,6 +5727,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetTexLevelParameterfvReply {
     pub response_type: u8,
@@ -5757,6 +5799,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetTexLevelParameterivReply {
     pub response_type: u8,
@@ -5818,6 +5861,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsEnabledReply {
     pub response_type: u8,
@@ -5874,6 +5918,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsListReply {
     pub response_type: u8,
@@ -5962,6 +6007,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&textures_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AreTexturesResidentReply {
     pub response_type: u8,
@@ -6057,6 +6103,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GenTexturesReply {
     pub response_type: u8,
@@ -6113,6 +6160,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsTextureReply {
     pub response_type: u8,
@@ -6184,6 +6232,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetColorTableReply {
     pub response_type: u8,
@@ -6248,6 +6297,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetColorTableParameterfvReply {
     pub response_type: u8,
@@ -6314,6 +6364,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetColorTableParameterivReply {
     pub response_type: u8,
@@ -6390,6 +6441,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetConvolutionFilterReply {
     pub response_type: u8,
@@ -6456,6 +6508,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetConvolutionParameterfvReply {
     pub response_type: u8,
@@ -6522,6 +6575,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetConvolutionParameterivReply {
     pub response_type: u8,
@@ -6598,6 +6652,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSeparableFilterReply {
     pub response_type: u8,
@@ -6675,6 +6730,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetHistogramReply {
     pub response_type: u8,
@@ -6739,6 +6795,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetHistogramParameterfvReply {
     pub response_type: u8,
@@ -6805,6 +6862,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetHistogramParameterivReply {
     pub response_type: u8,
@@ -6882,6 +6940,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMinmaxReply {
     pub response_type: u8,
@@ -6943,6 +7002,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetMinmaxParameterfvReply {
     pub response_type: u8,
@@ -7009,6 +7069,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMinmaxParameterivReply {
     pub response_type: u8,
@@ -7075,6 +7136,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCompressedTexImageARBReply {
     pub response_type: u8,
@@ -7171,6 +7233,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GenQueriesARBReply {
     pub response_type: u8,
@@ -7227,6 +7290,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsQueryARBReply {
     pub response_type: u8,
@@ -7288,6 +7352,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetQueryivARBReply {
     pub response_type: u8,
@@ -7354,6 +7419,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetQueryObjectivARBReply {
     pub response_type: u8,
@@ -7420,6 +7486,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetQueryObjectuivARBReply {
     pub response_type: u8,
@@ -7456,506 +7523,406 @@ pub trait ConnectionExt: RequestConnection {
     {
         render(self, context_tag, data)
     }
-
     fn glx_render_large<'c>(&'c self, context_tag: ContextTag, request_num: u16, request_total: u16, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         render_large(self, context_tag, request_num, request_total, data)
     }
-
     fn glx_create_context(&self, context: Context, visual: xproto::Visualid, screen: u32, share_list: Context, is_direct: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_context(self, context, visual, screen, share_list, is_direct)
     }
-
     fn glx_destroy_context(&self, context: Context) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_context(self, context)
     }
-
     fn glx_make_current(&self, drawable: Drawable, context: Context, old_context_tag: ContextTag) -> Result<Cookie<'_, Self, MakeCurrentReply>, ConnectionError>
     {
         make_current(self, drawable, context, old_context_tag)
     }
-
     fn glx_is_direct(&self, context: Context) -> Result<Cookie<'_, Self, IsDirectReply>, ConnectionError>
     {
         is_direct(self, context)
     }
-
     fn glx_query_version(&self, major_version: u32, minor_version: u32) -> Result<Cookie<'_, Self, QueryVersionReply>, ConnectionError>
     {
         query_version(self, major_version, minor_version)
     }
-
     fn glx_wait_gl(&self, context_tag: ContextTag) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         wait_gl(self, context_tag)
     }
-
     fn glx_wait_x(&self, context_tag: ContextTag) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         wait_x(self, context_tag)
     }
-
     fn glx_copy_context(&self, src: Context, dest: Context, mask: u32, src_context_tag: ContextTag) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         copy_context(self, src, dest, mask, src_context_tag)
     }
-
     fn glx_swap_buffers(&self, context_tag: ContextTag, drawable: Drawable) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         swap_buffers(self, context_tag, drawable)
     }
-
     fn glx_use_x_font(&self, context_tag: ContextTag, font: xproto::Font, first: u32, count: u32, list_base: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         use_x_font(self, context_tag, font, first, count, list_base)
     }
-
     fn glx_create_glx_pixmap(&self, screen: u32, visual: xproto::Visualid, pixmap: xproto::Pixmap, glx_pixmap: Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_glx_pixmap(self, screen, visual, pixmap, glx_pixmap)
     }
-
     fn glx_get_visual_configs(&self, screen: u32) -> Result<Cookie<'_, Self, GetVisualConfigsReply>, ConnectionError>
     {
         get_visual_configs(self, screen)
     }
-
     fn glx_destroy_glx_pixmap(&self, glx_pixmap: Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_glx_pixmap(self, glx_pixmap)
     }
-
     fn glx_vendor_private<'c>(&'c self, vendor_code: u32, context_tag: ContextTag, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         vendor_private(self, vendor_code, context_tag, data)
     }
-
     fn glx_vendor_private_with_reply<'c>(&'c self, vendor_code: u32, context_tag: ContextTag, data: &[u8]) -> Result<Cookie<'c, Self, VendorPrivateWithReplyReply>, ConnectionError>
     {
         vendor_private_with_reply(self, vendor_code, context_tag, data)
     }
-
     fn glx_query_extensions_string(&self, screen: u32) -> Result<Cookie<'_, Self, QueryExtensionsStringReply>, ConnectionError>
     {
         query_extensions_string(self, screen)
     }
-
     fn glx_query_server_string(&self, screen: u32, name: u32) -> Result<Cookie<'_, Self, QueryServerStringReply>, ConnectionError>
     {
         query_server_string(self, screen, name)
     }
-
     fn glx_client_info<'c>(&'c self, major_version: u32, minor_version: u32, string: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         client_info(self, major_version, minor_version, string)
     }
-
     fn glx_get_fb_configs(&self, screen: u32) -> Result<Cookie<'_, Self, GetFBConfigsReply>, ConnectionError>
     {
         get_fb_configs(self, screen)
     }
-
     fn glx_create_pixmap<'c>(&'c self, screen: u32, fbconfig: Fbconfig, pixmap: xproto::Pixmap, glx_pixmap: Pixmap, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_pixmap(self, screen, fbconfig, pixmap, glx_pixmap, attribs)
     }
-
     fn glx_destroy_pixmap(&self, glx_pixmap: Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_pixmap(self, glx_pixmap)
     }
-
     fn glx_create_new_context(&self, context: Context, fbconfig: Fbconfig, screen: u32, render_type: u32, share_list: Context, is_direct: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_new_context(self, context, fbconfig, screen, render_type, share_list, is_direct)
     }
-
     fn glx_query_context(&self, context: Context) -> Result<Cookie<'_, Self, QueryContextReply>, ConnectionError>
     {
         query_context(self, context)
     }
-
     fn glx_make_context_current(&self, old_context_tag: ContextTag, drawable: Drawable, read_drawable: Drawable, context: Context) -> Result<Cookie<'_, Self, MakeContextCurrentReply>, ConnectionError>
     {
         make_context_current(self, old_context_tag, drawable, read_drawable, context)
     }
-
     fn glx_create_pbuffer<'c>(&'c self, screen: u32, fbconfig: Fbconfig, pbuffer: Pbuffer, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_pbuffer(self, screen, fbconfig, pbuffer, attribs)
     }
-
     fn glx_destroy_pbuffer(&self, pbuffer: Pbuffer) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_pbuffer(self, pbuffer)
     }
-
     fn glx_get_drawable_attributes(&self, drawable: Drawable) -> Result<Cookie<'_, Self, GetDrawableAttributesReply>, ConnectionError>
     {
         get_drawable_attributes(self, drawable)
     }
-
     fn glx_change_drawable_attributes<'c>(&'c self, drawable: Drawable, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_drawable_attributes(self, drawable, attribs)
     }
-
     fn glx_create_window<'c>(&'c self, screen: u32, fbconfig: Fbconfig, window: xproto::Window, glx_window: Window, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_window(self, screen, fbconfig, window, glx_window, attribs)
     }
-
     fn glx_delete_window(&self, glxwindow: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_window(self, glxwindow)
     }
-
     fn glx_set_client_info_arb<'c>(&'c self, major_version: u32, minor_version: u32, gl_versions: &[u32], gl_extension_string: &[u8], glx_extension_string: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_client_info_arb(self, major_version, minor_version, gl_versions, gl_extension_string, glx_extension_string)
     }
-
     fn glx_create_context_attribs_arb<'c>(&'c self, context: Context, fbconfig: Fbconfig, screen: u32, share_list: Context, is_direct: bool, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_context_attribs_arb(self, context, fbconfig, screen, share_list, is_direct, attribs)
     }
-
     fn glx_set_client_info2_arb<'c>(&'c self, major_version: u32, minor_version: u32, gl_versions: &[u32], gl_extension_string: &[u8], glx_extension_string: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_client_info2_arb(self, major_version, minor_version, gl_versions, gl_extension_string, glx_extension_string)
     }
-
     fn glx_new_list(&self, context_tag: ContextTag, list: u32, mode: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         new_list(self, context_tag, list, mode)
     }
-
     fn glx_end_list(&self, context_tag: ContextTag) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         end_list(self, context_tag)
     }
-
     fn glx_delete_lists(&self, context_tag: ContextTag, list: u32, range: i32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_lists(self, context_tag, list, range)
     }
-
     fn glx_gen_lists(&self, context_tag: ContextTag, range: i32) -> Result<Cookie<'_, Self, GenListsReply>, ConnectionError>
     {
         gen_lists(self, context_tag, range)
     }
-
     fn glx_feedback_buffer(&self, context_tag: ContextTag, size: i32, type_: i32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         feedback_buffer(self, context_tag, size, type_)
     }
-
     fn glx_select_buffer(&self, context_tag: ContextTag, size: i32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_buffer(self, context_tag, size)
     }
-
     fn glx_render_mode(&self, context_tag: ContextTag, mode: u32) -> Result<Cookie<'_, Self, RenderModeReply>, ConnectionError>
     {
         render_mode(self, context_tag, mode)
     }
-
     fn glx_finish(&self, context_tag: ContextTag) -> Result<Cookie<'_, Self, FinishReply>, ConnectionError>
     {
         finish(self, context_tag)
     }
-
     fn glx_pixel_storef(&self, context_tag: ContextTag, pname: u32, datum: Float32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         pixel_storef(self, context_tag, pname, datum)
     }
-
     fn glx_pixel_storei(&self, context_tag: ContextTag, pname: u32, datum: i32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         pixel_storei(self, context_tag, pname, datum)
     }
-
     fn glx_read_pixels(&self, context_tag: ContextTag, x: i32, y: i32, width: i32, height: i32, format: u32, type_: u32, swap_bytes: bool, lsb_first: bool) -> Result<Cookie<'_, Self, ReadPixelsReply>, ConnectionError>
     {
         read_pixels(self, context_tag, x, y, width, height, format, type_, swap_bytes, lsb_first)
     }
-
     fn glx_get_booleanv(&self, context_tag: ContextTag, pname: i32) -> Result<Cookie<'_, Self, GetBooleanvReply>, ConnectionError>
     {
         get_booleanv(self, context_tag, pname)
     }
-
     fn glx_get_clip_plane(&self, context_tag: ContextTag, plane: i32) -> Result<Cookie<'_, Self, GetClipPlaneReply>, ConnectionError>
     {
         get_clip_plane(self, context_tag, plane)
     }
-
     fn glx_get_doublev(&self, context_tag: ContextTag, pname: u32) -> Result<Cookie<'_, Self, GetDoublevReply>, ConnectionError>
     {
         get_doublev(self, context_tag, pname)
     }
-
     fn glx_get_error(&self, context_tag: ContextTag) -> Result<Cookie<'_, Self, GetErrorReply>, ConnectionError>
     {
         get_error(self, context_tag)
     }
-
     fn glx_get_floatv(&self, context_tag: ContextTag, pname: u32) -> Result<Cookie<'_, Self, GetFloatvReply>, ConnectionError>
     {
         get_floatv(self, context_tag, pname)
     }
-
     fn glx_get_integerv(&self, context_tag: ContextTag, pname: u32) -> Result<Cookie<'_, Self, GetIntegervReply>, ConnectionError>
     {
         get_integerv(self, context_tag, pname)
     }
-
     fn glx_get_lightfv(&self, context_tag: ContextTag, light: u32, pname: u32) -> Result<Cookie<'_, Self, GetLightfvReply>, ConnectionError>
     {
         get_lightfv(self, context_tag, light, pname)
     }
-
     fn glx_get_lightiv(&self, context_tag: ContextTag, light: u32, pname: u32) -> Result<Cookie<'_, Self, GetLightivReply>, ConnectionError>
     {
         get_lightiv(self, context_tag, light, pname)
     }
-
     fn glx_get_mapdv(&self, context_tag: ContextTag, target: u32, query: u32) -> Result<Cookie<'_, Self, GetMapdvReply>, ConnectionError>
     {
         get_mapdv(self, context_tag, target, query)
     }
-
     fn glx_get_mapfv(&self, context_tag: ContextTag, target: u32, query: u32) -> Result<Cookie<'_, Self, GetMapfvReply>, ConnectionError>
     {
         get_mapfv(self, context_tag, target, query)
     }
-
     fn glx_get_mapiv(&self, context_tag: ContextTag, target: u32, query: u32) -> Result<Cookie<'_, Self, GetMapivReply>, ConnectionError>
     {
         get_mapiv(self, context_tag, target, query)
     }
-
     fn glx_get_materialfv(&self, context_tag: ContextTag, face: u32, pname: u32) -> Result<Cookie<'_, Self, GetMaterialfvReply>, ConnectionError>
     {
         get_materialfv(self, context_tag, face, pname)
     }
-
     fn glx_get_materialiv(&self, context_tag: ContextTag, face: u32, pname: u32) -> Result<Cookie<'_, Self, GetMaterialivReply>, ConnectionError>
     {
         get_materialiv(self, context_tag, face, pname)
     }
-
     fn glx_get_pixel_mapfv(&self, context_tag: ContextTag, map: u32) -> Result<Cookie<'_, Self, GetPixelMapfvReply>, ConnectionError>
     {
         get_pixel_mapfv(self, context_tag, map)
     }
-
     fn glx_get_pixel_mapuiv(&self, context_tag: ContextTag, map: u32) -> Result<Cookie<'_, Self, GetPixelMapuivReply>, ConnectionError>
     {
         get_pixel_mapuiv(self, context_tag, map)
     }
-
     fn glx_get_pixel_mapusv(&self, context_tag: ContextTag, map: u32) -> Result<Cookie<'_, Self, GetPixelMapusvReply>, ConnectionError>
     {
         get_pixel_mapusv(self, context_tag, map)
     }
-
     fn glx_get_polygon_stipple(&self, context_tag: ContextTag, lsb_first: bool) -> Result<Cookie<'_, Self, GetPolygonStippleReply>, ConnectionError>
     {
         get_polygon_stipple(self, context_tag, lsb_first)
     }
-
     fn glx_get_string(&self, context_tag: ContextTag, name: u32) -> Result<Cookie<'_, Self, GetStringReply>, ConnectionError>
     {
         get_string(self, context_tag, name)
     }
-
     fn glx_get_tex_envfv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetTexEnvfvReply>, ConnectionError>
     {
         get_tex_envfv(self, context_tag, target, pname)
     }
-
     fn glx_get_tex_enviv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetTexEnvivReply>, ConnectionError>
     {
         get_tex_enviv(self, context_tag, target, pname)
     }
-
     fn glx_get_tex_gendv(&self, context_tag: ContextTag, coord: u32, pname: u32) -> Result<Cookie<'_, Self, GetTexGendvReply>, ConnectionError>
     {
         get_tex_gendv(self, context_tag, coord, pname)
     }
-
     fn glx_get_tex_genfv(&self, context_tag: ContextTag, coord: u32, pname: u32) -> Result<Cookie<'_, Self, GetTexGenfvReply>, ConnectionError>
     {
         get_tex_genfv(self, context_tag, coord, pname)
     }
-
     fn glx_get_tex_geniv(&self, context_tag: ContextTag, coord: u32, pname: u32) -> Result<Cookie<'_, Self, GetTexGenivReply>, ConnectionError>
     {
         get_tex_geniv(self, context_tag, coord, pname)
     }
-
     fn glx_get_tex_image(&self, context_tag: ContextTag, target: u32, level: i32, format: u32, type_: u32, swap_bytes: bool) -> Result<Cookie<'_, Self, GetTexImageReply>, ConnectionError>
     {
         get_tex_image(self, context_tag, target, level, format, type_, swap_bytes)
     }
-
     fn glx_get_tex_parameterfv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetTexParameterfvReply>, ConnectionError>
     {
         get_tex_parameterfv(self, context_tag, target, pname)
     }
-
     fn glx_get_tex_parameteriv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetTexParameterivReply>, ConnectionError>
     {
         get_tex_parameteriv(self, context_tag, target, pname)
     }
-
     fn glx_get_tex_level_parameterfv(&self, context_tag: ContextTag, target: u32, level: i32, pname: u32) -> Result<Cookie<'_, Self, GetTexLevelParameterfvReply>, ConnectionError>
     {
         get_tex_level_parameterfv(self, context_tag, target, level, pname)
     }
-
     fn glx_get_tex_level_parameteriv(&self, context_tag: ContextTag, target: u32, level: i32, pname: u32) -> Result<Cookie<'_, Self, GetTexLevelParameterivReply>, ConnectionError>
     {
         get_tex_level_parameteriv(self, context_tag, target, level, pname)
     }
-
     fn glx_is_enabled(&self, context_tag: ContextTag, capability: u32) -> Result<Cookie<'_, Self, IsEnabledReply>, ConnectionError>
     {
         is_enabled(self, context_tag, capability)
     }
-
     fn glx_is_list(&self, context_tag: ContextTag, list: u32) -> Result<Cookie<'_, Self, IsListReply>, ConnectionError>
     {
         is_list(self, context_tag, list)
     }
-
     fn glx_flush(&self, context_tag: ContextTag) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         flush(self, context_tag)
     }
-
     fn glx_are_textures_resident<'c>(&'c self, context_tag: ContextTag, textures: &[u32]) -> Result<Cookie<'c, Self, AreTexturesResidentReply>, ConnectionError>
     {
         are_textures_resident(self, context_tag, textures)
     }
-
     fn glx_delete_textures<'c>(&'c self, context_tag: ContextTag, textures: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         delete_textures(self, context_tag, textures)
     }
-
     fn glx_gen_textures(&self, context_tag: ContextTag, n: i32) -> Result<Cookie<'_, Self, GenTexturesReply>, ConnectionError>
     {
         gen_textures(self, context_tag, n)
     }
-
     fn glx_is_texture(&self, context_tag: ContextTag, texture: u32) -> Result<Cookie<'_, Self, IsTextureReply>, ConnectionError>
     {
         is_texture(self, context_tag, texture)
     }
-
     fn glx_get_color_table(&self, context_tag: ContextTag, target: u32, format: u32, type_: u32, swap_bytes: bool) -> Result<Cookie<'_, Self, GetColorTableReply>, ConnectionError>
     {
         get_color_table(self, context_tag, target, format, type_, swap_bytes)
     }
-
     fn glx_get_color_table_parameterfv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetColorTableParameterfvReply>, ConnectionError>
     {
         get_color_table_parameterfv(self, context_tag, target, pname)
     }
-
     fn glx_get_color_table_parameteriv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetColorTableParameterivReply>, ConnectionError>
     {
         get_color_table_parameteriv(self, context_tag, target, pname)
     }
-
     fn glx_get_convolution_filter(&self, context_tag: ContextTag, target: u32, format: u32, type_: u32, swap_bytes: bool) -> Result<Cookie<'_, Self, GetConvolutionFilterReply>, ConnectionError>
     {
         get_convolution_filter(self, context_tag, target, format, type_, swap_bytes)
     }
-
     fn glx_get_convolution_parameterfv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetConvolutionParameterfvReply>, ConnectionError>
     {
         get_convolution_parameterfv(self, context_tag, target, pname)
     }
-
     fn glx_get_convolution_parameteriv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetConvolutionParameterivReply>, ConnectionError>
     {
         get_convolution_parameteriv(self, context_tag, target, pname)
     }
-
     fn glx_get_separable_filter(&self, context_tag: ContextTag, target: u32, format: u32, type_: u32, swap_bytes: bool) -> Result<Cookie<'_, Self, GetSeparableFilterReply>, ConnectionError>
     {
         get_separable_filter(self, context_tag, target, format, type_, swap_bytes)
     }
-
     fn glx_get_histogram(&self, context_tag: ContextTag, target: u32, format: u32, type_: u32, swap_bytes: bool, reset: bool) -> Result<Cookie<'_, Self, GetHistogramReply>, ConnectionError>
     {
         get_histogram(self, context_tag, target, format, type_, swap_bytes, reset)
     }
-
     fn glx_get_histogram_parameterfv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetHistogramParameterfvReply>, ConnectionError>
     {
         get_histogram_parameterfv(self, context_tag, target, pname)
     }
-
     fn glx_get_histogram_parameteriv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetHistogramParameterivReply>, ConnectionError>
     {
         get_histogram_parameteriv(self, context_tag, target, pname)
     }
-
     fn glx_get_minmax(&self, context_tag: ContextTag, target: u32, format: u32, type_: u32, swap_bytes: bool, reset: bool) -> Result<Cookie<'_, Self, GetMinmaxReply>, ConnectionError>
     {
         get_minmax(self, context_tag, target, format, type_, swap_bytes, reset)
     }
-
     fn glx_get_minmax_parameterfv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetMinmaxParameterfvReply>, ConnectionError>
     {
         get_minmax_parameterfv(self, context_tag, target, pname)
     }
-
     fn glx_get_minmax_parameteriv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetMinmaxParameterivReply>, ConnectionError>
     {
         get_minmax_parameteriv(self, context_tag, target, pname)
     }
-
     fn glx_get_compressed_tex_image_arb(&self, context_tag: ContextTag, target: u32, level: i32) -> Result<Cookie<'_, Self, GetCompressedTexImageARBReply>, ConnectionError>
     {
         get_compressed_tex_image_arb(self, context_tag, target, level)
     }
-
     fn glx_delete_queries_arb<'c>(&'c self, context_tag: ContextTag, ids: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         delete_queries_arb(self, context_tag, ids)
     }
-
     fn glx_gen_queries_arb(&self, context_tag: ContextTag, n: i32) -> Result<Cookie<'_, Self, GenQueriesARBReply>, ConnectionError>
     {
         gen_queries_arb(self, context_tag, n)
     }
-
     fn glx_is_query_arb(&self, context_tag: ContextTag, id: u32) -> Result<Cookie<'_, Self, IsQueryARBReply>, ConnectionError>
     {
         is_query_arb(self, context_tag, id)
     }
-
     fn glx_get_queryiv_arb(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetQueryivARBReply>, ConnectionError>
     {
         get_queryiv_arb(self, context_tag, target, pname)
     }
-
     fn glx_get_query_objectiv_arb(&self, context_tag: ContextTag, id: u32, pname: u32) -> Result<Cookie<'_, Self, GetQueryObjectivARBReply>, ConnectionError>
     {
         get_query_objectiv_arb(self, context_tag, id, pname)
     }
-
     fn glx_get_query_objectuiv_arb(&self, context_tag: ContextTag, id: u32, pname: u32) -> Result<Cookie<'_, Self, GetQueryObjectuivARBReply>, ConnectionError>
     {
         get_query_objectuiv_arb(self, context_tag, id, pname)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

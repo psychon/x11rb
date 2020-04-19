@@ -69,6 +69,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -127,6 +128,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply_with_fds(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, PartialEq, Eq)]
 pub struct OpenReply {
     pub response_type: u8,
@@ -234,6 +236,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply_with_fds(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, PartialEq, Eq)]
 pub struct BufferFromPixmapReply {
     pub response_type: u8,
@@ -345,6 +348,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply_with_fds(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, PartialEq, Eq)]
 pub struct FDFromFenceReply {
     pub response_type: u8,
@@ -406,6 +410,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSupportedModifiersReply {
     pub response_type: u8,
@@ -561,6 +566,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply_with_fds(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, PartialEq, Eq)]
 pub struct BuffersFromPixmapReply {
     pub response_type: u8,
@@ -613,50 +619,42 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, major_version, minor_version)
     }
-
     fn dri3_open(&self, drawable: xproto::Drawable, provider: u32) -> Result<CookieWithFds<'_, Self, OpenReply>, ConnectionError>
     {
         open(self, drawable, provider)
     }
-
     fn dri3_pixmap_from_buffer<A>(&self, pixmap: xproto::Pixmap, drawable: xproto::Drawable, size: u32, width: u16, height: u16, stride: u16, depth: u8, bpp: u8, pixmap_fd: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
         A: Into<RawFdContainer>,
     {
         pixmap_from_buffer(self, pixmap, drawable, size, width, height, stride, depth, bpp, pixmap_fd)
     }
-
     fn dri3_buffer_from_pixmap(&self, pixmap: xproto::Pixmap) -> Result<CookieWithFds<'_, Self, BufferFromPixmapReply>, ConnectionError>
     {
         buffer_from_pixmap(self, pixmap)
     }
-
     fn dri3_fence_from_fd<A>(&self, drawable: xproto::Drawable, fence: u32, initially_triggered: bool, fence_fd: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
         A: Into<RawFdContainer>,
     {
         fence_from_fd(self, drawable, fence, initially_triggered, fence_fd)
     }
-
     fn dri3_fd_from_fence(&self, drawable: xproto::Drawable, fence: u32) -> Result<CookieWithFds<'_, Self, FDFromFenceReply>, ConnectionError>
     {
         fd_from_fence(self, drawable, fence)
     }
-
     fn dri3_get_supported_modifiers(&self, window: u32, depth: u8, bpp: u8) -> Result<Cookie<'_, Self, GetSupportedModifiersReply>, ConnectionError>
     {
         get_supported_modifiers(self, window, depth, bpp)
     }
-
     fn dri3_pixmap_from_buffers<'c>(&'c self, pixmap: xproto::Pixmap, window: xproto::Window, width: u16, height: u16, stride0: u32, offset0: u32, stride1: u32, offset1: u32, stride2: u32, offset2: u32, stride3: u32, offset3: u32, depth: u8, bpp: u8, modifier: u64, buffers: Vec<RawFdContainer>) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         pixmap_from_buffers(self, pixmap, window, width, height, stride0, offset0, stride1, offset1, stride2, offset2, stride3, offset3, depth, bpp, modifier, buffers)
     }
-
     fn dri3_buffers_from_pixmap(&self, pixmap: xproto::Pixmap) -> Result<CookieWithFds<'_, Self, BuffersFromPixmapReply>, ConnectionError>
     {
         buffers_from_pixmap(self, pixmap)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

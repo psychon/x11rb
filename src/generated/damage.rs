@@ -226,6 +226,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -492,26 +493,22 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, client_major_version, client_minor_version)
     }
-
     fn damage_create(&self, damage: Damage, drawable: xproto::Drawable, level: ReportLevel) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create(self, damage, drawable, level)
     }
-
     fn damage_destroy(&self, damage: Damage) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy(self, damage)
     }
-
     fn damage_subtract(&self, damage: Damage, repair: xfixes::Region, parts: xfixes::Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         subtract(self, damage, repair, parts)
     }
-
     fn damage_add(&self, drawable: xproto::Drawable, region: xfixes::Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         add(self, drawable, region)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}
