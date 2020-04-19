@@ -193,8 +193,8 @@ pub struct NotifyEvent {
     pub server_time: xproto::Timestamp,
     pub shaped: bool,
 }
-impl NotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for NotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (shape_kind, remaining) = Kind::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -219,6 +219,7 @@ impl TryFrom<&[u8]> for NotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for NotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -231,21 +232,49 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for NotifyEvent {
 }
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let shape_kind = Kind::from(input.shape_kind).serialize();
-        let sequence = input.sequence.serialize();
-        let affected_window = input.affected_window.serialize();
-        let extents_x = input.extents_x.serialize();
-        let extents_y = input.extents_y.serialize();
-        let extents_width = input.extents_width.serialize();
-        let extents_height = input.extents_height.serialize();
-        let server_time = input.server_time.serialize();
-        let shaped = input.shaped.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let shape_kind_bytes = Kind::from(input.shape_kind).serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let affected_window_bytes = input.affected_window.serialize();
+        let extents_x_bytes = input.extents_x.serialize();
+        let extents_y_bytes = input.extents_y.serialize();
+        let extents_width_bytes = input.extents_width.serialize();
+        let extents_height_bytes = input.extents_height.serialize();
+        let server_time_bytes = input.server_time.serialize();
+        let shaped_bytes = input.shaped.serialize();
         [
-            response_type[0], shape_kind[0], sequence[0], sequence[1], affected_window[0], affected_window[1], affected_window[2], affected_window[3],
-            extents_x[0], extents_x[1], extents_y[0], extents_y[1], extents_width[0], extents_width[1], extents_height[0], extents_height[1],
-            server_time[0], server_time[1], server_time[2], server_time[3], shaped[0], 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            shape_kind_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            affected_window_bytes[0],
+            affected_window_bytes[1],
+            affected_window_bytes[2],
+            affected_window_bytes[3],
+            extents_x_bytes[0],
+            extents_x_bytes[1],
+            extents_y_bytes[0],
+            extents_y_bytes[1],
+            extents_width_bytes[0],
+            extents_width_bytes[1],
+            extents_height_bytes[0],
+            extents_height_bytes[1],
+            server_time_bytes[0],
+            server_time_bytes[1],
+            server_time_bytes[2],
+            server_time_bytes[3],
+            shaped_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -276,6 +305,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -284,8 +314,8 @@ pub struct QueryVersionReply {
     pub major_version: u16,
     pub minor_version: u16,
 }
-impl QueryVersionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryVersionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -305,22 +335,16 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 /// Opcode for the Rectangles request
 pub const RECTANGLES_REQUEST: u8 = 1;
-pub fn rectangles<'c, Conn, A, B, C>(conn: &'c Conn, operation: A, destination_kind: B, ordering: C, destination_window: xproto::Window, x_offset: i16, y_offset: i16, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn rectangles<'c, Conn>(conn: &'c Conn, operation: SO, destination_kind: SK, ordering: xproto::ClipOrdering, destination_window: xproto::Window, x_offset: i16, y_offset: i16, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<Op>,
-    B: Into<Kind>,
-    C: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let operation = operation.into();
-    let operation_bytes = operation.serialize();
-    let destination_kind = destination_kind.into();
-    let destination_kind_bytes = destination_kind.serialize();
-    let ordering = ordering.into();
-    let ordering_bytes = ordering.serialize();
+    let operation_bytes = Op::from(operation).serialize();
+    let destination_kind_bytes = Kind::from(destination_kind).serialize();
+    let ordering_bytes = u8::from(ordering).serialize();
     let destination_window_bytes = destination_window.serialize();
     let x_offset_bytes = x_offset.serialize();
     let y_offset_bytes = y_offset.serialize();
@@ -355,19 +379,15 @@ where
 
 /// Opcode for the Mask request
 pub const MASK_REQUEST: u8 = 2;
-pub fn mask<Conn, A, B>(conn: &Conn, operation: A, destination_kind: B, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_bitmap: xproto::Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn mask<Conn>(conn: &Conn, operation: SO, destination_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_bitmap: xproto::Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<Op>,
-    B: Into<Kind>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let operation = operation.into();
-    let operation_bytes = operation.serialize();
-    let destination_kind = destination_kind.into();
-    let destination_kind_bytes = destination_kind.serialize();
+    let operation_bytes = Op::from(operation).serialize();
+    let destination_kind_bytes = Kind::from(destination_kind).serialize();
     let destination_window_bytes = destination_window.serialize();
     let x_offset_bytes = x_offset.serialize();
     let y_offset_bytes = y_offset.serialize();
@@ -403,22 +423,16 @@ where
 
 /// Opcode for the Combine request
 pub const COMBINE_REQUEST: u8 = 3;
-pub fn combine<Conn, A, B, C>(conn: &Conn, operation: A, destination_kind: B, source_kind: C, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn combine<Conn>(conn: &Conn, operation: SO, destination_kind: SK, source_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<Op>,
-    B: Into<Kind>,
-    C: Into<Kind>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let operation = operation.into();
-    let operation_bytes = operation.serialize();
-    let destination_kind = destination_kind.into();
-    let destination_kind_bytes = destination_kind.serialize();
-    let source_kind = source_kind.into();
-    let source_kind_bytes = source_kind.serialize();
+    let operation_bytes = Op::from(operation).serialize();
+    let destination_kind_bytes = Kind::from(destination_kind).serialize();
+    let source_kind_bytes = Kind::from(source_kind).serialize();
     let destination_window_bytes = destination_window.serialize();
     let x_offset_bytes = x_offset.serialize();
     let y_offset_bytes = y_offset.serialize();
@@ -454,16 +468,14 @@ where
 
 /// Opcode for the Offset request
 pub const OFFSET_REQUEST: u8 = 4;
-pub fn offset<Conn, A>(conn: &Conn, destination_kind: A, destination_window: xproto::Window, x_offset: i16, y_offset: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn offset<Conn>(conn: &Conn, destination_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<Kind>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let destination_kind = destination_kind.into();
-    let destination_kind_bytes = destination_kind.serialize();
+    let destination_kind_bytes = Kind::from(destination_kind).serialize();
     let destination_window_bytes = destination_window.serialize();
     let x_offset_bytes = x_offset.serialize();
     let y_offset_bytes = y_offset.serialize();
@@ -518,6 +530,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryExtentsReply {
     pub response_type: u8,
@@ -534,8 +547,8 @@ pub struct QueryExtentsReply {
     pub clip_shape_extents_width: u16,
     pub clip_shape_extents_height: u16,
 }
-impl QueryExtentsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryExtentsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -572,7 +585,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let destination_window_bytes = destination_window.serialize();
-    let enable_bytes = (enable as u8).serialize();
+    let enable_bytes = enable.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         SELECT_INPUT_REQUEST,
@@ -620,6 +633,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InputSelectedReply {
     pub response_type: u8,
@@ -627,8 +641,8 @@ pub struct InputSelectedReply {
     pub sequence: u16,
     pub length: u32,
 }
-impl InputSelectedReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for InputSelectedReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (enabled, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -646,17 +660,15 @@ impl TryFrom<&[u8]> for InputSelectedReply {
 
 /// Opcode for the GetRectangles request
 pub const GET_RECTANGLES_REQUEST: u8 = 8;
-pub fn get_rectangles<Conn, A>(conn: &Conn, window: xproto::Window, source_kind: A) -> Result<Cookie<'_, Conn, GetRectanglesReply>, ConnectionError>
+pub fn get_rectangles<Conn>(conn: &Conn, window: xproto::Window, source_kind: SK) -> Result<Cookie<'_, Conn, GetRectanglesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<Kind>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let window_bytes = window.serialize();
-    let source_kind = source_kind.into();
-    let source_kind_bytes = source_kind.serialize();
+    let source_kind_bytes = Kind::from(source_kind).serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_RECTANGLES_REQUEST,
@@ -677,6 +689,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetRectanglesReply {
     pub response_type: u8,
@@ -685,8 +698,8 @@ pub struct GetRectanglesReply {
     pub length: u32,
     pub rectangles: Vec<xproto::Rectangle>,
 }
-impl GetRectanglesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetRectanglesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (ordering, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -712,61 +725,38 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self)
     }
-
-    fn shape_rectangles<'c, A, B, C>(&'c self, operation: A, destination_kind: B, ordering: C, destination_window: xproto::Window, x_offset: i16, y_offset: i16, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<Op>,
-        B: Into<Kind>,
-        C: Into<u8>,
+    fn shape_rectangles<'c>(&'c self, operation: SO, destination_kind: SK, ordering: xproto::ClipOrdering, destination_window: xproto::Window, x_offset: i16, y_offset: i16, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         self::rectangles(self, operation, destination_kind, ordering, destination_window, x_offset, y_offset, rectangles)
     }
-
-    fn shape_mask<A, B>(&self, operation: A, destination_kind: B, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_bitmap: xproto::Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<Op>,
-        B: Into<Kind>,
+    fn shape_mask(&self, operation: SO, destination_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_bitmap: xproto::Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         mask(self, operation, destination_kind, destination_window, x_offset, y_offset, source_bitmap)
     }
-
-    fn shape_combine<A, B, C>(&self, operation: A, destination_kind: B, source_kind: C, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<Op>,
-        B: Into<Kind>,
-        C: Into<Kind>,
+    fn shape_combine(&self, operation: SO, destination_kind: SK, source_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         combine(self, operation, destination_kind, source_kind, destination_window, x_offset, y_offset, source_window)
     }
-
-    fn shape_offset<A>(&self, destination_kind: A, destination_window: xproto::Window, x_offset: i16, y_offset: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<Kind>,
+    fn shape_offset(&self, destination_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         offset(self, destination_kind, destination_window, x_offset, y_offset)
     }
-
     fn shape_query_extents(&self, destination_window: xproto::Window) -> Result<Cookie<'_, Self, QueryExtentsReply>, ConnectionError>
     {
         query_extents(self, destination_window)
     }
-
     fn shape_select_input(&self, destination_window: xproto::Window, enable: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_input(self, destination_window, enable)
     }
-
     fn shape_input_selected(&self, destination_window: xproto::Window) -> Result<Cookie<'_, Self, InputSelectedReply>, ConnectionError>
     {
         input_selected(self, destination_window)
     }
-
-    fn shape_get_rectangles<A>(&self, window: xproto::Window, source_kind: A) -> Result<Cookie<'_, Self, GetRectanglesReply>, ConnectionError>
-    where
-        A: Into<Kind>,
+    fn shape_get_rectangles(&self, window: xproto::Window, source_kind: SK) -> Result<Cookie<'_, Self, GetRectanglesReply>, ConnectionError>
     {
         get_rectangles(self, window, source_kind)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

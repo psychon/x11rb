@@ -73,6 +73,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -81,8 +82,8 @@ pub struct QueryVersionReply {
     pub major_version: u32,
     pub minor_version: u32,
 }
-impl QueryVersionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryVersionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -289,22 +290,16 @@ impl TryFrom<u32> for SaveSetMapping {
 
 /// Opcode for the ChangeSaveSet request
 pub const CHANGE_SAVE_SET_REQUEST: u8 = 1;
-pub fn change_save_set<Conn, A, B, C>(conn: &Conn, mode: A, target: B, map: C, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn change_save_set<Conn>(conn: &Conn, mode: SaveSetMode, target: SaveSetTarget, map: SaveSetMapping, window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
-    B: Into<u8>,
-    C: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
-    let target = target.into();
-    let target_bytes = target.serialize();
-    let map = map.into();
-    let map_bytes = map.serialize();
+    let mode_bytes = u8::from(mode).serialize();
+    let target_bytes = u8::from(target).serialize();
+    let map_bytes = u8::from(map).serialize();
     let window_bytes = window.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -471,8 +466,8 @@ pub struct SelectionNotifyEvent {
     pub timestamp: xproto::Timestamp,
     pub selection_timestamp: xproto::Timestamp,
 }
-impl SelectionNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for SelectionNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (subtype, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -495,6 +490,7 @@ impl TryFrom<&[u8]> for SelectionNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for SelectionNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -507,19 +503,47 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for SelectionNotifyEvent {
 }
 impl From<&SelectionNotifyEvent> for [u8; 32] {
     fn from(input: &SelectionNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let subtype = u8::from(input.subtype).serialize();
-        let sequence = input.sequence.serialize();
-        let window = input.window.serialize();
-        let owner = input.owner.serialize();
-        let selection = input.selection.serialize();
-        let timestamp = input.timestamp.serialize();
-        let selection_timestamp = input.selection_timestamp.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let subtype_bytes = u8::from(input.subtype).serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let window_bytes = input.window.serialize();
+        let owner_bytes = input.owner.serialize();
+        let selection_bytes = input.selection.serialize();
+        let timestamp_bytes = input.timestamp.serialize();
+        let selection_timestamp_bytes = input.selection_timestamp.serialize();
         [
-            response_type[0], subtype[0], sequence[0], sequence[1], window[0], window[1], window[2], window[3],
-            owner[0], owner[1], owner[2], owner[3], selection[0], selection[1], selection[2], selection[3],
-            timestamp[0], timestamp[1], timestamp[2], timestamp[3], selection_timestamp[0], selection_timestamp[1], selection_timestamp[2], selection_timestamp[3],
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            subtype_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            owner_bytes[0],
+            owner_bytes[1],
+            owner_bytes[2],
+            owner_bytes[3],
+            selection_bytes[0],
+            selection_bytes[1],
+            selection_bytes[2],
+            selection_bytes[3],
+            timestamp_bytes[0],
+            timestamp_bytes[1],
+            timestamp_bytes[2],
+            timestamp_bytes[3],
+            selection_timestamp_bytes[0],
+            selection_timestamp_bytes[1],
+            selection_timestamp_bytes[2],
+            selection_timestamp_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -697,8 +721,8 @@ pub struct CursorNotifyEvent {
     pub timestamp: xproto::Timestamp,
     pub name: xproto::Atom,
 }
-impl CursorNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for CursorNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (subtype, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -720,6 +744,7 @@ impl TryFrom<&[u8]> for CursorNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for CursorNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -732,18 +757,46 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for CursorNotifyEvent {
 }
 impl From<&CursorNotifyEvent> for [u8; 32] {
     fn from(input: &CursorNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let subtype = u8::from(input.subtype).serialize();
-        let sequence = input.sequence.serialize();
-        let window = input.window.serialize();
-        let cursor_serial = input.cursor_serial.serialize();
-        let timestamp = input.timestamp.serialize();
-        let name = input.name.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let subtype_bytes = u8::from(input.subtype).serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let window_bytes = input.window.serialize();
+        let cursor_serial_bytes = input.cursor_serial.serialize();
+        let timestamp_bytes = input.timestamp.serialize();
+        let name_bytes = input.name.serialize();
         [
-            response_type[0], subtype[0], sequence[0], sequence[1], window[0], window[1], window[2], window[3],
-            cursor_serial[0], cursor_serial[1], cursor_serial[2], cursor_serial[3], timestamp[0], timestamp[1], timestamp[2], timestamp[3],
-            name[0], name[1], name[2], name[3], 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            subtype_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            cursor_serial_bytes[0],
+            cursor_serial_bytes[1],
+            cursor_serial_bytes[2],
+            cursor_serial_bytes[3],
+            timestamp_bytes[0],
+            timestamp_bytes[1],
+            timestamp_bytes[2],
+            timestamp_bytes[3],
+            name_bytes[0],
+            name_bytes[1],
+            name_bytes[2],
+            name_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -806,6 +859,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCursorImageReply {
     pub response_type: u8,
@@ -820,8 +874,8 @@ pub struct GetCursorImageReply {
     pub cursor_serial: u32,
     pub cursor_image: Vec<u32>,
 }
-impl GetCursorImageReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetCursorImageReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -856,8 +910,8 @@ pub struct BadRegionError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl BadRegionError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadRegionError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -883,14 +937,43 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadRegionError {
 }
 impl From<&BadRegionError> for [u8; 32] {
     fn from(input: &BadRegionError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -1024,18 +1107,16 @@ where
 
 /// Opcode for the CreateRegionFromWindow request
 pub const CREATE_REGION_FROM_WINDOW_REQUEST: u8 = 7;
-pub fn create_region_from_window<Conn, A>(conn: &Conn, region: Region, window: xproto::Window, kind: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_region_from_window<Conn>(conn: &Conn, region: Region, window: xproto::Window, kind: shape::SK) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<shape::Kind>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let region_bytes = region.serialize();
     let window_bytes = window.serialize();
-    let kind = kind.into();
-    let kind_bytes = kind.serialize();
+    let kind_bytes = shape::Kind::from(kind).serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_REGION_FROM_WINDOW_REQUEST,
@@ -1458,6 +1539,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct FetchRegionReply {
     pub response_type: u8,
@@ -1465,8 +1547,8 @@ pub struct FetchRegionReply {
     pub extents: xproto::Rectangle,
     pub rectangles: Vec<xproto::Rectangle>,
 }
-impl FetchRegionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for FetchRegionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1525,17 +1607,15 @@ where
 
 /// Opcode for the SetWindowShapeRegion request
 pub const SET_WINDOW_SHAPE_REGION_REQUEST: u8 = 21;
-pub fn set_window_shape_region<Conn, A>(conn: &Conn, dest: xproto::Window, dest_kind: A, x_offset: i16, y_offset: i16, region: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_window_shape_region<Conn>(conn: &Conn, dest: xproto::Window, dest_kind: shape::SK, x_offset: i16, y_offset: i16, region: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<shape::Kind>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let dest_bytes = dest.serialize();
-    let dest_kind = dest_kind.into();
-    let dest_kind_bytes = dest_kind.serialize();
+    let dest_kind_bytes = shape::Kind::from(dest_kind).serialize();
     let x_offset_bytes = x_offset.serialize();
     let y_offset_bytes = y_offset.serialize();
     let region_bytes = region.serialize();
@@ -1668,6 +1748,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCursorNameReply {
     pub response_type: u8,
@@ -1676,8 +1757,8 @@ pub struct GetCursorNameReply {
     pub atom: xproto::Atom,
     pub name: Vec<u8>,
 }
-impl GetCursorNameReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetCursorNameReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1718,6 +1799,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCursorImageAndNameReply {
     pub response_type: u8,
@@ -1734,8 +1816,8 @@ pub struct GetCursorImageAndNameReply {
     pub cursor_image: Vec<u32>,
     pub name: Vec<u8>,
 }
-impl GetCursorImageAndNameReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetCursorImageAndNameReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2092,174 +2174,134 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, client_major_version, client_minor_version)
     }
-
-    fn xfixes_change_save_set<A, B, C>(&self, mode: A, target: B, map: C, window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
-        B: Into<u8>,
-        C: Into<u8>,
+    fn xfixes_change_save_set(&self, mode: SaveSetMode, target: SaveSetTarget, map: SaveSetMapping, window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         change_save_set(self, mode, target, map, window)
     }
-
     fn xfixes_select_selection_input(&self, window: xproto::Window, selection: xproto::Atom, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_selection_input(self, window, selection, event_mask)
     }
-
     fn xfixes_select_cursor_input(&self, window: xproto::Window, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_cursor_input(self, window, event_mask)
     }
-
     fn xfixes_get_cursor_image(&self) -> Result<Cookie<'_, Self, GetCursorImageReply>, ConnectionError>
     {
         get_cursor_image(self)
     }
-
     fn xfixes_create_region<'c>(&'c self, region: Region, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_region(self, region, rectangles)
     }
-
     fn xfixes_create_region_from_bitmap(&self, region: Region, bitmap: xproto::Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_region_from_bitmap(self, region, bitmap)
     }
-
-    fn xfixes_create_region_from_window<A>(&self, region: Region, window: xproto::Window, kind: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<shape::Kind>,
+    fn xfixes_create_region_from_window(&self, region: Region, window: xproto::Window, kind: shape::SK) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_region_from_window(self, region, window, kind)
     }
-
     fn xfixes_create_region_from_gc(&self, region: Region, gc: xproto::Gcontext) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_region_from_gc(self, region, gc)
     }
-
     fn xfixes_create_region_from_picture(&self, region: Region, picture: render::Picture) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_region_from_picture(self, region, picture)
     }
-
     fn xfixes_destroy_region(&self, region: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_region(self, region)
     }
-
     fn xfixes_set_region<'c>(&'c self, region: Region, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_region(self, region, rectangles)
     }
-
     fn xfixes_copy_region(&self, source: Region, destination: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         copy_region(self, source, destination)
     }
-
     fn xfixes_union_region(&self, source1: Region, source2: Region, destination: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         union_region(self, source1, source2, destination)
     }
-
     fn xfixes_intersect_region(&self, source1: Region, source2: Region, destination: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         intersect_region(self, source1, source2, destination)
     }
-
     fn xfixes_subtract_region(&self, source1: Region, source2: Region, destination: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         subtract_region(self, source1, source2, destination)
     }
-
     fn xfixes_invert_region(&self, source: Region, bounds: xproto::Rectangle, destination: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         invert_region(self, source, bounds, destination)
     }
-
     fn xfixes_translate_region(&self, region: Region, dx: i16, dy: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         translate_region(self, region, dx, dy)
     }
-
     fn xfixes_region_extents(&self, source: Region, destination: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         region_extents(self, source, destination)
     }
-
     fn xfixes_fetch_region(&self, region: Region) -> Result<Cookie<'_, Self, FetchRegionReply>, ConnectionError>
     {
         fetch_region(self, region)
     }
-
     fn xfixes_set_gc_clip_region(&self, gc: xproto::Gcontext, region: Region, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_gc_clip_region(self, gc, region, x_origin, y_origin)
     }
-
-    fn xfixes_set_window_shape_region<A>(&self, dest: xproto::Window, dest_kind: A, x_offset: i16, y_offset: i16, region: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<shape::Kind>,
+    fn xfixes_set_window_shape_region(&self, dest: xproto::Window, dest_kind: shape::SK, x_offset: i16, y_offset: i16, region: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_window_shape_region(self, dest, dest_kind, x_offset, y_offset, region)
     }
-
     fn xfixes_set_picture_clip_region(&self, picture: render::Picture, region: Region, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_picture_clip_region(self, picture, region, x_origin, y_origin)
     }
-
     fn xfixes_set_cursor_name<'c>(&'c self, cursor: xproto::Cursor, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_cursor_name(self, cursor, name)
     }
-
     fn xfixes_get_cursor_name(&self, cursor: xproto::Cursor) -> Result<Cookie<'_, Self, GetCursorNameReply>, ConnectionError>
     {
         get_cursor_name(self, cursor)
     }
-
     fn xfixes_get_cursor_image_and_name(&self) -> Result<Cookie<'_, Self, GetCursorImageAndNameReply>, ConnectionError>
     {
         get_cursor_image_and_name(self)
     }
-
     fn xfixes_change_cursor(&self, source: xproto::Cursor, destination: xproto::Cursor) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         change_cursor(self, source, destination)
     }
-
     fn xfixes_change_cursor_by_name<'c>(&'c self, src: xproto::Cursor, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_cursor_by_name(self, src, name)
     }
-
     fn xfixes_expand_region(&self, source: Region, destination: Region, left: u16, right: u16, top: u16, bottom: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         expand_region(self, source, destination, left, right, top, bottom)
     }
-
     fn xfixes_hide_cursor(&self, window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         hide_cursor(self, window)
     }
-
     fn xfixes_show_cursor(&self, window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         show_cursor(self, window)
     }
-
     fn xfixes_create_pointer_barrier<'c>(&'c self, barrier: Barrier, window: xproto::Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: u32, devices: &[u16]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_pointer_barrier(self, barrier, window, x1, y1, x2, y2, directions, devices)
     }
-
     fn xfixes_delete_pointer_barrier(&self, barrier: Barrier) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_pointer_barrier(self, barrier)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

@@ -122,8 +122,8 @@ pub struct BadDamageError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl BadDamageError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadDamageError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -149,14 +149,43 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadDamageError {
 }
 impl From<&BadDamageError> for [u8; 32] {
     fn from(input: &BadDamageError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -197,6 +226,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -205,8 +235,8 @@ pub struct QueryVersionReply {
     pub major_version: u32,
     pub minor_version: u32,
 }
-impl QueryVersionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryVersionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -227,18 +257,16 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 /// Opcode for the Create request
 pub const CREATE_REQUEST: u8 = 1;
-pub fn create<Conn, A>(conn: &Conn, damage: Damage, drawable: xproto::Drawable, level: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create<Conn>(conn: &Conn, damage: Damage, drawable: xproto::Drawable, level: ReportLevel) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let damage_bytes = damage.serialize();
     let drawable_bytes = drawable.serialize();
-    let level = level.into();
-    let level_bytes = level.serialize();
+    let level_bytes = u8::from(level).serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_REQUEST,
@@ -373,8 +401,8 @@ pub struct NotifyEvent {
     pub area: xproto::Rectangle,
     pub geometry: xproto::Rectangle,
 }
-impl NotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for NotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (level, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -396,6 +424,7 @@ impl TryFrom<&[u8]> for NotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for NotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -408,19 +437,47 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for NotifyEvent {
 }
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let level = u8::from(input.level).serialize();
-        let sequence = input.sequence.serialize();
-        let drawable = input.drawable.serialize();
-        let damage = input.damage.serialize();
-        let timestamp = input.timestamp.serialize();
-        let area = input.area.serialize();
-        let geometry = input.geometry.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let level_bytes = u8::from(input.level).serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let drawable_bytes = input.drawable.serialize();
+        let damage_bytes = input.damage.serialize();
+        let timestamp_bytes = input.timestamp.serialize();
+        let area_bytes = input.area.serialize();
+        let geometry_bytes = input.geometry.serialize();
         [
-            response_type[0], level[0], sequence[0], sequence[1], drawable[0], drawable[1], drawable[2], drawable[3],
-            damage[0], damage[1], damage[2], damage[3], timestamp[0], timestamp[1], timestamp[2], timestamp[3],
-            area[0], area[1], area[2], area[3], area[4], area[5], area[6], area[7],
-            geometry[0], geometry[1], geometry[2], geometry[3], geometry[4], geometry[5], geometry[6], geometry[7]
+            response_type_bytes[0],
+            level_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            damage_bytes[0],
+            damage_bytes[1],
+            damage_bytes[2],
+            damage_bytes[3],
+            timestamp_bytes[0],
+            timestamp_bytes[1],
+            timestamp_bytes[2],
+            timestamp_bytes[3],
+            area_bytes[0],
+            area_bytes[1],
+            area_bytes[2],
+            area_bytes[3],
+            area_bytes[4],
+            area_bytes[5],
+            area_bytes[6],
+            area_bytes[7],
+            geometry_bytes[0],
+            geometry_bytes[1],
+            geometry_bytes[2],
+            geometry_bytes[3],
+            geometry_bytes[4],
+            geometry_bytes[5],
+            geometry_bytes[6],
+            geometry_bytes[7],
         ]
     }
 }
@@ -436,28 +493,22 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, client_major_version, client_minor_version)
     }
-
-    fn damage_create<A>(&self, damage: Damage, drawable: xproto::Drawable, level: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn damage_create(&self, damage: Damage, drawable: xproto::Drawable, level: ReportLevel) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create(self, damage, drawable, level)
     }
-
     fn damage_destroy(&self, damage: Damage) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy(self, damage)
     }
-
     fn damage_subtract(&self, damage: Damage, repair: xfixes::Region, parts: xfixes::Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         subtract(self, damage, repair, parts)
     }
-
     fn damage_add(&self, drawable: xproto::Drawable, region: xfixes::Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         add(self, drawable, region)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

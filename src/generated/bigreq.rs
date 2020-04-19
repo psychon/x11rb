@@ -57,6 +57,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EnableReply {
     pub response_type: u8,
@@ -64,8 +65,8 @@ pub struct EnableReply {
     pub length: u32,
     pub maximum_request_length: u32,
 }
-impl EnableReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for EnableReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -88,6 +89,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         enable(self)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

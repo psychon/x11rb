@@ -738,8 +738,8 @@ pub struct PictFormatError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl PictFormatError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PictFormatError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -765,14 +765,43 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for PictFormatError {
 }
 impl From<&PictFormatError> for [u8; 32] {
     fn from(input: &PictFormatError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -790,8 +819,8 @@ pub struct PictureError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl PictureError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PictureError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -817,14 +846,43 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for PictureError {
 }
 impl From<&PictureError> for [u8; 32] {
     fn from(input: &PictureError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -842,8 +900,8 @@ pub struct PictOpError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl PictOpError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PictOpError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -869,14 +927,43 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for PictOpError {
 }
 impl From<&PictOpError> for [u8; 32] {
     fn from(input: &PictOpError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -894,8 +981,8 @@ pub struct GlyphSetError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl GlyphSetError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GlyphSetError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -921,14 +1008,43 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for GlyphSetError {
 }
 impl From<&GlyphSetError> for [u8; 32] {
     fn from(input: &GlyphSetError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -946,8 +1062,8 @@ pub struct GlyphError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl GlyphError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GlyphError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -973,14 +1089,43 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for GlyphError {
 }
 impl From<&GlyphError> for [u8; 32] {
     fn from(input: &GlyphError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -1216,7 +1361,7 @@ impl Serialize for Pictdepth {
         bytes.reserve(8);
         self.depth.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
-        let num_visuals = self.visuals.len() as u16;
+        let num_visuals = u16::try_from(self.visuals.len()).expect("`visuals` has too many elements");
         num_visuals.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 4]);
         self.visuals.serialize_into(bytes);
@@ -1252,7 +1397,7 @@ impl Serialize for Pictscreen {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        let num_depths = self.depths.len() as u32;
+        let num_depths = u32::try_from(self.depths.len()).expect("`depths` has too many elements");
         num_depths.serialize_into(bytes);
         self.fallback.serialize_into(bytes);
         self.depths.serialize_into(bytes);
@@ -1696,6 +1841,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -1704,8 +1850,8 @@ pub struct QueryVersionReply {
     pub major_version: u32,
     pub minor_version: u32,
 }
-impl QueryVersionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryVersionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1745,6 +1891,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryPictFormatsReply {
     pub response_type: u8,
@@ -1756,8 +1903,8 @@ pub struct QueryPictFormatsReply {
     pub screens: Vec<Pictscreen>,
     pub subpixels: Vec<u32>,
 }
-impl QueryPictFormatsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryPictFormatsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1808,6 +1955,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryPictIndexValuesReply {
     pub response_type: u8,
@@ -1815,8 +1963,8 @@ pub struct QueryPictIndexValuesReply {
     pub length: u32,
     pub values: Vec<Indexvalue>,
 }
-impl QueryPictIndexValuesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryPictIndexValuesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1837,10 +1985,10 @@ impl TryFrom<&[u8]> for QueryPictIndexValuesReply {
 
 /// Opcode for the CreatePicture request
 pub const CREATE_PICTURE_REQUEST: u8 = 4;
-/// Auxiliary and optional information for the create_picture function.
+/// Auxiliary and optional information for the `create_picture` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct CreatePictureAux {
-    pub repeat: Option<u32>,
+    pub repeat: Option<Repeat>,
     pub alphamap: Option<Picture>,
     pub alphaxorigin: Option<i32>,
     pub alphayorigin: Option<i32>,
@@ -1848,11 +1996,60 @@ pub struct CreatePictureAux {
     pub clipyorigin: Option<i32>,
     pub clipmask: Option<xproto::Pixmap>,
     pub graphicsexposure: Option<u32>,
-    pub subwindowmode: Option<u32>,
-    pub polyedge: Option<u32>,
-    pub polymode: Option<u32>,
+    pub subwindowmode: Option<xproto::SubwindowMode>,
+    pub polyedge: Option<PolyEdge>,
+    pub polymode: Option<PolyMode>,
     pub dither: Option<xproto::Atom>,
     pub componentalpha: Option<u32>,
+}
+impl Serialize for CreatePictureAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Self::Bytes {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.repeat {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.alphamap {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.alphaxorigin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.alphayorigin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clipxorigin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clipyorigin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clipmask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.graphicsexposure {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.subwindowmode {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.polyedge {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.polymode {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.dither {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.componentalpha {
+            value.serialize_into(bytes);
+        }
+    }
 }
 impl CreatePictureAux {
     /// Create a new instance with all fields unset / not present.
@@ -1902,119 +2099,70 @@ impl CreatePictureAux {
         }
         mask
     }
-    /// Set the repeat field of this structure.
-    pub fn repeat<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `repeat` field of this structure.
+    pub fn repeat<I>(mut self, value: I) -> Self where I: Into<Option<Repeat>> {
         self.repeat = value.into();
         self
     }
-    /// Set the alphamap field of this structure.
+    /// Set the `alphamap` field of this structure.
     pub fn alphamap<I>(mut self, value: I) -> Self where I: Into<Option<Picture>> {
         self.alphamap = value.into();
         self
     }
-    /// Set the alphaxorigin field of this structure.
+    /// Set the `alphaxorigin` field of this structure.
     pub fn alphaxorigin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.alphaxorigin = value.into();
         self
     }
-    /// Set the alphayorigin field of this structure.
+    /// Set the `alphayorigin` field of this structure.
     pub fn alphayorigin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.alphayorigin = value.into();
         self
     }
-    /// Set the clipxorigin field of this structure.
+    /// Set the `clipxorigin` field of this structure.
     pub fn clipxorigin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.clipxorigin = value.into();
         self
     }
-    /// Set the clipyorigin field of this structure.
+    /// Set the `clipyorigin` field of this structure.
     pub fn clipyorigin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.clipyorigin = value.into();
         self
     }
-    /// Set the clipmask field of this structure.
+    /// Set the `clipmask` field of this structure.
     pub fn clipmask<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Pixmap>> {
         self.clipmask = value.into();
         self
     }
-    /// Set the graphicsexposure field of this structure.
+    /// Set the `graphicsexposure` field of this structure.
     pub fn graphicsexposure<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.graphicsexposure = value.into();
         self
     }
-    /// Set the subwindowmode field of this structure.
-    pub fn subwindowmode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `subwindowmode` field of this structure.
+    pub fn subwindowmode<I>(mut self, value: I) -> Self where I: Into<Option<xproto::SubwindowMode>> {
         self.subwindowmode = value.into();
         self
     }
-    /// Set the polyedge field of this structure.
-    pub fn polyedge<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `polyedge` field of this structure.
+    pub fn polyedge<I>(mut self, value: I) -> Self where I: Into<Option<PolyEdge>> {
         self.polyedge = value.into();
         self
     }
-    /// Set the polymode field of this structure.
-    pub fn polymode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `polymode` field of this structure.
+    pub fn polymode<I>(mut self, value: I) -> Self where I: Into<Option<PolyMode>> {
         self.polymode = value.into();
         self
     }
-    /// Set the dither field of this structure.
+    /// Set the `dither` field of this structure.
     pub fn dither<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Atom>> {
         self.dither = value.into();
         self
     }
-    /// Set the componentalpha field of this structure.
+    /// Set the `componentalpha` field of this structure.
     pub fn componentalpha<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.componentalpha = value.into();
         self
-    }
-}
-impl Serialize for CreatePictureAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.repeat {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.alphamap {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.alphaxorigin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.alphayorigin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clipxorigin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clipyorigin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clipmask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.graphicsexposure {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.subwindowmode {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.polyedge {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.polymode {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.dither {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.componentalpha {
-            value.serialize_into(bytes);
-        }
     }
 }
 pub fn create_picture<'c, Conn>(conn: &'c Conn, pid: Picture, drawable: xproto::Drawable, format: Pictformat, value_list: &CreatePictureAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -2064,10 +2212,10 @@ where
 
 /// Opcode for the ChangePicture request
 pub const CHANGE_PICTURE_REQUEST: u8 = 5;
-/// Auxiliary and optional information for the change_picture function.
+/// Auxiliary and optional information for the `change_picture` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ChangePictureAux {
-    pub repeat: Option<u32>,
+    pub repeat: Option<Repeat>,
     pub alphamap: Option<Picture>,
     pub alphaxorigin: Option<i32>,
     pub alphayorigin: Option<i32>,
@@ -2075,11 +2223,60 @@ pub struct ChangePictureAux {
     pub clipyorigin: Option<i32>,
     pub clipmask: Option<xproto::Pixmap>,
     pub graphicsexposure: Option<u32>,
-    pub subwindowmode: Option<u32>,
-    pub polyedge: Option<u32>,
-    pub polymode: Option<u32>,
+    pub subwindowmode: Option<xproto::SubwindowMode>,
+    pub polyedge: Option<PolyEdge>,
+    pub polymode: Option<PolyMode>,
     pub dither: Option<xproto::Atom>,
     pub componentalpha: Option<u32>,
+}
+impl Serialize for ChangePictureAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Self::Bytes {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.repeat {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.alphamap {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.alphaxorigin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.alphayorigin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clipxorigin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clipyorigin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clipmask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.graphicsexposure {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.subwindowmode {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.polyedge {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.polymode {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.dither {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.componentalpha {
+            value.serialize_into(bytes);
+        }
+    }
 }
 impl ChangePictureAux {
     /// Create a new instance with all fields unset / not present.
@@ -2129,119 +2326,70 @@ impl ChangePictureAux {
         }
         mask
     }
-    /// Set the repeat field of this structure.
-    pub fn repeat<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `repeat` field of this structure.
+    pub fn repeat<I>(mut self, value: I) -> Self where I: Into<Option<Repeat>> {
         self.repeat = value.into();
         self
     }
-    /// Set the alphamap field of this structure.
+    /// Set the `alphamap` field of this structure.
     pub fn alphamap<I>(mut self, value: I) -> Self where I: Into<Option<Picture>> {
         self.alphamap = value.into();
         self
     }
-    /// Set the alphaxorigin field of this structure.
+    /// Set the `alphaxorigin` field of this structure.
     pub fn alphaxorigin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.alphaxorigin = value.into();
         self
     }
-    /// Set the alphayorigin field of this structure.
+    /// Set the `alphayorigin` field of this structure.
     pub fn alphayorigin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.alphayorigin = value.into();
         self
     }
-    /// Set the clipxorigin field of this structure.
+    /// Set the `clipxorigin` field of this structure.
     pub fn clipxorigin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.clipxorigin = value.into();
         self
     }
-    /// Set the clipyorigin field of this structure.
+    /// Set the `clipyorigin` field of this structure.
     pub fn clipyorigin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.clipyorigin = value.into();
         self
     }
-    /// Set the clipmask field of this structure.
+    /// Set the `clipmask` field of this structure.
     pub fn clipmask<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Pixmap>> {
         self.clipmask = value.into();
         self
     }
-    /// Set the graphicsexposure field of this structure.
+    /// Set the `graphicsexposure` field of this structure.
     pub fn graphicsexposure<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.graphicsexposure = value.into();
         self
     }
-    /// Set the subwindowmode field of this structure.
-    pub fn subwindowmode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `subwindowmode` field of this structure.
+    pub fn subwindowmode<I>(mut self, value: I) -> Self where I: Into<Option<xproto::SubwindowMode>> {
         self.subwindowmode = value.into();
         self
     }
-    /// Set the polyedge field of this structure.
-    pub fn polyedge<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `polyedge` field of this structure.
+    pub fn polyedge<I>(mut self, value: I) -> Self where I: Into<Option<PolyEdge>> {
         self.polyedge = value.into();
         self
     }
-    /// Set the polymode field of this structure.
-    pub fn polymode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `polymode` field of this structure.
+    pub fn polymode<I>(mut self, value: I) -> Self where I: Into<Option<PolyMode>> {
         self.polymode = value.into();
         self
     }
-    /// Set the dither field of this structure.
+    /// Set the `dither` field of this structure.
     pub fn dither<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Atom>> {
         self.dither = value.into();
         self
     }
-    /// Set the componentalpha field of this structure.
+    /// Set the `componentalpha` field of this structure.
     pub fn componentalpha<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.componentalpha = value.into();
         self
-    }
-}
-impl Serialize for ChangePictureAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.repeat {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.alphamap {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.alphaxorigin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.alphayorigin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clipxorigin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clipyorigin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clipmask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.graphicsexposure {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.subwindowmode {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.polyedge {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.polymode {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.dither {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.componentalpha {
-            value.serialize_into(bytes);
-        }
     }
 }
 pub fn change_picture<'c, Conn>(conn: &'c Conn, picture: Picture, value_list: &ChangePictureAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -2345,16 +2493,14 @@ where
 
 /// Opcode for the Composite request
 pub const COMPOSITE_REQUEST: u8 = 8;
-pub fn composite<Conn, A>(conn: &Conn, op: A, src: Picture, mask: Picture, dst: Picture, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn composite<Conn>(conn: &Conn, op: PictOp, src: Picture, mask: Picture, dst: Picture, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let op = op.into();
-    let op_bytes = op.serialize();
+    let op_bytes = u8::from(op).serialize();
     let src_bytes = src.serialize();
     let mask_bytes = mask.serialize();
     let dst_bytes = dst.serialize();
@@ -2413,16 +2559,14 @@ where
 
 /// Opcode for the Trapezoids request
 pub const TRAPEZOIDS_REQUEST: u8 = 10;
-pub fn trapezoids<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, traps: &[Trapezoid]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn trapezoids<'c, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, traps: &[Trapezoid]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let op = op.into();
-    let op_bytes = op.serialize();
+    let op_bytes = u8::from(op).serialize();
     let src_bytes = src.serialize();
     let dst_bytes = dst.serialize();
     let mask_format_bytes = mask_format.serialize();
@@ -2467,16 +2611,14 @@ where
 
 /// Opcode for the Triangles request
 pub const TRIANGLES_REQUEST: u8 = 11;
-pub fn triangles<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, triangles: &[Triangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn triangles<'c, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, triangles: &[Triangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let op = op.into();
-    let op_bytes = op.serialize();
+    let op_bytes = u8::from(op).serialize();
     let src_bytes = src.serialize();
     let dst_bytes = dst.serialize();
     let mask_format_bytes = mask_format.serialize();
@@ -2521,16 +2663,14 @@ where
 
 /// Opcode for the TriStrip request
 pub const TRI_STRIP_REQUEST: u8 = 12;
-pub fn tri_strip<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn tri_strip<'c, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let op = op.into();
-    let op_bytes = op.serialize();
+    let op_bytes = u8::from(op).serialize();
     let src_bytes = src.serialize();
     let dst_bytes = dst.serialize();
     let mask_format_bytes = mask_format.serialize();
@@ -2575,16 +2715,14 @@ where
 
 /// Opcode for the TriFan request
 pub const TRI_FAN_REQUEST: u8 = 13;
-pub fn tri_fan<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn tri_fan<'c, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let op = op.into();
-    let op_bytes = op.serialize();
+    let op_bytes = u8::from(op).serialize();
     let src_bytes = src.serialize();
     let dst_bytes = dst.serialize();
     let mask_format_bytes = mask_format.serialize();
@@ -2792,16 +2930,14 @@ where
 
 /// Opcode for the CompositeGlyphs8 request
 pub const COMPOSITE_GLYPHS8_REQUEST: u8 = 23;
-pub fn composite_glyphs8<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn composite_glyphs8<'c, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let op = op.into();
-    let op_bytes = op.serialize();
+    let op_bytes = u8::from(op).serialize();
     let src_bytes = src.serialize();
     let dst_bytes = dst.serialize();
     let mask_format_bytes = mask_format.serialize();
@@ -2850,16 +2986,14 @@ where
 
 /// Opcode for the CompositeGlyphs16 request
 pub const COMPOSITE_GLYPHS16_REQUEST: u8 = 24;
-pub fn composite_glyphs16<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn composite_glyphs16<'c, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let op = op.into();
-    let op_bytes = op.serialize();
+    let op_bytes = u8::from(op).serialize();
     let src_bytes = src.serialize();
     let dst_bytes = dst.serialize();
     let mask_format_bytes = mask_format.serialize();
@@ -2908,16 +3042,14 @@ where
 
 /// Opcode for the CompositeGlyphs32 request
 pub const COMPOSITE_GLYPHS32_REQUEST: u8 = 25;
-pub fn composite_glyphs32<'c, Conn, A>(conn: &'c Conn, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn composite_glyphs32<'c, Conn>(conn: &'c Conn, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let op = op.into();
-    let op_bytes = op.serialize();
+    let op_bytes = u8::from(op).serialize();
     let src_bytes = src.serialize();
     let dst_bytes = dst.serialize();
     let mask_format_bytes = mask_format.serialize();
@@ -2966,16 +3098,14 @@ where
 
 /// Opcode for the FillRectangles request
 pub const FILL_RECTANGLES_REQUEST: u8 = 26;
-pub fn fill_rectangles<'c, Conn, A>(conn: &'c Conn, op: A, dst: Picture, color: Color, rects: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn fill_rectangles<'c, Conn>(conn: &'c Conn, op: PictOp, dst: Picture, color: Color, rects: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let op = op.into();
-    let op_bytes = op.serialize();
+    let op_bytes = u8::from(op).serialize();
     let dst_bytes = dst.serialize();
     let color_bytes = color.serialize();
     let rects_bytes = rects.serialize();
@@ -3237,6 +3367,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryFiltersReply {
     pub response_type: u8,
@@ -3245,8 +3376,8 @@ pub struct QueryFiltersReply {
     pub aliases: Vec<u16>,
     pub filters: Vec<xproto::Str>,
 }
-impl QueryFiltersReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryFiltersReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3747,174 +3878,126 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, client_major_version, client_minor_version)
     }
-
     fn render_query_pict_formats(&self) -> Result<Cookie<'_, Self, QueryPictFormatsReply>, ConnectionError>
     {
         query_pict_formats(self)
     }
-
     fn render_query_pict_index_values(&self, format: Pictformat) -> Result<Cookie<'_, Self, QueryPictIndexValuesReply>, ConnectionError>
     {
         query_pict_index_values(self, format)
     }
-
     fn render_create_picture<'c>(&'c self, pid: Picture, drawable: xproto::Drawable, format: Pictformat, value_list: &CreatePictureAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_picture(self, pid, drawable, format, value_list)
     }
-
     fn render_change_picture<'c>(&'c self, picture: Picture, value_list: &ChangePictureAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_picture(self, picture, value_list)
     }
-
     fn render_set_picture_clip_rectangles<'c>(&'c self, picture: Picture, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_picture_clip_rectangles(self, picture, clip_x_origin, clip_y_origin, rectangles)
     }
-
     fn render_free_picture(&self, picture: Picture) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         free_picture(self, picture)
     }
-
-    fn render_composite<A>(&self, op: A, src: Picture, mask: Picture, dst: Picture, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn render_composite(&self, op: PictOp, src: Picture, mask: Picture, dst: Picture, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         composite(self, op, src, mask, dst, src_x, src_y, mask_x, mask_y, dst_x, dst_y, width, height)
     }
-
-    fn render_trapezoids<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, traps: &[Trapezoid]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn render_trapezoids<'c>(&'c self, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, traps: &[Trapezoid]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         trapezoids(self, op, src, dst, mask_format, src_x, src_y, traps)
     }
-
-    fn render_triangles<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, triangles: &[Triangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn render_triangles<'c>(&'c self, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, triangles: &[Triangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         self::triangles(self, op, src, dst, mask_format, src_x, src_y, triangles)
     }
-
-    fn render_tri_strip<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn render_tri_strip<'c>(&'c self, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         tri_strip(self, op, src, dst, mask_format, src_x, src_y, points)
     }
-
-    fn render_tri_fan<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn render_tri_fan<'c>(&'c self, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, src_x: i16, src_y: i16, points: &[Pointfix]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         tri_fan(self, op, src, dst, mask_format, src_x, src_y, points)
     }
-
     fn render_create_glyph_set(&self, gsid: Glyphset, format: Pictformat) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_glyph_set(self, gsid, format)
     }
-
     fn render_reference_glyph_set(&self, gsid: Glyphset, existing: Glyphset) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         reference_glyph_set(self, gsid, existing)
     }
-
     fn render_free_glyph_set(&self, glyphset: Glyphset) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         free_glyph_set(self, glyphset)
     }
-
     fn render_add_glyphs<'c>(&'c self, glyphset: Glyphset, glyphs_len: u32, glyphids: &[u32], glyphs: &[Glyphinfo], data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         add_glyphs(self, glyphset, glyphs_len, glyphids, glyphs, data)
     }
-
     fn render_free_glyphs<'c>(&'c self, glyphset: Glyphset, glyphs: &[Glyph]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         free_glyphs(self, glyphset, glyphs)
     }
-
-    fn render_composite_glyphs8<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn render_composite_glyphs8<'c>(&'c self, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         composite_glyphs8(self, op, src, dst, mask_format, glyphset, src_x, src_y, glyphcmds)
     }
-
-    fn render_composite_glyphs16<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn render_composite_glyphs16<'c>(&'c self, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         composite_glyphs16(self, op, src, dst, mask_format, glyphset, src_x, src_y, glyphcmds)
     }
-
-    fn render_composite_glyphs32<'c, A>(&'c self, op: A, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn render_composite_glyphs32<'c>(&'c self, op: PictOp, src: Picture, dst: Picture, mask_format: Pictformat, glyphset: Glyphset, src_x: i16, src_y: i16, glyphcmds: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         composite_glyphs32(self, op, src, dst, mask_format, glyphset, src_x, src_y, glyphcmds)
     }
-
-    fn render_fill_rectangles<'c, A>(&'c self, op: A, dst: Picture, color: Color, rects: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn render_fill_rectangles<'c>(&'c self, op: PictOp, dst: Picture, color: Color, rects: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         fill_rectangles(self, op, dst, color, rects)
     }
-
     fn render_create_cursor(&self, cid: xproto::Cursor, source: Picture, x: u16, y: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_cursor(self, cid, source, x, y)
     }
-
     fn render_set_picture_transform(&self, picture: Picture, transform: Transform) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_picture_transform(self, picture, transform)
     }
-
     fn render_query_filters(&self, drawable: xproto::Drawable) -> Result<Cookie<'_, Self, QueryFiltersReply>, ConnectionError>
     {
         query_filters(self, drawable)
     }
-
     fn render_set_picture_filter<'c>(&'c self, picture: Picture, filter: &[u8], values: &[Fixed]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_picture_filter(self, picture, filter, values)
     }
-
     fn render_create_anim_cursor<'c>(&'c self, cid: xproto::Cursor, cursors: &[Animcursorelt]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_anim_cursor(self, cid, cursors)
     }
-
     fn render_add_traps<'c>(&'c self, picture: Picture, x_off: i16, y_off: i16, traps: &[Trap]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         add_traps(self, picture, x_off, y_off, traps)
     }
-
     fn render_create_solid_fill(&self, picture: Picture, color: Color) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_solid_fill(self, picture, color)
     }
-
     fn render_create_linear_gradient<'c>(&'c self, picture: Picture, p1: Pointfix, p2: Pointfix, num_stops: u32, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_linear_gradient(self, picture, p1, p2, num_stops, stops, colors)
     }
-
     fn render_create_radial_gradient<'c>(&'c self, picture: Picture, inner: Pointfix, outer: Pointfix, inner_radius: Fixed, outer_radius: Fixed, num_stops: u32, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_radial_gradient(self, picture, inner, outer, inner_radius, outer_radius, num_stops, stops, colors)
     }
-
     fn render_create_conical_gradient<'c>(&'c self, picture: Picture, center: Pointfix, angle: Fixed, num_stops: u32, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_conical_gradient(self, picture, center, angle, num_stops, stops, colors)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

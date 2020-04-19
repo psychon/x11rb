@@ -480,7 +480,7 @@ impl Serialize for Depth {
         bytes.reserve(8);
         self.depth.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
-        let visuals_len = self.visuals.len() as u16;
+        let visuals_len = u16::try_from(self.visuals.len()).expect("`visuals` has too many elements");
         visuals_len.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 4]);
         self.visuals.serialize_into(bytes);
@@ -728,7 +728,7 @@ impl Serialize for Screen {
         u8::from(self.backing_stores).serialize_into(bytes);
         self.save_unders.serialize_into(bytes);
         self.root_depth.serialize_into(bytes);
-        let allowed_depths_len = self.allowed_depths.len() as u8;
+        let allowed_depths_len = u8::try_from(self.allowed_depths.len()).expect("`allowed_depths` has too many elements");
         allowed_depths_len.serialize_into(bytes);
         self.allowed_depths.serialize_into(bytes);
     }
@@ -785,14 +785,14 @@ impl Serialize for SetupRequest {
         bytes.extend_from_slice(&[0; 1]);
         self.protocol_major_version.serialize_into(bytes);
         self.protocol_minor_version.serialize_into(bytes);
-        let authorization_protocol_name_len = self.authorization_protocol_name.len() as u16;
+        let authorization_protocol_name_len = u16::try_from(self.authorization_protocol_name.len()).expect("`authorization_protocol_name` has too many elements");
         authorization_protocol_name_len.serialize_into(bytes);
-        let authorization_protocol_data_len = self.authorization_protocol_data.len() as u16;
+        let authorization_protocol_data_len = u16::try_from(self.authorization_protocol_data.len()).expect("`authorization_protocol_data` has too many elements");
         authorization_protocol_data_len.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
-        self.authorization_protocol_name.serialize_into(bytes);
+        bytes.extend_from_slice(&self.authorization_protocol_name);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
-        self.authorization_protocol_data.serialize_into(bytes);
+        bytes.extend_from_slice(&self.authorization_protocol_data);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }
@@ -833,12 +833,12 @@ impl Serialize for SetupFailed {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
         self.status.serialize_into(bytes);
-        let reason_len = self.reason.len() as u8;
+        let reason_len = u8::try_from(self.reason.len()).expect("`reason` has too many elements");
         reason_len.serialize_into(bytes);
         self.protocol_major_version.serialize_into(bytes);
         self.protocol_minor_version.serialize_into(bytes);
         self.length.serialize_into(bytes);
-        self.reason.serialize_into(bytes);
+        bytes.extend_from_slice(&self.reason);
     }
 }
 
@@ -874,9 +874,9 @@ impl Serialize for SetupAuthenticate {
         bytes.reserve(8);
         self.status.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 5]);
-        let length = self.reason.len() as u16 / 4;
+        let length = u16::try_from(self.reason.len()).expect("`reason` has too many elements") / 4;
         length.serialize_into(bytes);
-        self.reason.serialize_into(bytes);
+        bytes.extend_from_slice(&self.reason);
     }
 }
 
@@ -1023,12 +1023,12 @@ impl Serialize for Setup {
         self.resource_id_base.serialize_into(bytes);
         self.resource_id_mask.serialize_into(bytes);
         self.motion_buffer_size.serialize_into(bytes);
-        let vendor_len = self.vendor.len() as u16;
+        let vendor_len = u16::try_from(self.vendor.len()).expect("`vendor` has too many elements");
         vendor_len.serialize_into(bytes);
         self.maximum_request_length.serialize_into(bytes);
-        let roots_len = self.roots.len() as u8;
+        let roots_len = u8::try_from(self.roots.len()).expect("`roots` has too many elements");
         roots_len.serialize_into(bytes);
-        let pixmap_formats_len = self.pixmap_formats.len() as u8;
+        let pixmap_formats_len = u8::try_from(self.pixmap_formats.len()).expect("`pixmap_formats` has too many elements");
         pixmap_formats_len.serialize_into(bytes);
         u8::from(self.image_byte_order).serialize_into(bytes);
         u8::from(self.bitmap_format_bit_order).serialize_into(bytes);
@@ -1037,7 +1037,7 @@ impl Serialize for Setup {
         self.min_keycode.serialize_into(bytes);
         self.max_keycode.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 4]);
-        self.vendor.serialize_into(bytes);
+        bytes.extend_from_slice(&self.vendor);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         self.pixmap_formats.serialize_into(bytes);
         self.roots.serialize_into(bytes);
@@ -1255,7 +1255,6 @@ impl TryFrom<u32> for WindowEnum {
 pub const KEY_PRESS_EVENT: u8 = 2;
 /// a key was pressed/released.
 ///
-///
 /// # Fields
 ///
 /// * `detail` - The keycode (a number representing a physical key on the keyboard) of the key
@@ -1276,8 +1275,8 @@ pub const KEY_PRESS_EVENT: u8 = 2;
 ///
 /// # See
 ///
-/// * GrabKey: request
-/// * GrabKeyboard: request
+/// * `GrabKey`: request
+/// * `GrabKeyboard`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct KeyPressEvent {
     pub response_type: u8,
@@ -1294,8 +1293,8 @@ pub struct KeyPressEvent {
     pub state: u16,
     pub same_screen: bool,
 }
-impl KeyPressEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for KeyPressEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = Keycode::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1322,6 +1321,7 @@ impl TryFrom<&[u8]> for KeyPressEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for KeyPressEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1334,24 +1334,52 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for KeyPressEvent {
 }
 impl From<&KeyPressEvent> for [u8; 32] {
     fn from(input: &KeyPressEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let event = input.event.serialize();
-        let child = input.child.serialize();
-        let root_x = input.root_x.serialize();
-        let root_y = input.root_y.serialize();
-        let event_x = input.event_x.serialize();
-        let event_y = input.event_y.serialize();
-        let state = input.state.serialize();
-        let same_screen = input.same_screen.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let event_bytes = input.event.serialize();
+        let child_bytes = input.child.serialize();
+        let root_x_bytes = input.root_x.serialize();
+        let root_y_bytes = input.root_y.serialize();
+        let event_x_bytes = input.event_x.serialize();
+        let event_y_bytes = input.event_y.serialize();
+        let state_bytes = input.state.serialize();
+        let same_screen_bytes = input.same_screen.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
-            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], 0
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            child_bytes[0],
+            child_bytes[1],
+            child_bytes[2],
+            child_bytes[3],
+            root_x_bytes[0],
+            root_x_bytes[1],
+            root_y_bytes[0],
+            root_y_bytes[1],
+            event_x_bytes[0],
+            event_x_bytes[1],
+            event_y_bytes[0],
+            event_y_bytes[1],
+            state_bytes[0],
+            state_bytes[1],
+            same_screen_bytes[0],
+            0,
         ]
     }
 }
@@ -1364,7 +1392,6 @@ impl From<KeyPressEvent> for [u8; 32] {
 /// Opcode for the KeyRelease event
 pub const KEY_RELEASE_EVENT: u8 = 3;
 /// a key was pressed/released.
-///
 ///
 /// # Fields
 ///
@@ -1386,8 +1413,8 @@ pub const KEY_RELEASE_EVENT: u8 = 3;
 ///
 /// # See
 ///
-/// * GrabKey: request
-/// * GrabKeyboard: request
+/// * `GrabKey`: request
+/// * `GrabKeyboard`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct KeyReleaseEvent {
     pub response_type: u8,
@@ -1404,8 +1431,8 @@ pub struct KeyReleaseEvent {
     pub state: u16,
     pub same_screen: bool,
 }
-impl KeyReleaseEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for KeyReleaseEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = Keycode::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1432,6 +1459,7 @@ impl TryFrom<&[u8]> for KeyReleaseEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for KeyReleaseEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1444,24 +1472,52 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for KeyReleaseEvent {
 }
 impl From<&KeyReleaseEvent> for [u8; 32] {
     fn from(input: &KeyReleaseEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let event = input.event.serialize();
-        let child = input.child.serialize();
-        let root_x = input.root_x.serialize();
-        let root_y = input.root_y.serialize();
-        let event_x = input.event_x.serialize();
-        let event_y = input.event_y.serialize();
-        let state = input.state.serialize();
-        let same_screen = input.same_screen.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let event_bytes = input.event.serialize();
+        let child_bytes = input.child.serialize();
+        let root_x_bytes = input.root_x.serialize();
+        let root_y_bytes = input.root_y.serialize();
+        let event_x_bytes = input.event_x.serialize();
+        let event_y_bytes = input.event_y.serialize();
+        let state_bytes = input.state.serialize();
+        let same_screen_bytes = input.same_screen.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
-            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], 0
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            child_bytes[0],
+            child_bytes[1],
+            child_bytes[2],
+            child_bytes[3],
+            root_x_bytes[0],
+            root_x_bytes[1],
+            root_y_bytes[0],
+            root_y_bytes[1],
+            event_x_bytes[0],
+            event_x_bytes[1],
+            event_y_bytes[0],
+            event_y_bytes[1],
+            state_bytes[0],
+            state_bytes[1],
+            same_screen_bytes[0],
+            0,
         ]
     }
 }
@@ -1534,7 +1590,6 @@ bitmask_binop!(ButtonMask, u16);
 pub const BUTTON_PRESS_EVENT: u8 = 4;
 /// a mouse button was pressed/released.
 ///
-///
 /// # Fields
 ///
 /// * `detail` - The keycode (a number representing a physical key on the keyboard) of the key
@@ -1555,8 +1610,8 @@ pub const BUTTON_PRESS_EVENT: u8 = 4;
 ///
 /// # See
 ///
-/// * GrabButton: request
-/// * GrabPointer: request
+/// * `GrabButton`: request
+/// * `GrabPointer`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ButtonPressEvent {
     pub response_type: u8,
@@ -1573,8 +1628,8 @@ pub struct ButtonPressEvent {
     pub state: u16,
     pub same_screen: bool,
 }
-impl ButtonPressEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ButtonPressEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = Button::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1601,6 +1656,7 @@ impl TryFrom<&[u8]> for ButtonPressEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ButtonPressEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1613,24 +1669,52 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ButtonPressEvent {
 }
 impl From<&ButtonPressEvent> for [u8; 32] {
     fn from(input: &ButtonPressEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let event = input.event.serialize();
-        let child = input.child.serialize();
-        let root_x = input.root_x.serialize();
-        let root_y = input.root_y.serialize();
-        let event_x = input.event_x.serialize();
-        let event_y = input.event_y.serialize();
-        let state = input.state.serialize();
-        let same_screen = input.same_screen.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let event_bytes = input.event.serialize();
+        let child_bytes = input.child.serialize();
+        let root_x_bytes = input.root_x.serialize();
+        let root_y_bytes = input.root_y.serialize();
+        let event_x_bytes = input.event_x.serialize();
+        let event_y_bytes = input.event_y.serialize();
+        let state_bytes = input.state.serialize();
+        let same_screen_bytes = input.same_screen.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
-            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], 0
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            child_bytes[0],
+            child_bytes[1],
+            child_bytes[2],
+            child_bytes[3],
+            root_x_bytes[0],
+            root_x_bytes[1],
+            root_y_bytes[0],
+            root_y_bytes[1],
+            event_x_bytes[0],
+            event_x_bytes[1],
+            event_y_bytes[0],
+            event_y_bytes[1],
+            state_bytes[0],
+            state_bytes[1],
+            same_screen_bytes[0],
+            0,
         ]
     }
 }
@@ -1643,7 +1727,6 @@ impl From<ButtonPressEvent> for [u8; 32] {
 /// Opcode for the ButtonRelease event
 pub const BUTTON_RELEASE_EVENT: u8 = 5;
 /// a mouse button was pressed/released.
-///
 ///
 /// # Fields
 ///
@@ -1665,8 +1748,8 @@ pub const BUTTON_RELEASE_EVENT: u8 = 5;
 ///
 /// # See
 ///
-/// * GrabButton: request
-/// * GrabPointer: request
+/// * `GrabButton`: request
+/// * `GrabPointer`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ButtonReleaseEvent {
     pub response_type: u8,
@@ -1683,8 +1766,8 @@ pub struct ButtonReleaseEvent {
     pub state: u16,
     pub same_screen: bool,
 }
-impl ButtonReleaseEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ButtonReleaseEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = Button::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1711,6 +1794,7 @@ impl TryFrom<&[u8]> for ButtonReleaseEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ButtonReleaseEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1723,24 +1807,52 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ButtonReleaseEvent {
 }
 impl From<&ButtonReleaseEvent> for [u8; 32] {
     fn from(input: &ButtonReleaseEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let event = input.event.serialize();
-        let child = input.child.serialize();
-        let root_x = input.root_x.serialize();
-        let root_y = input.root_y.serialize();
-        let event_x = input.event_x.serialize();
-        let event_y = input.event_y.serialize();
-        let state = input.state.serialize();
-        let same_screen = input.same_screen.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let event_bytes = input.event.serialize();
+        let child_bytes = input.child.serialize();
+        let root_x_bytes = input.root_x.serialize();
+        let root_y_bytes = input.root_y.serialize();
+        let event_x_bytes = input.event_x.serialize();
+        let event_y_bytes = input.event_y.serialize();
+        let state_bytes = input.state.serialize();
+        let same_screen_bytes = input.same_screen.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
-            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], 0
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            child_bytes[0],
+            child_bytes[1],
+            child_bytes[2],
+            child_bytes[3],
+            root_x_bytes[0],
+            root_x_bytes[1],
+            root_y_bytes[0],
+            root_y_bytes[1],
+            event_x_bytes[0],
+            event_x_bytes[1],
+            event_y_bytes[0],
+            event_y_bytes[1],
+            state_bytes[0],
+            state_bytes[1],
+            same_screen_bytes[0],
+            0,
         ]
     }
 }
@@ -1816,7 +1928,6 @@ impl TryFrom<u32> for Motion {
 pub const MOTION_NOTIFY_EVENT: u8 = 6;
 /// a key was pressed.
 ///
-///
 /// # Fields
 ///
 /// * `detail` - The keycode (a number representing a physical key on the keyboard) of the key
@@ -1837,8 +1948,8 @@ pub const MOTION_NOTIFY_EVENT: u8 = 6;
 ///
 /// # See
 ///
-/// * GrabKey: request
-/// * GrabKeyboard: request
+/// * `GrabKey`: request
+/// * `GrabKeyboard`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MotionNotifyEvent {
     pub response_type: u8,
@@ -1855,8 +1966,8 @@ pub struct MotionNotifyEvent {
     pub state: u16,
     pub same_screen: bool,
 }
-impl MotionNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for MotionNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1884,6 +1995,7 @@ impl TryFrom<&[u8]> for MotionNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for MotionNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1896,24 +2008,52 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for MotionNotifyEvent {
 }
 impl From<&MotionNotifyEvent> for [u8; 32] {
     fn from(input: &MotionNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = u8::from(input.detail).serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let event = input.event.serialize();
-        let child = input.child.serialize();
-        let root_x = input.root_x.serialize();
-        let root_y = input.root_y.serialize();
-        let event_x = input.event_x.serialize();
-        let event_y = input.event_y.serialize();
-        let state = input.state.serialize();
-        let same_screen = input.same_screen.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = u8::from(input.detail).serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let event_bytes = input.event.serialize();
+        let child_bytes = input.child.serialize();
+        let root_x_bytes = input.root_x.serialize();
+        let root_y_bytes = input.root_y.serialize();
+        let event_x_bytes = input.event_x.serialize();
+        let event_y_bytes = input.event_y.serialize();
+        let state_bytes = input.state.serialize();
+        let same_screen_bytes = input.same_screen.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
-            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], 0
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            child_bytes[0],
+            child_bytes[1],
+            child_bytes[2],
+            child_bytes[3],
+            root_x_bytes[0],
+            root_x_bytes[1],
+            root_y_bytes[0],
+            root_y_bytes[1],
+            event_x_bytes[0],
+            event_x_bytes[1],
+            event_y_bytes[0],
+            event_y_bytes[1],
+            state_bytes[0],
+            state_bytes[1],
+            same_screen_bytes[0],
+            0,
         ]
     }
 }
@@ -2075,7 +2215,6 @@ impl TryFrom<u32> for NotifyMode {
 pub const ENTER_NOTIFY_EVENT: u8 = 7;
 /// the pointer is in a different window.
 ///
-///
 /// # Fields
 ///
 /// * `child` - If the `event` window has subwindows and the final pointer position is in one
@@ -2105,8 +2244,8 @@ pub struct EnterNotifyEvent {
     pub mode: NotifyMode,
     pub same_screen_focus: u8,
 }
-impl EnterNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for EnterNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2135,6 +2274,7 @@ impl TryFrom<&[u8]> for EnterNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for EnterNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -2147,25 +2287,53 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for EnterNotifyEvent {
 }
 impl From<&EnterNotifyEvent> for [u8; 32] {
     fn from(input: &EnterNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = u8::from(input.detail).serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let event = input.event.serialize();
-        let child = input.child.serialize();
-        let root_x = input.root_x.serialize();
-        let root_y = input.root_y.serialize();
-        let event_x = input.event_x.serialize();
-        let event_y = input.event_y.serialize();
-        let state = input.state.serialize();
-        let mode = u8::from(input.mode).serialize();
-        let same_screen_focus = input.same_screen_focus.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = u8::from(input.detail).serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let event_bytes = input.event.serialize();
+        let child_bytes = input.child.serialize();
+        let root_x_bytes = input.root_x.serialize();
+        let root_y_bytes = input.root_y.serialize();
+        let event_x_bytes = input.event_x.serialize();
+        let event_y_bytes = input.event_y.serialize();
+        let state_bytes = input.state.serialize();
+        let mode_bytes = u8::from(input.mode).serialize();
+        let same_screen_focus_bytes = input.same_screen_focus.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
-            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], mode[0], same_screen_focus[0]
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            child_bytes[0],
+            child_bytes[1],
+            child_bytes[2],
+            child_bytes[3],
+            root_x_bytes[0],
+            root_x_bytes[1],
+            root_y_bytes[0],
+            root_y_bytes[1],
+            event_x_bytes[0],
+            event_x_bytes[1],
+            event_y_bytes[0],
+            event_y_bytes[1],
+            state_bytes[0],
+            state_bytes[1],
+            mode_bytes[0],
+            same_screen_focus_bytes[0],
         ]
     }
 }
@@ -2178,7 +2346,6 @@ impl From<EnterNotifyEvent> for [u8; 32] {
 /// Opcode for the LeaveNotify event
 pub const LEAVE_NOTIFY_EVENT: u8 = 8;
 /// the pointer is in a different window.
-///
 ///
 /// # Fields
 ///
@@ -2209,8 +2376,8 @@ pub struct LeaveNotifyEvent {
     pub mode: NotifyMode,
     pub same_screen_focus: u8,
 }
-impl LeaveNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for LeaveNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2239,6 +2406,7 @@ impl TryFrom<&[u8]> for LeaveNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for LeaveNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -2251,25 +2419,53 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for LeaveNotifyEvent {
 }
 impl From<&LeaveNotifyEvent> for [u8; 32] {
     fn from(input: &LeaveNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = u8::from(input.detail).serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let event = input.event.serialize();
-        let child = input.child.serialize();
-        let root_x = input.root_x.serialize();
-        let root_y = input.root_y.serialize();
-        let event_x = input.event_x.serialize();
-        let event_y = input.event_y.serialize();
-        let state = input.state.serialize();
-        let mode = u8::from(input.mode).serialize();
-        let same_screen_focus = input.same_screen_focus.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = u8::from(input.detail).serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let event_bytes = input.event.serialize();
+        let child_bytes = input.child.serialize();
+        let root_x_bytes = input.root_x.serialize();
+        let root_y_bytes = input.root_y.serialize();
+        let event_x_bytes = input.event_x.serialize();
+        let event_y_bytes = input.event_y.serialize();
+        let state_bytes = input.state.serialize();
+        let mode_bytes = u8::from(input.mode).serialize();
+        let same_screen_focus_bytes = input.same_screen_focus.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
-            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], mode[0], same_screen_focus[0]
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            child_bytes[0],
+            child_bytes[1],
+            child_bytes[2],
+            child_bytes[3],
+            root_x_bytes[0],
+            root_x_bytes[1],
+            root_y_bytes[0],
+            root_y_bytes[1],
+            event_x_bytes[0],
+            event_x_bytes[1],
+            event_y_bytes[0],
+            event_y_bytes[1],
+            state_bytes[0],
+            state_bytes[1],
+            mode_bytes[0],
+            same_screen_focus_bytes[0],
         ]
     }
 }
@@ -2283,7 +2479,6 @@ impl From<LeaveNotifyEvent> for [u8; 32] {
 pub const FOCUS_IN_EVENT: u8 = 9;
 /// NOT YET DOCUMENTED.
 ///
-///
 /// # Fields
 ///
 /// * `event` - The window on which the focus event was generated. This is the window used by
@@ -2296,8 +2491,8 @@ pub struct FocusInEvent {
     pub event: Window,
     pub mode: NotifyMode,
 }
-impl FocusInEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for FocusInEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2318,6 +2513,7 @@ impl TryFrom<&[u8]> for FocusInEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for FocusInEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -2330,16 +2526,45 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for FocusInEvent {
 }
 impl From<&FocusInEvent> for [u8; 32] {
     fn from(input: &FocusInEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = u8::from(input.detail).serialize();
-        let sequence = input.sequence.serialize();
-        let event = input.event.serialize();
-        let mode = u8::from(input.mode).serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = u8::from(input.detail).serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let event_bytes = input.event.serialize();
+        let mode_bytes = u8::from(input.mode).serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], event[0], event[1], event[2], event[3],
-            mode[0], 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            mode_bytes[0],
+            0,
+            0,
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -2353,7 +2578,6 @@ impl From<FocusInEvent> for [u8; 32] {
 pub const FOCUS_OUT_EVENT: u8 = 10;
 /// NOT YET DOCUMENTED.
 ///
-///
 /// # Fields
 ///
 /// * `event` - The window on which the focus event was generated. This is the window used by
@@ -2366,8 +2590,8 @@ pub struct FocusOutEvent {
     pub event: Window,
     pub mode: NotifyMode,
 }
-impl FocusOutEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for FocusOutEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2388,6 +2612,7 @@ impl TryFrom<&[u8]> for FocusOutEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for FocusOutEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -2400,16 +2625,45 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for FocusOutEvent {
 }
 impl From<&FocusOutEvent> for [u8; 32] {
     fn from(input: &FocusOutEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = u8::from(input.detail).serialize();
-        let sequence = input.sequence.serialize();
-        let event = input.event.serialize();
-        let mode = u8::from(input.mode).serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = u8::from(input.detail).serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let event_bytes = input.event.serialize();
+        let mode_bytes = u8::from(input.mode).serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], event[0], event[1], event[2], event[3],
-            mode[0], 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            mode_bytes[0],
+            0,
+            0,
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -2426,8 +2680,8 @@ pub struct KeymapNotifyEvent {
     pub response_type: u8,
     pub keys: [u8; 31],
 }
-impl KeymapNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for KeymapNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (keys_0, remaining) = u8::try_parse(remaining)?;
         let (keys_1, remaining) = u8::try_parse(remaining)?;
@@ -2505,6 +2759,7 @@ impl TryFrom<&[u8]> for KeymapNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for KeymapNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -2517,12 +2772,40 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for KeymapNotifyEvent {
 }
 impl From<&KeymapNotifyEvent> for [u8; 32] {
     fn from(input: &KeymapNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
+        let response_type_bytes = input.response_type.serialize();
         [
-            response_type[0], input.keys[0], input.keys[1], input.keys[2], input.keys[3], input.keys[4], input.keys[5], input.keys[6],
-            input.keys[7], input.keys[8], input.keys[9], input.keys[10], input.keys[11], input.keys[12], input.keys[13], input.keys[14],
-            input.keys[15], input.keys[16], input.keys[17], input.keys[18], input.keys[19], input.keys[20], input.keys[21], input.keys[22],
-            input.keys[23], input.keys[24], input.keys[25], input.keys[26], input.keys[27], input.keys[28], input.keys[29], input.keys[30]
+            response_type_bytes[0],
+            input.keys[0],
+            input.keys[1],
+            input.keys[2],
+            input.keys[3],
+            input.keys[4],
+            input.keys[5],
+            input.keys[6],
+            input.keys[7],
+            input.keys[8],
+            input.keys[9],
+            input.keys[10],
+            input.keys[11],
+            input.keys[12],
+            input.keys[13],
+            input.keys[14],
+            input.keys[15],
+            input.keys[16],
+            input.keys[17],
+            input.keys[18],
+            input.keys[19],
+            input.keys[20],
+            input.keys[21],
+            input.keys[22],
+            input.keys[23],
+            input.keys[24],
+            input.keys[25],
+            input.keys[26],
+            input.keys[27],
+            input.keys[28],
+            input.keys[29],
+            input.keys[30],
         ]
     }
 }
@@ -2535,7 +2818,6 @@ impl From<KeymapNotifyEvent> for [u8; 32] {
 /// Opcode for the Expose event
 pub const EXPOSE_EVENT: u8 = 12;
 /// NOT YET DOCUMENTED.
-///
 ///
 /// # Fields
 ///
@@ -2561,8 +2843,8 @@ pub struct ExposeEvent {
     pub height: u16,
     pub count: u16,
 }
-impl ExposeEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ExposeEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2585,6 +2867,7 @@ impl TryFrom<&[u8]> for ExposeEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ExposeEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -2597,19 +2880,48 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ExposeEvent {
 }
 impl From<&ExposeEvent> for [u8; 32] {
     fn from(input: &ExposeEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let window = input.window.serialize();
-        let x = input.x.serialize();
-        let y = input.y.serialize();
-        let width = input.width.serialize();
-        let height = input.height.serialize();
-        let count = input.count.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let window_bytes = input.window.serialize();
+        let x_bytes = input.x.serialize();
+        let y_bytes = input.y.serialize();
+        let width_bytes = input.width.serialize();
+        let height_bytes = input.height.serialize();
+        let count_bytes = input.count.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
-            x[0], x[1], y[0], y[1], width[0], width[1], height[0], height[1],
-            count[0], count[1], 0, 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            x_bytes[0],
+            x_bytes[1],
+            y_bytes[0],
+            y_bytes[1],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+            count_bytes[0],
+            count_bytes[1],
+            0,
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -2634,8 +2946,8 @@ pub struct GraphicsExposureEvent {
     pub count: u16,
     pub major_opcode: u8,
 }
-impl GraphicsExposureEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GraphicsExposureEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2660,6 +2972,7 @@ impl TryFrom<&[u8]> for GraphicsExposureEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for GraphicsExposureEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -2672,21 +2985,50 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for GraphicsExposureEvent {
 }
 impl From<&GraphicsExposureEvent> for [u8; 32] {
     fn from(input: &GraphicsExposureEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let drawable = input.drawable.serialize();
-        let x = input.x.serialize();
-        let y = input.y.serialize();
-        let width = input.width.serialize();
-        let height = input.height.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let count = input.count.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let drawable_bytes = input.drawable.serialize();
+        let x_bytes = input.x.serialize();
+        let y_bytes = input.y.serialize();
+        let width_bytes = input.width.serialize();
+        let height_bytes = input.height.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let count_bytes = input.count.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], drawable[0], drawable[1], drawable[2], drawable[3],
-            x[0], x[1], y[0], y[1], width[0], width[1], height[0], height[1],
-            minor_opcode[0], minor_opcode[1], count[0], count[1], major_opcode[0], 0, 0, 0,
-            /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            x_bytes[0],
+            x_bytes[1],
+            y_bytes[0],
+            y_bytes[1],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            count_bytes[0],
+            count_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            0,
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -2706,8 +3048,8 @@ pub struct NoExposureEvent {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl NoExposureEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for NoExposureEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2727,6 +3069,7 @@ impl TryFrom<&[u8]> for NoExposureEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for NoExposureEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -2739,16 +3082,45 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for NoExposureEvent {
 }
 impl From<&NoExposureEvent> for [u8; 32] {
     fn from(input: &NoExposureEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let drawable = input.drawable.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let drawable_bytes = input.drawable.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], drawable[0], drawable[1], drawable[2], drawable[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -2832,8 +3204,8 @@ pub struct VisibilityNotifyEvent {
     pub window: Window,
     pub state: Visibility,
 }
-impl VisibilityNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for VisibilityNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2853,6 +3225,7 @@ impl TryFrom<&[u8]> for VisibilityNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for VisibilityNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -2865,15 +3238,44 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for VisibilityNotifyEvent {
 }
 impl From<&VisibilityNotifyEvent> for [u8; 32] {
     fn from(input: &VisibilityNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let window = input.window.serialize();
-        let state = u8::from(input.state).serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let window_bytes = input.window.serialize();
+        let state_bytes = u8::from(input.state).serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
-            state[0], 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            state_bytes[0],
+            0,
+            0,
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -2898,8 +3300,8 @@ pub struct CreateNotifyEvent {
     pub border_width: u16,
     pub override_redirect: bool,
 }
-impl CreateNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for CreateNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2924,6 +3326,7 @@ impl TryFrom<&[u8]> for CreateNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for CreateNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -2936,21 +3339,50 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for CreateNotifyEvent {
 }
 impl From<&CreateNotifyEvent> for [u8; 32] {
     fn from(input: &CreateNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let parent = input.parent.serialize();
-        let window = input.window.serialize();
-        let x = input.x.serialize();
-        let y = input.y.serialize();
-        let width = input.width.serialize();
-        let height = input.height.serialize();
-        let border_width = input.border_width.serialize();
-        let override_redirect = input.override_redirect.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let parent_bytes = input.parent.serialize();
+        let window_bytes = input.window.serialize();
+        let x_bytes = input.x.serialize();
+        let y_bytes = input.y.serialize();
+        let width_bytes = input.width.serialize();
+        let height_bytes = input.height.serialize();
+        let border_width_bytes = input.border_width.serialize();
+        let override_redirect_bytes = input.override_redirect.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], parent[0], parent[1], parent[2], parent[3],
-            window[0], window[1], window[2], window[3], x[0], x[1], y[0], y[1],
-            width[0], width[1], height[0], height[1], border_width[0], border_width[1], override_redirect[0], 0,
-            /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            parent_bytes[0],
+            parent_bytes[1],
+            parent_bytes[2],
+            parent_bytes[3],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            x_bytes[0],
+            x_bytes[1],
+            y_bytes[0],
+            y_bytes[1],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+            border_width_bytes[0],
+            border_width_bytes[1],
+            override_redirect_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -2964,7 +3396,6 @@ impl From<CreateNotifyEvent> for [u8; 32] {
 pub const DESTROY_NOTIFY_EVENT: u8 = 17;
 /// a window is destroyed.
 ///
-///
 /// # Fields
 ///
 /// * `event` - The reconfigured window or its parent, depending on whether `StructureNotify`
@@ -2973,7 +3404,7 @@ pub const DESTROY_NOTIFY_EVENT: u8 = 17;
 ///
 /// # See
 ///
-/// * DestroyWindow: request
+/// * `DestroyWindow`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DestroyNotifyEvent {
     pub response_type: u8,
@@ -2981,8 +3412,8 @@ pub struct DestroyNotifyEvent {
     pub event: Window,
     pub window: Window,
 }
-impl DestroyNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DestroyNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3000,6 +3431,7 @@ impl TryFrom<&[u8]> for DestroyNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DestroyNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3012,15 +3444,44 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DestroyNotifyEvent {
 }
 impl From<&DestroyNotifyEvent> for [u8; 32] {
     fn from(input: &DestroyNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let event = input.event.serialize();
-        let window = input.window.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let event_bytes = input.event.serialize();
+        let window_bytes = input.window.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
-            window[0], window[1], window[2], window[3], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -3034,7 +3495,6 @@ impl From<DestroyNotifyEvent> for [u8; 32] {
 pub const UNMAP_NOTIFY_EVENT: u8 = 18;
 /// a window is unmapped.
 ///
-///
 /// # Fields
 ///
 /// * `event` - The reconfigured window or its parent, depending on whether `StructureNotify`
@@ -3045,7 +3505,7 @@ pub const UNMAP_NOTIFY_EVENT: u8 = 18;
 ///
 /// # See
 ///
-/// * UnmapWindow: request
+/// * `UnmapWindow`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UnmapNotifyEvent {
     pub response_type: u8,
@@ -3054,8 +3514,8 @@ pub struct UnmapNotifyEvent {
     pub window: Window,
     pub from_configure: bool,
 }
-impl UnmapNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for UnmapNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3075,6 +3535,7 @@ impl TryFrom<&[u8]> for UnmapNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for UnmapNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3087,16 +3548,45 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for UnmapNotifyEvent {
 }
 impl From<&UnmapNotifyEvent> for [u8; 32] {
     fn from(input: &UnmapNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let event = input.event.serialize();
-        let window = input.window.serialize();
-        let from_configure = input.from_configure.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let event_bytes = input.event.serialize();
+        let window_bytes = input.window.serialize();
+        let from_configure_bytes = input.from_configure.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
-            window[0], window[1], window[2], window[3], from_configure[0], 0, 0, 0,
-            /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            from_configure_bytes[0],
+            0,
+            0,
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -3110,7 +3600,6 @@ impl From<UnmapNotifyEvent> for [u8; 32] {
 pub const MAP_NOTIFY_EVENT: u8 = 19;
 /// a window was mapped.
 ///
-///
 /// # Fields
 ///
 /// * `event` - The window which was mapped or its parent, depending on whether
@@ -3120,7 +3609,7 @@ pub const MAP_NOTIFY_EVENT: u8 = 19;
 ///
 /// # See
 ///
-/// * MapWindow: request
+/// * `MapWindow`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MapNotifyEvent {
     pub response_type: u8,
@@ -3129,8 +3618,8 @@ pub struct MapNotifyEvent {
     pub window: Window,
     pub override_redirect: bool,
 }
-impl MapNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for MapNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3150,6 +3639,7 @@ impl TryFrom<&[u8]> for MapNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for MapNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3162,16 +3652,45 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for MapNotifyEvent {
 }
 impl From<&MapNotifyEvent> for [u8; 32] {
     fn from(input: &MapNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let event = input.event.serialize();
-        let window = input.window.serialize();
-        let override_redirect = input.override_redirect.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let event_bytes = input.event.serialize();
+        let window_bytes = input.window.serialize();
+        let override_redirect_bytes = input.override_redirect.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
-            window[0], window[1], window[2], window[3], override_redirect[0], 0, 0, 0,
-            /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            override_redirect_bytes[0],
+            0,
+            0,
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -3185,7 +3704,6 @@ impl From<MapNotifyEvent> for [u8; 32] {
 pub const MAP_REQUEST_EVENT: u8 = 20;
 /// window wants to be mapped.
 ///
-///
 /// # Fields
 ///
 /// * `parent` - The parent of `window`.
@@ -3193,7 +3711,7 @@ pub const MAP_REQUEST_EVENT: u8 = 20;
 ///
 /// # See
 ///
-/// * MapWindow: request
+/// * `MapWindow`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MapRequestEvent {
     pub response_type: u8,
@@ -3201,8 +3719,8 @@ pub struct MapRequestEvent {
     pub parent: Window,
     pub window: Window,
 }
-impl MapRequestEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for MapRequestEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3220,6 +3738,7 @@ impl TryFrom<&[u8]> for MapRequestEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for MapRequestEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3232,15 +3751,44 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for MapRequestEvent {
 }
 impl From<&MapRequestEvent> for [u8; 32] {
     fn from(input: &MapRequestEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let parent = input.parent.serialize();
-        let window = input.window.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let parent_bytes = input.parent.serialize();
+        let window_bytes = input.window.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], parent[0], parent[1], parent[2], parent[3],
-            window[0], window[1], window[2], window[3], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            parent_bytes[0],
+            parent_bytes[1],
+            parent_bytes[2],
+            parent_bytes[3],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -3263,8 +3811,8 @@ pub struct ReparentNotifyEvent {
     pub y: i16,
     pub override_redirect: bool,
 }
-impl ReparentNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ReparentNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3287,6 +3835,7 @@ impl TryFrom<&[u8]> for ReparentNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ReparentNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3299,19 +3848,48 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ReparentNotifyEvent {
 }
 impl From<&ReparentNotifyEvent> for [u8; 32] {
     fn from(input: &ReparentNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let event = input.event.serialize();
-        let window = input.window.serialize();
-        let parent = input.parent.serialize();
-        let x = input.x.serialize();
-        let y = input.y.serialize();
-        let override_redirect = input.override_redirect.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let event_bytes = input.event.serialize();
+        let window_bytes = input.window.serialize();
+        let parent_bytes = input.parent.serialize();
+        let x_bytes = input.x.serialize();
+        let y_bytes = input.y.serialize();
+        let override_redirect_bytes = input.override_redirect.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
-            window[0], window[1], window[2], window[3], parent[0], parent[1], parent[2], parent[3],
-            x[0], x[1], y[0], y[1], override_redirect[0], 0, 0, 0,
-            /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            parent_bytes[0],
+            parent_bytes[1],
+            parent_bytes[2],
+            parent_bytes[3],
+            x_bytes[0],
+            x_bytes[1],
+            y_bytes[0],
+            y_bytes[1],
+            override_redirect_bytes[0],
+            0,
+            0,
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -3324,7 +3902,6 @@ impl From<ReparentNotifyEvent> for [u8; 32] {
 /// Opcode for the ConfigureNotify event
 pub const CONFIGURE_NOTIFY_EVENT: u8 = 22;
 /// NOT YET DOCUMENTED.
-///
 ///
 /// # Fields
 ///
@@ -3345,7 +3922,7 @@ pub const CONFIGURE_NOTIFY_EVENT: u8 = 22;
 ///
 /// # See
 ///
-/// * FreeColormap: request
+/// * `FreeColormap`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ConfigureNotifyEvent {
     pub response_type: u8,
@@ -3360,8 +3937,8 @@ pub struct ConfigureNotifyEvent {
     pub border_width: u16,
     pub override_redirect: bool,
 }
-impl ConfigureNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ConfigureNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3387,6 +3964,7 @@ impl TryFrom<&[u8]> for ConfigureNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ConfigureNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3399,22 +3977,51 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ConfigureNotifyEvent {
 }
 impl From<&ConfigureNotifyEvent> for [u8; 32] {
     fn from(input: &ConfigureNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let event = input.event.serialize();
-        let window = input.window.serialize();
-        let above_sibling = input.above_sibling.serialize();
-        let x = input.x.serialize();
-        let y = input.y.serialize();
-        let width = input.width.serialize();
-        let height = input.height.serialize();
-        let border_width = input.border_width.serialize();
-        let override_redirect = input.override_redirect.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let event_bytes = input.event.serialize();
+        let window_bytes = input.window.serialize();
+        let above_sibling_bytes = input.above_sibling.serialize();
+        let x_bytes = input.x.serialize();
+        let y_bytes = input.y.serialize();
+        let width_bytes = input.width.serialize();
+        let height_bytes = input.height.serialize();
+        let border_width_bytes = input.border_width.serialize();
+        let override_redirect_bytes = input.override_redirect.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
-            window[0], window[1], window[2], window[3], above_sibling[0], above_sibling[1], above_sibling[2], above_sibling[3],
-            x[0], x[1], y[0], y[1], width[0], width[1], height[0], height[1],
-            border_width[0], border_width[1], override_redirect[0], 0, /* trailing padding */ 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            above_sibling_bytes[0],
+            above_sibling_bytes[1],
+            above_sibling_bytes[2],
+            above_sibling_bytes[3],
+            x_bytes[0],
+            x_bytes[1],
+            y_bytes[0],
+            y_bytes[1],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+            border_width_bytes[0],
+            border_width_bytes[1],
+            override_redirect_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -3441,8 +4048,8 @@ pub struct ConfigureRequestEvent {
     pub border_width: u16,
     pub value_mask: u16,
 }
-impl ConfigureRequestEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ConfigureRequestEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (stack_mode, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3468,6 +4075,7 @@ impl TryFrom<&[u8]> for ConfigureRequestEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ConfigureRequestEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3480,23 +4088,52 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ConfigureRequestEvent {
 }
 impl From<&ConfigureRequestEvent> for [u8; 32] {
     fn from(input: &ConfigureRequestEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let stack_mode = u8::from(input.stack_mode).serialize();
-        let sequence = input.sequence.serialize();
-        let parent = input.parent.serialize();
-        let window = input.window.serialize();
-        let sibling = input.sibling.serialize();
-        let x = input.x.serialize();
-        let y = input.y.serialize();
-        let width = input.width.serialize();
-        let height = input.height.serialize();
-        let border_width = input.border_width.serialize();
-        let value_mask = input.value_mask.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let stack_mode_bytes = u8::from(input.stack_mode).serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let parent_bytes = input.parent.serialize();
+        let window_bytes = input.window.serialize();
+        let sibling_bytes = input.sibling.serialize();
+        let x_bytes = input.x.serialize();
+        let y_bytes = input.y.serialize();
+        let width_bytes = input.width.serialize();
+        let height_bytes = input.height.serialize();
+        let border_width_bytes = input.border_width.serialize();
+        let value_mask_bytes = input.value_mask.serialize();
         [
-            response_type[0], stack_mode[0], sequence[0], sequence[1], parent[0], parent[1], parent[2], parent[3],
-            window[0], window[1], window[2], window[3], sibling[0], sibling[1], sibling[2], sibling[3],
-            x[0], x[1], y[0], y[1], width[0], width[1], height[0], height[1],
-            border_width[0], border_width[1], value_mask[0], value_mask[1], /* trailing padding */ 0, 0, 0, 0
+            response_type_bytes[0],
+            stack_mode_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            parent_bytes[0],
+            parent_bytes[1],
+            parent_bytes[2],
+            parent_bytes[3],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            sibling_bytes[0],
+            sibling_bytes[1],
+            sibling_bytes[2],
+            sibling_bytes[3],
+            x_bytes[0],
+            x_bytes[1],
+            y_bytes[0],
+            y_bytes[1],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+            border_width_bytes[0],
+            border_width_bytes[1],
+            value_mask_bytes[0],
+            value_mask_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -3517,8 +4154,8 @@ pub struct GravityNotifyEvent {
     pub x: i16,
     pub y: i16,
 }
-impl GravityNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GravityNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3538,6 +4175,7 @@ impl TryFrom<&[u8]> for GravityNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for GravityNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3550,17 +4188,46 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for GravityNotifyEvent {
 }
 impl From<&GravityNotifyEvent> for [u8; 32] {
     fn from(input: &GravityNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let event = input.event.serialize();
-        let window = input.window.serialize();
-        let x = input.x.serialize();
-        let y = input.y.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let event_bytes = input.event.serialize();
+        let window_bytes = input.window.serialize();
+        let x_bytes = input.x.serialize();
+        let y_bytes = input.y.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
-            window[0], window[1], window[2], window[3], x[0], x[1], y[0], y[1],
-            /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            x_bytes[0],
+            x_bytes[1],
+            y_bytes[0],
+            y_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -3580,8 +4247,8 @@ pub struct ResizeRequestEvent {
     pub width: u16,
     pub height: u16,
 }
-impl ResizeRequestEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ResizeRequestEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3600,6 +4267,7 @@ impl TryFrom<&[u8]> for ResizeRequestEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ResizeRequestEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3612,16 +4280,45 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ResizeRequestEvent {
 }
 impl From<&ResizeRequestEvent> for [u8; 32] {
     fn from(input: &ResizeRequestEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let window = input.window.serialize();
-        let width = input.width.serialize();
-        let height = input.height.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let window_bytes = input.window.serialize();
+        let width_bytes = input.width.serialize();
+        let height_bytes = input.height.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
-            width[0], width[1], height[0], height[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -3632,7 +4329,6 @@ impl From<ResizeRequestEvent> for [u8; 32] {
 }
 
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -3704,7 +4400,6 @@ impl TryFrom<u32> for Place {
 pub const CIRCULATE_NOTIFY_EVENT: u8 = 26;
 /// NOT YET DOCUMENTED.
 ///
-///
 /// # Fields
 ///
 /// * `event` - Either the restacked window or its parent, depending on whether
@@ -3713,7 +4408,7 @@ pub const CIRCULATE_NOTIFY_EVENT: u8 = 26;
 ///
 /// # See
 ///
-/// * CirculateWindow: request
+/// * `CirculateWindow`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CirculateNotifyEvent {
     pub response_type: u8,
@@ -3722,8 +4417,8 @@ pub struct CirculateNotifyEvent {
     pub window: Window,
     pub place: Place,
 }
-impl CirculateNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for CirculateNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3745,6 +4440,7 @@ impl TryFrom<&[u8]> for CirculateNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for CirculateNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3757,16 +4453,45 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for CirculateNotifyEvent {
 }
 impl From<&CirculateNotifyEvent> for [u8; 32] {
     fn from(input: &CirculateNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let event = input.event.serialize();
-        let window = input.window.serialize();
-        let place = u8::from(input.place).serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let event_bytes = input.event.serialize();
+        let window_bytes = input.window.serialize();
+        let place_bytes = u8::from(input.place).serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
-            window[0], window[1], window[2], window[3], 0, 0, 0, 0,
-            place[0], 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            place_bytes[0],
+            0,
+            0,
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -3780,7 +4505,6 @@ impl From<CirculateNotifyEvent> for [u8; 32] {
 pub const CIRCULATE_REQUEST_EVENT: u8 = 27;
 /// NOT YET DOCUMENTED.
 ///
-///
 /// # Fields
 ///
 /// * `event` - Either the restacked window or its parent, depending on whether
@@ -3789,7 +4513,7 @@ pub const CIRCULATE_REQUEST_EVENT: u8 = 27;
 ///
 /// # See
 ///
-/// * CirculateWindow: request
+/// * `CirculateWindow`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CirculateRequestEvent {
     pub response_type: u8,
@@ -3798,8 +4522,8 @@ pub struct CirculateRequestEvent {
     pub window: Window,
     pub place: Place,
 }
-impl CirculateRequestEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for CirculateRequestEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3821,6 +4545,7 @@ impl TryFrom<&[u8]> for CirculateRequestEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for CirculateRequestEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3833,16 +4558,45 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for CirculateRequestEvent {
 }
 impl From<&CirculateRequestEvent> for [u8; 32] {
     fn from(input: &CirculateRequestEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let event = input.event.serialize();
-        let window = input.window.serialize();
-        let place = u8::from(input.place).serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let event_bytes = input.event.serialize();
+        let window_bytes = input.window.serialize();
+        let place_bytes = u8::from(input.place).serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], event[0], event[1], event[2], event[3],
-            window[0], window[1], window[2], window[3], 0, 0, 0, 0,
-            place[0], 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            place_bytes[0],
+            0,
+            0,
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -3918,7 +4672,6 @@ impl TryFrom<u32> for Property {
 pub const PROPERTY_NOTIFY_EVENT: u8 = 28;
 /// a window property changed.
 ///
-///
 /// # Fields
 ///
 /// * `atom` - The property's atom, to indicate which property was changed.
@@ -3927,7 +4680,7 @@ pub const PROPERTY_NOTIFY_EVENT: u8 = 28;
 ///
 /// # See
 ///
-/// * ChangeProperty: request
+/// * `ChangeProperty`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PropertyNotifyEvent {
     pub response_type: u8,
@@ -3937,8 +4690,8 @@ pub struct PropertyNotifyEvent {
     pub time: Timestamp,
     pub state: Property,
 }
-impl PropertyNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PropertyNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3960,6 +4713,7 @@ impl TryFrom<&[u8]> for PropertyNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for PropertyNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3972,17 +4726,46 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for PropertyNotifyEvent {
 }
 impl From<&PropertyNotifyEvent> for [u8; 32] {
     fn from(input: &PropertyNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let window = input.window.serialize();
-        let atom = input.atom.serialize();
-        let time = input.time.serialize();
-        let state = u8::from(input.state).serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let window_bytes = input.window.serialize();
+        let atom_bytes = input.atom.serialize();
+        let time_bytes = input.time.serialize();
+        let state_bytes = u8::from(input.state).serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
-            atom[0], atom[1], atom[2], atom[3], time[0], time[1], time[2], time[3],
-            state[0], 0, 0, 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            atom_bytes[0],
+            atom_bytes[1],
+            atom_bytes[2],
+            atom_bytes[3],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            state_bytes[0],
+            0,
+            0,
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -4002,8 +4785,8 @@ pub struct SelectionClearEvent {
     pub owner: Window,
     pub selection: Atom,
 }
-impl SelectionClearEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for SelectionClearEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4022,6 +4805,7 @@ impl TryFrom<&[u8]> for SelectionClearEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for SelectionClearEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -4034,16 +4818,45 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for SelectionClearEvent {
 }
 impl From<&SelectionClearEvent> for [u8; 32] {
     fn from(input: &SelectionClearEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let owner = input.owner.serialize();
-        let selection = input.selection.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let owner_bytes = input.owner.serialize();
+        let selection_bytes = input.selection.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            owner[0], owner[1], owner[2], owner[3], selection[0], selection[1], selection[2], selection[3],
-            /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            owner_bytes[0],
+            owner_bytes[1],
+            owner_bytes[2],
+            owner_bytes[3],
+            selection_bytes[0],
+            selection_bytes[1],
+            selection_bytes[2],
+            selection_bytes[3],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -4301,8 +5114,8 @@ pub struct SelectionRequestEvent {
     pub target: Atom,
     pub property: Atom,
 }
-impl SelectionRequestEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for SelectionRequestEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4324,6 +5137,7 @@ impl TryFrom<&[u8]> for SelectionRequestEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for SelectionRequestEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -4336,19 +5150,48 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for SelectionRequestEvent {
 }
 impl From<&SelectionRequestEvent> for [u8; 32] {
     fn from(input: &SelectionRequestEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let owner = input.owner.serialize();
-        let requestor = input.requestor.serialize();
-        let selection = input.selection.serialize();
-        let target = input.target.serialize();
-        let property = input.property.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let owner_bytes = input.owner.serialize();
+        let requestor_bytes = input.requestor.serialize();
+        let selection_bytes = input.selection.serialize();
+        let target_bytes = input.target.serialize();
+        let property_bytes = input.property.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            owner[0], owner[1], owner[2], owner[3], requestor[0], requestor[1], requestor[2], requestor[3],
-            selection[0], selection[1], selection[2], selection[3], target[0], target[1], target[2], target[3],
-            property[0], property[1], property[2], property[3], /* trailing padding */ 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            owner_bytes[0],
+            owner_bytes[1],
+            owner_bytes[2],
+            owner_bytes[3],
+            requestor_bytes[0],
+            requestor_bytes[1],
+            requestor_bytes[2],
+            requestor_bytes[3],
+            selection_bytes[0],
+            selection_bytes[1],
+            selection_bytes[2],
+            selection_bytes[3],
+            target_bytes[0],
+            target_bytes[1],
+            target_bytes[2],
+            target_bytes[3],
+            property_bytes[0],
+            property_bytes[1],
+            property_bytes[2],
+            property_bytes[3],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -4370,8 +5213,8 @@ pub struct SelectionNotifyEvent {
     pub target: Atom,
     pub property: Atom,
 }
-impl SelectionNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for SelectionNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4392,6 +5235,7 @@ impl TryFrom<&[u8]> for SelectionNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for SelectionNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -4404,18 +5248,47 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for SelectionNotifyEvent {
 }
 impl From<&SelectionNotifyEvent> for [u8; 32] {
     fn from(input: &SelectionNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let requestor = input.requestor.serialize();
-        let selection = input.selection.serialize();
-        let target = input.target.serialize();
-        let property = input.property.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let requestor_bytes = input.requestor.serialize();
+        let selection_bytes = input.selection.serialize();
+        let target_bytes = input.target.serialize();
+        let property_bytes = input.property.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            requestor[0], requestor[1], requestor[2], requestor[3], selection[0], selection[1], selection[2], selection[3],
-            target[0], target[1], target[2], target[3], property[0], property[1], property[2], property[3],
-            /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            requestor_bytes[0],
+            requestor_bytes[1],
+            requestor_bytes[2],
+            requestor_bytes[3],
+            selection_bytes[0],
+            selection_bytes[1],
+            selection_bytes[2],
+            selection_bytes[3],
+            target_bytes[0],
+            target_bytes[1],
+            target_bytes[2],
+            target_bytes[3],
+            property_bytes[0],
+            property_bytes[1],
+            property_bytes[2],
+            property_bytes[3],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -4426,7 +5299,6 @@ impl From<SelectionNotifyEvent> for [u8; 32] {
 }
 
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -4557,7 +5429,6 @@ impl TryFrom<u32> for ColormapEnum {
 pub const COLORMAP_NOTIFY_EVENT: u8 = 32;
 /// the colormap for some window changed.
 ///
-///
 /// # Fields
 ///
 /// * `_new` - Indicates whether the colormap was changed (1) or installed/uninstalled (0).
@@ -4567,7 +5438,7 @@ pub const COLORMAP_NOTIFY_EVENT: u8 = 32;
 ///
 /// # See
 ///
-/// * FreeColormap: request
+/// * `FreeColormap`: request
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ColormapNotifyEvent {
     pub response_type: u8,
@@ -4577,8 +5448,8 @@ pub struct ColormapNotifyEvent {
     pub new: bool,
     pub state: ColormapState,
 }
-impl ColormapNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ColormapNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4600,6 +5471,7 @@ impl TryFrom<&[u8]> for ColormapNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ColormapNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -4612,17 +5484,46 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ColormapNotifyEvent {
 }
 impl From<&ColormapNotifyEvent> for [u8; 32] {
     fn from(input: &ColormapNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let window = input.window.serialize();
-        let colormap = input.colormap.serialize();
-        let new = input.new.serialize();
-        let state = u8::from(input.state).serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let window_bytes = input.window.serialize();
+        let colormap_bytes = input.colormap.serialize();
+        let new_bytes = input.new.serialize();
+        let state_bytes = u8::from(input.state).serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], window[0], window[1], window[2], window[3],
-            colormap[0], colormap[1], colormap[2], colormap[3], new[0], state[0], 0, 0,
-            /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            colormap_bytes[0],
+            colormap_bytes[1],
+            colormap_bytes[2],
+            colormap_bytes[3],
+            new_bytes[0],
+            state_bytes[0],
+            0,
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -4845,7 +5746,7 @@ pub const CLIENT_MESSAGE_EVENT: u8 = 33;
 ///
 /// # See
 ///
-/// * SendEvent: request
+/// * `SendEvent`: request
 #[derive(Debug, Clone, Copy)]
 pub struct ClientMessageEvent {
     pub response_type: u8,
@@ -4855,8 +5756,8 @@ pub struct ClientMessageEvent {
     pub type_: Atom,
     pub data: ClientMessageData,
 }
-impl ClientMessageEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ClientMessageEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (format, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4875,6 +5776,7 @@ impl TryFrom<&[u8]> for ClientMessageEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ClientMessageEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -4887,17 +5789,45 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ClientMessageEvent {
 }
 impl From<&ClientMessageEvent> for [u8; 32] {
     fn from(input: &ClientMessageEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let format = input.format.serialize();
-        let sequence = input.sequence.serialize();
-        let window = input.window.serialize();
-        let type_ = input.type_.serialize();
-        let data = input.data.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let format_bytes = input.format.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let window_bytes = input.window.serialize();
+        let type_bytes = input.type_.serialize();
+        let data_bytes = input.data.serialize();
         [
-            response_type[0], format[0], sequence[0], sequence[1], window[0], window[1], window[2], window[3],
-            type_[0], type_[1], type_[2], type_[3], data[0], data[1], data[2], data[3],
-            data[4], data[5], data[6], data[7], data[8], data[9], data[10], data[11],
-            data[12], data[13], data[14], data[15], data[16], data[17], data[18], data[19]
+            response_type_bytes[0],
+            format_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            type_bytes[0],
+            type_bytes[1],
+            type_bytes[2],
+            type_bytes[3],
+            data_bytes[0],
+            data_bytes[1],
+            data_bytes[2],
+            data_bytes[3],
+            data_bytes[4],
+            data_bytes[5],
+            data_bytes[6],
+            data_bytes[7],
+            data_bytes[8],
+            data_bytes[9],
+            data_bytes[10],
+            data_bytes[11],
+            data_bytes[12],
+            data_bytes[13],
+            data_bytes[14],
+            data_bytes[15],
+            data_bytes[16],
+            data_bytes[17],
+            data_bytes[18],
+            data_bytes[19],
         ]
     }
 }
@@ -4976,7 +5906,6 @@ impl TryFrom<u32> for Mapping {
 pub const MAPPING_NOTIFY_EVENT: u8 = 34;
 /// keyboard mapping changed.
 ///
-///
 /// # Fields
 ///
 /// * `count` - The number of keycodes altered.
@@ -4989,8 +5918,8 @@ pub struct MappingNotifyEvent {
     pub first_keycode: Keycode,
     pub count: u8,
 }
-impl MappingNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for MappingNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5011,6 +5940,7 @@ impl TryFrom<&[u8]> for MappingNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for MappingNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -5023,16 +5953,45 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for MappingNotifyEvent {
 }
 impl From<&MappingNotifyEvent> for [u8; 32] {
     fn from(input: &MappingNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let request = u8::from(input.request).serialize();
-        let first_keycode = input.first_keycode.serialize();
-        let count = input.count.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let request_bytes = u8::from(input.request).serialize();
+        let first_keycode_bytes = input.first_keycode.serialize();
+        let count_bytes = input.count.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], request[0], first_keycode[0], count[0], 0,
-            /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            request_bytes[0],
+            first_keycode_bytes[0],
+            count_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -5045,7 +6004,6 @@ impl From<MappingNotifyEvent> for [u8; 32] {
 /// Opcode for the GeGeneric event
 pub const GE_GENERIC_EVENT: u8 = 35;
 /// generic event (with length).
-///
 ///
 /// # Fields
 ///
@@ -5060,8 +6018,8 @@ pub struct GeGenericEvent {
     pub length: u32,
     pub event_type: u16,
 }
-impl GeGenericEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GeGenericEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5080,6 +6038,7 @@ impl TryFrom<&[u8]> for GeGenericEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for GeGenericEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -5102,8 +6061,8 @@ pub struct RequestError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl RequestError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for RequestError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5133,17 +6092,46 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for RequestError {
 }
 impl From<&RequestError> for [u8; 32] {
     fn from(input: &RequestError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -5164,8 +6152,8 @@ pub struct ValueError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl ValueError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ValueError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5195,17 +6183,46 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for ValueError {
 }
 impl From<&ValueError> for [u8; 32] {
     fn from(input: &ValueError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -5226,8 +6243,8 @@ pub struct WindowError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl WindowError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for WindowError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5257,17 +6274,46 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for WindowError {
 }
 impl From<&WindowError> for [u8; 32] {
     fn from(input: &WindowError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -5288,8 +6334,8 @@ pub struct PixmapError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl PixmapError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PixmapError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5319,17 +6365,46 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for PixmapError {
 }
 impl From<&PixmapError> for [u8; 32] {
     fn from(input: &PixmapError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -5350,8 +6425,8 @@ pub struct AtomError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl AtomError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for AtomError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5381,17 +6456,46 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for AtomError {
 }
 impl From<&AtomError> for [u8; 32] {
     fn from(input: &AtomError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -5412,8 +6516,8 @@ pub struct CursorError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl CursorError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for CursorError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5443,17 +6547,46 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for CursorError {
 }
 impl From<&CursorError> for [u8; 32] {
     fn from(input: &CursorError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -5474,8 +6607,8 @@ pub struct FontError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl FontError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for FontError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5505,17 +6638,46 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for FontError {
 }
 impl From<&FontError> for [u8; 32] {
     fn from(input: &FontError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -5536,8 +6698,8 @@ pub struct MatchError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl MatchError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for MatchError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5567,17 +6729,46 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for MatchError {
 }
 impl From<&MatchError> for [u8; 32] {
     fn from(input: &MatchError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -5598,8 +6789,8 @@ pub struct DrawableError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl DrawableError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DrawableError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5629,17 +6820,46 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for DrawableError {
 }
 impl From<&DrawableError> for [u8; 32] {
     fn from(input: &DrawableError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -5660,8 +6880,8 @@ pub struct AccessError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl AccessError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for AccessError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5691,17 +6911,46 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for AccessError {
 }
 impl From<&AccessError> for [u8; 32] {
     fn from(input: &AccessError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -5722,8 +6971,8 @@ pub struct AllocError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl AllocError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for AllocError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5753,17 +7002,46 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for AllocError {
 }
 impl From<&AllocError> for [u8; 32] {
     fn from(input: &AllocError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -5784,8 +7062,8 @@ pub struct ColormapError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl ColormapError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ColormapError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5815,17 +7093,46 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for ColormapError {
 }
 impl From<&ColormapError> for [u8; 32] {
     fn from(input: &ColormapError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -5846,8 +7153,8 @@ pub struct GContextError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl GContextError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GContextError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5877,17 +7184,46 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for GContextError {
 }
 impl From<&GContextError> for [u8; 32] {
     fn from(input: &GContextError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -5908,8 +7244,8 @@ pub struct IDChoiceError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl IDChoiceError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for IDChoiceError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5939,17 +7275,46 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for IDChoiceError {
 }
 impl From<&IDChoiceError> for [u8; 32] {
     fn from(input: &IDChoiceError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -5970,8 +7335,8 @@ pub struct NameError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl NameError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for NameError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6001,17 +7366,46 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for NameError {
 }
 impl From<&NameError> for [u8; 32] {
     fn from(input: &NameError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -6032,8 +7426,8 @@ pub struct LengthError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl LengthError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for LengthError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6063,17 +7457,46 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for LengthError {
 }
 impl From<&LengthError> for [u8; 32] {
     fn from(input: &LengthError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -6094,8 +7517,8 @@ pub struct ImplementationError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl ImplementationError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ImplementationError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6125,17 +7548,46 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for ImplementationError {
 }
 impl From<&ImplementationError> for [u8; 32] {
     fn from(input: &ImplementationError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -6211,7 +7663,6 @@ impl TryFrom<u32> for WindowClass {
 }
 
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -6492,7 +7943,7 @@ impl From<Gravity> for Option<u32> {
 
 /// Opcode for the CreateWindow request
 pub const CREATE_WINDOW_REQUEST: u8 = 1;
-/// Auxiliary and optional information for the create_window function.
+/// Auxiliary and optional information for the `create_window` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct CreateWindowAux {
     pub background_pixmap: Option<Pixmap>,
@@ -6501,7 +7952,7 @@ pub struct CreateWindowAux {
     pub border_pixel: Option<u32>,
     pub bit_gravity: Option<u32>,
     pub win_gravity: Option<u32>,
-    pub backing_store: Option<u32>,
+    pub backing_store: Option<BackingStore>,
     pub backing_planes: Option<u32>,
     pub backing_pixel: Option<u32>,
     pub override_redirect: Option<Bool32>,
@@ -6510,6 +7961,61 @@ pub struct CreateWindowAux {
     pub do_not_propogate_mask: Option<u32>,
     pub colormap: Option<Colormap>,
     pub cursor: Option<Cursor>,
+}
+impl Serialize for CreateWindowAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Self::Bytes {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.background_pixmap {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.background_pixel {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.border_pixmap {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.border_pixel {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bit_gravity {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.win_gravity {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.backing_store {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.backing_planes {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.backing_pixel {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.override_redirect {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.save_under {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.event_mask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.do_not_propogate_mask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.colormap {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.cursor {
+            value.serialize_into(bytes);
+        }
+    }
 }
 impl CreateWindowAux {
     /// Create a new instance with all fields unset / not present.
@@ -6565,135 +8071,80 @@ impl CreateWindowAux {
         }
         mask
     }
-    /// Set the background_pixmap field of this structure.
+    /// Set the `background_pixmap` field of this structure.
     pub fn background_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.background_pixmap = value.into();
         self
     }
-    /// Set the background_pixel field of this structure.
+    /// Set the `background_pixel` field of this structure.
     pub fn background_pixel<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.background_pixel = value.into();
         self
     }
-    /// Set the border_pixmap field of this structure.
+    /// Set the `border_pixmap` field of this structure.
     pub fn border_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.border_pixmap = value.into();
         self
     }
-    /// Set the border_pixel field of this structure.
+    /// Set the `border_pixel` field of this structure.
     pub fn border_pixel<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.border_pixel = value.into();
         self
     }
-    /// Set the bit_gravity field of this structure.
+    /// Set the `bit_gravity` field of this structure.
     pub fn bit_gravity<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.bit_gravity = value.into();
         self
     }
-    /// Set the win_gravity field of this structure.
+    /// Set the `win_gravity` field of this structure.
     pub fn win_gravity<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.win_gravity = value.into();
         self
     }
-    /// Set the backing_store field of this structure.
-    pub fn backing_store<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `backing_store` field of this structure.
+    pub fn backing_store<I>(mut self, value: I) -> Self where I: Into<Option<BackingStore>> {
         self.backing_store = value.into();
         self
     }
-    /// Set the backing_planes field of this structure.
+    /// Set the `backing_planes` field of this structure.
     pub fn backing_planes<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.backing_planes = value.into();
         self
     }
-    /// Set the backing_pixel field of this structure.
+    /// Set the `backing_pixel` field of this structure.
     pub fn backing_pixel<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.backing_pixel = value.into();
         self
     }
-    /// Set the override_redirect field of this structure.
+    /// Set the `override_redirect` field of this structure.
     pub fn override_redirect<I>(mut self, value: I) -> Self where I: Into<Option<Bool32>> {
         self.override_redirect = value.into();
         self
     }
-    /// Set the save_under field of this structure.
+    /// Set the `save_under` field of this structure.
     pub fn save_under<I>(mut self, value: I) -> Self where I: Into<Option<Bool32>> {
         self.save_under = value.into();
         self
     }
-    /// Set the event_mask field of this structure.
+    /// Set the `event_mask` field of this structure.
     pub fn event_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.event_mask = value.into();
         self
     }
-    /// Set the do_not_propogate_mask field of this structure.
+    /// Set the `do_not_propogate_mask` field of this structure.
     pub fn do_not_propogate_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.do_not_propogate_mask = value.into();
         self
     }
-    /// Set the colormap field of this structure.
+    /// Set the `colormap` field of this structure.
     pub fn colormap<I>(mut self, value: I) -> Self where I: Into<Option<Colormap>> {
         self.colormap = value.into();
         self
     }
-    /// Set the cursor field of this structure.
+    /// Set the `cursor` field of this structure.
     pub fn cursor<I>(mut self, value: I) -> Self where I: Into<Option<Cursor>> {
         self.cursor = value.into();
         self
-    }
-}
-impl Serialize for CreateWindowAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.background_pixmap {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.background_pixel {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.border_pixmap {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.border_pixel {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bit_gravity {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.win_gravity {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.backing_store {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.backing_planes {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.backing_pixel {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.override_redirect {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.save_under {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.event_mask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.do_not_propogate_mask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.colormap {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.cursor {
-            value.serialize_into(bytes);
-        }
     }
 }
 /// Creates a window.
@@ -6746,13 +8197,12 @@ impl Serialize for CreateWindowAux {
 ///
 /// # See
 ///
-/// * CreateNotify: event
-/// * MapWindow: request
-/// * xcb_generate_id: function
-pub fn create_window<'c, Conn, A>(conn: &'c Conn, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, visual: Visualid, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+/// * `CreateNotify`: event
+/// * `MapWindow`: request
+/// * `xcb_generate_id`: function
+pub fn create_window<'c, Conn>(conn: &'c Conn, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u16>,
 {
     let value_mask = value_list.value_mask();
     let value_list_bytes = value_list.serialize();
@@ -6765,8 +8215,7 @@ where
     let width_bytes = width.serialize();
     let height_bytes = height.serialize();
     let border_width_bytes = border_width.serialize();
-    let class = class.into();
-    let class_bytes = class.serialize();
+    let class_bytes = u16::from(class).serialize();
     let visual_bytes = visual.serialize();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
@@ -6815,7 +8264,7 @@ where
 
 /// Opcode for the ChangeWindowAttributes request
 pub const CHANGE_WINDOW_ATTRIBUTES_REQUEST: u8 = 2;
-/// Auxiliary and optional information for the change_window_attributes function.
+/// Auxiliary and optional information for the `change_window_attributes` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ChangeWindowAttributesAux {
     pub background_pixmap: Option<Pixmap>,
@@ -6824,7 +8273,7 @@ pub struct ChangeWindowAttributesAux {
     pub border_pixel: Option<u32>,
     pub bit_gravity: Option<u32>,
     pub win_gravity: Option<u32>,
-    pub backing_store: Option<u32>,
+    pub backing_store: Option<BackingStore>,
     pub backing_planes: Option<u32>,
     pub backing_pixel: Option<u32>,
     pub override_redirect: Option<Bool32>,
@@ -6833,6 +8282,61 @@ pub struct ChangeWindowAttributesAux {
     pub do_not_propogate_mask: Option<u32>,
     pub colormap: Option<Colormap>,
     pub cursor: Option<Cursor>,
+}
+impl Serialize for ChangeWindowAttributesAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Self::Bytes {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.background_pixmap {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.background_pixel {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.border_pixmap {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.border_pixel {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bit_gravity {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.win_gravity {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.backing_store {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.backing_planes {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.backing_pixel {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.override_redirect {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.save_under {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.event_mask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.do_not_propogate_mask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.colormap {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.cursor {
+            value.serialize_into(bytes);
+        }
+    }
 }
 impl ChangeWindowAttributesAux {
     /// Create a new instance with all fields unset / not present.
@@ -6888,135 +8392,80 @@ impl ChangeWindowAttributesAux {
         }
         mask
     }
-    /// Set the background_pixmap field of this structure.
+    /// Set the `background_pixmap` field of this structure.
     pub fn background_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.background_pixmap = value.into();
         self
     }
-    /// Set the background_pixel field of this structure.
+    /// Set the `background_pixel` field of this structure.
     pub fn background_pixel<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.background_pixel = value.into();
         self
     }
-    /// Set the border_pixmap field of this structure.
+    /// Set the `border_pixmap` field of this structure.
     pub fn border_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.border_pixmap = value.into();
         self
     }
-    /// Set the border_pixel field of this structure.
+    /// Set the `border_pixel` field of this structure.
     pub fn border_pixel<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.border_pixel = value.into();
         self
     }
-    /// Set the bit_gravity field of this structure.
+    /// Set the `bit_gravity` field of this structure.
     pub fn bit_gravity<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.bit_gravity = value.into();
         self
     }
-    /// Set the win_gravity field of this structure.
+    /// Set the `win_gravity` field of this structure.
     pub fn win_gravity<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.win_gravity = value.into();
         self
     }
-    /// Set the backing_store field of this structure.
-    pub fn backing_store<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `backing_store` field of this structure.
+    pub fn backing_store<I>(mut self, value: I) -> Self where I: Into<Option<BackingStore>> {
         self.backing_store = value.into();
         self
     }
-    /// Set the backing_planes field of this structure.
+    /// Set the `backing_planes` field of this structure.
     pub fn backing_planes<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.backing_planes = value.into();
         self
     }
-    /// Set the backing_pixel field of this structure.
+    /// Set the `backing_pixel` field of this structure.
     pub fn backing_pixel<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.backing_pixel = value.into();
         self
     }
-    /// Set the override_redirect field of this structure.
+    /// Set the `override_redirect` field of this structure.
     pub fn override_redirect<I>(mut self, value: I) -> Self where I: Into<Option<Bool32>> {
         self.override_redirect = value.into();
         self
     }
-    /// Set the save_under field of this structure.
+    /// Set the `save_under` field of this structure.
     pub fn save_under<I>(mut self, value: I) -> Self where I: Into<Option<Bool32>> {
         self.save_under = value.into();
         self
     }
-    /// Set the event_mask field of this structure.
+    /// Set the `event_mask` field of this structure.
     pub fn event_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.event_mask = value.into();
         self
     }
-    /// Set the do_not_propogate_mask field of this structure.
+    /// Set the `do_not_propogate_mask` field of this structure.
     pub fn do_not_propogate_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.do_not_propogate_mask = value.into();
         self
     }
-    /// Set the colormap field of this structure.
+    /// Set the `colormap` field of this structure.
     pub fn colormap<I>(mut self, value: I) -> Self where I: Into<Option<Colormap>> {
         self.colormap = value.into();
         self
     }
-    /// Set the cursor field of this structure.
+    /// Set the `cursor` field of this structure.
     pub fn cursor<I>(mut self, value: I) -> Self where I: Into<Option<Cursor>> {
         self.cursor = value.into();
         self
-    }
-}
-impl Serialize for ChangeWindowAttributesAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.background_pixmap {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.background_pixel {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.border_pixmap {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.border_pixel {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bit_gravity {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.win_gravity {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.backing_store {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.backing_planes {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.backing_pixel {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.override_redirect {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.save_under {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.event_mask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.do_not_propogate_mask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.colormap {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.cursor {
-            value.serialize_into(bytes);
-        }
     }
 }
 /// change window attributes.
@@ -7173,8 +8622,8 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -7208,8 +8657,8 @@ pub struct GetWindowAttributesReply {
     pub your_event_mask: u32,
     pub do_not_propagate_mask: u16,
 }
-impl GetWindowAttributesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetWindowAttributesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (backing_store, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -7264,9 +8713,9 @@ pub const DESTROY_WINDOW_REQUEST: u8 = 4;
 ///
 /// # See
 ///
-/// * DestroyNotify: event
-/// * MapWindow: request
-/// * UnmapWindow: request
+/// * `DestroyNotify`: event
+/// * `MapWindow`: request
+/// * `UnmapWindow`: request
 pub fn destroy_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -7400,15 +8849,13 @@ pub const CHANGE_SAVE_SET_REQUEST: u8 = 6;
 ///
 /// # See
 ///
-/// * ReparentWindow: request
-pub fn change_save_set<Conn, A>(conn: &Conn, mode: A, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+/// * `ReparentWindow`: request
+pub fn change_save_set<Conn>(conn: &Conn, mode: SetMode, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
+    let mode_bytes = u8::from(mode).serialize();
     let window_bytes = window.serialize();
     let mut request0 = [
         CHANGE_SAVE_SET_REQUEST,
@@ -7458,9 +8905,9 @@ pub const REPARENT_WINDOW_REQUEST: u8 = 7;
 ///
 /// # See
 ///
-/// * MapWindow: request
-/// * ReparentNotify: event
-/// * UnmapWindow: request
+/// * `MapWindow`: request
+/// * `ReparentNotify`: event
+/// * `UnmapWindow`: request
 pub fn reparent_window<Conn>(conn: &Conn, window: Window, parent: Window, x: i16, y: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -7529,9 +8976,9 @@ pub const MAP_WINDOW_REQUEST: u8 = 8;
 ///
 /// # See
 ///
-/// * Expose: event
-/// * MapNotify: event
-/// * UnmapWindow: request
+/// * `Expose`: event
+/// * `MapNotify`: event
+/// * `UnmapWindow`: request
 pub fn map_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -7600,9 +9047,9 @@ pub const UNMAP_WINDOW_REQUEST: u8 = 10;
 ///
 /// # See
 ///
-/// * Expose: event
-/// * MapWindow: request
-/// * UnmapNotify: event
+/// * `Expose`: event
+/// * `MapWindow`: request
+/// * `UnmapNotify`: event
 pub fn unmap_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -7802,7 +9249,7 @@ impl TryFrom<u32> for StackMode {
 
 /// Opcode for the ConfigureWindow request
 pub const CONFIGURE_WINDOW_REQUEST: u8 = 12;
-/// Auxiliary and optional information for the configure_window function.
+/// Auxiliary and optional information for the `configure_window` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ConfigureWindowAux {
     pub x: Option<i32>,
@@ -7811,7 +9258,38 @@ pub struct ConfigureWindowAux {
     pub height: Option<u32>,
     pub border_width: Option<u32>,
     pub sibling: Option<Window>,
-    pub stack_mode: Option<u32>,
+    pub stack_mode: Option<StackMode>,
+}
+impl Serialize for ConfigureWindowAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Self::Bytes {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.x {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.y {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.width {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.height {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.border_width {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.sibling {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.stack_mode {
+            u32::from(*value).serialize_into(bytes);
+        }
+    }
 }
 impl ConfigureWindowAux {
     /// Create a new instance with all fields unset / not present.
@@ -7843,71 +9321,40 @@ impl ConfigureWindowAux {
         }
         mask
     }
-    /// Set the x field of this structure.
+    /// Set the `x` field of this structure.
     pub fn x<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.x = value.into();
         self
     }
-    /// Set the y field of this structure.
+    /// Set the `y` field of this structure.
     pub fn y<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.y = value.into();
         self
     }
-    /// Set the width field of this structure.
+    /// Set the `width` field of this structure.
     pub fn width<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.width = value.into();
         self
     }
-    /// Set the height field of this structure.
+    /// Set the `height` field of this structure.
     pub fn height<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.height = value.into();
         self
     }
-    /// Set the border_width field of this structure.
+    /// Set the `border_width` field of this structure.
     pub fn border_width<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.border_width = value.into();
         self
     }
-    /// Set the sibling field of this structure.
+    /// Set the `sibling` field of this structure.
     pub fn sibling<I>(mut self, value: I) -> Self where I: Into<Option<Window>> {
         self.sibling = value.into();
         self
     }
-    /// Set the stack_mode field of this structure.
-    pub fn stack_mode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `stack_mode` field of this structure.
+    pub fn stack_mode<I>(mut self, value: I) -> Self where I: Into<Option<StackMode>> {
         self.stack_mode = value.into();
         self
-    }
-}
-impl Serialize for ConfigureWindowAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.x {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.y {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.width {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.height {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.border_width {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.sibling {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.stack_mode {
-            value.serialize_into(bytes);
-        }
     }
 }
 /// Configures window attributes.
@@ -7930,8 +9377,8 @@ impl Serialize for ConfigureWindowAux {
 ///
 /// # See
 ///
-/// * Expose: event
-/// * MapNotify: event
+/// * `Expose`: event
+/// * `MapNotify`: event
 ///
 /// # Example
 ///
@@ -8073,14 +9520,12 @@ pub const CIRCULATE_WINDOW_REQUEST: u8 = 13;
 ///
 /// * `Value` - The specified `direction` is invalid.
 /// * `Window` - The specified `window` does not exist.
-pub fn circulate_window<Conn, A>(conn: &Conn, direction: A, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn circulate_window<Conn>(conn: &Conn, direction: Circulate, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let direction = direction.into();
-    let direction_bytes = direction.serialize();
+    let direction_bytes = u8::from(direction).serialize();
     let window_bytes = window.serialize();
     let mut request0 = [
         CIRCULATE_WINDOW_REQUEST,
@@ -8116,7 +9561,7 @@ pub const GET_GEOMETRY_REQUEST: u8 = 14;
 ///
 /// # See
 ///
-/// * xwininfo: program
+/// * `xwininfo`: program
 ///
 /// # Example
 ///
@@ -8159,8 +9604,8 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -8188,8 +9633,8 @@ pub struct GetGeometryReply {
     pub height: u16,
     pub border_width: u16,
 }
-impl GetGeometryReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetGeometryReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (depth, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -8225,7 +9670,7 @@ pub const QUERY_TREE_REQUEST: u8 = 15;
 ///
 /// # See
 ///
-/// * xwininfo: program
+/// * `xwininfo`: program
 ///
 /// # Example
 ///
@@ -8273,8 +9718,8 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -8290,8 +9735,8 @@ pub struct QueryTreeReply {
     pub parent: Window,
     pub children: Vec<Window>,
 }
-impl QueryTreeReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryTreeReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -8337,8 +9782,8 @@ pub const INTERN_ATOM_REQUEST: u8 = 16;
 ///
 /// # See
 ///
-/// * GetAtomName: request
-/// * xlsatoms: program
+/// * `GetAtomName`: request
+/// * `xlsatoms`: program
 ///
 /// # Example
 ///
@@ -8364,7 +9809,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
-    let only_if_exists_bytes = (only_if_exists as u8).serialize();
+    let only_if_exists_bytes = only_if_exists.serialize();
     let name_len: u16 = name.len().try_into()?;
     let name_len_bytes = name_len.serialize();
     let mut request0 = [
@@ -8386,6 +9831,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InternAtomReply {
     pub response_type: u8,
@@ -8393,8 +9839,8 @@ pub struct InternAtomReply {
     pub length: u32,
     pub atom: Atom,
 }
-impl InternAtomReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for InternAtomReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -8435,6 +9881,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetAtomNameReply {
     pub response_type: u8,
@@ -8442,8 +9889,8 @@ pub struct GetAtomNameReply {
     pub length: u32,
     pub name: Vec<u8>,
 }
-impl GetAtomNameReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetAtomNameReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -8463,7 +9910,6 @@ impl TryFrom<&[u8]> for GetAtomNameReply {
 }
 
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -8569,8 +10015,8 @@ pub const CHANGE_PROPERTY_REQUEST: u8 = 18;
 ///
 /// # See
 ///
-/// * InternAtom: request
-/// * xprop: program
+/// * `InternAtom`: request
+/// * `xprop`: program
 ///
 /// # Example
 ///
@@ -8591,16 +10037,14 @@ pub const CHANGE_PROPERTY_REQUEST: u8 = 18;
 ///     xcb_flush(conn);
 /// }
 /// ```
-pub fn change_property<'c, Conn, A, B, C>(conn: &'c Conn, mode: A, window: Window, property: B, type_: C, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_property<'c, Conn, A, B>(conn: &'c Conn, mode: PropMode, window: Window, property: A, type_: B, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
+    A: Into<Atom>,
     B: Into<Atom>,
-    C: Into<Atom>,
 {
     let length_so_far = 0;
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
+    let mode_bytes = u8::from(mode).serialize();
     let window_bytes = window.serialize();
     let property = property.into();
     let property_bytes = property.serialize();
@@ -8936,8 +10380,8 @@ impl GetPropertyReply {
 ///
 /// # See
 ///
-/// * InternAtom: request
-/// * xprop: program
+/// * `InternAtom`: request
+/// * `xprop`: program
 ///
 /// # Example
 ///
@@ -8974,7 +10418,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
-    let delete_bytes = (delete as u8).serialize();
+    let delete_bytes = delete.serialize();
     let window_bytes = window.serialize();
     let property_bytes = property.serialize();
     let type_bytes = type_.serialize();
@@ -9012,8 +10456,8 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -9036,8 +10480,8 @@ pub struct GetPropertyReply {
     pub value_len: u32,
     pub value: Vec<u8>,
 }
-impl GetPropertyReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetPropertyReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (format, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -9082,6 +10526,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListPropertiesReply {
     pub response_type: u8,
@@ -9089,8 +10534,8 @@ pub struct ListPropertiesReply {
     pub length: u32,
     pub atoms: Vec<Atom>,
 }
-impl ListPropertiesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ListPropertiesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -9139,7 +10584,7 @@ pub const SET_SELECTION_OWNER_REQUEST: u8 = 22;
 ///
 /// # See
 ///
-/// * SetSelectionOwner: request
+/// * `SetSelectionOwner`: request
 pub fn set_selection_owner<Conn>(conn: &Conn, owner: Window, selection: Atom, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -9191,7 +10636,7 @@ pub const GET_SELECTION_OWNER_REQUEST: u8 = 23;
 ///
 /// # See
 ///
-/// * SetSelectionOwner: request
+/// * `SetSelectionOwner`: request
 pub fn get_selection_owner<Conn>(conn: &Conn, selection: Atom) -> Result<Cookie<'_, Conn, GetSelectionOwnerReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -9214,8 +10659,8 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -9227,8 +10672,8 @@ pub struct GetSelectionOwnerReply {
     pub length: u32,
     pub owner: Window,
 }
-impl GetSelectionOwnerReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetSelectionOwnerReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -9393,7 +10838,7 @@ pub const SEND_EVENT_REQUEST: u8 = 25;
 ///
 /// # See
 ///
-/// * ConfigureNotify: event
+/// * `ConfigureNotify`: event
 ///
 /// # Example
 ///
@@ -9433,7 +10878,7 @@ where
     A: Into<[u8; 32]>,
 {
     let length_so_far = 0;
-    let propagate_bytes = (propagate as u8).serialize();
+    let propagate_bytes = propagate.serialize();
     let destination_bytes = destination.serialize();
     let event_mask_bytes = event_mask.serialize();
     let event = event.into();
@@ -9461,7 +10906,6 @@ where
 }
 
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -9700,7 +11144,7 @@ pub const GRAB_POINTER_REQUEST: u8 = 26;
 ///
 /// # See
 ///
-/// * GrabKeyboard: request
+/// * `GrabKeyboard`: request
 ///
 /// # Example
 ///
@@ -9732,20 +11176,16 @@ pub const GRAB_POINTER_REQUEST: u8 = 26;
 ///     }
 /// }
 /// ```
-pub fn grab_pointer<Conn, A, B>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: A, keyboard_mode: B, confine_to: Window, cursor: Cursor, time: Timestamp) -> Result<Cookie<'_, Conn, GrabPointerReply>, ConnectionError>
+pub fn grab_pointer<Conn>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: Window, cursor: Cursor, time: Timestamp) -> Result<Cookie<'_, Conn, GrabPointerReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
-    B: Into<u8>,
 {
     let length_so_far = 0;
-    let owner_events_bytes = (owner_events as u8).serialize();
+    let owner_events_bytes = owner_events.serialize();
     let grab_window_bytes = grab_window.serialize();
     let event_mask_bytes = event_mask.serialize();
-    let pointer_mode = pointer_mode.into();
-    let pointer_mode_bytes = pointer_mode.serialize();
-    let keyboard_mode = keyboard_mode.into();
-    let keyboard_mode_bytes = keyboard_mode.serialize();
+    let pointer_mode_bytes = u8::from(pointer_mode).serialize();
+    let keyboard_mode_bytes = u8::from(keyboard_mode).serialize();
     let confine_to_bytes = confine_to.serialize();
     let cursor_bytes = cursor.serialize();
     let time_bytes = time.serialize();
@@ -9781,6 +11221,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabPointerReply {
     pub response_type: u8,
@@ -9788,8 +11229,8 @@ pub struct GrabPointerReply {
     pub sequence: u16,
     pub length: u32,
 }
-impl GrabPointerReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GrabPointerReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -9827,10 +11268,10 @@ pub const UNGRAB_POINTER_REQUEST: u8 = 27;
 ///
 /// # See
 ///
-/// * EnterNotify: event
-/// * GrabButton: request
-/// * GrabPointer: request
-/// * LeaveNotify: event
+/// * `EnterNotify`: event
+/// * `GrabButton`: request
+/// * `GrabPointer`: request
+/// * `LeaveNotify`: event
 pub fn ungrab_pointer<Conn>(conn: &Conn, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -9855,7 +11296,6 @@ where
 }
 
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -10005,25 +11445,19 @@ pub const GRAB_BUTTON_REQUEST: u8 = 28;
 /// * `Cursor` - The specified `cursor` does not exist.
 /// * `Value` - TODO: reasons?
 /// * `Window` - The specified `window` does not exist.
-pub fn grab_button<Conn, A, B, C>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: A, keyboard_mode: B, confine_to: Window, cursor: Cursor, button: C, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn grab_button<Conn>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: Window, cursor: Cursor, button: ButtonIndex, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
-    B: Into<u8>,
-    C: Into<u8>,
 {
     let length_so_far = 0;
-    let owner_events_bytes = (owner_events as u8).serialize();
+    let owner_events_bytes = owner_events.serialize();
     let grab_window_bytes = grab_window.serialize();
     let event_mask_bytes = event_mask.serialize();
-    let pointer_mode = pointer_mode.into();
-    let pointer_mode_bytes = pointer_mode.serialize();
-    let keyboard_mode = keyboard_mode.into();
-    let keyboard_mode_bytes = keyboard_mode.serialize();
+    let pointer_mode_bytes = u8::from(pointer_mode).serialize();
+    let keyboard_mode_bytes = u8::from(keyboard_mode).serialize();
     let confine_to_bytes = confine_to.serialize();
     let cursor_bytes = cursor.serialize();
-    let button = button.into();
-    let button_bytes = button.serialize();
+    let button_bytes = u8::from(button).serialize();
     let modifiers_bytes = modifiers.serialize();
     let mut request0 = [
         GRAB_BUTTON_REQUEST,
@@ -10060,14 +11494,12 @@ where
 
 /// Opcode for the UngrabButton request
 pub const UNGRAB_BUTTON_REQUEST: u8 = 29;
-pub fn ungrab_button<Conn, A>(conn: &Conn, button: A, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn ungrab_button<Conn>(conn: &Conn, button: ButtonIndex, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let button = button.into();
-    let button_bytes = button.serialize();
+    let button_bytes = u8::from(button).serialize();
     let grab_window_bytes = grab_window.serialize();
     let modifiers_bytes = modifiers.serialize();
     let mut request0 = [
@@ -10158,7 +11590,7 @@ pub const GRAB_KEYBOARD_REQUEST: u8 = 31;
 ///
 /// # See
 ///
-/// * GrabPointer: request
+/// * `GrabPointer`: request
 ///
 /// # Example
 ///
@@ -10188,20 +11620,16 @@ pub const GRAB_KEYBOARD_REQUEST: u8 = 31;
 ///     }
 /// }
 /// ```
-pub fn grab_keyboard<Conn, A, B>(conn: &Conn, owner_events: bool, grab_window: Window, time: Timestamp, pointer_mode: A, keyboard_mode: B) -> Result<Cookie<'_, Conn, GrabKeyboardReply>, ConnectionError>
+pub fn grab_keyboard<Conn>(conn: &Conn, owner_events: bool, grab_window: Window, time: Timestamp, pointer_mode: GrabMode, keyboard_mode: GrabMode) -> Result<Cookie<'_, Conn, GrabKeyboardReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
-    B: Into<u8>,
 {
     let length_so_far = 0;
-    let owner_events_bytes = (owner_events as u8).serialize();
+    let owner_events_bytes = owner_events.serialize();
     let grab_window_bytes = grab_window.serialize();
     let time_bytes = time.serialize();
-    let pointer_mode = pointer_mode.into();
-    let pointer_mode_bytes = pointer_mode.serialize();
-    let keyboard_mode = keyboard_mode.into();
-    let keyboard_mode_bytes = keyboard_mode.serialize();
+    let pointer_mode_bytes = u8::from(pointer_mode).serialize();
+    let keyboard_mode_bytes = u8::from(keyboard_mode).serialize();
     let mut request0 = [
         GRAB_KEYBOARD_REQUEST,
         owner_events_bytes[0],
@@ -10226,6 +11654,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabKeyboardReply {
     pub response_type: u8,
@@ -10233,8 +11662,8 @@ pub struct GrabKeyboardReply {
     pub sequence: u16,
     pub length: u32,
 }
-impl GrabKeyboardReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GrabKeyboardReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10394,22 +11823,18 @@ pub const GRAB_KEY_REQUEST: u8 = 33;
 ///
 /// # See
 ///
-/// * GrabKeyboard: request
-pub fn grab_key<Conn, A, B>(conn: &Conn, owner_events: bool, grab_window: Window, modifiers: u16, key: Keycode, pointer_mode: A, keyboard_mode: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+/// * `GrabKeyboard`: request
+pub fn grab_key<Conn>(conn: &Conn, owner_events: bool, grab_window: Window, modifiers: u16, key: Keycode, pointer_mode: GrabMode, keyboard_mode: GrabMode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
-    B: Into<u8>,
 {
     let length_so_far = 0;
-    let owner_events_bytes = (owner_events as u8).serialize();
+    let owner_events_bytes = owner_events.serialize();
     let grab_window_bytes = grab_window.serialize();
     let modifiers_bytes = modifiers.serialize();
     let key_bytes = key.serialize();
-    let pointer_mode = pointer_mode.into();
-    let pointer_mode_bytes = pointer_mode.serialize();
-    let keyboard_mode = keyboard_mode.into();
-    let keyboard_mode_bytes = keyboard_mode.serialize();
+    let pointer_mode_bytes = u8::from(pointer_mode).serialize();
+    let keyboard_mode_bytes = u8::from(keyboard_mode).serialize();
     let mut request0 = [
         GRAB_KEY_REQUEST,
         owner_events_bytes[0],
@@ -10460,8 +11885,8 @@ pub const UNGRAB_KEY_REQUEST: u8 = 34;
 ///
 /// # See
 ///
-/// * GrabKey: request
-/// * xev: program
+/// * `GrabKey`: request
+/// * `xev`: program
 pub fn ungrab_key<Conn>(conn: &Conn, key: Keycode, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -10492,7 +11917,6 @@ where
 }
 
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -10652,14 +12076,12 @@ pub const ALLOW_EVENTS_REQUEST: u8 = 35;
 /// # Errors
 ///
 /// * `Value` - You specified an invalid `mode`.
-pub fn allow_events<Conn, A>(conn: &Conn, mode: A, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn allow_events<Conn>(conn: &Conn, mode: Allow, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
+    let mode_bytes = u8::from(mode).serialize();
     let time_bytes = time.serialize();
     let mut request0 = [
         ALLOW_EVENTS_REQUEST,
@@ -10755,8 +12177,8 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -10791,8 +12213,8 @@ pub struct QueryPointerReply {
     pub win_y: i16,
     pub mask: u16,
 }
-impl QueryPointerReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryPointerReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10896,6 +12318,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMotionEventsReply {
     pub response_type: u8,
@@ -10903,8 +12326,8 @@ pub struct GetMotionEventsReply {
     pub length: u32,
     pub events: Vec<Timecoord>,
 }
-impl GetMotionEventsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetMotionEventsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10958,6 +12381,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TranslateCoordinatesReply {
     pub response_type: u8,
@@ -10968,8 +12392,8 @@ pub struct TranslateCoordinatesReply {
     pub dst_x: i16,
     pub dst_y: i16,
 }
-impl TranslateCoordinatesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for TranslateCoordinatesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (same_screen, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11021,7 +12445,7 @@ pub const WARP_POINTER_REQUEST: u8 = 41;
 ///
 /// # See
 ///
-/// * SetInputFocus: request
+/// * `SetInputFocus`: request
 pub fn warp_pointer<Conn>(conn: &Conn, src_window: Window, dst_window: Window, src_x: i16, src_y: i16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -11069,7 +12493,6 @@ where
 }
 
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -11183,16 +12606,14 @@ pub const SET_INPUT_FOCUS_REQUEST: u8 = 42;
 ///
 /// # See
 ///
-/// * FocusIn: event
-/// * FocusOut: event
-pub fn set_input_focus<Conn, A>(conn: &Conn, revert_to: A, focus: Window, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+/// * `FocusIn`: event
+/// * `FocusOut`: event
+pub fn set_input_focus<Conn>(conn: &Conn, revert_to: InputFocus, focus: Window, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let revert_to = revert_to.into();
-    let revert_to_bytes = revert_to.serialize();
+    let revert_to_bytes = u8::from(revert_to).serialize();
     let focus_bytes = focus.serialize();
     let time_bytes = time.serialize();
     let mut request0 = [
@@ -11235,6 +12656,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetInputFocusReply {
     pub response_type: u8,
@@ -11243,8 +12665,8 @@ pub struct GetInputFocusReply {
     pub length: u32,
     pub focus: Window,
 }
-impl GetInputFocusReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetInputFocusReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (revert_to, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11281,6 +12703,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryKeymapReply {
     pub response_type: u8,
@@ -11288,8 +12711,8 @@ pub struct QueryKeymapReply {
     pub length: u32,
     pub keys: [u8; 32],
 }
-impl QueryKeymapReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryKeymapReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11392,7 +12815,7 @@ pub const OPEN_FONT_REQUEST: u8 = 45;
 ///
 /// # See
 ///
-/// * xcb_generate_id: function
+/// * `xcb_generate_id`: function
 pub fn open_font<'c, Conn>(conn: &'c Conn, fid: Font, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -11647,8 +13070,8 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -11680,8 +13103,8 @@ pub struct QueryFontReply {
     pub properties: Vec<Fontprop>,
     pub char_infos: Vec<Charinfo>,
 }
-impl QueryFontReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryFontReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11782,6 +13205,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&string_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryTextExtentsReply {
     pub response_type: u8,
@@ -11796,8 +13220,8 @@ pub struct QueryTextExtentsReply {
     pub overall_left: i32,
     pub overall_right: i32,
 }
-impl QueryTextExtentsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryTextExtentsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (draw_direction, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11848,9 +13272,9 @@ impl Serialize for Str {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(1);
-        let name_len = self.name.len() as u8;
+        let name_len = u8::try_from(self.name.len()).expect("`name` has too many elements");
         name_len.serialize_into(bytes);
-        self.name.serialize_into(bytes);
+        bytes.extend_from_slice(&self.name);
     }
 }
 
@@ -11896,8 +13320,8 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(pattern), IoSlice::new(&padding0)], vec![])?)
 }
+
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -11909,8 +13333,8 @@ pub struct ListFontsReply {
     pub length: u32,
     pub names: Vec<Str>,
 }
-impl ListFontsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ListFontsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11971,8 +13395,8 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(ListFontsWithInfoCookie::new(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(pattern), IoSlice::new(&padding0)], vec![])?))
 }
+
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -12009,8 +13433,8 @@ pub struct ListFontsWithInfoReply {
     pub properties: Vec<Fontprop>,
     pub name: Vec<u8>,
 }
-impl ListFontsWithInfoReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ListFontsWithInfoReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (name_len, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12093,6 +13517,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetFontPathReply {
     pub response_type: u8,
@@ -12100,8 +13525,8 @@ pub struct GetFontPathReply {
     pub length: u32,
     pub path: Vec<Str>,
 }
-impl GetFontPathReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetFontPathReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12144,7 +13569,7 @@ pub const CREATE_PIXMAP_REQUEST: u8 = 53;
 ///
 /// # See
 ///
-/// * xcb_generate_id: function
+/// * `xcb_generate_id`: function
 pub fn create_pixmap<Conn>(conn: &Conn, depth: u8, pid: Pixmap, drawable: Drawable, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -12218,7 +13643,6 @@ where
 }
 
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -12973,32 +14397,111 @@ impl TryFrom<u32> for ArcMode {
 
 /// Opcode for the CreateGC request
 pub const CREATE_GC_REQUEST: u8 = 55;
-/// Auxiliary and optional information for the create_gc function.
+/// Auxiliary and optional information for the `create_gc` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct CreateGCAux {
-    pub function: Option<u32>,
+    pub function: Option<GX>,
     pub plane_mask: Option<u32>,
     pub foreground: Option<u32>,
     pub background: Option<u32>,
     pub line_width: Option<u32>,
-    pub line_style: Option<u32>,
-    pub cap_style: Option<u32>,
-    pub join_style: Option<u32>,
-    pub fill_style: Option<u32>,
-    pub fill_rule: Option<u32>,
+    pub line_style: Option<LineStyle>,
+    pub cap_style: Option<CapStyle>,
+    pub join_style: Option<JoinStyle>,
+    pub fill_style: Option<FillStyle>,
+    pub fill_rule: Option<FillRule>,
     pub tile: Option<Pixmap>,
     pub stipple: Option<Pixmap>,
     pub tile_stipple_x_origin: Option<i32>,
     pub tile_stipple_y_origin: Option<i32>,
     pub font: Option<Font>,
-    pub subwindow_mode: Option<u32>,
+    pub subwindow_mode: Option<SubwindowMode>,
     pub graphics_exposures: Option<Bool32>,
     pub clip_x_origin: Option<i32>,
     pub clip_y_origin: Option<i32>,
     pub clip_mask: Option<Pixmap>,
     pub dash_offset: Option<u32>,
     pub dashes: Option<u32>,
-    pub arc_mode: Option<u32>,
+    pub arc_mode: Option<ArcMode>,
+}
+impl Serialize for CreateGCAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Self::Bytes {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.function {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.plane_mask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.foreground {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.background {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.line_width {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.line_style {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.cap_style {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.join_style {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.fill_style {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.fill_rule {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.tile {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.stipple {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.tile_stipple_x_origin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.tile_stipple_y_origin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.font {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.subwindow_mode {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.graphics_exposures {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clip_x_origin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clip_y_origin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clip_mask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.dash_offset {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.dashes {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.arc_mode {
+            u32::from(*value).serialize_into(bytes);
+        }
+    }
 }
 impl CreateGCAux {
     /// Create a new instance with all fields unset / not present.
@@ -13078,199 +14581,120 @@ impl CreateGCAux {
         }
         mask
     }
-    /// Set the function field of this structure.
-    pub fn function<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `function` field of this structure.
+    pub fn function<I>(mut self, value: I) -> Self where I: Into<Option<GX>> {
         self.function = value.into();
         self
     }
-    /// Set the plane_mask field of this structure.
+    /// Set the `plane_mask` field of this structure.
     pub fn plane_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.plane_mask = value.into();
         self
     }
-    /// Set the foreground field of this structure.
+    /// Set the `foreground` field of this structure.
     pub fn foreground<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.foreground = value.into();
         self
     }
-    /// Set the background field of this structure.
+    /// Set the `background` field of this structure.
     pub fn background<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.background = value.into();
         self
     }
-    /// Set the line_width field of this structure.
+    /// Set the `line_width` field of this structure.
     pub fn line_width<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.line_width = value.into();
         self
     }
-    /// Set the line_style field of this structure.
-    pub fn line_style<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `line_style` field of this structure.
+    pub fn line_style<I>(mut self, value: I) -> Self where I: Into<Option<LineStyle>> {
         self.line_style = value.into();
         self
     }
-    /// Set the cap_style field of this structure.
-    pub fn cap_style<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `cap_style` field of this structure.
+    pub fn cap_style<I>(mut self, value: I) -> Self where I: Into<Option<CapStyle>> {
         self.cap_style = value.into();
         self
     }
-    /// Set the join_style field of this structure.
-    pub fn join_style<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `join_style` field of this structure.
+    pub fn join_style<I>(mut self, value: I) -> Self where I: Into<Option<JoinStyle>> {
         self.join_style = value.into();
         self
     }
-    /// Set the fill_style field of this structure.
-    pub fn fill_style<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `fill_style` field of this structure.
+    pub fn fill_style<I>(mut self, value: I) -> Self where I: Into<Option<FillStyle>> {
         self.fill_style = value.into();
         self
     }
-    /// Set the fill_rule field of this structure.
-    pub fn fill_rule<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `fill_rule` field of this structure.
+    pub fn fill_rule<I>(mut self, value: I) -> Self where I: Into<Option<FillRule>> {
         self.fill_rule = value.into();
         self
     }
-    /// Set the tile field of this structure.
+    /// Set the `tile` field of this structure.
     pub fn tile<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.tile = value.into();
         self
     }
-    /// Set the stipple field of this structure.
+    /// Set the `stipple` field of this structure.
     pub fn stipple<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.stipple = value.into();
         self
     }
-    /// Set the tile_stipple_x_origin field of this structure.
+    /// Set the `tile_stipple_x_origin` field of this structure.
     pub fn tile_stipple_x_origin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.tile_stipple_x_origin = value.into();
         self
     }
-    /// Set the tile_stipple_y_origin field of this structure.
+    /// Set the `tile_stipple_y_origin` field of this structure.
     pub fn tile_stipple_y_origin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.tile_stipple_y_origin = value.into();
         self
     }
-    /// Set the font field of this structure.
+    /// Set the `font` field of this structure.
     pub fn font<I>(mut self, value: I) -> Self where I: Into<Option<Font>> {
         self.font = value.into();
         self
     }
-    /// Set the subwindow_mode field of this structure.
-    pub fn subwindow_mode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `subwindow_mode` field of this structure.
+    pub fn subwindow_mode<I>(mut self, value: I) -> Self where I: Into<Option<SubwindowMode>> {
         self.subwindow_mode = value.into();
         self
     }
-    /// Set the graphics_exposures field of this structure.
+    /// Set the `graphics_exposures` field of this structure.
     pub fn graphics_exposures<I>(mut self, value: I) -> Self where I: Into<Option<Bool32>> {
         self.graphics_exposures = value.into();
         self
     }
-    /// Set the clip_x_origin field of this structure.
+    /// Set the `clip_x_origin` field of this structure.
     pub fn clip_x_origin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.clip_x_origin = value.into();
         self
     }
-    /// Set the clip_y_origin field of this structure.
+    /// Set the `clip_y_origin` field of this structure.
     pub fn clip_y_origin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.clip_y_origin = value.into();
         self
     }
-    /// Set the clip_mask field of this structure.
+    /// Set the `clip_mask` field of this structure.
     pub fn clip_mask<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.clip_mask = value.into();
         self
     }
-    /// Set the dash_offset field of this structure.
+    /// Set the `dash_offset` field of this structure.
     pub fn dash_offset<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.dash_offset = value.into();
         self
     }
-    /// Set the dashes field of this structure.
+    /// Set the `dashes` field of this structure.
     pub fn dashes<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.dashes = value.into();
         self
     }
-    /// Set the arc_mode field of this structure.
-    pub fn arc_mode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `arc_mode` field of this structure.
+    pub fn arc_mode<I>(mut self, value: I) -> Self where I: Into<Option<ArcMode>> {
         self.arc_mode = value.into();
         self
-    }
-}
-impl Serialize for CreateGCAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.function {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.plane_mask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.foreground {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.background {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.line_width {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.line_style {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.cap_style {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.join_style {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.fill_style {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.fill_rule {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.tile {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.stipple {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.tile_stipple_x_origin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.tile_stipple_y_origin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.font {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.subwindow_mode {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.graphics_exposures {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clip_x_origin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clip_y_origin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clip_mask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.dash_offset {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.dashes {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.arc_mode {
-            value.serialize_into(bytes);
-        }
     }
 }
 /// Creates a graphics context.
@@ -13295,7 +14719,7 @@ impl Serialize for CreateGCAux {
 ///
 /// # See
 ///
-/// * xcb_generate_id: function
+/// * `xcb_generate_id`: function
 pub fn create_gc<'c, Conn>(conn: &'c Conn, cid: Gcontext, drawable: Drawable, value_list: &CreateGCAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -13336,32 +14760,111 @@ where
 
 /// Opcode for the ChangeGC request
 pub const CHANGE_GC_REQUEST: u8 = 56;
-/// Auxiliary and optional information for the change_gc function.
+/// Auxiliary and optional information for the `change_gc` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ChangeGCAux {
-    pub function: Option<u32>,
+    pub function: Option<GX>,
     pub plane_mask: Option<u32>,
     pub foreground: Option<u32>,
     pub background: Option<u32>,
     pub line_width: Option<u32>,
-    pub line_style: Option<u32>,
-    pub cap_style: Option<u32>,
-    pub join_style: Option<u32>,
-    pub fill_style: Option<u32>,
-    pub fill_rule: Option<u32>,
+    pub line_style: Option<LineStyle>,
+    pub cap_style: Option<CapStyle>,
+    pub join_style: Option<JoinStyle>,
+    pub fill_style: Option<FillStyle>,
+    pub fill_rule: Option<FillRule>,
     pub tile: Option<Pixmap>,
     pub stipple: Option<Pixmap>,
     pub tile_stipple_x_origin: Option<i32>,
     pub tile_stipple_y_origin: Option<i32>,
     pub font: Option<Font>,
-    pub subwindow_mode: Option<u32>,
+    pub subwindow_mode: Option<SubwindowMode>,
     pub graphics_exposures: Option<Bool32>,
     pub clip_x_origin: Option<i32>,
     pub clip_y_origin: Option<i32>,
     pub clip_mask: Option<Pixmap>,
     pub dash_offset: Option<u32>,
     pub dashes: Option<u32>,
-    pub arc_mode: Option<u32>,
+    pub arc_mode: Option<ArcMode>,
+}
+impl Serialize for ChangeGCAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Self::Bytes {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.function {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.plane_mask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.foreground {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.background {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.line_width {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.line_style {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.cap_style {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.join_style {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.fill_style {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.fill_rule {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.tile {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.stipple {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.tile_stipple_x_origin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.tile_stipple_y_origin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.font {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.subwindow_mode {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.graphics_exposures {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clip_x_origin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clip_y_origin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clip_mask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.dash_offset {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.dashes {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.arc_mode {
+            u32::from(*value).serialize_into(bytes);
+        }
+    }
 }
 impl ChangeGCAux {
     /// Create a new instance with all fields unset / not present.
@@ -13441,199 +14944,120 @@ impl ChangeGCAux {
         }
         mask
     }
-    /// Set the function field of this structure.
-    pub fn function<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `function` field of this structure.
+    pub fn function<I>(mut self, value: I) -> Self where I: Into<Option<GX>> {
         self.function = value.into();
         self
     }
-    /// Set the plane_mask field of this structure.
+    /// Set the `plane_mask` field of this structure.
     pub fn plane_mask<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.plane_mask = value.into();
         self
     }
-    /// Set the foreground field of this structure.
+    /// Set the `foreground` field of this structure.
     pub fn foreground<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.foreground = value.into();
         self
     }
-    /// Set the background field of this structure.
+    /// Set the `background` field of this structure.
     pub fn background<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.background = value.into();
         self
     }
-    /// Set the line_width field of this structure.
+    /// Set the `line_width` field of this structure.
     pub fn line_width<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.line_width = value.into();
         self
     }
-    /// Set the line_style field of this structure.
-    pub fn line_style<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `line_style` field of this structure.
+    pub fn line_style<I>(mut self, value: I) -> Self where I: Into<Option<LineStyle>> {
         self.line_style = value.into();
         self
     }
-    /// Set the cap_style field of this structure.
-    pub fn cap_style<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `cap_style` field of this structure.
+    pub fn cap_style<I>(mut self, value: I) -> Self where I: Into<Option<CapStyle>> {
         self.cap_style = value.into();
         self
     }
-    /// Set the join_style field of this structure.
-    pub fn join_style<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `join_style` field of this structure.
+    pub fn join_style<I>(mut self, value: I) -> Self where I: Into<Option<JoinStyle>> {
         self.join_style = value.into();
         self
     }
-    /// Set the fill_style field of this structure.
-    pub fn fill_style<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `fill_style` field of this structure.
+    pub fn fill_style<I>(mut self, value: I) -> Self where I: Into<Option<FillStyle>> {
         self.fill_style = value.into();
         self
     }
-    /// Set the fill_rule field of this structure.
-    pub fn fill_rule<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `fill_rule` field of this structure.
+    pub fn fill_rule<I>(mut self, value: I) -> Self where I: Into<Option<FillRule>> {
         self.fill_rule = value.into();
         self
     }
-    /// Set the tile field of this structure.
+    /// Set the `tile` field of this structure.
     pub fn tile<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.tile = value.into();
         self
     }
-    /// Set the stipple field of this structure.
+    /// Set the `stipple` field of this structure.
     pub fn stipple<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.stipple = value.into();
         self
     }
-    /// Set the tile_stipple_x_origin field of this structure.
+    /// Set the `tile_stipple_x_origin` field of this structure.
     pub fn tile_stipple_x_origin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.tile_stipple_x_origin = value.into();
         self
     }
-    /// Set the tile_stipple_y_origin field of this structure.
+    /// Set the `tile_stipple_y_origin` field of this structure.
     pub fn tile_stipple_y_origin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.tile_stipple_y_origin = value.into();
         self
     }
-    /// Set the font field of this structure.
+    /// Set the `font` field of this structure.
     pub fn font<I>(mut self, value: I) -> Self where I: Into<Option<Font>> {
         self.font = value.into();
         self
     }
-    /// Set the subwindow_mode field of this structure.
-    pub fn subwindow_mode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `subwindow_mode` field of this structure.
+    pub fn subwindow_mode<I>(mut self, value: I) -> Self where I: Into<Option<SubwindowMode>> {
         self.subwindow_mode = value.into();
         self
     }
-    /// Set the graphics_exposures field of this structure.
+    /// Set the `graphics_exposures` field of this structure.
     pub fn graphics_exposures<I>(mut self, value: I) -> Self where I: Into<Option<Bool32>> {
         self.graphics_exposures = value.into();
         self
     }
-    /// Set the clip_x_origin field of this structure.
+    /// Set the `clip_x_origin` field of this structure.
     pub fn clip_x_origin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.clip_x_origin = value.into();
         self
     }
-    /// Set the clip_y_origin field of this structure.
+    /// Set the `clip_y_origin` field of this structure.
     pub fn clip_y_origin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.clip_y_origin = value.into();
         self
     }
-    /// Set the clip_mask field of this structure.
+    /// Set the `clip_mask` field of this structure.
     pub fn clip_mask<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
         self.clip_mask = value.into();
         self
     }
-    /// Set the dash_offset field of this structure.
+    /// Set the `dash_offset` field of this structure.
     pub fn dash_offset<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.dash_offset = value.into();
         self
     }
-    /// Set the dashes field of this structure.
+    /// Set the `dashes` field of this structure.
     pub fn dashes<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.dashes = value.into();
         self
     }
-    /// Set the arc_mode field of this structure.
-    pub fn arc_mode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `arc_mode` field of this structure.
+    pub fn arc_mode<I>(mut self, value: I) -> Self where I: Into<Option<ArcMode>> {
         self.arc_mode = value.into();
         self
-    }
-}
-impl Serialize for ChangeGCAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.function {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.plane_mask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.foreground {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.background {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.line_width {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.line_style {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.cap_style {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.join_style {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.fill_style {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.fill_rule {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.tile {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.stipple {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.tile_stipple_x_origin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.tile_stipple_y_origin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.font {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.subwindow_mode {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.graphics_exposures {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clip_x_origin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clip_y_origin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clip_mask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.dash_offset {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.dashes {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.arc_mode {
-            value.serialize_into(bytes);
-        }
     }
 }
 /// change graphics context components.
@@ -13853,14 +15277,12 @@ impl TryFrom<u32> for ClipOrdering {
 
 /// Opcode for the SetClipRectangles request
 pub const SET_CLIP_RECTANGLES_REQUEST: u8 = 59;
-pub fn set_clip_rectangles<'c, Conn, A>(conn: &'c Conn, ordering: A, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_clip_rectangles<'c, Conn>(conn: &'c Conn, ordering: ClipOrdering, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let ordering = ordering.into();
-    let ordering_bytes = ordering.serialize();
+    let ordering_bytes = u8::from(ordering).serialize();
     let gc_bytes = gc.serialize();
     let clip_x_origin_bytes = clip_x_origin.serialize();
     let clip_y_origin_bytes = clip_y_origin.serialize();
@@ -13932,7 +15354,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
-    let exposures_bytes = (exposures as u8).serialize();
+    let exposures_bytes = exposures.serialize();
     let window_bytes = window.serialize();
     let x_bytes = x.serialize();
     let y_bytes = y.serialize();
@@ -14097,7 +15519,6 @@ where
 
 /// BRIEF DESCRIPTION MISSING.
 ///
-///
 /// # Fields
 ///
 /// * `Origin` - Treats all coordinates as relative to the origin.
@@ -14166,14 +15587,12 @@ impl TryFrom<u32> for CoordMode {
 
 /// Opcode for the PolyPoint request
 pub const POLY_POINT_REQUEST: u8 = 64;
-pub fn poly_point<'c, Conn, A>(conn: &'c Conn, coordinate_mode: A, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_point<'c, Conn>(conn: &'c Conn, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let coordinate_mode = coordinate_mode.into();
-    let coordinate_mode_bytes = coordinate_mode.serialize();
+    let coordinate_mode_bytes = u8::from(coordinate_mode).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let points_bytes = points.serialize();
@@ -14241,14 +15660,12 @@ pub const POLY_LINE_REQUEST: u8 = 65;
 ///     xcb_flush(conn);
 /// }
 /// ```
-pub fn poly_line<'c, Conn, A>(conn: &'c Conn, coordinate_mode: A, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_line<'c, Conn>(conn: &'c Conn, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let coordinate_mode = coordinate_mode.into();
-    let coordinate_mode_bytes = coordinate_mode.serialize();
+    let coordinate_mode_bytes = u8::from(coordinate_mode).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let points_bytes = points.serialize();
@@ -14521,19 +15938,15 @@ impl TryFrom<u32> for PolyShape {
 
 /// Opcode for the FillPoly request
 pub const FILL_POLY_REQUEST: u8 = 69;
-pub fn fill_poly<'c, Conn, A, B>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, shape: A, coordinate_mode: B, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn fill_poly<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, shape: PolyShape, coordinate_mode: CoordMode, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
-    B: Into<u8>,
 {
     let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
-    let shape = shape.into();
-    let shape_bytes = shape.serialize();
-    let coordinate_mode = coordinate_mode.into();
-    let coordinate_mode_bytes = coordinate_mode.serialize();
+    let shape_bytes = u8::from(shape).serialize();
+    let coordinate_mode_bytes = u8::from(coordinate_mode).serialize();
     let points_bytes = points.serialize();
     let mut request0 = [
         FILL_POLY_REQUEST,
@@ -14723,14 +16136,12 @@ impl TryFrom<u32> for ImageFormat {
 
 /// Opcode for the PutImage request
 pub const PUT_IMAGE_REQUEST: u8 = 72;
-pub fn put_image<'c, Conn, A>(conn: &'c Conn, format: A, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn put_image<'c, Conn>(conn: &'c Conn, format: ImageFormat, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let format = format.into();
-    let format_bytes = format.serialize();
+    let format_bytes = u8::from(format).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let width_bytes = width.serialize();
@@ -14777,14 +16188,12 @@ where
 
 /// Opcode for the GetImage request
 pub const GET_IMAGE_REQUEST: u8 = 73;
-pub fn get_image<Conn, A>(conn: &Conn, format: A, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32) -> Result<Cookie<'_, Conn, GetImageReply>, ConnectionError>
+pub fn get_image<Conn>(conn: &Conn, format: ImageFormat, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32) -> Result<Cookie<'_, Conn, GetImageReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let format = format.into();
-    let format_bytes = format.serialize();
+    let format_bytes = u8::from(format).serialize();
     let drawable_bytes = drawable.serialize();
     let x_bytes = x.serialize();
     let y_bytes = y.serialize();
@@ -14819,6 +16228,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetImageReply {
     pub response_type: u8,
@@ -14827,8 +16237,8 @@ pub struct GetImageReply {
     pub visual: Visualid,
     pub data: Vec<u8>,
 }
-impl GetImageReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetImageReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (depth, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14960,7 +16370,7 @@ pub const IMAGE_TEXT8_REQUEST: u8 = 76;
 ///
 /// # See
 ///
-/// * ImageText16: request
+/// * `ImageText16`: request
 pub fn image_text8<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -15036,7 +16446,7 @@ pub const IMAGE_TEXT16_REQUEST: u8 = 77;
 ///
 /// # See
 ///
-/// * ImageText8: request
+/// * `ImageText8`: request
 pub fn image_text16<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[Char2b]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -15141,14 +16551,12 @@ impl TryFrom<u32> for ColormapAlloc {
 
 /// Opcode for the CreateColormap request
 pub const CREATE_COLORMAP_REQUEST: u8 = 78;
-pub fn create_colormap<Conn, A>(conn: &Conn, alloc: A, mid: Colormap, window: Window, visual: Visualid) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_colormap<Conn>(conn: &Conn, alloc: ColormapAlloc, mid: Colormap, window: Window, visual: Visualid) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let alloc = alloc.into();
-    let alloc_bytes = alloc.serialize();
+    let alloc_bytes = u8::from(alloc).serialize();
     let mid_bytes = mid.serialize();
     let window_bytes = window.serialize();
     let visual_bytes = visual.serialize();
@@ -15306,6 +16714,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListInstalledColormapsReply {
     pub response_type: u8,
@@ -15313,8 +16722,8 @@ pub struct ListInstalledColormapsReply {
     pub length: u32,
     pub cmaps: Vec<Colormap>,
 }
-impl ListInstalledColormapsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ListInstalledColormapsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15386,6 +16795,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AllocColorReply {
     pub response_type: u8,
@@ -15396,8 +16806,8 @@ pub struct AllocColorReply {
     pub blue: u16,
     pub pixel: u32,
 }
-impl AllocColorReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for AllocColorReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15451,6 +16861,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AllocNamedColorReply {
     pub response_type: u8,
@@ -15464,8 +16875,8 @@ pub struct AllocNamedColorReply {
     pub visual_green: u16,
     pub visual_blue: u16,
 }
-impl AllocNamedColorReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for AllocNamedColorReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15495,7 +16906,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
-    let contiguous_bytes = (contiguous as u8).serialize();
+    let contiguous_bytes = contiguous.serialize();
     let cmap_bytes = cmap.serialize();
     let colors_bytes = colors.serialize();
     let planes_bytes = planes.serialize();
@@ -15519,6 +16930,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AllocColorCellsReply {
     pub response_type: u8,
@@ -15527,8 +16939,8 @@ pub struct AllocColorCellsReply {
     pub pixels: Vec<u32>,
     pub masks: Vec<u32>,
 }
-impl AllocColorCellsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for AllocColorCellsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15556,7 +16968,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
-    let contiguous_bytes = (contiguous as u8).serialize();
+    let contiguous_bytes = contiguous.serialize();
     let cmap_bytes = cmap.serialize();
     let colors_bytes = colors.serialize();
     let reds_bytes = reds.serialize();
@@ -15586,6 +16998,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AllocColorPlanesReply {
     pub response_type: u8,
@@ -15596,8 +17009,8 @@ pub struct AllocColorPlanesReply {
     pub blue_mask: u32,
     pub pixels: Vec<u32>,
 }
-impl AllocColorPlanesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for AllocColorPlanesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15925,6 +17338,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&pixels_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryColorsReply {
     pub response_type: u8,
@@ -15932,8 +17346,8 @@ pub struct QueryColorsReply {
     pub length: u32,
     pub colors: Vec<Rgb>,
 }
-impl QueryColorsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryColorsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15985,6 +17399,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LookupColorReply {
     pub response_type: u8,
@@ -15997,8 +17412,8 @@ pub struct LookupColorReply {
     pub visual_green: u16,
     pub visual_blue: u16,
 }
-impl LookupColorReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for LookupColorReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -16436,14 +17851,12 @@ impl TryFrom<u32> for QueryShapeOf {
 
 /// Opcode for the QueryBestSize request
 pub const QUERY_BEST_SIZE_REQUEST: u8 = 97;
-pub fn query_best_size<Conn, A>(conn: &Conn, class: A, drawable: Drawable, width: u16, height: u16) -> Result<Cookie<'_, Conn, QueryBestSizeReply>, ConnectionError>
+pub fn query_best_size<Conn>(conn: &Conn, class: QueryShapeOf, drawable: Drawable, width: u16, height: u16) -> Result<Cookie<'_, Conn, QueryBestSizeReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let class = class.into();
-    let class_bytes = class.serialize();
+    let class_bytes = u8::from(class).serialize();
     let drawable_bytes = drawable.serialize();
     let width_bytes = width.serialize();
     let height_bytes = height.serialize();
@@ -16467,6 +17880,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryBestSizeReply {
     pub response_type: u8,
@@ -16475,8 +17889,8 @@ pub struct QueryBestSizeReply {
     pub width: u16,
     pub height: u16,
 }
-impl QueryBestSizeReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryBestSizeReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -16516,8 +17930,8 @@ pub const QUERY_EXTENSION_REQUEST: u8 = 98;
 ///
 /// # See
 ///
-/// * xcb_get_extension_data: function
-/// * xdpyinfo: program
+/// * `xcb_get_extension_data`: function
+/// * `xdpyinfo`: program
 pub fn query_extension<'c, Conn>(conn: &'c Conn, name: &[u8]) -> Result<Cookie<'c, Conn, QueryExtensionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -16544,8 +17958,8 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
 }
+
 /// BRIEF DESCRIPTION MISSING.
-///
 ///
 /// # Fields
 ///
@@ -16563,8 +17977,8 @@ pub struct QueryExtensionReply {
     pub first_event: u8,
     pub first_error: u8,
 }
-impl QueryExtensionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryExtensionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -16603,6 +18017,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListExtensionsReply {
     pub response_type: u8,
@@ -16610,8 +18025,8 @@ pub struct ListExtensionsReply {
     pub length: u32,
     pub names: Vec<Str>,
 }
-impl ListExtensionsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ListExtensionsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (names_len, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -16686,6 +18101,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetKeyboardMappingReply {
     pub response_type: u8,
@@ -16693,8 +18109,8 @@ pub struct GetKeyboardMappingReply {
     pub sequence: u16,
     pub keysyms: Vec<Keysym>,
 }
-impl GetKeyboardMappingReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetKeyboardMappingReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (keysyms_per_keycode, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -16922,7 +18338,7 @@ impl TryFrom<u32> for AutoRepeatMode {
 
 /// Opcode for the ChangeKeyboardControl request
 pub const CHANGE_KEYBOARD_CONTROL_REQUEST: u8 = 102;
-/// Auxiliary and optional information for the change_keyboard_control function.
+/// Auxiliary and optional information for the `change_keyboard_control` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ChangeKeyboardControlAux {
     pub key_click_percent: Option<i32>,
@@ -16930,9 +18346,43 @@ pub struct ChangeKeyboardControlAux {
     pub bell_pitch: Option<i32>,
     pub bell_duration: Option<i32>,
     pub led: Option<u32>,
-    pub led_mode: Option<u32>,
+    pub led_mode: Option<LedMode>,
     pub key: Option<Keycode32>,
-    pub auto_repeat_mode: Option<u32>,
+    pub auto_repeat_mode: Option<AutoRepeatMode>,
+}
+impl Serialize for ChangeKeyboardControlAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Self::Bytes {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.key_click_percent {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bell_percent {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bell_pitch {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bell_duration {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.led {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.led_mode {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.key {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.auto_repeat_mode {
+            u32::from(*value).serialize_into(bytes);
+        }
+    }
 }
 impl ChangeKeyboardControlAux {
     /// Create a new instance with all fields unset / not present.
@@ -16967,79 +18417,45 @@ impl ChangeKeyboardControlAux {
         }
         mask
     }
-    /// Set the key_click_percent field of this structure.
+    /// Set the `key_click_percent` field of this structure.
     pub fn key_click_percent<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.key_click_percent = value.into();
         self
     }
-    /// Set the bell_percent field of this structure.
+    /// Set the `bell_percent` field of this structure.
     pub fn bell_percent<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.bell_percent = value.into();
         self
     }
-    /// Set the bell_pitch field of this structure.
+    /// Set the `bell_pitch` field of this structure.
     pub fn bell_pitch<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.bell_pitch = value.into();
         self
     }
-    /// Set the bell_duration field of this structure.
+    /// Set the `bell_duration` field of this structure.
     pub fn bell_duration<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.bell_duration = value.into();
         self
     }
-    /// Set the led field of this structure.
+    /// Set the `led` field of this structure.
     pub fn led<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.led = value.into();
         self
     }
-    /// Set the led_mode field of this structure.
-    pub fn led_mode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `led_mode` field of this structure.
+    pub fn led_mode<I>(mut self, value: I) -> Self where I: Into<Option<LedMode>> {
         self.led_mode = value.into();
         self
     }
-    /// Set the key field of this structure.
+    /// Set the `key` field of this structure.
     pub fn key<I>(mut self, value: I) -> Self where I: Into<Option<Keycode32>> {
         self.key = value.into();
         self
     }
-    /// Set the auto_repeat_mode field of this structure.
-    pub fn auto_repeat_mode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `auto_repeat_mode` field of this structure.
+    pub fn auto_repeat_mode<I>(mut self, value: I) -> Self where I: Into<Option<AutoRepeatMode>> {
         self.auto_repeat_mode = value.into();
         self
-    }
-}
-impl Serialize for ChangeKeyboardControlAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.key_click_percent {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bell_percent {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bell_pitch {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bell_duration {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.led {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.led_mode {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.key {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.auto_repeat_mode {
-            value.serialize_into(bytes);
-        }
     }
 }
 pub fn change_keyboard_control<'c, Conn>(conn: &'c Conn, value_list: &ChangeKeyboardControlAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -17089,6 +18505,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetKeyboardControlReply {
     pub response_type: u8,
@@ -17102,8 +18519,8 @@ pub struct GetKeyboardControlReply {
     pub bell_duration: u16,
     pub auto_repeats: [u8; 32],
 }
-impl GetKeyboardControlReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetKeyboardControlReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (global_auto_repeat, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -17223,8 +18640,8 @@ where
     let acceleration_numerator_bytes = acceleration_numerator.serialize();
     let acceleration_denominator_bytes = acceleration_denominator.serialize();
     let threshold_bytes = threshold.serialize();
-    let do_acceleration_bytes = (do_acceleration as u8).serialize();
-    let do_threshold_bytes = (do_threshold as u8).serialize();
+    let do_acceleration_bytes = do_acceleration.serialize();
+    let do_threshold_bytes = do_threshold.serialize();
     let mut request0 = [
         CHANGE_POINTER_CONTROL_REQUEST,
         0,
@@ -17265,6 +18682,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPointerControlReply {
     pub response_type: u8,
@@ -17274,8 +18692,8 @@ pub struct GetPointerControlReply {
     pub acceleration_denominator: u16,
     pub threshold: u16,
 }
-impl GetPointerControlReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetPointerControlReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -17427,19 +18845,15 @@ impl TryFrom<u32> for Exposures {
 
 /// Opcode for the SetScreenSaver request
 pub const SET_SCREEN_SAVER_REQUEST: u8 = 107;
-pub fn set_screen_saver<Conn, A, B>(conn: &Conn, timeout: i16, interval: i16, prefer_blanking: A, allow_exposures: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_screen_saver<Conn>(conn: &Conn, timeout: i16, interval: i16, prefer_blanking: Blanking, allow_exposures: Exposures) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
-    B: Into<u8>,
 {
     let length_so_far = 0;
     let timeout_bytes = timeout.serialize();
     let interval_bytes = interval.serialize();
-    let prefer_blanking = prefer_blanking.into();
-    let prefer_blanking_bytes = prefer_blanking.serialize();
-    let allow_exposures = allow_exposures.into();
-    let allow_exposures_bytes = allow_exposures.serialize();
+    let prefer_blanking_bytes = u8::from(prefer_blanking).serialize();
+    let allow_exposures_bytes = u8::from(allow_exposures).serialize();
     let mut request0 = [
         SET_SCREEN_SAVER_REQUEST,
         0,
@@ -17480,6 +18894,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetScreenSaverReply {
     pub response_type: u8,
@@ -17490,8 +18905,8 @@ pub struct GetScreenSaverReply {
     pub prefer_blanking: Blanking,
     pub allow_exposures: Exposures,
 }
-impl GetScreenSaverReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetScreenSaverReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -17649,17 +19064,13 @@ impl TryFrom<u32> for Family {
 
 /// Opcode for the ChangeHosts request
 pub const CHANGE_HOSTS_REQUEST: u8 = 109;
-pub fn change_hosts<'c, Conn, A, B>(conn: &'c Conn, mode: A, family: B, address: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_hosts<'c, Conn>(conn: &'c Conn, mode: HostMode, family: Family, address: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
-    B: Into<u8>,
 {
     let length_so_far = 0;
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
-    let family = family.into();
-    let family_bytes = family.serialize();
+    let mode_bytes = u8::from(mode).serialize();
+    let family_bytes = u8::from(family).serialize();
     let address_len: u16 = address.len().try_into()?;
     let address_len_bytes = address_len.serialize();
     let mut request0 = [
@@ -17720,9 +19131,9 @@ impl Serialize for Host {
         bytes.reserve(4);
         u8::from(self.family).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
-        let address_len = self.address.len() as u16;
+        let address_len = u16::try_from(self.address.len()).expect("`address` has too many elements");
         address_len.serialize_into(bytes);
-        self.address.serialize_into(bytes);
+        bytes.extend_from_slice(&self.address);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }
@@ -17746,6 +19157,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListHostsReply {
     pub response_type: u8,
@@ -17754,8 +19166,8 @@ pub struct ListHostsReply {
     pub length: u32,
     pub hosts: Vec<Host>,
 }
-impl ListHostsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ListHostsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -17839,14 +19251,12 @@ impl TryFrom<u32> for AccessControl {
 
 /// Opcode for the SetAccessControl request
 pub const SET_ACCESS_CONTROL_REQUEST: u8 = 111;
-pub fn set_access_control<Conn, A>(conn: &Conn, mode: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_access_control<Conn>(conn: &Conn, mode: AccessControl) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
+    let mode_bytes = u8::from(mode).serialize();
     let mut request0 = [
         SET_ACCESS_CONTROL_REQUEST,
         mode_bytes[0],
@@ -17927,14 +19337,12 @@ impl TryFrom<u32> for CloseDown {
 
 /// Opcode for the SetCloseDownMode request
 pub const SET_CLOSE_DOWN_MODE_REQUEST: u8 = 112;
-pub fn set_close_down_mode<Conn, A>(conn: &Conn, mode: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_close_down_mode<Conn>(conn: &Conn, mode: CloseDown) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
+    let mode_bytes = u8::from(mode).serialize();
     let mut request0 = [
         SET_CLOSE_DOWN_MODE_REQUEST,
         mode_bytes[0],
@@ -18027,7 +19435,7 @@ pub const KILL_CLIENT_REQUEST: u8 = 113;
 ///
 /// # See
 ///
-/// * xkill: program
+/// * `xkill`: program
 pub fn kill_client<Conn>(conn: &Conn, resource: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -18151,14 +19559,12 @@ impl TryFrom<u32> for ScreenSaver {
 
 /// Opcode for the ForceScreenSaver request
 pub const FORCE_SCREEN_SAVER_REQUEST: u8 = 115;
-pub fn force_screen_saver<Conn, A>(conn: &Conn, mode: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn force_screen_saver<Conn>(conn: &Conn, mode: ScreenSaver) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let length_so_far = 0;
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
+    let mode_bytes = u8::from(mode).serialize();
     let mut request0 = [
         FORCE_SCREEN_SAVER_REQUEST,
         mode_bytes[0],
@@ -18261,6 +19667,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(map), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetPointerMappingReply {
     pub response_type: u8,
@@ -18268,8 +19675,8 @@ pub struct SetPointerMappingReply {
     pub sequence: u16,
     pub length: u32,
 }
-impl SetPointerMappingReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for SetPointerMappingReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -18305,6 +19712,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPointerMappingReply {
     pub response_type: u8,
@@ -18312,8 +19720,8 @@ pub struct GetPointerMappingReply {
     pub length: u32,
     pub map: Vec<u8>,
 }
-impl GetPointerMappingReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetPointerMappingReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (map_len, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -18436,6 +19844,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(keycodes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetModifierMappingReply {
     pub response_type: u8,
@@ -18443,8 +19852,8 @@ pub struct SetModifierMappingReply {
     pub sequence: u16,
     pub length: u32,
 }
-impl SetModifierMappingReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for SetModifierMappingReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -18480,6 +19889,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetModifierMappingReply {
     pub response_type: u8,
@@ -18487,8 +19897,8 @@ pub struct GetModifierMappingReply {
     pub length: u32,
     pub keycodes: Vec<Keycode>,
 }
-impl GetModifierMappingReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetModifierMappingReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (keycodes_per_modifier, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -18578,16 +19988,13 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * CreateNotify: event
-    /// * MapWindow: request
-    /// * xcb_generate_id: function
-    fn create_window<'c, A>(&'c self, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, visual: Visualid, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u16>,
+    /// * `CreateNotify`: event
+    /// * `MapWindow`: request
+    /// * `xcb_generate_id`: function
+    fn create_window<'c>(&'c self, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_window(self, depth, wid, parent, x, y, width, height, border_width, class, visual, value_list)
     }
-
     /// change window attributes.
     ///
     /// Changes the attributes specified by `value_mask` for the specified `window`.
@@ -18612,7 +20019,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         change_window_attributes(self, window, value_list)
     }
-
     /// Gets window attributes.
     ///
     /// Gets the current attributes for the specified `window`.
@@ -18629,7 +20035,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_window_attributes(self, window)
     }
-
     /// Destroys a window.
     ///
     /// Destroys the specified window and all of its subwindows. A DestroyNotify event
@@ -18649,19 +20054,17 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * DestroyNotify: event
-    /// * MapWindow: request
-    /// * UnmapWindow: request
+    /// * `DestroyNotify`: event
+    /// * `MapWindow`: request
+    /// * `UnmapWindow`: request
     fn destroy_window(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_window(self, window)
     }
-
     fn destroy_subwindows(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_subwindows(self, window)
     }
-
     /// Changes a client's save set.
     ///
     /// TODO: explain what the save set is for.
@@ -18683,14 +20086,11 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * ReparentWindow: request
-    fn change_save_set<A>(&self, mode: A, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    /// * `ReparentWindow`: request
+    fn change_save_set(&self, mode: SetMode, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         change_save_set(self, mode, window)
     }
-
     /// Reparents a window.
     ///
     /// Makes the specified window a child of the specified parent window. If the
@@ -18720,14 +20120,13 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * MapWindow: request
-    /// * ReparentNotify: event
-    /// * UnmapWindow: request
+    /// * `MapWindow`: request
+    /// * `ReparentNotify`: event
+    /// * `UnmapWindow`: request
     fn reparent_window(&self, window: Window, parent: Window, x: i16, y: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         reparent_window(self, window, parent, x, y)
     }
-
     /// Makes a window visible.
     ///
     /// Maps the specified window. This means making the window visible (as long as its
@@ -18760,19 +20159,17 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * Expose: event
-    /// * MapNotify: event
-    /// * UnmapWindow: request
+    /// * `Expose`: event
+    /// * `MapNotify`: event
+    /// * `UnmapWindow`: request
     fn map_window(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         map_window(self, window)
     }
-
     fn map_subwindows(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         map_subwindows(self, window)
     }
-
     /// Makes a window invisible.
     ///
     /// Unmaps the specified window. This means making the window invisible (and all
@@ -18791,19 +20188,17 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * Expose: event
-    /// * MapWindow: request
-    /// * UnmapNotify: event
+    /// * `Expose`: event
+    /// * `MapWindow`: request
+    /// * `UnmapNotify`: event
     fn unmap_window(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         unmap_window(self, window)
     }
-
     fn unmap_subwindows(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         unmap_subwindows(self, window)
     }
-
     /// Configures window attributes.
     ///
     /// Configures a window's size, position, border width and stacking order.
@@ -18824,8 +20219,8 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * Expose: event
-    /// * MapNotify: event
+    /// * `Expose`: event
+    /// * `MapNotify`: event
     ///
     /// # Example
     ///
@@ -18858,7 +20253,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         configure_window(self, window, value_list)
     }
-
     /// Change window stacking order.
     ///
     /// If `direction` is `XCB_CIRCULATE_RAISE_LOWEST`, the lowest mapped child (if
@@ -18875,13 +20269,10 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `Value` - The specified `direction` is invalid.
     /// * `Window` - The specified `window` does not exist.
-    fn circulate_window<A>(&self, direction: A, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn circulate_window(&self, direction: Circulate, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         circulate_window(self, direction, window)
     }
-
     /// Get current window geometry.
     ///
     /// Gets the current geometry of the specified drawable (either `Window` or `Pixmap`).
@@ -18897,7 +20288,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * xwininfo: program
+    /// * `xwininfo`: program
     ///
     /// # Example
     ///
@@ -18922,7 +20313,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_geometry(self, drawable)
     }
-
     /// query the window tree.
     ///
     /// Gets the root window ID, parent window ID and list of children windows for the
@@ -18934,7 +20324,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * xwininfo: program
+    /// * `xwininfo`: program
     ///
     /// # Example
     ///
@@ -18964,7 +20354,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_tree(self, window)
     }
-
     /// Get atom identifier by name.
     ///
     /// Retrieves the identifier (xcb_atom_t TODO) for the atom with the specified
@@ -18988,8 +20377,8 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * GetAtomName: request
-    /// * xlsatoms: program
+    /// * `GetAtomName`: request
+    /// * `xlsatoms`: program
     ///
     /// # Example
     ///
@@ -19014,12 +20403,10 @@ pub trait ConnectionExt: RequestConnection {
     {
         intern_atom(self, only_if_exists, name)
     }
-
     fn get_atom_name(&self, atom: Atom) -> Result<Cookie<'_, Self, GetAtomNameReply>, ConnectionError>
     {
         get_atom_name(self, atom)
     }
-
     /// Changes a window property.
     ///
     /// Sets or updates a property on the specified `window`. Properties are for
@@ -19048,8 +20435,8 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * InternAtom: request
-    /// * xprop: program
+    /// * `InternAtom`: request
+    /// * `xprop`: program
     ///
     /// # Example
     ///
@@ -19070,20 +20457,17 @@ pub trait ConnectionExt: RequestConnection {
     ///     xcb_flush(conn);
     /// }
     /// ```
-    fn change_property<'c, A, B, C>(&'c self, mode: A, window: Window, property: B, type_: C, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn change_property<'c, A, B>(&'c self, mode: PropMode, window: Window, property: A, type_: B, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
-        A: Into<u8>,
+        A: Into<Atom>,
         B: Into<Atom>,
-        C: Into<Atom>,
     {
         change_property(self, mode, window, property, type_, format, data_len, data)
     }
-
     fn delete_property(&self, window: Window, property: Atom) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_property(self, window, property)
     }
-
     /// Gets a window property.
     ///
     /// Gets the specified `property` from the specified `window`. Properties are for
@@ -19119,8 +20503,8 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * InternAtom: request
-    /// * xprop: program
+    /// * `InternAtom`: request
+    /// * `xprop`: program
     ///
     /// # Example
     ///
@@ -19156,12 +20540,10 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_property(self, delete, window, property, type_, long_offset, long_length)
     }
-
     fn list_properties(&self, window: Window) -> Result<Cookie<'_, Self, ListPropertiesReply>, ConnectionError>
     {
         list_properties(self, window)
     }
-
     /// Sets the owner of a selection.
     ///
     /// Makes `window` the owner of the selection `selection` and updates the
@@ -19190,12 +20572,11 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * SetSelectionOwner: request
+    /// * `SetSelectionOwner`: request
     fn set_selection_owner(&self, owner: Window, selection: Atom, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_selection_owner(self, owner, selection, time)
     }
-
     /// Gets the owner of a selection.
     ///
     /// Gets the owner of the specified selection.
@@ -19212,17 +20593,15 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * SetSelectionOwner: request
+    /// * `SetSelectionOwner`: request
     fn get_selection_owner(&self, selection: Atom) -> Result<Cookie<'_, Self, GetSelectionOwnerReply>, ConnectionError>
     {
         get_selection_owner(self, selection)
     }
-
     fn convert_selection(&self, requestor: Window, selection: Atom, target: Atom, property: Atom, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         convert_selection(self, requestor, selection, target, property, time)
     }
-
     /// send an event.
     ///
     /// Identifies the `destination` window, determines which clients should receive
@@ -19262,7 +20641,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * ConfigureNotify: event
+    /// * `ConfigureNotify`: event
     ///
     /// # Example
     ///
@@ -19302,7 +20681,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         send_event(self, propagate, destination, event_mask, event)
     }
-
     /// Grab the pointer.
     ///
     /// Actively grabs control of the pointer. Further pointer events are reported only to the grabbing client. Overrides any active pointer grab by this client.
@@ -19340,7 +20718,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * GrabKeyboard: request
+    /// * `GrabKeyboard`: request
     ///
     /// # Example
     ///
@@ -19372,14 +20750,10 @@ pub trait ConnectionExt: RequestConnection {
     ///     }
     /// }
     /// ```
-    fn grab_pointer<A, B>(&self, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: A, keyboard_mode: B, confine_to: Window, cursor: Cursor, time: Timestamp) -> Result<Cookie<'_, Self, GrabPointerReply>, ConnectionError>
-    where
-        A: Into<u8>,
-        B: Into<u8>,
+    fn grab_pointer(&self, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: Window, cursor: Cursor, time: Timestamp) -> Result<Cookie<'_, Self, GrabPointerReply>, ConnectionError>
     {
         grab_pointer(self, owner_events, grab_window, event_mask, pointer_mode, keyboard_mode, confine_to, cursor, time)
     }
-
     /// release the pointer.
     ///
     /// Releases the pointer and any queued events if you actively grabbed the pointer
@@ -19399,15 +20773,14 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * EnterNotify: event
-    /// * GrabButton: request
-    /// * GrabPointer: request
-    /// * LeaveNotify: event
+    /// * `EnterNotify`: event
+    /// * `GrabButton`: request
+    /// * `GrabPointer`: request
+    /// * `LeaveNotify`: event
     fn ungrab_pointer(&self, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_pointer(self, time)
     }
-
     /// Grab pointer button(s).
     ///
     /// This request establishes a passive grab. The pointer is actively grabbed as
@@ -19472,27 +20845,18 @@ pub trait ConnectionExt: RequestConnection {
     /// * `Cursor` - The specified `cursor` does not exist.
     /// * `Value` - TODO: reasons?
     /// * `Window` - The specified `window` does not exist.
-    fn grab_button<A, B, C>(&self, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: A, keyboard_mode: B, confine_to: Window, cursor: Cursor, button: C, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
-        B: Into<u8>,
-        C: Into<u8>,
+    fn grab_button(&self, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: Window, cursor: Cursor, button: ButtonIndex, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         grab_button(self, owner_events, grab_window, event_mask, pointer_mode, keyboard_mode, confine_to, cursor, button, modifiers)
     }
-
-    fn ungrab_button<A>(&self, button: A, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn ungrab_button(&self, button: ButtonIndex, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_button(self, button, grab_window, modifiers)
     }
-
     fn change_active_pointer_grab(&self, cursor: Cursor, time: Timestamp, event_mask: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         change_active_pointer_grab(self, cursor, time, event_mask)
     }
-
     /// Grab the keyboard.
     ///
     /// Actively grabs control of the keyboard and generates FocusIn and FocusOut
@@ -19523,7 +20887,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * GrabPointer: request
+    /// * `GrabPointer`: request
     ///
     /// # Example
     ///
@@ -19553,19 +20917,14 @@ pub trait ConnectionExt: RequestConnection {
     ///     }
     /// }
     /// ```
-    fn grab_keyboard<A, B>(&self, owner_events: bool, grab_window: Window, time: Timestamp, pointer_mode: A, keyboard_mode: B) -> Result<Cookie<'_, Self, GrabKeyboardReply>, ConnectionError>
-    where
-        A: Into<u8>,
-        B: Into<u8>,
+    fn grab_keyboard(&self, owner_events: bool, grab_window: Window, time: Timestamp, pointer_mode: GrabMode, keyboard_mode: GrabMode) -> Result<Cookie<'_, Self, GrabKeyboardReply>, ConnectionError>
     {
         grab_keyboard(self, owner_events, grab_window, time, pointer_mode, keyboard_mode)
     }
-
     fn ungrab_keyboard(&self, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_keyboard(self, time)
     }
-
     /// Grab keyboard key(s).
     ///
     /// Establishes a passive grab on the keyboard. In the future, the keyboard is
@@ -19623,15 +20982,11 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * GrabKeyboard: request
-    fn grab_key<A, B>(&self, owner_events: bool, grab_window: Window, modifiers: u16, key: Keycode, pointer_mode: A, keyboard_mode: B) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
-        B: Into<u8>,
+    /// * `GrabKeyboard`: request
+    fn grab_key(&self, owner_events: bool, grab_window: Window, modifiers: u16, key: Keycode, pointer_mode: GrabMode, keyboard_mode: GrabMode) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         grab_key(self, owner_events, grab_window, modifiers, key, pointer_mode, keyboard_mode)
     }
-
     /// release a key combination.
     ///
     /// Releases the key combination on `grab_window` if you grabbed it using
@@ -19655,13 +21010,12 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * GrabKey: request
-    /// * xev: program
+    /// * `GrabKey`: request
+    /// * `xev`: program
     fn ungrab_key(&self, key: Keycode, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_key(self, key, grab_window, modifiers)
     }
-
     /// release queued events.
     ///
     /// Releases queued events if the client has caused a device (pointer/keyboard) to
@@ -19679,23 +21033,18 @@ pub trait ConnectionExt: RequestConnection {
     /// # Errors
     ///
     /// * `Value` - You specified an invalid `mode`.
-    fn allow_events<A>(&self, mode: A, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn allow_events(&self, mode: Allow, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         allow_events(self, mode, time)
     }
-
     fn grab_server(&self) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         grab_server(self)
     }
-
     fn ungrab_server(&self) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_server(self)
     }
-
     /// get pointer coordinates.
     ///
     /// Gets the root window the pointer is logically on and the pointer coordinates
@@ -19713,17 +21062,14 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_pointer(self, window)
     }
-
     fn get_motion_events(&self, window: Window, start: Timestamp, stop: Timestamp) -> Result<Cookie<'_, Self, GetMotionEventsReply>, ConnectionError>
     {
         get_motion_events(self, window, start, stop)
     }
-
     fn translate_coordinates(&self, src_window: Window, dst_window: Window, src_x: i16, src_y: i16) -> Result<Cookie<'_, Self, TranslateCoordinatesReply>, ConnectionError>
     {
         translate_coordinates(self, src_window, dst_window, src_x, src_y)
     }
-
     /// move mouse pointer.
     ///
     /// Moves the mouse pointer to the specified position.
@@ -19755,12 +21101,11 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * SetInputFocus: request
+    /// * `SetInputFocus`: request
     fn warp_pointer(&self, src_window: Window, dst_window: Window, src_x: i16, src_y: i16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         warp_pointer(self, src_window, dst_window, src_x, src_y, src_width, src_height, dst_x, dst_y)
     }
-
     /// Sets input focus.
     ///
     /// Changes the input focus and the last-focus-change time. If the specified `time`
@@ -19794,25 +21139,20 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * FocusIn: event
-    /// * FocusOut: event
-    fn set_input_focus<A>(&self, revert_to: A, focus: Window, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    /// * `FocusIn`: event
+    /// * `FocusOut`: event
+    fn set_input_focus(&self, revert_to: InputFocus, focus: Window, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_input_focus(self, revert_to, focus, time)
     }
-
     fn get_input_focus(&self) -> Result<Cookie<'_, Self, GetInputFocusReply>, ConnectionError>
     {
         get_input_focus(self)
     }
-
     fn query_keymap(&self) -> Result<Cookie<'_, Self, QueryKeymapReply>, ConnectionError>
     {
         query_keymap(self)
     }
-
     /// opens a font.
     ///
     /// Opens any X core font matching the given `name` (for example "-misc-fixed-*").
@@ -19832,17 +21172,15 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * xcb_generate_id: function
+    /// * `xcb_generate_id`: function
     fn open_font<'c>(&'c self, fid: Font, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         open_font(self, fid, name)
     }
-
     fn close_font(&self, font: Font) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         close_font(self, font)
     }
-
     /// query font metrics.
     ///
     /// Queries information associated with the font.
@@ -19854,7 +21192,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_font(self, font)
     }
-
     /// get text extents.
     ///
     /// Query text extents from the X11 server. This request returns the bounding box
@@ -19893,7 +21230,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_text_extents(self, font, string)
     }
-
     /// get matching font names.
     ///
     /// Gets a list of available font names which match the given `pattern`.
@@ -19911,7 +21247,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         list_fonts(self, max_names, pattern)
     }
-
     /// get matching font names and information.
     ///
     /// Gets a list of available font names which match the given `pattern`.
@@ -19929,17 +21264,14 @@ pub trait ConnectionExt: RequestConnection {
     {
         list_fonts_with_info(self, max_names, pattern)
     }
-
     fn set_font_path<'c>(&'c self, font: &[Str]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_font_path(self, font)
     }
-
     fn get_font_path(&self) -> Result<Cookie<'_, Self, GetFontPathReply>, ConnectionError>
     {
         get_font_path(self)
     }
-
     /// Creates a pixmap.
     ///
     /// Creates a pixmap. The pixmap can only be used on the same screen as `drawable`
@@ -19962,12 +21294,11 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * xcb_generate_id: function
+    /// * `xcb_generate_id`: function
     fn create_pixmap(&self, depth: u8, pid: Pixmap, drawable: Drawable, width: u16, height: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_pixmap(self, depth, pid, drawable, width, height)
     }
-
     /// Destroys a pixmap.
     ///
     /// Deletes the association between the pixmap ID and the pixmap. The pixmap
@@ -19984,7 +21315,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         free_pixmap(self, pixmap)
     }
-
     /// Creates a graphics context.
     ///
     /// Creates a graphics context. The graphics context can be used with any drawable
@@ -20007,12 +21337,11 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * xcb_generate_id: function
+    /// * `xcb_generate_id`: function
     fn create_gc<'c>(&'c self, cid: Gcontext, drawable: Drawable, value_list: &CreateGCAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_gc(self, cid, drawable, value_list)
     }
-
     /// change graphics context components.
     ///
     /// Changes the components specified by `value_mask` for the specified graphics context.
@@ -20061,24 +21390,18 @@ pub trait ConnectionExt: RequestConnection {
     {
         change_gc(self, gc, value_list)
     }
-
     fn copy_gc(&self, src_gc: Gcontext, dst_gc: Gcontext, value_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         copy_gc(self, src_gc, dst_gc, value_mask)
     }
-
     fn set_dashes<'c>(&'c self, gc: Gcontext, dash_offset: u16, dashes: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_dashes(self, gc, dash_offset, dashes)
     }
-
-    fn set_clip_rectangles<'c, A>(&'c self, ordering: A, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn set_clip_rectangles<'c>(&'c self, ordering: ClipOrdering, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_clip_rectangles(self, ordering, gc, clip_x_origin, clip_y_origin, rectangles)
     }
-
     /// Destroys a graphics context.
     ///
     /// Destroys the specified `gc` and all associated storage.
@@ -20094,12 +21417,10 @@ pub trait ConnectionExt: RequestConnection {
     {
         free_gc(self, gc)
     }
-
     fn clear_area(&self, exposures: bool, window: Window, x: i16, y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         clear_area(self, exposures, window, x, y, width, height)
     }
-
     /// copy areas.
     ///
     /// Copies the specified rectangle from `src_drawable` to `dst_drawable`.
@@ -20125,19 +21446,14 @@ pub trait ConnectionExt: RequestConnection {
     {
         copy_area(self, src_drawable, dst_drawable, gc, src_x, src_y, dst_x, dst_y, width, height)
     }
-
     fn copy_plane(&self, src_drawable: Drawable, dst_drawable: Drawable, gc: Gcontext, src_x: i16, src_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16, bit_plane: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         copy_plane(self, src_drawable, dst_drawable, gc, src_x, src_y, dst_x, dst_y, width, height, bit_plane)
     }
-
-    fn poly_point<'c, A>(&'c self, coordinate_mode: A, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn poly_point<'c>(&'c self, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_point(self, coordinate_mode, drawable, gc, points)
     }
-
     /// draw lines.
     ///
     /// Draws `points_len`-1 lines between each pair of points (point[i], point[i+1])
@@ -20176,13 +21492,10 @@ pub trait ConnectionExt: RequestConnection {
     ///     xcb_flush(conn);
     /// }
     /// ```
-    fn poly_line<'c, A>(&'c self, coordinate_mode: A, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn poly_line<'c>(&'c self, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_line(self, coordinate_mode, drawable, gc, points)
     }
-
     /// draw lines.
     ///
     /// Draws multiple, unconnected lines. For each segment, a line is drawn between
@@ -20213,25 +21526,18 @@ pub trait ConnectionExt: RequestConnection {
     {
         poly_segment(self, drawable, gc, segments)
     }
-
     fn poly_rectangle<'c>(&'c self, drawable: Drawable, gc: Gcontext, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_rectangle(self, drawable, gc, rectangles)
     }
-
     fn poly_arc<'c>(&'c self, drawable: Drawable, gc: Gcontext, arcs: &[Arc]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_arc(self, drawable, gc, arcs)
     }
-
-    fn fill_poly<'c, A, B>(&'c self, drawable: Drawable, gc: Gcontext, shape: A, coordinate_mode: B, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
-        B: Into<u8>,
+    fn fill_poly<'c>(&'c self, drawable: Drawable, gc: Gcontext, shape: PolyShape, coordinate_mode: CoordMode, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         fill_poly(self, drawable, gc, shape, coordinate_mode, points)
     }
-
     /// Fills rectangles.
     ///
     /// Fills the specified rectangle(s) in the order listed in the array. For any
@@ -20261,36 +21567,26 @@ pub trait ConnectionExt: RequestConnection {
     {
         poly_fill_rectangle(self, drawable, gc, rectangles)
     }
-
     fn poly_fill_arc<'c>(&'c self, drawable: Drawable, gc: Gcontext, arcs: &[Arc]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_fill_arc(self, drawable, gc, arcs)
     }
-
-    fn put_image<'c, A>(&'c self, format: A, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn put_image<'c>(&'c self, format: ImageFormat, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         put_image(self, format, drawable, gc, width, height, dst_x, dst_y, left_pad, depth, data)
     }
-
-    fn get_image<A>(&self, format: A, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32) -> Result<Cookie<'_, Self, GetImageReply>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn get_image(&self, format: ImageFormat, drawable: Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32) -> Result<Cookie<'_, Self, GetImageReply>, ConnectionError>
     {
         get_image(self, format, drawable, x, y, width, height, plane_mask)
     }
-
     fn poly_text8<'c>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_text8(self, drawable, gc, x, y, items)
     }
-
     fn poly_text16<'c>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_text16(self, drawable, gc, x, y, items)
     }
-
     /// Draws text.
     ///
     /// Fills the destination rectangle with the background pixel from `gc`, then
@@ -20324,12 +21620,11 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * ImageText16: request
+    /// * `ImageText16`: request
     fn image_text8<'c>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         image_text8(self, drawable, gc, x, y, string)
     }
-
     /// Draws text.
     ///
     /// Fills the destination rectangle with the background pixel from `gc`, then
@@ -20364,44 +21659,35 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * ImageText8: request
+    /// * `ImageText8`: request
     fn image_text16<'c>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[Char2b]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         image_text16(self, drawable, gc, x, y, string)
     }
-
-    fn create_colormap<A>(&self, alloc: A, mid: Colormap, window: Window, visual: Visualid) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn create_colormap(&self, alloc: ColormapAlloc, mid: Colormap, window: Window, visual: Visualid) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_colormap(self, alloc, mid, window, visual)
     }
-
     fn free_colormap(&self, cmap: Colormap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         free_colormap(self, cmap)
     }
-
     fn copy_colormap_and_free(&self, mid: Colormap, src_cmap: Colormap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         copy_colormap_and_free(self, mid, src_cmap)
     }
-
     fn install_colormap(&self, cmap: Colormap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         install_colormap(self, cmap)
     }
-
     fn uninstall_colormap(&self, cmap: Colormap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         uninstall_colormap(self, cmap)
     }
-
     fn list_installed_colormaps(&self, window: Window) -> Result<Cookie<'_, Self, ListInstalledColormapsReply>, ConnectionError>
     {
         list_installed_colormaps(self, window)
     }
-
     /// Allocate a color.
     ///
     /// Allocates a read-only colormap entry corresponding to the closest RGB value
@@ -20424,52 +21710,42 @@ pub trait ConnectionExt: RequestConnection {
     {
         alloc_color(self, cmap, red, green, blue)
     }
-
     fn alloc_named_color<'c>(&'c self, cmap: Colormap, name: &[u8]) -> Result<Cookie<'c, Self, AllocNamedColorReply>, ConnectionError>
     {
         alloc_named_color(self, cmap, name)
     }
-
     fn alloc_color_cells(&self, contiguous: bool, cmap: Colormap, colors: u16, planes: u16) -> Result<Cookie<'_, Self, AllocColorCellsReply>, ConnectionError>
     {
         alloc_color_cells(self, contiguous, cmap, colors, planes)
     }
-
     fn alloc_color_planes(&self, contiguous: bool, cmap: Colormap, colors: u16, reds: u16, greens: u16, blues: u16) -> Result<Cookie<'_, Self, AllocColorPlanesReply>, ConnectionError>
     {
         alloc_color_planes(self, contiguous, cmap, colors, reds, greens, blues)
     }
-
     fn free_colors<'c>(&'c self, cmap: Colormap, plane_mask: u32, pixels: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         free_colors(self, cmap, plane_mask, pixels)
     }
-
     fn store_colors<'c>(&'c self, cmap: Colormap, items: &[Coloritem]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         store_colors(self, cmap, items)
     }
-
     fn store_named_color<'c>(&'c self, flags: u8, cmap: Colormap, pixel: u32, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         store_named_color(self, flags, cmap, pixel, name)
     }
-
     fn query_colors<'c>(&'c self, cmap: Colormap, pixels: &[u32]) -> Result<Cookie<'c, Self, QueryColorsReply>, ConnectionError>
     {
         query_colors(self, cmap, pixels)
     }
-
     fn lookup_color<'c>(&'c self, cmap: Colormap, name: &[u8]) -> Result<Cookie<'c, Self, LookupColorReply>, ConnectionError>
     {
         lookup_color(self, cmap, name)
     }
-
     fn create_cursor(&self, cid: Cursor, source: Pixmap, mask: Pixmap, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_cursor(self, cid, source, mask, fore_red, fore_green, fore_blue, back_red, back_green, back_blue, x, y)
     }
-
     /// create cursor.
     ///
     /// Creates a cursor from a font glyph. X provides a set of standard cursor shapes
@@ -20507,7 +21783,6 @@ pub trait ConnectionExt: RequestConnection {
     {
         create_glyph_cursor(self, cid, source_font, mask_font, source_char, mask_char, fore_red, fore_green, fore_blue, back_red, back_green, back_blue)
     }
-
     /// Deletes a cursor.
     ///
     /// Deletes the association between the cursor resource ID and the specified
@@ -20524,19 +21799,14 @@ pub trait ConnectionExt: RequestConnection {
     {
         free_cursor(self, cursor)
     }
-
     fn recolor_cursor(&self, cursor: Cursor, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         recolor_cursor(self, cursor, fore_red, fore_green, fore_blue, back_red, back_green, back_blue)
     }
-
-    fn query_best_size<A>(&self, class: A, drawable: Drawable, width: u16, height: u16) -> Result<Cookie<'_, Self, QueryBestSizeReply>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn query_best_size(&self, class: QueryShapeOf, drawable: Drawable, width: u16, height: u16) -> Result<Cookie<'_, Self, QueryBestSizeReply>, ConnectionError>
     {
         query_best_size(self, class, drawable, width, height)
     }
-
     /// check if extension is present.
     ///
     /// Determines if the specified extension is present on this X11 server.
@@ -20557,93 +21827,68 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * xcb_get_extension_data: function
-    /// * xdpyinfo: program
+    /// * `xcb_get_extension_data`: function
+    /// * `xdpyinfo`: program
     fn query_extension<'c>(&'c self, name: &[u8]) -> Result<Cookie<'c, Self, QueryExtensionReply>, ConnectionError>
     {
         query_extension(self, name)
     }
-
     fn list_extensions(&self) -> Result<Cookie<'_, Self, ListExtensionsReply>, ConnectionError>
     {
         list_extensions(self)
     }
-
     fn change_keyboard_mapping<'c>(&'c self, keycode_count: u8, first_keycode: Keycode, keysyms_per_keycode: u8, keysyms: &[Keysym]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_keyboard_mapping(self, keycode_count, first_keycode, keysyms_per_keycode, keysyms)
     }
-
     fn get_keyboard_mapping(&self, first_keycode: Keycode, count: u8) -> Result<Cookie<'_, Self, GetKeyboardMappingReply>, ConnectionError>
     {
         get_keyboard_mapping(self, first_keycode, count)
     }
-
     fn change_keyboard_control<'c>(&'c self, value_list: &ChangeKeyboardControlAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_keyboard_control(self, value_list)
     }
-
     fn get_keyboard_control(&self) -> Result<Cookie<'_, Self, GetKeyboardControlReply>, ConnectionError>
     {
         get_keyboard_control(self)
     }
-
     fn bell(&self, percent: i8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         bell(self, percent)
     }
-
     fn change_pointer_control(&self, acceleration_numerator: i16, acceleration_denominator: i16, threshold: i16, do_acceleration: bool, do_threshold: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         change_pointer_control(self, acceleration_numerator, acceleration_denominator, threshold, do_acceleration, do_threshold)
     }
-
     fn get_pointer_control(&self) -> Result<Cookie<'_, Self, GetPointerControlReply>, ConnectionError>
     {
         get_pointer_control(self)
     }
-
-    fn set_screen_saver<A, B>(&self, timeout: i16, interval: i16, prefer_blanking: A, allow_exposures: B) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
-        B: Into<u8>,
+    fn set_screen_saver(&self, timeout: i16, interval: i16, prefer_blanking: Blanking, allow_exposures: Exposures) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_screen_saver(self, timeout, interval, prefer_blanking, allow_exposures)
     }
-
     fn get_screen_saver(&self) -> Result<Cookie<'_, Self, GetScreenSaverReply>, ConnectionError>
     {
         get_screen_saver(self)
     }
-
-    fn change_hosts<'c, A, B>(&'c self, mode: A, family: B, address: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
-        B: Into<u8>,
+    fn change_hosts<'c>(&'c self, mode: HostMode, family: Family, address: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_hosts(self, mode, family, address)
     }
-
     fn list_hosts(&self) -> Result<Cookie<'_, Self, ListHostsReply>, ConnectionError>
     {
         list_hosts(self)
     }
-
-    fn set_access_control<A>(&self, mode: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn set_access_control(&self, mode: AccessControl) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_access_control(self, mode)
     }
-
-    fn set_close_down_mode<A>(&self, mode: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn set_close_down_mode(&self, mode: CloseDown) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_close_down_mode(self, mode)
     }
-
     /// kills a client.
     ///
     /// Forces a close down of the client that created the specified `resource`.
@@ -20662,48 +21907,39 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * xkill: program
+    /// * `xkill`: program
     fn kill_client(&self, resource: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         kill_client(self, resource)
     }
-
     fn rotate_properties<'c>(&'c self, window: Window, delta: i16, atoms: &[Atom]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         rotate_properties(self, window, delta, atoms)
     }
-
-    fn force_screen_saver<A>(&self, mode: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn force_screen_saver(&self, mode: ScreenSaver) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         force_screen_saver(self, mode)
     }
-
     fn set_pointer_mapping<'c>(&'c self, map: &[u8]) -> Result<Cookie<'c, Self, SetPointerMappingReply>, ConnectionError>
     {
         set_pointer_mapping(self, map)
     }
-
     fn get_pointer_mapping(&self) -> Result<Cookie<'_, Self, GetPointerMappingReply>, ConnectionError>
     {
         get_pointer_mapping(self)
     }
-
     fn set_modifier_mapping<'c>(&'c self, keycodes: &[Keycode]) -> Result<Cookie<'c, Self, SetModifierMappingReply>, ConnectionError>
     {
         set_modifier_mapping(self, keycodes)
     }
-
     fn get_modifier_mapping(&self) -> Result<Cookie<'_, Self, GetModifierMappingReply>, ConnectionError>
     {
         get_modifier_mapping(self)
     }
-
     fn no_operation(&self) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         no_operation(self)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

@@ -396,6 +396,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -404,8 +405,8 @@ pub struct QueryVersionReply {
     pub major_version: u32,
     pub minor_version: u32,
 }
-impl QueryVersionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryVersionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -425,17 +426,15 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 /// Opcode for the Connect request
 pub const CONNECT_REQUEST: u8 = 1;
-pub fn connect<Conn, A>(conn: &Conn, window: xproto::Window, driver_type: A) -> Result<Cookie<'_, Conn, ConnectReply>, ConnectionError>
+pub fn connect<Conn>(conn: &Conn, window: xproto::Window, driver_type: DriverType) -> Result<Cookie<'_, Conn, ConnectReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u32>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let window_bytes = window.serialize();
-    let driver_type = driver_type.into();
-    let driver_type_bytes = driver_type.serialize();
+    let driver_type_bytes = u32::from(driver_type).serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CONNECT_REQUEST,
@@ -456,6 +455,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ConnectReply {
     pub response_type: u8,
@@ -465,8 +465,8 @@ pub struct ConnectReply {
     pub alignment_pad: Vec<u8>,
     pub device_name: Vec<u8>,
 }
-impl ConnectReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ConnectReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -519,6 +519,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AuthenticateReply {
     pub response_type: u8,
@@ -526,8 +527,8 @@ pub struct AuthenticateReply {
     pub length: u32,
     pub authenticated: u32,
 }
-impl AuthenticateReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for AuthenticateReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -633,6 +634,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&attachments_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetBuffersReply {
     pub response_type: u8,
@@ -642,8 +644,8 @@ pub struct GetBuffersReply {
     pub height: u32,
     pub buffers: Vec<DRI2Buffer>,
 }
-impl GetBuffersReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetBuffersReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -705,14 +707,15 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CopyRegionReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
 }
-impl CopyRegionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for CopyRegionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -763,6 +766,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&attachments_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetBuffersWithFormatReply {
     pub response_type: u8,
@@ -772,8 +776,8 @@ pub struct GetBuffersWithFormatReply {
     pub height: u32,
     pub buffers: Vec<DRI2Buffer>,
 }
-impl GetBuffersWithFormatReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetBuffersWithFormatReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -850,6 +854,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SwapBuffersReply {
     pub response_type: u8,
@@ -858,8 +863,8 @@ pub struct SwapBuffersReply {
     pub swap_hi: u32,
     pub swap_lo: u32,
 }
-impl SwapBuffersReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for SwapBuffersReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -903,6 +908,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetMSCReply {
     pub response_type: u8,
@@ -915,8 +921,8 @@ pub struct GetMSCReply {
     pub sbc_hi: u32,
     pub sbc_lo: u32,
 }
-impl GetMSCReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetMSCReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -994,6 +1000,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WaitMSCReply {
     pub response_type: u8,
@@ -1006,8 +1013,8 @@ pub struct WaitMSCReply {
     pub sbc_hi: u32,
     pub sbc_lo: u32,
 }
-impl WaitMSCReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for WaitMSCReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1065,6 +1072,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct WaitSBCReply {
     pub response_type: u8,
@@ -1077,8 +1085,8 @@ pub struct WaitSBCReply {
     pub sbc_hi: u32,
     pub sbc_lo: u32,
 }
-impl WaitSBCReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for WaitSBCReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1163,6 +1171,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetParamReply {
     pub response_type: u8,
@@ -1172,8 +1181,8 @@ pub struct GetParamReply {
     pub value_hi: u32,
     pub value_lo: u32,
 }
-impl GetParamReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetParamReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (is_param_recognized, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1205,8 +1214,8 @@ pub struct BufferSwapCompleteEvent {
     pub msc_lo: u32,
     pub sbc: u32,
 }
-impl BufferSwapCompleteEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BufferSwapCompleteEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1231,6 +1240,7 @@ impl TryFrom<&[u8]> for BufferSwapCompleteEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for BufferSwapCompleteEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1243,20 +1253,48 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for BufferSwapCompleteEvent {
 }
 impl From<&BufferSwapCompleteEvent> for [u8; 32] {
     fn from(input: &BufferSwapCompleteEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let event_type = u16::from(input.event_type).serialize();
-        let drawable = input.drawable.serialize();
-        let ust_hi = input.ust_hi.serialize();
-        let ust_lo = input.ust_lo.serialize();
-        let msc_hi = input.msc_hi.serialize();
-        let msc_lo = input.msc_lo.serialize();
-        let sbc = input.sbc.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let event_type_bytes = u16::from(input.event_type).serialize();
+        let drawable_bytes = input.drawable.serialize();
+        let ust_hi_bytes = input.ust_hi.serialize();
+        let ust_lo_bytes = input.ust_lo.serialize();
+        let msc_hi_bytes = input.msc_hi.serialize();
+        let msc_lo_bytes = input.msc_lo.serialize();
+        let sbc_bytes = input.sbc.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], event_type[0], event_type[1], 0, 0,
-            drawable[0], drawable[1], drawable[2], drawable[3], ust_hi[0], ust_hi[1], ust_hi[2], ust_hi[3],
-            ust_lo[0], ust_lo[1], ust_lo[2], ust_lo[3], msc_hi[0], msc_hi[1], msc_hi[2], msc_hi[3],
-            msc_lo[0], msc_lo[1], msc_lo[2], msc_lo[3], sbc[0], sbc[1], sbc[2], sbc[3]
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            event_type_bytes[0],
+            event_type_bytes[1],
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            ust_hi_bytes[0],
+            ust_hi_bytes[1],
+            ust_hi_bytes[2],
+            ust_hi_bytes[3],
+            ust_lo_bytes[0],
+            ust_lo_bytes[1],
+            ust_lo_bytes[2],
+            ust_lo_bytes[3],
+            msc_hi_bytes[0],
+            msc_hi_bytes[1],
+            msc_hi_bytes[2],
+            msc_hi_bytes[3],
+            msc_lo_bytes[0],
+            msc_lo_bytes[1],
+            msc_lo_bytes[2],
+            msc_lo_bytes[3],
+            sbc_bytes[0],
+            sbc_bytes[1],
+            sbc_bytes[2],
+            sbc_bytes[3],
         ]
     }
 }
@@ -1274,8 +1312,8 @@ pub struct InvalidateBuffersEvent {
     pub sequence: u16,
     pub drawable: xproto::Drawable,
 }
-impl InvalidateBuffersEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for InvalidateBuffersEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1292,6 +1330,7 @@ impl TryFrom<&[u8]> for InvalidateBuffersEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for InvalidateBuffersEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1304,14 +1343,43 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for InvalidateBuffersEvent {
 }
 impl From<&InvalidateBuffersEvent> for [u8; 32] {
     fn from(input: &InvalidateBuffersEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let drawable = input.drawable.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let drawable_bytes = input.drawable.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], drawable[0], drawable[1], drawable[2], drawable[3],
-            /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -1327,73 +1395,58 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, major_version, minor_version)
     }
-
-    fn dri2_connect<A>(&self, window: xproto::Window, driver_type: A) -> Result<Cookie<'_, Self, ConnectReply>, ConnectionError>
-    where
-        A: Into<u32>,
+    fn dri2_connect(&self, window: xproto::Window, driver_type: DriverType) -> Result<Cookie<'_, Self, ConnectReply>, ConnectionError>
     {
         connect(self, window, driver_type)
     }
-
     fn dri2_authenticate(&self, window: xproto::Window, magic: u32) -> Result<Cookie<'_, Self, AuthenticateReply>, ConnectionError>
     {
         authenticate(self, window, magic)
     }
-
     fn dri2_create_drawable(&self, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_drawable(self, drawable)
     }
-
     fn dri2_destroy_drawable(&self, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_drawable(self, drawable)
     }
-
     fn dri2_get_buffers<'c>(&'c self, drawable: xproto::Drawable, count: u32, attachments: &[u32]) -> Result<Cookie<'c, Self, GetBuffersReply>, ConnectionError>
     {
         get_buffers(self, drawable, count, attachments)
     }
-
     fn dri2_copy_region(&self, drawable: xproto::Drawable, region: u32, dest: u32, src: u32) -> Result<Cookie<'_, Self, CopyRegionReply>, ConnectionError>
     {
         copy_region(self, drawable, region, dest, src)
     }
-
     fn dri2_get_buffers_with_format<'c>(&'c self, drawable: xproto::Drawable, count: u32, attachments: &[AttachFormat]) -> Result<Cookie<'c, Self, GetBuffersWithFormatReply>, ConnectionError>
     {
         get_buffers_with_format(self, drawable, count, attachments)
     }
-
     fn dri2_swap_buffers(&self, drawable: xproto::Drawable, target_msc_hi: u32, target_msc_lo: u32, divisor_hi: u32, divisor_lo: u32, remainder_hi: u32, remainder_lo: u32) -> Result<Cookie<'_, Self, SwapBuffersReply>, ConnectionError>
     {
         swap_buffers(self, drawable, target_msc_hi, target_msc_lo, divisor_hi, divisor_lo, remainder_hi, remainder_lo)
     }
-
     fn dri2_get_msc(&self, drawable: xproto::Drawable) -> Result<Cookie<'_, Self, GetMSCReply>, ConnectionError>
     {
         get_msc(self, drawable)
     }
-
     fn dri2_wait_msc(&self, drawable: xproto::Drawable, target_msc_hi: u32, target_msc_lo: u32, divisor_hi: u32, divisor_lo: u32, remainder_hi: u32, remainder_lo: u32) -> Result<Cookie<'_, Self, WaitMSCReply>, ConnectionError>
     {
         wait_msc(self, drawable, target_msc_hi, target_msc_lo, divisor_hi, divisor_lo, remainder_hi, remainder_lo)
     }
-
     fn dri2_wait_sbc(&self, drawable: xproto::Drawable, target_sbc_hi: u32, target_sbc_lo: u32) -> Result<Cookie<'_, Self, WaitSBCReply>, ConnectionError>
     {
         wait_sbc(self, drawable, target_sbc_hi, target_sbc_lo)
     }
-
     fn dri2_swap_interval(&self, drawable: xproto::Drawable, interval: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         swap_interval(self, drawable, interval)
     }
-
     fn dri2_get_param(&self, drawable: xproto::Drawable, param: u32) -> Result<Cookie<'_, Self, GetParamReply>, ConnectionError>
     {
         get_param(self, drawable, param)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

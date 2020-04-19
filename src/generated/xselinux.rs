@@ -65,6 +65,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -73,8 +74,8 @@ pub struct QueryVersionReply {
     pub server_major: u16,
     pub server_minor: u16,
 }
-impl QueryVersionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryVersionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -144,6 +145,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceCreateContextReply {
     pub response_type: u8,
@@ -151,8 +153,8 @@ pub struct GetDeviceCreateContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-impl GetDeviceCreateContextReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDeviceCreateContextReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -233,6 +235,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceContextReply {
     pub response_type: u8,
@@ -240,8 +243,8 @@ pub struct GetDeviceContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-impl GetDeviceContextReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDeviceContextReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -312,6 +315,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetWindowCreateContextReply {
     pub response_type: u8,
@@ -319,8 +323,8 @@ pub struct GetWindowCreateContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-impl GetWindowCreateContextReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetWindowCreateContextReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -365,6 +369,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetWindowContextReply {
     pub response_type: u8,
@@ -372,8 +377,8 @@ pub struct GetWindowContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-impl GetWindowContextReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetWindowContextReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -434,13 +439,13 @@ impl Serialize for ListItem {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
         self.name.serialize_into(bytes);
-        let object_context_len = self.object_context.len() as u32;
+        let object_context_len = u32::try_from(self.object_context.len()).expect("`object_context` has too many elements");
         object_context_len.serialize_into(bytes);
-        let data_context_len = self.data_context.len() as u32;
+        let data_context_len = u32::try_from(self.data_context.len()).expect("`data_context` has too many elements");
         data_context_len.serialize_into(bytes);
-        self.object_context.serialize_into(bytes);
+        bytes.extend_from_slice(&self.object_context);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
-        self.data_context.serialize_into(bytes);
+        bytes.extend_from_slice(&self.data_context);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }
@@ -497,6 +502,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPropertyCreateContextReply {
     pub response_type: u8,
@@ -504,8 +510,8 @@ pub struct GetPropertyCreateContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-impl GetPropertyCreateContextReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetPropertyCreateContextReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -576,6 +582,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPropertyUseContextReply {
     pub response_type: u8,
@@ -583,8 +590,8 @@ pub struct GetPropertyUseContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-impl GetPropertyUseContextReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetPropertyUseContextReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -634,6 +641,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPropertyContextReply {
     pub response_type: u8,
@@ -641,8 +649,8 @@ pub struct GetPropertyContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-impl GetPropertyContextReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetPropertyContextReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -692,6 +700,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPropertyDataContextReply {
     pub response_type: u8,
@@ -699,8 +708,8 @@ pub struct GetPropertyDataContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-impl GetPropertyDataContextReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetPropertyDataContextReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -745,6 +754,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListPropertiesReply {
     pub response_type: u8,
@@ -752,8 +762,8 @@ pub struct ListPropertiesReply {
     pub length: u32,
     pub properties: Vec<ListItem>,
 }
-impl ListPropertiesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ListPropertiesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -824,6 +834,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSelectionCreateContextReply {
     pub response_type: u8,
@@ -831,8 +842,8 @@ pub struct GetSelectionCreateContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-impl GetSelectionCreateContextReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetSelectionCreateContextReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -903,6 +914,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSelectionUseContextReply {
     pub response_type: u8,
@@ -910,8 +922,8 @@ pub struct GetSelectionUseContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-impl GetSelectionUseContextReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetSelectionUseContextReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -956,6 +968,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSelectionContextReply {
     pub response_type: u8,
@@ -963,8 +976,8 @@ pub struct GetSelectionContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-impl GetSelectionContextReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetSelectionContextReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1009,6 +1022,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSelectionDataContextReply {
     pub response_type: u8,
@@ -1016,8 +1030,8 @@ pub struct GetSelectionDataContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-impl GetSelectionDataContextReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetSelectionDataContextReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1057,6 +1071,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListSelectionsReply {
     pub response_type: u8,
@@ -1064,8 +1079,8 @@ pub struct ListSelectionsReply {
     pub length: u32,
     pub selections: Vec<ListItem>,
 }
-impl ListSelectionsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ListSelectionsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1110,6 +1125,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetClientContextReply {
     pub response_type: u8,
@@ -1117,8 +1133,8 @@ pub struct GetClientContextReply {
     pub length: u32,
     pub context: Vec<u8>,
 }
-impl GetClientContextReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetClientContextReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1143,116 +1159,94 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, client_major, client_minor)
     }
-
     fn xselinux_set_device_create_context<'c>(&'c self, context: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_device_create_context(self, context)
     }
-
     fn xselinux_get_device_create_context(&self) -> Result<Cookie<'_, Self, GetDeviceCreateContextReply>, ConnectionError>
     {
         get_device_create_context(self)
     }
-
     fn xselinux_set_device_context<'c>(&'c self, device: u32, context: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_device_context(self, device, context)
     }
-
     fn xselinux_get_device_context(&self, device: u32) -> Result<Cookie<'_, Self, GetDeviceContextReply>, ConnectionError>
     {
         get_device_context(self, device)
     }
-
     fn xselinux_set_window_create_context<'c>(&'c self, context: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_window_create_context(self, context)
     }
-
     fn xselinux_get_window_create_context(&self) -> Result<Cookie<'_, Self, GetWindowCreateContextReply>, ConnectionError>
     {
         get_window_create_context(self)
     }
-
     fn xselinux_get_window_context(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetWindowContextReply>, ConnectionError>
     {
         get_window_context(self, window)
     }
-
     fn xselinux_set_property_create_context<'c>(&'c self, context: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_property_create_context(self, context)
     }
-
     fn xselinux_get_property_create_context(&self) -> Result<Cookie<'_, Self, GetPropertyCreateContextReply>, ConnectionError>
     {
         get_property_create_context(self)
     }
-
     fn xselinux_set_property_use_context<'c>(&'c self, context: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_property_use_context(self, context)
     }
-
     fn xselinux_get_property_use_context(&self) -> Result<Cookie<'_, Self, GetPropertyUseContextReply>, ConnectionError>
     {
         get_property_use_context(self)
     }
-
     fn xselinux_get_property_context(&self, window: xproto::Window, property: xproto::Atom) -> Result<Cookie<'_, Self, GetPropertyContextReply>, ConnectionError>
     {
         get_property_context(self, window, property)
     }
-
     fn xselinux_get_property_data_context(&self, window: xproto::Window, property: xproto::Atom) -> Result<Cookie<'_, Self, GetPropertyDataContextReply>, ConnectionError>
     {
         get_property_data_context(self, window, property)
     }
-
     fn xselinux_list_properties(&self, window: xproto::Window) -> Result<Cookie<'_, Self, ListPropertiesReply>, ConnectionError>
     {
         list_properties(self, window)
     }
-
     fn xselinux_set_selection_create_context<'c>(&'c self, context: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_selection_create_context(self, context)
     }
-
     fn xselinux_get_selection_create_context(&self) -> Result<Cookie<'_, Self, GetSelectionCreateContextReply>, ConnectionError>
     {
         get_selection_create_context(self)
     }
-
     fn xselinux_set_selection_use_context<'c>(&'c self, context: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_selection_use_context(self, context)
     }
-
     fn xselinux_get_selection_use_context(&self) -> Result<Cookie<'_, Self, GetSelectionUseContextReply>, ConnectionError>
     {
         get_selection_use_context(self)
     }
-
     fn xselinux_get_selection_context(&self, selection: xproto::Atom) -> Result<Cookie<'_, Self, GetSelectionContextReply>, ConnectionError>
     {
         get_selection_context(self, selection)
     }
-
     fn xselinux_get_selection_data_context(&self, selection: xproto::Atom) -> Result<Cookie<'_, Self, GetSelectionDataContextReply>, ConnectionError>
     {
         get_selection_data_context(self, selection)
     }
-
     fn xselinux_list_selections(&self) -> Result<Cookie<'_, Self, ListSelectionsReply>, ConnectionError>
     {
         list_selections(self)
     }
-
     fn xselinux_get_client_context(&self, resource: u32) -> Result<Cookie<'_, Self, GetClientContextReply>, ConnectionError>
     {
         get_client_context(self, resource)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

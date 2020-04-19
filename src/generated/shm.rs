@@ -52,8 +52,8 @@ pub struct CompletionEvent {
     pub shmseg: Seg,
     pub offset: u32,
 }
-impl CompletionEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for CompletionEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -75,6 +75,7 @@ impl TryFrom<&[u8]> for CompletionEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for CompletionEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -87,18 +88,47 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for CompletionEvent {
 }
 impl From<&CompletionEvent> for [u8; 32] {
     fn from(input: &CompletionEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let drawable = input.drawable.serialize();
-        let minor_event = input.minor_event.serialize();
-        let major_event = input.major_event.serialize();
-        let shmseg = input.shmseg.serialize();
-        let offset = input.offset.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let drawable_bytes = input.drawable.serialize();
+        let minor_event_bytes = input.minor_event.serialize();
+        let major_event_bytes = input.major_event.serialize();
+        let shmseg_bytes = input.shmseg.serialize();
+        let offset_bytes = input.offset.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], drawable[0], drawable[1], drawable[2], drawable[3],
-            minor_event[0], minor_event[1], major_event[0], 0, shmseg[0], shmseg[1], shmseg[2], shmseg[3],
-            offset[0], offset[1], offset[2], offset[3], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            minor_event_bytes[0],
+            minor_event_bytes[1],
+            major_event_bytes[0],
+            0,
+            shmseg_bytes[0],
+            shmseg_bytes[1],
+            shmseg_bytes[2],
+            shmseg_bytes[3],
+            offset_bytes[0],
+            offset_bytes[1],
+            offset_bytes[2],
+            offset_bytes[3],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -119,8 +149,8 @@ pub struct BadSegError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadSegError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadSegError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -150,17 +180,46 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadSegError {
 }
 impl From<&BadSegError> for [u8; 32] {
     fn from(input: &BadSegError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -191,6 +250,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -203,8 +263,8 @@ pub struct QueryVersionReply {
     pub gid: u16,
     pub pixmap_format: u8,
 }
-impl QueryVersionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryVersionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (shared_pixmaps, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -237,7 +297,7 @@ where
     let length_so_far = 0;
     let shmseg_bytes = shmseg.serialize();
     let shmid_bytes = shmid.serialize();
-    let read_only_bytes = (read_only as u8).serialize();
+    let read_only_bytes = read_only.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         ATTACH_REQUEST,
@@ -311,7 +371,7 @@ where
     let dst_y_bytes = dst_y.serialize();
     let depth_bytes = depth.serialize();
     let format_bytes = format.serialize();
-    let send_event_bytes = (send_event as u8).serialize();
+    let send_event_bytes = send_event.serialize();
     let shmseg_bytes = shmseg.serialize();
     let offset_bytes = offset.serialize();
     let mut request0 = [
@@ -421,6 +481,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetImageReply {
     pub response_type: u8,
@@ -430,8 +491,8 @@ pub struct GetImageReply {
     pub visual: xproto::Visualid,
     pub size: u32,
 }
-impl GetImageReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetImageReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (depth, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -513,7 +574,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let shmseg_bytes = shmseg.serialize();
-    let read_only_bytes = (read_only as u8).serialize();
+    let read_only_bytes = read_only.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         ATTACH_FD_REQUEST,
@@ -547,7 +608,7 @@ where
     let length_so_far = 0;
     let shmseg_bytes = shmseg.serialize();
     let size_bytes = size.serialize();
-    let read_only_bytes = (read_only as u8).serialize();
+    let read_only_bytes = read_only.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_SEGMENT_REQUEST,
@@ -572,6 +633,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply_with_fds(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, PartialEq, Eq)]
 pub struct CreateSegmentReply {
     pub response_type: u8,
@@ -607,43 +669,36 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self)
     }
-
     fn shm_attach(&self, shmseg: Seg, shmid: u32, read_only: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         attach(self, shmseg, shmid, read_only)
     }
-
     fn shm_detach(&self, shmseg: Seg) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         detach(self, shmseg)
     }
-
     fn shm_put_image(&self, drawable: xproto::Drawable, gc: xproto::Gcontext, total_width: u16, total_height: u16, src_x: u16, src_y: u16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16, depth: u8, format: u8, send_event: bool, shmseg: Seg, offset: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         put_image(self, drawable, gc, total_width, total_height, src_x, src_y, src_width, src_height, dst_x, dst_y, depth, format, send_event, shmseg, offset)
     }
-
     fn shm_get_image(&self, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, plane_mask: u32, format: u8, shmseg: Seg, offset: u32) -> Result<Cookie<'_, Self, GetImageReply>, ConnectionError>
     {
         get_image(self, drawable, x, y, width, height, plane_mask, format, shmseg, offset)
     }
-
     fn shm_create_pixmap(&self, pid: xproto::Pixmap, drawable: xproto::Drawable, width: u16, height: u16, depth: u8, shmseg: Seg, offset: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_pixmap(self, pid, drawable, width, height, depth, shmseg, offset)
     }
-
     fn shm_attach_fd<A>(&self, shmseg: Seg, shm_fd: A, read_only: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
         A: Into<RawFdContainer>,
     {
         attach_fd(self, shmseg, shm_fd, read_only)
     }
-
     fn shm_create_segment(&self, shmseg: Seg, size: u32, read_only: bool) -> Result<CookieWithFds<'_, Self, CreateSegmentReply>, ConnectionError>
     {
         create_segment(self, shmseg, size, read_only)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

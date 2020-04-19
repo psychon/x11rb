@@ -403,7 +403,7 @@ impl Serialize for ClientInfo {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
         self.client_resource.serialize_into(bytes);
-        let num_ranges = self.ranges.len() as u32;
+        let num_ranges = u32::try_from(self.ranges.len()).expect("`ranges` has too many elements");
         num_ranges.serialize_into(bytes);
         self.ranges.serialize_into(bytes);
     }
@@ -418,8 +418,8 @@ pub struct BadContextError {
     pub sequence: u16,
     pub invalid_record: u32,
 }
-impl BadContextError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadContextError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -446,15 +446,44 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadContextError {
 }
 impl From<&BadContextError> for [u8; 32] {
     fn from(input: &BadContextError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let invalid_record = input.invalid_record.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let invalid_record_bytes = input.invalid_record.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], invalid_record[0], invalid_record[1], invalid_record[2], invalid_record[3],
-            /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            invalid_record_bytes[0],
+            invalid_record_bytes[1],
+            invalid_record_bytes[2],
+            invalid_record_bytes[3],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -491,6 +520,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -499,8 +529,8 @@ pub struct QueryVersionReply {
     pub major_version: u16,
     pub minor_version: u16,
 }
-impl QueryVersionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryVersionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -681,6 +711,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetContextReply {
     pub response_type: u8,
@@ -690,8 +721,8 @@ pub struct GetContextReply {
     pub element_header: ElementHeader,
     pub intercepted_clients: Vec<ClientInfo>,
 }
-impl GetContextReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetContextReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (enabled, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -738,6 +769,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EnableContextReply {
     pub response_type: u8,
@@ -750,8 +782,8 @@ pub struct EnableContextReply {
     pub rec_sequence_num: u32,
     pub data: Vec<u8>,
 }
-impl EnableContextReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for EnableContextReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (category, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -835,41 +867,34 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, major_version, minor_version)
     }
-
     fn record_create_context<'c>(&'c self, context: Context, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_context(self, context, element_header, client_specs, ranges)
     }
-
     fn record_register_clients<'c>(&'c self, context: Context, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         register_clients(self, context, element_header, client_specs, ranges)
     }
-
     fn record_unregister_clients<'c>(&'c self, context: Context, client_specs: &[ClientSpec]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         unregister_clients(self, context, client_specs)
     }
-
     fn record_get_context(&self, context: Context) -> Result<Cookie<'_, Self, GetContextReply>, ConnectionError>
     {
         get_context(self, context)
     }
-
     fn record_enable_context(&self, context: Context) -> Result<Cookie<'_, Self, EnableContextReply>, ConnectionError>
     {
         enable_context(self, context)
     }
-
     fn record_disable_context(&self, context: Context) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         disable_context(self, context)
     }
-
     fn record_free_context(&self, context: Context) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         free_context(self, context)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

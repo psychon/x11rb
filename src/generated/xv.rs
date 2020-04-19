@@ -640,14 +640,14 @@ impl Serialize for AdaptorInfo {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
         self.base_id.serialize_into(bytes);
-        let name_size = self.name.len() as u16;
+        let name_size = u16::try_from(self.name.len()).expect("`name` has too many elements");
         name_size.serialize_into(bytes);
         self.num_ports.serialize_into(bytes);
-        let num_formats = self.formats.len() as u16;
+        let num_formats = u16::try_from(self.formats.len()).expect("`formats` has too many elements");
         num_formats.serialize_into(bytes);
         self.type_.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
-        self.name.serialize_into(bytes);
+        bytes.extend_from_slice(&self.name);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         self.formats.serialize_into(bytes);
     }
@@ -695,13 +695,13 @@ impl Serialize for EncodingInfo {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(20);
         self.encoding.serialize_into(bytes);
-        let name_size = self.name.len() as u16;
+        let name_size = u16::try_from(self.name.len()).expect("`name` has too many elements");
         name_size.serialize_into(bytes);
         self.width.serialize_into(bytes);
         self.height.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.rate.serialize_into(bytes);
-        self.name.serialize_into(bytes);
+        bytes.extend_from_slice(&self.name);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }
@@ -748,12 +748,12 @@ impl Serialize for Image {
         self.id.serialize_into(bytes);
         self.width.serialize_into(bytes);
         self.height.serialize_into(bytes);
-        let data_size = self.data.len() as u32;
+        let data_size = u32::try_from(self.data.len()).expect("`data` has too many elements");
         data_size.serialize_into(bytes);
         self.num_planes.serialize_into(bytes);
         self.pitches.serialize_into(bytes);
         self.offsets.serialize_into(bytes);
-        self.data.serialize_into(bytes);
+        bytes.extend_from_slice(&self.data);
     }
 }
 
@@ -798,9 +798,9 @@ impl Serialize for AttributeInfo {
         self.flags.serialize_into(bytes);
         self.min.serialize_into(bytes);
         self.max.serialize_into(bytes);
-        let size = self.name.len() as u32;
+        let size = u32::try_from(self.name.len()).expect("`name` has too many elements");
         size.serialize_into(bytes);
-        self.name.serialize_into(bytes);
+        bytes.extend_from_slice(&self.name);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }
@@ -1165,8 +1165,8 @@ pub struct BadPortError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl BadPortError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadPortError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1192,14 +1192,43 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadPortError {
 }
 impl From<&BadPortError> for [u8; 32] {
     fn from(input: &BadPortError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -1217,8 +1246,8 @@ pub struct BadEncodingError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl BadEncodingError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadEncodingError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1244,14 +1273,43 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadEncodingError {
 }
 impl From<&BadEncodingError> for [u8; 32] {
     fn from(input: &BadEncodingError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -1269,8 +1327,8 @@ pub struct BadControlError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl BadControlError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadControlError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1296,14 +1354,43 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadControlError {
 }
 impl From<&BadControlError> for [u8; 32] {
     fn from(input: &BadControlError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -1324,8 +1411,8 @@ pub struct VideoNotifyEvent {
     pub drawable: xproto::Drawable,
     pub port: Port,
 }
-impl VideoNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for VideoNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (reason, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1345,6 +1432,7 @@ impl TryFrom<&[u8]> for VideoNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for VideoNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1357,17 +1445,46 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for VideoNotifyEvent {
 }
 impl From<&VideoNotifyEvent> for [u8; 32] {
     fn from(input: &VideoNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let reason = u8::from(input.reason).serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let drawable = input.drawable.serialize();
-        let port = input.port.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let reason_bytes = u8::from(input.reason).serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let drawable_bytes = input.drawable.serialize();
+        let port_bytes = input.port.serialize();
         [
-            response_type[0], reason[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            drawable[0], drawable[1], drawable[2], drawable[3], port[0], port[1], port[2], port[3],
-            /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            reason_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            port_bytes[0],
+            port_bytes[1],
+            port_bytes[2],
+            port_bytes[3],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -1388,8 +1505,8 @@ pub struct PortNotifyEvent {
     pub attribute: xproto::Atom,
     pub value: i32,
 }
-impl PortNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PortNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1409,6 +1526,7 @@ impl TryFrom<&[u8]> for PortNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for PortNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1421,17 +1539,46 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for PortNotifyEvent {
 }
 impl From<&PortNotifyEvent> for [u8; 32] {
     fn from(input: &PortNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let port = input.port.serialize();
-        let attribute = input.attribute.serialize();
-        let value = input.value.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let port_bytes = input.port.serialize();
+        let attribute_bytes = input.attribute.serialize();
+        let value_bytes = input.value.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            port[0], port[1], port[2], port[3], attribute[0], attribute[1], attribute[2], attribute[3],
-            value[0], value[1], value[2], value[3], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            port_bytes[0],
+            port_bytes[1],
+            port_bytes[2],
+            port_bytes[3],
+            attribute_bytes[0],
+            attribute_bytes[1],
+            attribute_bytes[2],
+            attribute_bytes[3],
+            value_bytes[0],
+            value_bytes[1],
+            value_bytes[2],
+            value_bytes[3],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -1462,6 +1609,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryExtensionReply {
     pub response_type: u8,
@@ -1470,8 +1618,8 @@ pub struct QueryExtensionReply {
     pub major: u16,
     pub minor: u16,
 }
-impl QueryExtensionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryExtensionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1515,6 +1663,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryAdaptorsReply {
     pub response_type: u8,
@@ -1522,8 +1671,8 @@ pub struct QueryAdaptorsReply {
     pub length: u32,
     pub info: Vec<AdaptorInfo>,
 }
-impl QueryAdaptorsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryAdaptorsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1568,6 +1717,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryEncodingsReply {
     pub response_type: u8,
@@ -1575,8 +1725,8 @@ pub struct QueryEncodingsReply {
     pub length: u32,
     pub info: Vec<EncodingInfo>,
 }
-impl QueryEncodingsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryEncodingsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1626,6 +1776,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabPortReply {
     pub response_type: u8,
@@ -1633,8 +1784,8 @@ pub struct GrabPortReply {
     pub sequence: u16,
     pub length: u32,
 }
-impl GrabPortReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GrabPortReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (result, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1969,7 +2120,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
-    let onoff_bytes = (onoff as u8).serialize();
+    let onoff_bytes = onoff.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         SELECT_VIDEO_NOTIFY_REQUEST,
@@ -2001,7 +2152,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let port_bytes = port.serialize();
-    let onoff_bytes = (onoff as u8).serialize();
+    let onoff_bytes = onoff.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         SELECT_PORT_NOTIFY_REQUEST,
@@ -2037,7 +2188,7 @@ where
     let vid_h_bytes = vid_h.serialize();
     let drw_w_bytes = drw_w.serialize();
     let drw_h_bytes = drw_h.serialize();
-    let motion_bytes = (motion as u8).serialize();
+    let motion_bytes = motion.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         QUERY_BEST_SIZE_REQUEST,
@@ -2066,6 +2217,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryBestSizeReply {
     pub response_type: u8,
@@ -2074,8 +2226,8 @@ pub struct QueryBestSizeReply {
     pub actual_width: u16,
     pub actual_height: u16,
 }
-impl QueryBestSizeReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryBestSizeReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2161,6 +2313,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPortAttributeReply {
     pub response_type: u8,
@@ -2168,8 +2321,8 @@ pub struct GetPortAttributeReply {
     pub length: u32,
     pub value: i32,
 }
-impl GetPortAttributeReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetPortAttributeReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2212,6 +2365,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryPortAttributesReply {
     pub response_type: u8,
@@ -2220,8 +2374,8 @@ pub struct QueryPortAttributesReply {
     pub text_size: u32,
     pub attributes: Vec<AttributeInfo>,
 }
-impl QueryPortAttributesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryPortAttributesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2267,6 +2421,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListImageFormatsReply {
     pub response_type: u8,
@@ -2274,8 +2429,8 @@ pub struct ListImageFormatsReply {
     pub length: u32,
     pub format: Vec<ImageFormatInfo>,
 }
-impl ListImageFormatsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ListImageFormatsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2331,6 +2486,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryImageAttributesReply {
     pub response_type: u8,
@@ -2343,8 +2499,8 @@ pub struct QueryImageAttributesReply {
     pub pitches: Vec<u32>,
     pub offsets: Vec<u32>,
 }
-impl QueryImageAttributesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryImageAttributesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2535,101 +2691,82 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_extension(self)
     }
-
     fn xv_query_adaptors(&self, window: xproto::Window) -> Result<Cookie<'_, Self, QueryAdaptorsReply>, ConnectionError>
     {
         query_adaptors(self, window)
     }
-
     fn xv_query_encodings(&self, port: Port) -> Result<Cookie<'_, Self, QueryEncodingsReply>, ConnectionError>
     {
         query_encodings(self, port)
     }
-
     fn xv_grab_port(&self, port: Port, time: xproto::Timestamp) -> Result<Cookie<'_, Self, GrabPortReply>, ConnectionError>
     {
         grab_port(self, port, time)
     }
-
     fn xv_ungrab_port(&self, port: Port, time: xproto::Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_port(self, port, time)
     }
-
     fn xv_put_video(&self, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         put_video(self, port, drawable, gc, vid_x, vid_y, vid_w, vid_h, drw_x, drw_y, drw_w, drw_h)
     }
-
     fn xv_put_still(&self, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         put_still(self, port, drawable, gc, vid_x, vid_y, vid_w, vid_h, drw_x, drw_y, drw_w, drw_h)
     }
-
     fn xv_get_video(&self, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         get_video(self, port, drawable, gc, vid_x, vid_y, vid_w, vid_h, drw_x, drw_y, drw_w, drw_h)
     }
-
     fn xv_get_still(&self, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, vid_x: i16, vid_y: i16, vid_w: u16, vid_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         get_still(self, port, drawable, gc, vid_x, vid_y, vid_w, vid_h, drw_x, drw_y, drw_w, drw_h)
     }
-
     fn xv_stop_video(&self, port: Port, drawable: xproto::Drawable) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         stop_video(self, port, drawable)
     }
-
     fn xv_select_video_notify(&self, drawable: xproto::Drawable, onoff: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_video_notify(self, drawable, onoff)
     }
-
     fn xv_select_port_notify(&self, port: Port, onoff: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_port_notify(self, port, onoff)
     }
-
     fn xv_query_best_size(&self, port: Port, vid_w: u16, vid_h: u16, drw_w: u16, drw_h: u16, motion: bool) -> Result<Cookie<'_, Self, QueryBestSizeReply>, ConnectionError>
     {
         query_best_size(self, port, vid_w, vid_h, drw_w, drw_h, motion)
     }
-
     fn xv_set_port_attribute(&self, port: Port, attribute: xproto::Atom, value: i32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_port_attribute(self, port, attribute, value)
     }
-
     fn xv_get_port_attribute(&self, port: Port, attribute: xproto::Atom) -> Result<Cookie<'_, Self, GetPortAttributeReply>, ConnectionError>
     {
         get_port_attribute(self, port, attribute)
     }
-
     fn xv_query_port_attributes(&self, port: Port) -> Result<Cookie<'_, Self, QueryPortAttributesReply>, ConnectionError>
     {
         query_port_attributes(self, port)
     }
-
     fn xv_list_image_formats(&self, port: Port) -> Result<Cookie<'_, Self, ListImageFormatsReply>, ConnectionError>
     {
         list_image_formats(self, port)
     }
-
     fn xv_query_image_attributes(&self, port: Port, id: u32, width: u16, height: u16) -> Result<Cookie<'_, Self, QueryImageAttributesReply>, ConnectionError>
     {
         query_image_attributes(self, port, id, width, height)
     }
-
     fn xv_put_image<'c>(&'c self, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, id: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         put_image(self, port, drawable, gc, id, src_x, src_y, src_w, src_h, drw_x, drw_y, drw_w, drw_h, width, height, data)
     }
-
     fn xv_shm_put_image(&self, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, shmseg: shm::Seg, id: u32, offset: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, send_event: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         shm_put_image(self, port, drawable, gc, shmseg, id, offset, src_x, src_y, src_w, src_h, drw_x, drw_y, drw_w, drw_h, width, height, send_event)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

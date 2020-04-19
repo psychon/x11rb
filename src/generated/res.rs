@@ -257,7 +257,7 @@ impl Serialize for ClientIdValue {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
         self.spec.serialize_into(bytes);
-        let length = self.value.len() as u32 * 4;
+        let length = u32::try_from(self.value.len()).expect("`value` has too many elements") * 4;
         length.serialize_into(bytes);
         self.value.serialize_into(bytes);
     }
@@ -397,7 +397,7 @@ impl Serialize for ResourceSizeValue {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(24);
         self.size.serialize_into(bytes);
-        let num_cross_references = self.cross_references.len() as u32;
+        let num_cross_references = u32::try_from(self.cross_references.len()).expect("`cross_references` has too many elements");
         num_cross_references.serialize_into(bytes);
         self.cross_references.serialize_into(bytes);
     }
@@ -430,6 +430,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -438,8 +439,8 @@ pub struct QueryVersionReply {
     pub server_major: u16,
     pub server_minor: u16,
 }
-impl QueryVersionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryVersionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -478,6 +479,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryClientsReply {
     pub response_type: u8,
@@ -485,8 +487,8 @@ pub struct QueryClientsReply {
     pub length: u32,
     pub clients: Vec<Client>,
 }
-impl QueryClientsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryClientsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -531,6 +533,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryClientResourcesReply {
     pub response_type: u8,
@@ -538,8 +541,8 @@ pub struct QueryClientResourcesReply {
     pub length: u32,
     pub types: Vec<Type>,
 }
-impl QueryClientResourcesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryClientResourcesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -584,6 +587,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryClientPixmapBytesReply {
     pub response_type: u8,
@@ -592,8 +596,8 @@ pub struct QueryClientPixmapBytesReply {
     pub bytes: u32,
     pub bytes_overflow: u32,
 }
-impl QueryClientPixmapBytesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryClientPixmapBytesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -642,6 +646,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&specs_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryClientIdsReply {
     pub response_type: u8,
@@ -649,8 +654,8 @@ pub struct QueryClientIdsReply {
     pub length: u32,
     pub ids: Vec<ClientIdValue>,
 }
-impl QueryClientIdsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryClientIdsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -705,6 +710,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&specs_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryResourceBytesReply {
     pub response_type: u8,
@@ -712,8 +718,8 @@ pub struct QueryResourceBytesReply {
     pub length: u32,
     pub sizes: Vec<ResourceSizeValue>,
 }
-impl QueryResourceBytesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryResourceBytesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -738,31 +744,26 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, client_major, client_minor)
     }
-
     fn res_query_clients(&self) -> Result<Cookie<'_, Self, QueryClientsReply>, ConnectionError>
     {
         query_clients(self)
     }
-
     fn res_query_client_resources(&self, xid: u32) -> Result<Cookie<'_, Self, QueryClientResourcesReply>, ConnectionError>
     {
         query_client_resources(self, xid)
     }
-
     fn res_query_client_pixmap_bytes(&self, xid: u32) -> Result<Cookie<'_, Self, QueryClientPixmapBytesReply>, ConnectionError>
     {
         query_client_pixmap_bytes(self, xid)
     }
-
     fn res_query_client_ids<'c>(&'c self, specs: &[ClientIdSpec]) -> Result<Cookie<'c, Self, QueryClientIdsReply>, ConnectionError>
     {
         query_client_ids(self, specs)
     }
-
     fn res_query_resource_bytes<'c>(&'c self, client: u32, specs: &[ResourceIdSpec]) -> Result<Cookie<'c, Self, QueryResourceBytesReply>, ConnectionError>
     {
         query_resource_bytes(self, client, specs)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

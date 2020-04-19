@@ -65,8 +65,8 @@ pub struct GenericError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl GenericError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GenericError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -96,17 +96,45 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for GenericError {
 }
 impl From<&GenericError> for [u8; 32] {
     fn from(input: &GenericError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -127,8 +155,8 @@ pub struct BadContextError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadContextError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadContextError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -158,17 +186,45 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadContextErro
 }
 impl From<&BadContextError> for [u8; 32] {
     fn from(input: &BadContextError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -189,8 +245,8 @@ pub struct BadContextStateError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadContextStateError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadContextStateError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -220,17 +276,45 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadContextStat
 }
 impl From<&BadContextStateError> for [u8; 32] {
     fn from(input: &BadContextStateError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -251,8 +335,8 @@ pub struct BadDrawableError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadDrawableError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadDrawableError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -282,17 +366,45 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadDrawableErr
 }
 impl From<&BadDrawableError> for [u8; 32] {
     fn from(input: &BadDrawableError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -313,8 +425,8 @@ pub struct BadPixmapError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadPixmapError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadPixmapError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -344,17 +456,45 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadPixmapError
 }
 impl From<&BadPixmapError> for [u8; 32] {
     fn from(input: &BadPixmapError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -375,8 +515,8 @@ pub struct BadContextTagError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadContextTagError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadContextTagError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -406,17 +546,45 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadContextTagE
 }
 impl From<&BadContextTagError> for [u8; 32] {
     fn from(input: &BadContextTagError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -437,8 +605,8 @@ pub struct BadCurrentWindowError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadCurrentWindowError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadCurrentWindowError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -468,17 +636,45 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadCurrentWind
 }
 impl From<&BadCurrentWindowError> for [u8; 32] {
     fn from(input: &BadCurrentWindowError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -499,8 +695,8 @@ pub struct BadRenderRequestError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadRenderRequestError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadRenderRequestError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -530,17 +726,45 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadRenderReque
 }
 impl From<&BadRenderRequestError> for [u8; 32] {
     fn from(input: &BadRenderRequestError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -561,8 +785,8 @@ pub struct BadLargeRequestError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadLargeRequestError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadLargeRequestError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -592,17 +816,45 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadLargeReques
 }
 impl From<&BadLargeRequestError> for [u8; 32] {
     fn from(input: &BadLargeRequestError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -623,8 +875,8 @@ pub struct UnsupportedPrivateRequestError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl UnsupportedPrivateRequestError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for UnsupportedPrivateRequestError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -654,17 +906,45 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for UnsupportedPri
 }
 impl From<&UnsupportedPrivateRequestError> for [u8; 32] {
     fn from(input: &UnsupportedPrivateRequestError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -685,8 +965,8 @@ pub struct BadFBConfigError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadFBConfigError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadFBConfigError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -716,17 +996,45 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadFBConfigErr
 }
 impl From<&BadFBConfigError> for [u8; 32] {
     fn from(input: &BadFBConfigError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -747,8 +1055,8 @@ pub struct BadPbufferError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadPbufferError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadPbufferError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -778,17 +1086,45 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadPbufferErro
 }
 impl From<&BadPbufferError> for [u8; 32] {
     fn from(input: &BadPbufferError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -809,8 +1145,8 @@ pub struct BadCurrentDrawableError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadCurrentDrawableError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadCurrentDrawableError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -840,17 +1176,45 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadCurrentDraw
 }
 impl From<&BadCurrentDrawableError> for [u8; 32] {
     fn from(input: &BadCurrentDrawableError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -871,8 +1235,8 @@ pub struct BadWindowError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl BadWindowError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadWindowError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -902,17 +1266,45 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadWindowError
 }
 impl From<&BadWindowError> for [u8; 32] {
     fn from(input: &BadWindowError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -933,8 +1325,8 @@ pub struct GLXBadProfileARBError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl GLXBadProfileARBError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GLXBadProfileARBError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -964,17 +1356,45 @@ impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for GLXBadProfileA
 }
 impl From<&GLXBadProfileARBError> for [u8; 32] {
     fn from(input: &GLXBadProfileARBError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_value = input.bad_value.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_value_bytes = input.bad_value.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_value[0], bad_value[1], bad_value[2], bad_value[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -1001,8 +1421,8 @@ pub struct PbufferClobberEvent {
     pub height: u16,
     pub count: u16,
 }
-impl PbufferClobberEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PbufferClobberEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1029,6 +1449,7 @@ impl TryFrom<&[u8]> for PbufferClobberEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for PbufferClobberEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1041,23 +1462,51 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for PbufferClobberEvent {
 }
 impl From<&PbufferClobberEvent> for [u8; 32] {
     fn from(input: &PbufferClobberEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let event_type = input.event_type.serialize();
-        let draw_type = input.draw_type.serialize();
-        let drawable = input.drawable.serialize();
-        let b_mask = input.b_mask.serialize();
-        let aux_buffer = input.aux_buffer.serialize();
-        let x = input.x.serialize();
-        let y = input.y.serialize();
-        let width = input.width.serialize();
-        let height = input.height.serialize();
-        let count = input.count.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let event_type_bytes = input.event_type.serialize();
+        let draw_type_bytes = input.draw_type.serialize();
+        let drawable_bytes = input.drawable.serialize();
+        let b_mask_bytes = input.b_mask.serialize();
+        let aux_buffer_bytes = input.aux_buffer.serialize();
+        let x_bytes = input.x.serialize();
+        let y_bytes = input.y.serialize();
+        let width_bytes = input.width.serialize();
+        let height_bytes = input.height.serialize();
+        let count_bytes = input.count.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], event_type[0], event_type[1], draw_type[0], draw_type[1],
-            drawable[0], drawable[1], drawable[2], drawable[3], b_mask[0], b_mask[1], b_mask[2], b_mask[3],
-            aux_buffer[0], aux_buffer[1], x[0], x[1], y[0], y[1], width[0], width[1],
-            height[0], height[1], count[0], count[1], 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            event_type_bytes[0],
+            event_type_bytes[1],
+            draw_type_bytes[0],
+            draw_type_bytes[1],
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            b_mask_bytes[0],
+            b_mask_bytes[1],
+            b_mask_bytes[2],
+            b_mask_bytes[3],
+            aux_buffer_bytes[0],
+            aux_buffer_bytes[1],
+            x_bytes[0],
+            x_bytes[1],
+            y_bytes[0],
+            y_bytes[1],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+            count_bytes[0],
+            count_bytes[1],
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -1081,8 +1530,8 @@ pub struct BufferSwapCompleteEvent {
     pub msc_lo: u32,
     pub sbc: u32,
 }
-impl BufferSwapCompleteEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BufferSwapCompleteEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1106,6 +1555,7 @@ impl TryFrom<&[u8]> for BufferSwapCompleteEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for BufferSwapCompleteEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1118,20 +1568,48 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for BufferSwapCompleteEvent {
 }
 impl From<&BufferSwapCompleteEvent> for [u8; 32] {
     fn from(input: &BufferSwapCompleteEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let event_type = input.event_type.serialize();
-        let drawable = input.drawable.serialize();
-        let ust_hi = input.ust_hi.serialize();
-        let ust_lo = input.ust_lo.serialize();
-        let msc_hi = input.msc_hi.serialize();
-        let msc_lo = input.msc_lo.serialize();
-        let sbc = input.sbc.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let event_type_bytes = input.event_type.serialize();
+        let drawable_bytes = input.drawable.serialize();
+        let ust_hi_bytes = input.ust_hi.serialize();
+        let ust_lo_bytes = input.ust_lo.serialize();
+        let msc_hi_bytes = input.msc_hi.serialize();
+        let msc_lo_bytes = input.msc_lo.serialize();
+        let sbc_bytes = input.sbc.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], event_type[0], event_type[1], 0, 0,
-            drawable[0], drawable[1], drawable[2], drawable[3], ust_hi[0], ust_hi[1], ust_hi[2], ust_hi[3],
-            ust_lo[0], ust_lo[1], ust_lo[2], ust_lo[3], msc_hi[0], msc_hi[1], msc_hi[2], msc_hi[3],
-            msc_lo[0], msc_lo[1], msc_lo[2], msc_lo[3], sbc[0], sbc[1], sbc[2], sbc[3]
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            event_type_bytes[0],
+            event_type_bytes[1],
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            ust_hi_bytes[0],
+            ust_hi_bytes[1],
+            ust_hi_bytes[2],
+            ust_hi_bytes[3],
+            ust_lo_bytes[0],
+            ust_lo_bytes[1],
+            ust_lo_bytes[2],
+            ust_lo_bytes[3],
+            msc_hi_bytes[0],
+            msc_hi_bytes[1],
+            msc_hi_bytes[2],
+            msc_hi_bytes[3],
+            msc_lo_bytes[0],
+            msc_lo_bytes[1],
+            msc_lo_bytes[2],
+            msc_lo_bytes[3],
+            sbc_bytes[0],
+            sbc_bytes[1],
+            sbc_bytes[2],
+            sbc_bytes[3],
         ]
     }
 }
@@ -1318,7 +1796,7 @@ where
     let visual_bytes = visual.serialize();
     let screen_bytes = screen.serialize();
     let share_list_bytes = share_list.serialize();
-    let is_direct_bytes = (is_direct as u8).serialize();
+    let is_direct_bytes = is_direct.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_CONTEXT_REQUEST,
@@ -1415,6 +1893,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MakeCurrentReply {
     pub response_type: u8,
@@ -1422,8 +1901,8 @@ pub struct MakeCurrentReply {
     pub length: u32,
     pub context_tag: ContextTag,
 }
-impl MakeCurrentReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for MakeCurrentReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1467,6 +1946,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsDirectReply {
     pub response_type: u8,
@@ -1474,8 +1954,8 @@ pub struct IsDirectReply {
     pub length: u32,
     pub is_direct: bool,
 }
-impl IsDirectReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for IsDirectReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1524,6 +2004,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -1532,8 +2013,8 @@ pub struct QueryVersionReply {
     pub major_version: u32,
     pub minor_version: u32,
 }
-impl QueryVersionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryVersionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1883,6 +2364,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetVisualConfigsReply {
     pub response_type: u8,
@@ -1891,8 +2373,8 @@ pub struct GetVisualConfigsReply {
     pub num_properties: u32,
     pub property_list: Vec<u32>,
 }
-impl GetVisualConfigsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetVisualConfigsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2008,6 +2490,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(data), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VendorPrivateWithReplyReply {
     pub response_type: u8,
@@ -2016,8 +2499,8 @@ pub struct VendorPrivateWithReplyReply {
     pub data1: [u8; 24],
     pub data2: Vec<u8>,
 }
-impl VendorPrivateWithReplyReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for VendorPrivateWithReplyReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2111,6 +2594,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryExtensionsStringReply {
     pub response_type: u8,
@@ -2118,8 +2602,8 @@ pub struct QueryExtensionsStringReply {
     pub length: u32,
     pub n: u32,
 }
-impl QueryExtensionsStringReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryExtensionsStringReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2169,6 +2653,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryServerStringReply {
     pub response_type: u8,
@@ -2176,8 +2661,8 @@ pub struct QueryServerStringReply {
     pub length: u32,
     pub string: Vec<u8>,
 }
-impl QueryServerStringReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryServerStringReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2264,6 +2749,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetFBConfigsReply {
     pub response_type: u8,
@@ -2272,8 +2758,8 @@ pub struct GetFBConfigsReply {
     pub num_properties: u32,
     pub property_list: Vec<u32>,
 }
-impl GetFBConfigsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetFBConfigsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2387,7 +2873,7 @@ where
     let screen_bytes = screen.serialize();
     let render_type_bytes = render_type.serialize();
     let share_list_bytes = share_list.serialize();
-    let is_direct_bytes = (is_direct as u8).serialize();
+    let is_direct_bytes = is_direct.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_NEW_CONTEXT_REQUEST,
@@ -2451,6 +2937,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryContextReply {
     pub response_type: u8,
@@ -2458,8 +2945,8 @@ pub struct QueryContextReply {
     pub length: u32,
     pub attribs: Vec<u32>,
 }
-impl QueryContextReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryContextReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2519,6 +3006,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MakeContextCurrentReply {
     pub response_type: u8,
@@ -2526,8 +3014,8 @@ pub struct MakeContextCurrentReply {
     pub length: u32,
     pub context_tag: ContextTag,
 }
-impl MakeContextCurrentReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for MakeContextCurrentReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2646,6 +3134,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDrawableAttributesReply {
     pub response_type: u8,
@@ -2653,8 +3142,8 @@ pub struct GetDrawableAttributesReply {
     pub length: u32,
     pub attribs: Vec<u32>,
 }
-impl GetDrawableAttributesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDrawableAttributesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2861,7 +3350,7 @@ where
     let fbconfig_bytes = fbconfig.serialize();
     let screen_bytes = screen.serialize();
     let share_list_bytes = share_list.serialize();
-    let is_direct_bytes = (is_direct as u8).serialize();
+    let is_direct_bytes = is_direct.serialize();
     assert_eq!(0, attribs.len() % 2, "Argument num_attribs has an incorrect length, must be a multiple of 2");
     let num_attribs = u32::try_from(attribs.len() / 2).unwrap();
     let num_attribs_bytes = num_attribs.serialize();
@@ -3095,6 +3584,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GenListsReply {
     pub response_type: u8,
@@ -3102,8 +3592,8 @@ pub struct GenListsReply {
     pub length: u32,
     pub ret_val: u32,
 }
-impl GenListsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GenListsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3220,6 +3710,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RenderModeReply {
     pub response_type: u8,
@@ -3229,8 +3720,8 @@ pub struct RenderModeReply {
     pub new_mode: u32,
     pub data: Vec<u32>,
 }
-impl RenderModeReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for RenderModeReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3327,14 +3818,15 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FinishReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
 }
-impl FinishReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for FinishReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3440,8 +3932,8 @@ where
     let height_bytes = height.serialize();
     let format_bytes = format.serialize();
     let type_bytes = type_.serialize();
-    let swap_bytes_bytes = (swap_bytes as u8).serialize();
-    let lsb_first_bytes = (lsb_first as u8).serialize();
+    let swap_bytes_bytes = swap_bytes.serialize();
+    let lsb_first_bytes = lsb_first.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         READ_PIXELS_REQUEST,
@@ -3486,14 +3978,15 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ReadPixelsReply {
     pub response_type: u8,
     pub sequence: u16,
     pub data: Vec<u8>,
 }
-impl ReadPixelsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ReadPixelsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3542,6 +4035,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetBooleanvReply {
     pub response_type: u8,
@@ -3550,8 +4044,8 @@ pub struct GetBooleanvReply {
     pub datum: bool,
     pub data: Vec<u8>,
 }
-impl GetBooleanvReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetBooleanvReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3603,14 +4097,15 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetClipPlaneReply {
     pub response_type: u8,
     pub sequence: u16,
     pub data: Vec<Float64>,
 }
-impl GetClipPlaneReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetClipPlaneReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3659,6 +4154,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetDoublevReply {
     pub response_type: u8,
@@ -3667,8 +4163,8 @@ pub struct GetDoublevReply {
     pub datum: Float64,
     pub data: Vec<Float64>,
 }
-impl GetDoublevReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDoublevReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3715,6 +4211,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetErrorReply {
     pub response_type: u8,
@@ -3722,8 +4219,8 @@ pub struct GetErrorReply {
     pub length: u32,
     pub error: i32,
 }
-impl GetErrorReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetErrorReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3771,6 +4268,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetFloatvReply {
     pub response_type: u8,
@@ -3779,8 +4277,8 @@ pub struct GetFloatvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-impl GetFloatvReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetFloatvReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3832,6 +4330,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetIntegervReply {
     pub response_type: u8,
@@ -3840,8 +4339,8 @@ pub struct GetIntegervReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-impl GetIntegervReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetIntegervReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3898,6 +4397,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetLightfvReply {
     pub response_type: u8,
@@ -3906,8 +4406,8 @@ pub struct GetLightfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-impl GetLightfvReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetLightfvReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3964,6 +4464,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetLightivReply {
     pub response_type: u8,
@@ -3972,8 +4473,8 @@ pub struct GetLightivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-impl GetLightivReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetLightivReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4030,6 +4531,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetMapdvReply {
     pub response_type: u8,
@@ -4038,8 +4540,8 @@ pub struct GetMapdvReply {
     pub datum: Float64,
     pub data: Vec<Float64>,
 }
-impl GetMapdvReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetMapdvReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4096,6 +4598,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetMapfvReply {
     pub response_type: u8,
@@ -4104,8 +4607,8 @@ pub struct GetMapfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-impl GetMapfvReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetMapfvReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4162,6 +4665,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMapivReply {
     pub response_type: u8,
@@ -4170,8 +4674,8 @@ pub struct GetMapivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-impl GetMapivReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetMapivReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4228,6 +4732,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetMaterialfvReply {
     pub response_type: u8,
@@ -4236,8 +4741,8 @@ pub struct GetMaterialfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-impl GetMaterialfvReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetMaterialfvReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4294,6 +4799,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMaterialivReply {
     pub response_type: u8,
@@ -4302,8 +4808,8 @@ pub struct GetMaterialivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-impl GetMaterialivReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetMaterialivReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4355,6 +4861,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetPixelMapfvReply {
     pub response_type: u8,
@@ -4363,8 +4870,8 @@ pub struct GetPixelMapfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-impl GetPixelMapfvReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetPixelMapfvReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4416,6 +4923,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPixelMapuivReply {
     pub response_type: u8,
@@ -4424,8 +4932,8 @@ pub struct GetPixelMapuivReply {
     pub datum: u32,
     pub data: Vec<u32>,
 }
-impl GetPixelMapuivReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetPixelMapuivReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4477,6 +4985,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPixelMapusvReply {
     pub response_type: u8,
@@ -4485,8 +4994,8 @@ pub struct GetPixelMapusvReply {
     pub datum: u16,
     pub data: Vec<u16>,
 }
-impl GetPixelMapusvReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetPixelMapusvReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4517,7 +5026,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let context_tag_bytes = context_tag.serialize();
-    let lsb_first_bytes = (lsb_first as u8).serialize();
+    let lsb_first_bytes = lsb_first.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_POLYGON_STIPPLE_REQUEST,
@@ -4538,14 +5047,15 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetPolygonStippleReply {
     pub response_type: u8,
     pub sequence: u16,
     pub data: Vec<u8>,
 }
-impl GetPolygonStippleReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetPolygonStippleReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4594,6 +5104,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetStringReply {
     pub response_type: u8,
@@ -4601,8 +5112,8 @@ pub struct GetStringReply {
     pub length: u32,
     pub string: Vec<u8>,
 }
-impl GetStringReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetStringReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4658,6 +5169,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetTexEnvfvReply {
     pub response_type: u8,
@@ -4666,8 +5178,8 @@ pub struct GetTexEnvfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-impl GetTexEnvfvReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetTexEnvfvReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4724,6 +5236,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetTexEnvivReply {
     pub response_type: u8,
@@ -4732,8 +5245,8 @@ pub struct GetTexEnvivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-impl GetTexEnvivReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetTexEnvivReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4790,6 +5303,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetTexGendvReply {
     pub response_type: u8,
@@ -4798,8 +5312,8 @@ pub struct GetTexGendvReply {
     pub datum: Float64,
     pub data: Vec<Float64>,
 }
-impl GetTexGendvReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetTexGendvReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4856,6 +5370,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetTexGenfvReply {
     pub response_type: u8,
@@ -4864,8 +5379,8 @@ pub struct GetTexGenfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-impl GetTexGenfvReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetTexGenfvReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4922,6 +5437,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetTexGenivReply {
     pub response_type: u8,
@@ -4930,8 +5446,8 @@ pub struct GetTexGenivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-impl GetTexGenivReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetTexGenivReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4966,7 +5482,7 @@ where
     let level_bytes = level.serialize();
     let format_bytes = format.serialize();
     let type_bytes = type_.serialize();
-    let swap_bytes_bytes = (swap_bytes as u8).serialize();
+    let swap_bytes_bytes = swap_bytes.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_TEX_IMAGE_REQUEST,
@@ -5003,6 +5519,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetTexImageReply {
     pub response_type: u8,
@@ -5012,8 +5529,8 @@ pub struct GetTexImageReply {
     pub depth: i32,
     pub data: Vec<u8>,
 }
-impl GetTexImageReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetTexImageReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5071,6 +5588,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetTexParameterfvReply {
     pub response_type: u8,
@@ -5079,8 +5597,8 @@ pub struct GetTexParameterfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-impl GetTexParameterfvReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetTexParameterfvReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5137,6 +5655,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetTexParameterivReply {
     pub response_type: u8,
@@ -5145,8 +5664,8 @@ pub struct GetTexParameterivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-impl GetTexParameterivReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetTexParameterivReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5208,6 +5727,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetTexLevelParameterfvReply {
     pub response_type: u8,
@@ -5216,8 +5736,8 @@ pub struct GetTexLevelParameterfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-impl GetTexLevelParameterfvReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetTexLevelParameterfvReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5279,6 +5799,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetTexLevelParameterivReply {
     pub response_type: u8,
@@ -5287,8 +5808,8 @@ pub struct GetTexLevelParameterivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-impl GetTexLevelParameterivReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetTexLevelParameterivReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5340,6 +5861,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsEnabledReply {
     pub response_type: u8,
@@ -5347,8 +5869,8 @@ pub struct IsEnabledReply {
     pub length: u32,
     pub ret_val: Bool32,
 }
-impl IsEnabledReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for IsEnabledReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5396,6 +5918,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsListReply {
     pub response_type: u8,
@@ -5403,8 +5926,8 @@ pub struct IsListReply {
     pub length: u32,
     pub ret_val: Bool32,
 }
-impl IsListReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for IsListReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5484,6 +6007,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&textures_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AreTexturesResidentReply {
     pub response_type: u8,
@@ -5491,8 +6015,8 @@ pub struct AreTexturesResidentReply {
     pub ret_val: Bool32,
     pub data: Vec<u8>,
 }
-impl AreTexturesResidentReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for AreTexturesResidentReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5579,14 +6103,15 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GenTexturesReply {
     pub response_type: u8,
     pub sequence: u16,
     pub data: Vec<u32>,
 }
-impl GenTexturesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GenTexturesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5635,6 +6160,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsTextureReply {
     pub response_type: u8,
@@ -5642,8 +6168,8 @@ pub struct IsTextureReply {
     pub length: u32,
     pub ret_val: Bool32,
 }
-impl IsTextureReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for IsTextureReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5673,7 +6199,7 @@ where
     let target_bytes = target.serialize();
     let format_bytes = format.serialize();
     let type_bytes = type_.serialize();
-    let swap_bytes_bytes = (swap_bytes as u8).serialize();
+    let swap_bytes_bytes = swap_bytes.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_COLOR_TABLE_REQUEST,
@@ -5706,6 +6232,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetColorTableReply {
     pub response_type: u8,
@@ -5713,8 +6240,8 @@ pub struct GetColorTableReply {
     pub width: i32,
     pub data: Vec<u8>,
 }
-impl GetColorTableReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetColorTableReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5770,6 +6297,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetColorTableParameterfvReply {
     pub response_type: u8,
@@ -5778,8 +6306,8 @@ pub struct GetColorTableParameterfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-impl GetColorTableParameterfvReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetColorTableParameterfvReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5836,6 +6364,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetColorTableParameterivReply {
     pub response_type: u8,
@@ -5844,8 +6373,8 @@ pub struct GetColorTableParameterivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-impl GetColorTableParameterivReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetColorTableParameterivReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5879,7 +6408,7 @@ where
     let target_bytes = target.serialize();
     let format_bytes = format.serialize();
     let type_bytes = type_.serialize();
-    let swap_bytes_bytes = (swap_bytes as u8).serialize();
+    let swap_bytes_bytes = swap_bytes.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_CONVOLUTION_FILTER_REQUEST,
@@ -5912,6 +6441,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetConvolutionFilterReply {
     pub response_type: u8,
@@ -5920,8 +6450,8 @@ pub struct GetConvolutionFilterReply {
     pub height: i32,
     pub data: Vec<u8>,
 }
-impl GetConvolutionFilterReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetConvolutionFilterReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5978,6 +6508,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetConvolutionParameterfvReply {
     pub response_type: u8,
@@ -5986,8 +6517,8 @@ pub struct GetConvolutionParameterfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-impl GetConvolutionParameterfvReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetConvolutionParameterfvReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6044,6 +6575,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetConvolutionParameterivReply {
     pub response_type: u8,
@@ -6052,8 +6584,8 @@ pub struct GetConvolutionParameterivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-impl GetConvolutionParameterivReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetConvolutionParameterivReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6087,7 +6619,7 @@ where
     let target_bytes = target.serialize();
     let format_bytes = format.serialize();
     let type_bytes = type_.serialize();
-    let swap_bytes_bytes = (swap_bytes as u8).serialize();
+    let swap_bytes_bytes = swap_bytes.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_SEPARABLE_FILTER_REQUEST,
@@ -6120,6 +6652,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSeparableFilterReply {
     pub response_type: u8,
@@ -6128,8 +6661,8 @@ pub struct GetSeparableFilterReply {
     pub col_h: i32,
     pub rows_and_cols: Vec<u8>,
 }
-impl GetSeparableFilterReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetSeparableFilterReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6163,8 +6696,8 @@ where
     let target_bytes = target.serialize();
     let format_bytes = format.serialize();
     let type_bytes = type_.serialize();
-    let swap_bytes_bytes = (swap_bytes as u8).serialize();
-    let reset_bytes = (reset as u8).serialize();
+    let swap_bytes_bytes = swap_bytes.serialize();
+    let reset_bytes = reset.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_HISTOGRAM_REQUEST,
@@ -6197,6 +6730,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetHistogramReply {
     pub response_type: u8,
@@ -6204,8 +6738,8 @@ pub struct GetHistogramReply {
     pub width: i32,
     pub data: Vec<u8>,
 }
-impl GetHistogramReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetHistogramReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6261,6 +6795,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetHistogramParameterfvReply {
     pub response_type: u8,
@@ -6269,8 +6804,8 @@ pub struct GetHistogramParameterfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-impl GetHistogramParameterfvReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetHistogramParameterfvReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6327,6 +6862,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetHistogramParameterivReply {
     pub response_type: u8,
@@ -6335,8 +6871,8 @@ pub struct GetHistogramParameterivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-impl GetHistogramParameterivReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetHistogramParameterivReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6370,8 +6906,8 @@ where
     let target_bytes = target.serialize();
     let format_bytes = format.serialize();
     let type_bytes = type_.serialize();
-    let swap_bytes_bytes = (swap_bytes as u8).serialize();
-    let reset_bytes = (reset as u8).serialize();
+    let swap_bytes_bytes = swap_bytes.serialize();
+    let reset_bytes = reset.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_MINMAX_REQUEST,
@@ -6404,14 +6940,15 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMinmaxReply {
     pub response_type: u8,
     pub sequence: u16,
     pub data: Vec<u8>,
 }
-impl GetMinmaxReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetMinmaxReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6465,6 +7002,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetMinmaxParameterfvReply {
     pub response_type: u8,
@@ -6473,8 +7011,8 @@ pub struct GetMinmaxParameterfvReply {
     pub datum: Float32,
     pub data: Vec<Float32>,
 }
-impl GetMinmaxParameterfvReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetMinmaxParameterfvReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6531,6 +7069,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMinmaxParameterivReply {
     pub response_type: u8,
@@ -6539,8 +7078,8 @@ pub struct GetMinmaxParameterivReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-impl GetMinmaxParameterivReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetMinmaxParameterivReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6597,6 +7136,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCompressedTexImageARBReply {
     pub response_type: u8,
@@ -6604,8 +7144,8 @@ pub struct GetCompressedTexImageARBReply {
     pub size: i32,
     pub data: Vec<u8>,
 }
-impl GetCompressedTexImageARBReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetCompressedTexImageARBReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6693,14 +7233,15 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GenQueriesARBReply {
     pub response_type: u8,
     pub sequence: u16,
     pub data: Vec<u32>,
 }
-impl GenQueriesARBReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GenQueriesARBReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6749,6 +7290,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IsQueryARBReply {
     pub response_type: u8,
@@ -6756,8 +7298,8 @@ pub struct IsQueryARBReply {
     pub length: u32,
     pub ret_val: Bool32,
 }
-impl IsQueryARBReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for IsQueryARBReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6810,6 +7352,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetQueryivARBReply {
     pub response_type: u8,
@@ -6818,8 +7361,8 @@ pub struct GetQueryivARBReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-impl GetQueryivARBReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetQueryivARBReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6876,6 +7419,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetQueryObjectivARBReply {
     pub response_type: u8,
@@ -6884,8 +7428,8 @@ pub struct GetQueryObjectivARBReply {
     pub datum: i32,
     pub data: Vec<i32>,
 }
-impl GetQueryObjectivARBReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetQueryObjectivARBReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6942,6 +7486,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetQueryObjectuivARBReply {
     pub response_type: u8,
@@ -6950,8 +7495,8 @@ pub struct GetQueryObjectuivARBReply {
     pub datum: u32,
     pub data: Vec<u32>,
 }
-impl GetQueryObjectuivARBReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetQueryObjectuivARBReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6978,506 +7523,406 @@ pub trait ConnectionExt: RequestConnection {
     {
         render(self, context_tag, data)
     }
-
     fn glx_render_large<'c>(&'c self, context_tag: ContextTag, request_num: u16, request_total: u16, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         render_large(self, context_tag, request_num, request_total, data)
     }
-
     fn glx_create_context(&self, context: Context, visual: xproto::Visualid, screen: u32, share_list: Context, is_direct: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_context(self, context, visual, screen, share_list, is_direct)
     }
-
     fn glx_destroy_context(&self, context: Context) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_context(self, context)
     }
-
     fn glx_make_current(&self, drawable: Drawable, context: Context, old_context_tag: ContextTag) -> Result<Cookie<'_, Self, MakeCurrentReply>, ConnectionError>
     {
         make_current(self, drawable, context, old_context_tag)
     }
-
     fn glx_is_direct(&self, context: Context) -> Result<Cookie<'_, Self, IsDirectReply>, ConnectionError>
     {
         is_direct(self, context)
     }
-
     fn glx_query_version(&self, major_version: u32, minor_version: u32) -> Result<Cookie<'_, Self, QueryVersionReply>, ConnectionError>
     {
         query_version(self, major_version, minor_version)
     }
-
     fn glx_wait_gl(&self, context_tag: ContextTag) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         wait_gl(self, context_tag)
     }
-
     fn glx_wait_x(&self, context_tag: ContextTag) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         wait_x(self, context_tag)
     }
-
     fn glx_copy_context(&self, src: Context, dest: Context, mask: u32, src_context_tag: ContextTag) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         copy_context(self, src, dest, mask, src_context_tag)
     }
-
     fn glx_swap_buffers(&self, context_tag: ContextTag, drawable: Drawable) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         swap_buffers(self, context_tag, drawable)
     }
-
     fn glx_use_x_font(&self, context_tag: ContextTag, font: xproto::Font, first: u32, count: u32, list_base: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         use_x_font(self, context_tag, font, first, count, list_base)
     }
-
     fn glx_create_glx_pixmap(&self, screen: u32, visual: xproto::Visualid, pixmap: xproto::Pixmap, glx_pixmap: Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_glx_pixmap(self, screen, visual, pixmap, glx_pixmap)
     }
-
     fn glx_get_visual_configs(&self, screen: u32) -> Result<Cookie<'_, Self, GetVisualConfigsReply>, ConnectionError>
     {
         get_visual_configs(self, screen)
     }
-
     fn glx_destroy_glx_pixmap(&self, glx_pixmap: Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_glx_pixmap(self, glx_pixmap)
     }
-
     fn glx_vendor_private<'c>(&'c self, vendor_code: u32, context_tag: ContextTag, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         vendor_private(self, vendor_code, context_tag, data)
     }
-
     fn glx_vendor_private_with_reply<'c>(&'c self, vendor_code: u32, context_tag: ContextTag, data: &[u8]) -> Result<Cookie<'c, Self, VendorPrivateWithReplyReply>, ConnectionError>
     {
         vendor_private_with_reply(self, vendor_code, context_tag, data)
     }
-
     fn glx_query_extensions_string(&self, screen: u32) -> Result<Cookie<'_, Self, QueryExtensionsStringReply>, ConnectionError>
     {
         query_extensions_string(self, screen)
     }
-
     fn glx_query_server_string(&self, screen: u32, name: u32) -> Result<Cookie<'_, Self, QueryServerStringReply>, ConnectionError>
     {
         query_server_string(self, screen, name)
     }
-
     fn glx_client_info<'c>(&'c self, major_version: u32, minor_version: u32, string: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         client_info(self, major_version, minor_version, string)
     }
-
     fn glx_get_fb_configs(&self, screen: u32) -> Result<Cookie<'_, Self, GetFBConfigsReply>, ConnectionError>
     {
         get_fb_configs(self, screen)
     }
-
     fn glx_create_pixmap<'c>(&'c self, screen: u32, fbconfig: Fbconfig, pixmap: xproto::Pixmap, glx_pixmap: Pixmap, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_pixmap(self, screen, fbconfig, pixmap, glx_pixmap, attribs)
     }
-
     fn glx_destroy_pixmap(&self, glx_pixmap: Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_pixmap(self, glx_pixmap)
     }
-
     fn glx_create_new_context(&self, context: Context, fbconfig: Fbconfig, screen: u32, render_type: u32, share_list: Context, is_direct: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_new_context(self, context, fbconfig, screen, render_type, share_list, is_direct)
     }
-
     fn glx_query_context(&self, context: Context) -> Result<Cookie<'_, Self, QueryContextReply>, ConnectionError>
     {
         query_context(self, context)
     }
-
     fn glx_make_context_current(&self, old_context_tag: ContextTag, drawable: Drawable, read_drawable: Drawable, context: Context) -> Result<Cookie<'_, Self, MakeContextCurrentReply>, ConnectionError>
     {
         make_context_current(self, old_context_tag, drawable, read_drawable, context)
     }
-
     fn glx_create_pbuffer<'c>(&'c self, screen: u32, fbconfig: Fbconfig, pbuffer: Pbuffer, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_pbuffer(self, screen, fbconfig, pbuffer, attribs)
     }
-
     fn glx_destroy_pbuffer(&self, pbuffer: Pbuffer) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_pbuffer(self, pbuffer)
     }
-
     fn glx_get_drawable_attributes(&self, drawable: Drawable) -> Result<Cookie<'_, Self, GetDrawableAttributesReply>, ConnectionError>
     {
         get_drawable_attributes(self, drawable)
     }
-
     fn glx_change_drawable_attributes<'c>(&'c self, drawable: Drawable, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_drawable_attributes(self, drawable, attribs)
     }
-
     fn glx_create_window<'c>(&'c self, screen: u32, fbconfig: Fbconfig, window: xproto::Window, glx_window: Window, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_window(self, screen, fbconfig, window, glx_window, attribs)
     }
-
     fn glx_delete_window(&self, glxwindow: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_window(self, glxwindow)
     }
-
     fn glx_set_client_info_arb<'c>(&'c self, major_version: u32, minor_version: u32, gl_versions: &[u32], gl_extension_string: &[u8], glx_extension_string: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_client_info_arb(self, major_version, minor_version, gl_versions, gl_extension_string, glx_extension_string)
     }
-
     fn glx_create_context_attribs_arb<'c>(&'c self, context: Context, fbconfig: Fbconfig, screen: u32, share_list: Context, is_direct: bool, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_context_attribs_arb(self, context, fbconfig, screen, share_list, is_direct, attribs)
     }
-
     fn glx_set_client_info2_arb<'c>(&'c self, major_version: u32, minor_version: u32, gl_versions: &[u32], gl_extension_string: &[u8], glx_extension_string: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_client_info2_arb(self, major_version, minor_version, gl_versions, gl_extension_string, glx_extension_string)
     }
-
     fn glx_new_list(&self, context_tag: ContextTag, list: u32, mode: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         new_list(self, context_tag, list, mode)
     }
-
     fn glx_end_list(&self, context_tag: ContextTag) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         end_list(self, context_tag)
     }
-
     fn glx_delete_lists(&self, context_tag: ContextTag, list: u32, range: i32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_lists(self, context_tag, list, range)
     }
-
     fn glx_gen_lists(&self, context_tag: ContextTag, range: i32) -> Result<Cookie<'_, Self, GenListsReply>, ConnectionError>
     {
         gen_lists(self, context_tag, range)
     }
-
     fn glx_feedback_buffer(&self, context_tag: ContextTag, size: i32, type_: i32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         feedback_buffer(self, context_tag, size, type_)
     }
-
     fn glx_select_buffer(&self, context_tag: ContextTag, size: i32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_buffer(self, context_tag, size)
     }
-
     fn glx_render_mode(&self, context_tag: ContextTag, mode: u32) -> Result<Cookie<'_, Self, RenderModeReply>, ConnectionError>
     {
         render_mode(self, context_tag, mode)
     }
-
     fn glx_finish(&self, context_tag: ContextTag) -> Result<Cookie<'_, Self, FinishReply>, ConnectionError>
     {
         finish(self, context_tag)
     }
-
     fn glx_pixel_storef(&self, context_tag: ContextTag, pname: u32, datum: Float32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         pixel_storef(self, context_tag, pname, datum)
     }
-
     fn glx_pixel_storei(&self, context_tag: ContextTag, pname: u32, datum: i32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         pixel_storei(self, context_tag, pname, datum)
     }
-
     fn glx_read_pixels(&self, context_tag: ContextTag, x: i32, y: i32, width: i32, height: i32, format: u32, type_: u32, swap_bytes: bool, lsb_first: bool) -> Result<Cookie<'_, Self, ReadPixelsReply>, ConnectionError>
     {
         read_pixels(self, context_tag, x, y, width, height, format, type_, swap_bytes, lsb_first)
     }
-
     fn glx_get_booleanv(&self, context_tag: ContextTag, pname: i32) -> Result<Cookie<'_, Self, GetBooleanvReply>, ConnectionError>
     {
         get_booleanv(self, context_tag, pname)
     }
-
     fn glx_get_clip_plane(&self, context_tag: ContextTag, plane: i32) -> Result<Cookie<'_, Self, GetClipPlaneReply>, ConnectionError>
     {
         get_clip_plane(self, context_tag, plane)
     }
-
     fn glx_get_doublev(&self, context_tag: ContextTag, pname: u32) -> Result<Cookie<'_, Self, GetDoublevReply>, ConnectionError>
     {
         get_doublev(self, context_tag, pname)
     }
-
     fn glx_get_error(&self, context_tag: ContextTag) -> Result<Cookie<'_, Self, GetErrorReply>, ConnectionError>
     {
         get_error(self, context_tag)
     }
-
     fn glx_get_floatv(&self, context_tag: ContextTag, pname: u32) -> Result<Cookie<'_, Self, GetFloatvReply>, ConnectionError>
     {
         get_floatv(self, context_tag, pname)
     }
-
     fn glx_get_integerv(&self, context_tag: ContextTag, pname: u32) -> Result<Cookie<'_, Self, GetIntegervReply>, ConnectionError>
     {
         get_integerv(self, context_tag, pname)
     }
-
     fn glx_get_lightfv(&self, context_tag: ContextTag, light: u32, pname: u32) -> Result<Cookie<'_, Self, GetLightfvReply>, ConnectionError>
     {
         get_lightfv(self, context_tag, light, pname)
     }
-
     fn glx_get_lightiv(&self, context_tag: ContextTag, light: u32, pname: u32) -> Result<Cookie<'_, Self, GetLightivReply>, ConnectionError>
     {
         get_lightiv(self, context_tag, light, pname)
     }
-
     fn glx_get_mapdv(&self, context_tag: ContextTag, target: u32, query: u32) -> Result<Cookie<'_, Self, GetMapdvReply>, ConnectionError>
     {
         get_mapdv(self, context_tag, target, query)
     }
-
     fn glx_get_mapfv(&self, context_tag: ContextTag, target: u32, query: u32) -> Result<Cookie<'_, Self, GetMapfvReply>, ConnectionError>
     {
         get_mapfv(self, context_tag, target, query)
     }
-
     fn glx_get_mapiv(&self, context_tag: ContextTag, target: u32, query: u32) -> Result<Cookie<'_, Self, GetMapivReply>, ConnectionError>
     {
         get_mapiv(self, context_tag, target, query)
     }
-
     fn glx_get_materialfv(&self, context_tag: ContextTag, face: u32, pname: u32) -> Result<Cookie<'_, Self, GetMaterialfvReply>, ConnectionError>
     {
         get_materialfv(self, context_tag, face, pname)
     }
-
     fn glx_get_materialiv(&self, context_tag: ContextTag, face: u32, pname: u32) -> Result<Cookie<'_, Self, GetMaterialivReply>, ConnectionError>
     {
         get_materialiv(self, context_tag, face, pname)
     }
-
     fn glx_get_pixel_mapfv(&self, context_tag: ContextTag, map: u32) -> Result<Cookie<'_, Self, GetPixelMapfvReply>, ConnectionError>
     {
         get_pixel_mapfv(self, context_tag, map)
     }
-
     fn glx_get_pixel_mapuiv(&self, context_tag: ContextTag, map: u32) -> Result<Cookie<'_, Self, GetPixelMapuivReply>, ConnectionError>
     {
         get_pixel_mapuiv(self, context_tag, map)
     }
-
     fn glx_get_pixel_mapusv(&self, context_tag: ContextTag, map: u32) -> Result<Cookie<'_, Self, GetPixelMapusvReply>, ConnectionError>
     {
         get_pixel_mapusv(self, context_tag, map)
     }
-
     fn glx_get_polygon_stipple(&self, context_tag: ContextTag, lsb_first: bool) -> Result<Cookie<'_, Self, GetPolygonStippleReply>, ConnectionError>
     {
         get_polygon_stipple(self, context_tag, lsb_first)
     }
-
     fn glx_get_string(&self, context_tag: ContextTag, name: u32) -> Result<Cookie<'_, Self, GetStringReply>, ConnectionError>
     {
         get_string(self, context_tag, name)
     }
-
     fn glx_get_tex_envfv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetTexEnvfvReply>, ConnectionError>
     {
         get_tex_envfv(self, context_tag, target, pname)
     }
-
     fn glx_get_tex_enviv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetTexEnvivReply>, ConnectionError>
     {
         get_tex_enviv(self, context_tag, target, pname)
     }
-
     fn glx_get_tex_gendv(&self, context_tag: ContextTag, coord: u32, pname: u32) -> Result<Cookie<'_, Self, GetTexGendvReply>, ConnectionError>
     {
         get_tex_gendv(self, context_tag, coord, pname)
     }
-
     fn glx_get_tex_genfv(&self, context_tag: ContextTag, coord: u32, pname: u32) -> Result<Cookie<'_, Self, GetTexGenfvReply>, ConnectionError>
     {
         get_tex_genfv(self, context_tag, coord, pname)
     }
-
     fn glx_get_tex_geniv(&self, context_tag: ContextTag, coord: u32, pname: u32) -> Result<Cookie<'_, Self, GetTexGenivReply>, ConnectionError>
     {
         get_tex_geniv(self, context_tag, coord, pname)
     }
-
     fn glx_get_tex_image(&self, context_tag: ContextTag, target: u32, level: i32, format: u32, type_: u32, swap_bytes: bool) -> Result<Cookie<'_, Self, GetTexImageReply>, ConnectionError>
     {
         get_tex_image(self, context_tag, target, level, format, type_, swap_bytes)
     }
-
     fn glx_get_tex_parameterfv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetTexParameterfvReply>, ConnectionError>
     {
         get_tex_parameterfv(self, context_tag, target, pname)
     }
-
     fn glx_get_tex_parameteriv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetTexParameterivReply>, ConnectionError>
     {
         get_tex_parameteriv(self, context_tag, target, pname)
     }
-
     fn glx_get_tex_level_parameterfv(&self, context_tag: ContextTag, target: u32, level: i32, pname: u32) -> Result<Cookie<'_, Self, GetTexLevelParameterfvReply>, ConnectionError>
     {
         get_tex_level_parameterfv(self, context_tag, target, level, pname)
     }
-
     fn glx_get_tex_level_parameteriv(&self, context_tag: ContextTag, target: u32, level: i32, pname: u32) -> Result<Cookie<'_, Self, GetTexLevelParameterivReply>, ConnectionError>
     {
         get_tex_level_parameteriv(self, context_tag, target, level, pname)
     }
-
     fn glx_is_enabled(&self, context_tag: ContextTag, capability: u32) -> Result<Cookie<'_, Self, IsEnabledReply>, ConnectionError>
     {
         is_enabled(self, context_tag, capability)
     }
-
     fn glx_is_list(&self, context_tag: ContextTag, list: u32) -> Result<Cookie<'_, Self, IsListReply>, ConnectionError>
     {
         is_list(self, context_tag, list)
     }
-
     fn glx_flush(&self, context_tag: ContextTag) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         flush(self, context_tag)
     }
-
     fn glx_are_textures_resident<'c>(&'c self, context_tag: ContextTag, textures: &[u32]) -> Result<Cookie<'c, Self, AreTexturesResidentReply>, ConnectionError>
     {
         are_textures_resident(self, context_tag, textures)
     }
-
     fn glx_delete_textures<'c>(&'c self, context_tag: ContextTag, textures: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         delete_textures(self, context_tag, textures)
     }
-
     fn glx_gen_textures(&self, context_tag: ContextTag, n: i32) -> Result<Cookie<'_, Self, GenTexturesReply>, ConnectionError>
     {
         gen_textures(self, context_tag, n)
     }
-
     fn glx_is_texture(&self, context_tag: ContextTag, texture: u32) -> Result<Cookie<'_, Self, IsTextureReply>, ConnectionError>
     {
         is_texture(self, context_tag, texture)
     }
-
     fn glx_get_color_table(&self, context_tag: ContextTag, target: u32, format: u32, type_: u32, swap_bytes: bool) -> Result<Cookie<'_, Self, GetColorTableReply>, ConnectionError>
     {
         get_color_table(self, context_tag, target, format, type_, swap_bytes)
     }
-
     fn glx_get_color_table_parameterfv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetColorTableParameterfvReply>, ConnectionError>
     {
         get_color_table_parameterfv(self, context_tag, target, pname)
     }
-
     fn glx_get_color_table_parameteriv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetColorTableParameterivReply>, ConnectionError>
     {
         get_color_table_parameteriv(self, context_tag, target, pname)
     }
-
     fn glx_get_convolution_filter(&self, context_tag: ContextTag, target: u32, format: u32, type_: u32, swap_bytes: bool) -> Result<Cookie<'_, Self, GetConvolutionFilterReply>, ConnectionError>
     {
         get_convolution_filter(self, context_tag, target, format, type_, swap_bytes)
     }
-
     fn glx_get_convolution_parameterfv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetConvolutionParameterfvReply>, ConnectionError>
     {
         get_convolution_parameterfv(self, context_tag, target, pname)
     }
-
     fn glx_get_convolution_parameteriv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetConvolutionParameterivReply>, ConnectionError>
     {
         get_convolution_parameteriv(self, context_tag, target, pname)
     }
-
     fn glx_get_separable_filter(&self, context_tag: ContextTag, target: u32, format: u32, type_: u32, swap_bytes: bool) -> Result<Cookie<'_, Self, GetSeparableFilterReply>, ConnectionError>
     {
         get_separable_filter(self, context_tag, target, format, type_, swap_bytes)
     }
-
     fn glx_get_histogram(&self, context_tag: ContextTag, target: u32, format: u32, type_: u32, swap_bytes: bool, reset: bool) -> Result<Cookie<'_, Self, GetHistogramReply>, ConnectionError>
     {
         get_histogram(self, context_tag, target, format, type_, swap_bytes, reset)
     }
-
     fn glx_get_histogram_parameterfv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetHistogramParameterfvReply>, ConnectionError>
     {
         get_histogram_parameterfv(self, context_tag, target, pname)
     }
-
     fn glx_get_histogram_parameteriv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetHistogramParameterivReply>, ConnectionError>
     {
         get_histogram_parameteriv(self, context_tag, target, pname)
     }
-
     fn glx_get_minmax(&self, context_tag: ContextTag, target: u32, format: u32, type_: u32, swap_bytes: bool, reset: bool) -> Result<Cookie<'_, Self, GetMinmaxReply>, ConnectionError>
     {
         get_minmax(self, context_tag, target, format, type_, swap_bytes, reset)
     }
-
     fn glx_get_minmax_parameterfv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetMinmaxParameterfvReply>, ConnectionError>
     {
         get_minmax_parameterfv(self, context_tag, target, pname)
     }
-
     fn glx_get_minmax_parameteriv(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetMinmaxParameterivReply>, ConnectionError>
     {
         get_minmax_parameteriv(self, context_tag, target, pname)
     }
-
     fn glx_get_compressed_tex_image_arb(&self, context_tag: ContextTag, target: u32, level: i32) -> Result<Cookie<'_, Self, GetCompressedTexImageARBReply>, ConnectionError>
     {
         get_compressed_tex_image_arb(self, context_tag, target, level)
     }
-
     fn glx_delete_queries_arb<'c>(&'c self, context_tag: ContextTag, ids: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         delete_queries_arb(self, context_tag, ids)
     }
-
     fn glx_gen_queries_arb(&self, context_tag: ContextTag, n: i32) -> Result<Cookie<'_, Self, GenQueriesARBReply>, ConnectionError>
     {
         gen_queries_arb(self, context_tag, n)
     }
-
     fn glx_is_query_arb(&self, context_tag: ContextTag, id: u32) -> Result<Cookie<'_, Self, IsQueryARBReply>, ConnectionError>
     {
         is_query_arb(self, context_tag, id)
     }
-
     fn glx_get_queryiv_arb(&self, context_tag: ContextTag, target: u32, pname: u32) -> Result<Cookie<'_, Self, GetQueryivARBReply>, ConnectionError>
     {
         get_queryiv_arb(self, context_tag, target, pname)
     }
-
     fn glx_get_query_objectiv_arb(&self, context_tag: ContextTag, id: u32, pname: u32) -> Result<Cookie<'_, Self, GetQueryObjectivARBReply>, ConnectionError>
     {
         get_query_objectiv_arb(self, context_tag, id, pname)
     }
-
     fn glx_get_query_objectuiv_arb(&self, context_tag: ContextTag, id: u32, pname: u32) -> Result<Cookie<'_, Self, GetQueryObjectuivARBReply>, ConnectionError>
     {
         get_query_objectuiv_arb(self, context_tag, id, pname)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

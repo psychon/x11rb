@@ -144,8 +144,8 @@ def emit_doc(out, doc):
     if doc is None:
         return
     out("/// %s.", doc.brief)
-    out("///")
     if doc.description:
+        out("///")
         out.with_prefix("/// ", doc.description)
 
     if doc.fields:
@@ -169,7 +169,7 @@ def emit_doc(out, doc):
         out("/// # See")
         out("///")
         for (see, text) in sorted(doc.see.items()):
-            out("/// * %s: %s", see, text)
+            out("/// * `%s`: %s", see, text)
 
     if doc.example:
         out("///")
@@ -307,6 +307,7 @@ class Module(object):
         with Indent(self.out):
             self.out.copy_from(self.trait_out)
         self.out("}")
+        self.out("")
         self.out("impl<C: RequestConnection + ?Sized> ConnectionExt for C {}")
 
     def enum(self, enum, name):
@@ -548,13 +549,22 @@ class Module(object):
                 for field in complex.fields:
                     if field.type.is_pad:
                         serialise_align_pad(self.out, field, "bytes")
+                    elif field.type.is_list and field.type.size == 1:
+                        assert not hasattr(field, "is_length_field_for"), field
+                        assert not hasattr(field, "has_enum_type"), field
+                        field_name = self._to_rust_variable(field.field_name)
+                        self.out("bytes.extend_from_slice(&self.%s);", field_name)
                     else:
                         field_name = self._to_rust_variable(field.field_name)
                         if hasattr(field, "is_length_field_for"):
                             # This field is a length field for some list. We get the value
                             # for this field as the length of the list.
-                            source = "self.%s.len() as %s" % (field.is_length_field_for.field_name,
-                                                              self._field_type(field))
+                            source = "%s::try_from(self.%s.len()).expect(\"`%s` %s\")" % (
+                                    self._field_type(field),
+                                    field.is_length_field_for.field_name,
+                                    field.is_length_field_for.field_name,
+                                    "has too many elements",
+                            )
                             expr = field.is_length_field_for.type.expr
                             if expr.op is not None:
                                 # Sigh. The length cannot be used as-is, but needs to be transformed
@@ -592,7 +602,8 @@ class Module(object):
                 result_type = self._to_complex_rust_type(field, None, '')
                 if union.is_eventstruct:
                     result_type += "Event"
-                self.out("pub fn as_%s(&self) -> %s {", self._lower_snake_name(('xcb', field.field_name)), result_type)
+                variant_name = camel_case_to_lower_snake(field.field_name)
+                self.out("pub fn as_%s(&self) -> %s {", variant_name, result_type)
                 with Indent(self.out):
                     self.out("fn do_the_parse(remaining: &[u8]) -> Result<%s, ParseError> {", result_type)
                     with Indent(self.out):
@@ -708,7 +719,7 @@ class Module(object):
 
         self.emit_opcode(name, 'Event', opcode_type, event.opcodes[name])
         emit_doc(self.out, event.doc)
-        self.complex_type(event, self._name(name) + 'Event', False, [])
+        self.complex_type(event, self._name(name) + 'Event', True, [])
 
         self._emit_tryfrom_generic(name, self.generic_event_name, 'Event')
         if not event.is_ge_event:
@@ -718,7 +729,7 @@ class Module(object):
     def error(self, error, name):
         assert not hasattr(error, "doc")
         self.emit_opcode(name, 'Error', 'u8', error.opcodes[name])
-        self.complex_type(error, self._name(name) + 'Error', False, [])
+        self.complex_type(error, self._name(name) + 'Error', True, [])
         self._emit_from_generic(name, self.generic_error_name, 'Error')
         self._emit_serialize(error, name, 'Error')
         self.out("")
@@ -743,6 +754,7 @@ class Module(object):
         self.out("impl<B: AsRef<[u8]>> TryFrom<%s<B>> for %s%s {", from_generic_type, self._name(name), extra_name)
         with Indent(self.out):
             self.out("type Error = ParseError;")
+            self.out("")
             self.out("fn try_from(value: %s<B>) -> Result<Self, Self::Error> {", from_generic_type)
             self.out.indent("Self::try_from(value.raw_bytes())")
             self.out("}")
@@ -782,29 +794,29 @@ class Module(object):
                                     for n in range(field.type.size):
                                         parts.append("%s_%d[%d]" % (field_name, i, n))
                         else:
+                            if field_name[-1] == "_":
+                                field_bytes = field_name + "bytes"
+                            else:
+                                field_bytes = field_name + "_bytes"
                             if not hasattr(field, "has_enum_type"):
-                                self.out("let %s = input.%s.serialize();", field_name, field_name)
+                                self.out("let %s = input.%s.serialize();", field_bytes, field_name)
                             else:
                                 # This field was interpreted as an enum. Turn it
                                 # back into something like u8.
                                 wire_field_type = self._to_complex_owned_rust_type(field)
                                 self.out("let %s = %s::from(input.%s).serialize();",
-                                         field_name, wire_field_type, field_name)
+                                         field_bytes, wire_field_type, field_name)
                             for i in range(field.type.size):
-                                parts.append("%s[%d]" % (field_name, i))
+                                parts.append("%s[%d]" % (field_bytes, i))
 
                 assert len(parts) <= 32
-                if len(parts) < 32:
-                    parts.append("/* trailing padding */ 0")
-                    while len(parts) < 32:
-                        parts.append("0")
-
                 self.out("[")
-                with Indent(self.out):
-                    while len(parts) > 8:
-                        self.out("%s,", ", ".join(parts[:8]))
-                        parts = parts[8:]
-                    self.out("%s", ", ".join(parts))
+                for part in parts:
+                    self.out.indent("%s,", part)
+                if len(parts) < 32:
+                    self.out.indent("// trailing padding")
+                    for i in range(32 - len(parts)):
+                        self.out.indent("0,")
                 self.out("]")
             self.out("}")
         self.out("}")
@@ -893,8 +905,8 @@ class Module(object):
 
                     with Indent(self.out):
                         self.out("let (v, new_remaining) = %s::try_parse(%s)?;", rust_type, ", ".join(try_parse_args))
-                        self.out("%s.push(v);", field_name)
                         self.out("remaining = new_remaining;")
+                        self.out("%s.push(v);", field_name)
                     self.out("}")
 
                 parts.append(field_name)
@@ -1102,7 +1114,17 @@ class Module(object):
                 else:
                     field = case.only_field
                     field_type = self._to_complex_owned_rust_type(field)
-                    self.out.indent("pub %s: %s<%s>,", self._aux_field_name(field), self.option_name, field_type)
+                    enum_name = None
+                    if field.enum is not None:
+                        enum_name = self.outer_module.get_type(field.enum).name
+                    if enum_name is None or enum_name == ("xcb", "Gravity"):
+                        self.out.indent("pub %s: %s<%s>,", self._aux_field_name(field), self.option_name, field_type)
+                        field.rust_enum_name = None
+                    else:
+                        enum_name = self._name(enum_name)
+                        self.out.indent("pub %s: %s<%s>,", self._aux_field_name(field),
+                                        self.option_name, enum_name)
+                        field.rust_enum_name = enum_name
         else:
             self.out("pub enum %s {", name)
             for case in switch_type.bitcases:
@@ -1155,6 +1177,7 @@ class Module(object):
             self.out("fn try_parse(%s) -> Result<(Self, &[u8]), ParseError> {",
                      ", ".join(args))
             with Indent(self.out):
+                self.out("let switch_expr = %s;", switch_field_name)
                 self.out("let mut outer_remaining = value;")
                 if switch_type.bitcases[0].type.is_bitcase:
                     all_parts = []
@@ -1167,8 +1190,8 @@ class Module(object):
                         else:
                             field_name = self._to_rust_variable(case.only_field.field_name)
                             field_type = self._to_complex_owned_rust_type(case.only_field)
-                        self.out("let %s = if %s & %s::from(%s::%s) != 0 {",
-                                 field_name, switch_field_name,
+                        self.out("let %s = if switch_expr & %s::from(%s::%s) != 0 {",
+                                 field_name,
                                  self._name(switch_field_type.field_type),
                                  self._name(expr.lenfield_type.name),
                                  ename_to_rust(expr.lenfield_name))
@@ -1202,7 +1225,7 @@ class Module(object):
                         else:
                             field_name = self._to_rust_variable(case.only_field.field_name)
                             field_type = self._to_complex_owned_rust_type(case.only_field)
-                        self.out("if %s == %s::from(%s::%s) {", switch_field_name,
+                        self.out("if switch_expr == %s::from(%s::%s) {",
                                  self._name(switch_field_type.field_type),
                                  self._name(expr.lenfield_type.name),
                                  ename_to_rust(expr.lenfield_name))
@@ -1349,7 +1372,43 @@ class Module(object):
             assert all(field.type.size % min_field_size == 0 for field in fixed_size_fields)
 
         self._emit_switch_type(switch.type, name, request.fields, False, "Auxiliary and optional information"
-                               + " for the %s function." % (request_function_name,))
+                               + " for the `%s` function" % (request_function_name,))
+
+        self.out("impl Serialize for %s {", name)
+        with Indent(self.out):
+            self.out("type Bytes = Vec<u8>;")
+            self.out("fn serialize(&self) -> Self::Bytes {")
+            with Indent(self.out):
+                self.out("let mut result = Vec::new();")
+                self.out("self.serialize_into(&mut result);")
+                self.out("result")
+            self.out("}")
+            self.out("fn serialize_into(&self, bytes: &mut Vec<u8>) {")
+            with Indent(self.out):
+                for case in switch.type.bitcases:
+                    if hasattr(case, "rust_name"):
+                        self.out("if let Some(ref value) = self.%s {", case.type.name[-1])
+                        with Indent(self.out):
+                            self.out("value.serialize_into(bytes);")
+                        self.out("}")
+                    else:
+                        self.out("if let Some(ref value) = self.%s {",
+                                 self._aux_field_name(case.only_field))
+                        with Indent(self.out):
+                            for field in case.type.fields:
+                                if field.visible:
+                                    assert field == case.only_field, field
+                                    if field.rust_enum_name is None:
+                                        self.out("value.serialize_into(bytes);")
+                                    else:
+                                        field_type = self._to_complex_owned_rust_type(field)
+                                        self.out("%s::from(*value).serialize_into(bytes);",
+                                                 field_type)
+                                else:
+                                    serialise_align_pad(self.out, field, "bytes")
+                        self.out("}")
+            self.out("}")
+        self.out("}")
 
         self.out("impl %s {", name)
         with Indent(self.out):
@@ -1387,45 +1446,17 @@ class Module(object):
                     field = case.only_field
                     aux_name = self._aux_field_name(field)
                     field_name = field.field_name
-                    field_type = self._to_complex_owned_rust_type(field)
-                self.out("/// Set the %s field of this structure.", field_name)
+                    if field.rust_enum_name is None:
+                        field_type = self._to_complex_owned_rust_type(field)
+                    else:
+                        field_type = field.rust_enum_name
+                self.out("/// Set the `%s` field of this structure.", field_name)
                 self.out("pub fn %s<I>(mut self, value: I) -> Self where I: Into<Option<%s>> {",
                          aux_name, field_type)
                 with Indent(self.out):
                     self.out("self.%s = value.into();", aux_name)
                     self.out("self")
                 self.out("}")
-        self.out("}")
-
-        self.out("impl Serialize for %s {", name)
-        with Indent(self.out):
-            self.out("type Bytes = Vec<u8>;")
-            self.out("fn serialize(&self) -> Vec<u8> {")
-            with Indent(self.out):
-                self.out("let mut result = Vec::new();")
-                self.out("self.serialize_into(&mut result);")
-                self.out("result")
-            self.out("}")
-            self.out("fn serialize_into(&self, bytes: &mut Vec<u8>) {")
-            with Indent(self.out):
-                for case in switch.type.bitcases:
-                    if hasattr(case, "rust_name"):
-                        self.out("if let Some(ref value) = self.%s {", case.type.name[-1])
-                        with Indent(self.out):
-                            self.out("value.serialize_into(bytes);")
-                        self.out("}")
-                    else:
-                        self.out("if let Some(ref value) = self.%s {",
-                                 self._aux_field_name(case.only_field))
-                        with Indent(self.out):
-                            for field in case.type.fields:
-                                if field.visible:
-                                    assert field == case.only_field, field
-                                    self.out("value.serialize_into(bytes);")
-                                else:
-                                    serialise_align_pad(self.out, field, "bytes")
-                        self.out("}")
-            self.out("}")
         self.out("}")
 
     def _find_type_for_name(self, name_to_find):

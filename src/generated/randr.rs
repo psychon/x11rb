@@ -58,8 +58,8 @@ pub struct BadOutputError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl BadOutputError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadOutputError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -85,14 +85,43 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadOutputError {
 }
 impl From<&BadOutputError> for [u8; 32] {
     fn from(input: &BadOutputError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -110,8 +139,8 @@ pub struct BadCrtcError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl BadCrtcError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadCrtcError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -137,14 +166,43 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadCrtcError {
 }
 impl From<&BadCrtcError> for [u8; 32] {
     fn from(input: &BadCrtcError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -162,8 +220,8 @@ pub struct BadModeError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl BadModeError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadModeError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -189,14 +247,43 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadModeError {
 }
 impl From<&BadModeError> for [u8; 32] {
     fn from(input: &BadModeError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -214,8 +301,8 @@ pub struct BadProviderError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl BadProviderError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadProviderError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -241,14 +328,43 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadProviderError {
 }
 impl From<&BadProviderError> for [u8; 32] {
     fn from(input: &BadProviderError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -410,7 +526,7 @@ impl Serialize for RefreshRates {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        let n_rates = self.rates.len() as u16;
+        let n_rates = u16::try_from(self.rates.len()).expect("`rates` has too many elements");
         n_rates.serialize_into(bytes);
         self.rates.serialize_into(bytes);
     }
@@ -447,6 +563,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -455,8 +572,8 @@ pub struct QueryVersionReply {
     pub major_version: u32,
     pub minor_version: u32,
 }
-impl QueryVersionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryVersionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -590,6 +707,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetScreenConfigReply {
     pub response_type: u8,
@@ -601,8 +719,8 @@ pub struct SetScreenConfigReply {
     pub root: xproto::Window,
     pub subpixel_order: render::SubPixel,
 }
-impl SetScreenConfigReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for SetScreenConfigReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -764,6 +882,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetScreenInfoReply {
     pub response_type: u8,
@@ -780,8 +899,8 @@ pub struct GetScreenInfoReply {
     pub sizes: Vec<ScreenSize>,
     pub rates: Vec<RefreshRates>,
 }
-impl GetScreenInfoReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetScreenInfoReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (rotations, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -834,6 +953,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetScreenSizeRangeReply {
     pub response_type: u8,
@@ -844,8 +964,8 @@ pub struct GetScreenSizeRangeReply {
     pub max_width: u16,
     pub max_height: u16,
 }
-impl GetScreenSizeRangeReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetScreenSizeRangeReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1128,6 +1248,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetScreenResourcesReply {
     pub response_type: u8,
@@ -1140,8 +1261,8 @@ pub struct GetScreenResourcesReply {
     pub modes: Vec<ModeInfo>,
     pub names: Vec<u8>,
 }
-impl GetScreenResourcesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetScreenResourcesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1264,6 +1385,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetOutputInfoReply {
     pub response_type: u8,
@@ -1282,8 +1404,8 @@ pub struct GetOutputInfoReply {
     pub clones: Vec<Output>,
     pub name: Vec<u8>,
 }
-impl GetOutputInfoReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetOutputInfoReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1343,6 +1465,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListOutputPropertiesReply {
     pub response_type: u8,
@@ -1350,8 +1473,8 @@ pub struct ListOutputPropertiesReply {
     pub length: u32,
     pub atoms: Vec<xproto::Atom>,
 }
-impl ListOutputPropertiesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ListOutputPropertiesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1401,6 +1524,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryOutputPropertyReply {
     pub response_type: u8,
@@ -1410,8 +1534,8 @@ pub struct QueryOutputPropertyReply {
     pub immutable: bool,
     pub valid_values: Vec<i32>,
 }
-impl QueryOutputPropertyReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryOutputPropertyReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1443,8 +1567,8 @@ where
     let length_so_far = 0;
     let output_bytes = output.serialize();
     let property_bytes = property.serialize();
-    let pending_bytes = (pending as u8).serialize();
-    let range_bytes = (range as u8).serialize();
+    let pending_bytes = pending.serialize();
+    let range_bytes = range.serialize();
     let values_bytes = values.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -1476,10 +1600,9 @@ where
 
 /// Opcode for the ChangeOutputProperty request
 pub const CHANGE_OUTPUT_PROPERTY_REQUEST: u8 = 13;
-pub fn change_output_property<'c, Conn, A>(conn: &'c Conn, output: Output, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: A, num_units: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_output_property<'c, Conn>(conn: &'c Conn, output: Output, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: xproto::PropMode, num_units: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1488,8 +1611,7 @@ where
     let property_bytes = property.serialize();
     let type_bytes = type_.serialize();
     let format_bytes = format.serialize();
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
+    let mode_bytes = u8::from(mode).serialize();
     let num_units_bytes = num_units.serialize();
     assert_eq!(data.len(), ((num_units as usize) * (format as usize)) / (8), "Argument data has an incorrect length");
     let mut request0 = [
@@ -1574,8 +1696,8 @@ where
     let type_bytes = type_.serialize();
     let long_offset_bytes = long_offset.serialize();
     let long_length_bytes = long_length.serialize();
-    let delete_bytes = (delete as u8).serialize();
-    let pending_bytes = (pending as u8).serialize();
+    let delete_bytes = delete.serialize();
+    let pending_bytes = pending.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_OUTPUT_PROPERTY_REQUEST,
@@ -1612,6 +1734,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetOutputPropertyReply {
     pub response_type: u8,
@@ -1623,8 +1746,8 @@ pub struct GetOutputPropertyReply {
     pub num_items: u32,
     pub data: Vec<u8>,
 }
-impl GetOutputPropertyReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetOutputPropertyReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (format, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1707,6 +1830,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateModeReply {
     pub response_type: u8,
@@ -1714,8 +1838,8 @@ pub struct CreateModeReply {
     pub length: u32,
     pub mode: Mode,
 }
-impl CreateModeReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for CreateModeReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1855,6 +1979,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCrtcInfoReply {
     pub response_type: u8,
@@ -1872,8 +1997,8 @@ pub struct GetCrtcInfoReply {
     pub outputs: Vec<Output>,
     pub possible: Vec<Output>,
 }
-impl GetCrtcInfoReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetCrtcInfoReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1958,6 +2083,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&outputs_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetCrtcConfigReply {
     pub response_type: u8,
@@ -1966,8 +2092,8 @@ pub struct SetCrtcConfigReply {
     pub length: u32,
     pub timestamp: xproto::Timestamp,
 }
-impl SetCrtcConfigReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for SetCrtcConfigReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2012,6 +2138,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetCrtcGammaSizeReply {
     pub response_type: u8,
@@ -2019,8 +2146,8 @@ pub struct GetCrtcGammaSizeReply {
     pub length: u32,
     pub size: u16,
 }
-impl GetCrtcGammaSizeReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetCrtcGammaSizeReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2064,6 +2191,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCrtcGammaReply {
     pub response_type: u8,
@@ -2074,8 +2202,8 @@ pub struct GetCrtcGammaReply {
     pub green: Vec<u16>,
     pub blue: Vec<u16>,
 }
-impl GetCrtcGammaReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetCrtcGammaReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2165,6 +2293,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetScreenResourcesCurrentReply {
     pub response_type: u8,
@@ -2177,8 +2306,8 @@ pub struct GetScreenResourcesCurrentReply {
     pub modes: Vec<ModeInfo>,
     pub names: Vec<u8>,
 }
-impl GetScreenResourcesCurrentReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetScreenResourcesCurrentReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2377,6 +2506,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetCrtcTransformReply {
     pub response_type: u8,
@@ -2390,8 +2520,8 @@ pub struct GetCrtcTransformReply {
     pub current_filter_name: Vec<u8>,
     pub current_params: Vec<render::Fixed>,
 }
-impl GetCrtcTransformReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetCrtcTransformReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
@@ -2455,6 +2585,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPanningReply {
     pub response_type: u8,
@@ -2475,8 +2606,8 @@ pub struct GetPanningReply {
     pub border_right: i16,
     pub border_bottom: i16,
 }
-impl GetPanningReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetPanningReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2573,6 +2704,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetPanningReply {
     pub response_type: u8,
@@ -2581,8 +2713,8 @@ pub struct SetPanningReply {
     pub length: u32,
     pub timestamp: xproto::Timestamp,
 }
-impl SetPanningReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for SetPanningReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2658,6 +2790,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetOutputPrimaryReply {
     pub response_type: u8,
@@ -2665,8 +2798,8 @@ pub struct GetOutputPrimaryReply {
     pub length: u32,
     pub output: Output,
 }
-impl GetOutputPrimaryReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetOutputPrimaryReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2709,6 +2842,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetProvidersReply {
     pub response_type: u8,
@@ -2717,8 +2851,8 @@ pub struct GetProvidersReply {
     pub timestamp: xproto::Timestamp,
     pub providers: Vec<Provider>,
 }
-impl GetProvidersReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetProvidersReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2838,6 +2972,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetProviderInfoReply {
     pub response_type: u8,
@@ -2853,8 +2988,8 @@ pub struct GetProviderInfoReply {
     pub associated_capability: Vec<u32>,
     pub name: Vec<u8>,
 }
-impl GetProviderInfoReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetProviderInfoReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2982,6 +3117,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListProviderPropertiesReply {
     pub response_type: u8,
@@ -2989,8 +3125,8 @@ pub struct ListProviderPropertiesReply {
     pub length: u32,
     pub atoms: Vec<xproto::Atom>,
 }
-impl ListProviderPropertiesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ListProviderPropertiesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3040,6 +3176,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryProviderPropertyReply {
     pub response_type: u8,
@@ -3049,8 +3186,8 @@ pub struct QueryProviderPropertyReply {
     pub immutable: bool,
     pub valid_values: Vec<i32>,
 }
-impl QueryProviderPropertyReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryProviderPropertyReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3082,8 +3219,8 @@ where
     let length_so_far = 0;
     let provider_bytes = provider.serialize();
     let property_bytes = property.serialize();
-    let pending_bytes = (pending as u8).serialize();
-    let range_bytes = (range as u8).serialize();
+    let pending_bytes = pending.serialize();
+    let range_bytes = range.serialize();
     let values_bytes = values.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -3211,8 +3348,8 @@ where
     let type_bytes = type_.serialize();
     let long_offset_bytes = long_offset.serialize();
     let long_length_bytes = long_length.serialize();
-    let delete_bytes = (delete as u8).serialize();
-    let pending_bytes = (pending as u8).serialize();
+    let delete_bytes = delete.serialize();
+    let pending_bytes = pending.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_PROVIDER_PROPERTY_REQUEST,
@@ -3249,6 +3386,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetProviderPropertyReply {
     pub response_type: u8,
@@ -3260,8 +3398,8 @@ pub struct GetProviderPropertyReply {
     pub num_items: u32,
     pub data: Vec<u8>,
 }
-impl GetProviderPropertyReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetProviderPropertyReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (format, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3300,8 +3438,8 @@ pub struct ScreenChangeNotifyEvent {
     pub mwidth: u16,
     pub mheight: u16,
 }
-impl ScreenChangeNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ScreenChangeNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (rotation, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3328,6 +3466,7 @@ impl TryFrom<&[u8]> for ScreenChangeNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ScreenChangeNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -3340,24 +3479,52 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ScreenChangeNotifyEvent {
 }
 impl From<&ScreenChangeNotifyEvent> for [u8; 32] {
     fn from(input: &ScreenChangeNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let rotation = input.rotation.serialize();
-        let sequence = input.sequence.serialize();
-        let timestamp = input.timestamp.serialize();
-        let config_timestamp = input.config_timestamp.serialize();
-        let root = input.root.serialize();
-        let request_window = input.request_window.serialize();
-        let size_id = input.size_id.serialize();
-        let subpixel_order = u16::from(input.subpixel_order).serialize();
-        let width = input.width.serialize();
-        let height = input.height.serialize();
-        let mwidth = input.mwidth.serialize();
-        let mheight = input.mheight.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let rotation_bytes = input.rotation.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let timestamp_bytes = input.timestamp.serialize();
+        let config_timestamp_bytes = input.config_timestamp.serialize();
+        let root_bytes = input.root.serialize();
+        let request_window_bytes = input.request_window.serialize();
+        let size_id_bytes = input.size_id.serialize();
+        let subpixel_order_bytes = u16::from(input.subpixel_order).serialize();
+        let width_bytes = input.width.serialize();
+        let height_bytes = input.height.serialize();
+        let mwidth_bytes = input.mwidth.serialize();
+        let mheight_bytes = input.mheight.serialize();
         [
-            response_type[0], rotation[0], sequence[0], sequence[1], timestamp[0], timestamp[1], timestamp[2], timestamp[3],
-            config_timestamp[0], config_timestamp[1], config_timestamp[2], config_timestamp[3], root[0], root[1], root[2], root[3],
-            request_window[0], request_window[1], request_window[2], request_window[3], size_id[0], size_id[1], subpixel_order[0], subpixel_order[1],
-            width[0], width[1], height[0], height[1], mwidth[0], mwidth[1], mheight[0], mheight[1]
+            response_type_bytes[0],
+            rotation_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            timestamp_bytes[0],
+            timestamp_bytes[1],
+            timestamp_bytes[2],
+            timestamp_bytes[3],
+            config_timestamp_bytes[0],
+            config_timestamp_bytes[1],
+            config_timestamp_bytes[2],
+            config_timestamp_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            request_window_bytes[0],
+            request_window_bytes[1],
+            request_window_bytes[2],
+            request_window_bytes[3],
+            size_id_bytes[0],
+            size_id_bytes[1],
+            subpixel_order_bytes[0],
+            subpixel_order_bytes[1],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+            mwidth_bytes[0],
+            mwidth_bytes[1],
+            mheight_bytes[0],
+            mheight_bytes[1],
         ]
     }
 }
@@ -3961,7 +4128,7 @@ impl Serialize for MonitorInfo {
         self.name.serialize_into(bytes);
         self.primary.serialize_into(bytes);
         self.automatic.serialize_into(bytes);
-        let n_output = self.outputs.len() as u16;
+        let n_output = u16::try_from(self.outputs.len()).expect("`outputs` has too many elements");
         n_output.serialize_into(bytes);
         self.x.serialize_into(bytes);
         self.y.serialize_into(bytes);
@@ -3983,7 +4150,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let window_bytes = window.serialize();
-    let get_active_bytes = (get_active as u8).serialize();
+    let get_active_bytes = get_active.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_MONITORS_REQUEST,
@@ -4004,6 +4171,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetMonitorsReply {
     pub response_type: u8,
@@ -4013,8 +4181,8 @@ pub struct GetMonitorsReply {
     pub n_outputs: u32,
     pub monitors: Vec<MonitorInfo>,
 }
-impl GetMonitorsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetMonitorsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4143,6 +4311,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply_with_fds(&[IoSlice::new(&request0), IoSlice::new(&crtcs_bytes), IoSlice::new(&outputs_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, PartialEq, Eq)]
 pub struct CreateLeaseReply {
     pub response_type: u8,
@@ -4279,7 +4448,7 @@ impl Serialize for LeaseNotify {
 #[derive(Debug, Copy, Clone)]
 pub struct NotifyData([u8; 28]);
 impl NotifyData {
-    pub fn as_xproto_cc(&self) -> CrtcChange {
+    pub fn as_cc(&self) -> CrtcChange {
         fn do_the_parse(remaining: &[u8]) -> Result<CrtcChange, ParseError> {
             let (cc, remaining) = CrtcChange::try_parse(remaining)?;
             let _ = remaining;
@@ -4287,7 +4456,7 @@ impl NotifyData {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_oc(&self) -> OutputChange {
+    pub fn as_oc(&self) -> OutputChange {
         fn do_the_parse(remaining: &[u8]) -> Result<OutputChange, ParseError> {
             let (oc, remaining) = OutputChange::try_parse(remaining)?;
             let _ = remaining;
@@ -4295,7 +4464,7 @@ impl NotifyData {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_op(&self) -> OutputProperty {
+    pub fn as_op(&self) -> OutputProperty {
         fn do_the_parse(remaining: &[u8]) -> Result<OutputProperty, ParseError> {
             let (op, remaining) = OutputProperty::try_parse(remaining)?;
             let _ = remaining;
@@ -4303,7 +4472,7 @@ impl NotifyData {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_pc(&self) -> ProviderChange {
+    pub fn as_pc(&self) -> ProviderChange {
         fn do_the_parse(remaining: &[u8]) -> Result<ProviderChange, ParseError> {
             let (pc, remaining) = ProviderChange::try_parse(remaining)?;
             let _ = remaining;
@@ -4311,7 +4480,7 @@ impl NotifyData {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_pp(&self) -> ProviderProperty {
+    pub fn as_pp(&self) -> ProviderProperty {
         fn do_the_parse(remaining: &[u8]) -> Result<ProviderProperty, ParseError> {
             let (pp, remaining) = ProviderProperty::try_parse(remaining)?;
             let _ = remaining;
@@ -4319,7 +4488,7 @@ impl NotifyData {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_rc(&self) -> ResourceChange {
+    pub fn as_rc(&self) -> ResourceChange {
         fn do_the_parse(remaining: &[u8]) -> Result<ResourceChange, ParseError> {
             let (rc, remaining) = ResourceChange::try_parse(remaining)?;
             let _ = remaining;
@@ -4327,7 +4496,7 @@ impl NotifyData {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_lc(&self) -> LeaseNotify {
+    pub fn as_lc(&self) -> LeaseNotify {
         fn do_the_parse(remaining: &[u8]) -> Result<LeaseNotify, ParseError> {
             let (lc, remaining) = LeaseNotify::try_parse(remaining)?;
             let _ = remaining;
@@ -4400,8 +4569,8 @@ pub struct NotifyEvent {
     pub sequence: u16,
     pub u: NotifyData,
 }
-impl NotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for NotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (sub_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4419,6 +4588,7 @@ impl TryFrom<&[u8]> for NotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for NotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -4431,15 +4601,43 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for NotifyEvent {
 }
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sub_code = u8::from(input.sub_code).serialize();
-        let sequence = input.sequence.serialize();
-        let u = input.u.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sub_code_bytes = u8::from(input.sub_code).serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let u_bytes = input.u.serialize();
         [
-            response_type[0], sub_code[0], sequence[0], sequence[1], u[0], u[1], u[2], u[3],
-            u[4], u[5], u[6], u[7], u[8], u[9], u[10], u[11],
-            u[12], u[13], u[14], u[15], u[16], u[17], u[18], u[19],
-            u[20], u[21], u[22], u[23], u[24], u[25], u[26], u[27]
+            response_type_bytes[0],
+            sub_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            u_bytes[0],
+            u_bytes[1],
+            u_bytes[2],
+            u_bytes[3],
+            u_bytes[4],
+            u_bytes[5],
+            u_bytes[6],
+            u_bytes[7],
+            u_bytes[8],
+            u_bytes[9],
+            u_bytes[10],
+            u_bytes[11],
+            u_bytes[12],
+            u_bytes[13],
+            u_bytes[14],
+            u_bytes[15],
+            u_bytes[16],
+            u_bytes[17],
+            u_bytes[18],
+            u_bytes[19],
+            u_bytes[20],
+            u_bytes[21],
+            u_bytes[22],
+            u_bytes[23],
+            u_bytes[24],
+            u_bytes[25],
+            u_bytes[26],
+            u_bytes[27],
         ]
     }
 }
@@ -4455,228 +4653,182 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, major_version, minor_version)
     }
-
     fn randr_set_screen_config(&self, window: xproto::Window, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, size_id: u16, rotation: u16, rate: u16) -> Result<Cookie<'_, Self, SetScreenConfigReply>, ConnectionError>
     {
         set_screen_config(self, window, timestamp, config_timestamp, size_id, rotation, rate)
     }
-
     fn randr_select_input(&self, window: xproto::Window, enable: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_input(self, window, enable)
     }
-
     fn randr_get_screen_info(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetScreenInfoReply>, ConnectionError>
     {
         get_screen_info(self, window)
     }
-
     fn randr_get_screen_size_range(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetScreenSizeRangeReply>, ConnectionError>
     {
         get_screen_size_range(self, window)
     }
-
     fn randr_set_screen_size(&self, window: xproto::Window, width: u16, height: u16, mm_width: u32, mm_height: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_screen_size(self, window, width, height, mm_width, mm_height)
     }
-
     fn randr_get_screen_resources(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetScreenResourcesReply>, ConnectionError>
     {
         get_screen_resources(self, window)
     }
-
     fn randr_get_output_info(&self, output: Output, config_timestamp: xproto::Timestamp) -> Result<Cookie<'_, Self, GetOutputInfoReply>, ConnectionError>
     {
         get_output_info(self, output, config_timestamp)
     }
-
     fn randr_list_output_properties(&self, output: Output) -> Result<Cookie<'_, Self, ListOutputPropertiesReply>, ConnectionError>
     {
         list_output_properties(self, output)
     }
-
     fn randr_query_output_property(&self, output: Output, property: xproto::Atom) -> Result<Cookie<'_, Self, QueryOutputPropertyReply>, ConnectionError>
     {
         query_output_property(self, output, property)
     }
-
     fn randr_configure_output_property<'c>(&'c self, output: Output, property: xproto::Atom, pending: bool, range: bool, values: &[i32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         configure_output_property(self, output, property, pending, range, values)
     }
-
-    fn randr_change_output_property<'c, A>(&'c self, output: Output, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: A, num_units: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn randr_change_output_property<'c>(&'c self, output: Output, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: xproto::PropMode, num_units: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_output_property(self, output, property, type_, format, mode, num_units, data)
     }
-
     fn randr_delete_output_property(&self, output: Output, property: xproto::Atom) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_output_property(self, output, property)
     }
-
     fn randr_get_output_property(&self, output: Output, property: xproto::Atom, type_: xproto::Atom, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Self, GetOutputPropertyReply>, ConnectionError>
     {
         get_output_property(self, output, property, type_, long_offset, long_length, delete, pending)
     }
-
     fn randr_create_mode<'c>(&'c self, window: xproto::Window, mode_info: ModeInfo, name: &[u8]) -> Result<Cookie<'c, Self, CreateModeReply>, ConnectionError>
     {
         create_mode(self, window, mode_info, name)
     }
-
     fn randr_destroy_mode(&self, mode: Mode) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_mode(self, mode)
     }
-
     fn randr_add_output_mode(&self, output: Output, mode: Mode) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         add_output_mode(self, output, mode)
     }
-
     fn randr_delete_output_mode(&self, output: Output, mode: Mode) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_output_mode(self, output, mode)
     }
-
     fn randr_get_crtc_info(&self, crtc: Crtc, config_timestamp: xproto::Timestamp) -> Result<Cookie<'_, Self, GetCrtcInfoReply>, ConnectionError>
     {
         get_crtc_info(self, crtc, config_timestamp)
     }
-
     fn randr_set_crtc_config<'c>(&'c self, crtc: Crtc, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, x: i16, y: i16, mode: Mode, rotation: u16, outputs: &[Output]) -> Result<Cookie<'c, Self, SetCrtcConfigReply>, ConnectionError>
     {
         set_crtc_config(self, crtc, timestamp, config_timestamp, x, y, mode, rotation, outputs)
     }
-
     fn randr_get_crtc_gamma_size(&self, crtc: Crtc) -> Result<Cookie<'_, Self, GetCrtcGammaSizeReply>, ConnectionError>
     {
         get_crtc_gamma_size(self, crtc)
     }
-
     fn randr_get_crtc_gamma(&self, crtc: Crtc) -> Result<Cookie<'_, Self, GetCrtcGammaReply>, ConnectionError>
     {
         get_crtc_gamma(self, crtc)
     }
-
     fn randr_set_crtc_gamma<'c>(&'c self, crtc: Crtc, size: u16, red: &[u16], green: &[u16], blue: &[u16]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_crtc_gamma(self, crtc, size, red, green, blue)
     }
-
     fn randr_get_screen_resources_current(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetScreenResourcesCurrentReply>, ConnectionError>
     {
         get_screen_resources_current(self, window)
     }
-
     fn randr_set_crtc_transform<'c>(&'c self, crtc: Crtc, transform: render::Transform, filter_name: &[u8], filter_params: &[render::Fixed]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_crtc_transform(self, crtc, transform, filter_name, filter_params)
     }
-
     fn randr_get_crtc_transform(&self, crtc: Crtc) -> Result<Cookie<'_, Self, GetCrtcTransformReply>, ConnectionError>
     {
         get_crtc_transform(self, crtc)
     }
-
     fn randr_get_panning(&self, crtc: Crtc) -> Result<Cookie<'_, Self, GetPanningReply>, ConnectionError>
     {
         get_panning(self, crtc)
     }
-
     fn randr_set_panning(&self, crtc: Crtc, timestamp: xproto::Timestamp, left: u16, top: u16, width: u16, height: u16, track_left: u16, track_top: u16, track_width: u16, track_height: u16, border_left: i16, border_top: i16, border_right: i16, border_bottom: i16) -> Result<Cookie<'_, Self, SetPanningReply>, ConnectionError>
     {
         set_panning(self, crtc, timestamp, left, top, width, height, track_left, track_top, track_width, track_height, border_left, border_top, border_right, border_bottom)
     }
-
     fn randr_set_output_primary(&self, window: xproto::Window, output: Output) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_output_primary(self, window, output)
     }
-
     fn randr_get_output_primary(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetOutputPrimaryReply>, ConnectionError>
     {
         get_output_primary(self, window)
     }
-
     fn randr_get_providers(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetProvidersReply>, ConnectionError>
     {
         get_providers(self, window)
     }
-
     fn randr_get_provider_info(&self, provider: Provider, config_timestamp: xproto::Timestamp) -> Result<Cookie<'_, Self, GetProviderInfoReply>, ConnectionError>
     {
         get_provider_info(self, provider, config_timestamp)
     }
-
     fn randr_set_provider_offload_sink(&self, provider: Provider, sink_provider: Provider, config_timestamp: xproto::Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_provider_offload_sink(self, provider, sink_provider, config_timestamp)
     }
-
     fn randr_set_provider_output_source(&self, provider: Provider, source_provider: Provider, config_timestamp: xproto::Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_provider_output_source(self, provider, source_provider, config_timestamp)
     }
-
     fn randr_list_provider_properties(&self, provider: Provider) -> Result<Cookie<'_, Self, ListProviderPropertiesReply>, ConnectionError>
     {
         list_provider_properties(self, provider)
     }
-
     fn randr_query_provider_property(&self, provider: Provider, property: xproto::Atom) -> Result<Cookie<'_, Self, QueryProviderPropertyReply>, ConnectionError>
     {
         query_provider_property(self, provider, property)
     }
-
     fn randr_configure_provider_property<'c>(&'c self, provider: Provider, property: xproto::Atom, pending: bool, range: bool, values: &[i32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         configure_provider_property(self, provider, property, pending, range, values)
     }
-
     fn randr_change_provider_property<'c>(&'c self, provider: Provider, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: u8, num_items: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_provider_property(self, provider, property, type_, format, mode, num_items, data)
     }
-
     fn randr_delete_provider_property(&self, provider: Provider, property: xproto::Atom) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_provider_property(self, provider, property)
     }
-
     fn randr_get_provider_property(&self, provider: Provider, property: xproto::Atom, type_: xproto::Atom, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Self, GetProviderPropertyReply>, ConnectionError>
     {
         get_provider_property(self, provider, property, type_, long_offset, long_length, delete, pending)
     }
-
     fn randr_get_monitors(&self, window: xproto::Window, get_active: bool) -> Result<Cookie<'_, Self, GetMonitorsReply>, ConnectionError>
     {
         get_monitors(self, window, get_active)
     }
-
     fn randr_set_monitor(&self, window: xproto::Window, monitorinfo: MonitorInfo) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_monitor(self, window, monitorinfo)
     }
-
     fn randr_delete_monitor(&self, window: xproto::Window, name: xproto::Atom) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_monitor(self, window, name)
     }
-
     fn randr_create_lease<'c>(&'c self, window: xproto::Window, lid: Lease, crtcs: &[Crtc], outputs: &[Output]) -> Result<CookieWithFds<'c, Self, CreateLeaseReply>, ConnectionError>
     {
         create_lease(self, window, lid, crtcs, outputs)
     }
-
     fn randr_free_lease(&self, lid: Lease, terminate: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         free_lease(self, lid, terminate)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

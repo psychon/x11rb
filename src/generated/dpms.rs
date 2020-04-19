@@ -63,6 +63,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetVersionReply {
     pub response_type: u8,
@@ -71,8 +72,8 @@ pub struct GetVersionReply {
     pub server_major_version: u16,
     pub server_minor_version: u16,
 }
-impl GetVersionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetVersionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -111,6 +112,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CapableReply {
     pub response_type: u8,
@@ -118,8 +120,8 @@ pub struct CapableReply {
     pub length: u32,
     pub capable: bool,
 }
-impl CapableReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for CapableReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -158,6 +160,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetTimeoutsReply {
     pub response_type: u8,
@@ -167,8 +170,8 @@ pub struct GetTimeoutsReply {
     pub suspend_timeout: u16,
     pub off_timeout: u16,
 }
-impl GetTimeoutsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetTimeoutsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -335,16 +338,14 @@ impl TryFrom<u32> for DPMSMode {
 
 /// Opcode for the ForceLevel request
 pub const FORCE_LEVEL_REQUEST: u8 = 6;
-pub fn force_level<Conn, A>(conn: &Conn, power_level: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn force_level<Conn>(conn: &Conn, power_level: DPMSMode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u16>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let power_level = power_level.into();
-    let power_level_bytes = power_level.serialize();
+    let power_level_bytes = u16::from(power_level).serialize();
     let mut request0 = [
         extension_information.major_opcode,
         FORCE_LEVEL_REQUEST,
@@ -383,6 +384,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InfoReply {
     pub response_type: u8,
@@ -391,8 +393,8 @@ pub struct InfoReply {
     pub power_level: DPMSMode,
     pub state: bool,
 }
-impl InfoReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for InfoReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -418,43 +420,34 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_version(self, client_major_version, client_minor_version)
     }
-
     fn dpms_capable(&self) -> Result<Cookie<'_, Self, CapableReply>, ConnectionError>
     {
         capable(self)
     }
-
     fn dpms_get_timeouts(&self) -> Result<Cookie<'_, Self, GetTimeoutsReply>, ConnectionError>
     {
         get_timeouts(self)
     }
-
     fn dpms_set_timeouts(&self, standby_timeout: u16, suspend_timeout: u16, off_timeout: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_timeouts(self, standby_timeout, suspend_timeout, off_timeout)
     }
-
     fn dpms_enable(&self) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         enable(self)
     }
-
     fn dpms_disable(&self) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         disable(self)
     }
-
-    fn dpms_force_level<A>(&self, power_level: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u16>,
+    fn dpms_force_level(&self, power_level: DPMSMode) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         force_level(self, power_level)
     }
-
     fn dpms_info(&self) -> Result<Cookie<'_, Self, InfoReply>, ConnectionError>
     {
         info(self)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

@@ -532,6 +532,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -540,8 +541,8 @@ pub struct QueryVersionReply {
     pub major_version: u32,
     pub minor_version: u32,
 }
-impl QueryVersionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryVersionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -795,6 +796,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryCapabilitiesReply {
     pub response_type: u8,
@@ -802,8 +804,8 @@ pub struct QueryCapabilitiesReply {
     pub length: u32,
     pub capabilities: u32,
 }
-impl QueryCapabilitiesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryCapabilitiesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -831,8 +833,8 @@ pub struct GenericEvent {
     pub evtype: u16,
     pub event: Event,
 }
-impl GenericEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GenericEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -852,6 +854,7 @@ impl TryFrom<&[u8]> for GenericEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<crate::x11_utils::GenericEvent<B>> for GenericEvent {
     type Error = ParseError;
+
     fn try_from(value: crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -864,17 +867,46 @@ impl<B: AsRef<[u8]>> TryFrom<&crate::x11_utils::GenericEvent<B>> for GenericEven
 }
 impl From<&GenericEvent> for [u8; 32] {
     fn from(input: &GenericEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let extension = input.extension.serialize();
-        let sequence = input.sequence.serialize();
-        let length = input.length.serialize();
-        let evtype = input.evtype.serialize();
-        let event = input.event.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let extension_bytes = input.extension.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let length_bytes = input.length.serialize();
+        let evtype_bytes = input.evtype.serialize();
+        let event_bytes = input.event.serialize();
         [
-            response_type[0], extension[0], sequence[0], sequence[1], length[0], length[1], length[2], length[3],
-            evtype[0], evtype[1], 0, 0, event[0], event[1], event[2], event[3],
-            /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            extension_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            evtype_bytes[0],
+            evtype_bytes[1],
+            0,
+            0,
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -905,8 +937,8 @@ pub struct ConfigureNotifyEvent {
     pub pixmap_height: u16,
     pub pixmap_flags: u32,
 }
-impl ConfigureNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ConfigureNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -936,6 +968,7 @@ impl TryFrom<&[u8]> for ConfigureNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<crate::x11_utils::GenericEvent<B>> for ConfigureNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -964,8 +997,8 @@ pub struct CompleteNotifyEvent {
     pub ust: u64,
     pub msc: u64,
 }
-impl CompleteNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for CompleteNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -992,6 +1025,7 @@ impl TryFrom<&[u8]> for CompleteNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<crate::x11_utils::GenericEvent<B>> for CompleteNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1018,8 +1052,8 @@ pub struct IdleNotifyEvent {
     pub pixmap: xproto::Pixmap,
     pub idle_fence: sync::Fence,
 }
-impl IdleNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for IdleNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1043,6 +1077,7 @@ impl TryFrom<&[u8]> for IdleNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<crate::x11_utils::GenericEvent<B>> for IdleNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1084,8 +1119,8 @@ pub struct RedirectNotifyEvent {
     pub remainder: u64,
     pub notifies: Vec<Notify>,
 }
-impl RedirectNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for RedirectNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1117,8 +1152,8 @@ impl RedirectNotifyEvent {
         let mut notifies = Vec::new();
         while !remaining.is_empty() {
             let (v, new_remaining) = Notify::try_parse(remaining)?;
-            notifies.push(v);
             remaining = new_remaining;
+            notifies.push(v);
         }
         let result = RedirectNotifyEvent { response_type, extension, sequence, length, event_type, update_window, event, event_window, window, pixmap, serial, valid_region, update_region, valid_rect, update_rect, x_off, y_off, target_crtc, wait_fence, idle_fence, options, target_msc, divisor, remainder, notifies };
         Ok((result, remaining))
@@ -1132,6 +1167,7 @@ impl TryFrom<&[u8]> for RedirectNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<crate::x11_utils::GenericEvent<B>> for RedirectNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1149,26 +1185,22 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, major_version, minor_version)
     }
-
     fn present_pixmap<'c>(&'c self, window: xproto::Window, pixmap: xproto::Pixmap, serial: u32, valid: xfixes::Region, update: xfixes::Region, x_off: i16, y_off: i16, target_crtc: randr::Crtc, wait_fence: sync::Fence, idle_fence: sync::Fence, options: u32, target_msc: u64, divisor: u64, remainder: u64, notifies: &[Notify]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         self::pixmap(self, window, pixmap, serial, valid, update, x_off, y_off, target_crtc, wait_fence, idle_fence, options, target_msc, divisor, remainder, notifies)
     }
-
     fn present_notify_msc(&self, window: xproto::Window, serial: u32, target_msc: u64, divisor: u64, remainder: u64) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         notify_msc(self, window, serial, target_msc, divisor, remainder)
     }
-
     fn present_select_input(&self, eid: Event, window: xproto::Window, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         select_input(self, eid, window, event_mask)
     }
-
     fn present_query_capabilities(&self, target: u32) -> Result<Cookie<'_, Self, QueryCapabilitiesReply>, ConnectionError>
     {
         query_capabilities(self, target)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

@@ -124,6 +124,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetExtensionVersionReply {
     pub response_type: u8,
@@ -134,8 +135,8 @@ pub struct GetExtensionVersionReply {
     pub server_minor: u16,
     pub present: bool,
 }
-impl GetExtensionVersionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetExtensionVersionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -607,7 +608,7 @@ impl Serialize for ValuatorInfo {
         bytes.reserve(8);
         u8::from(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
-        let axes_len = self.axes.len() as u8;
+        let axes_len = u8::try_from(self.axes.len()).expect("`axes` has too many elements");
         axes_len.serialize_into(bytes);
         u8::from(self.mode).serialize_into(bytes);
         self.motion_size.serialize_into(bytes);
@@ -692,7 +693,7 @@ impl Serialize for InputInfoInfoValuator {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(6);
-        let axes_len = self.axes.len() as u8;
+        let axes_len = u8::try_from(self.axes.len()).expect("`axes` has too many elements");
         axes_len.serialize_into(bytes);
         u8::from(self.mode).serialize_into(bytes);
         self.motion_size.serialize_into(bytes);
@@ -707,22 +708,23 @@ pub enum InputInfoInfo {
 }
 impl InputInfoInfo {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = class_id;
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if class_id == u8::from(InputClass::Key) {
+        if switch_expr == u8::from(InputClass::Key) {
             let (key, new_remaining) = InputInfoInfoKey::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputInfoInfo::Key(key));
         }
-        if class_id == u8::from(InputClass::Button) {
+        if switch_expr == u8::from(InputClass::Button) {
             let remaining = outer_remaining;
             let (num_buttons, remaining) = u16::try_parse(remaining)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputInfoInfo::NumButtons(num_buttons));
         }
-        if class_id == u8::from(InputClass::Valuator) {
+        if switch_expr == u8::from(InputClass::Valuator) {
             let (valuator, new_remaining) = InputInfoInfoValuator::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -833,9 +835,9 @@ impl Serialize for DeviceName {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(1);
-        let len = self.string.len() as u8;
+        let len = u8::try_from(self.string.len()).expect("`string` has too many elements");
         len.serialize_into(bytes);
-        self.string.serialize_into(bytes);
+        bytes.extend_from_slice(&self.string);
     }
 }
 
@@ -860,6 +862,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListInputDevicesReply {
     pub response_type: u8,
@@ -871,8 +874,8 @@ pub struct ListInputDevicesReply {
     pub infos: Vec<InputInfo>,
     pub names: Vec<xproto::Str>,
 }
-impl ListInputDevicesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ListInputDevicesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
@@ -963,6 +966,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OpenDeviceReply {
     pub response_type: u8,
@@ -971,8 +975,8 @@ pub struct OpenDeviceReply {
     pub length: u32,
     pub class_info: Vec<InputClassInfo>,
 }
-impl OpenDeviceReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for OpenDeviceReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
@@ -1025,17 +1029,15 @@ where
 
 /// Opcode for the SetDeviceMode request
 pub const SET_DEVICE_MODE_REQUEST: u8 = 5;
-pub fn set_device_mode<Conn, A>(conn: &Conn, device_id: u8, mode: A) -> Result<Cookie<'_, Conn, SetDeviceModeReply>, ConnectionError>
+pub fn set_device_mode<Conn>(conn: &Conn, device_id: u8, mode: ValuatorMode) -> Result<Cookie<'_, Conn, SetDeviceModeReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let device_id_bytes = device_id.serialize();
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
+    let mode_bytes = u8::from(mode).serialize();
     let mut request0 = [
         extension_information.major_opcode,
         SET_DEVICE_MODE_REQUEST,
@@ -1052,6 +1054,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceModeReply {
     pub response_type: u8,
@@ -1060,8 +1063,8 @@ pub struct SetDeviceModeReply {
     pub length: u32,
     pub status: xproto::GrabStatus,
 }
-impl SetDeviceModeReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for SetDeviceModeReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1143,6 +1146,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetSelectedExtensionEventsReply {
     pub response_type: u8,
@@ -1152,8 +1156,8 @@ pub struct GetSelectedExtensionEventsReply {
     pub this_classes: Vec<EventClass>,
     pub all_classes: Vec<EventClass>,
 }
-impl GetSelectedExtensionEventsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetSelectedExtensionEventsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1238,10 +1242,9 @@ impl TryFrom<u32> for PropagateMode {
 
 /// Opcode for the ChangeDeviceDontPropagateList request
 pub const CHANGE_DEVICE_DONT_PROPAGATE_LIST_REQUEST: u8 = 8;
-pub fn change_device_dont_propagate_list<'c, Conn, A>(conn: &'c Conn, window: xproto::Window, mode: A, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_device_dont_propagate_list<'c, Conn>(conn: &'c Conn, window: xproto::Window, mode: PropagateMode, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1249,8 +1252,7 @@ where
     let window_bytes = window.serialize();
     let num_classes: u16 = classes.len().try_into()?;
     let num_classes_bytes = num_classes.serialize();
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
+    let mode_bytes = u8::from(mode).serialize();
     let classes_bytes = classes.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -1302,6 +1304,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceDontPropagateListReply {
     pub response_type: u8,
@@ -1310,8 +1313,8 @@ pub struct GetDeviceDontPropagateListReply {
     pub length: u32,
     pub classes: Vec<EventClass>,
 }
-impl GetDeviceDontPropagateListReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDeviceDontPropagateListReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1354,7 +1357,7 @@ impl Serialize for DeviceTimeCoord {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(5);
         self.time.serialize_into(bytes);
-        let num_axes = self.axisvalues.len() as u8;
+        let num_axes = u8::try_from(self.axisvalues.len()).expect("`axisvalues` has too many elements");
         num_axes.serialize_into(bytes);
         self.axisvalues.serialize_into(bytes);
     }
@@ -1396,6 +1399,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceMotionEventsReply {
     pub response_type: u8,
@@ -1406,8 +1410,8 @@ pub struct GetDeviceMotionEventsReply {
     pub device_mode: ValuatorMode,
     pub events: Vec<DeviceTimeCoord>,
 }
-impl GetDeviceMotionEventsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDeviceMotionEventsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1421,8 +1425,8 @@ impl GetDeviceMotionEventsReply {
         let mut events = Vec::with_capacity(list_length);
         for _ in 0..list_length {
             let (v, new_remaining) = DeviceTimeCoord::try_parse(remaining, num_axes)?;
-            events.push(v);
             remaining = new_remaining;
+            events.push(v);
         }
         let device_mode = device_mode.try_into()?;
         let result = GetDeviceMotionEventsReply { response_type, xi_reply_type, sequence, length, num_axes, device_mode, events };
@@ -1462,6 +1466,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangeKeyboardDeviceReply {
     pub response_type: u8,
@@ -1470,8 +1475,8 @@ pub struct ChangeKeyboardDeviceReply {
     pub length: u32,
     pub status: xproto::GrabStatus,
 }
-impl ChangeKeyboardDeviceReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ChangeKeyboardDeviceReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1518,6 +1523,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangePointerDeviceReply {
     pub response_type: u8,
@@ -1526,8 +1532,8 @@ pub struct ChangePointerDeviceReply {
     pub length: u32,
     pub status: xproto::GrabStatus,
 }
-impl ChangePointerDeviceReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ChangePointerDeviceReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1548,11 +1554,9 @@ impl TryFrom<&[u8]> for ChangePointerDeviceReply {
 
 /// Opcode for the GrabDevice request
 pub const GRAB_DEVICE_REQUEST: u8 = 13;
-pub fn grab_device<'c, Conn, A, B>(conn: &'c Conn, grab_window: xproto::Window, time: xproto::Timestamp, this_device_mode: A, other_device_mode: B, owner_events: bool, device_id: u8, classes: &[EventClass]) -> Result<Cookie<'c, Conn, GrabDeviceReply>, ConnectionError>
+pub fn grab_device<'c, Conn>(conn: &'c Conn, grab_window: xproto::Window, time: xproto::Timestamp, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, owner_events: bool, device_id: u8, classes: &[EventClass]) -> Result<Cookie<'c, Conn, GrabDeviceReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
-    B: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1561,11 +1565,9 @@ where
     let time_bytes = time.serialize();
     let num_classes: u16 = classes.len().try_into()?;
     let num_classes_bytes = num_classes.serialize();
-    let this_device_mode = this_device_mode.into();
-    let this_device_mode_bytes = this_device_mode.serialize();
-    let other_device_mode = other_device_mode.into();
-    let other_device_mode_bytes = other_device_mode.serialize();
-    let owner_events_bytes = (owner_events as u8).serialize();
+    let this_device_mode_bytes = u8::from(this_device_mode).serialize();
+    let other_device_mode_bytes = u8::from(other_device_mode).serialize();
+    let owner_events_bytes = owner_events.serialize();
     let device_id_bytes = device_id.serialize();
     let classes_bytes = classes.serialize();
     let mut request0 = [
@@ -1599,6 +1601,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&classes_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GrabDeviceReply {
     pub response_type: u8,
@@ -1607,8 +1610,8 @@ pub struct GrabDeviceReply {
     pub length: u32,
     pub status: xproto::GrabStatus,
 }
-impl GrabDeviceReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GrabDeviceReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1720,11 +1723,9 @@ impl TryFrom<u32> for ModifierDevice {
 
 /// Opcode for the GrabDeviceKey request
 pub const GRAB_DEVICE_KEY_REQUEST: u8 = 15;
-pub fn grab_device_key<'c, Conn, A, B>(conn: &'c Conn, grab_window: xproto::Window, modifiers: u16, modifier_device: u8, grabbed_device: u8, key: u8, this_device_mode: A, other_device_mode: B, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn grab_device_key<'c, Conn>(conn: &'c Conn, grab_window: xproto::Window, modifiers: u16, modifier_device: u8, grabbed_device: u8, key: u8, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
-    B: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1736,11 +1737,9 @@ where
     let modifier_device_bytes = modifier_device.serialize();
     let grabbed_device_bytes = grabbed_device.serialize();
     let key_bytes = key.serialize();
-    let this_device_mode = this_device_mode.into();
-    let this_device_mode_bytes = this_device_mode.serialize();
-    let other_device_mode = other_device_mode.into();
-    let other_device_mode_bytes = other_device_mode.serialize();
-    let owner_events_bytes = (owner_events as u8).serialize();
+    let this_device_mode_bytes = u8::from(this_device_mode).serialize();
+    let other_device_mode_bytes = u8::from(other_device_mode).serialize();
+    let owner_events_bytes = owner_events.serialize();
     let classes_bytes = classes.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -1815,11 +1814,9 @@ where
 
 /// Opcode for the GrabDeviceButton request
 pub const GRAB_DEVICE_BUTTON_REQUEST: u8 = 17;
-pub fn grab_device_button<'c, Conn, A, B>(conn: &'c Conn, grab_window: xproto::Window, grabbed_device: u8, modifier_device: u8, modifiers: u16, this_device_mode: A, other_device_mode: B, button: u8, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn grab_device_button<'c, Conn>(conn: &'c Conn, grab_window: xproto::Window, grabbed_device: u8, modifier_device: u8, modifiers: u16, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, button: u8, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
-    B: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -1830,12 +1827,10 @@ where
     let num_classes: u16 = classes.len().try_into()?;
     let num_classes_bytes = num_classes.serialize();
     let modifiers_bytes = modifiers.serialize();
-    let this_device_mode = this_device_mode.into();
-    let this_device_mode_bytes = this_device_mode.serialize();
-    let other_device_mode = other_device_mode.into();
-    let other_device_mode_bytes = other_device_mode.serialize();
+    let this_device_mode_bytes = u8::from(this_device_mode).serialize();
+    let other_device_mode_bytes = u8::from(other_device_mode).serialize();
     let button_bytes = button.serialize();
-    let owner_events_bytes = (owner_events as u8).serialize();
+    let owner_events_bytes = owner_events.serialize();
     let classes_bytes = classes.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -1984,17 +1979,15 @@ impl TryFrom<u32> for DeviceInputMode {
 
 /// Opcode for the AllowDeviceEvents request
 pub const ALLOW_DEVICE_EVENTS_REQUEST: u8 = 19;
-pub fn allow_device_events<Conn, A>(conn: &Conn, time: xproto::Timestamp, mode: A, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn allow_device_events<Conn>(conn: &Conn, time: xproto::Timestamp, mode: DeviceInputMode, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let time_bytes = time.serialize();
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
+    let mode_bytes = u8::from(mode).serialize();
     let device_id_bytes = device_id.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -2043,6 +2036,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetDeviceFocusReply {
     pub response_type: u8,
@@ -2053,8 +2047,8 @@ pub struct GetDeviceFocusReply {
     pub time: xproto::Timestamp,
     pub revert_to: xproto::InputFocus,
 }
-impl GetDeviceFocusReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDeviceFocusReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2077,18 +2071,16 @@ impl TryFrom<&[u8]> for GetDeviceFocusReply {
 
 /// Opcode for the SetDeviceFocus request
 pub const SET_DEVICE_FOCUS_REQUEST: u8 = 21;
-pub fn set_device_focus<Conn, A>(conn: &Conn, focus: xproto::Window, time: xproto::Timestamp, revert_to: A, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_device_focus<Conn>(conn: &Conn, focus: xproto::Window, time: xproto::Timestamp, revert_to: xproto::InputFocus, device_id: u8) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let focus_bytes = focus.serialize();
     let time_bytes = time.serialize();
-    let revert_to = revert_to.into();
-    let revert_to_bytes = revert_to.serialize();
+    let revert_to_bytes = u8::from(revert_to).serialize();
     let device_id_bytes = device_id.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -2550,7 +2542,7 @@ impl Serialize for StringFeedbackState {
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.max_symbols.serialize_into(bytes);
-        let num_keysyms = self.keysyms.len() as u16;
+        let num_keysyms = u16::try_from(self.keysyms.len()).expect("`keysyms` has too many elements");
         num_keysyms.serialize_into(bytes);
         self.keysyms.serialize_into(bytes);
     }
@@ -2928,7 +2920,7 @@ impl Serialize for FeedbackStateDataString {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
         self.max_symbols.serialize_into(bytes);
-        let num_keysyms = self.keysyms.len() as u16;
+        let num_keysyms = u16::try_from(self.keysyms.len()).expect("`keysyms` has too many elements");
         num_keysyms.serialize_into(bytes);
         self.keysyms.serialize_into(bytes);
     }
@@ -3081,39 +3073,40 @@ pub enum FeedbackStateData {
 }
 impl FeedbackStateData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = class_id;
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if class_id == u8::from(FeedbackClass::Keyboard) {
+        if switch_expr == u8::from(FeedbackClass::Keyboard) {
             let (keyboard, new_remaining) = FeedbackStateDataKeyboard::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Keyboard(keyboard));
         }
-        if class_id == u8::from(FeedbackClass::Pointer) {
+        if switch_expr == u8::from(FeedbackClass::Pointer) {
             let (pointer, new_remaining) = FeedbackStateDataPointer::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Pointer(pointer));
         }
-        if class_id == u8::from(FeedbackClass::String) {
+        if switch_expr == u8::from(FeedbackClass::String) {
             let (string, new_remaining) = FeedbackStateDataString::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::String(string));
         }
-        if class_id == u8::from(FeedbackClass::Integer) {
+        if switch_expr == u8::from(FeedbackClass::Integer) {
             let (integer, new_remaining) = FeedbackStateDataInteger::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Integer(integer));
         }
-        if class_id == u8::from(FeedbackClass::Led) {
+        if switch_expr == u8::from(FeedbackClass::Led) {
             let (led, new_remaining) = FeedbackStateDataLed::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Led(led));
         }
-        if class_id == u8::from(FeedbackClass::Bell) {
+        if switch_expr == u8::from(FeedbackClass::Bell) {
             let (bell, new_remaining) = FeedbackStateDataBell::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -3250,6 +3243,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetFeedbackControlReply {
     pub response_type: u8,
@@ -3258,8 +3252,8 @@ pub struct GetFeedbackControlReply {
     pub length: u32,
     pub feedbacks: Vec<FeedbackState>,
 }
-impl GetFeedbackControlReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetFeedbackControlReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3524,7 +3518,7 @@ impl Serialize for StringFeedbackCtl {
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
-        let num_keysyms = self.keysyms.len() as u16;
+        let num_keysyms = u16::try_from(self.keysyms.len()).expect("`keysyms` has too many elements");
         num_keysyms.serialize_into(bytes);
         self.keysyms.serialize_into(bytes);
     }
@@ -3803,7 +3797,7 @@ impl Serialize for FeedbackCtlDataString {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
         bytes.extend_from_slice(&[0; 2]);
-        let num_keysyms = self.keysyms.len() as u16;
+        let num_keysyms = u16::try_from(self.keysyms.len()).expect("`keysyms` has too many elements");
         num_keysyms.serialize_into(bytes);
         self.keysyms.serialize_into(bytes);
     }
@@ -3907,40 +3901,41 @@ pub enum FeedbackCtlData {
 }
 impl FeedbackCtlData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = class_id;
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if class_id == u8::from(FeedbackClass::Keyboard) {
+        if switch_expr == u8::from(FeedbackClass::Keyboard) {
             let (keyboard, new_remaining) = FeedbackCtlDataKeyboard::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Keyboard(keyboard));
         }
-        if class_id == u8::from(FeedbackClass::Pointer) {
+        if switch_expr == u8::from(FeedbackClass::Pointer) {
             let (pointer, new_remaining) = FeedbackCtlDataPointer::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Pointer(pointer));
         }
-        if class_id == u8::from(FeedbackClass::String) {
+        if switch_expr == u8::from(FeedbackClass::String) {
             let (string, new_remaining) = FeedbackCtlDataString::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::String(string));
         }
-        if class_id == u8::from(FeedbackClass::Integer) {
+        if switch_expr == u8::from(FeedbackClass::Integer) {
             let remaining = outer_remaining;
             let (int_to_display, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::IntToDisplay(int_to_display));
         }
-        if class_id == u8::from(FeedbackClass::Led) {
+        if switch_expr == u8::from(FeedbackClass::Led) {
             let (led, new_remaining) = FeedbackCtlDataLed::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Led(led));
         }
-        if class_id == u8::from(FeedbackClass::Bell) {
+        if switch_expr == u8::from(FeedbackClass::Bell) {
             let (bell, new_remaining) = FeedbackCtlDataBell::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -4178,6 +4173,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceKeyMappingReply {
     pub response_type: u8,
@@ -4186,8 +4182,8 @@ pub struct GetDeviceKeyMappingReply {
     pub keysyms_per_keycode: u8,
     pub keysyms: Vec<xproto::Keysym>,
 }
-impl GetDeviceKeyMappingReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDeviceKeyMappingReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4267,6 +4263,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceModifierMappingReply {
     pub response_type: u8,
@@ -4275,8 +4272,8 @@ pub struct GetDeviceModifierMappingReply {
     pub length: u32,
     pub keymaps: Vec<u8>,
 }
-impl GetDeviceModifierMappingReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDeviceModifierMappingReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4327,6 +4324,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(keymaps), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceModifierMappingReply {
     pub response_type: u8,
@@ -4335,8 +4333,8 @@ pub struct SetDeviceModifierMappingReply {
     pub length: u32,
     pub status: xproto::MappingStatus,
 }
-impl SetDeviceModifierMappingReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for SetDeviceModifierMappingReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4381,6 +4379,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceButtonMappingReply {
     pub response_type: u8,
@@ -4389,8 +4388,8 @@ pub struct GetDeviceButtonMappingReply {
     pub length: u32,
     pub map: Vec<u8>,
 }
-impl GetDeviceButtonMappingReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDeviceButtonMappingReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
@@ -4445,6 +4444,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(map), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceButtonMappingReply {
     pub response_type: u8,
@@ -4453,8 +4453,8 @@ pub struct SetDeviceButtonMappingReply {
     pub length: u32,
     pub status: xproto::MappingStatus,
 }
-impl SetDeviceButtonMappingReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for SetDeviceButtonMappingReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4862,7 +4862,7 @@ impl Serialize for ValuatorState {
         bytes.reserve(4);
         u8::from(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
-        let num_valuators = self.valuators.len() as u8;
+        let num_valuators = u8::try_from(self.valuators.len()).expect("`valuators` has too many elements");
         num_valuators.serialize_into(bytes);
         self.mode.serialize_into(bytes);
         self.valuators.serialize_into(bytes);
@@ -5164,7 +5164,7 @@ impl Serialize for InputStateDataValuator {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        let num_valuators = self.valuators.len() as u8;
+        let num_valuators = u8::try_from(self.valuators.len()).expect("`valuators` has too many elements");
         num_valuators.serialize_into(bytes);
         self.mode.serialize_into(bytes);
         self.valuators.serialize_into(bytes);
@@ -5178,21 +5178,22 @@ pub enum InputStateData {
 }
 impl InputStateData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = class_id;
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if class_id == u8::from(InputClass::Key) {
+        if switch_expr == u8::from(InputClass::Key) {
             let (key, new_remaining) = InputStateDataKey::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputStateData::Key(key));
         }
-        if class_id == u8::from(InputClass::Button) {
+        if switch_expr == u8::from(InputClass::Button) {
             let (button, new_remaining) = InputStateDataButton::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputStateData::Button(button));
         }
-        if class_id == u8::from(InputClass::Valuator) {
+        if switch_expr == u8::from(InputClass::Valuator) {
             let (valuator, new_remaining) = InputStateDataValuator::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -5302,6 +5303,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryDeviceStateReply {
     pub response_type: u8,
@@ -5310,8 +5312,8 @@ pub struct QueryDeviceStateReply {
     pub length: u32,
     pub classes: Vec<InputState>,
 }
-impl QueryDeviceStateReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryDeviceStateReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5393,6 +5395,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&valuators_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct SetDeviceValuatorsReply {
     pub response_type: u8,
@@ -5401,8 +5404,8 @@ pub struct SetDeviceValuatorsReply {
     pub length: u32,
     pub status: xproto::GrabStatus,
 }
-impl SetDeviceValuatorsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for SetDeviceValuatorsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6079,27 +6082,28 @@ pub enum DeviceStateData {
 }
 impl DeviceStateData {
     fn try_parse(value: &[u8], control_id: u16) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = control_id;
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if control_id == u16::from(DeviceControl::Resolution) {
+        if switch_expr == u16::from(DeviceControl::Resolution) {
             let (resolution, new_remaining) = DeviceStateDataResolution::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Resolution(resolution));
         }
-        if control_id == u16::from(DeviceControl::Abscalib) {
+        if switch_expr == u16::from(DeviceControl::Abscalib) {
             let (abs_calib, new_remaining) = DeviceStateDataAbsCalib::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::AbsCalib(abs_calib));
         }
-        if control_id == u16::from(DeviceControl::Core) {
+        if switch_expr == u16::from(DeviceControl::Core) {
             let (core, new_remaining) = DeviceStateDataCore::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Core(core));
         }
-        if control_id == u16::from(DeviceControl::Enable) {
+        if switch_expr == u16::from(DeviceControl::Enable) {
             let remaining = outer_remaining;
             let (enable, remaining) = u8::try_parse(remaining)?;
             let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -6107,7 +6111,7 @@ impl DeviceStateData {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Enable(enable));
         }
-        if control_id == u16::from(DeviceControl::Absarea) {
+        if switch_expr == u16::from(DeviceControl::Absarea) {
             let (abs_area, new_remaining) = DeviceStateDataAbsArea::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -6217,16 +6221,14 @@ impl Serialize for DeviceState {
 
 /// Opcode for the GetDeviceControl request
 pub const GET_DEVICE_CONTROL_REQUEST: u8 = 34;
-pub fn get_device_control<Conn, A>(conn: &Conn, control_id: A, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceControlReply>, ConnectionError>
+pub fn get_device_control<Conn>(conn: &Conn, control_id: DeviceControl, device_id: u8) -> Result<Cookie<'_, Conn, GetDeviceControlReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u16>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let control_id = control_id.into();
-    let control_id_bytes = control_id.serialize();
+    let control_id_bytes = u16::from(control_id).serialize();
     let device_id_bytes = device_id.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -6244,6 +6246,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceControlReply {
     pub response_type: u8,
@@ -6253,8 +6256,8 @@ pub struct GetDeviceControlReply {
     pub status: u8,
     pub control: DeviceState,
 }
-impl GetDeviceControlReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDeviceControlReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6311,7 +6314,7 @@ impl Serialize for DeviceResolutionCtl {
         u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.first_valuator.serialize_into(bytes);
-        let num_valuators = self.resolution_values.len() as u8;
+        let num_valuators = u8::try_from(self.resolution_values.len()).expect("`resolution_values` has too many elements");
         num_valuators.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.resolution_values.serialize_into(bytes);
@@ -6637,7 +6640,7 @@ impl Serialize for DeviceCtlDataResolution {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
         self.first_valuator.serialize_into(bytes);
-        let num_valuators = self.resolution_values.len() as u8;
+        let num_valuators = u8::try_from(self.resolution_values.len()).expect("`resolution_values` has too many elements");
         num_valuators.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.resolution_values.serialize_into(bytes);
@@ -6815,21 +6818,22 @@ pub enum DeviceCtlData {
 }
 impl DeviceCtlData {
     fn try_parse(value: &[u8], control_id: u16) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = control_id;
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if control_id == u16::from(DeviceControl::Resolution) {
+        if switch_expr == u16::from(DeviceControl::Resolution) {
             let (resolution, new_remaining) = DeviceCtlDataResolution::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Resolution(resolution));
         }
-        if control_id == u16::from(DeviceControl::Abscalib) {
+        if switch_expr == u16::from(DeviceControl::Abscalib) {
             let (abs_calib, new_remaining) = DeviceCtlDataAbsCalib::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::AbsCalib(abs_calib));
         }
-        if control_id == u16::from(DeviceControl::Core) {
+        if switch_expr == u16::from(DeviceControl::Core) {
             let remaining = outer_remaining;
             let (status, remaining) = u8::try_parse(remaining)?;
             let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -6837,7 +6841,7 @@ impl DeviceCtlData {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Status(status));
         }
-        if control_id == u16::from(DeviceControl::Enable) {
+        if switch_expr == u16::from(DeviceControl::Enable) {
             let remaining = outer_remaining;
             let (enable, remaining) = u8::try_parse(remaining)?;
             let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -6845,7 +6849,7 @@ impl DeviceCtlData {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Enable(enable));
         }
-        if control_id == u16::from(DeviceControl::Absarea) {
+        if switch_expr == u16::from(DeviceControl::Absarea) {
             let (abs_area, new_remaining) = DeviceCtlDataAbsArea::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -6963,17 +6967,15 @@ impl Serialize for DeviceCtl {
 
 /// Opcode for the ChangeDeviceControl request
 pub const CHANGE_DEVICE_CONTROL_REQUEST: u8 = 35;
-pub fn change_device_control<Conn, A>(conn: &Conn, control_id: A, device_id: u8, control: DeviceCtl) -> Result<Cookie<'_, Conn, ChangeDeviceControlReply>, ConnectionError>
+pub fn change_device_control<Conn>(conn: &Conn, control_id: DeviceControl, device_id: u8, control: DeviceCtl) -> Result<Cookie<'_, Conn, ChangeDeviceControlReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u16>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let control_bytes = control.serialize();
     let length_so_far = 0;
-    let control_id = control_id.into();
-    let control_id_bytes = control_id.serialize();
+    let control_id_bytes = u16::from(control_id).serialize();
     let device_id_bytes = device_id.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -6994,6 +6996,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&control_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ChangeDeviceControlReply {
     pub response_type: u8,
@@ -7002,8 +7005,8 @@ pub struct ChangeDeviceControlReply {
     pub length: u32,
     pub status: u8,
 }
-impl ChangeDeviceControlReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ChangeDeviceControlReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -7047,6 +7050,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListDevicePropertiesReply {
     pub response_type: u8,
@@ -7055,8 +7059,8 @@ pub struct ListDevicePropertiesReply {
     pub length: u32,
     pub atoms: Vec<xproto::Atom>,
 }
-impl ListDevicePropertiesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ListDevicePropertiesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -7190,10 +7194,9 @@ impl ChangeDevicePropertyAux {
         }
     }
 }
-pub fn change_device_property<'c, Conn, A>(conn: &'c Conn, property: xproto::Atom, type_: xproto::Atom, device_id: u8, mode: A, num_items: u32, items: &ChangeDevicePropertyAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_device_property<'c, Conn>(conn: &'c Conn, property: xproto::Atom, type_: xproto::Atom, device_id: u8, mode: xproto::PropMode, num_items: u32, items: &ChangeDevicePropertyAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -7204,8 +7207,7 @@ where
     let type_bytes = type_.serialize();
     let device_id_bytes = device_id.serialize();
     let format_bytes = format.serialize();
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
+    let mode_bytes = u8::from(mode).serialize();
     let num_items_bytes = num_items.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -7285,7 +7287,7 @@ where
     let offset_bytes = offset.serialize();
     let len_bytes = len.serialize();
     let device_id_bytes = device_id.serialize();
-    let delete_bytes = (delete as u8).serialize();
+    let delete_bytes = delete.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_DEVICE_PROPERTY_REQUEST,
@@ -7318,6 +7320,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum GetDevicePropertyItems {
     Data8(Vec<u8>),
@@ -7326,9 +7329,10 @@ pub enum GetDevicePropertyItems {
 }
 impl GetDevicePropertyItems {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = format;
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if format == u8::from(PropertyFormat::M8Bits) {
+        if switch_expr == u8::from(PropertyFormat::M8Bits) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data8, remaining) = crate::x11_utils::parse_list::<u8>(remaining, num_items as usize)?;
@@ -7340,7 +7344,7 @@ impl GetDevicePropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(GetDevicePropertyItems::Data8(data8));
         }
-        if format == u8::from(PropertyFormat::M16Bits) {
+        if switch_expr == u8::from(PropertyFormat::M16Bits) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items as usize)?;
@@ -7352,7 +7356,7 @@ impl GetDevicePropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(GetDevicePropertyItems::Data16(data16));
         }
-        if format == u8::from(PropertyFormat::M32Bits) {
+        if switch_expr == u8::from(PropertyFormat::M32Bits) {
             let remaining = outer_remaining;
             let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items as usize)?;
             outer_remaining = remaining;
@@ -7429,8 +7433,8 @@ pub struct GetDevicePropertyReply {
     pub device_id: u8,
     pub items: GetDevicePropertyItems,
 }
-impl GetDevicePropertyReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDevicePropertyReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -7651,6 +7655,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIQueryPointerReply {
     pub response_type: u8,
@@ -7667,8 +7672,8 @@ pub struct XIQueryPointerReply {
     pub group: GroupInfo,
     pub buttons: Vec<u32>,
 }
-impl XIQueryPointerReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for XIQueryPointerReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -7969,11 +7974,11 @@ impl Serialize for AddMaster {
         bytes.reserve(8);
         u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
-        let name_len = self.name.len() as u16;
+        let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         name_len.serialize_into(bytes);
         self.send_core.serialize_into(bytes);
         self.enable.serialize_into(bytes);
-        self.name.serialize_into(bytes);
+        bytes.extend_from_slice(&self.name);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }
@@ -8180,11 +8185,11 @@ impl Serialize for HierarchyChangeDataAddMaster {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        let name_len = self.name.len() as u16;
+        let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         name_len.serialize_into(bytes);
         self.send_core.serialize_into(bytes);
         self.enable.serialize_into(bytes);
-        self.name.serialize_into(bytes);
+        bytes.extend_from_slice(&self.name);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }
@@ -8286,27 +8291,28 @@ pub enum HierarchyChangeData {
 }
 impl HierarchyChangeData {
     fn try_parse(value: &[u8], type_: u16) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = type_;
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if type_ == u16::from(HierarchyChangeType::AddMaster) {
+        if switch_expr == u16::from(HierarchyChangeType::AddMaster) {
             let (add_master, new_remaining) = HierarchyChangeDataAddMaster::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::AddMaster(add_master));
         }
-        if type_ == u16::from(HierarchyChangeType::RemoveMaster) {
+        if switch_expr == u16::from(HierarchyChangeType::RemoveMaster) {
             let (remove_master, new_remaining) = HierarchyChangeDataRemoveMaster::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::RemoveMaster(remove_master));
         }
-        if type_ == u16::from(HierarchyChangeType::AttachSlave) {
+        if switch_expr == u16::from(HierarchyChangeType::AttachSlave) {
             let (attach_slave, new_remaining) = HierarchyChangeDataAttachSlave::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::AttachSlave(attach_slave));
         }
-        if type_ == u16::from(HierarchyChangeType::DetachSlave) {
+        if switch_expr == u16::from(HierarchyChangeType::DetachSlave) {
             let remaining = outer_remaining;
             let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
             let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
@@ -8498,6 +8504,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIGetClientPointerReply {
     pub response_type: u8,
@@ -8506,8 +8513,8 @@ pub struct XIGetClientPointerReply {
     pub set: bool,
     pub deviceid: DeviceId,
 }
-impl XIGetClientPointerReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for XIGetClientPointerReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -8660,7 +8667,7 @@ impl Serialize for EventMask {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
         self.deviceid.serialize_into(bytes);
-        let mask_len = self.mask.len() as u16;
+        let mask_len = u16::try_from(self.mask.len()).expect("`mask` has too many elements");
         mask_len.serialize_into(bytes);
         self.mask.serialize_into(bytes);
     }
@@ -8730,6 +8737,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIQueryVersionReply {
     pub response_type: u8,
@@ -8738,8 +8746,8 @@ pub struct XIQueryVersionReply {
     pub major_version: u16,
     pub minor_version: u16,
 }
-impl XIQueryVersionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for XIQueryVersionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -9170,7 +9178,7 @@ impl Serialize for KeyClass {
         u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
-        let num_keys = self.keys.len() as u16;
+        let num_keys = u16::try_from(self.keys.len()).expect("`keys` has too many elements");
         num_keys.serialize_into(bytes);
         self.keys.serialize_into(bytes);
     }
@@ -9455,7 +9463,7 @@ impl Serialize for DeviceClassDataKey {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        let num_keys = self.keys.len() as u16;
+        let num_keys = u16::try_from(self.keys.len()).expect("`keys` has too many elements");
         num_keys.serialize_into(bytes);
         self.keys.serialize_into(bytes);
     }
@@ -9697,33 +9705,34 @@ pub enum DeviceClassData {
 }
 impl DeviceClassData {
     fn try_parse(value: &[u8], type_: u16) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = type_;
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if type_ == u16::from(DeviceClassType::Key) {
+        if switch_expr == u16::from(DeviceClassType::Key) {
             let (key, new_remaining) = DeviceClassDataKey::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Key(key));
         }
-        if type_ == u16::from(DeviceClassType::Button) {
+        if switch_expr == u16::from(DeviceClassType::Button) {
             let (button, new_remaining) = DeviceClassDataButton::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Button(button));
         }
-        if type_ == u16::from(DeviceClassType::Valuator) {
+        if switch_expr == u16::from(DeviceClassType::Valuator) {
             let (valuator, new_remaining) = DeviceClassDataValuator::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Valuator(valuator));
         }
-        if type_ == u16::from(DeviceClassType::Scroll) {
+        if switch_expr == u16::from(DeviceClassType::Scroll) {
             let (scroll, new_remaining) = DeviceClassDataScroll::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Scroll(scroll));
         }
-        if type_ == u16::from(DeviceClassType::Touch) {
+        if switch_expr == u16::from(DeviceClassType::Touch) {
             let (touch, new_remaining) = DeviceClassDataTouch::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -9874,13 +9883,13 @@ impl Serialize for XIDeviceInfo {
         self.deviceid.serialize_into(bytes);
         u16::from(self.type_).serialize_into(bytes);
         self.attachment.serialize_into(bytes);
-        let num_classes = self.classes.len() as u16;
+        let num_classes = u16::try_from(self.classes.len()).expect("`classes` has too many elements");
         num_classes.serialize_into(bytes);
-        let name_len = self.name.len() as u16;
+        let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         name_len.serialize_into(bytes);
         self.enabled.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
-        self.name.serialize_into(bytes);
+        bytes.extend_from_slice(&self.name);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         self.classes.serialize_into(bytes);
     }
@@ -9912,6 +9921,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIQueryDeviceReply {
     pub response_type: u8,
@@ -9919,8 +9929,8 @@ pub struct XIQueryDeviceReply {
     pub length: u32,
     pub infos: Vec<XIDeviceInfo>,
 }
-impl XIQueryDeviceReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for XIQueryDeviceReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10002,6 +10012,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIGetFocusReply {
     pub response_type: u8,
@@ -10009,8 +10020,8 @@ pub struct XIGetFocusReply {
     pub length: u32,
     pub focus: xproto::Window,
 }
-impl XIGetFocusReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for XIGetFocusReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10092,12 +10103,9 @@ impl TryFrom<u32> for GrabOwner {
 
 /// Opcode for the XIGrabDevice request
 pub const XI_GRAB_DEVICE_REQUEST: u8 = 51;
-pub fn xi_grab_device<'c, Conn, A, B, C>(conn: &'c Conn, window: xproto::Window, time: xproto::Timestamp, cursor: xproto::Cursor, deviceid: DeviceId, mode: A, paired_device_mode: B, owner_events: C, mask: &[u32]) -> Result<Cookie<'c, Conn, XIGrabDeviceReply>, ConnectionError>
+pub fn xi_grab_device<'c, Conn>(conn: &'c Conn, window: xproto::Window, time: xproto::Timestamp, cursor: xproto::Cursor, deviceid: DeviceId, mode: xproto::GrabMode, paired_device_mode: xproto::GrabMode, owner_events: GrabOwner, mask: &[u32]) -> Result<Cookie<'c, Conn, XIGrabDeviceReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
-    B: Into<u8>,
-    C: Into<bool>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -10106,12 +10114,9 @@ where
     let time_bytes = time.serialize();
     let cursor_bytes = cursor.serialize();
     let deviceid_bytes = deviceid.serialize();
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
-    let paired_device_mode = paired_device_mode.into();
-    let paired_device_mode_bytes = paired_device_mode.serialize();
-    let owner_events = owner_events.into();
-    let owner_events_bytes = (owner_events as u8).serialize();
+    let mode_bytes = u8::from(mode).serialize();
+    let paired_device_mode_bytes = u8::from(paired_device_mode).serialize();
+    let owner_events_bytes = u8::from(owner_events).serialize();
     let mask_len: u16 = mask.len().try_into()?;
     let mask_len_bytes = mask_len.serialize();
     let mask_bytes = mask.serialize();
@@ -10150,6 +10155,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&mask_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct XIGrabDeviceReply {
     pub response_type: u8,
@@ -10157,8 +10163,8 @@ pub struct XIGrabDeviceReply {
     pub length: u32,
     pub status: xproto::GrabStatus,
 }
-impl XIGrabDeviceReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for XIGrabDeviceReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10291,18 +10297,16 @@ impl TryFrom<u32> for EventMode {
 
 /// Opcode for the XIAllowEvents request
 pub const XI_ALLOW_EVENTS_REQUEST: u8 = 53;
-pub fn xi_allow_events<Conn, A>(conn: &Conn, time: xproto::Timestamp, deviceid: DeviceId, event_mode: A, touchid: u32, grab_window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn xi_allow_events<Conn>(conn: &Conn, time: xproto::Timestamp, deviceid: DeviceId, event_mode: EventMode, touchid: u32, grab_window: xproto::Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let time_bytes = time.serialize();
     let deviceid_bytes = deviceid.serialize();
-    let event_mode = event_mode.into();
-    let event_mode_bytes = event_mode.serialize();
+    let event_mode_bytes = u8::from(event_mode).serialize();
     let touchid_bytes = touchid.serialize();
     let grab_window_bytes = grab_window.serialize();
     let mut request0 = [
@@ -10545,13 +10549,9 @@ impl Serialize for GrabModifierInfo {
 
 /// Opcode for the XIPassiveGrabDevice request
 pub const XI_PASSIVE_GRAB_DEVICE_REQUEST: u8 = 54;
-pub fn xi_passive_grab_device<'c, Conn, A, B, C, D>(conn: &'c Conn, time: xproto::Timestamp, grab_window: xproto::Window, cursor: xproto::Cursor, detail: u32, deviceid: DeviceId, grab_type: A, grab_mode: B, paired_device_mode: C, owner_events: D, mask: &[u32], modifiers: &[u32]) -> Result<Cookie<'c, Conn, XIPassiveGrabDeviceReply>, ConnectionError>
+pub fn xi_passive_grab_device<'c, Conn>(conn: &'c Conn, time: xproto::Timestamp, grab_window: xproto::Window, cursor: xproto::Cursor, detail: u32, deviceid: DeviceId, grab_type: GrabType, grab_mode: GrabMode22, paired_device_mode: xproto::GrabMode, owner_events: GrabOwner, mask: &[u32], modifiers: &[u32]) -> Result<Cookie<'c, Conn, XIPassiveGrabDeviceReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
-    B: Into<u8>,
-    C: Into<u8>,
-    D: Into<bool>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -10565,14 +10565,10 @@ where
     let num_modifiers_bytes = num_modifiers.serialize();
     let mask_len: u16 = mask.len().try_into()?;
     let mask_len_bytes = mask_len.serialize();
-    let grab_type = grab_type.into();
-    let grab_type_bytes = grab_type.serialize();
-    let grab_mode = grab_mode.into();
-    let grab_mode_bytes = grab_mode.serialize();
-    let paired_device_mode = paired_device_mode.into();
-    let paired_device_mode_bytes = paired_device_mode.serialize();
-    let owner_events = owner_events.into();
-    let owner_events_bytes = (owner_events as u8).serialize();
+    let grab_type_bytes = u8::from(grab_type).serialize();
+    let grab_mode_bytes = u8::from(grab_mode).serialize();
+    let paired_device_mode_bytes = u8::from(paired_device_mode).serialize();
+    let owner_events_bytes = u8::from(owner_events).serialize();
     let mask_bytes = mask.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -10619,6 +10615,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(&mask_bytes), IoSlice::new(&modifiers_bytes), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIPassiveGrabDeviceReply {
     pub response_type: u8,
@@ -10626,8 +10623,8 @@ pub struct XIPassiveGrabDeviceReply {
     pub length: u32,
     pub modifiers: Vec<GrabModifierInfo>,
 }
-impl XIPassiveGrabDeviceReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for XIPassiveGrabDeviceReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10648,10 +10645,9 @@ impl TryFrom<&[u8]> for XIPassiveGrabDeviceReply {
 
 /// Opcode for the XIPassiveUngrabDevice request
 pub const XI_PASSIVE_UNGRAB_DEVICE_REQUEST: u8 = 55;
-pub fn xi_passive_ungrab_device<'c, Conn, A>(conn: &'c Conn, grab_window: xproto::Window, detail: u32, deviceid: DeviceId, grab_type: A, modifiers: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn xi_passive_ungrab_device<'c, Conn>(conn: &'c Conn, grab_window: xproto::Window, detail: u32, deviceid: DeviceId, grab_type: GrabType, modifiers: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -10661,8 +10657,7 @@ where
     let deviceid_bytes = deviceid.serialize();
     let num_modifiers: u16 = modifiers.len().try_into()?;
     let num_modifiers_bytes = num_modifiers.serialize();
-    let grab_type = grab_type.into();
-    let grab_type_bytes = grab_type.serialize();
+    let grab_type_bytes = u8::from(grab_type).serialize();
     let modifiers_bytes = modifiers.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -10722,6 +10717,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIListPropertiesReply {
     pub response_type: u8,
@@ -10729,8 +10725,8 @@ pub struct XIListPropertiesReply {
     pub length: u32,
     pub properties: Vec<xproto::Atom>,
 }
-impl XIListPropertiesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for XIListPropertiesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10799,10 +10795,9 @@ impl XIChangePropertyAux {
         }
     }
 }
-pub fn xi_change_property<'c, Conn, A>(conn: &'c Conn, deviceid: DeviceId, mode: A, property: xproto::Atom, type_: xproto::Atom, num_items: u32, items: &XIChangePropertyAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn xi_change_property<'c, Conn>(conn: &'c Conn, deviceid: DeviceId, mode: xproto::PropMode, property: xproto::Atom, type_: xproto::Atom, num_items: u32, items: &XIChangePropertyAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<u8>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
@@ -10810,8 +10805,7 @@ where
     let items_bytes = items.serialize();
     let length_so_far = 0;
     let deviceid_bytes = deviceid.serialize();
-    let mode = mode.into();
-    let mode_bytes = mode.serialize();
+    let mode_bytes = u8::from(mode).serialize();
     let format_bytes = format.serialize();
     let property_bytes = property.serialize();
     let type_bytes = type_.serialize();
@@ -10890,7 +10884,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let deviceid_bytes = deviceid.serialize();
-    let delete_bytes = (delete as u8).serialize();
+    let delete_bytes = delete.serialize();
     let property_bytes = property.serialize();
     let type_bytes = type_.serialize();
     let offset_bytes = offset.serialize();
@@ -10927,6 +10921,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum XIGetPropertyItems {
     Data8(Vec<u8>),
@@ -10935,9 +10930,10 @@ pub enum XIGetPropertyItems {
 }
 impl XIGetPropertyItems {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = format;
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if format == u8::from(PropertyFormat::M8Bits) {
+        if switch_expr == u8::from(PropertyFormat::M8Bits) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data8, remaining) = crate::x11_utils::parse_list::<u8>(remaining, num_items as usize)?;
@@ -10949,7 +10945,7 @@ impl XIGetPropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIGetPropertyItems::Data8(data8));
         }
-        if format == u8::from(PropertyFormat::M16Bits) {
+        if switch_expr == u8::from(PropertyFormat::M16Bits) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items as usize)?;
@@ -10961,7 +10957,7 @@ impl XIGetPropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIGetPropertyItems::Data16(data16));
         }
-        if format == u8::from(PropertyFormat::M32Bits) {
+        if switch_expr == u8::from(PropertyFormat::M32Bits) {
             let remaining = outer_remaining;
             let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items as usize)?;
             outer_remaining = remaining;
@@ -11036,8 +11032,8 @@ pub struct XIGetPropertyReply {
     pub format: PropertyFormat,
     pub items: XIGetPropertyItems,
 }
-impl XIGetPropertyReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for XIGetPropertyReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11086,6 +11082,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct XIGetSelectedEventsReply {
     pub response_type: u8,
@@ -11093,8 +11090,8 @@ pub struct XIGetSelectedEventsReply {
     pub length: u32,
     pub masks: Vec<EventMask>,
 }
-impl XIGetSelectedEventsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for XIGetSelectedEventsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11209,8 +11206,8 @@ pub struct DeviceValuatorEvent {
     pub first_valuator: u8,
     pub valuators: [i32; 6],
 }
-impl DeviceValuatorEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceValuatorEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11243,6 +11240,7 @@ impl TryFrom<&[u8]> for DeviceValuatorEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceValuatorEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -11255,12 +11253,12 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceValuatorEvent {
 }
 impl From<&DeviceValuatorEvent> for [u8; 32] {
     fn from(input: &DeviceValuatorEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let device_id = input.device_id.serialize();
-        let sequence = input.sequence.serialize();
-        let device_state = input.device_state.serialize();
-        let num_valuators = input.num_valuators.serialize();
-        let first_valuator = input.first_valuator.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let device_id_bytes = input.device_id.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let device_state_bytes = input.device_state.serialize();
+        let num_valuators_bytes = input.num_valuators.serialize();
+        let first_valuator_bytes = input.first_valuator.serialize();
         let valuators_0 = input.valuators[0].serialize();
         let valuators_1 = input.valuators[1].serialize();
         let valuators_2 = input.valuators[2].serialize();
@@ -11268,10 +11266,38 @@ impl From<&DeviceValuatorEvent> for [u8; 32] {
         let valuators_4 = input.valuators[4].serialize();
         let valuators_5 = input.valuators[5].serialize();
         [
-            response_type[0], device_id[0], sequence[0], sequence[1], device_state[0], device_state[1], num_valuators[0], first_valuator[0],
-            valuators_0[0], valuators_0[1], valuators_0[2], valuators_0[3], valuators_1[0], valuators_1[1], valuators_1[2], valuators_1[3],
-            valuators_2[0], valuators_2[1], valuators_2[2], valuators_2[3], valuators_3[0], valuators_3[1], valuators_3[2], valuators_3[3],
-            valuators_4[0], valuators_4[1], valuators_4[2], valuators_4[3], valuators_5[0], valuators_5[1], valuators_5[2], valuators_5[3]
+            response_type_bytes[0],
+            device_id_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            device_state_bytes[0],
+            device_state_bytes[1],
+            num_valuators_bytes[0],
+            first_valuator_bytes[0],
+            valuators_0[0],
+            valuators_0[1],
+            valuators_0[2],
+            valuators_0[3],
+            valuators_1[0],
+            valuators_1[1],
+            valuators_1[2],
+            valuators_1[3],
+            valuators_2[0],
+            valuators_2[1],
+            valuators_2[2],
+            valuators_2[3],
+            valuators_3[0],
+            valuators_3[1],
+            valuators_3[2],
+            valuators_3[3],
+            valuators_4[0],
+            valuators_4[1],
+            valuators_4[2],
+            valuators_4[3],
+            valuators_5[0],
+            valuators_5[1],
+            valuators_5[2],
+            valuators_5[3],
         ]
     }
 }
@@ -11360,8 +11386,8 @@ pub struct DeviceKeyPressEvent {
     pub same_screen: bool,
     pub device_id: u8,
 }
-impl DeviceKeyPressEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceKeyPressEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11388,6 +11414,7 @@ impl TryFrom<&[u8]> for DeviceKeyPressEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceKeyPressEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -11400,25 +11427,53 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceKeyPressEvent {
 }
 impl From<&DeviceKeyPressEvent> for [u8; 32] {
     fn from(input: &DeviceKeyPressEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let event = input.event.serialize();
-        let child = input.child.serialize();
-        let root_x = input.root_x.serialize();
-        let root_y = input.root_y.serialize();
-        let event_x = input.event_x.serialize();
-        let event_y = input.event_y.serialize();
-        let state = input.state.serialize();
-        let same_screen = input.same_screen.serialize();
-        let device_id = input.device_id.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let event_bytes = input.event.serialize();
+        let child_bytes = input.child.serialize();
+        let root_x_bytes = input.root_x.serialize();
+        let root_y_bytes = input.root_y.serialize();
+        let event_x_bytes = input.event_x.serialize();
+        let event_y_bytes = input.event_y.serialize();
+        let state_bytes = input.state.serialize();
+        let same_screen_bytes = input.same_screen.serialize();
+        let device_id_bytes = input.device_id.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
-            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], device_id[0]
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            child_bytes[0],
+            child_bytes[1],
+            child_bytes[2],
+            child_bytes[3],
+            root_x_bytes[0],
+            root_x_bytes[1],
+            root_y_bytes[0],
+            root_y_bytes[1],
+            event_x_bytes[0],
+            event_x_bytes[1],
+            event_y_bytes[0],
+            event_y_bytes[1],
+            state_bytes[0],
+            state_bytes[1],
+            same_screen_bytes[0],
+            device_id_bytes[0],
         ]
     }
 }
@@ -11447,8 +11502,8 @@ pub struct DeviceKeyReleaseEvent {
     pub same_screen: bool,
     pub device_id: u8,
 }
-impl DeviceKeyReleaseEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceKeyReleaseEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11475,6 +11530,7 @@ impl TryFrom<&[u8]> for DeviceKeyReleaseEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceKeyReleaseEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -11487,25 +11543,53 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceKeyReleaseEvent {
 }
 impl From<&DeviceKeyReleaseEvent> for [u8; 32] {
     fn from(input: &DeviceKeyReleaseEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let event = input.event.serialize();
-        let child = input.child.serialize();
-        let root_x = input.root_x.serialize();
-        let root_y = input.root_y.serialize();
-        let event_x = input.event_x.serialize();
-        let event_y = input.event_y.serialize();
-        let state = input.state.serialize();
-        let same_screen = input.same_screen.serialize();
-        let device_id = input.device_id.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let event_bytes = input.event.serialize();
+        let child_bytes = input.child.serialize();
+        let root_x_bytes = input.root_x.serialize();
+        let root_y_bytes = input.root_y.serialize();
+        let event_x_bytes = input.event_x.serialize();
+        let event_y_bytes = input.event_y.serialize();
+        let state_bytes = input.state.serialize();
+        let same_screen_bytes = input.same_screen.serialize();
+        let device_id_bytes = input.device_id.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
-            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], device_id[0]
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            child_bytes[0],
+            child_bytes[1],
+            child_bytes[2],
+            child_bytes[3],
+            root_x_bytes[0],
+            root_x_bytes[1],
+            root_y_bytes[0],
+            root_y_bytes[1],
+            event_x_bytes[0],
+            event_x_bytes[1],
+            event_y_bytes[0],
+            event_y_bytes[1],
+            state_bytes[0],
+            state_bytes[1],
+            same_screen_bytes[0],
+            device_id_bytes[0],
         ]
     }
 }
@@ -11534,8 +11618,8 @@ pub struct DeviceButtonPressEvent {
     pub same_screen: bool,
     pub device_id: u8,
 }
-impl DeviceButtonPressEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceButtonPressEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11562,6 +11646,7 @@ impl TryFrom<&[u8]> for DeviceButtonPressEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceButtonPressEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -11574,25 +11659,53 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceButtonPressEvent {
 }
 impl From<&DeviceButtonPressEvent> for [u8; 32] {
     fn from(input: &DeviceButtonPressEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let event = input.event.serialize();
-        let child = input.child.serialize();
-        let root_x = input.root_x.serialize();
-        let root_y = input.root_y.serialize();
-        let event_x = input.event_x.serialize();
-        let event_y = input.event_y.serialize();
-        let state = input.state.serialize();
-        let same_screen = input.same_screen.serialize();
-        let device_id = input.device_id.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let event_bytes = input.event.serialize();
+        let child_bytes = input.child.serialize();
+        let root_x_bytes = input.root_x.serialize();
+        let root_y_bytes = input.root_y.serialize();
+        let event_x_bytes = input.event_x.serialize();
+        let event_y_bytes = input.event_y.serialize();
+        let state_bytes = input.state.serialize();
+        let same_screen_bytes = input.same_screen.serialize();
+        let device_id_bytes = input.device_id.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
-            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], device_id[0]
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            child_bytes[0],
+            child_bytes[1],
+            child_bytes[2],
+            child_bytes[3],
+            root_x_bytes[0],
+            root_x_bytes[1],
+            root_y_bytes[0],
+            root_y_bytes[1],
+            event_x_bytes[0],
+            event_x_bytes[1],
+            event_y_bytes[0],
+            event_y_bytes[1],
+            state_bytes[0],
+            state_bytes[1],
+            same_screen_bytes[0],
+            device_id_bytes[0],
         ]
     }
 }
@@ -11621,8 +11734,8 @@ pub struct DeviceButtonReleaseEvent {
     pub same_screen: bool,
     pub device_id: u8,
 }
-impl DeviceButtonReleaseEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceButtonReleaseEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11649,6 +11762,7 @@ impl TryFrom<&[u8]> for DeviceButtonReleaseEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceButtonReleaseEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -11661,25 +11775,53 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceButtonReleaseEvent {
 }
 impl From<&DeviceButtonReleaseEvent> for [u8; 32] {
     fn from(input: &DeviceButtonReleaseEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let event = input.event.serialize();
-        let child = input.child.serialize();
-        let root_x = input.root_x.serialize();
-        let root_y = input.root_y.serialize();
-        let event_x = input.event_x.serialize();
-        let event_y = input.event_y.serialize();
-        let state = input.state.serialize();
-        let same_screen = input.same_screen.serialize();
-        let device_id = input.device_id.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let event_bytes = input.event.serialize();
+        let child_bytes = input.child.serialize();
+        let root_x_bytes = input.root_x.serialize();
+        let root_y_bytes = input.root_y.serialize();
+        let event_x_bytes = input.event_x.serialize();
+        let event_y_bytes = input.event_y.serialize();
+        let state_bytes = input.state.serialize();
+        let same_screen_bytes = input.same_screen.serialize();
+        let device_id_bytes = input.device_id.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
-            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], device_id[0]
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            child_bytes[0],
+            child_bytes[1],
+            child_bytes[2],
+            child_bytes[3],
+            root_x_bytes[0],
+            root_x_bytes[1],
+            root_y_bytes[0],
+            root_y_bytes[1],
+            event_x_bytes[0],
+            event_x_bytes[1],
+            event_y_bytes[0],
+            event_y_bytes[1],
+            state_bytes[0],
+            state_bytes[1],
+            same_screen_bytes[0],
+            device_id_bytes[0],
         ]
     }
 }
@@ -11708,8 +11850,8 @@ pub struct DeviceMotionNotifyEvent {
     pub same_screen: bool,
     pub device_id: u8,
 }
-impl DeviceMotionNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceMotionNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11736,6 +11878,7 @@ impl TryFrom<&[u8]> for DeviceMotionNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceMotionNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -11748,25 +11891,53 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceMotionNotifyEvent {
 }
 impl From<&DeviceMotionNotifyEvent> for [u8; 32] {
     fn from(input: &DeviceMotionNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let event = input.event.serialize();
-        let child = input.child.serialize();
-        let root_x = input.root_x.serialize();
-        let root_y = input.root_y.serialize();
-        let event_x = input.event_x.serialize();
-        let event_y = input.event_y.serialize();
-        let state = input.state.serialize();
-        let same_screen = input.same_screen.serialize();
-        let device_id = input.device_id.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let event_bytes = input.event.serialize();
+        let child_bytes = input.child.serialize();
+        let root_x_bytes = input.root_x.serialize();
+        let root_y_bytes = input.root_y.serialize();
+        let event_x_bytes = input.event_x.serialize();
+        let event_y_bytes = input.event_y.serialize();
+        let state_bytes = input.state.serialize();
+        let same_screen_bytes = input.same_screen.serialize();
+        let device_id_bytes = input.device_id.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
-            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], device_id[0]
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            child_bytes[0],
+            child_bytes[1],
+            child_bytes[2],
+            child_bytes[3],
+            root_x_bytes[0],
+            root_x_bytes[1],
+            root_y_bytes[0],
+            root_y_bytes[1],
+            event_x_bytes[0],
+            event_x_bytes[1],
+            event_y_bytes[0],
+            event_y_bytes[1],
+            state_bytes[0],
+            state_bytes[1],
+            same_screen_bytes[0],
+            device_id_bytes[0],
         ]
     }
 }
@@ -11788,8 +11959,8 @@ pub struct DeviceFocusInEvent {
     pub mode: xproto::NotifyMode,
     pub device_id: u8,
 }
-impl DeviceFocusInEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceFocusInEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11812,6 +11983,7 @@ impl TryFrom<&[u8]> for DeviceFocusInEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceFocusInEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -11824,18 +11996,46 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceFocusInEvent {
 }
 impl From<&DeviceFocusInEvent> for [u8; 32] {
     fn from(input: &DeviceFocusInEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = u8::from(input.detail).serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let window = input.window.serialize();
-        let mode = u8::from(input.mode).serialize();
-        let device_id = input.device_id.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = u8::from(input.detail).serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let window_bytes = input.window.serialize();
+        let mode_bytes = u8::from(input.mode).serialize();
+        let device_id_bytes = input.device_id.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            window[0], window[1], window[2], window[3], mode[0], device_id[0], 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            mode_bytes[0],
+            device_id_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -11857,8 +12057,8 @@ pub struct DeviceFocusOutEvent {
     pub mode: xproto::NotifyMode,
     pub device_id: u8,
 }
-impl DeviceFocusOutEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceFocusOutEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11881,6 +12081,7 @@ impl TryFrom<&[u8]> for DeviceFocusOutEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceFocusOutEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -11893,18 +12094,46 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceFocusOutEvent {
 }
 impl From<&DeviceFocusOutEvent> for [u8; 32] {
     fn from(input: &DeviceFocusOutEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = u8::from(input.detail).serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let window = input.window.serialize();
-        let mode = u8::from(input.mode).serialize();
-        let device_id = input.device_id.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = u8::from(input.detail).serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let window_bytes = input.window.serialize();
+        let mode_bytes = u8::from(input.mode).serialize();
+        let device_id_bytes = input.device_id.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            window[0], window[1], window[2], window[3], mode[0], device_id[0], 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            mode_bytes[0],
+            device_id_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -11933,8 +12162,8 @@ pub struct ProximityInEvent {
     pub same_screen: bool,
     pub device_id: u8,
 }
-impl ProximityInEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ProximityInEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11961,6 +12190,7 @@ impl TryFrom<&[u8]> for ProximityInEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ProximityInEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -11973,25 +12203,53 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ProximityInEvent {
 }
 impl From<&ProximityInEvent> for [u8; 32] {
     fn from(input: &ProximityInEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let event = input.event.serialize();
-        let child = input.child.serialize();
-        let root_x = input.root_x.serialize();
-        let root_y = input.root_y.serialize();
-        let event_x = input.event_x.serialize();
-        let event_y = input.event_y.serialize();
-        let state = input.state.serialize();
-        let same_screen = input.same_screen.serialize();
-        let device_id = input.device_id.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let event_bytes = input.event.serialize();
+        let child_bytes = input.child.serialize();
+        let root_x_bytes = input.root_x.serialize();
+        let root_y_bytes = input.root_y.serialize();
+        let event_x_bytes = input.event_x.serialize();
+        let event_y_bytes = input.event_y.serialize();
+        let state_bytes = input.state.serialize();
+        let same_screen_bytes = input.same_screen.serialize();
+        let device_id_bytes = input.device_id.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
-            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], device_id[0]
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            child_bytes[0],
+            child_bytes[1],
+            child_bytes[2],
+            child_bytes[3],
+            root_x_bytes[0],
+            root_x_bytes[1],
+            root_y_bytes[0],
+            root_y_bytes[1],
+            event_x_bytes[0],
+            event_x_bytes[1],
+            event_y_bytes[0],
+            event_y_bytes[1],
+            state_bytes[0],
+            state_bytes[1],
+            same_screen_bytes[0],
+            device_id_bytes[0],
         ]
     }
 }
@@ -12020,8 +12278,8 @@ pub struct ProximityOutEvent {
     pub same_screen: bool,
     pub device_id: u8,
 }
-impl ProximityOutEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ProximityOutEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12048,6 +12306,7 @@ impl TryFrom<&[u8]> for ProximityOutEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ProximityOutEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -12060,25 +12319,53 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ProximityOutEvent {
 }
 impl From<&ProximityOutEvent> for [u8; 32] {
     fn from(input: &ProximityOutEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let root = input.root.serialize();
-        let event = input.event.serialize();
-        let child = input.child.serialize();
-        let root_x = input.root_x.serialize();
-        let root_y = input.root_y.serialize();
-        let event_x = input.event_x.serialize();
-        let event_y = input.event_y.serialize();
-        let state = input.state.serialize();
-        let same_screen = input.same_screen.serialize();
-        let device_id = input.device_id.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let root_bytes = input.root.serialize();
+        let event_bytes = input.event.serialize();
+        let child_bytes = input.child.serialize();
+        let root_x_bytes = input.root_x.serialize();
+        let root_y_bytes = input.root_y.serialize();
+        let event_x_bytes = input.event_x.serialize();
+        let event_y_bytes = input.event_y.serialize();
+        let state_bytes = input.state.serialize();
+        let same_screen_bytes = input.same_screen.serialize();
+        let device_id_bytes = input.device_id.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            root[0], root[1], root[2], root[3], event[0], event[1], event[2], event[3],
-            child[0], child[1], child[2], child[3], root_x[0], root_x[1], root_y[0], root_y[1],
-            event_x[0], event_x[1], event_y[0], event_y[1], state[0], state[1], same_screen[0], device_id[0]
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            child_bytes[0],
+            child_bytes[1],
+            child_bytes[2],
+            child_bytes[3],
+            root_x_bytes[0],
+            root_x_bytes[1],
+            root_y_bytes[0],
+            root_y_bytes[1],
+            event_x_bytes[0],
+            event_x_bytes[1],
+            event_y_bytes[0],
+            event_y_bytes[1],
+            state_bytes[0],
+            state_bytes[1],
+            same_screen_bytes[0],
+            device_id_bytes[0],
         ]
     }
 }
@@ -12176,8 +12463,8 @@ pub struct DeviceStateNotifyEvent {
     pub keys: [u8; 4],
     pub valuators: [u32; 3],
 }
-impl DeviceStateNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceStateNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12226,6 +12513,7 @@ impl TryFrom<&[u8]> for DeviceStateNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceStateNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -12238,22 +12526,50 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceStateNotifyEvent {
 }
 impl From<&DeviceStateNotifyEvent> for [u8; 32] {
     fn from(input: &DeviceStateNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let device_id = input.device_id.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let num_keys = input.num_keys.serialize();
-        let num_buttons = input.num_buttons.serialize();
-        let num_valuators = input.num_valuators.serialize();
-        let classes_reported = input.classes_reported.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let device_id_bytes = input.device_id.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let num_keys_bytes = input.num_keys.serialize();
+        let num_buttons_bytes = input.num_buttons.serialize();
+        let num_valuators_bytes = input.num_valuators.serialize();
+        let classes_reported_bytes = input.classes_reported.serialize();
         let valuators_0 = input.valuators[0].serialize();
         let valuators_1 = input.valuators[1].serialize();
         let valuators_2 = input.valuators[2].serialize();
         [
-            response_type[0], device_id[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            num_keys[0], num_buttons[0], num_valuators[0], classes_reported[0], input.buttons[0], input.buttons[1], input.buttons[2], input.buttons[3],
-            input.keys[0], input.keys[1], input.keys[2], input.keys[3], valuators_0[0], valuators_0[1], valuators_0[2], valuators_0[3],
-            valuators_1[0], valuators_1[1], valuators_1[2], valuators_1[3], valuators_2[0], valuators_2[1], valuators_2[2], valuators_2[3]
+            response_type_bytes[0],
+            device_id_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            num_keys_bytes[0],
+            num_buttons_bytes[0],
+            num_valuators_bytes[0],
+            classes_reported_bytes[0],
+            input.buttons[0],
+            input.buttons[1],
+            input.buttons[2],
+            input.buttons[3],
+            input.keys[0],
+            input.keys[1],
+            input.keys[2],
+            input.keys[3],
+            valuators_0[0],
+            valuators_0[1],
+            valuators_0[2],
+            valuators_0[3],
+            valuators_1[0],
+            valuators_1[1],
+            valuators_1[2],
+            valuators_1[3],
+            valuators_2[0],
+            valuators_2[1],
+            valuators_2[2],
+            valuators_2[3],
         ]
     }
 }
@@ -12275,8 +12591,8 @@ pub struct DeviceMappingNotifyEvent {
     pub count: u8,
     pub time: xproto::Timestamp,
 }
-impl DeviceMappingNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceMappingNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12299,6 +12615,7 @@ impl TryFrom<&[u8]> for DeviceMappingNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceMappingNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -12311,18 +12628,46 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceMappingNotifyEvent {
 }
 impl From<&DeviceMappingNotifyEvent> for [u8; 32] {
     fn from(input: &DeviceMappingNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let device_id = input.device_id.serialize();
-        let sequence = input.sequence.serialize();
-        let request = u8::from(input.request).serialize();
-        let first_keycode = input.first_keycode.serialize();
-        let count = input.count.serialize();
-        let time = input.time.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let device_id_bytes = input.device_id.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let request_bytes = u8::from(input.request).serialize();
+        let first_keycode_bytes = input.first_keycode.serialize();
+        let count_bytes = input.count.serialize();
+        let time_bytes = input.time.serialize();
         [
-            response_type[0], device_id[0], sequence[0], sequence[1], request[0], first_keycode[0], count[0], 0,
-            time[0], time[1], time[2], time[3], 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            device_id_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            request_bytes[0],
+            first_keycode_bytes[0],
+            count_bytes[0],
+            0,
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -12404,8 +12749,8 @@ pub struct ChangeDeviceNotifyEvent {
     pub time: xproto::Timestamp,
     pub request: ChangeDevice,
 }
-impl ChangeDeviceNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ChangeDeviceNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12425,6 +12770,7 @@ impl TryFrom<&[u8]> for ChangeDeviceNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ChangeDeviceNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -12437,16 +12783,44 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for ChangeDeviceNotifyEvent {
 }
 impl From<&ChangeDeviceNotifyEvent> for [u8; 32] {
     fn from(input: &ChangeDeviceNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let device_id = input.device_id.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let request = u8::from(input.request).serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let device_id_bytes = input.device_id.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let request_bytes = u8::from(input.request).serialize();
         [
-            response_type[0], device_id[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            request[0], 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            device_id_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            request_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -12465,8 +12839,8 @@ pub struct DeviceKeyStateNotifyEvent {
     pub sequence: u16,
     pub keys: [u8; 28],
 }
-impl DeviceKeyStateNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceKeyStateNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12540,6 +12914,7 @@ impl TryFrom<&[u8]> for DeviceKeyStateNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceKeyStateNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -12552,14 +12927,42 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceKeyStateNotifyEvent {
 }
 impl From<&DeviceKeyStateNotifyEvent> for [u8; 32] {
     fn from(input: &DeviceKeyStateNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let device_id = input.device_id.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let device_id_bytes = input.device_id.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], device_id[0], sequence[0], sequence[1], input.keys[0], input.keys[1], input.keys[2], input.keys[3],
-            input.keys[4], input.keys[5], input.keys[6], input.keys[7], input.keys[8], input.keys[9], input.keys[10], input.keys[11],
-            input.keys[12], input.keys[13], input.keys[14], input.keys[15], input.keys[16], input.keys[17], input.keys[18], input.keys[19],
-            input.keys[20], input.keys[21], input.keys[22], input.keys[23], input.keys[24], input.keys[25], input.keys[26], input.keys[27]
+            response_type_bytes[0],
+            device_id_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            input.keys[0],
+            input.keys[1],
+            input.keys[2],
+            input.keys[3],
+            input.keys[4],
+            input.keys[5],
+            input.keys[6],
+            input.keys[7],
+            input.keys[8],
+            input.keys[9],
+            input.keys[10],
+            input.keys[11],
+            input.keys[12],
+            input.keys[13],
+            input.keys[14],
+            input.keys[15],
+            input.keys[16],
+            input.keys[17],
+            input.keys[18],
+            input.keys[19],
+            input.keys[20],
+            input.keys[21],
+            input.keys[22],
+            input.keys[23],
+            input.keys[24],
+            input.keys[25],
+            input.keys[26],
+            input.keys[27],
         ]
     }
 }
@@ -12578,8 +12981,8 @@ pub struct DeviceButtonStateNotifyEvent {
     pub sequence: u16,
     pub buttons: [u8; 28],
 }
-impl DeviceButtonStateNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceButtonStateNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12653,6 +13056,7 @@ impl TryFrom<&[u8]> for DeviceButtonStateNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceButtonStateNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -12665,14 +13069,42 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DeviceButtonStateNotifyEvent 
 }
 impl From<&DeviceButtonStateNotifyEvent> for [u8; 32] {
     fn from(input: &DeviceButtonStateNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let device_id = input.device_id.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let device_id_bytes = input.device_id.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], device_id[0], sequence[0], sequence[1], input.buttons[0], input.buttons[1], input.buttons[2], input.buttons[3],
-            input.buttons[4], input.buttons[5], input.buttons[6], input.buttons[7], input.buttons[8], input.buttons[9], input.buttons[10], input.buttons[11],
-            input.buttons[12], input.buttons[13], input.buttons[14], input.buttons[15], input.buttons[16], input.buttons[17], input.buttons[18], input.buttons[19],
-            input.buttons[20], input.buttons[21], input.buttons[22], input.buttons[23], input.buttons[24], input.buttons[25], input.buttons[26], input.buttons[27]
+            response_type_bytes[0],
+            device_id_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            input.buttons[0],
+            input.buttons[1],
+            input.buttons[2],
+            input.buttons[3],
+            input.buttons[4],
+            input.buttons[5],
+            input.buttons[6],
+            input.buttons[7],
+            input.buttons[8],
+            input.buttons[9],
+            input.buttons[10],
+            input.buttons[11],
+            input.buttons[12],
+            input.buttons[13],
+            input.buttons[14],
+            input.buttons[15],
+            input.buttons[16],
+            input.buttons[17],
+            input.buttons[18],
+            input.buttons[19],
+            input.buttons[20],
+            input.buttons[21],
+            input.buttons[22],
+            input.buttons[23],
+            input.buttons[24],
+            input.buttons[25],
+            input.buttons[26],
+            input.buttons[27],
         ]
     }
 }
@@ -12767,8 +13199,8 @@ pub struct DevicePresenceNotifyEvent {
     pub device_id: u8,
     pub control: u16,
 }
-impl DevicePresenceNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DevicePresenceNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12790,6 +13222,7 @@ impl TryFrom<&[u8]> for DevicePresenceNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DevicePresenceNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -12802,17 +13235,45 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DevicePresenceNotifyEvent {
 }
 impl From<&DevicePresenceNotifyEvent> for [u8; 32] {
     fn from(input: &DevicePresenceNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let devchange = u8::from(input.devchange).serialize();
-        let device_id = input.device_id.serialize();
-        let control = input.control.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let devchange_bytes = u8::from(input.devchange).serialize();
+        let device_id_bytes = input.device_id.serialize();
+        let control_bytes = input.control.serialize();
         [
-            response_type[0], 0, sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            devchange[0], device_id[0], control[0], control[1], 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            devchange_bytes[0],
+            device_id_bytes[0],
+            control_bytes[0],
+            control_bytes[1],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -12833,8 +13294,8 @@ pub struct DevicePropertyNotifyEvent {
     pub property: xproto::Atom,
     pub device_id: u8,
 }
-impl DevicePropertyNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DevicePropertyNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (state, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12855,6 +13316,7 @@ impl TryFrom<&[u8]> for DevicePropertyNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DevicePropertyNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -12867,17 +13329,45 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for DevicePropertyNotifyEvent {
 }
 impl From<&DevicePropertyNotifyEvent> for [u8; 32] {
     fn from(input: &DevicePropertyNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let state = u8::from(input.state).serialize();
-        let sequence = input.sequence.serialize();
-        let time = input.time.serialize();
-        let property = input.property.serialize();
-        let device_id = input.device_id.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let state_bytes = u8::from(input.state).serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let time_bytes = input.time.serialize();
+        let property_bytes = input.property.serialize();
+        let device_id_bytes = input.device_id.serialize();
         [
-            response_type[0], state[0], sequence[0], sequence[1], time[0], time[1], time[2], time[3],
-            property[0], property[1], property[2], property[3], 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, device_id[0]
+            response_type_bytes[0],
+            state_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            property_bytes[0],
+            property_bytes[1],
+            property_bytes[2],
+            property_bytes[3],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            device_id_bytes[0],
         ]
     }
 }
@@ -12964,8 +13454,8 @@ pub struct DeviceChangedEvent {
     pub reason: ChangeReason,
     pub classes: Vec<DeviceClass>,
 }
-impl DeviceChangedEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceChangedEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -12991,6 +13481,7 @@ impl TryFrom<&[u8]> for DeviceChangedEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for DeviceChangedEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -13057,8 +13548,8 @@ pub struct KeyPressEvent {
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
 }
-impl KeyPressEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for KeyPressEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13096,6 +13587,7 @@ impl TryFrom<&[u8]> for KeyPressEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for KeyPressEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -13134,8 +13626,8 @@ pub struct KeyReleaseEvent {
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
 }
-impl KeyReleaseEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for KeyReleaseEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13173,6 +13665,7 @@ impl TryFrom<&[u8]> for KeyReleaseEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for KeyReleaseEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -13239,8 +13732,8 @@ pub struct ButtonPressEvent {
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
 }
-impl ButtonPressEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ButtonPressEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13278,6 +13771,7 @@ impl TryFrom<&[u8]> for ButtonPressEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ButtonPressEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -13316,8 +13810,8 @@ pub struct ButtonReleaseEvent {
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
 }
-impl ButtonReleaseEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ButtonReleaseEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13355,6 +13849,7 @@ impl TryFrom<&[u8]> for ButtonReleaseEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for ButtonReleaseEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -13393,8 +13888,8 @@ pub struct MotionEvent {
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
 }
-impl MotionEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for MotionEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13432,6 +13927,7 @@ impl TryFrom<&[u8]> for MotionEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for MotionEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -13624,8 +14120,8 @@ pub struct EnterEvent {
     pub group: GroupInfo,
     pub buttons: Vec<u32>,
 }
-impl EnterEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for EnterEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13663,6 +14159,7 @@ impl TryFrom<&[u8]> for EnterEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for EnterEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -13701,8 +14198,8 @@ pub struct LeaveEvent {
     pub group: GroupInfo,
     pub buttons: Vec<u32>,
 }
-impl LeaveEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for LeaveEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13740,6 +14237,7 @@ impl TryFrom<&[u8]> for LeaveEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for LeaveEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -13778,8 +14276,8 @@ pub struct FocusInEvent {
     pub group: GroupInfo,
     pub buttons: Vec<u32>,
 }
-impl FocusInEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for FocusInEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13817,6 +14315,7 @@ impl TryFrom<&[u8]> for FocusInEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for FocusInEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -13855,8 +14354,8 @@ pub struct FocusOutEvent {
     pub group: GroupInfo,
     pub buttons: Vec<u32>,
 }
-impl FocusOutEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for FocusOutEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -13894,6 +14393,7 @@ impl TryFrom<&[u8]> for FocusOutEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for FocusOutEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14061,8 +14561,8 @@ pub struct HierarchyEvent {
     pub flags: u32,
     pub infos: Vec<HierarchyInfo>,
 }
-impl HierarchyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for HierarchyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14086,6 +14586,7 @@ impl TryFrom<&[u8]> for HierarchyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for HierarchyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14176,8 +14677,8 @@ pub struct PropertyEvent {
     pub property: xproto::Atom,
     pub what: PropertyFlag,
 }
-impl PropertyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PropertyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14201,6 +14702,7 @@ impl TryFrom<&[u8]> for PropertyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for PropertyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14230,8 +14732,8 @@ pub struct RawKeyPressEvent {
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
 }
-impl RawKeyPressEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for RawKeyPressEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14259,6 +14761,7 @@ impl TryFrom<&[u8]> for RawKeyPressEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for RawKeyPressEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14288,8 +14791,8 @@ pub struct RawKeyReleaseEvent {
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
 }
-impl RawKeyReleaseEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for RawKeyReleaseEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14317,6 +14820,7 @@ impl TryFrom<&[u8]> for RawKeyReleaseEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for RawKeyReleaseEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14346,8 +14850,8 @@ pub struct RawButtonPressEvent {
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
 }
-impl RawButtonPressEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for RawButtonPressEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14375,6 +14879,7 @@ impl TryFrom<&[u8]> for RawButtonPressEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for RawButtonPressEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14404,8 +14909,8 @@ pub struct RawButtonReleaseEvent {
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
 }
-impl RawButtonReleaseEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for RawButtonReleaseEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14433,6 +14938,7 @@ impl TryFrom<&[u8]> for RawButtonReleaseEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for RawButtonReleaseEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14462,8 +14968,8 @@ pub struct RawMotionEvent {
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
 }
-impl RawMotionEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for RawMotionEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14491,6 +14997,7 @@ impl TryFrom<&[u8]> for RawMotionEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for RawMotionEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14560,8 +15067,8 @@ pub struct TouchBeginEvent {
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
 }
-impl TouchBeginEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for TouchBeginEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14599,6 +15106,7 @@ impl TryFrom<&[u8]> for TouchBeginEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for TouchBeginEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14637,8 +15145,8 @@ pub struct TouchUpdateEvent {
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
 }
-impl TouchUpdateEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for TouchUpdateEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14676,6 +15184,7 @@ impl TryFrom<&[u8]> for TouchUpdateEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for TouchUpdateEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14714,8 +15223,8 @@ pub struct TouchEndEvent {
     pub valuator_mask: Vec<u32>,
     pub axisvalues: Vec<Fp3232>,
 }
-impl TouchEndEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for TouchEndEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14753,6 +15262,7 @@ impl TryFrom<&[u8]> for TouchEndEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for TouchEndEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14841,8 +15351,8 @@ pub struct TouchOwnershipEvent {
     pub sourceid: DeviceId,
     pub flags: TouchOwnershipFlags,
 }
-impl TouchOwnershipEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for TouchOwnershipEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14871,6 +15381,7 @@ impl TryFrom<&[u8]> for TouchOwnershipEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for TouchOwnershipEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14900,8 +15411,8 @@ pub struct RawTouchBeginEvent {
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
 }
-impl RawTouchBeginEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for RawTouchBeginEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14929,6 +15440,7 @@ impl TryFrom<&[u8]> for RawTouchBeginEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for RawTouchBeginEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -14958,8 +15470,8 @@ pub struct RawTouchUpdateEvent {
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
 }
-impl RawTouchUpdateEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for RawTouchUpdateEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -14987,6 +15499,7 @@ impl TryFrom<&[u8]> for RawTouchUpdateEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for RawTouchUpdateEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -15016,8 +15529,8 @@ pub struct RawTouchEndEvent {
     pub axisvalues: Vec<Fp3232>,
     pub axisvalues_raw: Vec<Fp3232>,
 }
-impl RawTouchEndEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for RawTouchEndEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15045,6 +15558,7 @@ impl TryFrom<&[u8]> for RawTouchEndEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for RawTouchEndEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -15142,8 +15656,8 @@ pub struct BarrierHitEvent {
     pub dx: Fp3232,
     pub dy: Fp3232,
 }
-impl BarrierHitEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BarrierHitEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15175,6 +15689,7 @@ impl TryFrom<&[u8]> for BarrierHitEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for BarrierHitEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -15209,8 +15724,8 @@ pub struct BarrierLeaveEvent {
     pub dx: Fp3232,
     pub dy: Fp3232,
 }
-impl BarrierLeaveEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BarrierLeaveEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (extension, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15242,6 +15757,7 @@ impl TryFrom<&[u8]> for BarrierLeaveEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for BarrierLeaveEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -15256,7 +15772,7 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for BarrierLeaveEvent {
 #[derive(Debug, Copy, Clone)]
 pub struct EventForSend([u8; 32]);
 impl EventForSend {
-    pub fn as_xproto_device_valuator(&self) -> DeviceValuatorEvent {
+    pub fn as_device_valuator(&self) -> DeviceValuatorEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceValuatorEvent, ParseError> {
             let (event, remaining) = DeviceValuatorEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15264,7 +15780,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_key_press(&self) -> DeviceKeyPressEvent {
+    pub fn as_device_key_press(&self) -> DeviceKeyPressEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceKeyPressEvent, ParseError> {
             let (event, remaining) = DeviceKeyPressEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15272,7 +15788,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_key_release(&self) -> DeviceKeyReleaseEvent {
+    pub fn as_device_key_release(&self) -> DeviceKeyReleaseEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceKeyReleaseEvent, ParseError> {
             let (event, remaining) = DeviceKeyReleaseEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15280,7 +15796,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_button_press(&self) -> DeviceButtonPressEvent {
+    pub fn as_device_button_press(&self) -> DeviceButtonPressEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceButtonPressEvent, ParseError> {
             let (event, remaining) = DeviceButtonPressEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15288,7 +15804,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_button_release(&self) -> DeviceButtonReleaseEvent {
+    pub fn as_device_button_release(&self) -> DeviceButtonReleaseEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceButtonReleaseEvent, ParseError> {
             let (event, remaining) = DeviceButtonReleaseEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15296,7 +15812,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_motion_notify(&self) -> DeviceMotionNotifyEvent {
+    pub fn as_device_motion_notify(&self) -> DeviceMotionNotifyEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceMotionNotifyEvent, ParseError> {
             let (event, remaining) = DeviceMotionNotifyEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15304,7 +15820,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_focus_in(&self) -> DeviceFocusInEvent {
+    pub fn as_device_focus_in(&self) -> DeviceFocusInEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceFocusInEvent, ParseError> {
             let (event, remaining) = DeviceFocusInEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15312,7 +15828,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_focus_out(&self) -> DeviceFocusOutEvent {
+    pub fn as_device_focus_out(&self) -> DeviceFocusOutEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceFocusOutEvent, ParseError> {
             let (event, remaining) = DeviceFocusOutEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15320,7 +15836,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_proximity_in(&self) -> ProximityInEvent {
+    pub fn as_proximity_in(&self) -> ProximityInEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<ProximityInEvent, ParseError> {
             let (event, remaining) = ProximityInEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15328,7 +15844,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_proximity_out(&self) -> ProximityOutEvent {
+    pub fn as_proximity_out(&self) -> ProximityOutEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<ProximityOutEvent, ParseError> {
             let (event, remaining) = ProximityOutEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15336,7 +15852,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_state_notify(&self) -> DeviceStateNotifyEvent {
+    pub fn as_device_state_notify(&self) -> DeviceStateNotifyEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceStateNotifyEvent, ParseError> {
             let (event, remaining) = DeviceStateNotifyEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15344,7 +15860,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_mapping_notify(&self) -> DeviceMappingNotifyEvent {
+    pub fn as_device_mapping_notify(&self) -> DeviceMappingNotifyEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceMappingNotifyEvent, ParseError> {
             let (event, remaining) = DeviceMappingNotifyEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15352,7 +15868,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_change_device_notify(&self) -> ChangeDeviceNotifyEvent {
+    pub fn as_change_device_notify(&self) -> ChangeDeviceNotifyEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<ChangeDeviceNotifyEvent, ParseError> {
             let (event, remaining) = ChangeDeviceNotifyEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15360,7 +15876,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_key_state_notify(&self) -> DeviceKeyStateNotifyEvent {
+    pub fn as_device_key_state_notify(&self) -> DeviceKeyStateNotifyEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceKeyStateNotifyEvent, ParseError> {
             let (event, remaining) = DeviceKeyStateNotifyEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15368,7 +15884,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_button_state_notify(&self) -> DeviceButtonStateNotifyEvent {
+    pub fn as_device_button_state_notify(&self) -> DeviceButtonStateNotifyEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DeviceButtonStateNotifyEvent, ParseError> {
             let (event, remaining) = DeviceButtonStateNotifyEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15376,7 +15892,7 @@ impl EventForSend {
         }
         do_the_parse(&self.0).unwrap()
     }
-    pub fn as_xproto_device_presence_notify(&self) -> DevicePresenceNotifyEvent {
+    pub fn as_device_presence_notify(&self) -> DevicePresenceNotifyEvent {
         fn do_the_parse(remaining: &[u8]) -> Result<DevicePresenceNotifyEvent, ParseError> {
             let (event, remaining) = DevicePresenceNotifyEvent::try_parse(remaining)?;
             let _ = remaining;
@@ -15461,7 +15977,7 @@ where
     let length_so_far = 0;
     let destination_bytes = destination.serialize();
     let device_id_bytes = device_id.serialize();
-    let propagate_bytes = (propagate as u8).serialize();
+    let propagate_bytes = propagate.serialize();
     let num_classes: u16 = classes.len().try_into()?;
     let num_classes_bytes = num_classes.serialize();
     let num_events: u8 = events.len().try_into()?;
@@ -15505,8 +16021,8 @@ pub struct DeviceError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl DeviceError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15532,14 +16048,43 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for DeviceError {
 }
 impl From<&DeviceError> for [u8; 32] {
     fn from(input: &DeviceError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -15557,8 +16102,8 @@ pub struct EventError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl EventError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for EventError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15584,14 +16129,43 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for EventError {
 }
 impl From<&EventError> for [u8; 32] {
     fn from(input: &EventError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -15609,8 +16183,8 @@ pub struct ModeError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl ModeError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ModeError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15636,14 +16210,43 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for ModeError {
 }
 impl From<&ModeError> for [u8; 32] {
     fn from(input: &ModeError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -15661,8 +16264,8 @@ pub struct DeviceBusyError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl DeviceBusyError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for DeviceBusyError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15688,14 +16291,43 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for DeviceBusyError {
 }
 impl From<&DeviceBusyError> for [u8; 32] {
     fn from(input: &DeviceBusyError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -15713,8 +16345,8 @@ pub struct ClassError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl ClassError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ClassError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -15740,14 +16372,43 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for ClassError {
 }
 impl From<&ClassError> for [u8; 32] {
     fn from(input: &ClassError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -15763,344 +16424,246 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_extension_version(self, name)
     }
-
     fn xinput_list_input_devices(&self) -> Result<Cookie<'_, Self, ListInputDevicesReply>, ConnectionError>
     {
         list_input_devices(self)
     }
-
     fn xinput_open_device(&self, device_id: u8) -> Result<Cookie<'_, Self, OpenDeviceReply>, ConnectionError>
     {
         open_device(self, device_id)
     }
-
     fn xinput_close_device(&self, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         close_device(self, device_id)
     }
-
-    fn xinput_set_device_mode<A>(&self, device_id: u8, mode: A) -> Result<Cookie<'_, Self, SetDeviceModeReply>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn xinput_set_device_mode(&self, device_id: u8, mode: ValuatorMode) -> Result<Cookie<'_, Self, SetDeviceModeReply>, ConnectionError>
     {
         set_device_mode(self, device_id, mode)
     }
-
     fn xinput_select_extension_event<'c>(&'c self, window: xproto::Window, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         select_extension_event(self, window, classes)
     }
-
     fn xinput_get_selected_extension_events(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetSelectedExtensionEventsReply>, ConnectionError>
     {
         get_selected_extension_events(self, window)
     }
-
-    fn xinput_change_device_dont_propagate_list<'c, A>(&'c self, window: xproto::Window, mode: A, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn xinput_change_device_dont_propagate_list<'c>(&'c self, window: xproto::Window, mode: PropagateMode, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_device_dont_propagate_list(self, window, mode, classes)
     }
-
     fn xinput_get_device_dont_propagate_list(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetDeviceDontPropagateListReply>, ConnectionError>
     {
         get_device_dont_propagate_list(self, window)
     }
-
     fn xinput_get_device_motion_events(&self, start: xproto::Timestamp, stop: xproto::Timestamp, device_id: u8) -> Result<Cookie<'_, Self, GetDeviceMotionEventsReply>, ConnectionError>
     {
         get_device_motion_events(self, start, stop, device_id)
     }
-
     fn xinput_change_keyboard_device(&self, device_id: u8) -> Result<Cookie<'_, Self, ChangeKeyboardDeviceReply>, ConnectionError>
     {
         change_keyboard_device(self, device_id)
     }
-
     fn xinput_change_pointer_device(&self, x_axis: u8, y_axis: u8, device_id: u8) -> Result<Cookie<'_, Self, ChangePointerDeviceReply>, ConnectionError>
     {
         change_pointer_device(self, x_axis, y_axis, device_id)
     }
-
-    fn xinput_grab_device<'c, A, B>(&'c self, grab_window: xproto::Window, time: xproto::Timestamp, this_device_mode: A, other_device_mode: B, owner_events: bool, device_id: u8, classes: &[EventClass]) -> Result<Cookie<'c, Self, GrabDeviceReply>, ConnectionError>
-    where
-        A: Into<u8>,
-        B: Into<u8>,
+    fn xinput_grab_device<'c>(&'c self, grab_window: xproto::Window, time: xproto::Timestamp, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, owner_events: bool, device_id: u8, classes: &[EventClass]) -> Result<Cookie<'c, Self, GrabDeviceReply>, ConnectionError>
     {
         grab_device(self, grab_window, time, this_device_mode, other_device_mode, owner_events, device_id, classes)
     }
-
     fn xinput_ungrab_device(&self, time: xproto::Timestamp, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_device(self, time, device_id)
     }
-
-    fn xinput_grab_device_key<'c, A, B>(&'c self, grab_window: xproto::Window, modifiers: u16, modifier_device: u8, grabbed_device: u8, key: u8, this_device_mode: A, other_device_mode: B, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
-        B: Into<u8>,
+    fn xinput_grab_device_key<'c>(&'c self, grab_window: xproto::Window, modifiers: u16, modifier_device: u8, grabbed_device: u8, key: u8, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         grab_device_key(self, grab_window, modifiers, modifier_device, grabbed_device, key, this_device_mode, other_device_mode, owner_events, classes)
     }
-
     fn xinput_ungrab_device_key(&self, grab_window: xproto::Window, modifiers: u16, modifier_device: u8, key: u8, grabbed_device: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_device_key(self, grab_window, modifiers, modifier_device, key, grabbed_device)
     }
-
-    fn xinput_grab_device_button<'c, A, B>(&'c self, grab_window: xproto::Window, grabbed_device: u8, modifier_device: u8, modifiers: u16, this_device_mode: A, other_device_mode: B, button: u8, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
-        B: Into<u8>,
+    fn xinput_grab_device_button<'c>(&'c self, grab_window: xproto::Window, grabbed_device: u8, modifier_device: u8, modifiers: u16, this_device_mode: xproto::GrabMode, other_device_mode: xproto::GrabMode, button: u8, owner_events: bool, classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         grab_device_button(self, grab_window, grabbed_device, modifier_device, modifiers, this_device_mode, other_device_mode, button, owner_events, classes)
     }
-
     fn xinput_ungrab_device_button(&self, grab_window: xproto::Window, modifiers: u16, modifier_device: u8, button: u8, grabbed_device: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         ungrab_device_button(self, grab_window, modifiers, modifier_device, button, grabbed_device)
     }
-
-    fn xinput_allow_device_events<A>(&self, time: xproto::Timestamp, mode: A, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn xinput_allow_device_events(&self, time: xproto::Timestamp, mode: DeviceInputMode, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         allow_device_events(self, time, mode, device_id)
     }
-
     fn xinput_get_device_focus(&self, device_id: u8) -> Result<Cookie<'_, Self, GetDeviceFocusReply>, ConnectionError>
     {
         get_device_focus(self, device_id)
     }
-
-    fn xinput_set_device_focus<A>(&self, focus: xproto::Window, time: xproto::Timestamp, revert_to: A, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn xinput_set_device_focus(&self, focus: xproto::Window, time: xproto::Timestamp, revert_to: xproto::InputFocus, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_device_focus(self, focus, time, revert_to, device_id)
     }
-
     fn xinput_get_feedback_control(&self, device_id: u8) -> Result<Cookie<'_, Self, GetFeedbackControlReply>, ConnectionError>
     {
         get_feedback_control(self, device_id)
     }
-
     fn xinput_change_feedback_control(&self, mask: u32, device_id: u8, feedback_id: u8, feedback: FeedbackCtl) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         change_feedback_control(self, mask, device_id, feedback_id, feedback)
     }
-
     fn xinput_get_device_key_mapping(&self, device_id: u8, first_keycode: KeyCode, count: u8) -> Result<Cookie<'_, Self, GetDeviceKeyMappingReply>, ConnectionError>
     {
         get_device_key_mapping(self, device_id, first_keycode, count)
     }
-
     fn xinput_change_device_key_mapping<'c>(&'c self, device_id: u8, first_keycode: KeyCode, keysyms_per_keycode: u8, keycode_count: u8, keysyms: &[xproto::Keysym]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_device_key_mapping(self, device_id, first_keycode, keysyms_per_keycode, keycode_count, keysyms)
     }
-
     fn xinput_get_device_modifier_mapping(&self, device_id: u8) -> Result<Cookie<'_, Self, GetDeviceModifierMappingReply>, ConnectionError>
     {
         get_device_modifier_mapping(self, device_id)
     }
-
     fn xinput_set_device_modifier_mapping<'c>(&'c self, device_id: u8, keymaps: &[u8]) -> Result<Cookie<'c, Self, SetDeviceModifierMappingReply>, ConnectionError>
     {
         set_device_modifier_mapping(self, device_id, keymaps)
     }
-
     fn xinput_get_device_button_mapping(&self, device_id: u8) -> Result<Cookie<'_, Self, GetDeviceButtonMappingReply>, ConnectionError>
     {
         get_device_button_mapping(self, device_id)
     }
-
     fn xinput_set_device_button_mapping<'c>(&'c self, device_id: u8, map: &[u8]) -> Result<Cookie<'c, Self, SetDeviceButtonMappingReply>, ConnectionError>
     {
         set_device_button_mapping(self, device_id, map)
     }
-
     fn xinput_query_device_state(&self, device_id: u8) -> Result<Cookie<'_, Self, QueryDeviceStateReply>, ConnectionError>
     {
         query_device_state(self, device_id)
     }
-
     fn xinput_device_bell(&self, device_id: u8, feedback_id: u8, feedback_class: u8, percent: i8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         device_bell(self, device_id, feedback_id, feedback_class, percent)
     }
-
     fn xinput_set_device_valuators<'c>(&'c self, device_id: u8, first_valuator: u8, valuators: &[i32]) -> Result<Cookie<'c, Self, SetDeviceValuatorsReply>, ConnectionError>
     {
         set_device_valuators(self, device_id, first_valuator, valuators)
     }
-
-    fn xinput_get_device_control<A>(&self, control_id: A, device_id: u8) -> Result<Cookie<'_, Self, GetDeviceControlReply>, ConnectionError>
-    where
-        A: Into<u16>,
+    fn xinput_get_device_control(&self, control_id: DeviceControl, device_id: u8) -> Result<Cookie<'_, Self, GetDeviceControlReply>, ConnectionError>
     {
         get_device_control(self, control_id, device_id)
     }
-
-    fn xinput_change_device_control<A>(&self, control_id: A, device_id: u8, control: DeviceCtl) -> Result<Cookie<'_, Self, ChangeDeviceControlReply>, ConnectionError>
-    where
-        A: Into<u16>,
+    fn xinput_change_device_control(&self, control_id: DeviceControl, device_id: u8, control: DeviceCtl) -> Result<Cookie<'_, Self, ChangeDeviceControlReply>, ConnectionError>
     {
         change_device_control(self, control_id, device_id, control)
     }
-
     fn xinput_list_device_properties(&self, device_id: u8) -> Result<Cookie<'_, Self, ListDevicePropertiesReply>, ConnectionError>
     {
         list_device_properties(self, device_id)
     }
-
-    fn xinput_change_device_property<'c, A>(&'c self, property: xproto::Atom, type_: xproto::Atom, device_id: u8, mode: A, num_items: u32, items: &ChangeDevicePropertyAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn xinput_change_device_property<'c>(&'c self, property: xproto::Atom, type_: xproto::Atom, device_id: u8, mode: xproto::PropMode, num_items: u32, items: &ChangeDevicePropertyAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_device_property(self, property, type_, device_id, mode, num_items, items)
     }
-
     fn xinput_delete_device_property(&self, property: xproto::Atom, device_id: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         delete_device_property(self, property, device_id)
     }
-
     fn xinput_get_device_property(&self, property: xproto::Atom, type_: xproto::Atom, offset: u32, len: u32, device_id: u8, delete: bool) -> Result<Cookie<'_, Self, GetDevicePropertyReply>, ConnectionError>
     {
         get_device_property(self, property, type_, offset, len, device_id, delete)
     }
-
     fn xinput_xi_query_pointer(&self, window: xproto::Window, deviceid: DeviceId) -> Result<Cookie<'_, Self, XIQueryPointerReply>, ConnectionError>
     {
         xi_query_pointer(self, window, deviceid)
     }
-
     fn xinput_xi_warp_pointer(&self, src_win: xproto::Window, dst_win: xproto::Window, src_x: Fp1616, src_y: Fp1616, src_width: u16, src_height: u16, dst_x: Fp1616, dst_y: Fp1616, deviceid: DeviceId) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         xi_warp_pointer(self, src_win, dst_win, src_x, src_y, src_width, src_height, dst_x, dst_y, deviceid)
     }
-
     fn xinput_xi_change_cursor(&self, window: xproto::Window, cursor: xproto::Cursor, deviceid: DeviceId) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         xi_change_cursor(self, window, cursor, deviceid)
     }
-
     fn xinput_xi_change_hierarchy<'c>(&'c self, changes: &[HierarchyChange]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         xi_change_hierarchy(self, changes)
     }
-
     fn xinput_xi_set_client_pointer(&self, window: xproto::Window, deviceid: DeviceId) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         xi_set_client_pointer(self, window, deviceid)
     }
-
     fn xinput_xi_get_client_pointer(&self, window: xproto::Window) -> Result<Cookie<'_, Self, XIGetClientPointerReply>, ConnectionError>
     {
         xi_get_client_pointer(self, window)
     }
-
     fn xinput_xi_select_events<'c>(&'c self, window: xproto::Window, masks: &[EventMask]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         xi_select_events(self, window, masks)
     }
-
     fn xinput_xi_query_version(&self, major_version: u16, minor_version: u16) -> Result<Cookie<'_, Self, XIQueryVersionReply>, ConnectionError>
     {
         xi_query_version(self, major_version, minor_version)
     }
-
     fn xinput_xi_query_device(&self, deviceid: DeviceId) -> Result<Cookie<'_, Self, XIQueryDeviceReply>, ConnectionError>
     {
         xi_query_device(self, deviceid)
     }
-
     fn xinput_xi_set_focus(&self, window: xproto::Window, time: xproto::Timestamp, deviceid: DeviceId) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         xi_set_focus(self, window, time, deviceid)
     }
-
     fn xinput_xi_get_focus(&self, deviceid: DeviceId) -> Result<Cookie<'_, Self, XIGetFocusReply>, ConnectionError>
     {
         xi_get_focus(self, deviceid)
     }
-
-    fn xinput_xi_grab_device<'c, A, B, C>(&'c self, window: xproto::Window, time: xproto::Timestamp, cursor: xproto::Cursor, deviceid: DeviceId, mode: A, paired_device_mode: B, owner_events: C, mask: &[u32]) -> Result<Cookie<'c, Self, XIGrabDeviceReply>, ConnectionError>
-    where
-        A: Into<u8>,
-        B: Into<u8>,
-        C: Into<bool>,
+    fn xinput_xi_grab_device<'c>(&'c self, window: xproto::Window, time: xproto::Timestamp, cursor: xproto::Cursor, deviceid: DeviceId, mode: xproto::GrabMode, paired_device_mode: xproto::GrabMode, owner_events: GrabOwner, mask: &[u32]) -> Result<Cookie<'c, Self, XIGrabDeviceReply>, ConnectionError>
     {
         xi_grab_device(self, window, time, cursor, deviceid, mode, paired_device_mode, owner_events, mask)
     }
-
     fn xinput_xi_ungrab_device(&self, time: xproto::Timestamp, deviceid: DeviceId) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         xi_ungrab_device(self, time, deviceid)
     }
-
-    fn xinput_xi_allow_events<A>(&self, time: xproto::Timestamp, deviceid: DeviceId, event_mode: A, touchid: u32, grab_window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn xinput_xi_allow_events(&self, time: xproto::Timestamp, deviceid: DeviceId, event_mode: EventMode, touchid: u32, grab_window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         xi_allow_events(self, time, deviceid, event_mode, touchid, grab_window)
     }
-
-    fn xinput_xi_passive_grab_device<'c, A, B, C, D>(&'c self, time: xproto::Timestamp, grab_window: xproto::Window, cursor: xproto::Cursor, detail: u32, deviceid: DeviceId, grab_type: A, grab_mode: B, paired_device_mode: C, owner_events: D, mask: &[u32], modifiers: &[u32]) -> Result<Cookie<'c, Self, XIPassiveGrabDeviceReply>, ConnectionError>
-    where
-        A: Into<u8>,
-        B: Into<u8>,
-        C: Into<u8>,
-        D: Into<bool>,
+    fn xinput_xi_passive_grab_device<'c>(&'c self, time: xproto::Timestamp, grab_window: xproto::Window, cursor: xproto::Cursor, detail: u32, deviceid: DeviceId, grab_type: GrabType, grab_mode: GrabMode22, paired_device_mode: xproto::GrabMode, owner_events: GrabOwner, mask: &[u32], modifiers: &[u32]) -> Result<Cookie<'c, Self, XIPassiveGrabDeviceReply>, ConnectionError>
     {
         xi_passive_grab_device(self, time, grab_window, cursor, detail, deviceid, grab_type, grab_mode, paired_device_mode, owner_events, mask, modifiers)
     }
-
-    fn xinput_xi_passive_ungrab_device<'c, A>(&'c self, grab_window: xproto::Window, detail: u32, deviceid: DeviceId, grab_type: A, modifiers: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn xinput_xi_passive_ungrab_device<'c>(&'c self, grab_window: xproto::Window, detail: u32, deviceid: DeviceId, grab_type: GrabType, modifiers: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         xi_passive_ungrab_device(self, grab_window, detail, deviceid, grab_type, modifiers)
     }
-
     fn xinput_xi_list_properties(&self, deviceid: DeviceId) -> Result<Cookie<'_, Self, XIListPropertiesReply>, ConnectionError>
     {
         xi_list_properties(self, deviceid)
     }
-
-    fn xinput_xi_change_property<'c, A>(&'c self, deviceid: DeviceId, mode: A, property: xproto::Atom, type_: xproto::Atom, num_items: u32, items: &XIChangePropertyAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
-    where
-        A: Into<u8>,
+    fn xinput_xi_change_property<'c>(&'c self, deviceid: DeviceId, mode: xproto::PropMode, property: xproto::Atom, type_: xproto::Atom, num_items: u32, items: &XIChangePropertyAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         xi_change_property(self, deviceid, mode, property, type_, num_items, items)
     }
-
     fn xinput_xi_delete_property(&self, deviceid: DeviceId, property: xproto::Atom) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         xi_delete_property(self, deviceid, property)
     }
-
     fn xinput_xi_get_property(&self, deviceid: DeviceId, delete: bool, property: xproto::Atom, type_: xproto::Atom, offset: u32, len: u32) -> Result<Cookie<'_, Self, XIGetPropertyReply>, ConnectionError>
     {
         xi_get_property(self, deviceid, delete, property, type_, offset, len)
     }
-
     fn xinput_xi_get_selected_events(&self, window: xproto::Window) -> Result<Cookie<'_, Self, XIGetSelectedEventsReply>, ConnectionError>
     {
         xi_get_selected_events(self, window)
     }
-
     fn xinput_xi_barrier_release_pointer<'c>(&'c self, barriers: &[BarrierReleasePointerInfo]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         xi_barrier_release_pointer(self, barriers)
     }
-
     fn xinput_send_extension_event<'c>(&'c self, destination: xproto::Window, device_id: u8, propagate: bool, events: &[EventForSend], classes: &[EventClass]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         send_extension_event(self, destination, device_id, propagate, events, classes)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

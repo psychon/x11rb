@@ -79,13 +79,13 @@ impl Serialize for Printer {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        let name_len = self.name.len() as u32;
+        let name_len = u32::try_from(self.name.len()).expect("`name` has too many elements");
         name_len.serialize_into(bytes);
-        self.name.serialize_into(bytes);
+        bytes.extend_from_slice(&self.name);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
-        let desc_len = self.description.len() as u32;
+        let desc_len = u32::try_from(self.description.len()).expect("`description` has too many elements");
         desc_len.serialize_into(bytes);
-        self.description.serialize_into(bytes);
+        bytes.extend_from_slice(&self.description);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }
@@ -392,6 +392,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintQueryVersionReply {
     pub response_type: u8,
@@ -400,8 +401,8 @@ pub struct PrintQueryVersionReply {
     pub major_version: u16,
     pub minor_version: u16,
 }
-impl PrintQueryVersionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PrintQueryVersionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -456,6 +457,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(printer_name), IoSlice::new(locale), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetPrinterListReply {
     pub response_type: u8,
@@ -463,8 +465,8 @@ pub struct PrintGetPrinterListReply {
     pub length: u32,
     pub printers: Vec<Printer>,
 }
-impl PrintGetPrinterListReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PrintGetPrinterListReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -596,6 +598,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetContextReply {
     pub response_type: u8,
@@ -603,8 +606,8 @@ pub struct PrintGetContextReply {
     pub length: u32,
     pub context: u32,
 }
-impl PrintGetContextReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PrintGetContextReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -669,6 +672,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetScreenOfContextReply {
     pub response_type: u8,
@@ -676,8 +680,8 @@ pub struct PrintGetScreenOfContextReply {
     pub length: u32,
     pub root: xproto::Window,
 }
-impl PrintGetScreenOfContextReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PrintGetScreenOfContextReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -730,7 +734,7 @@ where
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let cancel_bytes = (cancel as u8).serialize();
+    let cancel_bytes = cancel.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         PRINT_END_JOB_REQUEST,
@@ -784,7 +788,7 @@ where
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let cancel_bytes = (cancel as u8).serialize();
+    let cancel_bytes = cancel.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         PRINT_END_DOC_REQUEST,
@@ -879,6 +883,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetDocumentDataReply {
     pub response_type: u8,
@@ -888,8 +893,8 @@ pub struct PrintGetDocumentDataReply {
     pub finished_flag: u32,
     pub data: Vec<u8>,
 }
-impl PrintGetDocumentDataReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PrintGetDocumentDataReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -946,7 +951,7 @@ where
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let cancel_bytes = (cancel as u8).serialize();
+    let cancel_bytes = cancel.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         PRINT_END_PAGE_REQUEST,
@@ -1022,6 +1027,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintInputSelectedReply {
     pub response_type: u8,
@@ -1030,8 +1036,8 @@ pub struct PrintInputSelectedReply {
     pub event_mask: u32,
     pub all_events_mask: u32,
 }
-impl PrintInputSelectedReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PrintInputSelectedReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1080,6 +1086,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetAttributesReply {
     pub response_type: u8,
@@ -1087,8 +1094,8 @@ pub struct PrintGetAttributesReply {
     pub length: u32,
     pub attributes: Vec<String8>,
 }
-impl PrintGetAttributesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PrintGetAttributesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1147,6 +1154,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintGetOneAttributesReply {
     pub response_type: u8,
@@ -1154,8 +1162,8 @@ pub struct PrintGetOneAttributesReply {
     pub length: u32,
     pub value: Vec<String8>,
 }
-impl PrintGetOneAttributesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PrintGetOneAttributesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1241,6 +1249,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetPageDimensionsReply {
     pub response_type: u8,
@@ -1253,8 +1262,8 @@ pub struct PrintGetPageDimensionsReply {
     pub reproducible_width: u16,
     pub reproducible_height: u16,
 }
-impl PrintGetPageDimensionsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PrintGetPageDimensionsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1297,6 +1306,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PrintQueryScreensReply {
     pub response_type: u8,
@@ -1304,8 +1314,8 @@ pub struct PrintQueryScreensReply {
     pub length: u32,
     pub roots: Vec<xproto::Window>,
 }
-impl PrintQueryScreensReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PrintQueryScreensReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1355,6 +1365,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintSetImageResolutionReply {
     pub response_type: u8,
@@ -1363,8 +1374,8 @@ pub struct PrintSetImageResolutionReply {
     pub length: u32,
     pub previous_resolutions: u16,
 }
-impl PrintSetImageResolutionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PrintSetImageResolutionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (status, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1407,6 +1418,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct PrintGetImageResolutionReply {
     pub response_type: u8,
@@ -1414,8 +1426,8 @@ pub struct PrintGetImageResolutionReply {
     pub length: u32,
     pub image_resolution: u16,
 }
-impl PrintGetImageResolutionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for PrintGetImageResolutionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1442,8 +1454,8 @@ pub struct NotifyEvent {
     pub context: Pcontext,
     pub cancel: bool,
 }
-impl NotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for NotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1461,6 +1473,7 @@ impl TryFrom<&[u8]> for NotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for NotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1473,16 +1486,45 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for NotifyEvent {
 }
 impl From<&NotifyEvent> for [u8; 32] {
     fn from(input: &NotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let context = input.context.serialize();
-        let cancel = input.cancel.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let context_bytes = input.context.serialize();
+        let cancel_bytes = input.cancel.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], context[0], context[1], context[2], context[3],
-            cancel[0], /* trailing padding */ 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            context_bytes[0],
+            context_bytes[1],
+            context_bytes[2],
+            context_bytes[3],
+            cancel_bytes[0],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -1501,8 +1543,8 @@ pub struct AttributNotifyEvent {
     pub sequence: u16,
     pub context: Pcontext,
 }
-impl AttributNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for AttributNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (detail, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1519,6 +1561,7 @@ impl TryFrom<&[u8]> for AttributNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for AttributNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1531,15 +1574,44 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for AttributNotifyEvent {
 }
 impl From<&AttributNotifyEvent> for [u8; 32] {
     fn from(input: &AttributNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let detail = input.detail.serialize();
-        let sequence = input.sequence.serialize();
-        let context = input.context.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let detail_bytes = input.detail.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let context_bytes = input.context.serialize();
         [
-            response_type[0], detail[0], sequence[0], sequence[1], context[0], context[1], context[2], context[3],
-            /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            detail_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            context_bytes[0],
+            context_bytes[1],
+            context_bytes[2],
+            context_bytes[3],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -1557,8 +1629,8 @@ pub struct BadContextError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl BadContextError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadContextError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1584,14 +1656,43 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadContextError {
 }
 impl From<&BadContextError> for [u8; 32] {
     fn from(input: &BadContextError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -1609,8 +1710,8 @@ pub struct BadSequenceError {
     pub error_code: u8,
     pub sequence: u16,
 }
-impl BadSequenceError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for BadSequenceError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1636,14 +1737,43 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadSequenceError {
 }
 impl From<&BadSequenceError> for [u8; 32] {
     fn from(input: &BadSequenceError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -1659,126 +1789,102 @@ pub trait ConnectionExt: RequestConnection {
     {
         print_query_version(self)
     }
-
     fn xprint_print_get_printer_list<'c>(&'c self, printer_name: &[String8], locale: &[String8]) -> Result<Cookie<'c, Self, PrintGetPrinterListReply>, ConnectionError>
     {
         print_get_printer_list(self, printer_name, locale)
     }
-
     fn xprint_print_rehash_printer_list(&self) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_rehash_printer_list(self)
     }
-
     fn xprint_create_context<'c>(&'c self, context_id: u32, printer_name: &[String8], locale: &[String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_context(self, context_id, printer_name, locale)
     }
-
     fn xprint_print_set_context(&self, context: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_set_context(self, context)
     }
-
     fn xprint_print_get_context(&self) -> Result<Cookie<'_, Self, PrintGetContextReply>, ConnectionError>
     {
         print_get_context(self)
     }
-
     fn xprint_print_destroy_context(&self, context: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_destroy_context(self, context)
     }
-
     fn xprint_print_get_screen_of_context(&self) -> Result<Cookie<'_, Self, PrintGetScreenOfContextReply>, ConnectionError>
     {
         print_get_screen_of_context(self)
     }
-
     fn xprint_print_start_job(&self, output_mode: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_start_job(self, output_mode)
     }
-
     fn xprint_print_end_job(&self, cancel: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_end_job(self, cancel)
     }
-
     fn xprint_print_start_doc(&self, driver_mode: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_start_doc(self, driver_mode)
     }
-
     fn xprint_print_end_doc(&self, cancel: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_end_doc(self, cancel)
     }
-
     fn xprint_print_put_document_data<'c>(&'c self, drawable: xproto::Drawable, data: &[u8], doc_format: &[String8], options: &[String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         print_put_document_data(self, drawable, data, doc_format, options)
     }
-
     fn xprint_print_get_document_data(&self, context: Pcontext, max_bytes: u32) -> Result<Cookie<'_, Self, PrintGetDocumentDataReply>, ConnectionError>
     {
         print_get_document_data(self, context, max_bytes)
     }
-
     fn xprint_print_start_page(&self, window: xproto::Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_start_page(self, window)
     }
-
     fn xprint_print_end_page(&self, cancel: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_end_page(self, cancel)
     }
-
     fn xprint_print_select_input(&self, context: Pcontext, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         print_select_input(self, context, event_mask)
     }
-
     fn xprint_print_input_selected(&self, context: Pcontext) -> Result<Cookie<'_, Self, PrintInputSelectedReply>, ConnectionError>
     {
         print_input_selected(self, context)
     }
-
     fn xprint_print_get_attributes(&self, context: Pcontext, pool: u8) -> Result<Cookie<'_, Self, PrintGetAttributesReply>, ConnectionError>
     {
         print_get_attributes(self, context, pool)
     }
-
     fn xprint_print_get_one_attributes<'c>(&'c self, context: Pcontext, pool: u8, name: &[String8]) -> Result<Cookie<'c, Self, PrintGetOneAttributesReply>, ConnectionError>
     {
         print_get_one_attributes(self, context, pool, name)
     }
-
     fn xprint_print_set_attributes<'c>(&'c self, context: Pcontext, string_len: u32, pool: u8, rule: u8, attributes: &[String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         print_set_attributes(self, context, string_len, pool, rule, attributes)
     }
-
     fn xprint_print_get_page_dimensions(&self, context: Pcontext) -> Result<Cookie<'_, Self, PrintGetPageDimensionsReply>, ConnectionError>
     {
         print_get_page_dimensions(self, context)
     }
-
     fn xprint_print_query_screens(&self) -> Result<Cookie<'_, Self, PrintQueryScreensReply>, ConnectionError>
     {
         print_query_screens(self)
     }
-
     fn xprint_print_set_image_resolution(&self, context: Pcontext, image_resolution: u16) -> Result<Cookie<'_, Self, PrintSetImageResolutionReply>, ConnectionError>
     {
         print_set_image_resolution(self, context, image_resolution)
     }
-
     fn xprint_print_get_image_resolution(&self, context: Pcontext) -> Result<Cookie<'_, Self, PrintGetImageResolutionReply>, ConnectionError>
     {
         print_get_image_resolution(self, context)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

@@ -65,6 +65,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetVersionReply {
     pub response_type: u8,
@@ -73,8 +74,8 @@ pub struct GetVersionReply {
     pub length: u32,
     pub minor_version: u16,
 }
-impl GetVersionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetVersionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (major_version, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -184,6 +185,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CompareCursorReply {
     pub response_type: u8,
@@ -191,8 +193,8 @@ pub struct CompareCursorReply {
     pub sequence: u16,
     pub length: u32,
 }
-impl CompareCursorReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for CompareCursorReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (same, remaining) = bool::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -278,7 +280,7 @@ where
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let impervious_bytes = (impervious as u8).serialize();
+    let impervious_bytes = impervious.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GRAB_CONTROL_REQUEST,
@@ -302,21 +304,18 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_version(self, major_version, minor_version)
     }
-
     fn xtest_compare_cursor(&self, window: xproto::Window, cursor: xproto::Cursor) -> Result<Cookie<'_, Self, CompareCursorReply>, ConnectionError>
     {
         compare_cursor(self, window, cursor)
     }
-
     fn xtest_fake_input(&self, type_: u8, detail: u8, time: u32, root: xproto::Window, root_x: i16, root_y: i16, deviceid: u8) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         fake_input(self, type_, detail, time, root, root_x, root_y, deviceid)
     }
-
     fn xtest_grab_control(&self, impervious: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         grab_control(self, impervious)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

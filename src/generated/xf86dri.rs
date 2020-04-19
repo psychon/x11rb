@@ -107,6 +107,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryVersionReply {
     pub response_type: u8,
@@ -116,8 +117,8 @@ pub struct QueryVersionReply {
     pub dri_minor_version: u16,
     pub dri_minor_patch: u32,
 }
-impl QueryVersionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryVersionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -162,6 +163,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryDirectRenderingCapableReply {
     pub response_type: u8,
@@ -169,8 +171,8 @@ pub struct QueryDirectRenderingCapableReply {
     pub length: u32,
     pub is_capable: bool,
 }
-impl QueryDirectRenderingCapableReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryDirectRenderingCapableReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -213,6 +215,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OpenConnectionReply {
     pub response_type: u8,
@@ -222,8 +225,8 @@ pub struct OpenConnectionReply {
     pub sarea_handle_high: u32,
     pub bus_id: Vec<u8>,
 }
-impl OpenConnectionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for OpenConnectionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -297,6 +300,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetClientDriverNameReply {
     pub response_type: u8,
@@ -307,8 +311,8 @@ pub struct GetClientDriverNameReply {
     pub client_driver_patch_version: u32,
     pub client_driver_name: Vec<u8>,
 }
-impl GetClientDriverNameReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetClientDriverNameReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -366,6 +370,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateContextReply {
     pub response_type: u8,
@@ -373,8 +378,8 @@ pub struct CreateContextReply {
     pub length: u32,
     pub hw_context: u32,
 }
-impl CreateContextReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for CreateContextReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -454,6 +459,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CreateDrawableReply {
     pub response_type: u8,
@@ -461,8 +467,8 @@ pub struct CreateDrawableReply {
     pub length: u32,
     pub hw_drawable_handle: u32,
 }
-impl CreateDrawableReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for CreateDrawableReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -542,6 +548,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDrawableInfoReply {
     pub response_type: u8,
@@ -558,8 +565,8 @@ pub struct GetDrawableInfoReply {
     pub clip_rects: Vec<DrmClipRect>,
     pub back_clip_rects: Vec<DrmClipRect>,
 }
-impl GetDrawableInfoReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDrawableInfoReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -613,6 +620,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetDeviceInfoReply {
     pub response_type: u8,
@@ -625,8 +633,8 @@ pub struct GetDeviceInfoReply {
     pub framebuffer_stride: u32,
     pub device_private: Vec<u32>,
 }
-impl GetDeviceInfoReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDeviceInfoReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -680,6 +688,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AuthConnectionReply {
     pub response_type: u8,
@@ -687,8 +696,8 @@ pub struct AuthConnectionReply {
     pub length: u32,
     pub authenticated: u32,
 }
-impl AuthConnectionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for AuthConnectionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -711,61 +720,50 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self)
     }
-
     fn xf86dri_query_direct_rendering_capable(&self, screen: u32) -> Result<Cookie<'_, Self, QueryDirectRenderingCapableReply>, ConnectionError>
     {
         query_direct_rendering_capable(self, screen)
     }
-
     fn xf86dri_open_connection(&self, screen: u32) -> Result<Cookie<'_, Self, OpenConnectionReply>, ConnectionError>
     {
         open_connection(self, screen)
     }
-
     fn xf86dri_close_connection(&self, screen: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         close_connection(self, screen)
     }
-
     fn xf86dri_get_client_driver_name(&self, screen: u32) -> Result<Cookie<'_, Self, GetClientDriverNameReply>, ConnectionError>
     {
         get_client_driver_name(self, screen)
     }
-
     fn xf86dri_create_context(&self, screen: u32, visual: u32, context: u32) -> Result<Cookie<'_, Self, CreateContextReply>, ConnectionError>
     {
         create_context(self, screen, visual, context)
     }
-
     fn xf86dri_destroy_context(&self, screen: u32, context: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_context(self, screen, context)
     }
-
     fn xf86dri_create_drawable(&self, screen: u32, drawable: u32) -> Result<Cookie<'_, Self, CreateDrawableReply>, ConnectionError>
     {
         create_drawable(self, screen, drawable)
     }
-
     fn xf86dri_destroy_drawable(&self, screen: u32, drawable: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_drawable(self, screen, drawable)
     }
-
     fn xf86dri_get_drawable_info(&self, screen: u32, drawable: u32) -> Result<Cookie<'_, Self, GetDrawableInfoReply>, ConnectionError>
     {
         get_drawable_info(self, screen, drawable)
     }
-
     fn xf86dri_get_device_info(&self, screen: u32) -> Result<Cookie<'_, Self, GetDeviceInfoReply>, ConnectionError>
     {
         get_device_info(self, screen)
     }
-
     fn xf86dri_auth_connection(&self, screen: u32, magic: u32) -> Result<Cookie<'_, Self, AuthConnectionReply>, ConnectionError>
     {
         auth_connection(self, screen, magic)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}

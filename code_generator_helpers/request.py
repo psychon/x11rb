@@ -74,11 +74,9 @@ def collect_function_arguments(module, obj, name, aux_name):
             rust_type = module._to_complex_rust_type(field, aux_name, '&')
 
             # Does this argument have a generic type? This is yes if
-            # - it comes from an enum, or
             # - it is a FD (but not a list of FDs)
             # - It is the "event" argument of SendEvent
-            if (field.enum is not None and not field.type.is_list) or \
-                    (field.isfd and not field.type.is_list) or \
+            if (field.isfd and not field.type.is_list) or \
                     (name == ('xcb', 'SendEvent') and field.field_name == 'event') or \
                     (name == ('xcb', 'ChangeProperty') and field.field_type == ('xcb', 'ATOM')):
                 if name == ('xcb', 'SendEvent') and field.field_name == 'event':
@@ -89,6 +87,10 @@ def collect_function_arguments(module, obj, name, aux_name):
                 generics.append(letter)
                 where.append("%s: Into<%s>" % (letter, rust_type))
                 rust_type = letter
+
+            if field.enum is not None:
+                rust_type = module.outer_module.get_type(field.enum)
+                rust_type = module._name(rust_type.name)
 
             args.append("%s: %s" % (module._to_rust_variable(field.field_name), rust_type))
             arg_names.append(module._to_rust_variable(field.field_name))
@@ -309,8 +311,7 @@ def request_implementation(module, obj, name, fds, fds_is_list):
                     # (Needed because this is not a function argument)
                     module.out("let %s: %s = %s.len().try_into()?;", rust_variable,
                                module._field_type(field), list_var_name)
-            if (field.enum is not None and not hasattr(field, 'lenfield_for_switch')) or \
-                    (name == ('xcb', 'ChangeProperty') and field.field_type == ('xcb', 'ATOM')):
+            if (name == ('xcb', 'ChangeProperty') and field.field_type == ('xcb', 'ATOM')):
                 # This is a generic parameter, call Into::into
                 module.out("let %s = %s.into();", rust_variable, rust_variable)
             field_bytes = module._to_rust_variable(field_name + "_bytes")
@@ -319,9 +320,11 @@ def request_implementation(module, obj, name, fds, fds_is_list):
                 # already called serialize() to get the bytes.
                 pass
             elif field.type.size is not None:  # Size None was already handled above
-                if code_generator_helpers.module.is_bool(field.type) or \
-                        (name == ('xcb', 'InternAtom') and field_name == 'only_if_exists'):
-                    module.out("let %s = (%s as u8).serialize();", field_bytes, rust_variable)
+                if field.enum is not None and not hasattr(field, 'lenfield_for_switch'):
+                    field_type = module._field_type(field)
+                    if field_type == "bool":
+                        field_type = "u8"
+                    module.out("let %s = %s::from(%s).serialize();", field_bytes, field_type, rust_variable)
                 else:
                     module.out("let %s = %s.serialize();", field_bytes, rust_variable)
             if field.type.is_switch or field.type.size is None:
@@ -443,7 +446,6 @@ def generate_request_code(module, obj, name, function_name):
     else:
         module.trait_out.indent("%s(%s)", function_name, ", ".join(arg_names))
     module.trait_out("}")
-    module.trait_out("")
 
     # Then emit the global function that actually does all the work
     if need_lifetime:
@@ -464,7 +466,9 @@ def generate_request_code(module, obj, name, function_name):
     module.out("}")
 
     if obj.reply:
+        module.out("")
+        has_fds = any(field.isfd for field in obj.reply.fields)
         code_generator_helpers.module.emit_doc(module.out, obj.reply.doc)
-        module.complex_type(obj.reply, module._name(name) + 'Reply', False, [])
+        module.complex_type(obj.reply, module._name(name) + 'Reply', not has_fds, [])
 
     module.out("")

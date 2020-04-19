@@ -394,9 +394,9 @@ impl Serialize for Systemcounter {
         bytes.reserve(14);
         self.counter.serialize_into(bytes);
         self.resolution.serialize_into(bytes);
-        let name_len = self.name.len() as u16;
+        let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         name_len.serialize_into(bytes);
-        self.name.serialize_into(bytes);
+        bytes.extend_from_slice(&self.name);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }
@@ -538,8 +538,8 @@ pub struct CounterError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl CounterError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for CounterError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -568,17 +568,46 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for CounterError {
 }
 impl From<&CounterError> for [u8; 32] {
     fn from(input: &CounterError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_counter = input.bad_counter.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_counter_bytes = input.bad_counter.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_counter[0], bad_counter[1], bad_counter[2], bad_counter[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], /* trailing padding */ 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_counter_bytes[0],
+            bad_counter_bytes[1],
+            bad_counter_bytes[2],
+            bad_counter_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -599,8 +628,8 @@ pub struct AlarmError {
     pub minor_opcode: u16,
     pub major_opcode: u8,
 }
-impl AlarmError {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for AlarmError {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (error_code, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -629,17 +658,46 @@ impl<B: AsRef<[u8]>> From<&GenericError<B>> for AlarmError {
 }
 impl From<&AlarmError> for [u8; 32] {
     fn from(input: &AlarmError) -> Self {
-        let response_type = input.response_type.serialize();
-        let error_code = input.error_code.serialize();
-        let sequence = input.sequence.serialize();
-        let bad_alarm = input.bad_alarm.serialize();
-        let minor_opcode = input.minor_opcode.serialize();
-        let major_opcode = input.major_opcode.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let error_code_bytes = input.error_code.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let bad_alarm_bytes = input.bad_alarm.serialize();
+        let minor_opcode_bytes = input.minor_opcode.serialize();
+        let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type[0], error_code[0], sequence[0], sequence[1], bad_alarm[0], bad_alarm[1], bad_alarm[2], bad_alarm[3],
-            minor_opcode[0], minor_opcode[1], major_opcode[0], /* trailing padding */ 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_alarm_bytes[0],
+            bad_alarm_bytes[1],
+            bad_alarm_bytes[2],
+            bad_alarm_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -676,6 +734,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct InitializeReply {
     pub response_type: u8,
@@ -684,8 +743,8 @@ pub struct InitializeReply {
     pub major_version: u8,
     pub minor_version: u8,
 }
-impl InitializeReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for InitializeReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -725,6 +784,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListSystemCountersReply {
     pub response_type: u8,
@@ -732,8 +792,8 @@ pub struct ListSystemCountersReply {
     pub length: u32,
     pub counters: Vec<Systemcounter>,
 }
-impl ListSystemCountersReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ListSystemCountersReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -841,6 +901,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryCounterReply {
     pub response_type: u8,
@@ -848,8 +909,8 @@ pub struct QueryCounterReply {
     pub length: u32,
     pub counter_value: Int64,
 }
-impl QueryCounterReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryCounterReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -966,15 +1027,43 @@ where
 
 /// Opcode for the CreateAlarm request
 pub const CREATE_ALARM_REQUEST: u8 = 8;
-/// Auxiliary and optional information for the create_alarm function.
+/// Auxiliary and optional information for the `create_alarm` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct CreateAlarmAux {
     pub counter: Option<Counter>,
-    pub value_type: Option<u32>,
+    pub value_type: Option<VALUETYPE>,
     pub value: Option<Int64>,
-    pub test_type: Option<u32>,
+    pub test_type: Option<TESTTYPE>,
     pub delta: Option<Int64>,
     pub events: Option<u32>,
+}
+impl Serialize for CreateAlarmAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Self::Bytes {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.counter {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.value_type {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.value {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.test_type {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.delta {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.events {
+            value.serialize_into(bytes);
+        }
+    }
 }
 impl CreateAlarmAux {
     /// Create a new instance with all fields unset / not present.
@@ -1003,63 +1092,35 @@ impl CreateAlarmAux {
         }
         mask
     }
-    /// Set the counter field of this structure.
+    /// Set the `counter` field of this structure.
     pub fn counter<I>(mut self, value: I) -> Self where I: Into<Option<Counter>> {
         self.counter = value.into();
         self
     }
-    /// Set the valueType field of this structure.
-    pub fn value_type<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `valueType` field of this structure.
+    pub fn value_type<I>(mut self, value: I) -> Self where I: Into<Option<VALUETYPE>> {
         self.value_type = value.into();
         self
     }
-    /// Set the value field of this structure.
+    /// Set the `value` field of this structure.
     pub fn value<I>(mut self, value: I) -> Self where I: Into<Option<Int64>> {
         self.value = value.into();
         self
     }
-    /// Set the testType field of this structure.
-    pub fn test_type<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `testType` field of this structure.
+    pub fn test_type<I>(mut self, value: I) -> Self where I: Into<Option<TESTTYPE>> {
         self.test_type = value.into();
         self
     }
-    /// Set the delta field of this structure.
+    /// Set the `delta` field of this structure.
     pub fn delta<I>(mut self, value: I) -> Self where I: Into<Option<Int64>> {
         self.delta = value.into();
         self
     }
-    /// Set the events field of this structure.
+    /// Set the `events` field of this structure.
     pub fn events<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.events = value.into();
         self
-    }
-}
-impl Serialize for CreateAlarmAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.counter {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.value_type {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.value {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.test_type {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.delta {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.events {
-            value.serialize_into(bytes);
-        }
     }
 }
 pub fn create_alarm<'c, Conn>(conn: &'c Conn, id: Alarm, value_list: &CreateAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1099,15 +1160,43 @@ where
 
 /// Opcode for the ChangeAlarm request
 pub const CHANGE_ALARM_REQUEST: u8 = 9;
-/// Auxiliary and optional information for the change_alarm function.
+/// Auxiliary and optional information for the `change_alarm` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ChangeAlarmAux {
     pub counter: Option<Counter>,
-    pub value_type: Option<u32>,
+    pub value_type: Option<VALUETYPE>,
     pub value: Option<Int64>,
-    pub test_type: Option<u32>,
+    pub test_type: Option<TESTTYPE>,
     pub delta: Option<Int64>,
     pub events: Option<u32>,
+}
+impl Serialize for ChangeAlarmAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Self::Bytes {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.counter {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.value_type {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.value {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.test_type {
+            u32::from(*value).serialize_into(bytes);
+        }
+        if let Some(ref value) = self.delta {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.events {
+            value.serialize_into(bytes);
+        }
+    }
 }
 impl ChangeAlarmAux {
     /// Create a new instance with all fields unset / not present.
@@ -1136,63 +1225,35 @@ impl ChangeAlarmAux {
         }
         mask
     }
-    /// Set the counter field of this structure.
+    /// Set the `counter` field of this structure.
     pub fn counter<I>(mut self, value: I) -> Self where I: Into<Option<Counter>> {
         self.counter = value.into();
         self
     }
-    /// Set the valueType field of this structure.
-    pub fn value_type<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `valueType` field of this structure.
+    pub fn value_type<I>(mut self, value: I) -> Self where I: Into<Option<VALUETYPE>> {
         self.value_type = value.into();
         self
     }
-    /// Set the value field of this structure.
+    /// Set the `value` field of this structure.
     pub fn value<I>(mut self, value: I) -> Self where I: Into<Option<Int64>> {
         self.value = value.into();
         self
     }
-    /// Set the testType field of this structure.
-    pub fn test_type<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    /// Set the `testType` field of this structure.
+    pub fn test_type<I>(mut self, value: I) -> Self where I: Into<Option<TESTTYPE>> {
         self.test_type = value.into();
         self
     }
-    /// Set the delta field of this structure.
+    /// Set the `delta` field of this structure.
     pub fn delta<I>(mut self, value: I) -> Self where I: Into<Option<Int64>> {
         self.delta = value.into();
         self
     }
-    /// Set the events field of this structure.
+    /// Set the `events` field of this structure.
     pub fn events<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.events = value.into();
         self
-    }
-}
-impl Serialize for ChangeAlarmAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.counter {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.value_type {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.value {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.test_type {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.delta {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.events {
-            value.serialize_into(bytes);
-        }
     }
 }
 pub fn change_alarm<'c, Conn>(conn: &'c Conn, id: Alarm, value_list: &ChangeAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -1283,6 +1344,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryAlarmReply {
     pub response_type: u8,
@@ -1293,8 +1355,8 @@ pub struct QueryAlarmReply {
     pub events: bool,
     pub state: ALARMSTATE,
 }
-impl QueryAlarmReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryAlarmReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1374,6 +1436,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetPriorityReply {
     pub response_type: u8,
@@ -1381,8 +1444,8 @@ pub struct GetPriorityReply {
     pub length: u32,
     pub priority: i32,
 }
-impl GetPriorityReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetPriorityReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1410,7 +1473,7 @@ where
     let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let fence_bytes = fence.serialize();
-    let initially_triggered_bytes = (initially_triggered as u8).serialize();
+    let initially_triggered_bytes = initially_triggered.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_FENCE_REQUEST,
@@ -1543,6 +1606,7 @@ where
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryFenceReply {
     pub response_type: u8,
@@ -1550,8 +1614,8 @@ pub struct QueryFenceReply {
     pub length: u32,
     pub triggered: bool,
 }
-impl QueryFenceReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryFenceReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1609,8 +1673,8 @@ pub struct CounterNotifyEvent {
     pub count: u16,
     pub destroyed: bool,
 }
-impl CounterNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for CounterNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (kind, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1633,6 +1697,7 @@ impl TryFrom<&[u8]> for CounterNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for CounterNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1645,20 +1710,48 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for CounterNotifyEvent {
 }
 impl From<&CounterNotifyEvent> for [u8; 32] {
     fn from(input: &CounterNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let kind = input.kind.serialize();
-        let sequence = input.sequence.serialize();
-        let counter = input.counter.serialize();
-        let wait_value = input.wait_value.serialize();
-        let counter_value = input.counter_value.serialize();
-        let timestamp = input.timestamp.serialize();
-        let count = input.count.serialize();
-        let destroyed = input.destroyed.serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let kind_bytes = input.kind.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let counter_bytes = input.counter.serialize();
+        let wait_value_bytes = input.wait_value.serialize();
+        let counter_value_bytes = input.counter_value.serialize();
+        let timestamp_bytes = input.timestamp.serialize();
+        let count_bytes = input.count.serialize();
+        let destroyed_bytes = input.destroyed.serialize();
         [
-            response_type[0], kind[0], sequence[0], sequence[1], counter[0], counter[1], counter[2], counter[3],
-            wait_value[0], wait_value[1], wait_value[2], wait_value[3], wait_value[4], wait_value[5], wait_value[6], wait_value[7],
-            counter_value[0], counter_value[1], counter_value[2], counter_value[3], counter_value[4], counter_value[5], counter_value[6], counter_value[7],
-            timestamp[0], timestamp[1], timestamp[2], timestamp[3], count[0], count[1], destroyed[0], 0
+            response_type_bytes[0],
+            kind_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            counter_bytes[0],
+            counter_bytes[1],
+            counter_bytes[2],
+            counter_bytes[3],
+            wait_value_bytes[0],
+            wait_value_bytes[1],
+            wait_value_bytes[2],
+            wait_value_bytes[3],
+            wait_value_bytes[4],
+            wait_value_bytes[5],
+            wait_value_bytes[6],
+            wait_value_bytes[7],
+            counter_value_bytes[0],
+            counter_value_bytes[1],
+            counter_value_bytes[2],
+            counter_value_bytes[3],
+            counter_value_bytes[4],
+            counter_value_bytes[5],
+            counter_value_bytes[6],
+            counter_value_bytes[7],
+            timestamp_bytes[0],
+            timestamp_bytes[1],
+            timestamp_bytes[2],
+            timestamp_bytes[3],
+            count_bytes[0],
+            count_bytes[1],
+            destroyed_bytes[0],
+            0,
         ]
     }
 }
@@ -1681,8 +1774,8 @@ pub struct AlarmNotifyEvent {
     pub timestamp: xproto::Timestamp,
     pub state: ALARMSTATE,
 }
-impl AlarmNotifyEvent {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for AlarmNotifyEvent {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (kind, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1705,6 +1798,7 @@ impl TryFrom<&[u8]> for AlarmNotifyEvent {
 }
 impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for AlarmNotifyEvent {
     type Error = ParseError;
+
     fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
         Self::try_from(value.raw_bytes())
     }
@@ -1717,19 +1811,47 @@ impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for AlarmNotifyEvent {
 }
 impl From<&AlarmNotifyEvent> for [u8; 32] {
     fn from(input: &AlarmNotifyEvent) -> Self {
-        let response_type = input.response_type.serialize();
-        let kind = input.kind.serialize();
-        let sequence = input.sequence.serialize();
-        let alarm = input.alarm.serialize();
-        let counter_value = input.counter_value.serialize();
-        let alarm_value = input.alarm_value.serialize();
-        let timestamp = input.timestamp.serialize();
-        let state = u8::from(input.state).serialize();
+        let response_type_bytes = input.response_type.serialize();
+        let kind_bytes = input.kind.serialize();
+        let sequence_bytes = input.sequence.serialize();
+        let alarm_bytes = input.alarm.serialize();
+        let counter_value_bytes = input.counter_value.serialize();
+        let alarm_value_bytes = input.alarm_value.serialize();
+        let timestamp_bytes = input.timestamp.serialize();
+        let state_bytes = u8::from(input.state).serialize();
         [
-            response_type[0], kind[0], sequence[0], sequence[1], alarm[0], alarm[1], alarm[2], alarm[3],
-            counter_value[0], counter_value[1], counter_value[2], counter_value[3], counter_value[4], counter_value[5], counter_value[6], counter_value[7],
-            alarm_value[0], alarm_value[1], alarm_value[2], alarm_value[3], alarm_value[4], alarm_value[5], alarm_value[6], alarm_value[7],
-            timestamp[0], timestamp[1], timestamp[2], timestamp[3], state[0], 0, 0, 0
+            response_type_bytes[0],
+            kind_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            alarm_bytes[0],
+            alarm_bytes[1],
+            alarm_bytes[2],
+            alarm_bytes[3],
+            counter_value_bytes[0],
+            counter_value_bytes[1],
+            counter_value_bytes[2],
+            counter_value_bytes[3],
+            counter_value_bytes[4],
+            counter_value_bytes[5],
+            counter_value_bytes[6],
+            counter_value_bytes[7],
+            alarm_value_bytes[0],
+            alarm_value_bytes[1],
+            alarm_value_bytes[2],
+            alarm_value_bytes[3],
+            alarm_value_bytes[4],
+            alarm_value_bytes[5],
+            alarm_value_bytes[6],
+            alarm_value_bytes[7],
+            timestamp_bytes[0],
+            timestamp_bytes[1],
+            timestamp_bytes[2],
+            timestamp_bytes[3],
+            state_bytes[0],
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -1745,101 +1867,82 @@ pub trait ConnectionExt: RequestConnection {
     {
         initialize(self, desired_major_version, desired_minor_version)
     }
-
     fn sync_list_system_counters(&self) -> Result<Cookie<'_, Self, ListSystemCountersReply>, ConnectionError>
     {
         list_system_counters(self)
     }
-
     fn sync_create_counter(&self, id: Counter, initial_value: Int64) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_counter(self, id, initial_value)
     }
-
     fn sync_destroy_counter(&self, counter: Counter) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_counter(self, counter)
     }
-
     fn sync_query_counter(&self, counter: Counter) -> Result<Cookie<'_, Self, QueryCounterReply>, ConnectionError>
     {
         query_counter(self, counter)
     }
-
     fn sync_await_<'c>(&'c self, wait_list: &[Waitcondition]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         await_(self, wait_list)
     }
-
     fn sync_change_counter(&self, counter: Counter, amount: Int64) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         change_counter(self, counter, amount)
     }
-
     fn sync_set_counter(&self, counter: Counter, value: Int64) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_counter(self, counter, value)
     }
-
     fn sync_create_alarm<'c>(&'c self, id: Alarm, value_list: &CreateAlarmAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_alarm(self, id, value_list)
     }
-
     fn sync_change_alarm<'c>(&'c self, id: Alarm, value_list: &ChangeAlarmAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_alarm(self, id, value_list)
     }
-
     fn sync_destroy_alarm(&self, alarm: Alarm) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_alarm(self, alarm)
     }
-
     fn sync_query_alarm(&self, alarm: Alarm) -> Result<Cookie<'_, Self, QueryAlarmReply>, ConnectionError>
     {
         query_alarm(self, alarm)
     }
-
     fn sync_set_priority(&self, id: u32, priority: i32) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         set_priority(self, id, priority)
     }
-
     fn sync_get_priority(&self, id: u32) -> Result<Cookie<'_, Self, GetPriorityReply>, ConnectionError>
     {
         get_priority(self, id)
     }
-
     fn sync_create_fence(&self, drawable: xproto::Drawable, fence: Fence, initially_triggered: bool) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         create_fence(self, drawable, fence, initially_triggered)
     }
-
     fn sync_trigger_fence(&self, fence: Fence) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         trigger_fence(self, fence)
     }
-
     fn sync_reset_fence(&self, fence: Fence) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         reset_fence(self, fence)
     }
-
     fn sync_destroy_fence(&self, fence: Fence) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         destroy_fence(self, fence)
     }
-
     fn sync_query_fence(&self, fence: Fence) -> Result<Cookie<'_, Self, QueryFenceReply>, ConnectionError>
     {
         query_fence(self, fence)
     }
-
     fn sync_await_fence<'c>(&'c self, fence_list: &[Fence]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         await_fence(self, fence_list)
     }
-
 }
+
 impl<C: RequestConnection + ?Sized> ConnectionExt for C {}
