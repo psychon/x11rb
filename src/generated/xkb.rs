@@ -2660,8 +2660,8 @@ impl Serialize for CountedString16 {
         bytes.reserve(2);
         let length = u16::try_from(self.string.len()).expect("`string` has too many elements");
         length.serialize_into(bytes);
-        self.string.serialize_into(bytes);
-        self.alignment_pad.serialize_into(bytes);
+        bytes.extend_from_slice(&self.string);
+        bytes.extend_from_slice(&self.alignment_pad);
     }
 }
 
@@ -2816,7 +2816,7 @@ impl Serialize for KeySymMap {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        self.kt_index.serialize_into(bytes);
+        bytes.extend_from_slice(&self.kt_index);
         self.group_info.serialize_into(bytes);
         self.width.serialize_into(bytes);
         let n_syms = u16::try_from(self.syms.len()).expect("`syms` has too many elements");
@@ -4006,7 +4006,7 @@ impl Serialize for Listing {
         self.flags.serialize_into(bytes);
         let length = u16::try_from(self.string.len()).expect("`string` has too many elements");
         length.serialize_into(bytes);
-        self.string.serialize_into(bytes);
+        bytes.extend_from_slice(&self.string);
         bytes.extend_from_slice(&[0; 1][..(2 - (bytes.len() % 2)) % 2]);
     }
 }
@@ -7684,7 +7684,7 @@ impl Serialize for GetMapMapBitcase3 {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(0);
-        self.acts_rtrn_count.serialize_into(bytes);
+        bytes.extend_from_slice(&self.acts_rtrn_count);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         self.acts_rtrn_acts.serialize_into(bytes);
     }
@@ -7880,7 +7880,7 @@ impl Serialize for SetMapAuxBitcase3 {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(0);
-        self.actions_count.serialize_into(bytes);
+        bytes.extend_from_slice(&self.actions_count);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         self.actions.serialize_into(bytes);
     }
@@ -8576,7 +8576,7 @@ impl Serialize for GetNamesValueListBitcase8 {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(0);
-        self.n_levels_per_type.serialize_into(bytes);
+        bytes.extend_from_slice(&self.n_levels_per_type);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         self.kt_level_names.serialize_into(bytes);
     }
@@ -8784,7 +8784,7 @@ impl Serialize for SetNamesAuxBitcase8 {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(0);
-        self.n_levels_per_type.serialize_into(bytes);
+        bytes.extend_from_slice(&self.n_levels_per_type);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         self.kt_level_names.serialize_into(bytes);
     }

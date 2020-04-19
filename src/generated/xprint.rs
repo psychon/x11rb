@@ -81,11 +81,11 @@ impl Serialize for Printer {
         bytes.reserve(4);
         let name_len = u32::try_from(self.name.len()).expect("`name` has too many elements");
         name_len.serialize_into(bytes);
-        self.name.serialize_into(bytes);
+        bytes.extend_from_slice(&self.name);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         let desc_len = u32::try_from(self.description.len()).expect("`description` has too many elements");
         desc_len.serialize_into(bytes);
-        self.description.serialize_into(bytes);
+        bytes.extend_from_slice(&self.description);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }

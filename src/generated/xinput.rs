@@ -836,7 +836,7 @@ impl Serialize for DeviceName {
         bytes.reserve(1);
         let len = u8::try_from(self.string.len()).expect("`string` has too many elements");
         len.serialize_into(bytes);
-        self.string.serialize_into(bytes);
+        bytes.extend_from_slice(&self.string);
     }
 }
 
@@ -7954,7 +7954,7 @@ impl Serialize for AddMaster {
         name_len.serialize_into(bytes);
         self.send_core.serialize_into(bytes);
         self.enable.serialize_into(bytes);
-        self.name.serialize_into(bytes);
+        bytes.extend_from_slice(&self.name);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }
@@ -8165,7 +8165,7 @@ impl Serialize for HierarchyChangeDataAddMaster {
         name_len.serialize_into(bytes);
         self.send_core.serialize_into(bytes);
         self.enable.serialize_into(bytes);
-        self.name.serialize_into(bytes);
+        bytes.extend_from_slice(&self.name);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }
@@ -9863,7 +9863,7 @@ impl Serialize for XIDeviceInfo {
         name_len.serialize_into(bytes);
         self.enabled.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
-        self.name.serialize_into(bytes);
+        bytes.extend_from_slice(&self.name);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         self.classes.serialize_into(bytes);
     }

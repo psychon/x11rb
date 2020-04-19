@@ -438,9 +438,9 @@ impl Serialize for ListItem {
         object_context_len.serialize_into(bytes);
         let data_context_len = u32::try_from(self.data_context.len()).expect("`data_context` has too many elements");
         data_context_len.serialize_into(bytes);
-        self.object_context.serialize_into(bytes);
+        bytes.extend_from_slice(&self.object_context);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
-        self.data_context.serialize_into(bytes);
+        bytes.extend_from_slice(&self.data_context);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }

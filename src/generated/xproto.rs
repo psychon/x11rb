@@ -790,9 +790,9 @@ impl Serialize for SetupRequest {
         let authorization_protocol_data_len = u16::try_from(self.authorization_protocol_data.len()).expect("`authorization_protocol_data` has too many elements");
         authorization_protocol_data_len.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
-        self.authorization_protocol_name.serialize_into(bytes);
+        bytes.extend_from_slice(&self.authorization_protocol_name);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
-        self.authorization_protocol_data.serialize_into(bytes);
+        bytes.extend_from_slice(&self.authorization_protocol_data);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }
@@ -838,7 +838,7 @@ impl Serialize for SetupFailed {
         self.protocol_major_version.serialize_into(bytes);
         self.protocol_minor_version.serialize_into(bytes);
         self.length.serialize_into(bytes);
-        self.reason.serialize_into(bytes);
+        bytes.extend_from_slice(&self.reason);
     }
 }
 
@@ -876,7 +876,7 @@ impl Serialize for SetupAuthenticate {
         bytes.extend_from_slice(&[0; 5]);
         let length = u16::try_from(self.reason.len()).expect("`reason` has too many elements") / 4;
         length.serialize_into(bytes);
-        self.reason.serialize_into(bytes);
+        bytes.extend_from_slice(&self.reason);
     }
 }
 
@@ -1037,7 +1037,7 @@ impl Serialize for Setup {
         self.min_keycode.serialize_into(bytes);
         self.max_keycode.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 4]);
-        self.vendor.serialize_into(bytes);
+        bytes.extend_from_slice(&self.vendor);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         self.pixmap_formats.serialize_into(bytes);
         self.roots.serialize_into(bytes);
@@ -13257,7 +13257,7 @@ impl Serialize for Str {
         bytes.reserve(1);
         let name_len = u8::try_from(self.name.len()).expect("`name` has too many elements");
         name_len.serialize_into(bytes);
-        self.name.serialize_into(bytes);
+        bytes.extend_from_slice(&self.name);
     }
 }
 
@@ -19098,7 +19098,7 @@ impl Serialize for Host {
         bytes.extend_from_slice(&[0; 1]);
         let address_len = u16::try_from(self.address.len()).expect("`address` has too many elements");
         address_len.serialize_into(bytes);
-        self.address.serialize_into(bytes);
+        bytes.extend_from_slice(&self.address);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }

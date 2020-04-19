@@ -647,7 +647,7 @@ impl Serialize for AdaptorInfo {
         num_formats.serialize_into(bytes);
         self.type_.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
-        self.name.serialize_into(bytes);
+        bytes.extend_from_slice(&self.name);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         self.formats.serialize_into(bytes);
     }
@@ -701,7 +701,7 @@ impl Serialize for EncodingInfo {
         self.height.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.rate.serialize_into(bytes);
-        self.name.serialize_into(bytes);
+        bytes.extend_from_slice(&self.name);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }
@@ -753,7 +753,7 @@ impl Serialize for Image {
         self.num_planes.serialize_into(bytes);
         self.pitches.serialize_into(bytes);
         self.offsets.serialize_into(bytes);
-        self.data.serialize_into(bytes);
+        bytes.extend_from_slice(&self.data);
     }
 }
 
@@ -800,7 +800,7 @@ impl Serialize for AttributeInfo {
         self.max.serialize_into(bytes);
         let size = u32::try_from(self.name.len()).expect("`name` has too many elements");
         size.serialize_into(bytes);
-        self.name.serialize_into(bytes);
+        bytes.extend_from_slice(&self.name);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }

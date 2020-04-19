@@ -548,6 +548,11 @@ class Module(object):
                 for field in complex.fields:
                     if field.type.is_pad:
                         serialise_align_pad(self.out, field, "bytes")
+                    elif field.type.is_list and field.type.size == 1:
+                        assert not hasattr(field, "is_length_field_for"), field
+                        assert not hasattr(field, "has_enum_type"), field
+                        field_name = self._to_rust_variable(field.field_name)
+                        self.out("bytes.extend_from_slice(&self.%s);", field_name)
                     else:
                         field_name = self._to_rust_variable(field.field_name)
                         if hasattr(field, "is_length_field_for"):
