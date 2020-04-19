@@ -1034,6 +1034,34 @@ pub struct CreateAlarmAux {
     pub delta: Option<Int64>,
     pub events: Option<u32>,
 }
+impl Serialize for CreateAlarmAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.counter {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.value_type {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.value {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.test_type {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.delta {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.events {
+            value.serialize_into(bytes);
+        }
+    }
+}
 impl CreateAlarmAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
@@ -1092,34 +1120,6 @@ impl CreateAlarmAux {
         self
     }
 }
-impl Serialize for CreateAlarmAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.counter {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.value_type {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.value {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.test_type {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.delta {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.events {
-            value.serialize_into(bytes);
-        }
-    }
-}
 pub fn create_alarm<'c, Conn>(conn: &'c Conn, id: Alarm, value_list: &CreateAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -1166,6 +1166,34 @@ pub struct ChangeAlarmAux {
     pub test_type: Option<u32>,
     pub delta: Option<Int64>,
     pub events: Option<u32>,
+}
+impl Serialize for ChangeAlarmAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.counter {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.value_type {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.value {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.test_type {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.delta {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.events {
+            value.serialize_into(bytes);
+        }
+    }
 }
 impl ChangeAlarmAux {
     /// Create a new instance with all fields unset / not present.
@@ -1223,34 +1251,6 @@ impl ChangeAlarmAux {
     pub fn events<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.events = value.into();
         self
-    }
-}
-impl Serialize for ChangeAlarmAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.counter {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.value_type {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.value {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.test_type {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.delta {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.events {
-            value.serialize_into(bytes);
-        }
     }
 }
 pub fn change_alarm<'c, Conn>(conn: &'c Conn, id: Alarm, value_list: &ChangeAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>

@@ -6943,6 +6943,49 @@ pub struct SelectEventsAux {
     pub bitcase10: Option<SelectEventsAuxBitcase10>,
     pub bitcase11: Option<SelectEventsAuxBitcase11>,
 }
+impl Serialize for SelectEventsAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.bitcase1 {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bitcase2 {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bitcase3 {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bitcase4 {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bitcase5 {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bitcase6 {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bitcase7 {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bitcase8 {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bitcase9 {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bitcase10 {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bitcase11 {
+            value.serialize_into(bytes);
+        }
+    }
+}
 impl SelectEventsAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
@@ -7039,49 +7082,6 @@ impl SelectEventsAux {
     pub fn bitcase11<I>(mut self, value: I) -> Self where I: Into<Option<SelectEventsAuxBitcase11>> {
         self.bitcase11 = value.into();
         self
-    }
-}
-impl Serialize for SelectEventsAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.bitcase1 {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bitcase2 {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bitcase3 {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bitcase4 {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bitcase5 {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bitcase6 {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bitcase7 {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bitcase8 {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bitcase9 {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bitcase10 {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bitcase11 {
-            value.serialize_into(bytes);
-        }
     }
 }
 pub fn select_events<'c, Conn>(conn: &'c Conn, device_spec: DeviceSpec, affect_which: u16, clear: u16, select_all: u16, affect_map: u16, map: u16, details: &SelectEventsAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -7898,6 +7898,41 @@ pub struct SetMapAux {
     pub modmap: Option<Vec<KeyModMap>>,
     pub vmodmap: Option<Vec<KeyVModMap>>,
 }
+impl Serialize for SetMapAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.types {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.syms {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bitcase3 {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.behaviors {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.vmods {
+            value.serialize_into(bytes);
+            bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
+        }
+        if let Some(ref value) = self.explicit {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.modmap {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.vmodmap {
+            value.serialize_into(bytes);
+        }
+    }
+}
 impl SetMapAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
@@ -7970,41 +8005,6 @@ impl SetMapAux {
     pub fn vmodmap<I>(mut self, value: I) -> Self where I: Into<Option<Vec<KeyVModMap>>> {
         self.vmodmap = value.into();
         self
-    }
-}
-impl Serialize for SetMapAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.types {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.syms {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bitcase3 {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.behaviors {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.vmods {
-            value.serialize_into(bytes);
-            bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
-        }
-        if let Some(ref value) = self.explicit {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.modmap {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.vmodmap {
-            value.serialize_into(bytes);
-        }
     }
 }
 pub fn set_map<'c, Conn>(conn: &'c Conn, device_spec: DeviceSpec, flags: u16, min_key_code: xproto::Keycode, max_key_code: xproto::Keycode, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, total_syms: u16, first_key_action: xproto::Keycode, n_key_actions: u8, total_actions: u16, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, total_key_behaviors: u8, first_key_explicit: xproto::Keycode, n_key_explicit: u8, total_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, total_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8, total_v_mod_map_keys: u8, virtual_mods: u16, values: &SetMapAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
@@ -8811,6 +8811,58 @@ pub struct SetNamesAux {
     pub key_aliases: Option<Vec<KeyAlias>>,
     pub radio_group_names: Option<Vec<xproto::Atom>>,
 }
+impl Serialize for SetNamesAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.keycodes_name {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.geometry_name {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.symbols_name {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.phys_symbols_name {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.types_name {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.compat_name {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.type_names {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bitcase8 {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.indicator_names {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.virtual_mod_names {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.groups {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.key_names {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.key_aliases {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.radio_group_names {
+            value.serialize_into(bytes);
+        }
+    }
+}
 impl SetNamesAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
@@ -8931,58 +8983,6 @@ impl SetNamesAux {
     pub fn radio_group_names<I>(mut self, value: I) -> Self where I: Into<Option<Vec<xproto::Atom>>> {
         self.radio_group_names = value.into();
         self
-    }
-}
-impl Serialize for SetNamesAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.keycodes_name {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.geometry_name {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.symbols_name {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.phys_symbols_name {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.types_name {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.compat_name {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.type_names {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bitcase8 {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.indicator_names {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.virtual_mod_names {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.groups {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.key_names {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.key_aliases {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.radio_group_names {
-            value.serialize_into(bytes);
-        }
     }
 }
 pub fn set_names<'c, Conn>(conn: &'c Conn, device_spec: DeviceSpec, virtual_mods: u16, first_type: u8, n_types: u8, first_kt_levelt: u8, n_kt_levels: u8, indicators: u32, group_names: u8, n_radio_groups: u8, first_key: xproto::Keycode, n_keys: u8, n_key_aliases: u8, total_kt_level_names: u16, values: &SetNamesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>

@@ -1356,6 +1356,37 @@ class Module(object):
         self._emit_switch_type(switch.type, name, request.fields, False, "Auxiliary and optional information"
                                + " for the %s function." % (request_function_name,))
 
+        self.out("impl Serialize for %s {", name)
+        with Indent(self.out):
+            self.out("type Bytes = Vec<u8>;")
+            self.out("fn serialize(&self) -> Vec<u8> {")
+            with Indent(self.out):
+                self.out("let mut result = Vec::new();")
+                self.out("self.serialize_into(&mut result);")
+                self.out("result")
+            self.out("}")
+            self.out("fn serialize_into(&self, bytes: &mut Vec<u8>) {")
+            with Indent(self.out):
+                for case in switch.type.bitcases:
+                    if hasattr(case, "rust_name"):
+                        self.out("if let Some(ref value) = self.%s {", case.type.name[-1])
+                        with Indent(self.out):
+                            self.out("value.serialize_into(bytes);")
+                        self.out("}")
+                    else:
+                        self.out("if let Some(ref value) = self.%s {",
+                                 self._aux_field_name(case.only_field))
+                        with Indent(self.out):
+                            for field in case.type.fields:
+                                if field.visible:
+                                    assert field == case.only_field, field
+                                    self.out("value.serialize_into(bytes);")
+                                else:
+                                    serialise_align_pad(self.out, field, "bytes")
+                        self.out("}")
+            self.out("}")
+        self.out("}")
+
         self.out("impl %s {", name)
         with Indent(self.out):
 
@@ -1400,37 +1431,6 @@ class Module(object):
                     self.out("self.%s = value.into();", aux_name)
                     self.out("self")
                 self.out("}")
-        self.out("}")
-
-        self.out("impl Serialize for %s {", name)
-        with Indent(self.out):
-            self.out("type Bytes = Vec<u8>;")
-            self.out("fn serialize(&self) -> Vec<u8> {")
-            with Indent(self.out):
-                self.out("let mut result = Vec::new();")
-                self.out("self.serialize_into(&mut result);")
-                self.out("result")
-            self.out("}")
-            self.out("fn serialize_into(&self, bytes: &mut Vec<u8>) {")
-            with Indent(self.out):
-                for case in switch.type.bitcases:
-                    if hasattr(case, "rust_name"):
-                        self.out("if let Some(ref value) = self.%s {", case.type.name[-1])
-                        with Indent(self.out):
-                            self.out("value.serialize_into(bytes);")
-                        self.out("}")
-                    else:
-                        self.out("if let Some(ref value) = self.%s {",
-                                 self._aux_field_name(case.only_field))
-                        with Indent(self.out):
-                            for field in case.type.fields:
-                                if field.visible:
-                                    assert field == case.only_field, field
-                                    self.out("value.serialize_into(bytes);")
-                                else:
-                                    serialise_align_pad(self.out, field, "bytes")
-                        self.out("}")
-            self.out("}")
         self.out("}")
 
     def _find_type_for_name(self, name_to_find):

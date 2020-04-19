@@ -1999,6 +1999,55 @@ pub struct CreatePictureAux {
     pub dither: Option<xproto::Atom>,
     pub componentalpha: Option<u32>,
 }
+impl Serialize for CreatePictureAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.repeat {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.alphamap {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.alphaxorigin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.alphayorigin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clipxorigin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clipyorigin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clipmask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.graphicsexposure {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.subwindowmode {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.polyedge {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.polymode {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.dither {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.componentalpha {
+            value.serialize_into(bytes);
+        }
+    }
+}
 impl CreatePictureAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
@@ -2113,55 +2162,6 @@ impl CreatePictureAux {
         self
     }
 }
-impl Serialize for CreatePictureAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.repeat {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.alphamap {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.alphaxorigin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.alphayorigin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clipxorigin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clipyorigin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clipmask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.graphicsexposure {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.subwindowmode {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.polyedge {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.polymode {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.dither {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.componentalpha {
-            value.serialize_into(bytes);
-        }
-    }
-}
 pub fn create_picture<'c, Conn>(conn: &'c Conn, pid: Picture, drawable: xproto::Drawable, format: Pictformat, value_list: &CreatePictureAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -2225,6 +2225,55 @@ pub struct ChangePictureAux {
     pub polymode: Option<u32>,
     pub dither: Option<xproto::Atom>,
     pub componentalpha: Option<u32>,
+}
+impl Serialize for ChangePictureAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.repeat {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.alphamap {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.alphaxorigin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.alphayorigin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clipxorigin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clipyorigin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clipmask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.graphicsexposure {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.subwindowmode {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.polyedge {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.polymode {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.dither {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.componentalpha {
+            value.serialize_into(bytes);
+        }
+    }
 }
 impl ChangePictureAux {
     /// Create a new instance with all fields unset / not present.
@@ -2338,55 +2387,6 @@ impl ChangePictureAux {
     pub fn componentalpha<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.componentalpha = value.into();
         self
-    }
-}
-impl Serialize for ChangePictureAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.repeat {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.alphamap {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.alphaxorigin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.alphayorigin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clipxorigin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clipyorigin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clipmask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.graphicsexposure {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.subwindowmode {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.polyedge {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.polymode {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.dither {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.componentalpha {
-            value.serialize_into(bytes);
-        }
     }
 }
 pub fn change_picture<'c, Conn>(conn: &'c Conn, picture: Picture, value_list: &ChangePictureAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>

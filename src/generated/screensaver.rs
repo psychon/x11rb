@@ -404,6 +404,61 @@ pub struct SetAttributesAux {
     pub colormap: Option<xproto::Colormap>,
     pub cursor: Option<xproto::Cursor>,
 }
+impl Serialize for SetAttributesAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.background_pixmap {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.background_pixel {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.border_pixmap {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.border_pixel {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bit_gravity {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.win_gravity {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.backing_store {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.backing_planes {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.backing_pixel {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.override_redirect {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.save_under {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.event_mask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.do_not_propogate_mask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.colormap {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.cursor {
+            value.serialize_into(bytes);
+        }
+    }
+}
 impl SetAttributesAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
@@ -532,61 +587,6 @@ impl SetAttributesAux {
     pub fn cursor<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Cursor>> {
         self.cursor = value.into();
         self
-    }
-}
-impl Serialize for SetAttributesAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.background_pixmap {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.background_pixel {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.border_pixmap {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.border_pixel {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bit_gravity {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.win_gravity {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.backing_store {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.backing_planes {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.backing_pixel {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.override_redirect {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.save_under {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.event_mask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.do_not_propogate_mask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.colormap {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.cursor {
-            value.serialize_into(bytes);
-        }
     }
 }
 pub fn set_attributes<'c, Conn, A>(conn: &'c Conn, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: A, depth: u8, visual: xproto::Visualid, value_list: &SetAttributesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>

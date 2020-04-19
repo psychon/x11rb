@@ -7962,6 +7962,61 @@ pub struct CreateWindowAux {
     pub colormap: Option<Colormap>,
     pub cursor: Option<Cursor>,
 }
+impl Serialize for CreateWindowAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.background_pixmap {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.background_pixel {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.border_pixmap {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.border_pixel {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bit_gravity {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.win_gravity {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.backing_store {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.backing_planes {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.backing_pixel {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.override_redirect {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.save_under {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.event_mask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.do_not_propogate_mask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.colormap {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.cursor {
+            value.serialize_into(bytes);
+        }
+    }
+}
 impl CreateWindowAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
@@ -8090,61 +8145,6 @@ impl CreateWindowAux {
     pub fn cursor<I>(mut self, value: I) -> Self where I: Into<Option<Cursor>> {
         self.cursor = value.into();
         self
-    }
-}
-impl Serialize for CreateWindowAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.background_pixmap {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.background_pixel {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.border_pixmap {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.border_pixel {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bit_gravity {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.win_gravity {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.backing_store {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.backing_planes {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.backing_pixel {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.override_redirect {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.save_under {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.event_mask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.do_not_propogate_mask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.colormap {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.cursor {
-            value.serialize_into(bytes);
-        }
     }
 }
 /// Creates a window.
@@ -8285,6 +8285,61 @@ pub struct ChangeWindowAttributesAux {
     pub colormap: Option<Colormap>,
     pub cursor: Option<Cursor>,
 }
+impl Serialize for ChangeWindowAttributesAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.background_pixmap {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.background_pixel {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.border_pixmap {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.border_pixel {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bit_gravity {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.win_gravity {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.backing_store {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.backing_planes {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.backing_pixel {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.override_redirect {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.save_under {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.event_mask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.do_not_propogate_mask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.colormap {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.cursor {
+            value.serialize_into(bytes);
+        }
+    }
+}
 impl ChangeWindowAttributesAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
@@ -8413,61 +8468,6 @@ impl ChangeWindowAttributesAux {
     pub fn cursor<I>(mut self, value: I) -> Self where I: Into<Option<Cursor>> {
         self.cursor = value.into();
         self
-    }
-}
-impl Serialize for ChangeWindowAttributesAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.background_pixmap {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.background_pixel {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.border_pixmap {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.border_pixel {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bit_gravity {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.win_gravity {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.backing_store {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.backing_planes {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.backing_pixel {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.override_redirect {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.save_under {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.event_mask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.do_not_propogate_mask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.colormap {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.cursor {
-            value.serialize_into(bytes);
-        }
     }
 }
 /// change window attributes.
@@ -9263,6 +9263,37 @@ pub struct ConfigureWindowAux {
     pub sibling: Option<Window>,
     pub stack_mode: Option<u32>,
 }
+impl Serialize for ConfigureWindowAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.x {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.y {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.width {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.height {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.border_width {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.sibling {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.stack_mode {
+            value.serialize_into(bytes);
+        }
+    }
+}
 impl ConfigureWindowAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
@@ -9327,37 +9358,6 @@ impl ConfigureWindowAux {
     pub fn stack_mode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.stack_mode = value.into();
         self
-    }
-}
-impl Serialize for ConfigureWindowAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.x {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.y {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.width {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.height {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.border_width {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.sibling {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.stack_mode {
-            value.serialize_into(bytes);
-        }
     }
 }
 /// Configures window attributes.
@@ -14436,6 +14436,85 @@ pub struct CreateGCAux {
     pub dashes: Option<u32>,
     pub arc_mode: Option<u32>,
 }
+impl Serialize for CreateGCAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.function {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.plane_mask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.foreground {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.background {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.line_width {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.line_style {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.cap_style {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.join_style {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.fill_style {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.fill_rule {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.tile {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.stipple {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.tile_stipple_x_origin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.tile_stipple_y_origin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.font {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.subwindow_mode {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.graphics_exposures {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clip_x_origin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clip_y_origin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clip_mask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.dash_offset {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.dashes {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.arc_mode {
+            value.serialize_into(bytes);
+        }
+    }
+}
 impl CreateGCAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
@@ -14630,85 +14709,6 @@ impl CreateGCAux {
         self
     }
 }
-impl Serialize for CreateGCAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.function {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.plane_mask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.foreground {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.background {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.line_width {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.line_style {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.cap_style {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.join_style {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.fill_style {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.fill_rule {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.tile {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.stipple {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.tile_stipple_x_origin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.tile_stipple_y_origin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.font {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.subwindow_mode {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.graphics_exposures {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clip_x_origin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clip_y_origin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clip_mask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.dash_offset {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.dashes {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.arc_mode {
-            value.serialize_into(bytes);
-        }
-    }
-}
 /// Creates a graphics context.
 ///
 /// Creates a graphics context. The graphics context can be used with any drawable
@@ -14798,6 +14798,85 @@ pub struct ChangeGCAux {
     pub dash_offset: Option<u32>,
     pub dashes: Option<u32>,
     pub arc_mode: Option<u32>,
+}
+impl Serialize for ChangeGCAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.function {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.plane_mask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.foreground {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.background {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.line_width {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.line_style {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.cap_style {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.join_style {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.fill_style {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.fill_rule {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.tile {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.stipple {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.tile_stipple_x_origin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.tile_stipple_y_origin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.font {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.subwindow_mode {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.graphics_exposures {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clip_x_origin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clip_y_origin {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.clip_mask {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.dash_offset {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.dashes {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.arc_mode {
+            value.serialize_into(bytes);
+        }
+    }
 }
 impl ChangeGCAux {
     /// Create a new instance with all fields unset / not present.
@@ -14991,85 +15070,6 @@ impl ChangeGCAux {
     pub fn arc_mode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.arc_mode = value.into();
         self
-    }
-}
-impl Serialize for ChangeGCAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.function {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.plane_mask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.foreground {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.background {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.line_width {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.line_style {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.cap_style {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.join_style {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.fill_style {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.fill_rule {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.tile {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.stipple {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.tile_stipple_x_origin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.tile_stipple_y_origin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.font {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.subwindow_mode {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.graphics_exposures {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clip_x_origin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clip_y_origin {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.clip_mask {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.dash_offset {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.dashes {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.arc_mode {
-            value.serialize_into(bytes);
-        }
     }
 }
 /// change graphics context components.
@@ -18368,6 +18368,40 @@ pub struct ChangeKeyboardControlAux {
     pub key: Option<Keycode32>,
     pub auto_repeat_mode: Option<u32>,
 }
+impl Serialize for ChangeKeyboardControlAux {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Vec<u8> {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        if let Some(ref value) = self.key_click_percent {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bell_percent {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bell_pitch {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.bell_duration {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.led {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.led_mode {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.key {
+            value.serialize_into(bytes);
+        }
+        if let Some(ref value) = self.auto_repeat_mode {
+            value.serialize_into(bytes);
+        }
+    }
+}
 impl ChangeKeyboardControlAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
@@ -18440,40 +18474,6 @@ impl ChangeKeyboardControlAux {
     pub fn auto_repeat_mode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.auto_repeat_mode = value.into();
         self
-    }
-}
-impl Serialize for ChangeKeyboardControlAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
-        let mut result = Vec::new();
-        self.serialize_into(&mut result);
-        result
-    }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.key_click_percent {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bell_percent {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bell_pitch {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.bell_duration {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.led {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.led_mode {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.key {
-            value.serialize_into(bytes);
-        }
-        if let Some(ref value) = self.auto_repeat_mode {
-            value.serialize_into(bytes);
-        }
     }
 }
 pub fn change_keyboard_control<'c, Conn>(conn: &'c Conn, value_list: &ChangeKeyboardControlAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
