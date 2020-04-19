@@ -1170,6 +1170,7 @@ class Module(object):
             self.out("fn try_parse(%s) -> Result<(Self, &[u8]), ParseError> {",
                      ", ".join(args))
             with Indent(self.out):
+                self.out("let switch_expr = %s;", switch_field_name)
                 self.out("let mut outer_remaining = value;")
                 if switch_type.bitcases[0].type.is_bitcase:
                     all_parts = []
@@ -1182,8 +1183,8 @@ class Module(object):
                         else:
                             field_name = self._to_rust_variable(case.only_field.field_name)
                             field_type = self._to_complex_owned_rust_type(case.only_field)
-                        self.out("let %s = if %s & %s::from(%s::%s) != 0 {",
-                                 field_name, switch_field_name,
+                        self.out("let %s = if switch_expr & %s::from(%s::%s) != 0 {",
+                                 field_name,
                                  self._name(switch_field_type.field_type),
                                  self._name(expr.lenfield_type.name),
                                  ename_to_rust(expr.lenfield_name))
@@ -1217,7 +1218,7 @@ class Module(object):
                         else:
                             field_name = self._to_rust_variable(case.only_field.field_name)
                             field_type = self._to_complex_owned_rust_type(case.only_field)
-                        self.out("if %s == %s::from(%s::%s) {", switch_field_name,
+                        self.out("if switch_expr == %s::from(%s::%s) {",
                                  self._name(switch_field_type.field_type),
                                  self._name(expr.lenfield_type.name),
                                  ename_to_rust(expr.lenfield_name))

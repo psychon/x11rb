@@ -7702,8 +7702,9 @@ pub struct GetMapMap {
 }
 impl GetMapMap {
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = present;
         let mut outer_remaining = value;
-        let types_rtrn = if present & u16::from(MapPart::KeyTypes) != 0 {
+        let types_rtrn = if switch_expr & u16::from(MapPart::KeyTypes) != 0 {
             let remaining = outer_remaining;
             let (types_rtrn, remaining) = crate::x11_utils::parse_list::<KeyType>(remaining, n_types as usize)?;
             outer_remaining = remaining;
@@ -7711,7 +7712,7 @@ impl GetMapMap {
         } else {
             None
         };
-        let syms_rtrn = if present & u16::from(MapPart::KeySyms) != 0 {
+        let syms_rtrn = if switch_expr & u16::from(MapPart::KeySyms) != 0 {
             let remaining = outer_remaining;
             let (syms_rtrn, remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms as usize)?;
             outer_remaining = remaining;
@@ -7719,14 +7720,14 @@ impl GetMapMap {
         } else {
             None
         };
-        let bitcase3 = if present & u16::from(MapPart::KeyActions) != 0 {
+        let bitcase3 = if switch_expr & u16::from(MapPart::KeyActions) != 0 {
             let (bitcase3, new_remaining) = GetMapMapBitcase3::try_parse(outer_remaining, n_key_actions, total_actions)?;
             outer_remaining = new_remaining;
             Some(bitcase3)
         } else {
             None
         };
-        let behaviors_rtrn = if present & u16::from(MapPart::KeyBehaviors) != 0 {
+        let behaviors_rtrn = if switch_expr & u16::from(MapPart::KeyBehaviors) != 0 {
             let remaining = outer_remaining;
             let (behaviors_rtrn, remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors as usize)?;
             outer_remaining = remaining;
@@ -7734,7 +7735,7 @@ impl GetMapMap {
         } else {
             None
         };
-        let vmods_rtrn = if present & u16::from(MapPart::VirtualMods) != 0 {
+        let vmods_rtrn = if switch_expr & u16::from(MapPart::VirtualMods) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
             let (vmods_rtrn, remaining) = crate::x11_utils::parse_list::<u8>(remaining, usize::try_from(virtual_mods.count_ones()).unwrap())?;
@@ -7747,7 +7748,7 @@ impl GetMapMap {
         } else {
             None
         };
-        let explicit_rtrn = if present & u16::from(MapPart::ExplicitComponents) != 0 {
+        let explicit_rtrn = if switch_expr & u16::from(MapPart::ExplicitComponents) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
             let (explicit_rtrn, remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit as usize)?;
@@ -7760,7 +7761,7 @@ impl GetMapMap {
         } else {
             None
         };
-        let modmap_rtrn = if present & u16::from(MapPart::ModifierMap) != 0 {
+        let modmap_rtrn = if switch_expr & u16::from(MapPart::ModifierMap) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
             let (modmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys as usize)?;
@@ -7773,7 +7774,7 @@ impl GetMapMap {
         } else {
             None
         };
-        let vmodmap_rtrn = if present & u16::from(MapPart::VirtualModMap) != 0 {
+        let vmodmap_rtrn = if switch_expr & u16::from(MapPart::VirtualModMap) != 0 {
             let remaining = outer_remaining;
             let (vmodmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys as usize)?;
             outer_remaining = remaining;
@@ -8599,8 +8600,9 @@ pub struct GetNamesValueList {
 }
 impl GetNamesValueList {
     fn try_parse(value: &[u8], which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = which;
         let mut outer_remaining = value;
-        let keycodes_name = if which & u32::from(NameDetail::Keycodes) != 0 {
+        let keycodes_name = if switch_expr & u32::from(NameDetail::Keycodes) != 0 {
             let remaining = outer_remaining;
             let (keycodes_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -8608,7 +8610,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let geometry_name = if which & u32::from(NameDetail::Geometry) != 0 {
+        let geometry_name = if switch_expr & u32::from(NameDetail::Geometry) != 0 {
             let remaining = outer_remaining;
             let (geometry_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -8616,7 +8618,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let symbols_name = if which & u32::from(NameDetail::Symbols) != 0 {
+        let symbols_name = if switch_expr & u32::from(NameDetail::Symbols) != 0 {
             let remaining = outer_remaining;
             let (symbols_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -8624,7 +8626,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let phys_symbols_name = if which & u32::from(NameDetail::PhysSymbols) != 0 {
+        let phys_symbols_name = if switch_expr & u32::from(NameDetail::PhysSymbols) != 0 {
             let remaining = outer_remaining;
             let (phys_symbols_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -8632,7 +8634,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let types_name = if which & u32::from(NameDetail::Types) != 0 {
+        let types_name = if switch_expr & u32::from(NameDetail::Types) != 0 {
             let remaining = outer_remaining;
             let (types_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -8640,7 +8642,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let compat_name = if which & u32::from(NameDetail::Compat) != 0 {
+        let compat_name = if switch_expr & u32::from(NameDetail::Compat) != 0 {
             let remaining = outer_remaining;
             let (compat_name, remaining) = xproto::Atom::try_parse(remaining)?;
             outer_remaining = remaining;
@@ -8648,7 +8650,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let type_names = if which & u32::from(NameDetail::KeyTypeNames) != 0 {
+        let type_names = if switch_expr & u32::from(NameDetail::KeyTypeNames) != 0 {
             let remaining = outer_remaining;
             let (type_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_types as usize)?;
             outer_remaining = remaining;
@@ -8656,14 +8658,14 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let bitcase8 = if which & u32::from(NameDetail::KTLevelNames) != 0 {
+        let bitcase8 = if switch_expr & u32::from(NameDetail::KTLevelNames) != 0 {
             let (bitcase8, new_remaining) = GetNamesValueListBitcase8::try_parse(outer_remaining, n_types)?;
             outer_remaining = new_remaining;
             Some(bitcase8)
         } else {
             None
         };
-        let indicator_names = if which & u32::from(NameDetail::IndicatorNames) != 0 {
+        let indicator_names = if switch_expr & u32::from(NameDetail::IndicatorNames) != 0 {
             let remaining = outer_remaining;
             let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from(indicators.count_ones()).unwrap())?;
             outer_remaining = remaining;
@@ -8671,7 +8673,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let virtual_mod_names = if which & u32::from(NameDetail::VirtualModNames) != 0 {
+        let virtual_mod_names = if switch_expr & u32::from(NameDetail::VirtualModNames) != 0 {
             let remaining = outer_remaining;
             let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from(virtual_mods.count_ones()).unwrap())?;
             outer_remaining = remaining;
@@ -8679,7 +8681,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let groups = if which & u32::from(NameDetail::GroupNames) != 0 {
+        let groups = if switch_expr & u32::from(NameDetail::GroupNames) != 0 {
             let remaining = outer_remaining;
             let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from(group_names.count_ones()).unwrap())?;
             outer_remaining = remaining;
@@ -8687,7 +8689,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let key_names = if which & u32::from(NameDetail::KeyNames) != 0 {
+        let key_names = if switch_expr & u32::from(NameDetail::KeyNames) != 0 {
             let remaining = outer_remaining;
             let (key_names, remaining) = crate::x11_utils::parse_list::<KeyName>(remaining, n_keys as usize)?;
             outer_remaining = remaining;
@@ -8695,7 +8697,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let key_aliases = if which & u32::from(NameDetail::KeyAliases) != 0 {
+        let key_aliases = if switch_expr & u32::from(NameDetail::KeyAliases) != 0 {
             let remaining = outer_remaining;
             let (key_aliases, remaining) = crate::x11_utils::parse_list::<KeyAlias>(remaining, n_key_aliases as usize)?;
             outer_remaining = remaining;
@@ -8703,7 +8705,7 @@ impl GetNamesValueList {
         } else {
             None
         };
-        let radio_group_names = if which & u32::from(NameDetail::RGNames) != 0 {
+        let radio_group_names = if switch_expr & u32::from(NameDetail::RGNames) != 0 {
             let remaining = outer_remaining;
             let (radio_group_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_radio_groups as usize)?;
             outer_remaining = remaining;

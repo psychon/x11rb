@@ -707,22 +707,23 @@ pub enum InputInfoInfo {
 }
 impl InputInfoInfo {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = class_id;
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if class_id == u8::from(InputClass::Key) {
+        if switch_expr == u8::from(InputClass::Key) {
             let (key, new_remaining) = InputInfoInfoKey::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputInfoInfo::Key(key));
         }
-        if class_id == u8::from(InputClass::Button) {
+        if switch_expr == u8::from(InputClass::Button) {
             let remaining = outer_remaining;
             let (num_buttons, remaining) = u16::try_parse(remaining)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputInfoInfo::NumButtons(num_buttons));
         }
-        if class_id == u8::from(InputClass::Valuator) {
+        if switch_expr == u8::from(InputClass::Valuator) {
             let (valuator, new_remaining) = InputInfoInfoValuator::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -3061,39 +3062,40 @@ pub enum FeedbackStateData {
 }
 impl FeedbackStateData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = class_id;
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if class_id == u8::from(FeedbackClass::Keyboard) {
+        if switch_expr == u8::from(FeedbackClass::Keyboard) {
             let (keyboard, new_remaining) = FeedbackStateDataKeyboard::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Keyboard(keyboard));
         }
-        if class_id == u8::from(FeedbackClass::Pointer) {
+        if switch_expr == u8::from(FeedbackClass::Pointer) {
             let (pointer, new_remaining) = FeedbackStateDataPointer::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Pointer(pointer));
         }
-        if class_id == u8::from(FeedbackClass::String) {
+        if switch_expr == u8::from(FeedbackClass::String) {
             let (string, new_remaining) = FeedbackStateDataString::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::String(string));
         }
-        if class_id == u8::from(FeedbackClass::Integer) {
+        if switch_expr == u8::from(FeedbackClass::Integer) {
             let (integer, new_remaining) = FeedbackStateDataInteger::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Integer(integer));
         }
-        if class_id == u8::from(FeedbackClass::Led) {
+        if switch_expr == u8::from(FeedbackClass::Led) {
             let (led, new_remaining) = FeedbackStateDataLed::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Led(led));
         }
-        if class_id == u8::from(FeedbackClass::Bell) {
+        if switch_expr == u8::from(FeedbackClass::Bell) {
             let (bell, new_remaining) = FeedbackStateDataBell::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -3887,40 +3889,41 @@ pub enum FeedbackCtlData {
 }
 impl FeedbackCtlData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = class_id;
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if class_id == u8::from(FeedbackClass::Keyboard) {
+        if switch_expr == u8::from(FeedbackClass::Keyboard) {
             let (keyboard, new_remaining) = FeedbackCtlDataKeyboard::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Keyboard(keyboard));
         }
-        if class_id == u8::from(FeedbackClass::Pointer) {
+        if switch_expr == u8::from(FeedbackClass::Pointer) {
             let (pointer, new_remaining) = FeedbackCtlDataPointer::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Pointer(pointer));
         }
-        if class_id == u8::from(FeedbackClass::String) {
+        if switch_expr == u8::from(FeedbackClass::String) {
             let (string, new_remaining) = FeedbackCtlDataString::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::String(string));
         }
-        if class_id == u8::from(FeedbackClass::Integer) {
+        if switch_expr == u8::from(FeedbackClass::Integer) {
             let remaining = outer_remaining;
             let (int_to_display, remaining) = i32::try_parse(remaining)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::IntToDisplay(int_to_display));
         }
-        if class_id == u8::from(FeedbackClass::Led) {
+        if switch_expr == u8::from(FeedbackClass::Led) {
             let (led, new_remaining) = FeedbackCtlDataLed::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Led(led));
         }
-        if class_id == u8::from(FeedbackClass::Bell) {
+        if switch_expr == u8::from(FeedbackClass::Bell) {
             let (bell, new_remaining) = FeedbackCtlDataBell::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -5158,21 +5161,22 @@ pub enum InputStateData {
 }
 impl InputStateData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = class_id;
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if class_id == u8::from(InputClass::Key) {
+        if switch_expr == u8::from(InputClass::Key) {
             let (key, new_remaining) = InputStateDataKey::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputStateData::Key(key));
         }
-        if class_id == u8::from(InputClass::Button) {
+        if switch_expr == u8::from(InputClass::Button) {
             let (button, new_remaining) = InputStateDataButton::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputStateData::Button(button));
         }
-        if class_id == u8::from(InputClass::Valuator) {
+        if switch_expr == u8::from(InputClass::Valuator) {
             let (valuator, new_remaining) = InputStateDataValuator::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -6059,27 +6063,28 @@ pub enum DeviceStateData {
 }
 impl DeviceStateData {
     fn try_parse(value: &[u8], control_id: u16) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = control_id;
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if control_id == u16::from(DeviceControl::Resolution) {
+        if switch_expr == u16::from(DeviceControl::Resolution) {
             let (resolution, new_remaining) = DeviceStateDataResolution::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Resolution(resolution));
         }
-        if control_id == u16::from(DeviceControl::Abscalib) {
+        if switch_expr == u16::from(DeviceControl::Abscalib) {
             let (abs_calib, new_remaining) = DeviceStateDataAbsCalib::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::AbsCalib(abs_calib));
         }
-        if control_id == u16::from(DeviceControl::Core) {
+        if switch_expr == u16::from(DeviceControl::Core) {
             let (core, new_remaining) = DeviceStateDataCore::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Core(core));
         }
-        if control_id == u16::from(DeviceControl::Enable) {
+        if switch_expr == u16::from(DeviceControl::Enable) {
             let remaining = outer_remaining;
             let (enable, remaining) = u8::try_parse(remaining)?;
             let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -6087,7 +6092,7 @@ impl DeviceStateData {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Enable(enable));
         }
-        if control_id == u16::from(DeviceControl::Absarea) {
+        if switch_expr == u16::from(DeviceControl::Absarea) {
             let (abs_area, new_remaining) = DeviceStateDataAbsArea::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -6793,21 +6798,22 @@ pub enum DeviceCtlData {
 }
 impl DeviceCtlData {
     fn try_parse(value: &[u8], control_id: u16) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = control_id;
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if control_id == u16::from(DeviceControl::Resolution) {
+        if switch_expr == u16::from(DeviceControl::Resolution) {
             let (resolution, new_remaining) = DeviceCtlDataResolution::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Resolution(resolution));
         }
-        if control_id == u16::from(DeviceControl::Abscalib) {
+        if switch_expr == u16::from(DeviceControl::Abscalib) {
             let (abs_calib, new_remaining) = DeviceCtlDataAbsCalib::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::AbsCalib(abs_calib));
         }
-        if control_id == u16::from(DeviceControl::Core) {
+        if switch_expr == u16::from(DeviceControl::Core) {
             let remaining = outer_remaining;
             let (status, remaining) = u8::try_parse(remaining)?;
             let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -6815,7 +6821,7 @@ impl DeviceCtlData {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Status(status));
         }
-        if control_id == u16::from(DeviceControl::Enable) {
+        if switch_expr == u16::from(DeviceControl::Enable) {
             let remaining = outer_remaining;
             let (enable, remaining) = u8::try_parse(remaining)?;
             let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -6823,7 +6829,7 @@ impl DeviceCtlData {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Enable(enable));
         }
-        if control_id == u16::from(DeviceControl::Absarea) {
+        if switch_expr == u16::from(DeviceControl::Absarea) {
             let (abs_area, new_remaining) = DeviceCtlDataAbsArea::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -7300,9 +7306,10 @@ pub enum GetDevicePropertyItems {
 }
 impl GetDevicePropertyItems {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = format;
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if format == u8::from(PropertyFormat::M8Bits) {
+        if switch_expr == u8::from(PropertyFormat::M8Bits) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data8, remaining) = crate::x11_utils::parse_list::<u8>(remaining, num_items as usize)?;
@@ -7314,7 +7321,7 @@ impl GetDevicePropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(GetDevicePropertyItems::Data8(data8));
         }
-        if format == u8::from(PropertyFormat::M16Bits) {
+        if switch_expr == u8::from(PropertyFormat::M16Bits) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items as usize)?;
@@ -7326,7 +7333,7 @@ impl GetDevicePropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(GetDevicePropertyItems::Data16(data16));
         }
-        if format == u8::from(PropertyFormat::M32Bits) {
+        if switch_expr == u8::from(PropertyFormat::M32Bits) {
             let remaining = outer_remaining;
             let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items as usize)?;
             outer_remaining = remaining;
@@ -8260,27 +8267,28 @@ pub enum HierarchyChangeData {
 }
 impl HierarchyChangeData {
     fn try_parse(value: &[u8], type_: u16) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = type_;
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if type_ == u16::from(HierarchyChangeType::AddMaster) {
+        if switch_expr == u16::from(HierarchyChangeType::AddMaster) {
             let (add_master, new_remaining) = HierarchyChangeDataAddMaster::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::AddMaster(add_master));
         }
-        if type_ == u16::from(HierarchyChangeType::RemoveMaster) {
+        if switch_expr == u16::from(HierarchyChangeType::RemoveMaster) {
             let (remove_master, new_remaining) = HierarchyChangeDataRemoveMaster::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::RemoveMaster(remove_master));
         }
-        if type_ == u16::from(HierarchyChangeType::AttachSlave) {
+        if switch_expr == u16::from(HierarchyChangeType::AttachSlave) {
             let (attach_slave, new_remaining) = HierarchyChangeDataAttachSlave::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::AttachSlave(attach_slave));
         }
-        if type_ == u16::from(HierarchyChangeType::DetachSlave) {
+        if switch_expr == u16::from(HierarchyChangeType::DetachSlave) {
             let remaining = outer_remaining;
             let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
             let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
@@ -9671,33 +9679,34 @@ pub enum DeviceClassData {
 }
 impl DeviceClassData {
     fn try_parse(value: &[u8], type_: u16) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = type_;
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if type_ == u16::from(DeviceClassType::Key) {
+        if switch_expr == u16::from(DeviceClassType::Key) {
             let (key, new_remaining) = DeviceClassDataKey::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Key(key));
         }
-        if type_ == u16::from(DeviceClassType::Button) {
+        if switch_expr == u16::from(DeviceClassType::Button) {
             let (button, new_remaining) = DeviceClassDataButton::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Button(button));
         }
-        if type_ == u16::from(DeviceClassType::Valuator) {
+        if switch_expr == u16::from(DeviceClassType::Valuator) {
             let (valuator, new_remaining) = DeviceClassDataValuator::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Valuator(valuator));
         }
-        if type_ == u16::from(DeviceClassType::Scroll) {
+        if switch_expr == u16::from(DeviceClassType::Scroll) {
             let (scroll, new_remaining) = DeviceClassDataScroll::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Scroll(scroll));
         }
-        if type_ == u16::from(DeviceClassType::Touch) {
+        if switch_expr == u16::from(DeviceClassType::Touch) {
             let (touch, new_remaining) = DeviceClassDataTouch::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -10889,9 +10898,10 @@ pub enum XIGetPropertyItems {
 }
 impl XIGetPropertyItems {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
+        let switch_expr = format;
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if format == u8::from(PropertyFormat::M8Bits) {
+        if switch_expr == u8::from(PropertyFormat::M8Bits) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data8, remaining) = crate::x11_utils::parse_list::<u8>(remaining, num_items as usize)?;
@@ -10903,7 +10913,7 @@ impl XIGetPropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIGetPropertyItems::Data8(data8));
         }
-        if format == u8::from(PropertyFormat::M16Bits) {
+        if switch_expr == u8::from(PropertyFormat::M16Bits) {
             let remaining = outer_remaining;
             let value = remaining;
             let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items as usize)?;
@@ -10915,7 +10925,7 @@ impl XIGetPropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIGetPropertyItems::Data16(data16));
         }
-        if format == u8::from(PropertyFormat::M32Bits) {
+        if switch_expr == u8::from(PropertyFormat::M32Bits) {
             let remaining = outer_remaining;
             let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items as usize)?;
             outer_remaining = remaining;
