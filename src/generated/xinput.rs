@@ -134,8 +134,8 @@ pub struct GetExtensionVersionReply {
     pub server_minor: u16,
     pub present: bool,
 }
-impl GetExtensionVersionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetExtensionVersionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -871,8 +871,8 @@ pub struct ListInputDevicesReply {
     pub infos: Vec<InputInfo>,
     pub names: Vec<xproto::Str>,
 }
-impl ListInputDevicesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ListInputDevicesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
@@ -971,8 +971,8 @@ pub struct OpenDeviceReply {
     pub length: u32,
     pub class_info: Vec<InputClassInfo>,
 }
-impl OpenDeviceReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for OpenDeviceReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
@@ -1060,8 +1060,8 @@ pub struct SetDeviceModeReply {
     pub length: u32,
     pub status: xproto::GrabStatus,
 }
-impl SetDeviceModeReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for SetDeviceModeReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1152,8 +1152,8 @@ pub struct GetSelectedExtensionEventsReply {
     pub this_classes: Vec<EventClass>,
     pub all_classes: Vec<EventClass>,
 }
-impl GetSelectedExtensionEventsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetSelectedExtensionEventsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1310,8 +1310,8 @@ pub struct GetDeviceDontPropagateListReply {
     pub length: u32,
     pub classes: Vec<EventClass>,
 }
-impl GetDeviceDontPropagateListReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDeviceDontPropagateListReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1406,8 +1406,8 @@ pub struct GetDeviceMotionEventsReply {
     pub device_mode: ValuatorMode,
     pub events: Vec<DeviceTimeCoord>,
 }
-impl GetDeviceMotionEventsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDeviceMotionEventsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1470,8 +1470,8 @@ pub struct ChangeKeyboardDeviceReply {
     pub length: u32,
     pub status: xproto::GrabStatus,
 }
-impl ChangeKeyboardDeviceReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ChangeKeyboardDeviceReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1526,8 +1526,8 @@ pub struct ChangePointerDeviceReply {
     pub length: u32,
     pub status: xproto::GrabStatus,
 }
-impl ChangePointerDeviceReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ChangePointerDeviceReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -1607,8 +1607,8 @@ pub struct GrabDeviceReply {
     pub length: u32,
     pub status: xproto::GrabStatus,
 }
-impl GrabDeviceReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GrabDeviceReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -2053,8 +2053,8 @@ pub struct GetDeviceFocusReply {
     pub time: xproto::Timestamp,
     pub revert_to: xproto::InputFocus,
 }
-impl GetDeviceFocusReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDeviceFocusReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -3258,8 +3258,8 @@ pub struct GetFeedbackControlReply {
     pub length: u32,
     pub feedbacks: Vec<FeedbackState>,
 }
-impl GetFeedbackControlReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetFeedbackControlReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4186,8 +4186,8 @@ pub struct GetDeviceKeyMappingReply {
     pub keysyms_per_keycode: u8,
     pub keysyms: Vec<xproto::Keysym>,
 }
-impl GetDeviceKeyMappingReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDeviceKeyMappingReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4275,8 +4275,8 @@ pub struct GetDeviceModifierMappingReply {
     pub length: u32,
     pub keymaps: Vec<u8>,
 }
-impl GetDeviceModifierMappingReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDeviceModifierMappingReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4335,8 +4335,8 @@ pub struct SetDeviceModifierMappingReply {
     pub length: u32,
     pub status: xproto::MappingStatus,
 }
-impl SetDeviceModifierMappingReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for SetDeviceModifierMappingReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -4389,8 +4389,8 @@ pub struct GetDeviceButtonMappingReply {
     pub length: u32,
     pub map: Vec<u8>,
 }
-impl GetDeviceButtonMappingReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDeviceButtonMappingReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
@@ -4453,8 +4453,8 @@ pub struct SetDeviceButtonMappingReply {
     pub length: u32,
     pub status: xproto::MappingStatus,
 }
-impl SetDeviceButtonMappingReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for SetDeviceButtonMappingReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5310,8 +5310,8 @@ pub struct QueryDeviceStateReply {
     pub length: u32,
     pub classes: Vec<InputState>,
 }
-impl QueryDeviceStateReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for QueryDeviceStateReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -5401,8 +5401,8 @@ pub struct SetDeviceValuatorsReply {
     pub length: u32,
     pub status: xproto::GrabStatus,
 }
-impl SetDeviceValuatorsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for SetDeviceValuatorsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -6253,8 +6253,8 @@ pub struct GetDeviceControlReply {
     pub status: u8,
     pub control: DeviceState,
 }
-impl GetDeviceControlReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDeviceControlReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -7002,8 +7002,8 @@ pub struct ChangeDeviceControlReply {
     pub length: u32,
     pub status: u8,
 }
-impl ChangeDeviceControlReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ChangeDeviceControlReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -7055,8 +7055,8 @@ pub struct ListDevicePropertiesReply {
     pub length: u32,
     pub atoms: Vec<xproto::Atom>,
 }
-impl ListDevicePropertiesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for ListDevicePropertiesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -7429,8 +7429,8 @@ pub struct GetDevicePropertyReply {
     pub device_id: u8,
     pub items: GetDevicePropertyItems,
 }
-impl GetDevicePropertyReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for GetDevicePropertyReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (xi_reply_type, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -7667,8 +7667,8 @@ pub struct XIQueryPointerReply {
     pub group: GroupInfo,
     pub buttons: Vec<u32>,
 }
-impl XIQueryPointerReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for XIQueryPointerReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -8506,8 +8506,8 @@ pub struct XIGetClientPointerReply {
     pub set: bool,
     pub deviceid: DeviceId,
 }
-impl XIGetClientPointerReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for XIGetClientPointerReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -8738,8 +8738,8 @@ pub struct XIQueryVersionReply {
     pub major_version: u16,
     pub minor_version: u16,
 }
-impl XIQueryVersionReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for XIQueryVersionReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -9919,8 +9919,8 @@ pub struct XIQueryDeviceReply {
     pub length: u32,
     pub infos: Vec<XIDeviceInfo>,
 }
-impl XIQueryDeviceReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for XIQueryDeviceReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10009,8 +10009,8 @@ pub struct XIGetFocusReply {
     pub length: u32,
     pub focus: xproto::Window,
 }
-impl XIGetFocusReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for XIGetFocusReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10157,8 +10157,8 @@ pub struct XIGrabDeviceReply {
     pub length: u32,
     pub status: xproto::GrabStatus,
 }
-impl XIGrabDeviceReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for XIGrabDeviceReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10626,8 +10626,8 @@ pub struct XIPassiveGrabDeviceReply {
     pub length: u32,
     pub modifiers: Vec<GrabModifierInfo>,
 }
-impl XIPassiveGrabDeviceReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for XIPassiveGrabDeviceReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -10729,8 +10729,8 @@ pub struct XIListPropertiesReply {
     pub length: u32,
     pub properties: Vec<xproto::Atom>,
 }
-impl XIListPropertiesReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for XIListPropertiesReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11036,8 +11036,8 @@ pub struct XIGetPropertyReply {
     pub format: PropertyFormat,
     pub items: XIGetPropertyItems,
 }
-impl XIGetPropertyReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for XIGetPropertyReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
@@ -11093,8 +11093,8 @@ pub struct XIGetSelectedEventsReply {
     pub length: u32,
     pub masks: Vec<EventMask>,
 }
-impl XIGetSelectedEventsReply {
-    pub(crate) fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+impl TryParse for XIGetSelectedEventsReply {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;

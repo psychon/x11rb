@@ -464,7 +464,8 @@ def generate_request_code(module, obj, name, function_name):
     module.out("}")
 
     if obj.reply:
+        has_fds = any(field.isfd for field in obj.reply.fields)
         code_generator_helpers.module.emit_doc(module.out, obj.reply.doc)
-        module.complex_type(obj.reply, module._name(name) + 'Reply', False, [])
+        module.complex_type(obj.reply, module._name(name) + 'Reply', not has_fds, [])
 
     module.out("")
