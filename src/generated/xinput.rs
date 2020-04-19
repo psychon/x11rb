@@ -607,7 +607,7 @@ impl Serialize for ValuatorInfo {
         bytes.reserve(8);
         u8::from(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
-        let axes_len = self.axes.len() as u8;
+        let axes_len = u8::try_from(self.axes.len()).expect("`axes` has too many elements");
         axes_len.serialize_into(bytes);
         u8::from(self.mode).serialize_into(bytes);
         self.motion_size.serialize_into(bytes);
@@ -692,7 +692,7 @@ impl Serialize for InputInfoInfoValuator {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(6);
-        let axes_len = self.axes.len() as u8;
+        let axes_len = u8::try_from(self.axes.len()).expect("`axes` has too many elements");
         axes_len.serialize_into(bytes);
         u8::from(self.mode).serialize_into(bytes);
         self.motion_size.serialize_into(bytes);
@@ -833,7 +833,7 @@ impl Serialize for DeviceName {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(1);
-        let len = self.string.len() as u8;
+        let len = u8::try_from(self.string.len()).expect("`string` has too many elements");
         len.serialize_into(bytes);
         self.string.serialize_into(bytes);
     }
@@ -1354,7 +1354,7 @@ impl Serialize for DeviceTimeCoord {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(5);
         self.time.serialize_into(bytes);
-        let num_axes = self.axisvalues.len() as u8;
+        let num_axes = u8::try_from(self.axisvalues.len()).expect("`axisvalues` has too many elements");
         num_axes.serialize_into(bytes);
         self.axisvalues.serialize_into(bytes);
     }
@@ -2550,7 +2550,7 @@ impl Serialize for StringFeedbackState {
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.max_symbols.serialize_into(bytes);
-        let num_keysyms = self.keysyms.len() as u16;
+        let num_keysyms = u16::try_from(self.keysyms.len()).expect("`keysyms` has too many elements");
         num_keysyms.serialize_into(bytes);
         self.keysyms.serialize_into(bytes);
     }
@@ -2928,7 +2928,7 @@ impl Serialize for FeedbackStateDataString {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
         self.max_symbols.serialize_into(bytes);
-        let num_keysyms = self.keysyms.len() as u16;
+        let num_keysyms = u16::try_from(self.keysyms.len()).expect("`keysyms` has too many elements");
         num_keysyms.serialize_into(bytes);
         self.keysyms.serialize_into(bytes);
     }
@@ -3524,7 +3524,7 @@ impl Serialize for StringFeedbackCtl {
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
-        let num_keysyms = self.keysyms.len() as u16;
+        let num_keysyms = u16::try_from(self.keysyms.len()).expect("`keysyms` has too many elements");
         num_keysyms.serialize_into(bytes);
         self.keysyms.serialize_into(bytes);
     }
@@ -3803,7 +3803,7 @@ impl Serialize for FeedbackCtlDataString {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
         bytes.extend_from_slice(&[0; 2]);
-        let num_keysyms = self.keysyms.len() as u16;
+        let num_keysyms = u16::try_from(self.keysyms.len()).expect("`keysyms` has too many elements");
         num_keysyms.serialize_into(bytes);
         self.keysyms.serialize_into(bytes);
     }
@@ -4862,7 +4862,7 @@ impl Serialize for ValuatorState {
         bytes.reserve(4);
         u8::from(self.class_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
-        let num_valuators = self.valuators.len() as u8;
+        let num_valuators = u8::try_from(self.valuators.len()).expect("`valuators` has too many elements");
         num_valuators.serialize_into(bytes);
         self.mode.serialize_into(bytes);
         self.valuators.serialize_into(bytes);
@@ -5164,7 +5164,7 @@ impl Serialize for InputStateDataValuator {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        let num_valuators = self.valuators.len() as u8;
+        let num_valuators = u8::try_from(self.valuators.len()).expect("`valuators` has too many elements");
         num_valuators.serialize_into(bytes);
         self.mode.serialize_into(bytes);
         self.valuators.serialize_into(bytes);
@@ -6311,7 +6311,7 @@ impl Serialize for DeviceResolutionCtl {
         u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.first_valuator.serialize_into(bytes);
-        let num_valuators = self.resolution_values.len() as u8;
+        let num_valuators = u8::try_from(self.resolution_values.len()).expect("`resolution_values` has too many elements");
         num_valuators.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.resolution_values.serialize_into(bytes);
@@ -6637,7 +6637,7 @@ impl Serialize for DeviceCtlDataResolution {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
         self.first_valuator.serialize_into(bytes);
-        let num_valuators = self.resolution_values.len() as u8;
+        let num_valuators = u8::try_from(self.resolution_values.len()).expect("`resolution_values` has too many elements");
         num_valuators.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.resolution_values.serialize_into(bytes);
@@ -7969,7 +7969,7 @@ impl Serialize for AddMaster {
         bytes.reserve(8);
         u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
-        let name_len = self.name.len() as u16;
+        let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         name_len.serialize_into(bytes);
         self.send_core.serialize_into(bytes);
         self.enable.serialize_into(bytes);
@@ -8180,7 +8180,7 @@ impl Serialize for HierarchyChangeDataAddMaster {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        let name_len = self.name.len() as u16;
+        let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         name_len.serialize_into(bytes);
         self.send_core.serialize_into(bytes);
         self.enable.serialize_into(bytes);
@@ -8660,7 +8660,7 @@ impl Serialize for EventMask {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
         self.deviceid.serialize_into(bytes);
-        let mask_len = self.mask.len() as u16;
+        let mask_len = u16::try_from(self.mask.len()).expect("`mask` has too many elements");
         mask_len.serialize_into(bytes);
         self.mask.serialize_into(bytes);
     }
@@ -9170,7 +9170,7 @@ impl Serialize for KeyClass {
         u16::from(self.type_).serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
-        let num_keys = self.keys.len() as u16;
+        let num_keys = u16::try_from(self.keys.len()).expect("`keys` has too many elements");
         num_keys.serialize_into(bytes);
         self.keys.serialize_into(bytes);
     }
@@ -9455,7 +9455,7 @@ impl Serialize for DeviceClassDataKey {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        let num_keys = self.keys.len() as u16;
+        let num_keys = u16::try_from(self.keys.len()).expect("`keys` has too many elements");
         num_keys.serialize_into(bytes);
         self.keys.serialize_into(bytes);
     }
@@ -9874,9 +9874,9 @@ impl Serialize for XIDeviceInfo {
         self.deviceid.serialize_into(bytes);
         u16::from(self.type_).serialize_into(bytes);
         self.attachment.serialize_into(bytes);
-        let num_classes = self.classes.len() as u16;
+        let num_classes = u16::try_from(self.classes.len()).expect("`classes` has too many elements");
         num_classes.serialize_into(bytes);
-        let name_len = self.name.len() as u16;
+        let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         name_len.serialize_into(bytes);
         self.enabled.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);

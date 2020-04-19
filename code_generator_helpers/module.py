@@ -553,8 +553,12 @@ class Module(object):
                         if hasattr(field, "is_length_field_for"):
                             # This field is a length field for some list. We get the value
                             # for this field as the length of the list.
-                            source = "self.%s.len() as %s" % (field.is_length_field_for.field_name,
-                                                              self._field_type(field))
+                            source = "%s::try_from(self.%s.len()).expect(\"`%s` %s\")" % (
+                                    self._field_type(field),
+                                    field.is_length_field_for.field_name,
+                                    field.is_length_field_for.field_name,
+                                    "has too many elements",
+                            )
                             expr = field.is_length_field_for.type.expr
                             if expr.op is not None:
                                 # Sigh. The length cannot be used as-is, but needs to be transformed

@@ -403,7 +403,7 @@ impl Serialize for ClientInfo {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
         self.client_resource.serialize_into(bytes);
-        let num_ranges = self.ranges.len() as u32;
+        let num_ranges = u32::try_from(self.ranges.len()).expect("`ranges` has too many elements");
         num_ranges.serialize_into(bytes);
         self.ranges.serialize_into(bytes);
     }

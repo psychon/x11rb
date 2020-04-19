@@ -526,7 +526,7 @@ impl Serialize for RefreshRates {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        let n_rates = self.rates.len() as u16;
+        let n_rates = u16::try_from(self.rates.len()).expect("`rates` has too many elements");
         n_rates.serialize_into(bytes);
         self.rates.serialize_into(bytes);
     }
@@ -4105,7 +4105,7 @@ impl Serialize for MonitorInfo {
         self.name.serialize_into(bytes);
         self.primary.serialize_into(bytes);
         self.automatic.serialize_into(bytes);
-        let n_output = self.outputs.len() as u16;
+        let n_output = u16::try_from(self.outputs.len()).expect("`outputs` has too many elements");
         n_output.serialize_into(bytes);
         self.x.serialize_into(bytes);
         self.y.serialize_into(bytes);

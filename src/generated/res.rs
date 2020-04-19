@@ -257,7 +257,7 @@ impl Serialize for ClientIdValue {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
         self.spec.serialize_into(bytes);
-        let length = self.value.len() as u32 * 4;
+        let length = u32::try_from(self.value.len()).expect("`value` has too many elements") * 4;
         length.serialize_into(bytes);
         self.value.serialize_into(bytes);
     }
@@ -397,7 +397,7 @@ impl Serialize for ResourceSizeValue {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(24);
         self.size.serialize_into(bytes);
-        let num_cross_references = self.cross_references.len() as u32;
+        let num_cross_references = u32::try_from(self.cross_references.len()).expect("`cross_references` has too many elements");
         num_cross_references.serialize_into(bytes);
         self.cross_references.serialize_into(bytes);
     }

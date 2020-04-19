@@ -434,9 +434,9 @@ impl Serialize for ListItem {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
         self.name.serialize_into(bytes);
-        let object_context_len = self.object_context.len() as u32;
+        let object_context_len = u32::try_from(self.object_context.len()).expect("`object_context` has too many elements");
         object_context_len.serialize_into(bytes);
-        let data_context_len = self.data_context.len() as u32;
+        let data_context_len = u32::try_from(self.data_context.len()).expect("`data_context` has too many elements");
         data_context_len.serialize_into(bytes);
         self.object_context.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);

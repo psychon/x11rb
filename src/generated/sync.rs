@@ -394,7 +394,7 @@ impl Serialize for Systemcounter {
         bytes.reserve(14);
         self.counter.serialize_into(bytes);
         self.resolution.serialize_into(bytes);
-        let name_len = self.name.len() as u16;
+        let name_len = u16::try_from(self.name.len()).expect("`name` has too many elements");
         name_len.serialize_into(bytes);
         self.name.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);

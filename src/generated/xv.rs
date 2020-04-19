@@ -640,10 +640,10 @@ impl Serialize for AdaptorInfo {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
         self.base_id.serialize_into(bytes);
-        let name_size = self.name.len() as u16;
+        let name_size = u16::try_from(self.name.len()).expect("`name` has too many elements");
         name_size.serialize_into(bytes);
         self.num_ports.serialize_into(bytes);
-        let num_formats = self.formats.len() as u16;
+        let num_formats = u16::try_from(self.formats.len()).expect("`formats` has too many elements");
         num_formats.serialize_into(bytes);
         self.type_.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
@@ -695,7 +695,7 @@ impl Serialize for EncodingInfo {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(20);
         self.encoding.serialize_into(bytes);
-        let name_size = self.name.len() as u16;
+        let name_size = u16::try_from(self.name.len()).expect("`name` has too many elements");
         name_size.serialize_into(bytes);
         self.width.serialize_into(bytes);
         self.height.serialize_into(bytes);
@@ -748,7 +748,7 @@ impl Serialize for Image {
         self.id.serialize_into(bytes);
         self.width.serialize_into(bytes);
         self.height.serialize_into(bytes);
-        let data_size = self.data.len() as u32;
+        let data_size = u32::try_from(self.data.len()).expect("`data` has too many elements");
         data_size.serialize_into(bytes);
         self.num_planes.serialize_into(bytes);
         self.pitches.serialize_into(bytes);
@@ -798,7 +798,7 @@ impl Serialize for AttributeInfo {
         self.flags.serialize_into(bytes);
         self.min.serialize_into(bytes);
         self.max.serialize_into(bytes);
-        let size = self.name.len() as u32;
+        let size = u32::try_from(self.name.len()).expect("`name` has too many elements");
         size.serialize_into(bytes);
         self.name.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);

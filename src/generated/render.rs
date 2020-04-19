@@ -1361,7 +1361,7 @@ impl Serialize for Pictdepth {
         bytes.reserve(8);
         self.depth.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
-        let num_visuals = self.visuals.len() as u16;
+        let num_visuals = u16::try_from(self.visuals.len()).expect("`visuals` has too many elements");
         num_visuals.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 4]);
         self.visuals.serialize_into(bytes);
@@ -1397,7 +1397,7 @@ impl Serialize for Pictscreen {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
-        let num_depths = self.depths.len() as u32;
+        let num_depths = u32::try_from(self.depths.len()).expect("`depths` has too many elements");
         num_depths.serialize_into(bytes);
         self.fallback.serialize_into(bytes);
         self.depths.serialize_into(bytes);

@@ -2658,7 +2658,7 @@ impl Serialize for CountedString16 {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        let length = self.string.len() as u16;
+        let length = u16::try_from(self.string.len()).expect("`string` has too many elements");
         length.serialize_into(bytes);
         self.string.serialize_into(bytes);
         self.alignment_pad.serialize_into(bytes);
@@ -2765,7 +2765,7 @@ impl Serialize for KeyType {
         self.mods_mods.serialize_into(bytes);
         self.mods_vmods.serialize_into(bytes);
         self.num_levels.serialize_into(bytes);
-        let n_map_entries = self.map.len() as u8;
+        let n_map_entries = u8::try_from(self.map.len()).expect("`map` has too many elements");
         n_map_entries.serialize_into(bytes);
         self.has_preserve.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
@@ -2819,7 +2819,7 @@ impl Serialize for KeySymMap {
         self.kt_index.serialize_into(bytes);
         self.group_info.serialize_into(bytes);
         self.width.serialize_into(bytes);
-        let n_syms = self.syms.len() as u16;
+        let n_syms = u16::try_from(self.syms.len()).expect("`syms` has too many elements");
         n_syms.serialize_into(bytes);
         self.syms.serialize_into(bytes);
     }
@@ -3569,7 +3569,7 @@ impl Serialize for SetKeyType {
         self.real_mods.serialize_into(bytes);
         self.virtual_mods.serialize_into(bytes);
         self.num_levels.serialize_into(bytes);
-        let n_map_entries = self.entries.len() as u8;
+        let n_map_entries = u8::try_from(self.entries.len()).expect("`entries` has too many elements");
         n_map_entries.serialize_into(bytes);
         self.preserve.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
@@ -3610,7 +3610,7 @@ impl Serialize for Outline {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        let n_points = self.points.len() as u8;
+        let n_points = u8::try_from(self.points.len()).expect("`points` has too many elements");
         n_points.serialize_into(bytes);
         self.corner_radius.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
@@ -3653,7 +3653,7 @@ impl Serialize for Shape {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
         self.name.serialize_into(bytes);
-        let n_outlines = self.outlines.len() as u8;
+        let n_outlines = u8::try_from(self.outlines.len()).expect("`outlines` has too many elements");
         n_outlines.serialize_into(bytes);
         self.primary_ndx.serialize_into(bytes);
         self.approx_ndx.serialize_into(bytes);
@@ -3809,7 +3809,7 @@ impl Serialize for OverlayRow {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
         self.row_under.serialize_into(bytes);
-        let n_keys = self.keys.len() as u8;
+        let n_keys = u8::try_from(self.keys.len()).expect("`keys` has too many elements");
         n_keys.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.keys.serialize_into(bytes);
@@ -3847,7 +3847,7 @@ impl Serialize for Overlay {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
         self.name.serialize_into(bytes);
-        let n_rows = self.rows.len() as u8;
+        let n_rows = u8::try_from(self.rows.len()).expect("`rows` has too many elements");
         n_rows.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
         self.rows.serialize_into(bytes);
@@ -3890,7 +3890,7 @@ impl Serialize for Row {
         bytes.reserve(8);
         self.top.serialize_into(bytes);
         self.left.serialize_into(bytes);
-        let n_keys = self.keys.len() as u8;
+        let n_keys = u8::try_from(self.keys.len()).expect("`keys` has too many elements");
         n_keys.serialize_into(bytes);
         self.vertical.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
@@ -4004,7 +4004,7 @@ impl Serialize for Listing {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
         self.flags.serialize_into(bytes);
-        let length = self.string.len() as u16;
+        let length = u16::try_from(self.string.len()).expect("`string` has too many elements");
         length.serialize_into(bytes);
         self.string.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1][..(2 - (bytes.len() % 2)) % 2]);

@@ -480,7 +480,7 @@ impl Serialize for Depth {
         bytes.reserve(8);
         self.depth.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
-        let visuals_len = self.visuals.len() as u16;
+        let visuals_len = u16::try_from(self.visuals.len()).expect("`visuals` has too many elements");
         visuals_len.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 4]);
         self.visuals.serialize_into(bytes);
@@ -728,7 +728,7 @@ impl Serialize for Screen {
         u8::from(self.backing_stores).serialize_into(bytes);
         self.save_unders.serialize_into(bytes);
         self.root_depth.serialize_into(bytes);
-        let allowed_depths_len = self.allowed_depths.len() as u8;
+        let allowed_depths_len = u8::try_from(self.allowed_depths.len()).expect("`allowed_depths` has too many elements");
         allowed_depths_len.serialize_into(bytes);
         self.allowed_depths.serialize_into(bytes);
     }
@@ -785,9 +785,9 @@ impl Serialize for SetupRequest {
         bytes.extend_from_slice(&[0; 1]);
         self.protocol_major_version.serialize_into(bytes);
         self.protocol_minor_version.serialize_into(bytes);
-        let authorization_protocol_name_len = self.authorization_protocol_name.len() as u16;
+        let authorization_protocol_name_len = u16::try_from(self.authorization_protocol_name.len()).expect("`authorization_protocol_name` has too many elements");
         authorization_protocol_name_len.serialize_into(bytes);
-        let authorization_protocol_data_len = self.authorization_protocol_data.len() as u16;
+        let authorization_protocol_data_len = u16::try_from(self.authorization_protocol_data.len()).expect("`authorization_protocol_data` has too many elements");
         authorization_protocol_data_len.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.authorization_protocol_name.serialize_into(bytes);
@@ -833,7 +833,7 @@ impl Serialize for SetupFailed {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(8);
         self.status.serialize_into(bytes);
-        let reason_len = self.reason.len() as u8;
+        let reason_len = u8::try_from(self.reason.len()).expect("`reason` has too many elements");
         reason_len.serialize_into(bytes);
         self.protocol_major_version.serialize_into(bytes);
         self.protocol_minor_version.serialize_into(bytes);
@@ -874,7 +874,7 @@ impl Serialize for SetupAuthenticate {
         bytes.reserve(8);
         self.status.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 5]);
-        let length = self.reason.len() as u16 / 4;
+        let length = u16::try_from(self.reason.len()).expect("`reason` has too many elements") / 4;
         length.serialize_into(bytes);
         self.reason.serialize_into(bytes);
     }
@@ -1023,12 +1023,12 @@ impl Serialize for Setup {
         self.resource_id_base.serialize_into(bytes);
         self.resource_id_mask.serialize_into(bytes);
         self.motion_buffer_size.serialize_into(bytes);
-        let vendor_len = self.vendor.len() as u16;
+        let vendor_len = u16::try_from(self.vendor.len()).expect("`vendor` has too many elements");
         vendor_len.serialize_into(bytes);
         self.maximum_request_length.serialize_into(bytes);
-        let roots_len = self.roots.len() as u8;
+        let roots_len = u8::try_from(self.roots.len()).expect("`roots` has too many elements");
         roots_len.serialize_into(bytes);
-        let pixmap_formats_len = self.pixmap_formats.len() as u8;
+        let pixmap_formats_len = u8::try_from(self.pixmap_formats.len()).expect("`pixmap_formats` has too many elements");
         pixmap_formats_len.serialize_into(bytes);
         u8::from(self.image_byte_order).serialize_into(bytes);
         u8::from(self.bitmap_format_bit_order).serialize_into(bytes);
@@ -13289,7 +13289,7 @@ impl Serialize for Str {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(1);
-        let name_len = self.name.len() as u8;
+        let name_len = u8::try_from(self.name.len()).expect("`name` has too many elements");
         name_len.serialize_into(bytes);
         self.name.serialize_into(bytes);
     }
@@ -19161,7 +19161,7 @@ impl Serialize for Host {
         bytes.reserve(4);
         u8::from(self.family).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
-        let address_len = self.address.len() as u16;
+        let address_len = u16::try_from(self.address.len()).expect("`address` has too many elements");
         address_len.serialize_into(bytes);
         self.address.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
