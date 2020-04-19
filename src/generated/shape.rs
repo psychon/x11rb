@@ -242,10 +242,38 @@ impl From<&NotifyEvent> for [u8; 32] {
         let server_time_bytes = input.server_time.serialize();
         let shaped_bytes = input.shaped.serialize();
         [
-            response_type_bytes[0], shape_kind_bytes[0], sequence_bytes[0], sequence_bytes[1], affected_window_bytes[0], affected_window_bytes[1], affected_window_bytes[2], affected_window_bytes[3],
-            extents_x_bytes[0], extents_x_bytes[1], extents_y_bytes[0], extents_y_bytes[1], extents_width_bytes[0], extents_width_bytes[1], extents_height_bytes[0], extents_height_bytes[1],
-            server_time_bytes[0], server_time_bytes[1], server_time_bytes[2], server_time_bytes[3], shaped_bytes[0], 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            shape_kind_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            affected_window_bytes[0],
+            affected_window_bytes[1],
+            affected_window_bytes[2],
+            affected_window_bytes[3],
+            extents_x_bytes[0],
+            extents_x_bytes[1],
+            extents_y_bytes[0],
+            extents_y_bytes[1],
+            extents_width_bytes[0],
+            extents_width_bytes[1],
+            extents_height_bytes[0],
+            extents_height_bytes[1],
+            server_time_bytes[0],
+            server_time_bytes[1],
+            server_time_bytes[2],
+            server_time_bytes[3],
+            shaped_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }

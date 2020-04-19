@@ -798,17 +798,13 @@ class Module(object):
                                 parts.append("%s[%d]" % (field_bytes, i))
 
                 assert len(parts) <= 32
-                if len(parts) < 32:
-                    parts.append("/* trailing padding */ 0")
-                    while len(parts) < 32:
-                        parts.append("0")
-
                 self.out("[")
-                with Indent(self.out):
-                    while len(parts) > 8:
-                        self.out("%s,", ", ".join(parts[:8]))
-                        parts = parts[8:]
-                    self.out("%s", ", ".join(parts))
+                for part in parts:
+                    self.out.indent("%s,", part)
+                if len(parts) < 32:
+                    self.out.indent("// trailing padding")
+                    for i in range(32 - len(parts)):
+                        self.out.indent("0,")
                 self.out("]")
             self.out("}")
         self.out("}")

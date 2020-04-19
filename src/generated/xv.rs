@@ -1196,10 +1196,39 @@ impl From<&BadPortError> for [u8; 32] {
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
-            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -1248,10 +1277,39 @@ impl From<&BadEncodingError> for [u8; 32] {
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
-            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -1300,10 +1358,39 @@ impl From<&BadControlError> for [u8; 32] {
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
-            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -1364,10 +1451,39 @@ impl From<&VideoNotifyEvent> for [u8; 32] {
         let drawable_bytes = input.drawable.serialize();
         let port_bytes = input.port.serialize();
         [
-            response_type_bytes[0], reason_bytes[0], sequence_bytes[0], sequence_bytes[1], time_bytes[0], time_bytes[1], time_bytes[2], time_bytes[3],
-            drawable_bytes[0], drawable_bytes[1], drawable_bytes[2], drawable_bytes[3], port_bytes[0], port_bytes[1], port_bytes[2], port_bytes[3],
-            /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            reason_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            port_bytes[0],
+            port_bytes[1],
+            port_bytes[2],
+            port_bytes[3],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -1428,10 +1544,39 @@ impl From<&PortNotifyEvent> for [u8; 32] {
         let attribute_bytes = input.attribute.serialize();
         let value_bytes = input.value.serialize();
         [
-            response_type_bytes[0], 0, sequence_bytes[0], sequence_bytes[1], time_bytes[0], time_bytes[1], time_bytes[2], time_bytes[3],
-            port_bytes[0], port_bytes[1], port_bytes[2], port_bytes[3], attribute_bytes[0], attribute_bytes[1], attribute_bytes[2], attribute_bytes[3],
-            value_bytes[0], value_bytes[1], value_bytes[2], value_bytes[3], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            port_bytes[0],
+            port_bytes[1],
+            port_bytes[2],
+            port_bytes[3],
+            attribute_bytes[0],
+            attribute_bytes[1],
+            attribute_bytes[2],
+            attribute_bytes[3],
+            value_bytes[0],
+            value_bytes[1],
+            value_bytes[2],
+            value_bytes[3],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }

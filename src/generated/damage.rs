@@ -153,10 +153,39 @@ impl From<&BadDamageError> for [u8; 32] {
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
-            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -417,10 +446,38 @@ impl From<&NotifyEvent> for [u8; 32] {
         let area_bytes = input.area.serialize();
         let geometry_bytes = input.geometry.serialize();
         [
-            response_type_bytes[0], level_bytes[0], sequence_bytes[0], sequence_bytes[1], drawable_bytes[0], drawable_bytes[1], drawable_bytes[2], drawable_bytes[3],
-            damage_bytes[0], damage_bytes[1], damage_bytes[2], damage_bytes[3], timestamp_bytes[0], timestamp_bytes[1], timestamp_bytes[2], timestamp_bytes[3],
-            area_bytes[0], area_bytes[1], area_bytes[2], area_bytes[3], area_bytes[4], area_bytes[5], area_bytes[6], area_bytes[7],
-            geometry_bytes[0], geometry_bytes[1], geometry_bytes[2], geometry_bytes[3], geometry_bytes[4], geometry_bytes[5], geometry_bytes[6], geometry_bytes[7]
+            response_type_bytes[0],
+            level_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            damage_bytes[0],
+            damage_bytes[1],
+            damage_bytes[2],
+            damage_bytes[3],
+            timestamp_bytes[0],
+            timestamp_bytes[1],
+            timestamp_bytes[2],
+            timestamp_bytes[3],
+            area_bytes[0],
+            area_bytes[1],
+            area_bytes[2],
+            area_bytes[3],
+            area_bytes[4],
+            area_bytes[5],
+            area_bytes[6],
+            area_bytes[7],
+            geometry_bytes[0],
+            geometry_bytes[1],
+            geometry_bytes[2],
+            geometry_bytes[3],
+            geometry_bytes[4],
+            geometry_bytes[5],
+            geometry_bytes[6],
+            geometry_bytes[7],
         ]
     }
 }

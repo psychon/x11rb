@@ -89,10 +89,39 @@ impl From<&BadOutputError> for [u8; 32] {
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
-            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -141,10 +170,39 @@ impl From<&BadCrtcError> for [u8; 32] {
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
-            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -193,10 +251,39 @@ impl From<&BadModeError> for [u8; 32] {
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
-            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -245,10 +332,39 @@ impl From<&BadProviderError> for [u8; 32] {
         let error_code_bytes = input.error_code.serialize();
         let sequence_bytes = input.sequence.serialize();
         [
-            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -3354,10 +3470,38 @@ impl From<&ScreenChangeNotifyEvent> for [u8; 32] {
         let mwidth_bytes = input.mwidth.serialize();
         let mheight_bytes = input.mheight.serialize();
         [
-            response_type_bytes[0], rotation_bytes[0], sequence_bytes[0], sequence_bytes[1], timestamp_bytes[0], timestamp_bytes[1], timestamp_bytes[2], timestamp_bytes[3],
-            config_timestamp_bytes[0], config_timestamp_bytes[1], config_timestamp_bytes[2], config_timestamp_bytes[3], root_bytes[0], root_bytes[1], root_bytes[2], root_bytes[3],
-            request_window_bytes[0], request_window_bytes[1], request_window_bytes[2], request_window_bytes[3], size_id_bytes[0], size_id_bytes[1], subpixel_order_bytes[0], subpixel_order_bytes[1],
-            width_bytes[0], width_bytes[1], height_bytes[0], height_bytes[1], mwidth_bytes[0], mwidth_bytes[1], mheight_bytes[0], mheight_bytes[1]
+            response_type_bytes[0],
+            rotation_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            timestamp_bytes[0],
+            timestamp_bytes[1],
+            timestamp_bytes[2],
+            timestamp_bytes[3],
+            config_timestamp_bytes[0],
+            config_timestamp_bytes[1],
+            config_timestamp_bytes[2],
+            config_timestamp_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            request_window_bytes[0],
+            request_window_bytes[1],
+            request_window_bytes[2],
+            request_window_bytes[3],
+            size_id_bytes[0],
+            size_id_bytes[1],
+            subpixel_order_bytes[0],
+            subpixel_order_bytes[1],
+            width_bytes[0],
+            width_bytes[1],
+            height_bytes[0],
+            height_bytes[1],
+            mwidth_bytes[0],
+            mwidth_bytes[1],
+            mheight_bytes[0],
+            mheight_bytes[1],
         ]
     }
 }
@@ -4436,10 +4580,38 @@ impl From<&NotifyEvent> for [u8; 32] {
         let sequence_bytes = input.sequence.serialize();
         let u_bytes = input.u.serialize();
         [
-            response_type_bytes[0], sub_code_bytes[0], sequence_bytes[0], sequence_bytes[1], u_bytes[0], u_bytes[1], u_bytes[2], u_bytes[3],
-            u_bytes[4], u_bytes[5], u_bytes[6], u_bytes[7], u_bytes[8], u_bytes[9], u_bytes[10], u_bytes[11],
-            u_bytes[12], u_bytes[13], u_bytes[14], u_bytes[15], u_bytes[16], u_bytes[17], u_bytes[18], u_bytes[19],
-            u_bytes[20], u_bytes[21], u_bytes[22], u_bytes[23], u_bytes[24], u_bytes[25], u_bytes[26], u_bytes[27]
+            response_type_bytes[0],
+            sub_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            u_bytes[0],
+            u_bytes[1],
+            u_bytes[2],
+            u_bytes[3],
+            u_bytes[4],
+            u_bytes[5],
+            u_bytes[6],
+            u_bytes[7],
+            u_bytes[8],
+            u_bytes[9],
+            u_bytes[10],
+            u_bytes[11],
+            u_bytes[12],
+            u_bytes[13],
+            u_bytes[14],
+            u_bytes[15],
+            u_bytes[16],
+            u_bytes[17],
+            u_bytes[18],
+            u_bytes[19],
+            u_bytes[20],
+            u_bytes[21],
+            u_bytes[22],
+            u_bytes[23],
+            u_bytes[24],
+            u_bytes[25],
+            u_bytes[26],
+            u_bytes[27],
         ]
     }
 }

@@ -871,10 +871,39 @@ impl From<&GenericEvent> for [u8; 32] {
         let evtype_bytes = input.evtype.serialize();
         let event_bytes = input.event.serialize();
         [
-            response_type_bytes[0], extension_bytes[0], sequence_bytes[0], sequence_bytes[1], length_bytes[0], length_bytes[1], length_bytes[2], length_bytes[3],
-            evtype_bytes[0], evtype_bytes[1], 0, 0, event_bytes[0], event_bytes[1], event_bytes[2], event_bytes[3],
-            /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            extension_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            length_bytes[0],
+            length_bytes[1],
+            length_bytes[2],
+            length_bytes[3],
+            evtype_bytes[0],
+            evtype_bytes[1],
+            0,
+            0,
+            event_bytes[0],
+            event_bytes[1],
+            event_bytes[2],
+            event_bytes[3],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }

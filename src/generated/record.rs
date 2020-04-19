@@ -451,10 +451,39 @@ impl From<&BadContextError> for [u8; 32] {
         let sequence_bytes = input.sequence.serialize();
         let invalid_record_bytes = input.invalid_record.serialize();
         [
-            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], invalid_record_bytes[0], invalid_record_bytes[1], invalid_record_bytes[2], invalid_record_bytes[3],
-            /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            invalid_record_bytes[0],
+            invalid_record_bytes[1],
+            invalid_record_bytes[2],
+            invalid_record_bytes[3],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }

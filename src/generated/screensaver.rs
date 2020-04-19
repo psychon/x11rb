@@ -763,10 +763,38 @@ impl From<&NotifyEvent> for [u8; 32] {
         let kind_bytes = u8::from(input.kind).serialize();
         let forced_bytes = input.forced.serialize();
         [
-            response_type_bytes[0], state_bytes[0], sequence_bytes[0], sequence_bytes[1], time_bytes[0], time_bytes[1], time_bytes[2], time_bytes[3],
-            root_bytes[0], root_bytes[1], root_bytes[2], root_bytes[3], window_bytes[0], window_bytes[1], window_bytes[2], window_bytes[3],
-            kind_bytes[0], forced_bytes[0], 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            state_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            time_bytes[0],
+            time_bytes[1],
+            time_bytes[2],
+            time_bytes[3],
+            root_bytes[0],
+            root_bytes[1],
+            root_bytes[2],
+            root_bytes[3],
+            window_bytes[0],
+            window_bytes[1],
+            window_bytes[2],
+            window_bytes[3],
+            kind_bytes[0],
+            forced_bytes[0],
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }

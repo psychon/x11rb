@@ -1253,10 +1253,38 @@ impl From<&BufferSwapCompleteEvent> for [u8; 32] {
         let msc_lo_bytes = input.msc_lo.serialize();
         let sbc_bytes = input.sbc.serialize();
         [
-            response_type_bytes[0], 0, sequence_bytes[0], sequence_bytes[1], event_type_bytes[0], event_type_bytes[1], 0, 0,
-            drawable_bytes[0], drawable_bytes[1], drawable_bytes[2], drawable_bytes[3], ust_hi_bytes[0], ust_hi_bytes[1], ust_hi_bytes[2], ust_hi_bytes[3],
-            ust_lo_bytes[0], ust_lo_bytes[1], ust_lo_bytes[2], ust_lo_bytes[3], msc_hi_bytes[0], msc_hi_bytes[1], msc_hi_bytes[2], msc_hi_bytes[3],
-            msc_lo_bytes[0], msc_lo_bytes[1], msc_lo_bytes[2], msc_lo_bytes[3], sbc_bytes[0], sbc_bytes[1], sbc_bytes[2], sbc_bytes[3]
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            event_type_bytes[0],
+            event_type_bytes[1],
+            0,
+            0,
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            ust_hi_bytes[0],
+            ust_hi_bytes[1],
+            ust_hi_bytes[2],
+            ust_hi_bytes[3],
+            ust_lo_bytes[0],
+            ust_lo_bytes[1],
+            ust_lo_bytes[2],
+            ust_lo_bytes[3],
+            msc_hi_bytes[0],
+            msc_hi_bytes[1],
+            msc_hi_bytes[2],
+            msc_hi_bytes[3],
+            msc_lo_bytes[0],
+            msc_lo_bytes[1],
+            msc_lo_bytes[2],
+            msc_lo_bytes[3],
+            sbc_bytes[0],
+            sbc_bytes[1],
+            sbc_bytes[2],
+            sbc_bytes[3],
         ]
     }
 }
@@ -1308,10 +1336,39 @@ impl From<&InvalidateBuffersEvent> for [u8; 32] {
         let sequence_bytes = input.sequence.serialize();
         let drawable_bytes = input.drawable.serialize();
         [
-            response_type_bytes[0], 0, sequence_bytes[0], sequence_bytes[1], drawable_bytes[0], drawable_bytes[1], drawable_bytes[2], drawable_bytes[3],
-            /* trailing padding */ 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }

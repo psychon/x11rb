@@ -95,10 +95,39 @@ impl From<&CompletionEvent> for [u8; 32] {
         let shmseg_bytes = input.shmseg.serialize();
         let offset_bytes = input.offset.serialize();
         [
-            response_type_bytes[0], 0, sequence_bytes[0], sequence_bytes[1], drawable_bytes[0], drawable_bytes[1], drawable_bytes[2], drawable_bytes[3],
-            minor_event_bytes[0], minor_event_bytes[1], major_event_bytes[0], 0, shmseg_bytes[0], shmseg_bytes[1], shmseg_bytes[2], shmseg_bytes[3],
-            offset_bytes[0], offset_bytes[1], offset_bytes[2], offset_bytes[3], /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            0,
+            sequence_bytes[0],
+            sequence_bytes[1],
+            drawable_bytes[0],
+            drawable_bytes[1],
+            drawable_bytes[2],
+            drawable_bytes[3],
+            minor_event_bytes[0],
+            minor_event_bytes[1],
+            major_event_bytes[0],
+            0,
+            shmseg_bytes[0],
+            shmseg_bytes[1],
+            shmseg_bytes[2],
+            shmseg_bytes[3],
+            offset_bytes[0],
+            offset_bytes[1],
+            offset_bytes[2],
+            offset_bytes[3],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -157,10 +186,39 @@ impl From<&BadSegError> for [u8; 32] {
         let minor_opcode_bytes = input.minor_opcode.serialize();
         let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], bad_value_bytes[0], bad_value_bytes[1], bad_value_bytes[2], bad_value_bytes[3],
-            minor_opcode_bytes[0], minor_opcode_bytes[1], major_opcode_bytes[0], 0, /* trailing padding */ 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_value_bytes[0],
+            bad_value_bytes[1],
+            bad_value_bytes[2],
+            bad_value_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            0,
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }

@@ -575,10 +575,39 @@ impl From<&CounterError> for [u8; 32] {
         let minor_opcode_bytes = input.minor_opcode.serialize();
         let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], bad_counter_bytes[0], bad_counter_bytes[1], bad_counter_bytes[2], bad_counter_bytes[3],
-            minor_opcode_bytes[0], minor_opcode_bytes[1], major_opcode_bytes[0], /* trailing padding */ 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_counter_bytes[0],
+            bad_counter_bytes[1],
+            bad_counter_bytes[2],
+            bad_counter_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -636,10 +665,39 @@ impl From<&AlarmError> for [u8; 32] {
         let minor_opcode_bytes = input.minor_opcode.serialize();
         let major_opcode_bytes = input.major_opcode.serialize();
         [
-            response_type_bytes[0], error_code_bytes[0], sequence_bytes[0], sequence_bytes[1], bad_alarm_bytes[0], bad_alarm_bytes[1], bad_alarm_bytes[2], bad_alarm_bytes[3],
-            minor_opcode_bytes[0], minor_opcode_bytes[1], major_opcode_bytes[0], /* trailing padding */ 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            response_type_bytes[0],
+            error_code_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            bad_alarm_bytes[0],
+            bad_alarm_bytes[1],
+            bad_alarm_bytes[2],
+            bad_alarm_bytes[3],
+            minor_opcode_bytes[0],
+            minor_opcode_bytes[1],
+            major_opcode_bytes[0],
+            // trailing padding
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
         ]
     }
 }
@@ -1655,10 +1713,38 @@ impl From<&CounterNotifyEvent> for [u8; 32] {
         let count_bytes = input.count.serialize();
         let destroyed_bytes = input.destroyed.serialize();
         [
-            response_type_bytes[0], kind_bytes[0], sequence_bytes[0], sequence_bytes[1], counter_bytes[0], counter_bytes[1], counter_bytes[2], counter_bytes[3],
-            wait_value_bytes[0], wait_value_bytes[1], wait_value_bytes[2], wait_value_bytes[3], wait_value_bytes[4], wait_value_bytes[5], wait_value_bytes[6], wait_value_bytes[7],
-            counter_value_bytes[0], counter_value_bytes[1], counter_value_bytes[2], counter_value_bytes[3], counter_value_bytes[4], counter_value_bytes[5], counter_value_bytes[6], counter_value_bytes[7],
-            timestamp_bytes[0], timestamp_bytes[1], timestamp_bytes[2], timestamp_bytes[3], count_bytes[0], count_bytes[1], destroyed_bytes[0], 0
+            response_type_bytes[0],
+            kind_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            counter_bytes[0],
+            counter_bytes[1],
+            counter_bytes[2],
+            counter_bytes[3],
+            wait_value_bytes[0],
+            wait_value_bytes[1],
+            wait_value_bytes[2],
+            wait_value_bytes[3],
+            wait_value_bytes[4],
+            wait_value_bytes[5],
+            wait_value_bytes[6],
+            wait_value_bytes[7],
+            counter_value_bytes[0],
+            counter_value_bytes[1],
+            counter_value_bytes[2],
+            counter_value_bytes[3],
+            counter_value_bytes[4],
+            counter_value_bytes[5],
+            counter_value_bytes[6],
+            counter_value_bytes[7],
+            timestamp_bytes[0],
+            timestamp_bytes[1],
+            timestamp_bytes[2],
+            timestamp_bytes[3],
+            count_bytes[0],
+            count_bytes[1],
+            destroyed_bytes[0],
+            0,
         ]
     }
 }
@@ -1726,10 +1812,38 @@ impl From<&AlarmNotifyEvent> for [u8; 32] {
         let timestamp_bytes = input.timestamp.serialize();
         let state_bytes = u8::from(input.state).serialize();
         [
-            response_type_bytes[0], kind_bytes[0], sequence_bytes[0], sequence_bytes[1], alarm_bytes[0], alarm_bytes[1], alarm_bytes[2], alarm_bytes[3],
-            counter_value_bytes[0], counter_value_bytes[1], counter_value_bytes[2], counter_value_bytes[3], counter_value_bytes[4], counter_value_bytes[5], counter_value_bytes[6], counter_value_bytes[7],
-            alarm_value_bytes[0], alarm_value_bytes[1], alarm_value_bytes[2], alarm_value_bytes[3], alarm_value_bytes[4], alarm_value_bytes[5], alarm_value_bytes[6], alarm_value_bytes[7],
-            timestamp_bytes[0], timestamp_bytes[1], timestamp_bytes[2], timestamp_bytes[3], state_bytes[0], 0, 0, 0
+            response_type_bytes[0],
+            kind_bytes[0],
+            sequence_bytes[0],
+            sequence_bytes[1],
+            alarm_bytes[0],
+            alarm_bytes[1],
+            alarm_bytes[2],
+            alarm_bytes[3],
+            counter_value_bytes[0],
+            counter_value_bytes[1],
+            counter_value_bytes[2],
+            counter_value_bytes[3],
+            counter_value_bytes[4],
+            counter_value_bytes[5],
+            counter_value_bytes[6],
+            counter_value_bytes[7],
+            alarm_value_bytes[0],
+            alarm_value_bytes[1],
+            alarm_value_bytes[2],
+            alarm_value_bytes[3],
+            alarm_value_bytes[4],
+            alarm_value_bytes[5],
+            alarm_value_bytes[6],
+            alarm_value_bytes[7],
+            timestamp_bytes[0],
+            timestamp_bytes[1],
+            timestamp_bytes[2],
+            timestamp_bytes[3],
+            state_bytes[0],
+            0,
+            0,
+            0,
         ]
     }
 }
