@@ -1024,7 +1024,7 @@ where
 
 /// Opcode for the CreateAlarm request
 pub const CREATE_ALARM_REQUEST: u8 = 8;
-/// Auxiliary and optional information for the create_alarm function.
+/// Auxiliary and optional information for the `create_alarm` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct CreateAlarmAux {
     pub counter: Option<Counter>,
@@ -1089,32 +1089,32 @@ impl CreateAlarmAux {
         }
         mask
     }
-    /// Set the counter field of this structure.
+    /// Set the `counter` field of this structure.
     pub fn counter<I>(mut self, value: I) -> Self where I: Into<Option<Counter>> {
         self.counter = value.into();
         self
     }
-    /// Set the valueType field of this structure.
+    /// Set the `valueType` field of this structure.
     pub fn value_type<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.value_type = value.into();
         self
     }
-    /// Set the value field of this structure.
+    /// Set the `value` field of this structure.
     pub fn value<I>(mut self, value: I) -> Self where I: Into<Option<Int64>> {
         self.value = value.into();
         self
     }
-    /// Set the testType field of this structure.
+    /// Set the `testType` field of this structure.
     pub fn test_type<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.test_type = value.into();
         self
     }
-    /// Set the delta field of this structure.
+    /// Set the `delta` field of this structure.
     pub fn delta<I>(mut self, value: I) -> Self where I: Into<Option<Int64>> {
         self.delta = value.into();
         self
     }
-    /// Set the events field of this structure.
+    /// Set the `events` field of this structure.
     pub fn events<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.events = value.into();
         self
@@ -1157,7 +1157,7 @@ where
 
 /// Opcode for the ChangeAlarm request
 pub const CHANGE_ALARM_REQUEST: u8 = 9;
-/// Auxiliary and optional information for the change_alarm function.
+/// Auxiliary and optional information for the `change_alarm` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ChangeAlarmAux {
     pub counter: Option<Counter>,
@@ -1222,32 +1222,32 @@ impl ChangeAlarmAux {
         }
         mask
     }
-    /// Set the counter field of this structure.
+    /// Set the `counter` field of this structure.
     pub fn counter<I>(mut self, value: I) -> Self where I: Into<Option<Counter>> {
         self.counter = value.into();
         self
     }
-    /// Set the valueType field of this structure.
+    /// Set the `valueType` field of this structure.
     pub fn value_type<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.value_type = value.into();
         self
     }
-    /// Set the value field of this structure.
+    /// Set the `value` field of this structure.
     pub fn value<I>(mut self, value: I) -> Self where I: Into<Option<Int64>> {
         self.value = value.into();
         self
     }
-    /// Set the testType field of this structure.
+    /// Set the `testType` field of this structure.
     pub fn test_type<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.test_type = value.into();
         self
     }
-    /// Set the delta field of this structure.
+    /// Set the `delta` field of this structure.
     pub fn delta<I>(mut self, value: I) -> Self where I: Into<Option<Int64>> {
         self.delta = value.into();
         self
     }
-    /// Set the events field of this structure.
+    /// Set the `events` field of this structure.
     pub fn events<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.events = value.into();
         self

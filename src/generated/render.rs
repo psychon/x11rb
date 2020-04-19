@@ -1982,7 +1982,7 @@ impl TryFrom<&[u8]> for QueryPictIndexValuesReply {
 
 /// Opcode for the CreatePicture request
 pub const CREATE_PICTURE_REQUEST: u8 = 4;
-/// Auxiliary and optional information for the create_picture function.
+/// Auxiliary and optional information for the `create_picture` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct CreatePictureAux {
     pub repeat: Option<u32>,
@@ -2096,67 +2096,67 @@ impl CreatePictureAux {
         }
         mask
     }
-    /// Set the repeat field of this structure.
+    /// Set the `repeat` field of this structure.
     pub fn repeat<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.repeat = value.into();
         self
     }
-    /// Set the alphamap field of this structure.
+    /// Set the `alphamap` field of this structure.
     pub fn alphamap<I>(mut self, value: I) -> Self where I: Into<Option<Picture>> {
         self.alphamap = value.into();
         self
     }
-    /// Set the alphaxorigin field of this structure.
+    /// Set the `alphaxorigin` field of this structure.
     pub fn alphaxorigin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.alphaxorigin = value.into();
         self
     }
-    /// Set the alphayorigin field of this structure.
+    /// Set the `alphayorigin` field of this structure.
     pub fn alphayorigin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.alphayorigin = value.into();
         self
     }
-    /// Set the clipxorigin field of this structure.
+    /// Set the `clipxorigin` field of this structure.
     pub fn clipxorigin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.clipxorigin = value.into();
         self
     }
-    /// Set the clipyorigin field of this structure.
+    /// Set the `clipyorigin` field of this structure.
     pub fn clipyorigin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.clipyorigin = value.into();
         self
     }
-    /// Set the clipmask field of this structure.
+    /// Set the `clipmask` field of this structure.
     pub fn clipmask<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Pixmap>> {
         self.clipmask = value.into();
         self
     }
-    /// Set the graphicsexposure field of this structure.
+    /// Set the `graphicsexposure` field of this structure.
     pub fn graphicsexposure<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.graphicsexposure = value.into();
         self
     }
-    /// Set the subwindowmode field of this structure.
+    /// Set the `subwindowmode` field of this structure.
     pub fn subwindowmode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.subwindowmode = value.into();
         self
     }
-    /// Set the polyedge field of this structure.
+    /// Set the `polyedge` field of this structure.
     pub fn polyedge<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.polyedge = value.into();
         self
     }
-    /// Set the polymode field of this structure.
+    /// Set the `polymode` field of this structure.
     pub fn polymode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.polymode = value.into();
         self
     }
-    /// Set the dither field of this structure.
+    /// Set the `dither` field of this structure.
     pub fn dither<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Atom>> {
         self.dither = value.into();
         self
     }
-    /// Set the componentalpha field of this structure.
+    /// Set the `componentalpha` field of this structure.
     pub fn componentalpha<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.componentalpha = value.into();
         self
@@ -2209,7 +2209,7 @@ where
 
 /// Opcode for the ChangePicture request
 pub const CHANGE_PICTURE_REQUEST: u8 = 5;
-/// Auxiliary and optional information for the change_picture function.
+/// Auxiliary and optional information for the `change_picture` function
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct ChangePictureAux {
     pub repeat: Option<u32>,
@@ -2323,67 +2323,67 @@ impl ChangePictureAux {
         }
         mask
     }
-    /// Set the repeat field of this structure.
+    /// Set the `repeat` field of this structure.
     pub fn repeat<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.repeat = value.into();
         self
     }
-    /// Set the alphamap field of this structure.
+    /// Set the `alphamap` field of this structure.
     pub fn alphamap<I>(mut self, value: I) -> Self where I: Into<Option<Picture>> {
         self.alphamap = value.into();
         self
     }
-    /// Set the alphaxorigin field of this structure.
+    /// Set the `alphaxorigin` field of this structure.
     pub fn alphaxorigin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.alphaxorigin = value.into();
         self
     }
-    /// Set the alphayorigin field of this structure.
+    /// Set the `alphayorigin` field of this structure.
     pub fn alphayorigin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.alphayorigin = value.into();
         self
     }
-    /// Set the clipxorigin field of this structure.
+    /// Set the `clipxorigin` field of this structure.
     pub fn clipxorigin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.clipxorigin = value.into();
         self
     }
-    /// Set the clipyorigin field of this structure.
+    /// Set the `clipyorigin` field of this structure.
     pub fn clipyorigin<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
         self.clipyorigin = value.into();
         self
     }
-    /// Set the clipmask field of this structure.
+    /// Set the `clipmask` field of this structure.
     pub fn clipmask<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Pixmap>> {
         self.clipmask = value.into();
         self
     }
-    /// Set the graphicsexposure field of this structure.
+    /// Set the `graphicsexposure` field of this structure.
     pub fn graphicsexposure<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.graphicsexposure = value.into();
         self
     }
-    /// Set the subwindowmode field of this structure.
+    /// Set the `subwindowmode` field of this structure.
     pub fn subwindowmode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.subwindowmode = value.into();
         self
     }
-    /// Set the polyedge field of this structure.
+    /// Set the `polyedge` field of this structure.
     pub fn polyedge<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.polyedge = value.into();
         self
     }
-    /// Set the polymode field of this structure.
+    /// Set the `polymode` field of this structure.
     pub fn polymode<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.polymode = value.into();
         self
     }
-    /// Set the dither field of this structure.
+    /// Set the `dither` field of this structure.
     pub fn dither<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Atom>> {
         self.dither = value.into();
         self
     }
-    /// Set the componentalpha field of this structure.
+    /// Set the `componentalpha` field of this structure.
     pub fn componentalpha<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
         self.componentalpha = value.into();
         self

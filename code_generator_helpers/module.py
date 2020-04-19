@@ -1354,7 +1354,7 @@ class Module(object):
             assert all(field.type.size % min_field_size == 0 for field in fixed_size_fields)
 
         self._emit_switch_type(switch.type, name, request.fields, False, "Auxiliary and optional information"
-                               + " for the %s function." % (request_function_name,))
+                               + " for the `%s` function" % (request_function_name,))
 
         self.out("impl Serialize for %s {", name)
         with Indent(self.out):
@@ -1424,7 +1424,7 @@ class Module(object):
                     aux_name = self._aux_field_name(field)
                     field_name = field.field_name
                     field_type = self._to_complex_owned_rust_type(field)
-                self.out("/// Set the %s field of this structure.", field_name)
+                self.out("/// Set the `%s` field of this structure.", field_name)
                 self.out("pub fn %s<I>(mut self, value: I) -> Self where I: Into<Option<%s>> {",
                          aux_name, field_type)
                 with Indent(self.out):
