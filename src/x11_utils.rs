@@ -98,7 +98,7 @@ impl<B: AsRef<[u8]>> GenericEvent<B> {
             value_slice[6],
             value_slice[7],
         ]);
-        let length_field: usize = length_field.try_into()?;
+        let length_field: usize = length_field.try_into().or(Err(ParseError::ParseError))?;
         let actual_length = value_slice.len();
         let event = GenericEvent(value);
         let expected_length = match event.response_type() {
