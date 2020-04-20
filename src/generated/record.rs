@@ -559,11 +559,10 @@ where
     let length_so_far = 0;
     let context_bytes = context.serialize();
     let element_header_bytes = element_header.serialize();
-    let num_client_specs: u32 = client_specs.len().try_into()?;
+    let num_client_specs = u32::try_from(client_specs.len()).expect("`client_specs` has too many elements");
     let num_client_specs_bytes = num_client_specs.serialize();
-    let num_ranges: u32 = ranges.len().try_into()?;
+    let num_ranges = u32::try_from(ranges.len()).expect("`ranges` has too many elements");
     let num_ranges_bytes = num_ranges.serialize();
-    let client_specs_bytes = client_specs.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_CONTEXT_REQUEST,
@@ -587,6 +586,7 @@ where
         num_ranges_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let client_specs_bytes = client_specs.serialize();
     let length_so_far = length_so_far + client_specs_bytes.len();
     let ranges_bytes = ranges.serialize();
     let length_so_far = length_so_far + ranges_bytes.len();
@@ -609,11 +609,10 @@ where
     let length_so_far = 0;
     let context_bytes = context.serialize();
     let element_header_bytes = element_header.serialize();
-    let num_client_specs: u32 = client_specs.len().try_into()?;
+    let num_client_specs = u32::try_from(client_specs.len()).expect("`client_specs` has too many elements");
     let num_client_specs_bytes = num_client_specs.serialize();
-    let num_ranges: u32 = ranges.len().try_into()?;
+    let num_ranges = u32::try_from(ranges.len()).expect("`ranges` has too many elements");
     let num_ranges_bytes = num_ranges.serialize();
-    let client_specs_bytes = client_specs.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         REGISTER_CLIENTS_REQUEST,
@@ -637,6 +636,7 @@ where
         num_ranges_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let client_specs_bytes = client_specs.serialize();
     let length_so_far = length_so_far + client_specs_bytes.len();
     let ranges_bytes = ranges.serialize();
     let length_so_far = length_so_far + ranges_bytes.len();
@@ -658,9 +658,8 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let context_bytes = context.serialize();
-    let num_client_specs: u32 = client_specs.len().try_into()?;
+    let num_client_specs = u32::try_from(client_specs.len()).expect("`client_specs` has too many elements");
     let num_client_specs_bytes = num_client_specs.serialize();
-    let client_specs_bytes = client_specs.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         UNREGISTER_CLIENTS_REQUEST,
@@ -676,6 +675,7 @@ where
         num_client_specs_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let client_specs_bytes = client_specs.serialize();
     let length_so_far = length_so_far + client_specs_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -795,7 +795,7 @@ impl TryParse for EnableContextReply {
         let (server_time, remaining) = u32::try_parse(remaining)?;
         let (rec_sequence_num, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * (4))?;
+        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
         let result = EnableContextReply { response_type, category, sequence, element_header, client_swapped, xid_base, server_time, rec_sequence_num, data };
         Ok((result, remaining))
     }

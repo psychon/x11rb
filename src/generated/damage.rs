@@ -24,14 +24,8 @@ use crate::errors::{ConnectionError, ParseError};
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
-#[allow(unused_imports)]
-use super::xproto;
-#[allow(unused_imports)]
-use super::render;
-#[allow(unused_imports)]
-use super::shape;
-#[allow(unused_imports)]
 use super::xfixes;
+use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
 pub const X11_EXTENSION_NAME: &str = "DAMAGE";
@@ -321,12 +315,16 @@ where
 
 /// Opcode for the Subtract request
 pub const SUBTRACT_REQUEST: u8 = 3;
-pub fn subtract<Conn>(conn: &Conn, damage: Damage, repair: xfixes::Region, parts: xfixes::Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn subtract<Conn, A, B>(conn: &Conn, damage: Damage, repair: A, parts: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<xfixes::Region>,
+    B: Into<xfixes::Region>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let repair: xfixes::Region = repair.into();
+    let parts: xfixes::Region = parts.into();
     let length_so_far = 0;
     let damage_bytes = damage.serialize();
     let repair_bytes = repair.serialize();
@@ -501,7 +499,10 @@ pub trait ConnectionExt: RequestConnection {
     {
         destroy(self, damage)
     }
-    fn damage_subtract(&self, damage: Damage, repair: xfixes::Region, parts: xfixes::Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn damage_subtract<A, B>(&self, damage: Damage, repair: A, parts: B) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<xfixes::Region>,
+        B: Into<xfixes::Region>,
     {
         subtract(self, damage, repair, parts)
     }

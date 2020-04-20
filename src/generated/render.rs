@@ -24,7 +24,6 @@ use crate::errors::{ConnectionError, ParseError};
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
-#[allow(unused_imports)]
 use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
@@ -1901,7 +1900,7 @@ pub struct QueryPictFormatsReply {
     pub num_visuals: u32,
     pub formats: Vec<Pictforminfo>,
     pub screens: Vec<Pictscreen>,
-    pub subpixels: Vec<u32>,
+    pub subpixels: Vec<SubPixel>,
 }
 impl TryParse for QueryPictFormatsReply {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -1917,7 +1916,15 @@ impl TryParse for QueryPictFormatsReply {
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (formats, remaining) = crate::x11_utils::parse_list::<Pictforminfo>(remaining, num_formats as usize)?;
         let (screens, remaining) = crate::x11_utils::parse_list::<Pictscreen>(remaining, num_screens as usize)?;
-        let (subpixels, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_subpixel as usize)?;
+        let mut remaining = remaining;
+        let list_length = num_subpixel as usize;
+        let mut subpixels = Vec::with_capacity(list_length);
+        for _ in 0..list_length {
+            let (v, new_remaining) = u32::try_parse(remaining)?;
+            let v = v.try_into()?;
+            remaining = new_remaining;
+            subpixels.push(v);
+        }
         let result = QueryPictFormatsReply { response_type, sequence, length, num_depths, num_visuals, formats, screens, subpixels };
         Ok((result, remaining))
     }
@@ -2010,94 +2017,97 @@ impl Serialize for CreatePictureAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.repeat {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(repeat) = self.repeat {
+            u32::from(repeat).serialize_into(bytes);
         }
-        if let Some(ref value) = self.alphamap {
-            value.serialize_into(bytes);
+        if let Some(alphamap) = self.alphamap {
+            alphamap.serialize_into(bytes);
         }
-        if let Some(ref value) = self.alphaxorigin {
-            value.serialize_into(bytes);
+        if let Some(alphaxorigin) = self.alphaxorigin {
+            alphaxorigin.serialize_into(bytes);
         }
-        if let Some(ref value) = self.alphayorigin {
-            value.serialize_into(bytes);
+        if let Some(alphayorigin) = self.alphayorigin {
+            alphayorigin.serialize_into(bytes);
         }
-        if let Some(ref value) = self.clipxorigin {
-            value.serialize_into(bytes);
+        if let Some(clipxorigin) = self.clipxorigin {
+            clipxorigin.serialize_into(bytes);
         }
-        if let Some(ref value) = self.clipyorigin {
-            value.serialize_into(bytes);
+        if let Some(clipyorigin) = self.clipyorigin {
+            clipyorigin.serialize_into(bytes);
         }
-        if let Some(ref value) = self.clipmask {
-            value.serialize_into(bytes);
+        if let Some(clipmask) = self.clipmask {
+            clipmask.serialize_into(bytes);
         }
-        if let Some(ref value) = self.graphicsexposure {
-            value.serialize_into(bytes);
+        if let Some(graphicsexposure) = self.graphicsexposure {
+            graphicsexposure.serialize_into(bytes);
         }
-        if let Some(ref value) = self.subwindowmode {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(subwindowmode) = self.subwindowmode {
+            u32::from(subwindowmode).serialize_into(bytes);
         }
-        if let Some(ref value) = self.polyedge {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(polyedge) = self.polyedge {
+            u32::from(polyedge).serialize_into(bytes);
         }
-        if let Some(ref value) = self.polymode {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(polymode) = self.polymode {
+            u32::from(polymode).serialize_into(bytes);
         }
-        if let Some(ref value) = self.dither {
-            value.serialize_into(bytes);
+        if let Some(dither) = self.dither {
+            dither.serialize_into(bytes);
         }
-        if let Some(ref value) = self.componentalpha {
-            value.serialize_into(bytes);
+        if let Some(componentalpha) = self.componentalpha {
+            componentalpha.serialize_into(bytes);
         }
+    }
+}
+impl CreatePictureAux {
+    #[allow(dead_code)]
+    fn switch_expr(&self) -> u32 {
+        let mut expr_value: u32 = 0;
+        if self.repeat.is_some() {
+            expr_value |= u32::from(CP::Repeat);
+        }
+        if self.alphamap.is_some() {
+            expr_value |= u32::from(CP::AlphaMap);
+        }
+        if self.alphaxorigin.is_some() {
+            expr_value |= u32::from(CP::AlphaXOrigin);
+        }
+        if self.alphayorigin.is_some() {
+            expr_value |= u32::from(CP::AlphaYOrigin);
+        }
+        if self.clipxorigin.is_some() {
+            expr_value |= u32::from(CP::ClipXOrigin);
+        }
+        if self.clipyorigin.is_some() {
+            expr_value |= u32::from(CP::ClipYOrigin);
+        }
+        if self.clipmask.is_some() {
+            expr_value |= u32::from(CP::ClipMask);
+        }
+        if self.graphicsexposure.is_some() {
+            expr_value |= u32::from(CP::GraphicsExposure);
+        }
+        if self.subwindowmode.is_some() {
+            expr_value |= u32::from(CP::SubwindowMode);
+        }
+        if self.polyedge.is_some() {
+            expr_value |= u32::from(CP::PolyEdge);
+        }
+        if self.polymode.is_some() {
+            expr_value |= u32::from(CP::PolyMode);
+        }
+        if self.dither.is_some() {
+            expr_value |= u32::from(CP::Dither);
+        }
+        if self.componentalpha.is_some() {
+            expr_value |= u32::from(CP::ComponentAlpha);
+        }
+        expr_value
     }
 }
 impl CreatePictureAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
         Default::default()
-    }
-    fn value_mask(&self) -> u32 {
-        let mut mask = 0;
-        if self.repeat.is_some() {
-            mask |= u32::from(CP::Repeat);
-        }
-        if self.alphamap.is_some() {
-            mask |= u32::from(CP::AlphaMap);
-        }
-        if self.alphaxorigin.is_some() {
-            mask |= u32::from(CP::AlphaXOrigin);
-        }
-        if self.alphayorigin.is_some() {
-            mask |= u32::from(CP::AlphaYOrigin);
-        }
-        if self.clipxorigin.is_some() {
-            mask |= u32::from(CP::ClipXOrigin);
-        }
-        if self.clipyorigin.is_some() {
-            mask |= u32::from(CP::ClipYOrigin);
-        }
-        if self.clipmask.is_some() {
-            mask |= u32::from(CP::ClipMask);
-        }
-        if self.graphicsexposure.is_some() {
-            mask |= u32::from(CP::GraphicsExposure);
-        }
-        if self.subwindowmode.is_some() {
-            mask |= u32::from(CP::SubwindowMode);
-        }
-        if self.polyedge.is_some() {
-            mask |= u32::from(CP::PolyEdge);
-        }
-        if self.polymode.is_some() {
-            mask |= u32::from(CP::PolyMode);
-        }
-        if self.dither.is_some() {
-            mask |= u32::from(CP::Dither);
-        }
-        if self.componentalpha.is_some() {
-            mask |= u32::from(CP::ComponentAlpha);
-        }
-        mask
     }
     /// Set the `repeat` field of this structure.
     pub fn repeat<I>(mut self, value: I) -> Self where I: Into<Option<Repeat>> {
@@ -2165,18 +2175,18 @@ impl CreatePictureAux {
         self
     }
 }
+
 pub fn create_picture<'c, Conn>(conn: &'c Conn, pid: Picture, drawable: xproto::Drawable, format: Pictformat, value_list: &CreatePictureAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let value_mask = value_list.value_mask();
-    let value_list_bytes = value_list.serialize();
     let length_so_far = 0;
     let pid_bytes = pid.serialize();
     let drawable_bytes = drawable.serialize();
     let format_bytes = format.serialize();
+    let value_mask = value_list.switch_expr();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -2201,6 +2211,7 @@ where
         value_mask_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let value_list_bytes = value_list.serialize();
     let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -2237,94 +2248,97 @@ impl Serialize for ChangePictureAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.repeat {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(repeat) = self.repeat {
+            u32::from(repeat).serialize_into(bytes);
         }
-        if let Some(ref value) = self.alphamap {
-            value.serialize_into(bytes);
+        if let Some(alphamap) = self.alphamap {
+            alphamap.serialize_into(bytes);
         }
-        if let Some(ref value) = self.alphaxorigin {
-            value.serialize_into(bytes);
+        if let Some(alphaxorigin) = self.alphaxorigin {
+            alphaxorigin.serialize_into(bytes);
         }
-        if let Some(ref value) = self.alphayorigin {
-            value.serialize_into(bytes);
+        if let Some(alphayorigin) = self.alphayorigin {
+            alphayorigin.serialize_into(bytes);
         }
-        if let Some(ref value) = self.clipxorigin {
-            value.serialize_into(bytes);
+        if let Some(clipxorigin) = self.clipxorigin {
+            clipxorigin.serialize_into(bytes);
         }
-        if let Some(ref value) = self.clipyorigin {
-            value.serialize_into(bytes);
+        if let Some(clipyorigin) = self.clipyorigin {
+            clipyorigin.serialize_into(bytes);
         }
-        if let Some(ref value) = self.clipmask {
-            value.serialize_into(bytes);
+        if let Some(clipmask) = self.clipmask {
+            clipmask.serialize_into(bytes);
         }
-        if let Some(ref value) = self.graphicsexposure {
-            value.serialize_into(bytes);
+        if let Some(graphicsexposure) = self.graphicsexposure {
+            graphicsexposure.serialize_into(bytes);
         }
-        if let Some(ref value) = self.subwindowmode {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(subwindowmode) = self.subwindowmode {
+            u32::from(subwindowmode).serialize_into(bytes);
         }
-        if let Some(ref value) = self.polyedge {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(polyedge) = self.polyedge {
+            u32::from(polyedge).serialize_into(bytes);
         }
-        if let Some(ref value) = self.polymode {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(polymode) = self.polymode {
+            u32::from(polymode).serialize_into(bytes);
         }
-        if let Some(ref value) = self.dither {
-            value.serialize_into(bytes);
+        if let Some(dither) = self.dither {
+            dither.serialize_into(bytes);
         }
-        if let Some(ref value) = self.componentalpha {
-            value.serialize_into(bytes);
+        if let Some(componentalpha) = self.componentalpha {
+            componentalpha.serialize_into(bytes);
         }
+    }
+}
+impl ChangePictureAux {
+    #[allow(dead_code)]
+    fn switch_expr(&self) -> u32 {
+        let mut expr_value: u32 = 0;
+        if self.repeat.is_some() {
+            expr_value |= u32::from(CP::Repeat);
+        }
+        if self.alphamap.is_some() {
+            expr_value |= u32::from(CP::AlphaMap);
+        }
+        if self.alphaxorigin.is_some() {
+            expr_value |= u32::from(CP::AlphaXOrigin);
+        }
+        if self.alphayorigin.is_some() {
+            expr_value |= u32::from(CP::AlphaYOrigin);
+        }
+        if self.clipxorigin.is_some() {
+            expr_value |= u32::from(CP::ClipXOrigin);
+        }
+        if self.clipyorigin.is_some() {
+            expr_value |= u32::from(CP::ClipYOrigin);
+        }
+        if self.clipmask.is_some() {
+            expr_value |= u32::from(CP::ClipMask);
+        }
+        if self.graphicsexposure.is_some() {
+            expr_value |= u32::from(CP::GraphicsExposure);
+        }
+        if self.subwindowmode.is_some() {
+            expr_value |= u32::from(CP::SubwindowMode);
+        }
+        if self.polyedge.is_some() {
+            expr_value |= u32::from(CP::PolyEdge);
+        }
+        if self.polymode.is_some() {
+            expr_value |= u32::from(CP::PolyMode);
+        }
+        if self.dither.is_some() {
+            expr_value |= u32::from(CP::Dither);
+        }
+        if self.componentalpha.is_some() {
+            expr_value |= u32::from(CP::ComponentAlpha);
+        }
+        expr_value
     }
 }
 impl ChangePictureAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
         Default::default()
-    }
-    fn value_mask(&self) -> u32 {
-        let mut mask = 0;
-        if self.repeat.is_some() {
-            mask |= u32::from(CP::Repeat);
-        }
-        if self.alphamap.is_some() {
-            mask |= u32::from(CP::AlphaMap);
-        }
-        if self.alphaxorigin.is_some() {
-            mask |= u32::from(CP::AlphaXOrigin);
-        }
-        if self.alphayorigin.is_some() {
-            mask |= u32::from(CP::AlphaYOrigin);
-        }
-        if self.clipxorigin.is_some() {
-            mask |= u32::from(CP::ClipXOrigin);
-        }
-        if self.clipyorigin.is_some() {
-            mask |= u32::from(CP::ClipYOrigin);
-        }
-        if self.clipmask.is_some() {
-            mask |= u32::from(CP::ClipMask);
-        }
-        if self.graphicsexposure.is_some() {
-            mask |= u32::from(CP::GraphicsExposure);
-        }
-        if self.subwindowmode.is_some() {
-            mask |= u32::from(CP::SubwindowMode);
-        }
-        if self.polyedge.is_some() {
-            mask |= u32::from(CP::PolyEdge);
-        }
-        if self.polymode.is_some() {
-            mask |= u32::from(CP::PolyMode);
-        }
-        if self.dither.is_some() {
-            mask |= u32::from(CP::Dither);
-        }
-        if self.componentalpha.is_some() {
-            mask |= u32::from(CP::ComponentAlpha);
-        }
-        mask
     }
     /// Set the `repeat` field of this structure.
     pub fn repeat<I>(mut self, value: I) -> Self where I: Into<Option<Repeat>> {
@@ -2392,16 +2406,16 @@ impl ChangePictureAux {
         self
     }
 }
+
 pub fn change_picture<'c, Conn>(conn: &'c Conn, picture: Picture, value_list: &ChangePictureAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let value_mask = value_list.value_mask();
-    let value_list_bytes = value_list.serialize();
     let length_so_far = 0;
     let picture_bytes = picture.serialize();
+    let value_mask = value_list.switch_expr();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -2418,6 +2432,7 @@ where
         value_mask_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let value_list_bytes = value_list.serialize();
     let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -2439,7 +2454,6 @@ where
     let picture_bytes = picture.serialize();
     let clip_x_origin_bytes = clip_x_origin.serialize();
     let clip_y_origin_bytes = clip_y_origin.serialize();
-    let rectangles_bytes = rectangles.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         SET_PICTURE_CLIP_RECTANGLES_REQUEST,
@@ -2455,6 +2469,7 @@ where
         clip_y_origin_bytes[1],
     ];
     let length_so_far = length_so_far + request0.len();
+    let rectangles_bytes = rectangles.serialize();
     let length_so_far = length_so_far + rectangles_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -2493,12 +2508,14 @@ where
 
 /// Opcode for the Composite request
 pub const COMPOSITE_REQUEST: u8 = 8;
-pub fn composite<Conn>(conn: &Conn, op: PictOp, src: Picture, mask: Picture, dst: Picture, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn composite<Conn, A>(conn: &Conn, op: PictOp, src: Picture, mask: A, dst: Picture, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<Picture>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let mask: Picture = mask.into();
     let length_so_far = 0;
     let op_bytes = u8::from(op).serialize();
     let src_bytes = src.serialize();
@@ -2572,7 +2589,6 @@ where
     let mask_format_bytes = mask_format.serialize();
     let src_x_bytes = src_x.serialize();
     let src_y_bytes = src_y.serialize();
-    let traps_bytes = traps.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         TRAPEZOIDS_REQUEST,
@@ -2600,6 +2616,7 @@ where
         src_y_bytes[1],
     ];
     let length_so_far = length_so_far + request0.len();
+    let traps_bytes = traps.serialize();
     let length_so_far = length_so_far + traps_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -2624,7 +2641,6 @@ where
     let mask_format_bytes = mask_format.serialize();
     let src_x_bytes = src_x.serialize();
     let src_y_bytes = src_y.serialize();
-    let triangles_bytes = triangles.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         TRIANGLES_REQUEST,
@@ -2652,6 +2668,7 @@ where
         src_y_bytes[1],
     ];
     let length_so_far = length_so_far + request0.len();
+    let triangles_bytes = triangles.serialize();
     let length_so_far = length_so_far + triangles_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -2676,7 +2693,6 @@ where
     let mask_format_bytes = mask_format.serialize();
     let src_x_bytes = src_x.serialize();
     let src_y_bytes = src_y.serialize();
-    let points_bytes = points.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         TRI_STRIP_REQUEST,
@@ -2704,6 +2720,7 @@ where
         src_y_bytes[1],
     ];
     let length_so_far = length_so_far + request0.len();
+    let points_bytes = points.serialize();
     let length_so_far = length_so_far + points_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -2728,7 +2745,6 @@ where
     let mask_format_bytes = mask_format.serialize();
     let src_x_bytes = src_x.serialize();
     let src_y_bytes = src_y.serialize();
-    let points_bytes = points.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         TRI_FAN_REQUEST,
@@ -2756,6 +2772,7 @@ where
         src_y_bytes[1],
     ];
     let length_so_far = length_so_far + request0.len();
+    let points_bytes = points.serialize();
     let length_so_far = length_so_far + points_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -2867,8 +2884,6 @@ where
     let length_so_far = 0;
     let glyphset_bytes = glyphset.serialize();
     let glyphs_len_bytes = glyphs_len.serialize();
-    assert_eq!(glyphids.len(), glyphs_len as usize, "Argument glyphids has an incorrect length");
-    let glyphids_bytes = glyphids.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         ADD_GLYPHS_REQUEST,
@@ -2884,8 +2899,10 @@ where
         glyphs_len_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    assert_eq!(glyphids.len(), glyphs_len as usize, "`glyphids` has an incorrect length");
+    let glyphids_bytes = glyphids.serialize();
     let length_so_far = length_so_far + glyphids_bytes.len();
-    assert_eq!(glyphs.len(), glyphs_len as usize, "Argument glyphs has an incorrect length");
+    assert_eq!(glyphs.len(), glyphs_len as usize, "`glyphs` has an incorrect length");
     let glyphs_bytes = glyphs.serialize();
     let length_so_far = length_so_far + glyphs_bytes.len();
     let length_so_far = length_so_far + data.len();
@@ -2907,7 +2924,6 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let glyphset_bytes = glyphset.serialize();
-    let glyphs_bytes = glyphs.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         FREE_GLYPHS_REQUEST,
@@ -2919,6 +2935,7 @@ where
         glyphset_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let glyphs_bytes = glyphs.serialize();
     let length_so_far = length_so_far + glyphs_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -3108,7 +3125,6 @@ where
     let op_bytes = u8::from(op).serialize();
     let dst_bytes = dst.serialize();
     let color_bytes = color.serialize();
-    let rects_bytes = rects.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         FILL_RECTANGLES_REQUEST,
@@ -3132,6 +3148,7 @@ where
         color_bytes[7],
     ];
     let length_so_far = length_so_far + request0.len();
+    let rects_bytes = rects.serialize();
     let length_so_far = length_so_far + rects_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -3408,7 +3425,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let picture_bytes = picture.serialize();
-    let filter_len: u16 = filter.len().try_into()?;
+    let filter_len = u16::try_from(filter.len()).expect("`filter` has too many elements");
     let filter_len_bytes = filter_len.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -3490,7 +3507,6 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let cid_bytes = cid.serialize();
-    let cursors_bytes = cursors.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_ANIM_CURSOR_REQUEST,
@@ -3502,6 +3518,7 @@ where
         cid_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let cursors_bytes = cursors.serialize();
     let length_so_far = length_so_far + cursors_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -3631,7 +3648,6 @@ where
     let picture_bytes = picture.serialize();
     let x_off_bytes = x_off.serialize();
     let y_off_bytes = y_off.serialize();
-    let traps_bytes = traps.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         ADD_TRAPS_REQUEST,
@@ -3647,6 +3663,7 @@ where
         y_off_bytes[1],
     ];
     let length_so_far = length_so_far + request0.len();
+    let traps_bytes = traps.serialize();
     let length_so_far = length_so_far + traps_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -3705,8 +3722,6 @@ where
     let p1_bytes = p1.serialize();
     let p2_bytes = p2.serialize();
     let num_stops_bytes = num_stops.serialize();
-    assert_eq!(stops.len(), num_stops as usize, "Argument stops has an incorrect length");
-    let stops_bytes = stops.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_LINEAR_GRADIENT_REQUEST,
@@ -3738,8 +3753,10 @@ where
         num_stops_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    assert_eq!(stops.len(), num_stops as usize, "`stops` has an incorrect length");
+    let stops_bytes = stops.serialize();
     let length_so_far = length_so_far + stops_bytes.len();
-    assert_eq!(colors.len(), num_stops as usize, "Argument colors has an incorrect length");
+    assert_eq!(colors.len(), num_stops as usize, "`colors` has an incorrect length");
     let colors_bytes = colors.serialize();
     let length_so_far = length_so_far + colors_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
@@ -3765,8 +3782,6 @@ where
     let inner_radius_bytes = inner_radius.serialize();
     let outer_radius_bytes = outer_radius.serialize();
     let num_stops_bytes = num_stops.serialize();
-    assert_eq!(stops.len(), num_stops as usize, "Argument stops has an incorrect length");
-    let stops_bytes = stops.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_RADIAL_GRADIENT_REQUEST,
@@ -3806,8 +3821,10 @@ where
         num_stops_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    assert_eq!(stops.len(), num_stops as usize, "`stops` has an incorrect length");
+    let stops_bytes = stops.serialize();
     let length_so_far = length_so_far + stops_bytes.len();
-    assert_eq!(colors.len(), num_stops as usize, "Argument colors has an incorrect length");
+    assert_eq!(colors.len(), num_stops as usize, "`colors` has an incorrect length");
     let colors_bytes = colors.serialize();
     let length_so_far = length_so_far + colors_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
@@ -3831,8 +3848,6 @@ where
     let center_bytes = center.serialize();
     let angle_bytes = angle.serialize();
     let num_stops_bytes = num_stops.serialize();
-    assert_eq!(stops.len(), num_stops as usize, "Argument stops has an incorrect length");
-    let stops_bytes = stops.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_CONICAL_GRADIENT_REQUEST,
@@ -3860,8 +3875,10 @@ where
         num_stops_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    assert_eq!(stops.len(), num_stops as usize, "`stops` has an incorrect length");
+    let stops_bytes = stops.serialize();
     let length_so_far = length_so_far + stops_bytes.len();
-    assert_eq!(colors.len(), num_stops as usize, "Argument colors has an incorrect length");
+    assert_eq!(colors.len(), num_stops as usize, "`colors` has an incorrect length");
     let colors_bytes = colors.serialize();
     let length_so_far = length_so_far + colors_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
@@ -3902,7 +3919,9 @@ pub trait ConnectionExt: RequestConnection {
     {
         free_picture(self, picture)
     }
-    fn render_composite(&self, op: PictOp, src: Picture, mask: Picture, dst: Picture, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn render_composite<A>(&self, op: PictOp, src: Picture, mask: A, dst: Picture, src_x: i16, src_y: i16, mask_x: i16, mask_y: i16, dst_x: i16, dst_y: i16, width: u16, height: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<Picture>,
     {
         composite(self, op, src, mask, dst, src_x, src_y, mask_x, mask_y, dst_x, dst_y, width, height)
     }

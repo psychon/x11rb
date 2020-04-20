@@ -22,18 +22,10 @@ use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError};
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
-#[allow(unused_imports)]
-use super::xproto;
-#[allow(unused_imports)]
-use super::render;
-#[allow(unused_imports)]
 use super::randr;
-#[allow(unused_imports)]
-use super::shape;
-#[allow(unused_imports)]
-use super::xfixes;
-#[allow(unused_imports)]
 use super::sync;
+use super::xfixes;
+use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
 pub const X11_EXTENSION_NAME: &str = "Present";
@@ -583,7 +575,6 @@ where
     let target_msc_bytes = target_msc.serialize();
     let divisor_bytes = divisor.serialize();
     let remainder_bytes = remainder.serialize();
-    let notifies_bytes = notifies.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         PIXMAP_REQUEST,
@@ -659,6 +650,7 @@ where
         remainder_bytes[7],
     ];
     let length_so_far = length_so_far + request0.len();
+    let notifies_bytes = notifies.serialize();
     let length_so_far = length_so_far + notifies_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -735,12 +727,14 @@ pub type Event = u32;
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 3;
-pub fn select_input<Conn>(conn: &Conn, eid: Event, window: xproto::Window, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn select_input<Conn, A>(conn: &Conn, eid: Event, window: xproto::Window, event_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<u32>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let event_mask: u32 = event_mask.into();
     let length_so_far = 0;
     let eid_bytes = eid.serialize();
     let window_bytes = window.serialize();
@@ -1193,7 +1187,9 @@ pub trait ConnectionExt: RequestConnection {
     {
         notify_msc(self, window, serial, target_msc, divisor, remainder)
     }
-    fn present_select_input(&self, eid: Event, window: xproto::Window, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn present_select_input<A>(&self, eid: Event, window: xproto::Window, event_mask: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<u32>,
     {
         select_input(self, eid, window, event_mask)
     }

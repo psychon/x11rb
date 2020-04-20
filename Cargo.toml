@@ -14,8 +14,6 @@ keywords = ["xcb", "X11"]
 exclude = [
     "/xcb-proto-1.14-1-g2b3559c",
     "/Makefile",
-    "/rs_code_generator.py",
-    "/code_generator_helpers",
     "/.mergify.yml",
 ]
 
@@ -106,3 +104,6 @@ required-features = ["libc", "shm"]
 [[example]]
 name = "xeyes"
 required-features = ["shape"]
+
+[workspace]
+members = ["generator", "xcbgen-rs"]

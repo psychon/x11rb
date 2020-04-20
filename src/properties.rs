@@ -26,8 +26,8 @@ where
             conn,
             false,
             window,
-            AtomEnum::WM_CLASS.into(),
-            AtomEnum::STRING.into(),
+            AtomEnum::WM_CLASS,
+            AtomEnum::STRING,
             0,
             2048,
         )?))
@@ -154,8 +154,8 @@ where
             conn,
             false,
             window,
-            property.into(),
-            AtomEnum::WM_SIZE_HINTS.into(),
+            property,
+            AtomEnum::WM_SIZE_HINTS,
             0,
             NUM_WM_SIZE_HINTS_ELEMENTS,
         )?))
@@ -450,8 +450,8 @@ where
             conn,
             false,
             window,
-            AtomEnum::WM_HINTS.into(),
-            AtomEnum::WM_HINTS.into(),
+            AtomEnum::WM_HINTS,
+            AtomEnum::WM_HINTS,
             0,
             NUM_WM_HINTS_ELEMENTS,
         )?))

@@ -24,7 +24,6 @@ use crate::errors::{ConnectionError, ParseError};
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
-#[allow(unused_imports)]
 use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
@@ -167,6 +166,7 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let pixmap_fd: RawFdContainer = pixmap_fd.into();
     let length_so_far = 0;
     let pixmap_bytes = pixmap.serialize();
     let drawable_bytes = drawable.serialize();
@@ -206,8 +206,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    let fds = vec!(pixmap_fd.into());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], fds)?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![pixmap_fd])?)
 }
 
 /// Opcode for the BufferFromPixmap request
@@ -287,6 +286,7 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let fence_fd: RawFdContainer = fence_fd.into();
     let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let fence_bytes = fence.serialize();
@@ -313,8 +313,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    let fds = vec!(fence_fd.into());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], fds)?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![fence_fd])?)
 }
 
 /// Opcode for the FDFromFence request
@@ -443,7 +442,7 @@ impl TryFrom<&[u8]> for GetSupportedModifiersReply {
 
 /// Opcode for the PixmapFromBuffers request
 pub const PIXMAP_FROM_BUFFERS_REQUEST: u8 = 7;
-pub fn pixmap_from_buffers<'c, Conn>(conn: &'c Conn, pixmap: xproto::Pixmap, window: xproto::Window, width: u16, height: u16, stride0: u32, offset0: u32, stride1: u32, offset1: u32, stride2: u32, offset2: u32, stride3: u32, offset3: u32, depth: u8, bpp: u8, modifier: u64, buffers: Vec<RawFdContainer>) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn pixmap_from_buffers<Conn>(conn: &Conn, pixmap: xproto::Pixmap, window: xproto::Window, width: u16, height: u16, stride0: u32, offset0: u32, stride1: u32, offset1: u32, stride2: u32, offset2: u32, stride3: u32, offset3: u32, depth: u8, bpp: u8, modifier: u64, buffers: Vec<RawFdContainer>) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -452,7 +451,7 @@ where
     let length_so_far = 0;
     let pixmap_bytes = pixmap.serialize();
     let window_bytes = window.serialize();
-    let num_buffers: u8 = buffers.len().try_into()?;
+    let num_buffers = u8::try_from(buffers.len()).expect("`buffers` has too many elements");
     let num_buffers_bytes = num_buffers.serialize();
     let width_bytes = width.serialize();
     let height_bytes = height.serialize();
@@ -647,7 +646,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_supported_modifiers(self, window, depth, bpp)
     }
-    fn dri3_pixmap_from_buffers<'c>(&'c self, pixmap: xproto::Pixmap, window: xproto::Window, width: u16, height: u16, stride0: u32, offset0: u32, stride1: u32, offset1: u32, stride2: u32, offset2: u32, stride3: u32, offset3: u32, depth: u8, bpp: u8, modifier: u64, buffers: Vec<RawFdContainer>) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn dri3_pixmap_from_buffers(&self, pixmap: xproto::Pixmap, window: xproto::Window, width: u16, height: u16, stride0: u32, offset0: u32, stride1: u32, offset1: u32, stride2: u32, offset2: u32, stride3: u32, offset3: u32, depth: u8, bpp: u8, modifier: u64, buffers: Vec<RawFdContainer>) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         pixmap_from_buffers(self, pixmap, window, width, height, stride0, offset0, stride1, offset1, stride2, offset2, stride3, offset3, depth, bpp, modifier, buffers)
     }

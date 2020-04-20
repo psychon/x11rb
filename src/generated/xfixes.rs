@@ -24,12 +24,9 @@ use crate::errors::{ConnectionError, ParseError};
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
-#[allow(unused_imports)]
-use super::xproto;
-#[allow(unused_imports)]
 use super::render;
-#[allow(unused_imports)]
 use super::shape;
+use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
 pub const X11_EXTENSION_NAME: &str = "XFIXES";
@@ -555,12 +552,14 @@ impl From<SelectionNotifyEvent> for [u8; 32] {
 
 /// Opcode for the SelectSelectionInput request
 pub const SELECT_SELECTION_INPUT_REQUEST: u8 = 2;
-pub fn select_selection_input<Conn>(conn: &Conn, window: xproto::Window, selection: xproto::Atom, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn select_selection_input<Conn, A>(conn: &Conn, window: xproto::Window, selection: xproto::Atom, event_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<u32>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let event_mask: u32 = event_mask.into();
     let length_so_far = 0;
     let window_bytes = window.serialize();
     let selection_bytes = selection.serialize();
@@ -808,12 +807,14 @@ impl From<CursorNotifyEvent> for [u8; 32] {
 
 /// Opcode for the SelectCursorInput request
 pub const SELECT_CURSOR_INPUT_REQUEST: u8 = 3;
-pub fn select_cursor_input<Conn>(conn: &Conn, window: xproto::Window, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn select_cursor_input<Conn, A>(conn: &Conn, window: xproto::Window, event_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<u32>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let event_mask: u32 = event_mask.into();
     let length_so_far = 0;
     let window_bytes = window.serialize();
     let event_mask_bytes = event_mask.serialize();
@@ -1052,7 +1053,6 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let region_bytes = region.serialize();
-    let rectangles_bytes = rectangles.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_REGION_REQUEST,
@@ -1064,6 +1064,7 @@ where
         region_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let rectangles_bytes = rectangles.serialize();
     let length_so_far = length_so_far + rectangles_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -1243,7 +1244,6 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let region_bytes = region.serialize();
-    let rectangles_bytes = rectangles.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         SET_REGION_REQUEST,
@@ -1255,6 +1255,7 @@ where
         region_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let rectangles_bytes = rectangles.serialize();
     let length_so_far = length_so_far + rectangles_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -1555,7 +1556,7 @@ impl TryParse for FetchRegionReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (extents, remaining) = xproto::Rectangle::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
-        let (rectangles, remaining) = crate::x11_utils::parse_list::<xproto::Rectangle>(remaining, (length as usize) / (2))?;
+        let (rectangles, remaining) = crate::x11_utils::parse_list::<xproto::Rectangle>(remaining, (length as usize) / 2)?;
         let result = FetchRegionReply { response_type, sequence, extents, rectangles };
         Ok((result, remaining))
     }
@@ -1569,12 +1570,14 @@ impl TryFrom<&[u8]> for FetchRegionReply {
 
 /// Opcode for the SetGCClipRegion request
 pub const SET_GC_CLIP_REGION_REQUEST: u8 = 20;
-pub fn set_gc_clip_region<Conn>(conn: &Conn, gc: xproto::Gcontext, region: Region, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_gc_clip_region<Conn, A>(conn: &Conn, gc: xproto::Gcontext, region: A, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<Region>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let region: Region = region.into();
     let length_so_far = 0;
     let gc_bytes = gc.serialize();
     let region_bytes = region.serialize();
@@ -1607,12 +1610,14 @@ where
 
 /// Opcode for the SetWindowShapeRegion request
 pub const SET_WINDOW_SHAPE_REGION_REQUEST: u8 = 21;
-pub fn set_window_shape_region<Conn>(conn: &Conn, dest: xproto::Window, dest_kind: shape::SK, x_offset: i16, y_offset: i16, region: Region) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_window_shape_region<Conn, A>(conn: &Conn, dest: xproto::Window, dest_kind: shape::SK, x_offset: i16, y_offset: i16, region: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<Region>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let region: Region = region.into();
     let length_so_far = 0;
     let dest_bytes = dest.serialize();
     let dest_kind_bytes = shape::Kind::from(dest_kind).serialize();
@@ -1650,12 +1655,14 @@ where
 
 /// Opcode for the SetPictureClipRegion request
 pub const SET_PICTURE_CLIP_REGION_REQUEST: u8 = 22;
-pub fn set_picture_clip_region<Conn>(conn: &Conn, picture: render::Picture, region: Region, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_picture_clip_region<Conn, A>(conn: &Conn, picture: render::Picture, region: A, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<Region>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let region: Region = region.into();
     let length_so_far = 0;
     let picture_bytes = picture.serialize();
     let region_bytes = region.serialize();
@@ -1696,7 +1703,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let cursor_bytes = cursor.serialize();
-    let nbytes: u16 = name.len().try_into()?;
+    let nbytes = u16::try_from(name.len()).expect("`name` has too many elements");
     let nbytes_bytes = nbytes.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -1887,7 +1894,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let src_bytes = src.serialize();
-    let nbytes: u16 = name.len().try_into()?;
+    let nbytes = u16::try_from(name.len()).expect("`name` has too many elements");
     let nbytes_bytes = nbytes.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -2084,12 +2091,14 @@ bitmask_binop!(BarrierDirections, u8);
 
 /// Opcode for the CreatePointerBarrier request
 pub const CREATE_POINTER_BARRIER_REQUEST: u8 = 31;
-pub fn create_pointer_barrier<'c, Conn>(conn: &'c Conn, barrier: Barrier, window: xproto::Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: u32, devices: &[u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_pointer_barrier<'c, Conn, A>(conn: &'c Conn, barrier: Barrier, window: xproto::Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: A, devices: &[u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<u32>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let directions: u32 = directions.into();
     let length_so_far = 0;
     let barrier_bytes = barrier.serialize();
     let window_bytes = window.serialize();
@@ -2098,9 +2107,8 @@ where
     let x2_bytes = x2.serialize();
     let y2_bytes = y2.serialize();
     let directions_bytes = directions.serialize();
-    let num_devices: u16 = devices.len().try_into()?;
+    let num_devices = u16::try_from(devices.len()).expect("`devices` has too many elements");
     let num_devices_bytes = num_devices.serialize();
-    let devices_bytes = devices.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_POINTER_BARRIER_REQUEST,
@@ -2132,6 +2140,7 @@ where
         num_devices_bytes[1],
     ];
     let length_so_far = length_so_far + request0.len();
+    let devices_bytes = devices.serialize();
     let length_so_far = length_so_far + devices_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -2178,11 +2187,15 @@ pub trait ConnectionExt: RequestConnection {
     {
         change_save_set(self, mode, target, map, window)
     }
-    fn xfixes_select_selection_input(&self, window: xproto::Window, selection: xproto::Atom, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_select_selection_input<A>(&self, window: xproto::Window, selection: xproto::Atom, event_mask: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<u32>,
     {
         select_selection_input(self, window, selection, event_mask)
     }
-    fn xfixes_select_cursor_input(&self, window: xproto::Window, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_select_cursor_input<A>(&self, window: xproto::Window, event_mask: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<u32>,
     {
         select_cursor_input(self, window, event_mask)
     }
@@ -2250,15 +2263,21 @@ pub trait ConnectionExt: RequestConnection {
     {
         fetch_region(self, region)
     }
-    fn xfixes_set_gc_clip_region(&self, gc: xproto::Gcontext, region: Region, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_set_gc_clip_region<A>(&self, gc: xproto::Gcontext, region: A, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<Region>,
     {
         set_gc_clip_region(self, gc, region, x_origin, y_origin)
     }
-    fn xfixes_set_window_shape_region(&self, dest: xproto::Window, dest_kind: shape::SK, x_offset: i16, y_offset: i16, region: Region) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_set_window_shape_region<A>(&self, dest: xproto::Window, dest_kind: shape::SK, x_offset: i16, y_offset: i16, region: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<Region>,
     {
         set_window_shape_region(self, dest, dest_kind, x_offset, y_offset, region)
     }
-    fn xfixes_set_picture_clip_region(&self, picture: render::Picture, region: Region, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xfixes_set_picture_clip_region<A>(&self, picture: render::Picture, region: A, x_origin: i16, y_origin: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<Region>,
     {
         set_picture_clip_region(self, picture, region, x_origin, y_origin)
     }
@@ -2294,7 +2313,9 @@ pub trait ConnectionExt: RequestConnection {
     {
         show_cursor(self, window)
     }
-    fn xfixes_create_pointer_barrier<'c>(&'c self, barrier: Barrier, window: xproto::Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: u32, devices: &[u16]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xfixes_create_pointer_barrier<'c, A>(&'c self, barrier: Barrier, window: xproto::Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: A, devices: &[u16]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    where
+        A: Into<u32>,
     {
         create_pointer_barrier(self, barrier, window, x1, y1, x2, y2, directions, devices)
     }

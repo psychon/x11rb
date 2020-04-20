@@ -10,7 +10,7 @@ use x11rb::connection::{Connection, RequestConnection};
 use x11rb::errors::{ReplyError, ReplyOrIdError};
 use x11rb::x11_utils::Event as _;
 use x11rb::xproto::*;
-use x11rb::{Error, Event, COPY_DEPTH_FROM_PARENT};
+use x11rb::{Error, Event, COPY_DEPTH_FROM_PARENT, CURRENT_TIME};
 
 const TITLEBAR_HEIGHT: u16 = 20;
 
@@ -186,8 +186,8 @@ impl<'a, C: Connection> WMState<'a, C> {
             .get_property(
                 false,
                 state.window,
-                AtomEnum::WM_NAME.into(),
-                AtomEnum::STRING.into(),
+                AtomEnum::WM_NAME,
+                AtomEnum::STRING,
                 0,
                 std::u32::MAX,
             )?
@@ -296,7 +296,8 @@ impl<'a, C: Connection> WMState<'a, C> {
         } else {
             event.event
         };
-        self.conn.set_input_focus(InputFocus::Parent, window, 0)?;
+        self.conn
+            .set_input_focus(InputFocus::Parent, window, CURRENT_TIME)?;
         Ok(())
     }
 
@@ -315,7 +316,7 @@ impl<'a, C: Connection> WMState<'a, C> {
                 data: data.into(),
             };
             self.conn
-                .send_event(false, state.window, EventMask::NoEvent.into(), &event)?;
+                .send_event(false, state.window, EventMask::NoEvent, &event)?;
         }
         Ok(())
     }

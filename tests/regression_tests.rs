@@ -263,8 +263,8 @@ fn test_send_event() -> Result<(), ConnectionError> {
     // "Send" it
     let conn = FakeConnection::default();
     let propagate = true;
-    let destination = 0x1337;
-    let event_mask = 7;
+    let destination: u32 = 0x1337;
+    let event_mask: u32 = 7;
     conn.send_event(propagate, destination, event_mask, event)?;
 
     let mut expected = Vec::new();

@@ -39,12 +39,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Ask for present ConfigureNotify events
     let event_id = conn.generate_id()?;
-    present::select_input(
-        &conn,
-        event_id,
-        win_id,
-        present::EventMask::ConfigureNotify.into(),
-    )?;
+    present::select_input(&conn, event_id, win_id, present::EventMask::ConfigureNotify)?;
 
     // Cause an event
     conn.configure_window(win_id, &ConfigureWindowAux::new().width(20))?;

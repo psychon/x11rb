@@ -24,10 +24,8 @@ use crate::errors::{ConnectionError, ParseError};
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
-#[allow(unused_imports)]
-use super::xproto;
-#[allow(unused_imports)]
 use super::render;
+use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
 pub const X11_EXTENSION_NAME: &str = "RANDR";
@@ -525,7 +523,6 @@ impl Serialize for RefreshRates {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        bytes.reserve(2);
         let n_rates = u16::try_from(self.rates.len()).expect("`rates` has too many elements");
         n_rates.serialize_into(bytes);
         self.rates.serialize_into(bytes);
@@ -662,12 +659,14 @@ impl TryFrom<u32> for SetConfig {
 
 /// Opcode for the SetScreenConfig request
 pub const SET_SCREEN_CONFIG_REQUEST: u8 = 2;
-pub fn set_screen_config<Conn>(conn: &Conn, window: xproto::Window, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, size_id: u16, rotation: u16, rate: u16) -> Result<Cookie<'_, Conn, SetScreenConfigReply>, ConnectionError>
+pub fn set_screen_config<Conn, A>(conn: &Conn, window: xproto::Window, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, size_id: u16, rotation: A, rate: u16) -> Result<Cookie<'_, Conn, SetScreenConfigReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<u16>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let rotation: u16 = rotation.into();
     let length_so_far = 0;
     let window_bytes = window.serialize();
     let timestamp_bytes = timestamp.serialize();
@@ -826,12 +825,14 @@ bitmask_binop!(NotifyMask, u8);
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 4;
-pub fn select_input<Conn>(conn: &Conn, window: xproto::Window, enable: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn select_input<Conn, A>(conn: &Conn, window: xproto::Window, enable: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<u16>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let enable: u16 = enable.into();
     let length_so_far = 0;
     let window_bytes = window.serialize();
     let enable_bytes = enable.serialize();
@@ -1569,7 +1570,6 @@ where
     let property_bytes = property.serialize();
     let pending_bytes = pending.serialize();
     let range_bytes = range.serialize();
-    let values_bytes = values.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CONFIGURE_OUTPUT_PROPERTY_REQUEST,
@@ -1589,6 +1589,7 @@ where
         0,
     ];
     let length_so_far = length_so_far + request0.len();
+    let values_bytes = values.serialize();
     let length_so_far = length_so_far + values_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -1613,7 +1614,6 @@ where
     let format_bytes = format.serialize();
     let mode_bytes = u8::from(mode).serialize();
     let num_units_bytes = num_units.serialize();
-    assert_eq!(data.len(), ((num_units as usize) * (format as usize)) / (8), "Argument data has an incorrect length");
     let mut request0 = [
         extension_information.major_opcode,
         CHANGE_OUTPUT_PROPERTY_REQUEST,
@@ -1641,6 +1641,7 @@ where
         num_units_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    assert_eq!(data.len(), ((num_units as usize) * (format as usize)) / 8, "`data` has an incorrect length");
     let length_so_far = length_so_far + data.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -1684,12 +1685,14 @@ where
 
 /// Opcode for the GetOutputProperty request
 pub const GET_OUTPUT_PROPERTY_REQUEST: u8 = 15;
-pub fn get_output_property<Conn>(conn: &Conn, output: Output, property: xproto::Atom, type_: xproto::Atom, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Conn, GetOutputPropertyReply>, ConnectionError>
+pub fn get_output_property<Conn, A>(conn: &Conn, output: Output, property: xproto::Atom, type_: A, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Conn, GetOutputPropertyReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<xproto::Atom>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let type_: xproto::Atom = type_.into();
     let length_so_far = 0;
     let output_bytes = output.serialize();
     let property_bytes = property.serialize();
@@ -1756,7 +1759,7 @@ impl TryParse for GetOutputPropertyReply {
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (num_items as usize) * ((format as usize) / (8)))?;
+        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (num_items as usize) * ((format as usize) / 8))?;
         let result = GetOutputPropertyReply { response_type, format, sequence, length, type_, bytes_after, num_items, data };
         Ok((result, remaining))
     }
@@ -2029,12 +2032,14 @@ impl TryFrom<&[u8]> for GetCrtcInfoReply {
 
 /// Opcode for the SetCrtcConfig request
 pub const SET_CRTC_CONFIG_REQUEST: u8 = 21;
-pub fn set_crtc_config<'c, Conn>(conn: &'c Conn, crtc: Crtc, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, x: i16, y: i16, mode: Mode, rotation: u16, outputs: &[Output]) -> Result<Cookie<'c, Conn, SetCrtcConfigReply>, ConnectionError>
+pub fn set_crtc_config<'c, Conn, A>(conn: &'c Conn, crtc: Crtc, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, x: i16, y: i16, mode: Mode, rotation: A, outputs: &[Output]) -> Result<Cookie<'c, Conn, SetCrtcConfigReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<u16>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let rotation: u16 = rotation.into();
     let length_so_far = 0;
     let crtc_bytes = crtc.serialize();
     let timestamp_bytes = timestamp.serialize();
@@ -2043,7 +2048,6 @@ where
     let y_bytes = y.serialize();
     let mode_bytes = mode.serialize();
     let rotation_bytes = rotation.serialize();
-    let outputs_bytes = outputs.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         SET_CRTC_CONFIG_REQUEST,
@@ -2075,6 +2079,7 @@ where
         0,
     ];
     let length_so_far = length_so_far + request0.len();
+    let outputs_bytes = outputs.serialize();
     let length_so_far = length_so_far + outputs_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -2235,8 +2240,6 @@ where
     let length_so_far = 0;
     let crtc_bytes = crtc.serialize();
     let size_bytes = size.serialize();
-    assert_eq!(red.len(), size as usize, "Argument red has an incorrect length");
-    let red_bytes = red.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         SET_CRTC_GAMMA_REQUEST,
@@ -2252,11 +2255,13 @@ where
         0,
     ];
     let length_so_far = length_so_far + request0.len();
+    assert_eq!(red.len(), size as usize, "`red` has an incorrect length");
+    let red_bytes = red.serialize();
     let length_so_far = length_so_far + red_bytes.len();
-    assert_eq!(green.len(), size as usize, "Argument green has an incorrect length");
+    assert_eq!(green.len(), size as usize, "`green` has an incorrect length");
     let green_bytes = green.serialize();
     let length_so_far = length_so_far + green_bytes.len();
-    assert_eq!(blue.len(), size as usize, "Argument blue has an incorrect length");
+    assert_eq!(blue.len(), size as usize, "`blue` has an incorrect length");
     let blue_bytes = blue.serialize();
     let length_so_far = length_so_far + blue_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
@@ -2414,7 +2419,7 @@ where
     let length_so_far = 0;
     let crtc_bytes = crtc.serialize();
     let transform_bytes = transform.serialize();
-    let filter_len: u16 = filter_name.len().try_into()?;
+    let filter_len = u16::try_from(filter_name.len()).expect("`filter_name` has too many elements");
     let filter_len_bytes = filter_len.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -3221,7 +3226,6 @@ where
     let property_bytes = property.serialize();
     let pending_bytes = pending.serialize();
     let range_bytes = range.serialize();
-    let values_bytes = values.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CONFIGURE_PROVIDER_PROPERTY_REQUEST,
@@ -3241,6 +3245,7 @@ where
         0,
     ];
     let length_so_far = length_so_far + request0.len();
+    let values_bytes = values.serialize();
     let length_so_far = length_so_far + values_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -3265,7 +3270,6 @@ where
     let format_bytes = format.serialize();
     let mode_bytes = mode.serialize();
     let num_items_bytes = num_items.serialize();
-    assert_eq!(data.len(), (num_items as usize) * ((format as usize) / (8)), "Argument data has an incorrect length");
     let mut request0 = [
         extension_information.major_opcode,
         CHANGE_PROVIDER_PROPERTY_REQUEST,
@@ -3293,6 +3297,7 @@ where
         num_items_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    assert_eq!(data.len(), (num_items as usize) * ((format as usize) / 8), "`data` has an incorrect length");
     let length_so_far = length_so_far + data.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -3408,7 +3413,7 @@ impl TryParse for GetProviderPropertyReply {
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (num_items as usize) * ((format as usize) / (8)))?;
+        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (num_items as usize) * ((format as usize) / 8))?;
         let result = GetProviderPropertyReply { response_type, format, sequence, length, type_, bytes_after, num_items, data };
         Ok((result, remaining))
     }
@@ -4161,7 +4166,7 @@ where
         window_bytes[2],
         window_bytes[3],
         get_active_bytes[0],
-        0 /* trailing padding */,
+        0,
         0,
         0,
     ];
@@ -4211,7 +4216,6 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let monitorinfo_bytes = monitorinfo.serialize();
     let length_so_far = 0;
     let window_bytes = window.serialize();
     let mut request0 = [
@@ -4225,6 +4229,7 @@ where
         window_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let monitorinfo_bytes = monitorinfo.serialize();
     let length_so_far = length_so_far + monitorinfo_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -4277,11 +4282,10 @@ where
     let length_so_far = 0;
     let window_bytes = window.serialize();
     let lid_bytes = lid.serialize();
-    let num_crtcs: u16 = crtcs.len().try_into()?;
+    let num_crtcs = u16::try_from(crtcs.len()).expect("`crtcs` has too many elements");
     let num_crtcs_bytes = num_crtcs.serialize();
-    let num_outputs: u16 = outputs.len().try_into()?;
+    let num_outputs = u16::try_from(outputs.len()).expect("`outputs` has too many elements");
     let num_outputs_bytes = num_outputs.serialize();
-    let crtcs_bytes = crtcs.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_LEASE_REQUEST,
@@ -4301,6 +4305,7 @@ where
         num_outputs_bytes[1],
     ];
     let length_so_far = length_so_far + request0.len();
+    let crtcs_bytes = crtcs.serialize();
     let length_so_far = length_so_far + crtcs_bytes.len();
     let outputs_bytes = outputs.serialize();
     let length_so_far = length_so_far + outputs_bytes.len();
@@ -4362,7 +4367,7 @@ where
         lid_bytes[2],
         lid_bytes[3],
         terminate_bytes[0],
-        0 /* trailing padding */,
+        0,
         0,
         0,
     ];
@@ -4525,38 +4530,45 @@ impl TryParse for NotifyData {
     }
 }
 impl From<CrtcChange> for NotifyData {
-    fn from(value: CrtcChange) -> Self {
-        Self(value.serialize())
+    fn from(cc: CrtcChange) -> Self {
+        let cc_bytes = cc.serialize();
+        Self(cc_bytes)
     }
 }
 impl From<OutputChange> for NotifyData {
-    fn from(value: OutputChange) -> Self {
-        Self(value.serialize())
+    fn from(oc: OutputChange) -> Self {
+        let oc_bytes = oc.serialize();
+        Self(oc_bytes)
     }
 }
 impl From<OutputProperty> for NotifyData {
-    fn from(value: OutputProperty) -> Self {
-        Self(value.serialize())
+    fn from(op: OutputProperty) -> Self {
+        let op_bytes = op.serialize();
+        Self(op_bytes)
     }
 }
 impl From<ProviderChange> for NotifyData {
-    fn from(value: ProviderChange) -> Self {
-        Self(value.serialize())
+    fn from(pc: ProviderChange) -> Self {
+        let pc_bytes = pc.serialize();
+        Self(pc_bytes)
     }
 }
 impl From<ProviderProperty> for NotifyData {
-    fn from(value: ProviderProperty) -> Self {
-        Self(value.serialize())
+    fn from(pp: ProviderProperty) -> Self {
+        let pp_bytes = pp.serialize();
+        Self(pp_bytes)
     }
 }
 impl From<ResourceChange> for NotifyData {
-    fn from(value: ResourceChange) -> Self {
-        Self(value.serialize())
+    fn from(rc: ResourceChange) -> Self {
+        let rc_bytes = rc.serialize();
+        Self(rc_bytes)
     }
 }
 impl From<LeaseNotify> for NotifyData {
-    fn from(value: LeaseNotify) -> Self {
-        Self(value.serialize())
+    fn from(lc: LeaseNotify) -> Self {
+        let lc_bytes = lc.serialize();
+        Self(lc_bytes)
     }
 }
 
@@ -4653,11 +4665,15 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, major_version, minor_version)
     }
-    fn randr_set_screen_config(&self, window: xproto::Window, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, size_id: u16, rotation: u16, rate: u16) -> Result<Cookie<'_, Self, SetScreenConfigReply>, ConnectionError>
+    fn randr_set_screen_config<A>(&self, window: xproto::Window, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, size_id: u16, rotation: A, rate: u16) -> Result<Cookie<'_, Self, SetScreenConfigReply>, ConnectionError>
+    where
+        A: Into<u16>,
     {
         set_screen_config(self, window, timestamp, config_timestamp, size_id, rotation, rate)
     }
-    fn randr_select_input(&self, window: xproto::Window, enable: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn randr_select_input<A>(&self, window: xproto::Window, enable: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<u16>,
     {
         select_input(self, window, enable)
     }
@@ -4701,7 +4717,9 @@ pub trait ConnectionExt: RequestConnection {
     {
         delete_output_property(self, output, property)
     }
-    fn randr_get_output_property(&self, output: Output, property: xproto::Atom, type_: xproto::Atom, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Self, GetOutputPropertyReply>, ConnectionError>
+    fn randr_get_output_property<A>(&self, output: Output, property: xproto::Atom, type_: A, long_offset: u32, long_length: u32, delete: bool, pending: bool) -> Result<Cookie<'_, Self, GetOutputPropertyReply>, ConnectionError>
+    where
+        A: Into<xproto::Atom>,
     {
         get_output_property(self, output, property, type_, long_offset, long_length, delete, pending)
     }
@@ -4725,7 +4743,9 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_crtc_info(self, crtc, config_timestamp)
     }
-    fn randr_set_crtc_config<'c>(&'c self, crtc: Crtc, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, x: i16, y: i16, mode: Mode, rotation: u16, outputs: &[Output]) -> Result<Cookie<'c, Self, SetCrtcConfigReply>, ConnectionError>
+    fn randr_set_crtc_config<'c, A>(&'c self, crtc: Crtc, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, x: i16, y: i16, mode: Mode, rotation: A, outputs: &[Output]) -> Result<Cookie<'c, Self, SetCrtcConfigReply>, ConnectionError>
+    where
+        A: Into<u16>,
     {
         set_crtc_config(self, crtc, timestamp, config_timestamp, x, y, mode, rotation, outputs)
     }
