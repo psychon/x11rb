@@ -663,6 +663,37 @@ impl Serialize for InputInfoInfoKey {
         bytes.extend_from_slice(&[0; 2]);
     }
 }
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct InputInfoInfoButton {
+    pub num_buttons: u16,
+}
+impl TryParse for InputInfoInfoButton {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (num_buttons, remaining) = u16::try_parse(remaining)?;
+        let result = InputInfoInfoButton { num_buttons };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for InputInfoInfoButton {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
+impl Serialize for InputInfoInfoButton {
+    type Bytes = [u8; 2];
+    fn serialize(&self) -> Self::Bytes {
+        let num_buttons_bytes = self.num_buttons.serialize();
+        [
+            num_buttons_bytes[0],
+            num_buttons_bytes[1],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(2);
+        self.num_buttons.serialize_into(bytes);
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct InputInfoInfoValuator {
     pub mode: ValuatorMode,
@@ -705,7 +736,7 @@ impl Serialize for InputInfoInfoValuator {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum InputInfoInfo {
     Key(InputInfoInfoKey),
-    NumButtons(u16),
+    Button(InputInfoInfoButton),
     Valuator(InputInfoInfoValuator),
 }
 impl InputInfoInfo {
@@ -720,11 +751,10 @@ impl InputInfoInfo {
             parse_result = Some(InputInfoInfo::Key(key));
         }
         if switch_expr == u8::from(InputClass::Button) {
-            let remaining = outer_remaining;
-            let (num_buttons, remaining) = u16::try_parse(remaining)?;
-            outer_remaining = remaining;
+            let (button, new_remaining) = InputInfoInfoButton::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
-            parse_result = Some(InputInfoInfo::NumButtons(num_buttons));
+            parse_result = Some(InputInfoInfo::Button(button));
         }
         if switch_expr == u8::from(InputClass::Valuator) {
             let (valuator, new_remaining) = InputInfoInfoValuator::try_parse(outer_remaining)?;
@@ -745,9 +775,9 @@ impl InputInfoInfo {
             _ => None,
         }
     }
-    pub fn as_num_buttons(&self) -> Option<&u16> {
+    pub fn as_button(&self) -> Option<&InputInfoInfoButton> {
         match self {
-            InputInfoInfo::NumButtons(value) => Some(value),
+            InputInfoInfo::Button(value) => Some(value),
             _ => None,
         }
     }
@@ -768,9 +798,7 @@ impl Serialize for InputInfoInfo {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         match self {
             InputInfoInfo::Key(key) => key.serialize_into(bytes),
-            InputInfoInfo::NumButtons(num_buttons) => {
-                num_buttons.serialize_into(bytes);
-            }
+            InputInfoInfo::Button(button) => button.serialize_into(bytes),
             InputInfoInfo::Valuator(valuator) => valuator.serialize_into(bytes),
         }
     }
@@ -779,7 +807,7 @@ impl InputInfoInfo {
     fn switch_expr(&self) -> u8 {
         match self {
             InputInfoInfo::Key(_) => u8::from(InputClass::Key),
-            InputInfoInfo::NumButtons(_) => u8::from(InputClass::Button),
+            InputInfoInfo::Button(_) => u8::from(InputClass::Button),
             InputInfoInfo::Valuator(_) => u8::from(InputClass::Valuator),
         }
     }
@@ -3830,6 +3858,73 @@ impl Serialize for FeedbackCtlDataPointer {
         self.threshold.serialize_into(bytes);
     }
 }
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct FeedbackCtlDataString {
+    pub keysyms: Vec<xproto::Keysym>,
+}
+impl TryParse for FeedbackCtlDataString {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let (num_keysyms, remaining) = u16::try_parse(remaining)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms as usize)?;
+        let result = FeedbackCtlDataString { keysyms };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for FeedbackCtlDataString {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
+impl Serialize for FeedbackCtlDataString {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Self::Bytes {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(4);
+        bytes.extend_from_slice(&[0; 2]);
+        let num_keysyms = u16::try_from(self.keysyms.len()).expect("`keysyms` has too many elements");
+        num_keysyms.serialize_into(bytes);
+        self.keysyms.serialize_into(bytes);
+    }
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FeedbackCtlDataInteger {
+    pub int_to_display: i32,
+}
+impl TryParse for FeedbackCtlDataInteger {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (int_to_display, remaining) = i32::try_parse(remaining)?;
+        let result = FeedbackCtlDataInteger { int_to_display };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for FeedbackCtlDataInteger {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
+impl Serialize for FeedbackCtlDataInteger {
+    type Bytes = [u8; 4];
+    fn serialize(&self) -> Self::Bytes {
+        let int_to_display_bytes = self.int_to_display.serialize();
+        [
+            int_to_display_bytes[0],
+            int_to_display_bytes[1],
+            int_to_display_bytes[2],
+            int_to_display_bytes[3],
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(4);
+        self.int_to_display.serialize_into(bytes);
+    }
+}
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FeedbackCtlDataLed {
     pub led_mask: u32,
@@ -3922,8 +4017,8 @@ impl Serialize for FeedbackCtlDataBell {
 pub enum FeedbackCtlData {
     Keyboard(FeedbackCtlDataKeyboard),
     Pointer(FeedbackCtlDataPointer),
-    Keysyms(Vec<xproto::Keysym>),
-    IntToDisplay(i32),
+    String(FeedbackCtlDataString),
+    Integer(FeedbackCtlDataInteger),
     Led(FeedbackCtlDataLed),
     Bell(FeedbackCtlDataBell),
 }
@@ -3945,20 +4040,16 @@ impl FeedbackCtlData {
             parse_result = Some(FeedbackCtlData::Pointer(pointer));
         }
         if switch_expr == u8::from(FeedbackClass::String) {
-            let remaining = outer_remaining;
-            let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-            let (num_keysyms, remaining) = u16::try_parse(remaining)?;
-            let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms as usize)?;
-            outer_remaining = remaining;
+            let (string, new_remaining) = FeedbackCtlDataString::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
-            parse_result = Some(FeedbackCtlData::Keysyms(keysyms));
+            parse_result = Some(FeedbackCtlData::String(string));
         }
         if switch_expr == u8::from(FeedbackClass::Integer) {
-            let remaining = outer_remaining;
-            let (int_to_display, remaining) = i32::try_parse(remaining)?;
-            outer_remaining = remaining;
+            let (integer, new_remaining) = FeedbackCtlDataInteger::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
-            parse_result = Some(FeedbackCtlData::IntToDisplay(int_to_display));
+            parse_result = Some(FeedbackCtlData::Integer(integer));
         }
         if switch_expr == u8::from(FeedbackClass::Led) {
             let (led, new_remaining) = FeedbackCtlDataLed::try_parse(outer_remaining)?;
@@ -3991,15 +4082,15 @@ impl FeedbackCtlData {
             _ => None,
         }
     }
-    pub fn as_keysyms(&self) -> Option<&Vec<xproto::Keysym>> {
+    pub fn as_string(&self) -> Option<&FeedbackCtlDataString> {
         match self {
-            FeedbackCtlData::Keysyms(value) => Some(value),
+            FeedbackCtlData::String(value) => Some(value),
             _ => None,
         }
     }
-    pub fn as_int_to_display(&self) -> Option<&i32> {
+    pub fn as_integer(&self) -> Option<&FeedbackCtlDataInteger> {
         match self {
-            FeedbackCtlData::IntToDisplay(value) => Some(value),
+            FeedbackCtlData::Integer(value) => Some(value),
             _ => None,
         }
     }
@@ -4027,16 +4118,8 @@ impl Serialize for FeedbackCtlData {
         match self {
             FeedbackCtlData::Keyboard(keyboard) => keyboard.serialize_into(bytes),
             FeedbackCtlData::Pointer(pointer) => pointer.serialize_into(bytes),
-            FeedbackCtlData::Keysyms(keysyms) => {
-                bytes.reserve(4);
-                bytes.extend_from_slice(&[0; 2]);
-                let num_keysyms = u16::try_from(keysyms.len()).expect("`keysyms` has too many elements");
-                num_keysyms.serialize_into(bytes);
-                keysyms.serialize_into(bytes);
-            }
-            FeedbackCtlData::IntToDisplay(int_to_display) => {
-                int_to_display.serialize_into(bytes);
-            }
+            FeedbackCtlData::String(string) => string.serialize_into(bytes),
+            FeedbackCtlData::Integer(integer) => integer.serialize_into(bytes),
             FeedbackCtlData::Led(led) => led.serialize_into(bytes),
             FeedbackCtlData::Bell(bell) => bell.serialize_into(bytes),
         }
@@ -4047,8 +4130,8 @@ impl FeedbackCtlData {
         match self {
             FeedbackCtlData::Keyboard(_) => u8::from(FeedbackClass::Keyboard),
             FeedbackCtlData::Pointer(_) => u8::from(FeedbackClass::Pointer),
-            FeedbackCtlData::Keysyms(_) => u8::from(FeedbackClass::String),
-            FeedbackCtlData::IntToDisplay(_) => u8::from(FeedbackClass::Integer),
+            FeedbackCtlData::String(_) => u8::from(FeedbackClass::String),
+            FeedbackCtlData::Integer(_) => u8::from(FeedbackClass::Integer),
             FeedbackCtlData::Led(_) => u8::from(FeedbackClass::Led),
             FeedbackCtlData::Bell(_) => u8::from(FeedbackClass::Bell),
         }
@@ -6799,6 +6882,41 @@ impl Serialize for DeviceCtlDataAbsCalib {
     }
 }
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct DeviceCtlDataCore {
+    pub status: u8,
+}
+impl TryParse for DeviceCtlDataCore {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (status, remaining) = u8::try_parse(remaining)?;
+        let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
+        let result = DeviceCtlDataCore { status };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for DeviceCtlDataCore {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
+impl Serialize for DeviceCtlDataCore {
+    type Bytes = [u8; 4];
+    fn serialize(&self) -> Self::Bytes {
+        let status_bytes = self.status.serialize();
+        [
+            status_bytes[0],
+            0,
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(4);
+        self.status.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 3]);
+    }
+}
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct DeviceCtlDataAbsArea {
     pub offset_x: u32,
     pub offset_y: u32,
@@ -6875,7 +6993,7 @@ impl Serialize for DeviceCtlDataAbsArea {
 pub enum DeviceCtlData {
     Resolution(DeviceCtlDataResolution),
     AbsCalib(DeviceCtlDataAbsCalib),
-    Status(u8),
+    Core(DeviceCtlDataCore),
     Enable(u8),
     AbsArea(DeviceCtlDataAbsArea),
 }
@@ -6897,12 +7015,10 @@ impl DeviceCtlData {
             parse_result = Some(DeviceCtlData::AbsCalib(abs_calib));
         }
         if switch_expr == u16::from(DeviceControl::Core) {
-            let remaining = outer_remaining;
-            let (status, remaining) = u8::try_parse(remaining)?;
-            let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-            outer_remaining = remaining;
+            let (core, new_remaining) = DeviceCtlDataCore::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
-            parse_result = Some(DeviceCtlData::Status(status));
+            parse_result = Some(DeviceCtlData::Core(core));
         }
         if switch_expr == u16::from(DeviceControl::Enable) {
             let remaining = outer_remaining;
@@ -6937,9 +7053,9 @@ impl DeviceCtlData {
             _ => None,
         }
     }
-    pub fn as_status(&self) -> Option<&u8> {
+    pub fn as_core(&self) -> Option<&DeviceCtlDataCore> {
         match self {
-            DeviceCtlData::Status(value) => Some(value),
+            DeviceCtlData::Core(value) => Some(value),
             _ => None,
         }
     }
@@ -6967,11 +7083,7 @@ impl Serialize for DeviceCtlData {
         match self {
             DeviceCtlData::Resolution(resolution) => resolution.serialize_into(bytes),
             DeviceCtlData::AbsCalib(abs_calib) => abs_calib.serialize_into(bytes),
-            DeviceCtlData::Status(status) => {
-                bytes.reserve(4);
-                status.serialize_into(bytes);
-                bytes.extend_from_slice(&[0; 3]);
-            }
+            DeviceCtlData::Core(core) => core.serialize_into(bytes),
             DeviceCtlData::Enable(enable) => {
                 bytes.reserve(4);
                 enable.serialize_into(bytes);
@@ -6986,7 +7098,7 @@ impl DeviceCtlData {
         match self {
             DeviceCtlData::Resolution(_) => u16::from(DeviceControl::Resolution),
             DeviceCtlData::AbsCalib(_) => u16::from(DeviceControl::Abscalib),
-            DeviceCtlData::Status(_) => u16::from(DeviceControl::Core),
+            DeviceCtlData::Core(_) => u16::from(DeviceControl::Core),
             DeviceCtlData::Enable(_) => u16::from(DeviceControl::Enable),
             DeviceCtlData::AbsArea(_) => u16::from(DeviceControl::Absarea),
         }
@@ -8339,12 +8451,47 @@ impl Serialize for HierarchyChangeDataAttachSlave {
         self.master.serialize_into(bytes);
     }
 }
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct HierarchyChangeDataDetachSlave {
+    pub deviceid: DeviceId,
+}
+impl TryParse for HierarchyChangeDataDetachSlave {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
+        let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
+        let result = HierarchyChangeDataDetachSlave { deviceid };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for HierarchyChangeDataDetachSlave {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
+impl Serialize for HierarchyChangeDataDetachSlave {
+    type Bytes = [u8; 4];
+    fn serialize(&self) -> Self::Bytes {
+        let deviceid_bytes = self.deviceid.serialize();
+        [
+            deviceid_bytes[0],
+            deviceid_bytes[1],
+            0,
+            0,
+        ]
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        bytes.reserve(4);
+        self.deviceid.serialize_into(bytes);
+        bytes.extend_from_slice(&[0; 2]);
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum HierarchyChangeData {
     AddMaster(HierarchyChangeDataAddMaster),
     RemoveMaster(HierarchyChangeDataRemoveMaster),
     AttachSlave(HierarchyChangeDataAttachSlave),
-    Deviceid(DeviceId),
+    DetachSlave(HierarchyChangeDataDetachSlave),
 }
 impl HierarchyChangeData {
     fn try_parse(value: &[u8], type_: u16) -> Result<(Self, &[u8]), ParseError> {
@@ -8370,12 +8517,10 @@ impl HierarchyChangeData {
             parse_result = Some(HierarchyChangeData::AttachSlave(attach_slave));
         }
         if switch_expr == u16::from(HierarchyChangeType::DetachSlave) {
-            let remaining = outer_remaining;
-            let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
-            let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-            outer_remaining = remaining;
+            let (detach_slave, new_remaining) = HierarchyChangeDataDetachSlave::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
-            parse_result = Some(HierarchyChangeData::Deviceid(deviceid));
+            parse_result = Some(HierarchyChangeData::DetachSlave(detach_slave));
         }
         match parse_result {
             None => Err(ParseError::ParseError),
@@ -8402,9 +8547,9 @@ impl HierarchyChangeData {
             _ => None,
         }
     }
-    pub fn as_deviceid(&self) -> Option<&DeviceId> {
+    pub fn as_detach_slave(&self) -> Option<&HierarchyChangeDataDetachSlave> {
         match self {
-            HierarchyChangeData::Deviceid(value) => Some(value),
+            HierarchyChangeData::DetachSlave(value) => Some(value),
             _ => None,
         }
     }
@@ -8421,11 +8566,7 @@ impl Serialize for HierarchyChangeData {
             HierarchyChangeData::AddMaster(add_master) => add_master.serialize_into(bytes),
             HierarchyChangeData::RemoveMaster(remove_master) => remove_master.serialize_into(bytes),
             HierarchyChangeData::AttachSlave(attach_slave) => attach_slave.serialize_into(bytes),
-            HierarchyChangeData::Deviceid(deviceid) => {
-                bytes.reserve(4);
-                deviceid.serialize_into(bytes);
-                bytes.extend_from_slice(&[0; 2]);
-            }
+            HierarchyChangeData::DetachSlave(detach_slave) => detach_slave.serialize_into(bytes),
         }
     }
 }
@@ -8435,7 +8576,7 @@ impl HierarchyChangeData {
             HierarchyChangeData::AddMaster(_) => u16::from(HierarchyChangeType::AddMaster),
             HierarchyChangeData::RemoveMaster(_) => u16::from(HierarchyChangeType::RemoveMaster),
             HierarchyChangeData::AttachSlave(_) => u16::from(HierarchyChangeType::AttachSlave),
-            HierarchyChangeData::Deviceid(_) => u16::from(HierarchyChangeType::DetachSlave),
+            HierarchyChangeData::DetachSlave(_) => u16::from(HierarchyChangeType::DetachSlave),
         }
     }
 }
@@ -9501,6 +9642,37 @@ impl Serialize for ValuatorClass {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+pub struct DeviceClassDataKey {
+    pub keys: Vec<u32>,
+}
+impl TryParse for DeviceClassDataKey {
+    fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
+        let (num_keys, remaining) = u16::try_parse(remaining)?;
+        let (keys, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_keys as usize)?;
+        let result = DeviceClassDataKey { keys };
+        Ok((result, remaining))
+    }
+}
+impl TryFrom<&[u8]> for DeviceClassDataKey {
+    type Error = ParseError;
+    fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
+        Ok(Self::try_parse(value)?.0)
+    }
+}
+impl Serialize for DeviceClassDataKey {
+    type Bytes = Vec<u8>;
+    fn serialize(&self) -> Self::Bytes {
+        let mut result = Vec::new();
+        self.serialize_into(&mut result);
+        result
+    }
+    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+        let num_keys = u16::try_from(self.keys.len()).expect("`keys` has too many elements");
+        num_keys.serialize_into(bytes);
+        self.keys.serialize_into(bytes);
+    }
+}
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DeviceClassDataButton {
     pub state: Vec<u32>,
     pub labels: Vec<xproto::Atom>,
@@ -9728,7 +9900,7 @@ impl Serialize for DeviceClassDataTouch {
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DeviceClassData {
-    Keys(Vec<u32>),
+    Key(DeviceClassDataKey),
     Button(DeviceClassDataButton),
     Valuator(DeviceClassDataValuator),
     Scroll(DeviceClassDataScroll),
@@ -9740,12 +9912,10 @@ impl DeviceClassData {
         let mut outer_remaining = value;
         let mut parse_result = None;
         if switch_expr == u16::from(DeviceClassType::Key) {
-            let remaining = outer_remaining;
-            let (num_keys, remaining) = u16::try_parse(remaining)?;
-            let (keys, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_keys as usize)?;
-            outer_remaining = remaining;
+            let (key, new_remaining) = DeviceClassDataKey::try_parse(outer_remaining)?;
+            outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
-            parse_result = Some(DeviceClassData::Keys(keys));
+            parse_result = Some(DeviceClassData::Key(key));
         }
         if switch_expr == u16::from(DeviceClassType::Button) {
             let (button, new_remaining) = DeviceClassDataButton::try_parse(outer_remaining)?;
@@ -9778,9 +9948,9 @@ impl DeviceClassData {
     }
 }
 impl DeviceClassData {
-    pub fn as_keys(&self) -> Option<&Vec<u32>> {
+    pub fn as_key(&self) -> Option<&DeviceClassDataKey> {
         match self {
-            DeviceClassData::Keys(value) => Some(value),
+            DeviceClassData::Key(value) => Some(value),
             _ => None,
         }
     }
@@ -9818,11 +9988,7 @@ impl Serialize for DeviceClassData {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         match self {
-            DeviceClassData::Keys(keys) => {
-                let num_keys = u16::try_from(keys.len()).expect("`keys` has too many elements");
-                num_keys.serialize_into(bytes);
-                keys.serialize_into(bytes);
-            }
+            DeviceClassData::Key(key) => key.serialize_into(bytes),
             DeviceClassData::Button(button) => button.serialize_into(bytes),
             DeviceClassData::Valuator(valuator) => valuator.serialize_into(bytes),
             DeviceClassData::Scroll(scroll) => scroll.serialize_into(bytes),
@@ -9833,7 +9999,7 @@ impl Serialize for DeviceClassData {
 impl DeviceClassData {
     fn switch_expr(&self) -> u16 {
         match self {
-            DeviceClassData::Keys(_) => u16::from(DeviceClassType::Key),
+            DeviceClassData::Key(_) => u16::from(DeviceClassType::Key),
             DeviceClassData::Button(_) => u16::from(DeviceClassType::Button),
             DeviceClassData::Valuator(_) => u16::from(DeviceClassType::Valuator),
             DeviceClassData::Scroll(_) => u16::from(DeviceClassType::Scroll),
