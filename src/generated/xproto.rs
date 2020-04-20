@@ -8024,7 +8024,6 @@ impl Serialize for CreateWindowAux {
     }
 }
 impl CreateWindowAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u32 {
         let mut expr_value: u32 = 0;
         if self.background_pixmap.is_some() {
@@ -8350,7 +8349,6 @@ impl Serialize for ChangeWindowAttributesAux {
     }
 }
 impl ChangeWindowAttributesAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u32 {
         let mut expr_value: u32 = 0;
         if self.background_pixmap.is_some() {
@@ -9312,7 +9310,6 @@ impl Serialize for ConfigureWindowAux {
     }
 }
 impl ConfigureWindowAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u16 {
         let mut expr_value: u16 = 0;
         if self.x.is_some() {
@@ -14580,7 +14577,6 @@ impl Serialize for CreateGCAux {
     }
 }
 impl CreateGCAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u32 {
         let mut expr_value: u32 = 0;
         if self.function.is_some() {
@@ -14947,7 +14943,6 @@ impl Serialize for ChangeGCAux {
     }
 }
 impl ChangeGCAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u32 {
         let mut expr_value: u32 = 0;
         if self.function.is_some() {
@@ -18475,7 +18470,6 @@ impl Serialize for ChangeKeyboardControlAux {
     }
 }
 impl ChangeKeyboardControlAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u32 {
         let mut expr_value: u32 = 0;
         if self.key_click_percent.is_some() {

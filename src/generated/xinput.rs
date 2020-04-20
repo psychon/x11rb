@@ -768,7 +768,6 @@ impl Serialize for InputInfoInfo {
     }
 }
 impl InputInfoInfo {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u8 {
         match self {
             InputInfoInfo::Key(_) => u8::from(InputClass::Key),
@@ -3213,7 +3212,6 @@ impl Serialize for FeedbackStateData {
     }
 }
 impl FeedbackStateData {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u8 {
         match self {
             FeedbackStateData::Keyboard(_) => u8::from(FeedbackClass::Keyboard),
@@ -4029,7 +4027,6 @@ impl Serialize for FeedbackCtlData {
     }
 }
 impl FeedbackCtlData {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u8 {
         match self {
             FeedbackCtlData::Keyboard(_) => u8::from(FeedbackClass::Keyboard),
@@ -5278,7 +5275,6 @@ impl Serialize for InputStateData {
     }
 }
 impl InputStateData {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u8 {
         match self {
             InputStateData::Key(_) => u8::from(InputClass::Key),
@@ -6223,7 +6219,6 @@ impl Serialize for DeviceStateData {
     }
 }
 impl DeviceStateData {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u16 {
         match self {
             DeviceStateData::Resolution(_) => u16::from(DeviceControl::Resolution),
@@ -6971,7 +6966,6 @@ impl Serialize for DeviceCtlData {
     }
 }
 impl DeviceCtlData {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u16 {
         match self {
             DeviceCtlData::Resolution(_) => u16::from(DeviceControl::Resolution),
@@ -7250,7 +7244,6 @@ impl Serialize for ChangeDevicePropertyAux {
     }
 }
 impl ChangeDevicePropertyAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u8 {
         match self {
             ChangeDevicePropertyAux::Data8(_) => u8::from(PropertyFormat::M8Bits),
@@ -8413,7 +8406,6 @@ impl Serialize for HierarchyChangeData {
     }
 }
 impl HierarchyChangeData {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u16 {
         match self {
             HierarchyChangeData::AddMaster(_) => u16::from(HierarchyChangeType::AddMaster),
@@ -9815,7 +9807,6 @@ impl Serialize for DeviceClassData {
     }
 }
 impl DeviceClassData {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u16 {
         match self {
             DeviceClassData::Keys(_) => u16::from(DeviceClassType::Key),
@@ -10864,7 +10855,6 @@ impl Serialize for XIChangePropertyAux {
     }
 }
 impl XIChangePropertyAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u8 {
         match self {
             XIChangePropertyAux::Data8(_) => u8::from(PropertyFormat::M8Bits),

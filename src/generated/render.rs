@@ -2059,7 +2059,6 @@ impl Serialize for CreatePictureAux {
     }
 }
 impl CreatePictureAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u32 {
         let mut expr_value: u32 = 0;
         if self.repeat.is_some() {
@@ -2290,7 +2289,6 @@ impl Serialize for ChangePictureAux {
     }
 }
 impl ChangePictureAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u32 {
         let mut expr_value: u32 = 0;
         if self.repeat.is_some() {

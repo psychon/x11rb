@@ -6622,7 +6622,6 @@ impl Serialize for SelectEventsAux {
     }
 }
 impl SelectEventsAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u16 {
         let mut expr_value: u16 = 0;
         if self.bitcase1.is_some() {
@@ -7613,7 +7612,6 @@ impl Serialize for SetMapAux {
     }
 }
 impl SetMapAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u16 {
         let mut expr_value: u16 = 0;
         if self.types.is_some() {
@@ -8562,7 +8560,6 @@ impl Serialize for SetNamesAux {
     }
 }
 impl SetNamesAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u32 {
         let mut expr_value: u32 = 0;
         if self.keycodes_name.is_some() {

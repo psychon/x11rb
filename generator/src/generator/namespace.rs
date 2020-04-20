@@ -2311,7 +2311,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             outln!(out, "impl {} {{", name);
             out.indented(|out| {
                 let expr_type = self.get_switch_discriminant_rust_type(&switch.expr);
-                outln!(out, "#[allow(dead_code)]");
                 outln!(out, "fn switch_expr(&self) -> {} {{", expr_type);
                 out.indented(|out| {
                     if switch.kind == xcbdefs::SwitchKind::Case {

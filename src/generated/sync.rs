@@ -1065,7 +1065,6 @@ impl Serialize for CreateAlarmAux {
     }
 }
 impl CreateAlarmAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u32 {
         let mut expr_value: u32 = 0;
         if self.counter.is_some() {
@@ -1202,7 +1201,6 @@ impl Serialize for ChangeAlarmAux {
     }
 }
 impl ChangeAlarmAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u32 {
         let mut expr_value: u32 = 0;
         if self.counter.is_some() {
