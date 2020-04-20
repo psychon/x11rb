@@ -69,7 +69,7 @@ pub trait ConnectionExt: XProtoConnectionExt {
             property,
             type_,
             8,
-            data.len().try_into()?,
+            data.len().try_into().expect("`data` has too many elements"),
             data,
         )
     }
@@ -97,7 +97,7 @@ pub trait ConnectionExt: XProtoConnectionExt {
             property,
             type_,
             16,
-            data.len().try_into()?,
+            data.len().try_into().expect("`data` has too many elements"),
             &data_u8,
         )
     }
@@ -125,7 +125,7 @@ pub trait ConnectionExt: XProtoConnectionExt {
             property,
             type_,
             32,
-            data.len().try_into()?,
+            data.len().try_into().expect("`data` has too many elements"),
             &data_u8,
         )
     }
