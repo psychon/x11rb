@@ -14,8 +14,9 @@ document](doc/comparison.md).
 
 ## Building
 
-This crate uses a code generator that is implemented in Python. As such, you
-need to have Python available to build this crate.
+This crate uses a code generator that is implemented in Rust. A copy of the
+generated code is included, so you do not need to run the generator unless
+you have modified the definitions or the generator itself.
 
 The code generator uses the X11 XML description from `xcb-proto`. A copy of
 xcb-proto that comes with the source code is used.

@@ -214,7 +214,7 @@ where
         suspend_timeout_bytes[1],
         off_timeout_bytes[0],
         off_timeout_bytes[1],
-        0 /* trailing padding */,
+        0,
         0,
     ];
     let length_so_far = length_so_far + request0.len();
@@ -353,7 +353,7 @@ where
         0,
         power_level_bytes[0],
         power_level_bytes[1],
-        0 /* trailing padding */,
+        0,
         0,
     ];
     let length_so_far = length_so_far + request0.len();

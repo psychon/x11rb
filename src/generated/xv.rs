@@ -24,10 +24,8 @@ use crate::errors::{ConnectionError, ParseError};
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
-#[allow(unused_imports)]
-use super::xproto;
-#[allow(unused_imports)]
 use super::shm;
+use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
 pub const X11_EXTENSION_NAME: &str = "XVideo";
@@ -1131,7 +1129,7 @@ impl Serialize for ImageFormatInfo {
         u8::from(self.type_).serialize_into(bytes);
         u8::from(self.byte_order).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
-        self.guid.serialize_into(bytes);
+        bytes.extend_from_slice(&self.guid);
         self.bpp.serialize_into(bytes);
         self.num_planes.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
@@ -1151,7 +1149,7 @@ impl Serialize for ImageFormatInfo {
         self.vvert_y_period.serialize_into(bytes);
         self.vvert_u_period.serialize_into(bytes);
         self.vvert_v_period.serialize_into(bytes);
-        self.vcomp_order.serialize_into(bytes);
+        bytes.extend_from_slice(&self.vcomp_order);
         u8::from(self.vscanline_order).serialize_into(bytes);
         bytes.extend_from_slice(&[0; 11]);
     }
@@ -1747,12 +1745,14 @@ impl TryFrom<&[u8]> for QueryEncodingsReply {
 
 /// Opcode for the GrabPort request
 pub const GRAB_PORT_REQUEST: u8 = 3;
-pub fn grab_port<Conn>(conn: &Conn, port: Port, time: xproto::Timestamp) -> Result<Cookie<'_, Conn, GrabPortReply>, ConnectionError>
+pub fn grab_port<Conn, A>(conn: &Conn, port: Port, time: A) -> Result<Cookie<'_, Conn, GrabPortReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<xproto::Timestamp>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let time: xproto::Timestamp = time.into();
     let length_so_far = 0;
     let port_bytes = port.serialize();
     let time_bytes = time.serialize();
@@ -1804,12 +1804,14 @@ impl TryFrom<&[u8]> for GrabPortReply {
 
 /// Opcode for the UngrabPort request
 pub const UNGRAB_PORT_REQUEST: u8 = 4;
-pub fn ungrab_port<Conn>(conn: &Conn, port: Port, time: xproto::Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn ungrab_port<Conn, A>(conn: &Conn, port: Port, time: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<xproto::Timestamp>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let time: xproto::Timestamp = time.into();
     let length_so_far = 0;
     let port_bytes = port.serialize();
     let time_bytes = time.serialize();
@@ -2699,11 +2701,15 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_encodings(self, port)
     }
-    fn xv_grab_port(&self, port: Port, time: xproto::Timestamp) -> Result<Cookie<'_, Self, GrabPortReply>, ConnectionError>
+    fn xv_grab_port<A>(&self, port: Port, time: A) -> Result<Cookie<'_, Self, GrabPortReply>, ConnectionError>
+    where
+        A: Into<xproto::Timestamp>,
     {
         grab_port(self, port, time)
     }
-    fn xv_ungrab_port(&self, port: Port, time: xproto::Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn xv_ungrab_port<A>(&self, port: Port, time: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<xproto::Timestamp>,
     {
         ungrab_port(self, port, time)
     }

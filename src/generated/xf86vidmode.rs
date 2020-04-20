@@ -497,12 +497,14 @@ impl TryFrom<&[u8]> for GetModeLineReply {
 
 /// Opcode for the ModModeLine request
 pub const MOD_MODE_LINE_REQUEST: u8 = 2;
-pub fn mod_mode_line<'c, Conn>(conn: &'c Conn, screen: u32, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn mod_mode_line<'c, Conn, A>(conn: &'c Conn, screen: u32, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<u32>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let flags: u32 = flags.into();
     let length_so_far = 0;
     let screen_bytes = screen.serialize();
     let hdisplay_bytes = hdisplay.serialize();
@@ -515,7 +517,7 @@ where
     let vsyncend_bytes = vsyncend.serialize();
     let vtotal_bytes = vtotal.serialize();
     let flags_bytes = flags.serialize();
-    let privsize: u32 = private.len().try_into()?;
+    let privsize = u32::try_from(private.len()).expect("`private` has too many elements");
     let privsize_bytes = privsize.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -657,7 +659,7 @@ impl TryParse for GetMonitorReply {
         let (hsync, remaining) = crate::x11_utils::parse_list::<Syncrange>(remaining, num_hsync as usize)?;
         let (vsync, remaining) = crate::x11_utils::parse_list::<Syncrange>(remaining, num_vsync as usize)?;
         let (vendor, remaining) = crate::x11_utils::parse_list::<u8>(remaining, vendor_length as usize)?;
-        let (alignment_pad, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (((vendor_length as usize) + (3)) & (!(3))) - (vendor_length as usize))?;
+        let (alignment_pad, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (((vendor_length as usize) + 3) & (!3)) - (vendor_length as usize))?;
         let (model, remaining) = crate::x11_utils::parse_list::<u8>(remaining, model_length as usize)?;
         let result = GetMonitorReply { response_type, sequence, length, hsync, vsync, vendor, alignment_pad, model };
         Ok((result, remaining))
@@ -754,12 +756,16 @@ impl TryFrom<&[u8]> for GetAllModeLinesReply {
 
 /// Opcode for the AddModeLine request
 pub const ADD_MODE_LINE_REQUEST: u8 = 7;
-pub fn add_mode_line<'c, Conn>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, after_dotclock: Dotclock, after_hdisplay: u16, after_hsyncstart: u16, after_hsyncend: u16, after_htotal: u16, after_hskew: u16, after_vdisplay: u16, after_vsyncstart: u16, after_vsyncend: u16, after_vtotal: u16, after_flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn add_mode_line<'c, Conn, A, B>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, after_dotclock: Dotclock, after_hdisplay: u16, after_hsyncstart: u16, after_hsyncend: u16, after_htotal: u16, after_hskew: u16, after_vdisplay: u16, after_vsyncstart: u16, after_vsyncend: u16, after_vtotal: u16, after_flags: B, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<u32>,
+    B: Into<u32>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let flags: u32 = flags.into();
+    let after_flags: u32 = after_flags.into();
     let length_so_far = 0;
     let screen_bytes = screen.serialize();
     let dotclock_bytes = dotclock.serialize();
@@ -773,7 +779,7 @@ where
     let vsyncend_bytes = vsyncend.serialize();
     let vtotal_bytes = vtotal.serialize();
     let flags_bytes = flags.serialize();
-    let privsize: u32 = private.len().try_into()?;
+    let privsize = u32::try_from(private.len()).expect("`private` has too many elements");
     let privsize_bytes = privsize.serialize();
     let after_dotclock_bytes = after_dotclock.serialize();
     let after_hdisplay_bytes = after_hdisplay.serialize();
@@ -892,12 +898,14 @@ where
 
 /// Opcode for the DeleteModeLine request
 pub const DELETE_MODE_LINE_REQUEST: u8 = 8;
-pub fn delete_mode_line<'c, Conn>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn delete_mode_line<'c, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<u32>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let flags: u32 = flags.into();
     let length_so_far = 0;
     let screen_bytes = screen.serialize();
     let dotclock_bytes = dotclock.serialize();
@@ -911,7 +919,7 @@ where
     let vsyncend_bytes = vsyncend.serialize();
     let vtotal_bytes = vtotal.serialize();
     let flags_bytes = flags.serialize();
-    let privsize: u32 = private.len().try_into()?;
+    let privsize = u32::try_from(private.len()).expect("`private` has too many elements");
     let privsize_bytes = privsize.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -979,12 +987,14 @@ where
 
 /// Opcode for the ValidateModeLine request
 pub const VALIDATE_MODE_LINE_REQUEST: u8 = 9;
-pub fn validate_mode_line<'c, Conn>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<Cookie<'c, Conn, ValidateModeLineReply>, ConnectionError>
+pub fn validate_mode_line<'c, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &[u8]) -> Result<Cookie<'c, Conn, ValidateModeLineReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<u32>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let flags: u32 = flags.into();
     let length_so_far = 0;
     let screen_bytes = screen.serialize();
     let dotclock_bytes = dotclock.serialize();
@@ -998,7 +1008,7 @@ where
     let vsyncend_bytes = vsyncend.serialize();
     let vtotal_bytes = vtotal.serialize();
     let flags_bytes = flags.serialize();
-    let privsize: u32 = private.len().try_into()?;
+    let privsize = u32::try_from(private.len()).expect("`private` has too many elements");
     let privsize_bytes = privsize.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -1092,12 +1102,14 @@ impl TryFrom<&[u8]> for ValidateModeLineReply {
 
 /// Opcode for the SwitchToMode request
 pub const SWITCH_TO_MODE_REQUEST: u8 = 10;
-pub fn switch_to_mode<'c, Conn>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn switch_to_mode<'c, Conn, A>(conn: &'c Conn, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<u32>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let flags: u32 = flags.into();
     let length_so_far = 0;
     let screen_bytes = screen.serialize();
     let dotclock_bytes = dotclock.serialize();
@@ -1111,7 +1123,7 @@ where
     let vsyncend_bytes = vsyncend.serialize();
     let vtotal_bytes = vtotal.serialize();
     let flags_bytes = flags.serialize();
-    let privsize: u32 = private.len().try_into()?;
+    let privsize = u32::try_from(private.len()).expect("`private` has too many elements");
     let privsize_bytes = privsize.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -1316,7 +1328,7 @@ impl TryParse for GetDotClocksReply {
         let (clocks, remaining) = u32::try_parse(remaining)?;
         let (maxclocks, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (clock, remaining) = crate::x11_utils::parse_list::<u32>(remaining, ((1) - ((flags as usize) & (1))) * (clocks as usize))?;
+        let (clock, remaining) = crate::x11_utils::parse_list::<u32>(remaining, (1 - ((flags as usize) & 1)) * (clocks as usize))?;
         let result = GetDotClocksReply { response_type, sequence, length, flags, clocks, maxclocks, clock };
         Ok((result, remaining))
     }
@@ -1537,9 +1549,9 @@ impl TryParse for GetGammaRampReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (size, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (red, remaining) = crate::x11_utils::parse_list::<u16>(remaining, ((size as usize) + (1)) & (!(1)))?;
-        let (green, remaining) = crate::x11_utils::parse_list::<u16>(remaining, ((size as usize) + (1)) & (!(1)))?;
-        let (blue, remaining) = crate::x11_utils::parse_list::<u16>(remaining, ((size as usize) + (1)) & (!(1)))?;
+        let (red, remaining) = crate::x11_utils::parse_list::<u16>(remaining, ((size as usize) + 1) & (!1))?;
+        let (green, remaining) = crate::x11_utils::parse_list::<u16>(remaining, ((size as usize) + 1) & (!1))?;
+        let (blue, remaining) = crate::x11_utils::parse_list::<u16>(remaining, ((size as usize) + 1) & (!1))?;
         let result = GetGammaRampReply { response_type, sequence, length, size, red, green, blue };
         Ok((result, remaining))
     }
@@ -1562,8 +1574,6 @@ where
     let length_so_far = 0;
     let screen_bytes = screen.serialize();
     let size_bytes = size.serialize();
-    assert_eq!(red.len(), ((size as usize) + (1)) & (!(1)), "Argument red has an incorrect length");
-    let red_bytes = red.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         SET_GAMMA_RAMP_REQUEST,
@@ -1575,11 +1585,13 @@ where
         size_bytes[1],
     ];
     let length_so_far = length_so_far + request0.len();
+    assert_eq!(red.len(), ((size as usize) + 1) & (!1), "`red` has an incorrect length");
+    let red_bytes = red.serialize();
     let length_so_far = length_so_far + red_bytes.len();
-    assert_eq!(green.len(), ((size as usize) + (1)) & (!(1)), "Argument green has an incorrect length");
+    assert_eq!(green.len(), ((size as usize) + 1) & (!1), "`green` has an incorrect length");
     let green_bytes = green.serialize();
     let length_so_far = length_so_far + green_bytes.len();
-    assert_eq!(blue.len(), ((size as usize) + (1)) & (!(1)), "Argument blue has an incorrect length");
+    assert_eq!(blue.len(), ((size as usize) + 1) & (!1), "`blue` has an incorrect length");
     let blue_bytes = blue.serialize();
     let length_so_far = length_so_far + blue_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
@@ -2273,7 +2285,9 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_mode_line(self, screen)
     }
-    fn xf86vidmode_mod_mode_line<'c>(&'c self, screen: u32, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xf86vidmode_mod_mode_line<'c, A>(&'c self, screen: u32, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    where
+        A: Into<u32>,
     {
         mod_mode_line(self, screen, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, private)
     }
@@ -2293,19 +2307,28 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_all_mode_lines(self, screen)
     }
-    fn xf86vidmode_add_mode_line<'c>(&'c self, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, after_dotclock: Dotclock, after_hdisplay: u16, after_hsyncstart: u16, after_hsyncend: u16, after_htotal: u16, after_hskew: u16, after_vdisplay: u16, after_vsyncstart: u16, after_vsyncend: u16, after_vtotal: u16, after_flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xf86vidmode_add_mode_line<'c, A, B>(&'c self, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, after_dotclock: Dotclock, after_hdisplay: u16, after_hsyncstart: u16, after_hsyncend: u16, after_htotal: u16, after_hskew: u16, after_vdisplay: u16, after_vsyncstart: u16, after_vsyncend: u16, after_vtotal: u16, after_flags: B, private: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    where
+        A: Into<u32>,
+        B: Into<u32>,
     {
         add_mode_line(self, screen, dotclock, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, after_dotclock, after_hdisplay, after_hsyncstart, after_hsyncend, after_htotal, after_hskew, after_vdisplay, after_vsyncstart, after_vsyncend, after_vtotal, after_flags, private)
     }
-    fn xf86vidmode_delete_mode_line<'c>(&'c self, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xf86vidmode_delete_mode_line<'c, A>(&'c self, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    where
+        A: Into<u32>,
     {
         delete_mode_line(self, screen, dotclock, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, private)
     }
-    fn xf86vidmode_validate_mode_line<'c>(&'c self, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<Cookie<'c, Self, ValidateModeLineReply>, ConnectionError>
+    fn xf86vidmode_validate_mode_line<'c, A>(&'c self, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &[u8]) -> Result<Cookie<'c, Self, ValidateModeLineReply>, ConnectionError>
+    where
+        A: Into<u32>,
     {
         validate_mode_line(self, screen, dotclock, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, private)
     }
-    fn xf86vidmode_switch_to_mode<'c>(&'c self, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: u32, private: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xf86vidmode_switch_to_mode<'c, A>(&'c self, screen: u32, dotclock: Dotclock, hdisplay: u16, hsyncstart: u16, hsyncend: u16, htotal: u16, hskew: u16, vdisplay: u16, vsyncstart: u16, vsyncend: u16, vtotal: u16, flags: A, private: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    where
+        A: Into<u32>,
     {
         switch_to_mode(self, screen, dotclock, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, private)
     }

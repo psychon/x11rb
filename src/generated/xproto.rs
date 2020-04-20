@@ -852,7 +852,7 @@ impl TryParse for SetupAuthenticate {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(5..).ok_or(ParseError::ParseError)?;
         let (length, remaining) = u16::try_parse(remaining)?;
-        let (reason, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * (4))?;
+        let (reason, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
         let result = SetupAuthenticate { status, reason };
         Ok((result, remaining))
     }
@@ -874,7 +874,8 @@ impl Serialize for SetupAuthenticate {
         bytes.reserve(8);
         self.status.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 5]);
-        let length = u16::try_from(self.reason.len()).expect("`reason` has too many elements") / 4;
+        assert_eq!(self.reason.len() % 4, 0, "`reason` has an incorrect length, must be a multiple of 4");
+        let length = u16::try_from(self.reason.len() / 4).expect("`reason` has too many elements");
         length.serialize_into(bytes);
         bytes.extend_from_slice(&self.reason);
     }
@@ -1259,19 +1260,19 @@ pub const KEY_PRESS_EVENT: u8 = 2;
 ///
 /// * `detail` - The keycode (a number representing a physical key on the keyboard) of the key
 /// which was pressed.
+/// * `time` - Time when the event was generated (in milliseconds).
+/// * `root` - The root window of `child`.
+/// * `same_screen` - Whether the `event` window is on the same screen as the `root` window.
 /// * `event_x` - If `same_screen` is true, this is the X coordinate relative to the `event`
 /// window's origin. Otherwise, `event_x` will be set to zero.
 /// * `event_y` - If `same_screen` is true, this is the Y coordinate relative to the `event`
 /// window's origin. Otherwise, `event_y` will be set to zero.
-/// * `root` - The root window of `child`.
 /// * `root_x` - The X coordinate of the pointer relative to the `root` window at the time of
 /// the event.
 /// * `root_y` - The Y coordinate of the pointer relative to the `root` window at the time of
 /// the event.
-/// * `same_screen` - Whether the `event` window is on the same screen as the `root` window.
 /// * `state` - The logical state of the pointer buttons and modifier keys just prior to the
 /// event.
-/// * `time` - Time when the event was generated (in milliseconds).
 ///
 /// # See
 ///
@@ -1397,19 +1398,19 @@ pub const KEY_RELEASE_EVENT: u8 = 3;
 ///
 /// * `detail` - The keycode (a number representing a physical key on the keyboard) of the key
 /// which was pressed.
+/// * `time` - Time when the event was generated (in milliseconds).
+/// * `root` - The root window of `child`.
+/// * `same_screen` - Whether the `event` window is on the same screen as the `root` window.
 /// * `event_x` - If `same_screen` is true, this is the X coordinate relative to the `event`
 /// window's origin. Otherwise, `event_x` will be set to zero.
 /// * `event_y` - If `same_screen` is true, this is the Y coordinate relative to the `event`
 /// window's origin. Otherwise, `event_y` will be set to zero.
-/// * `root` - The root window of `child`.
 /// * `root_x` - The X coordinate of the pointer relative to the `root` window at the time of
 /// the event.
 /// * `root_y` - The Y coordinate of the pointer relative to the `root` window at the time of
 /// the event.
-/// * `same_screen` - Whether the `event` window is on the same screen as the `root` window.
 /// * `state` - The logical state of the pointer buttons and modifier keys just prior to the
 /// event.
-/// * `time` - Time when the event was generated (in milliseconds).
 ///
 /// # See
 ///
@@ -1594,19 +1595,19 @@ pub const BUTTON_PRESS_EVENT: u8 = 4;
 ///
 /// * `detail` - The keycode (a number representing a physical key on the keyboard) of the key
 /// which was pressed.
+/// * `time` - Time when the event was generated (in milliseconds).
+/// * `root` - The root window of `child`.
+/// * `same_screen` - Whether the `event` window is on the same screen as the `root` window.
 /// * `event_x` - If `same_screen` is true, this is the X coordinate relative to the `event`
 /// window's origin. Otherwise, `event_x` will be set to zero.
 /// * `event_y` - If `same_screen` is true, this is the Y coordinate relative to the `event`
 /// window's origin. Otherwise, `event_y` will be set to zero.
-/// * `root` - The root window of `child`.
 /// * `root_x` - The X coordinate of the pointer relative to the `root` window at the time of
 /// the event.
 /// * `root_y` - The Y coordinate of the pointer relative to the `root` window at the time of
 /// the event.
-/// * `same_screen` - Whether the `event` window is on the same screen as the `root` window.
 /// * `state` - The logical state of the pointer buttons and modifier keys just prior to the
 /// event.
-/// * `time` - Time when the event was generated (in milliseconds).
 ///
 /// # See
 ///
@@ -1732,19 +1733,19 @@ pub const BUTTON_RELEASE_EVENT: u8 = 5;
 ///
 /// * `detail` - The keycode (a number representing a physical key on the keyboard) of the key
 /// which was pressed.
+/// * `time` - Time when the event was generated (in milliseconds).
+/// * `root` - The root window of `child`.
+/// * `same_screen` - Whether the `event` window is on the same screen as the `root` window.
 /// * `event_x` - If `same_screen` is true, this is the X coordinate relative to the `event`
 /// window's origin. Otherwise, `event_x` will be set to zero.
 /// * `event_y` - If `same_screen` is true, this is the Y coordinate relative to the `event`
 /// window's origin. Otherwise, `event_y` will be set to zero.
-/// * `root` - The root window of `child`.
 /// * `root_x` - The X coordinate of the pointer relative to the `root` window at the time of
 /// the event.
 /// * `root_y` - The Y coordinate of the pointer relative to the `root` window at the time of
 /// the event.
-/// * `same_screen` - Whether the `event` window is on the same screen as the `root` window.
 /// * `state` - The logical state of the pointer buttons and modifier keys just prior to the
 /// event.
-/// * `time` - Time when the event was generated (in milliseconds).
 ///
 /// # See
 ///
@@ -1932,19 +1933,19 @@ pub const MOTION_NOTIFY_EVENT: u8 = 6;
 ///
 /// * `detail` - The keycode (a number representing a physical key on the keyboard) of the key
 /// which was pressed.
+/// * `time` - Time when the event was generated (in milliseconds).
+/// * `root` - The root window of `child`.
+/// * `same_screen` - Whether the `event` window is on the same screen as the `root` window.
 /// * `event_x` - If `same_screen` is true, this is the X coordinate relative to the `event`
 /// window's origin. Otherwise, `event_x` will be set to zero.
 /// * `event_y` - If `same_screen` is true, this is the Y coordinate relative to the `event`
 /// window's origin. Otherwise, `event_y` will be set to zero.
-/// * `root` - The root window of `child`.
 /// * `root_x` - The X coordinate of the pointer relative to the `root` window at the time of
 /// the event.
 /// * `root_y` - The Y coordinate of the pointer relative to the `root` window at the time of
 /// the event.
-/// * `same_screen` - Whether the `event` window is on the same screen as the `root` window.
 /// * `state` - The logical state of the pointer buttons and modifier keys just prior to the
 /// event.
-/// * `time` - Time when the event was generated (in milliseconds).
 ///
 /// # See
 ///
@@ -2217,16 +2218,17 @@ pub const ENTER_NOTIFY_EVENT: u8 = 7;
 ///
 /// # Fields
 ///
+/// * `event` - The window on which the event was generated.
 /// * `child` - If the `event` window has subwindows and the final pointer position is in one
 /// of them, then `child` is set to that subwindow, `XCB_WINDOW_NONE` otherwise.
-/// * `event` - The window on which the event was generated.
+/// * `root` - The root window for the final cursor position.
+/// * `root_x` - The pointer X coordinate relative to `root`'s origin at the time of the event.
+/// * `root_y` - The pointer Y coordinate relative to `root`'s origin at the time of the event.
 /// * `event_x` - If `event` is on the same screen as `root`, this is the pointer X coordinate
 /// relative to the event window's origin.
 /// * `event_y` - If `event` is on the same screen as `root`, this is the pointer Y coordinate
 /// relative to the event window's origin.
-/// * `root` - The root window for the final cursor position.
-/// * `root_x` - The pointer X coordinate relative to `root`'s origin at the time of the event.
-/// * `root_y` - The pointer Y coordinate relative to `root`'s origin at the time of the event.
+/// * `mode` -
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EnterNotifyEvent {
     pub response_type: u8,
@@ -2349,16 +2351,17 @@ pub const LEAVE_NOTIFY_EVENT: u8 = 8;
 ///
 /// # Fields
 ///
+/// * `event` - The window on which the event was generated.
 /// * `child` - If the `event` window has subwindows and the final pointer position is in one
 /// of them, then `child` is set to that subwindow, `XCB_WINDOW_NONE` otherwise.
-/// * `event` - The window on which the event was generated.
+/// * `root` - The root window for the final cursor position.
+/// * `root_x` - The pointer X coordinate relative to `root`'s origin at the time of the event.
+/// * `root_y` - The pointer Y coordinate relative to `root`'s origin at the time of the event.
 /// * `event_x` - If `event` is on the same screen as `root`, this is the pointer X coordinate
 /// relative to the event window's origin.
 /// * `event_y` - If `event` is on the same screen as `root`, this is the pointer Y coordinate
 /// relative to the event window's origin.
-/// * `root` - The root window for the final cursor position.
-/// * `root_x` - The pointer X coordinate relative to `root`'s origin at the time of the event.
-/// * `root_y` - The pointer Y coordinate relative to `root`'s origin at the time of the event.
+/// * `mode` -
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct LeaveNotifyEvent {
     pub response_type: u8,
@@ -2483,6 +2486,8 @@ pub const FOCUS_IN_EVENT: u8 = 9;
 ///
 /// * `event` - The window on which the focus event was generated. This is the window used by
 /// the X server to report the event.
+/// * `detail` -
+/// * `mode` -
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FocusInEvent {
     pub response_type: u8,
@@ -2582,6 +2587,8 @@ pub const FOCUS_OUT_EVENT: u8 = 10;
 ///
 /// * `event` - The window on which the focus event was generated. This is the window used by
 /// the X server to report the event.
+/// * `detail` -
+/// * `mode` -
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct FocusOutEvent {
     pub response_type: u8,
@@ -2821,17 +2828,17 @@ pub const EXPOSE_EVENT: u8 = 12;
 ///
 /// # Fields
 ///
-/// * `count` - The amount of `Expose` events following this one. Simple applications that do
-/// not want to optimize redisplay by distinguishing between subareas of its window
-/// can just ignore all Expose events with nonzero counts and perform full
-/// redisplays on events with zero counts.
-/// * `height` - The height of the exposed rectangle.
-/// * `width` - The width of the exposed rectangle.
 /// * `window` - The exposed (damaged) window.
 /// * `x` - The X coordinate of the left-upper corner of the exposed rectangle, relative to
 /// the `window`'s origin.
 /// * `y` - The Y coordinate of the left-upper corner of the exposed rectangle, relative to
 /// the `window`'s origin.
+/// * `width` - The width of the exposed rectangle.
+/// * `height` - The height of the exposed rectangle.
+/// * `count` - The amount of `Expose` events following this one. Simple applications that do
+/// not want to optimize redisplay by distinguishing between subareas of its window
+/// can just ignore all Expose events with nonzero counts and perform full
+/// redisplays on events with zero counts.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ExposeEvent {
     pub response_type: u8,
@@ -3499,9 +3506,9 @@ pub const UNMAP_NOTIFY_EVENT: u8 = 18;
 ///
 /// * `event` - The reconfigured window or its parent, depending on whether `StructureNotify`
 /// or `SubstructureNotify` was selected.
+/// * `window` - The window that was unmapped.
 /// * `from_configure` - Set to 1 if the event was generated as a result of a resizing of the window's
 /// parent when `window` had a win_gravity of `UnmapGravity`.
-/// * `window` - The window that was unmapped.
 ///
 /// # See
 ///
@@ -3604,8 +3611,8 @@ pub const MAP_NOTIFY_EVENT: u8 = 19;
 ///
 /// * `event` - The window which was mapped or its parent, depending on whether
 /// `StructureNotify` or `SubstructureNotify` was selected.
-/// * `override_redirect` - Window managers should ignore this window if `override_redirect` is 1.
 /// * `window` - The window that was mapped.
+/// * `override_redirect` - Window managers should ignore this window if `override_redirect` is 1.
 ///
 /// # See
 ///
@@ -3905,20 +3912,20 @@ pub const CONFIGURE_NOTIFY_EVENT: u8 = 22;
 ///
 /// # Fields
 ///
+/// * `event` - The reconfigured window or its parent, depending on whether `StructureNotify`
+/// or `SubstructureNotify` was selected.
+/// * `window` - The window whose size, position, border, and/or stacking order was changed.
 /// * `above_sibling` - If `XCB_NONE`, the `window` is on the bottom of the stack with respect to
 /// sibling windows. However, if set to a sibling window, the `window` is placed on
 /// top of this sibling window.
-/// * `border_width` - The border width of `window`.
-/// * `event` - The reconfigured window or its parent, depending on whether `StructureNotify`
-/// or `SubstructureNotify` was selected.
-/// * `height` - The inside height of `window`, not including the border.
-/// * `override_redirect` - Window managers should ignore this window if `override_redirect` is 1.
-/// * `width` - The inside width of `window`, not including the border.
-/// * `window` - The window whose size, position, border, and/or stacking order was changed.
 /// * `x` - The X coordinate of the upper-left outside corner of `window`, relative to the
 /// parent window's origin.
 /// * `y` - The Y coordinate of the upper-left outside corner of `window`, relative to the
 /// parent window's origin.
+/// * `width` - The inside width of `window`, not including the border.
+/// * `height` - The inside height of `window`, not including the border.
+/// * `border_width` - The border width of `window`.
+/// * `override_redirect` - Window managers should ignore this window if `override_redirect` is 1.
 ///
 /// # See
 ///
@@ -4328,12 +4335,10 @@ impl From<ResizeRequestEvent> for [u8; 32] {
     }
 }
 
-/// BRIEF DESCRIPTION MISSING.
-///
 /// # Fields
 ///
-/// * `OnBottom` - The window is now below all siblings.
 /// * `OnTop` - The window is now on top of all siblings.
+/// * `OnBottom` - The window is now below all siblings.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum Place {
@@ -4405,6 +4410,7 @@ pub const CIRCULATE_NOTIFY_EVENT: u8 = 26;
 /// * `event` - Either the restacked window or its parent, depending on whether
 /// `StructureNotify` or `SubstructureNotify` was selected.
 /// * `window` - The restacked window.
+/// * `place` -
 ///
 /// # See
 ///
@@ -4510,6 +4516,7 @@ pub const CIRCULATE_REQUEST_EVENT: u8 = 27;
 /// * `event` - Either the restacked window or its parent, depending on whether
 /// `StructureNotify` or `SubstructureNotify` was selected.
 /// * `window` - The restacked window.
+/// * `place` -
 ///
 /// # See
 ///
@@ -4674,9 +4681,10 @@ pub const PROPERTY_NOTIFY_EVENT: u8 = 28;
 ///
 /// # Fields
 ///
+/// * `window` - The window whose associated property was changed.
 /// * `atom` - The property's atom, to indicate which property was changed.
 /// * `time` - A timestamp of the server time when the property was changed.
-/// * `window` - The window whose associated property was changed.
+/// * `state` -
 ///
 /// # See
 ///
@@ -5298,12 +5306,10 @@ impl From<SelectionNotifyEvent> for [u8; 32] {
     }
 }
 
-/// BRIEF DESCRIPTION MISSING.
-///
 /// # Fields
 ///
-/// * `Installed` - The colormap was installed.
 /// * `Uninstalled` - The colormap was uninstalled.
+/// * `Installed` - The colormap was installed.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum ColormapState {
@@ -5431,10 +5437,11 @@ pub const COLORMAP_NOTIFY_EVENT: u8 = 32;
 ///
 /// # Fields
 ///
-/// * `_new` - Indicates whether the colormap was changed (1) or installed/uninstalled (0).
+/// * `window` - The window whose associated colormap is changed, installed or uninstalled.
 /// * `colormap` - The colormap which is changed, installed or uninstalled. This is `XCB_NONE`
 /// when the colormap is changed by a call to `FreeColormap`.
-/// * `window` - The window whose associated colormap is changed, installed or uninstalled.
+/// * `_new` - Indicates whether the colormap was changed (1) or installed/uninstalled (0).
+/// * `state` -
 ///
 /// # See
 ///
@@ -5654,75 +5661,75 @@ impl TryParse for ClientMessageData {
     }
 }
 impl From<[u8; 20]> for ClientMessageData {
-    fn from(value: [u8; 20]) -> Self {
-        Self(value)
+    fn from(data8: [u8; 20]) -> Self {
+        Self(data8)
     }
 }
 impl From<[u16; 10]> for ClientMessageData {
-    fn from(value: [u16; 10]) -> Self {
-        let value0 = value[0].serialize();
-        let value1 = value[1].serialize();
-        let value2 = value[2].serialize();
-        let value3 = value[3].serialize();
-        let value4 = value[4].serialize();
-        let value5 = value[5].serialize();
-        let value6 = value[6].serialize();
-        let value7 = value[7].serialize();
-        let value8 = value[8].serialize();
-        let value9 = value[9].serialize();
+    fn from(data16: [u16; 10]) -> Self {
+        let data16_0_bytes = data16[0].serialize();
+        let data16_1_bytes = data16[1].serialize();
+        let data16_2_bytes = data16[2].serialize();
+        let data16_3_bytes = data16[3].serialize();
+        let data16_4_bytes = data16[4].serialize();
+        let data16_5_bytes = data16[5].serialize();
+        let data16_6_bytes = data16[6].serialize();
+        let data16_7_bytes = data16[7].serialize();
+        let data16_8_bytes = data16[8].serialize();
+        let data16_9_bytes = data16[9].serialize();
         let value = [
-            value0[0],
-            value0[1],
-            value1[0],
-            value1[1],
-            value2[0],
-            value2[1],
-            value3[0],
-            value3[1],
-            value4[0],
-            value4[1],
-            value5[0],
-            value5[1],
-            value6[0],
-            value6[1],
-            value7[0],
-            value7[1],
-            value8[0],
-            value8[1],
-            value9[0],
-            value9[1],
+            data16_0_bytes[0],
+            data16_0_bytes[1],
+            data16_1_bytes[0],
+            data16_1_bytes[1],
+            data16_2_bytes[0],
+            data16_2_bytes[1],
+            data16_3_bytes[0],
+            data16_3_bytes[1],
+            data16_4_bytes[0],
+            data16_4_bytes[1],
+            data16_5_bytes[0],
+            data16_5_bytes[1],
+            data16_6_bytes[0],
+            data16_6_bytes[1],
+            data16_7_bytes[0],
+            data16_7_bytes[1],
+            data16_8_bytes[0],
+            data16_8_bytes[1],
+            data16_9_bytes[0],
+            data16_9_bytes[1],
         ];
         Self(value)
     }
 }
 impl From<[u32; 5]> for ClientMessageData {
-    fn from(value: [u32; 5]) -> Self {
-        let value0 = value[0].serialize();
-        let value1 = value[1].serialize();
-        let value2 = value[2].serialize();
-        let value3 = value[3].serialize();
-        let value4 = value[4].serialize();
+    fn from(data32: [u32; 5]) -> Self {
+        let data32_0_bytes = data32[0].serialize();
+        let data32_1_bytes = data32[1].serialize();
+        let data32_2_bytes = data32[2].serialize();
+        let data32_3_bytes = data32[3].serialize();
+        let data32_4_bytes = data32[4].serialize();
         let value = [
-            value0[0],
-            value0[1],
-            value0[2],
-            value0[3],
-            value1[0],
-            value1[1],
-            value1[2],
-            value1[3],
-            value2[0],
-            value2[1],
-            value2[2],
-            value2[3],
-            value3[0],
-            value3[1],
-            value3[2],
-            value3[3],
-            value4[0],
-            value4[1],
-            value4[2],
-            value4[3],
+            data32_0_bytes[0],
+            data32_0_bytes[1],
+            data32_0_bytes[2],
+            data32_0_bytes[3],
+            data32_1_bytes[0],
+            data32_1_bytes[1],
+            data32_1_bytes[2],
+            data32_1_bytes[3],
+            data32_2_bytes[0],
+            data32_2_bytes[1],
+            data32_2_bytes[2],
+            data32_2_bytes[3],
+            data32_3_bytes[0],
+            data32_3_bytes[1],
+            data32_3_bytes[2],
+            data32_3_bytes[3],
+            data32_4_bytes[0],
+            data32_4_bytes[1],
+            data32_4_bytes[2],
+            data32_4_bytes[3],
         ];
         Self(value)
     }
@@ -5739,10 +5746,10 @@ pub const CLIENT_MESSAGE_EVENT: u8 = 33;
 ///
 /// # Fields
 ///
-/// * `data` - The data itself (20 bytes max).
 /// * `format` - Specifies how to interpret `data`. Can be either 8, 16 or 32.
 /// * `type` - An atom which indicates how the data should be interpreted by the receiving
 /// client.
+/// * `data` - The data itself (20 bytes max).
 ///
 /// # See
 ///
@@ -5908,8 +5915,9 @@ pub const MAPPING_NOTIFY_EVENT: u8 = 34;
 ///
 /// # Fields
 ///
-/// * `count` - The number of keycodes altered.
+/// * `request` -
 /// * `first_keycode` - The first number in the range of the altered mapping.
+/// * `count` - The number of keycodes altered.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct MappingNotifyEvent {
     pub response_type: u8,
@@ -6007,9 +6015,9 @@ pub const GE_GENERIC_EVENT: u8 = 35;
 ///
 /// # Fields
 ///
-/// * `evtype` - The extension-specific event type
 /// * `extension` - The major opcode of the extension creating this event
 /// * `length` - The amount (in 4-byte units) of data beyond 32 bytes
+/// * `evtype` - The extension-specific event type
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GeGenericEvent {
     pub response_type: u8,
@@ -7662,13 +7670,8 @@ impl TryFrom<u32> for WindowClass {
     }
 }
 
-/// BRIEF DESCRIPTION MISSING.
-///
 /// # Fields
 ///
-/// * `BackPixel` - Overrides `BackPixmap`. A pixmap of undefined size filled with the specified
-/// background pixel is used for the background. Range-checking is not performed,
-/// the background pixel is truncated to the appropriate number of bits.
 /// * `BackPixmap` - Overrides the default background-pixmap. The background pixmap and window must
 /// have the same root and same depth. Any size pixmap can be used, although some
 /// sizes may be faster than others.
@@ -7681,14 +7684,22 @@ impl TryFrom<u32> for WindowClass {
 /// used, but the window must have the same depth as the parent (or a Match error
 /// results).   The parent's background is tracked, and the current version is
 /// used each time the window background is required.
-/// * `BackingPixel` - The backing-pixel specifies what value to use in planes not covered by
-/// backing-planes. The server is free to save only the specified bit planes in the
-/// backing-store or save-under and regenerate the remaining planes with the
-/// specified pixel value. Any bits beyond the specified depth of the window in
-/// these values are simply ignored.
-/// * `BackingPlanes` - The backing-planes indicates (with bits set to 1) which bit planes of the
-/// window hold dynamic data that must be preserved in backing-stores and during
-/// save-unders.
+/// * `BackPixel` - Overrides `BackPixmap`. A pixmap of undefined size filled with the specified
+/// background pixel is used for the background. Range-checking is not performed,
+/// the background pixel is truncated to the appropriate number of bits.
+/// * `BorderPixmap` - Overrides the default border-pixmap. The border pixmap and window must have the
+/// same root and the same depth. Any size pixmap can be used, although some sizes
+/// may be faster than others.
+///
+/// The special value `XCB_COPY_FROM_PARENT` means the parent's border pixmap is
+/// copied (subsequent changes to the parent's border attribute do not affect the
+/// child), but the window must have the same depth as the parent.
+/// * `BorderPixel` - Overrides `BorderPixmap`. A pixmap of undefined size filled with the specified
+/// border pixel is used for the border. Range checking is not performed on the
+/// border-pixel value, it is truncated to the appropriate number of bits.
+/// * `BitGravity` - Defines which region of the window should be retained if the window is resized.
+/// * `WinGravity` - Defines how the window should be repositioned if the parent is resized (see
+/// `ConfigureWindow`).
 /// * `BackingStore` - A backing-store of `WhenMapped` advises the server that maintaining contents of
 /// obscured regions when the window is mapped would be beneficial. A backing-store
 /// of `Always` advises the server that maintaining contents even when the window
@@ -7700,17 +7711,23 @@ impl TryFrom<u32> for WindowClass {
 /// the region within the parent boundaries, even if the window is larger than its
 /// parent. While the server maintains contents, exposure events will not normally
 /// be generated, but the server may stop maintaining contents at any time.
-/// * `BitGravity` - Defines which region of the window should be retained if the window is resized.
-/// * `BorderPixel` - Overrides `BorderPixmap`. A pixmap of undefined size filled with the specified
-/// border pixel is used for the border. Range checking is not performed on the
-/// border-pixel value, it is truncated to the appropriate number of bits.
-/// * `BorderPixmap` - Overrides the default border-pixmap. The border pixmap and window must have the
-/// same root and the same depth. Any size pixmap can be used, although some sizes
-/// may be faster than others.
-///
-/// The special value `XCB_COPY_FROM_PARENT` means the parent's border pixmap is
-/// copied (subsequent changes to the parent's border attribute do not affect the
-/// child), but the window must have the same depth as the parent.
+/// * `BackingPlanes` - The backing-planes indicates (with bits set to 1) which bit planes of the
+/// window hold dynamic data that must be preserved in backing-stores and during
+/// save-unders.
+/// * `BackingPixel` - The backing-pixel specifies what value to use in planes not covered by
+/// backing-planes. The server is free to save only the specified bit planes in the
+/// backing-store or save-under and regenerate the remaining planes with the
+/// specified pixel value. Any bits beyond the specified depth of the window in
+/// these values are simply ignored.
+/// * `OverrideRedirect` - The override-redirect specifies whether map and configure requests on this
+/// window should override a SubstructureRedirect on the parent, typically to
+/// inform a window manager not to tamper with the window.
+/// * `SaveUnder` - If 1, the server is advised that when this window is mapped, saving the
+/// contents of windows it obscures would be beneficial.
+/// * `EventMask` - The event-mask defines which events the client is interested in for this window
+/// (or for some event types, inferiors of the window).
+/// * `DontPropagate` - The do-not-propagate-mask defines which events should not be propagated to
+/// ancestor windows when no client has the event type selected in this window.
 /// * `Colormap` - The colormap specifies the colormap that best reflects the true colors of the window. Servers
 /// capable of supporting multiple hardware colormaps may use this information, and window man-
 /// agers may use it for InstallColormap requests. The colormap must have the same visual type
@@ -7723,17 +7740,6 @@ impl TryFrom<u32> for WindowClass {
 /// * `Cursor` - If a cursor is specified, it will be used whenever the pointer is in the window. If None is speci-
 /// fied, the parent's cursor will be used when the pointer is in the window, and any change in the
 /// parent's cursor will cause an immediate change in the displayed cursor.
-/// * `DontPropagate` - The do-not-propagate-mask defines which events should not be propagated to
-/// ancestor windows when no client has the event type selected in this window.
-/// * `EventMask` - The event-mask defines which events the client is interested in for this window
-/// (or for some event types, inferiors of the window).
-/// * `OverrideRedirect` - The override-redirect specifies whether map and configure requests on this
-/// window should override a SubstructureRedirect on the parent, typically to
-/// inform a window manager not to tamper with the window.
-/// * `SaveUnder` - If 1, the server is advised that when this window is mapped, saving the
-/// contents of windows it obscures would be beneficial.
-/// * `WinGravity` - Defines how the window should be repositioned if the parent is resized (see
-/// `ConfigureWindow`).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u16)]
 pub enum CW {
@@ -7970,106 +7976,109 @@ impl Serialize for CreateWindowAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.background_pixmap {
-            value.serialize_into(bytes);
+        if let Some(background_pixmap) = self.background_pixmap {
+            background_pixmap.serialize_into(bytes);
         }
-        if let Some(ref value) = self.background_pixel {
-            value.serialize_into(bytes);
+        if let Some(background_pixel) = self.background_pixel {
+            background_pixel.serialize_into(bytes);
         }
-        if let Some(ref value) = self.border_pixmap {
-            value.serialize_into(bytes);
+        if let Some(border_pixmap) = self.border_pixmap {
+            border_pixmap.serialize_into(bytes);
         }
-        if let Some(ref value) = self.border_pixel {
-            value.serialize_into(bytes);
+        if let Some(border_pixel) = self.border_pixel {
+            border_pixel.serialize_into(bytes);
         }
-        if let Some(ref value) = self.bit_gravity {
-            value.serialize_into(bytes);
+        if let Some(bit_gravity) = self.bit_gravity {
+            bit_gravity.serialize_into(bytes);
         }
-        if let Some(ref value) = self.win_gravity {
-            value.serialize_into(bytes);
+        if let Some(win_gravity) = self.win_gravity {
+            win_gravity.serialize_into(bytes);
         }
-        if let Some(ref value) = self.backing_store {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(backing_store) = self.backing_store {
+            u32::from(backing_store).serialize_into(bytes);
         }
-        if let Some(ref value) = self.backing_planes {
-            value.serialize_into(bytes);
+        if let Some(backing_planes) = self.backing_planes {
+            backing_planes.serialize_into(bytes);
         }
-        if let Some(ref value) = self.backing_pixel {
-            value.serialize_into(bytes);
+        if let Some(backing_pixel) = self.backing_pixel {
+            backing_pixel.serialize_into(bytes);
         }
-        if let Some(ref value) = self.override_redirect {
-            value.serialize_into(bytes);
+        if let Some(override_redirect) = self.override_redirect {
+            override_redirect.serialize_into(bytes);
         }
-        if let Some(ref value) = self.save_under {
-            value.serialize_into(bytes);
+        if let Some(save_under) = self.save_under {
+            save_under.serialize_into(bytes);
         }
-        if let Some(ref value) = self.event_mask {
-            value.serialize_into(bytes);
+        if let Some(event_mask) = self.event_mask {
+            event_mask.serialize_into(bytes);
         }
-        if let Some(ref value) = self.do_not_propogate_mask {
-            value.serialize_into(bytes);
+        if let Some(do_not_propogate_mask) = self.do_not_propogate_mask {
+            do_not_propogate_mask.serialize_into(bytes);
         }
-        if let Some(ref value) = self.colormap {
-            value.serialize_into(bytes);
+        if let Some(colormap) = self.colormap {
+            colormap.serialize_into(bytes);
         }
-        if let Some(ref value) = self.cursor {
-            value.serialize_into(bytes);
+        if let Some(cursor) = self.cursor {
+            cursor.serialize_into(bytes);
         }
+    }
+}
+impl CreateWindowAux {
+    #[allow(dead_code)]
+    fn switch_expr(&self) -> u32 {
+        let mut expr_value: u32 = 0;
+        if self.background_pixmap.is_some() {
+            expr_value |= u32::from(CW::BackPixmap);
+        }
+        if self.background_pixel.is_some() {
+            expr_value |= u32::from(CW::BackPixel);
+        }
+        if self.border_pixmap.is_some() {
+            expr_value |= u32::from(CW::BorderPixmap);
+        }
+        if self.border_pixel.is_some() {
+            expr_value |= u32::from(CW::BorderPixel);
+        }
+        if self.bit_gravity.is_some() {
+            expr_value |= u32::from(CW::BitGravity);
+        }
+        if self.win_gravity.is_some() {
+            expr_value |= u32::from(CW::WinGravity);
+        }
+        if self.backing_store.is_some() {
+            expr_value |= u32::from(CW::BackingStore);
+        }
+        if self.backing_planes.is_some() {
+            expr_value |= u32::from(CW::BackingPlanes);
+        }
+        if self.backing_pixel.is_some() {
+            expr_value |= u32::from(CW::BackingPixel);
+        }
+        if self.override_redirect.is_some() {
+            expr_value |= u32::from(CW::OverrideRedirect);
+        }
+        if self.save_under.is_some() {
+            expr_value |= u32::from(CW::SaveUnder);
+        }
+        if self.event_mask.is_some() {
+            expr_value |= u32::from(CW::EventMask);
+        }
+        if self.do_not_propogate_mask.is_some() {
+            expr_value |= u32::from(CW::DontPropagate);
+        }
+        if self.colormap.is_some() {
+            expr_value |= u32::from(CW::Colormap);
+        }
+        if self.cursor.is_some() {
+            expr_value |= u32::from(CW::Cursor);
+        }
+        expr_value
     }
 }
 impl CreateWindowAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
         Default::default()
-    }
-    fn value_mask(&self) -> u32 {
-        let mut mask = 0;
-        if self.background_pixmap.is_some() {
-            mask |= u32::from(CW::BackPixmap);
-        }
-        if self.background_pixel.is_some() {
-            mask |= u32::from(CW::BackPixel);
-        }
-        if self.border_pixmap.is_some() {
-            mask |= u32::from(CW::BorderPixmap);
-        }
-        if self.border_pixel.is_some() {
-            mask |= u32::from(CW::BorderPixel);
-        }
-        if self.bit_gravity.is_some() {
-            mask |= u32::from(CW::BitGravity);
-        }
-        if self.win_gravity.is_some() {
-            mask |= u32::from(CW::WinGravity);
-        }
-        if self.backing_store.is_some() {
-            mask |= u32::from(CW::BackingStore);
-        }
-        if self.backing_planes.is_some() {
-            mask |= u32::from(CW::BackingPlanes);
-        }
-        if self.backing_pixel.is_some() {
-            mask |= u32::from(CW::BackingPixel);
-        }
-        if self.override_redirect.is_some() {
-            mask |= u32::from(CW::OverrideRedirect);
-        }
-        if self.save_under.is_some() {
-            mask |= u32::from(CW::SaveUnder);
-        }
-        if self.event_mask.is_some() {
-            mask |= u32::from(CW::EventMask);
-        }
-        if self.do_not_propogate_mask.is_some() {
-            mask |= u32::from(CW::DontPropagate);
-        }
-        if self.colormap.is_some() {
-            mask |= u32::from(CW::Colormap);
-        }
-        if self.cursor.is_some() {
-            mask |= u32::from(CW::Cursor);
-        }
-        mask
     }
     /// Set the `background_pixmap` field of this structure.
     pub fn background_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
@@ -8147,6 +8156,7 @@ impl CreateWindowAux {
         self
     }
 }
+
 /// Creates a window.
 ///
 /// Creates an unmapped window as child of the specified `parent` window. A
@@ -8166,46 +8176,45 @@ impl CreateWindowAux {
 ///
 /// # Fields
 ///
-/// * `border_width` - TODO:
-///
-/// Must be zero if the `class` is `InputOnly` or a `xcb_match_error_t` occurs.
+/// * `wid` - The ID with which you will refer to the new window, created by
+/// `xcb_generate_id`.
 /// * `depth` - Specifies the new window's depth (TODO: what unit?).
 ///
 /// The special value `XCB_COPY_FROM_PARENT` means the depth is taken from the
 /// `parent` window.
-/// * `height` - The height of the new window.
-/// * `parent` - The parent window of the new window.
 /// * `visual` - Specifies the id for the new window's visual.
 ///
 /// The special value `XCB_COPY_FROM_PARENT` means the visual is taken from the
 /// `parent` window.
-/// * `wid` - The ID with which you will refer to the new window, created by
-/// `xcb_generate_id`.
-/// * `width` - The width of the new window.
+/// * `class` -
+/// * `parent` - The parent window of the new window.
+/// * `border_width` - TODO:
+///
+/// Must be zero if the `class` is `InputOnly` or a `xcb_match_error_t` occurs.
 /// * `x` - The X coordinate of the new window.
 /// * `y` - The Y coordinate of the new window.
+/// * `width` - The width of the new window.
+/// * `height` - The height of the new window.
 ///
 /// # Errors
 ///
-/// * `Alloc` - The X server could not allocate the requested resources (no memory?).
 /// * `Colormap` - TODO: reasons?
-/// * `Cursor` - TODO: reasons?
 /// * `Match` - TODO: reasons?
+/// * `Cursor` - TODO: reasons?
 /// * `Pixmap` - TODO: reasons?
 /// * `Value` - TODO: reasons?
 /// * `Window` - TODO: reasons?
+/// * `Alloc` - The X server could not allocate the requested resources (no memory?).
 ///
 /// # See
 ///
-/// * `CreateNotify`: event
-/// * `MapWindow`: request
 /// * `xcb_generate_id`: function
+/// * `MapWindow`: request
+/// * `CreateNotify`: event
 pub fn create_window<'c, Conn>(conn: &'c Conn, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let value_mask = value_list.value_mask();
-    let value_list_bytes = value_list.serialize();
     let length_so_far = 0;
     let depth_bytes = depth.serialize();
     let wid_bytes = wid.serialize();
@@ -8217,6 +8226,7 @@ where
     let border_width_bytes = border_width.serialize();
     let class_bytes = u16::from(class).serialize();
     let visual_bytes = visual.serialize();
+    let value_mask = value_list.switch_expr();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
         CREATE_WINDOW_REQUEST,
@@ -8253,6 +8263,7 @@ where
         value_mask_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let value_list_bytes = value_list.serialize();
     let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -8291,106 +8302,109 @@ impl Serialize for ChangeWindowAttributesAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.background_pixmap {
-            value.serialize_into(bytes);
+        if let Some(background_pixmap) = self.background_pixmap {
+            background_pixmap.serialize_into(bytes);
         }
-        if let Some(ref value) = self.background_pixel {
-            value.serialize_into(bytes);
+        if let Some(background_pixel) = self.background_pixel {
+            background_pixel.serialize_into(bytes);
         }
-        if let Some(ref value) = self.border_pixmap {
-            value.serialize_into(bytes);
+        if let Some(border_pixmap) = self.border_pixmap {
+            border_pixmap.serialize_into(bytes);
         }
-        if let Some(ref value) = self.border_pixel {
-            value.serialize_into(bytes);
+        if let Some(border_pixel) = self.border_pixel {
+            border_pixel.serialize_into(bytes);
         }
-        if let Some(ref value) = self.bit_gravity {
-            value.serialize_into(bytes);
+        if let Some(bit_gravity) = self.bit_gravity {
+            bit_gravity.serialize_into(bytes);
         }
-        if let Some(ref value) = self.win_gravity {
-            value.serialize_into(bytes);
+        if let Some(win_gravity) = self.win_gravity {
+            win_gravity.serialize_into(bytes);
         }
-        if let Some(ref value) = self.backing_store {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(backing_store) = self.backing_store {
+            u32::from(backing_store).serialize_into(bytes);
         }
-        if let Some(ref value) = self.backing_planes {
-            value.serialize_into(bytes);
+        if let Some(backing_planes) = self.backing_planes {
+            backing_planes.serialize_into(bytes);
         }
-        if let Some(ref value) = self.backing_pixel {
-            value.serialize_into(bytes);
+        if let Some(backing_pixel) = self.backing_pixel {
+            backing_pixel.serialize_into(bytes);
         }
-        if let Some(ref value) = self.override_redirect {
-            value.serialize_into(bytes);
+        if let Some(override_redirect) = self.override_redirect {
+            override_redirect.serialize_into(bytes);
         }
-        if let Some(ref value) = self.save_under {
-            value.serialize_into(bytes);
+        if let Some(save_under) = self.save_under {
+            save_under.serialize_into(bytes);
         }
-        if let Some(ref value) = self.event_mask {
-            value.serialize_into(bytes);
+        if let Some(event_mask) = self.event_mask {
+            event_mask.serialize_into(bytes);
         }
-        if let Some(ref value) = self.do_not_propogate_mask {
-            value.serialize_into(bytes);
+        if let Some(do_not_propogate_mask) = self.do_not_propogate_mask {
+            do_not_propogate_mask.serialize_into(bytes);
         }
-        if let Some(ref value) = self.colormap {
-            value.serialize_into(bytes);
+        if let Some(colormap) = self.colormap {
+            colormap.serialize_into(bytes);
         }
-        if let Some(ref value) = self.cursor {
-            value.serialize_into(bytes);
+        if let Some(cursor) = self.cursor {
+            cursor.serialize_into(bytes);
         }
+    }
+}
+impl ChangeWindowAttributesAux {
+    #[allow(dead_code)]
+    fn switch_expr(&self) -> u32 {
+        let mut expr_value: u32 = 0;
+        if self.background_pixmap.is_some() {
+            expr_value |= u32::from(CW::BackPixmap);
+        }
+        if self.background_pixel.is_some() {
+            expr_value |= u32::from(CW::BackPixel);
+        }
+        if self.border_pixmap.is_some() {
+            expr_value |= u32::from(CW::BorderPixmap);
+        }
+        if self.border_pixel.is_some() {
+            expr_value |= u32::from(CW::BorderPixel);
+        }
+        if self.bit_gravity.is_some() {
+            expr_value |= u32::from(CW::BitGravity);
+        }
+        if self.win_gravity.is_some() {
+            expr_value |= u32::from(CW::WinGravity);
+        }
+        if self.backing_store.is_some() {
+            expr_value |= u32::from(CW::BackingStore);
+        }
+        if self.backing_planes.is_some() {
+            expr_value |= u32::from(CW::BackingPlanes);
+        }
+        if self.backing_pixel.is_some() {
+            expr_value |= u32::from(CW::BackingPixel);
+        }
+        if self.override_redirect.is_some() {
+            expr_value |= u32::from(CW::OverrideRedirect);
+        }
+        if self.save_under.is_some() {
+            expr_value |= u32::from(CW::SaveUnder);
+        }
+        if self.event_mask.is_some() {
+            expr_value |= u32::from(CW::EventMask);
+        }
+        if self.do_not_propogate_mask.is_some() {
+            expr_value |= u32::from(CW::DontPropagate);
+        }
+        if self.colormap.is_some() {
+            expr_value |= u32::from(CW::Colormap);
+        }
+        if self.cursor.is_some() {
+            expr_value |= u32::from(CW::Cursor);
+        }
+        expr_value
     }
 }
 impl ChangeWindowAttributesAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
         Default::default()
-    }
-    fn value_mask(&self) -> u32 {
-        let mut mask = 0;
-        if self.background_pixmap.is_some() {
-            mask |= u32::from(CW::BackPixmap);
-        }
-        if self.background_pixel.is_some() {
-            mask |= u32::from(CW::BackPixel);
-        }
-        if self.border_pixmap.is_some() {
-            mask |= u32::from(CW::BorderPixmap);
-        }
-        if self.border_pixel.is_some() {
-            mask |= u32::from(CW::BorderPixel);
-        }
-        if self.bit_gravity.is_some() {
-            mask |= u32::from(CW::BitGravity);
-        }
-        if self.win_gravity.is_some() {
-            mask |= u32::from(CW::WinGravity);
-        }
-        if self.backing_store.is_some() {
-            mask |= u32::from(CW::BackingStore);
-        }
-        if self.backing_planes.is_some() {
-            mask |= u32::from(CW::BackingPlanes);
-        }
-        if self.backing_pixel.is_some() {
-            mask |= u32::from(CW::BackingPixel);
-        }
-        if self.override_redirect.is_some() {
-            mask |= u32::from(CW::OverrideRedirect);
-        }
-        if self.save_under.is_some() {
-            mask |= u32::from(CW::SaveUnder);
-        }
-        if self.event_mask.is_some() {
-            mask |= u32::from(CW::EventMask);
-        }
-        if self.do_not_propogate_mask.is_some() {
-            mask |= u32::from(CW::DontPropagate);
-        }
-        if self.colormap.is_some() {
-            mask |= u32::from(CW::Colormap);
-        }
-        if self.cursor.is_some() {
-            mask |= u32::from(CW::Cursor);
-        }
-        mask
     }
     /// Set the `background_pixmap` field of this structure.
     pub fn background_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<Pixmap>> {
@@ -8468,16 +8482,18 @@ impl ChangeWindowAttributesAux {
         self
     }
 }
+
 /// change window attributes.
 ///
 /// Changes the attributes specified by `value_mask` for the specified `window`.
 ///
 /// # Fields
 ///
+/// * `window` - The window to change.
+/// * `value_mask` -
 /// * `value_list` - Values for each of the attributes specified in the bitmask `value_mask`. The
 /// order has to correspond to the order of possible `value_mask` bits. See the
 /// example.
-/// * `window` - The window to change.
 ///
 /// # Errors
 ///
@@ -8492,10 +8508,9 @@ pub fn change_window_attributes<'c, Conn>(conn: &'c Conn, window: Window, value_
 where
     Conn: RequestConnection + ?Sized,
 {
-    let value_mask = value_list.value_mask();
-    let value_list_bytes = value_list.serialize();
     let length_so_far = 0;
     let window_bytes = window.serialize();
+    let value_mask = value_list.switch_expr();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
         CHANGE_WINDOW_ATTRIBUTES_REQUEST,
@@ -8512,6 +8527,7 @@ where
         value_mask_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let value_list_bytes = value_list.serialize();
     let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -8598,8 +8614,8 @@ pub const GET_WINDOW_ATTRIBUTES_REQUEST: u8 = 3;
 ///
 /// # Errors
 ///
-/// * `Drawable` - TODO: reasons?
 /// * `Window` - The specified `window` does not exist.
+/// * `Drawable` - TODO: reasons?
 pub fn get_window_attributes<Conn>(conn: &Conn, window: Window) -> Result<Cookie<'_, Conn, GetWindowAttributesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -8623,19 +8639,22 @@ where
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
-/// BRIEF DESCRIPTION MISSING.
-///
 /// # Fields
 ///
-/// * `all_event_masks` - Set of events all people have interest in.
-/// * `backing_pixel` - Value to be used when restoring planes.
-/// * `backing_planes` - Planes to be preserved if possible.
-/// * `colormap` - Color map to be associated with window.
-/// * `do_not_propagate_mask` - Set of events that should not propagate.
 /// * `override_redirect` - Window managers should ignore this window if `override_redirect` is 1.
-/// * `save_under` - Boolean, should bits under be saved?
 /// * `visual` - The associated visual structure of `window`.
+/// * `backing_planes` - Planes to be preserved if possible.
+/// * `backing_pixel` - Value to be used when restoring planes.
+/// * `save_under` - Boolean, should bits under be saved?
+/// * `colormap` - Color map to be associated with window.
+/// * `all_event_masks` - Set of events all people have interest in.
 /// * `your_event_mask` - My event mask.
+/// * `do_not_propagate_mask` - Set of events that should not propagate.
+/// * `backing_store` -
+/// * `class` -
+/// * `bit_gravity` -
+/// * `win_gravity` -
+/// * `map_state` -
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetWindowAttributesReply {
     pub response_type: u8,
@@ -8843,7 +8862,7 @@ pub const CHANGE_SAVE_SET_REQUEST: u8 = 6;
 /// # Errors
 ///
 /// * `Match` - You created the specified window. This does not make sense, you can only add
-///windows created by other clients to your save set.
+/// windows created by other clients to your save set.
 /// * `Value` - You specified an invalid mode.
 /// * `Window` - The specified window does not exist.
 ///
@@ -8887,26 +8906,26 @@ pub const REPARENT_WINDOW_REQUEST: u8 = 7;
 ///
 /// # Fields
 ///
-/// * `parent` - The new parent of the window.
 /// * `window` - The window to reparent.
+/// * `parent` - The new parent of the window.
 /// * `x` - The X position of the window within its new parent.
 /// * `y` - The Y position of the window within its new parent.
 ///
 /// # Errors
 ///
 /// * `Match` - The new parent window is not on the same screen as the old parent window.
-///
-///The new parent window is the specified window or an inferior of the specified window.
-///
-///The new parent is InputOnly and the window is not.
-///
-///The specified window has a ParentRelative background and the new parent window is not the same depth as the specified window.
+/// 
+/// The new parent window is the specified window or an inferior of the specified window.
+/// 
+/// The new parent is InputOnly and the window is not.
+/// 
+/// The specified window has a ParentRelative background and the new parent window is not the same depth as the specified window.
 /// * `Window` - The specified window does not exist.
 ///
 /// # See
 ///
-/// * `MapWindow`: request
 /// * `ReparentNotify`: event
+/// * `MapWindow`: request
 /// * `UnmapWindow`: request
 pub fn reparent_window<Conn>(conn: &Conn, window: Window, parent: Window, x: i16, y: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -8976,8 +8995,8 @@ pub const MAP_WINDOW_REQUEST: u8 = 8;
 ///
 /// # See
 ///
-/// * `Expose`: event
 /// * `MapNotify`: event
+/// * `Expose`: event
 /// * `UnmapWindow`: request
 pub fn map_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
@@ -9047,9 +9066,9 @@ pub const UNMAP_WINDOW_REQUEST: u8 = 10;
 ///
 /// # See
 ///
+/// * `UnmapNotify`: event
 /// * `Expose`: event
 /// * `MapWindow`: request
-/// * `UnmapNotify`: event
 pub fn unmap_window<Conn>(conn: &Conn, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -9099,6 +9118,7 @@ where
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(non_camel_case_types)]
 #[repr(u8)]
 pub enum ConfigWindow {
     X = 1 << 0,
@@ -9268,58 +9288,61 @@ impl Serialize for ConfigureWindowAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.x {
-            value.serialize_into(bytes);
+        if let Some(x) = self.x {
+            x.serialize_into(bytes);
         }
-        if let Some(ref value) = self.y {
-            value.serialize_into(bytes);
+        if let Some(y) = self.y {
+            y.serialize_into(bytes);
         }
-        if let Some(ref value) = self.width {
-            value.serialize_into(bytes);
+        if let Some(width) = self.width {
+            width.serialize_into(bytes);
         }
-        if let Some(ref value) = self.height {
-            value.serialize_into(bytes);
+        if let Some(height) = self.height {
+            height.serialize_into(bytes);
         }
-        if let Some(ref value) = self.border_width {
-            value.serialize_into(bytes);
+        if let Some(border_width) = self.border_width {
+            border_width.serialize_into(bytes);
         }
-        if let Some(ref value) = self.sibling {
-            value.serialize_into(bytes);
+        if let Some(sibling) = self.sibling {
+            sibling.serialize_into(bytes);
         }
-        if let Some(ref value) = self.stack_mode {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(stack_mode) = self.stack_mode {
+            u32::from(stack_mode).serialize_into(bytes);
         }
+    }
+}
+impl ConfigureWindowAux {
+    #[allow(dead_code)]
+    fn switch_expr(&self) -> u16 {
+        let mut expr_value: u16 = 0;
+        if self.x.is_some() {
+            expr_value |= u16::from(ConfigWindow::X);
+        }
+        if self.y.is_some() {
+            expr_value |= u16::from(ConfigWindow::Y);
+        }
+        if self.width.is_some() {
+            expr_value |= u16::from(ConfigWindow::Width);
+        }
+        if self.height.is_some() {
+            expr_value |= u16::from(ConfigWindow::Height);
+        }
+        if self.border_width.is_some() {
+            expr_value |= u16::from(ConfigWindow::BorderWidth);
+        }
+        if self.sibling.is_some() {
+            expr_value |= u16::from(ConfigWindow::Sibling);
+        }
+        if self.stack_mode.is_some() {
+            expr_value |= u16::from(ConfigWindow::StackMode);
+        }
+        expr_value
     }
 }
 impl ConfigureWindowAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
         Default::default()
-    }
-    fn value_mask(&self) -> u16 {
-        let mut mask = 0;
-        if self.x.is_some() {
-            mask |= u16::from(ConfigWindow::X);
-        }
-        if self.y.is_some() {
-            mask |= u16::from(ConfigWindow::Y);
-        }
-        if self.width.is_some() {
-            mask |= u16::from(ConfigWindow::Width);
-        }
-        if self.height.is_some() {
-            mask |= u16::from(ConfigWindow::Height);
-        }
-        if self.border_width.is_some() {
-            mask |= u16::from(ConfigWindow::BorderWidth);
-        }
-        if self.sibling.is_some() {
-            mask |= u16::from(ConfigWindow::Sibling);
-        }
-        if self.stack_mode.is_some() {
-            mask |= u16::from(ConfigWindow::StackMode);
-        }
-        mask
     }
     /// Set the `x` field of this structure.
     pub fn x<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
@@ -9357,28 +9380,29 @@ impl ConfigureWindowAux {
         self
     }
 }
+
 /// Configures window attributes.
 ///
 /// Configures a window's size, position, border width and stacking order.
 ///
 /// # Fields
 ///
+/// * `window` - The window to configure.
+/// * `value_mask` - Bitmask of attributes to change.
 /// * `value_list` - New values, corresponding to the attributes in value_mask. The order has to
 /// correspond to the order of possible `value_mask` bits. See the example.
-/// * `value_mask` - Bitmask of attributes to change.
-/// * `window` - The window to configure.
 ///
 /// # Errors
 ///
 /// * `Match` - You specified a Sibling without also specifying StackMode or the window is not
-///actually a Sibling.
-/// * `Value` - TODO: reasons?
+/// actually a Sibling.
 /// * `Window` - The specified window does not exist. TODO: any other reason?
+/// * `Value` - TODO: reasons?
 ///
 /// # See
 ///
-/// * `Expose`: event
 /// * `MapNotify`: event
+/// * `Expose`: event
 ///
 /// # Example
 ///
@@ -9411,10 +9435,9 @@ pub fn configure_window<'c, Conn>(conn: &'c Conn, window: Window, value_list: &C
 where
     Conn: RequestConnection + ?Sized,
 {
-    let value_mask = value_list.value_mask();
-    let value_list_bytes = value_list.serialize();
     let length_so_far = 0;
     let window_bytes = window.serialize();
+    let value_mask = value_list.switch_expr();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
         CONFIGURE_WINDOW_REQUEST,
@@ -9431,6 +9454,7 @@ where
         0,
     ];
     let length_so_far = length_so_far + request0.len();
+    let value_list_bytes = value_list.serialize();
     let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -9514,12 +9538,13 @@ pub const CIRCULATE_WINDOW_REQUEST: u8 = 13;
 ///
 /// # Fields
 ///
+/// * `direction` -
 /// * `window` - The window to raise/lower (depending on `direction`).
 ///
 /// # Errors
 ///
-/// * `Value` - The specified `direction` is invalid.
 /// * `Window` - The specified `window` does not exist.
+/// * `Value` - The specified `direction` is invalid.
 pub fn circulate_window<Conn>(conn: &Conn, direction: Circulate, window: Window) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
@@ -9605,21 +9630,19 @@ where
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
-/// BRIEF DESCRIPTION MISSING.
-///
 /// # Fields
 ///
-/// * `border_width` - The border width (in pixels).
-/// * `depth` - The depth of the drawable (bits per pixel for the object).
-/// * `height` - The height of `drawable`.
 /// * `root` - Root window of the screen containing `drawable`.
-/// * `width` - The width of `drawable`.
 /// * `x` - The X coordinate of `drawable`. If `drawable` is a window, the coordinate
 /// specifies the upper-left outer corner relative to its parent's origin. If
 /// `drawable` is a pixmap, the X coordinate is always 0.
 /// * `y` - The Y coordinate of `drawable`. If `drawable` is a window, the coordinate
 /// specifies the upper-left outer corner relative to its parent's origin. If
 /// `drawable` is a pixmap, the Y coordinate is always 0.
+/// * `width` - The width of `drawable`.
+/// * `height` - The height of `drawable`.
+/// * `border_width` - The border width (in pixels).
+/// * `depth` - The depth of the drawable (bits per pixel for the object).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GetGeometryReply {
     pub response_type: u8,
@@ -9719,13 +9742,11 @@ where
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
-/// BRIEF DESCRIPTION MISSING.
-///
 /// # Fields
 ///
-/// * `children_len` - The number of child windows.
-/// * `parent` - The parent window of `window`.
 /// * `root` - The root window of `window`.
+/// * `parent` - The parent window of `window`.
+/// * `children_len` - The number of child windows.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryTreeReply {
     pub response_type: u8,
@@ -9771,8 +9792,8 @@ pub const INTERN_ATOM_REQUEST: u8 = 16;
 ///
 /// # Fields
 ///
-/// * `name` - The name of the atom.
 /// * `name_len` - The length of the following `name`.
+/// * `name` - The name of the atom.
 /// * `only_if_exists` - Return a valid atom id only if the atom already exists.
 ///
 /// # Errors
@@ -9782,8 +9803,8 @@ pub const INTERN_ATOM_REQUEST: u8 = 16;
 ///
 /// # See
 ///
-/// * `GetAtomName`: request
 /// * `xlsatoms`: program
+/// * `GetAtomName`: request
 ///
 /// # Example
 ///
@@ -9810,7 +9831,7 @@ where
 {
     let length_so_far = 0;
     let only_if_exists_bytes = only_if_exists.serialize();
-    let name_len: u16 = name.len().try_into()?;
+    let name_len = u16::try_from(name.len()).expect("`name` has too many elements");
     let name_len_bytes = name_len.serialize();
     let mut request0 = [
         INTERN_ATOM_REQUEST,
@@ -9909,17 +9930,15 @@ impl TryFrom<&[u8]> for GetAtomNameReply {
     }
 }
 
-/// BRIEF DESCRIPTION MISSING.
-///
 /// # Fields
 ///
-/// * `Append` - Insert the new data after the beginning of existing data. The `format` must
-/// match existing property value. If the property is undefined, it is treated as
-/// defined with the correct type and format with zero-length data.
+/// * `Replace` - Discard the previous property value and store the new data.
 /// * `Prepend` - Insert the new data before the beginning of existing data. The `format` must
 /// match existing property value. If the property is undefined, it is treated as
 /// defined with the correct type and format with zero-length data.
-/// * `Replace` - Discard the previous property value and store the new data.
+/// * `Append` - Insert the new data after the beginning of existing data. The `format` must
+/// match existing property value. If the property is undefined, it is treated as
+/// defined with the correct type and format with zero-length data.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum PropMode {
@@ -9996,22 +10015,23 @@ pub const CHANGE_PROPERTY_REQUEST: u8 = 18;
 ///
 /// # Fields
 ///
-/// * `data` - The property data.
-/// * `data_len` - Specifies the number of elements (see `format`).
+/// * `window` - The window whose property you want to change.
+/// * `mode` -
+/// * `property` - The property you want to change (an atom).
+/// * `type` - The type of the property you want to change (an atom).
 /// * `format` - Specifies whether the data should be viewed as a list of 8-bit, 16-bit or
 /// 32-bit quantities. Possible values are 8, 16 and 32. This information allows
 /// the X server to correctly perform byte-swap operations as necessary.
-/// * `property` - The property you want to change (an atom).
-/// * `type` - The type of the property you want to change (an atom).
-/// * `window` - The window whose property you want to change.
+/// * `data_len` - Specifies the number of elements (see `format`).
+/// * `data` - The property data.
 ///
 /// # Errors
 ///
-/// * `Alloc` - The X server could not store the property (no memory?).
-/// * `Atom` - `property` or `type` do not refer to a valid atom.
 /// * `Match` - TODO: reasons?
 /// * `Value` - TODO: reasons?
 /// * `Window` - The specified `window` does not exist.
+/// * `Atom` - `property` or `type` do not refer to a valid atom.
+/// * `Alloc` - The X server could not store the property (no memory?).
 ///
 /// # See
 ///
@@ -10043,16 +10063,15 @@ where
     A: Into<Atom>,
     B: Into<Atom>,
 {
+    let property: Atom = property.into();
+    let type_: Atom = type_.into();
     let length_so_far = 0;
     let mode_bytes = u8::from(mode).serialize();
     let window_bytes = window.serialize();
-    let property = property.into();
     let property_bytes = property.serialize();
-    let type_ = type_.into();
     let type_bytes = type_.serialize();
     let format_bytes = format.serialize();
     let data_len_bytes = data_len.serialize();
-    assert_eq!(data.len(), ((data_len as usize) * (format as usize)) / (8), "Argument data has an incorrect length");
     let mut request0 = [
         CHANGE_PROPERTY_REQUEST,
         mode_bytes[0],
@@ -10080,6 +10099,7 @@ where
         data_len_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    assert_eq!(data.len(), ((data_len as usize) * (format as usize)) / 8, "`data` has an incorrect length");
     let length_so_far = length_so_far + data.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -10180,11 +10200,126 @@ impl TryFrom<u32> for GetPropertyType {
 
 /// Opcode for the GetProperty request
 pub const GET_PROPERTY_REQUEST: u8 = 20;
+/// Gets a window property.
+///
+/// Gets the specified `property` from the specified `window`. Properties are for
+/// example the window title (`WM_NAME`) or its minimum size (`WM_NORMAL_HINTS`).
+/// Protocols such as EWMH also use properties - for example EWMH defines the
+/// window title, encoded as UTF-8 string, in the `_NET_WM_NAME` property.
+///
+/// TODO: talk about `type`
+///
+/// TODO: talk about `delete`
+///
+/// TODO: talk about the offset/length thing. what's a valid use case?
+///
+/// # Fields
+///
+/// * `window` - The window whose property you want to get.
+/// * `delete` - Whether the property should actually be deleted. For deleting a property, the
+/// specified `type` has to match the actual property type.
+/// * `property` - The property you want to get (an atom).
+/// * `type` - The type of the property you want to get (an atom).
+/// * `long_offset` - Specifies the offset (in 32-bit multiples) in the specified property where the
+/// data is to be retrieved.
+/// * `long_length` - Specifies how many 32-bit multiples of data should be retrieved (e.g. if you
+/// set `long_length` to 4, you will receive 16 bytes of data).
+///
+/// # Errors
+///
+/// * `Window` - The specified `window` does not exist.
+/// * `Atom` - `property` or `type` do not refer to a valid atom.
+/// * `Value` - The specified `long_offset` is beyond the actual property length (e.g. the
+/// property has a length of 3 bytes and you are setting `long_offset` to 1,
+/// resulting in a byte offset of 4).
+///
+/// # See
+///
+/// * `InternAtom`: request
+/// * `xprop`: program
+///
+/// # Example
+///
+/// ```text
+/// /*
+///  * Prints the WM_NAME property of the window.
+///  *
+///  */
+/// void my_example(xcb_connection_t *c, xcb_window_t window) {
+///     xcb_get_property_cookie_t cookie;
+///     xcb_get_property_reply_t *reply;
+///
+///     /* These atoms are predefined in the X11 protocol. */
+///     xcb_atom_t property = XCB_ATOM_WM_NAME;
+///     xcb_atom_t type = XCB_ATOM_STRING;
+///
+///     // TODO: a reasonable long_length for WM_NAME?
+///     cookie = xcb_get_property(c, 0, window, property, type, 0, 0);
+///     if ((reply = xcb_get_property_reply(c, cookie, NULL))) {
+///         int len = xcb_get_property_value_length(reply);
+///         if (len == 0) {
+///             printf("TODO\\n");
+///             free(reply);
+///             return;
+///         }
+///         printf("WM_NAME is %.*s\\n", len,
+///                (char*)xcb_get_property_value(reply));
+///     }
+///     free(reply);
+/// }
+/// ```
+pub fn get_property<Conn, A, B>(conn: &Conn, delete: bool, window: Window, property: A, type_: B, long_offset: u32, long_length: u32) -> Result<Cookie<'_, Conn, GetPropertyReply>, ConnectionError>
+where
+    Conn: RequestConnection + ?Sized,
+    A: Into<Atom>,
+    B: Into<Atom>,
+{
+    let property: Atom = property.into();
+    let type_: Atom = type_.into();
+    let length_so_far = 0;
+    let delete_bytes = delete.serialize();
+    let window_bytes = window.serialize();
+    let property_bytes = property.serialize();
+    let type_bytes = type_.serialize();
+    let long_offset_bytes = long_offset.serialize();
+    let long_length_bytes = long_length.serialize();
+    let mut request0 = [
+        GET_PROPERTY_REQUEST,
+        delete_bytes[0],
+        0,
+        0,
+        window_bytes[0],
+        window_bytes[1],
+        window_bytes[2],
+        window_bytes[3],
+        property_bytes[0],
+        property_bytes[1],
+        property_bytes[2],
+        property_bytes[3],
+        type_bytes[0],
+        type_bytes[1],
+        type_bytes[2],
+        type_bytes[3],
+        long_offset_bytes[0],
+        long_offset_bytes[1],
+        long_offset_bytes[2],
+        long_offset_bytes[3],
+        long_length_bytes[0],
+        long_length_bytes[1],
+        long_length_bytes[2],
+        long_length_bytes[3],
+    ];
+    let length_so_far = length_so_far + request0.len();
+    assert_eq!(length_so_far % 4, 0);
+    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
+    request0[2..4].copy_from_slice(&length.to_ne_bytes());
+    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
+}
 impl GetPropertyReply {
     /// Iterate over the contained value if its format is 8.
     ///
     /// This function checks if the `format` member of the reply
-    /// is 8. If it it is not, `None` is returned.  Otherwise
+    /// is 8. If it it is not, `None` is returned. Otherwise
     /// and iterator is returned that interprets the value in
     /// this reply as type `u8`.
     ///
@@ -10240,7 +10375,7 @@ impl GetPropertyReply {
     /// Iterate over the contained value if its format is 16.
     ///
     /// This function checks if the `format` member of the reply
-    /// is 16. If it it is not, `None` is returned.  Otherwise
+    /// is 16. If it it is not, `None` is returned. Otherwise
     /// and iterator is returned that interprets the value in
     /// this reply as type `u16`.
     ///
@@ -10294,7 +10429,7 @@ impl GetPropertyReply {
     /// Iterate over the contained value if its format is 32.
     ///
     /// This function checks if the `format` member of the reply
-    /// is 32. If it it is not, `None` is returned.  Otherwise
+    /// is 32. If it it is not, `None` is returned. Otherwise
     /// and iterator is returned that interprets the value in
     /// this reply as type `u32`.
     ///
@@ -10345,128 +10480,16 @@ impl GetPropertyReply {
         }
     }
 }
-/// Gets a window property.
-///
-/// Gets the specified `property` from the specified `window`. Properties are for
-/// example the window title (`WM_NAME`) or its minimum size (`WM_NORMAL_HINTS`).
-/// Protocols such as EWMH also use properties - for example EWMH defines the
-/// window title, encoded as UTF-8 string, in the `_NET_WM_NAME` property.
-///
-/// TODO: talk about `type`
-///
-/// TODO: talk about `delete`
-///
-/// TODO: talk about the offset/length thing. what's a valid use case?
-///
-/// # Fields
-///
-/// * `delete` - Whether the property should actually be deleted. For deleting a property, the
-/// specified `type` has to match the actual property type.
-/// * `long_length` - Specifies how many 32-bit multiples of data should be retrieved (e.g. if you
-/// set `long_length` to 4, you will receive 16 bytes of data).
-/// * `long_offset` - Specifies the offset (in 32-bit multiples) in the specified property where the
-/// data is to be retrieved.
-/// * `property` - The property you want to get (an atom).
-/// * `type` - The type of the property you want to get (an atom).
-/// * `window` - The window whose property you want to get.
-///
-/// # Errors
-///
-/// * `Atom` - `property` or `type` do not refer to a valid atom.
-/// * `Value` - The specified `long_offset` is beyond the actual property length (e.g. the
-///property has a length of 3 bytes and you are setting `long_offset` to 1,
-///resulting in a byte offset of 4).
-/// * `Window` - The specified `window` does not exist.
-///
-/// # See
-///
-/// * `InternAtom`: request
-/// * `xprop`: program
-///
-/// # Example
-///
-/// ```text
-/// /*
-///  * Prints the WM_NAME property of the window.
-///  *
-///  */
-/// void my_example(xcb_connection_t *c, xcb_window_t window) {
-///     xcb_get_property_cookie_t cookie;
-///     xcb_get_property_reply_t *reply;
-///
-///     /* These atoms are predefined in the X11 protocol. */
-///     xcb_atom_t property = XCB_ATOM_WM_NAME;
-///     xcb_atom_t type = XCB_ATOM_STRING;
-///
-///     // TODO: a reasonable long_length for WM_NAME?
-///     cookie = xcb_get_property(c, 0, window, property, type, 0, 0);
-///     if ((reply = xcb_get_property_reply(c, cookie, NULL))) {
-///         int len = xcb_get_property_value_length(reply);
-///         if (len == 0) {
-///             printf("TODO\\n");
-///             free(reply);
-///             return;
-///         }
-///         printf("WM_NAME is %.*s\\n", len,
-///                (char*)xcb_get_property_value(reply));
-///     }
-///     free(reply);
-/// }
-/// ```
-pub fn get_property<Conn>(conn: &Conn, delete: bool, window: Window, property: Atom, type_: Atom, long_offset: u32, long_length: u32) -> Result<Cookie<'_, Conn, GetPropertyReply>, ConnectionError>
-where
-    Conn: RequestConnection + ?Sized,
-{
-    let length_so_far = 0;
-    let delete_bytes = delete.serialize();
-    let window_bytes = window.serialize();
-    let property_bytes = property.serialize();
-    let type_bytes = type_.serialize();
-    let long_offset_bytes = long_offset.serialize();
-    let long_length_bytes = long_length.serialize();
-    let mut request0 = [
-        GET_PROPERTY_REQUEST,
-        delete_bytes[0],
-        0,
-        0,
-        window_bytes[0],
-        window_bytes[1],
-        window_bytes[2],
-        window_bytes[3],
-        property_bytes[0],
-        property_bytes[1],
-        property_bytes[2],
-        property_bytes[3],
-        type_bytes[0],
-        type_bytes[1],
-        type_bytes[2],
-        type_bytes[3],
-        long_offset_bytes[0],
-        long_offset_bytes[1],
-        long_offset_bytes[2],
-        long_offset_bytes[3],
-        long_length_bytes[0],
-        long_length_bytes[1],
-        long_length_bytes[2],
-        long_length_bytes[3],
-    ];
-    let length_so_far = length_so_far + request0.len();
-    assert_eq!(length_so_far % 4, 0);
-    let length = u16::try_from(length_so_far / 4).unwrap_or(0);
-    request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
-}
 
-/// BRIEF DESCRIPTION MISSING.
-///
+
 /// # Fields
 ///
-/// * `bytes_after` - The number of bytes remaining to be read in the property if a partial read was
-/// performed.
 /// * `format` - Specifies whether the data should be viewed as a list of 8-bit, 16-bit, or
 /// 32-bit quantities. Possible values are 8, 16, and 32. This information allows
 /// the X server to correctly perform byte-swap operations as necessary.
 /// * `type` - The actual type of the property (an atom).
+/// * `bytes_after` - The number of bytes remaining to be read in the property if a partial read was
+/// performed.
 /// * `value_len` - The length of value. You should use the corresponding accessor instead of this
 /// field.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -10490,7 +10513,7 @@ impl TryParse for GetPropertyReply {
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (value_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (value, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (value_len as usize) * ((format as usize) / (8)))?;
+        let (value, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (value_len as usize) * ((format as usize) / 8))?;
         let result = GetPropertyReply { response_type, format, sequence, length, type_, bytes_after, value_len, value };
         Ok((result, remaining))
     }
@@ -10565,10 +10588,10 @@ pub const SET_SELECTION_OWNER_REQUEST: u8 = 22;
 ///
 /// # Fields
 ///
+/// * `selection` - The selection.
 /// * `owner` - The new owner of the selection.
 ///
 /// The special value `XCB_NONE` means that the selection will have no owner.
-/// * `selection` - The selection.
 /// * `time` - Timestamp to avoid race conditions when running X over the network.
 ///
 /// The selection will not be changed if `time` is earlier than the current
@@ -10585,10 +10608,14 @@ pub const SET_SELECTION_OWNER_REQUEST: u8 = 22;
 /// # See
 ///
 /// * `SetSelectionOwner`: request
-pub fn set_selection_owner<Conn>(conn: &Conn, owner: Window, selection: Atom, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_selection_owner<Conn, A, B>(conn: &Conn, owner: A, selection: Atom, time: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<Window>,
+    B: Into<Timestamp>,
 {
+    let owner: Window = owner.into();
+    let time: Timestamp = time.into();
     let length_so_far = 0;
     let owner_bytes = owner.serialize();
     let selection_bytes = selection.serialize();
@@ -10660,8 +10687,6 @@ where
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
-/// BRIEF DESCRIPTION MISSING.
-///
 /// # Fields
 ///
 /// * `owner` - The current selection owner window.
@@ -10692,10 +10717,14 @@ impl TryFrom<&[u8]> for GetSelectionOwnerReply {
 
 /// Opcode for the ConvertSelection request
 pub const CONVERT_SELECTION_REQUEST: u8 = 24;
-pub fn convert_selection<Conn>(conn: &Conn, requestor: Window, selection: Atom, target: Atom, property: Atom, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn convert_selection<Conn, A, B>(conn: &Conn, requestor: Window, selection: Atom, target: Atom, property: A, time: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<Atom>,
+    B: Into<Timestamp>,
 {
+    let property: Atom = property.into();
+    let time: Timestamp = time.into();
     let length_so_far = 0;
     let requestor_bytes = requestor.serialize();
     let selection_bytes = selection.serialize();
@@ -10819,7 +10848,6 @@ pub const SEND_EVENT_REQUEST: u8 = 25;
 ///
 /// The special value `XCB_SEND_EVENT_DEST_ITEM_FOCUS` refers to the window which
 /// has the keyboard focus.
-/// * `event` - The event to send to the specified `destination`.
 /// * `event_mask` - Event_mask for determining which clients should receive the specified event.
 /// See `destination` and `propagate`.
 /// * `propagate` - If `propagate` is true and no clients have selected any event on `destination`,
@@ -10830,11 +10858,12 @@ pub const SEND_EVENT_REQUEST: u8 = 25;
 /// `InputFocus` was originally specified as the destination, the event is not sent
 /// to any clients. Otherwise, the event is reported to every client selecting on
 /// the final destination any of the types specified in `event_mask`.
+/// * `event` - The event to send to the specified `destination`.
 ///
 /// # Errors
 ///
-/// * `Value` - The given `event` is neither a core event nor an event defined by an extension.
 /// * `Window` - The specified `destination` window does not exist.
+/// * `Value` - The given `event` is neither a core event nor an event defined by an extension.
 ///
 /// # See
 ///
@@ -10872,17 +10901,20 @@ pub const SEND_EVENT_REQUEST: u8 = 25;
 ///     free(event);
 /// }
 /// ```
-pub fn send_event<Conn, A>(conn: &Conn, propagate: bool, destination: Window, event_mask: u32, event: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn send_event<Conn, A, B, C>(conn: &Conn, propagate: bool, destination: A, event_mask: B, event: C) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
-    A: Into<[u8; 32]>,
+    A: Into<Window>,
+    B: Into<u32>,
+    C: Into<[u8; 32]>,
 {
+    let destination: Window = destination.into();
+    let event_mask: u32 = event_mask.into();
+    let event: [u8; 32] = event.into();
     let length_so_far = 0;
     let propagate_bytes = propagate.serialize();
     let destination_bytes = destination.serialize();
     let event_mask_bytes = event_mask.serialize();
-    let event = event.into();
-    let event = &event;
     let mut request0 = [
         SEND_EVENT_REQUEST,
         propagate_bytes[0],
@@ -10902,17 +10934,15 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(event)], vec![])?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0), IoSlice::new(&event)], vec![])?)
 }
 
-/// BRIEF DESCRIPTION MISSING.
-///
 /// # Fields
 ///
-/// * `Async` - Keyboard event processing continues normally.
 /// * `Sync` - The state of the keyboard appears to freeze: No further keyboard events are
 /// generated by the server until the grabbing client issues a releasing
 /// `AllowEvents` request or until the keyboard grab is released.
+/// * `Async` - Keyboard event processing continues normally.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum GrabMode {
@@ -11113,18 +11143,18 @@ pub const GRAB_POINTER_REQUEST: u8 = 26;
 ///
 /// # Fields
 ///
+/// * `event_mask` - Specifies which pointer events are reported to the client.
+///
+/// TODO: which values?
 /// * `confine_to` - Specifies the window to confine the pointer in (the user will not be able to
 /// move the pointer out of that window).
 ///
 /// The special value `XCB_NONE` means don't confine the pointer.
 /// * `cursor` - Specifies the cursor that should be displayed or `XCB_NONE` to not change the
 /// cursor.
-/// * `event_mask` - Specifies which pointer events are reported to the client.
-///
-/// TODO: which values?
-/// * `grab_window` - Specifies the window on which the pointer should be grabbed.
 /// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
 /// reported to the `grab_window`.
+/// * `grab_window` - Specifies the window on which the pointer should be grabbed.
 /// * `time` - The time argument allows you to avoid certain circumstances that come up if
 /// applications take a long time to respond or if there are long network delays.
 /// Consider a situation where you have two applications, both of which normally
@@ -11136,6 +11166,8 @@ pub const GRAB_POINTER_REQUEST: u8 = 26;
 ///
 /// The special value `XCB_CURRENT_TIME` will be replaced with the current server
 /// time.
+/// * `pointer_mode` -
+/// * `keyboard_mode` -
 ///
 /// # Errors
 ///
@@ -11176,10 +11208,18 @@ pub const GRAB_POINTER_REQUEST: u8 = 26;
 ///     }
 /// }
 /// ```
-pub fn grab_pointer<Conn>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: Window, cursor: Cursor, time: Timestamp) -> Result<Cookie<'_, Conn, GrabPointerReply>, ConnectionError>
+pub fn grab_pointer<Conn, A, B, C, D>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: A, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: B, cursor: C, time: D) -> Result<Cookie<'_, Conn, GrabPointerReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<u16>,
+    B: Into<Window>,
+    C: Into<Cursor>,
+    D: Into<Timestamp>,
 {
+    let event_mask: u16 = event_mask.into();
+    let confine_to: Window = confine_to.into();
+    let cursor: Cursor = cursor.into();
+    let time: Timestamp = time.into();
     let length_so_far = 0;
     let owner_events_bytes = owner_events.serialize();
     let grab_window_bytes = grab_window.serialize();
@@ -11259,23 +11299,25 @@ pub const UNGRAB_POINTER_REQUEST: u8 = 27;
 ///
 /// # Fields
 ///
-/// * `name` - A pattern describing an X core font.
-/// * `name_len` - Length (in bytes) of `name`.
 /// * `time` - Timestamp to avoid race conditions when running X over the network.
 ///
 /// The pointer will not be released if `time` is earlier than the
 /// last-pointer-grab time or later than the current X server time.
+/// * `name_len` - Length (in bytes) of `name`.
+/// * `name` - A pattern describing an X core font.
 ///
 /// # See
 ///
-/// * `EnterNotify`: event
-/// * `GrabButton`: request
 /// * `GrabPointer`: request
+/// * `GrabButton`: request
+/// * `EnterNotify`: event
 /// * `LeaveNotify`: event
-pub fn ungrab_pointer<Conn>(conn: &Conn, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn ungrab_pointer<Conn, A>(conn: &Conn, time: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<Timestamp>,
 {
+    let time: Timestamp = time.into();
     let length_so_far = 0;
     let time_bytes = time.serialize();
     let mut request0 = [
@@ -11295,16 +11337,14 @@ where
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
-/// BRIEF DESCRIPTION MISSING.
-///
 /// # Fields
 ///
+/// * `Any` - Any of the following (or none):
 /// * `1` - The left mouse button.
 /// * `2` - The right mouse button.
 /// * `3` - The middle mouse button.
 /// * `4` - Scroll wheel. TODO: direction?
 /// * `5` - Scroll wheel. TODO: direction?
-/// * `Any` - Any of the following (or none):
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum ButtonIndex {
@@ -11421,34 +11461,45 @@ pub const GRAB_BUTTON_REQUEST: u8 = 28;
 ///
 /// # Fields
 ///
+/// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
+/// reported to the `grab_window`.
+/// * `grab_window` - Specifies the window on which the pointer should be grabbed.
+/// * `event_mask` - Specifies which pointer events are reported to the client.
+///
+/// TODO: which values?
 /// * `confine_to` - Specifies the window to confine the pointer in (the user will not be able to
 /// move the pointer out of that window).
 ///
 /// The special value `XCB_NONE` means don't confine the pointer.
 /// * `cursor` - Specifies the cursor that should be displayed or `XCB_NONE` to not change the
 /// cursor.
-/// * `event_mask` - Specifies which pointer events are reported to the client.
-///
-/// TODO: which values?
-/// * `grab_window` - Specifies the window on which the pointer should be grabbed.
 /// * `modifiers` - The modifiers to grab.
 ///
 /// Using the special value `XCB_MOD_MASK_ANY` means grab the pointer with all
 /// possible modifier combinations.
-/// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
-/// reported to the `grab_window`.
+/// * `pointer_mode` -
+/// * `keyboard_mode` -
+/// * `button` -
 ///
 /// # Errors
 ///
 /// * `Access` - Another client has already issued a GrabButton with the same button/key
-///combination on the same window.
-/// * `Cursor` - The specified `cursor` does not exist.
+/// combination on the same window.
 /// * `Value` - TODO: reasons?
+/// * `Cursor` - The specified `cursor` does not exist.
 /// * `Window` - The specified `window` does not exist.
-pub fn grab_button<Conn>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: Window, cursor: Cursor, button: ButtonIndex, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn grab_button<Conn, A, B, C, D>(conn: &Conn, owner_events: bool, grab_window: Window, event_mask: A, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: B, cursor: C, button: ButtonIndex, modifiers: D) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<u16>,
+    B: Into<Window>,
+    C: Into<Cursor>,
+    D: Into<u16>,
 {
+    let event_mask: u16 = event_mask.into();
+    let confine_to: Window = confine_to.into();
+    let cursor: Cursor = cursor.into();
+    let modifiers: u16 = modifiers.into();
     let length_so_far = 0;
     let owner_events_bytes = owner_events.serialize();
     let grab_window_bytes = grab_window.serialize();
@@ -11494,10 +11545,12 @@ where
 
 /// Opcode for the UngrabButton request
 pub const UNGRAB_BUTTON_REQUEST: u8 = 29;
-pub fn ungrab_button<Conn>(conn: &Conn, button: ButtonIndex, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn ungrab_button<Conn, A>(conn: &Conn, button: ButtonIndex, grab_window: Window, modifiers: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<u16>,
 {
+    let modifiers: u16 = modifiers.into();
     let length_so_far = 0;
     let button_bytes = u8::from(button).serialize();
     let grab_window_bytes = grab_window.serialize();
@@ -11525,10 +11578,16 @@ where
 
 /// Opcode for the ChangeActivePointerGrab request
 pub const CHANGE_ACTIVE_POINTER_GRAB_REQUEST: u8 = 30;
-pub fn change_active_pointer_grab<Conn>(conn: &Conn, cursor: Cursor, time: Timestamp, event_mask: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn change_active_pointer_grab<Conn, A, B, C>(conn: &Conn, cursor: A, time: B, event_mask: C) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<Cursor>,
+    B: Into<Timestamp>,
+    C: Into<u16>,
 {
+    let cursor: Cursor = cursor.into();
+    let time: Timestamp = time.into();
+    let event_mask: u16 = event_mask.into();
     let length_so_far = 0;
     let cursor_bytes = cursor.serialize();
     let time_bytes = time.serialize();
@@ -11575,13 +11634,15 @@ pub const GRAB_KEYBOARD_REQUEST: u8 = 31;
 ///
 /// # Fields
 ///
-/// * `grab_window` - Specifies the window on which the pointer should be grabbed.
 /// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
 /// reported to the `grab_window`.
+/// * `grab_window` - Specifies the window on which the pointer should be grabbed.
 /// * `time` - Timestamp to avoid race conditions when running X over the network.
 ///
 /// The special value `XCB_CURRENT_TIME` will be replaced with the current server
 /// time.
+/// * `pointer_mode` -
+/// * `keyboard_mode` -
 ///
 /// # Errors
 ///
@@ -11620,10 +11681,12 @@ pub const GRAB_KEYBOARD_REQUEST: u8 = 31;
 ///     }
 /// }
 /// ```
-pub fn grab_keyboard<Conn>(conn: &Conn, owner_events: bool, grab_window: Window, time: Timestamp, pointer_mode: GrabMode, keyboard_mode: GrabMode) -> Result<Cookie<'_, Conn, GrabKeyboardReply>, ConnectionError>
+pub fn grab_keyboard<Conn, A>(conn: &Conn, owner_events: bool, grab_window: Window, time: A, pointer_mode: GrabMode, keyboard_mode: GrabMode) -> Result<Cookie<'_, Conn, GrabKeyboardReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<Timestamp>,
 {
+    let time: Timestamp = time.into();
     let length_so_far = 0;
     let owner_events_bytes = owner_events.serialize();
     let grab_window_bytes = grab_window.serialize();
@@ -11682,10 +11745,12 @@ impl TryFrom<&[u8]> for GrabKeyboardReply {
 
 /// Opcode for the UngrabKeyboard request
 pub const UNGRAB_KEYBOARD_REQUEST: u8 = 32;
-pub fn ungrab_keyboard<Conn>(conn: &Conn, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn ungrab_keyboard<Conn, A>(conn: &Conn, time: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<Timestamp>,
 {
+    let time: Timestamp = time.into();
     let length_so_far = 0;
     let time_bytes = time.serialize();
     let mut request0 = [
@@ -11801,33 +11866,39 @@ pub const GRAB_KEY_REQUEST: u8 = 33;
 ///
 /// # Fields
 ///
-/// * `cursor` - Specifies the cursor that should be displayed or `XCB_NONE` to not change the
-/// cursor.
+/// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
+/// reported to the `grab_window`.
 /// * `grab_window` - Specifies the window on which the pointer should be grabbed.
 /// * `key` - The keycode of the key to grab.
 ///
 /// The special value `XCB_GRAB_ANY` means grab any key.
+/// * `cursor` - Specifies the cursor that should be displayed or `XCB_NONE` to not change the
+/// cursor.
 /// * `modifiers` - The modifiers to grab.
 ///
 /// Using the special value `XCB_MOD_MASK_ANY` means grab the pointer with all
 /// possible modifier combinations.
-/// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
-/// reported to the `grab_window`.
+/// * `pointer_mode` -
+/// * `keyboard_mode` -
 ///
 /// # Errors
 ///
 /// * `Access` - Another client has already issued a GrabKey with the same button/key
-///combination on the same window.
+/// combination on the same window.
 /// * `Value` - TODO: reasons?
 /// * `Window` - The specified `window` does not exist.
 ///
 /// # See
 ///
 /// * `GrabKeyboard`: request
-pub fn grab_key<Conn>(conn: &Conn, owner_events: bool, grab_window: Window, modifiers: u16, key: Keycode, pointer_mode: GrabMode, keyboard_mode: GrabMode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn grab_key<Conn, A, B>(conn: &Conn, owner_events: bool, grab_window: Window, modifiers: A, key: B, pointer_mode: GrabMode, keyboard_mode: GrabMode) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<u16>,
+    B: Into<Keycode>,
 {
+    let modifiers: u16 = modifiers.into();
+    let key: Keycode = key.into();
     let length_so_far = 0;
     let owner_events_bytes = owner_events.serialize();
     let grab_window_bytes = grab_window.serialize();
@@ -11869,10 +11940,10 @@ pub const UNGRAB_KEY_REQUEST: u8 = 34;
 ///
 /// # Fields
 ///
-/// * `grab_window` - The window on which the grabbed key combination will be released.
 /// * `key` - The keycode of the specified key combination.
 ///
 /// Using the special value `XCB_GRAB_ANY` means releasing all possible key codes.
+/// * `grab_window` - The window on which the grabbed key combination will be released.
 /// * `modifiers` - The modifiers of the specified key combination.
 ///
 /// Using the special value `XCB_MOD_MASK_ANY` means releasing the key combination
@@ -11880,17 +11951,21 @@ pub const UNGRAB_KEY_REQUEST: u8 = 34;
 ///
 /// # Errors
 ///
-/// * `Value` - TODO: reasons?
 /// * `Window` - The specified `grab_window` does not exist.
+/// * `Value` - TODO: reasons?
 ///
 /// # See
 ///
 /// * `GrabKey`: request
 /// * `xev`: program
-pub fn ungrab_key<Conn>(conn: &Conn, key: Keycode, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn ungrab_key<Conn, A, B>(conn: &Conn, key: A, grab_window: Window, modifiers: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<Keycode>,
+    B: Into<u16>,
 {
+    let key: Keycode = key.into();
+    let modifiers: u16 = modifiers.into();
     let length_so_far = 0;
     let key_bytes = key.serialize();
     let grab_window_bytes = grab_window.serialize();
@@ -11916,19 +11991,8 @@ where
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
-/// BRIEF DESCRIPTION MISSING.
-///
 /// # Fields
 ///
-/// * `AsyncBoth` - For AsyncBoth, if the pointer and the keyboard are frozen by the client, event
-/// processing for both devices continues normally. If a device is frozen twice by
-/// the client on behalf of two separate grabs, AsyncBoth thaws for both. AsyncBoth
-/// has no effect unless both pointer and keyboard are frozen by the client.
-/// * `AsyncKeyboard` - For AsyncKeyboard, if the keyboard is frozen by the client, keyboard event
-/// processing continues normally. If the keyboard is frozen twice by the client on
-/// behalf of two separate grabs, AsyncKeyboard thaws for both. AsyncKeyboard has
-/// no effect if the keyboard is not frozen by the client, but the keyboard need
-/// not be grabbed by the client.
 /// * `AsyncPointer` - For AsyncPointer, if the pointer is frozen by the client, pointer event
 /// processing continues normally. If the pointer is frozen twice by the client on
 /// behalf of two separate grabs, AsyncPointer thaws for both. AsyncPointer has no
@@ -11936,14 +12000,13 @@ where
 /// grabbed by the client.
 ///
 /// TODO: rewrite this in more understandable terms.
-/// * `ReplayKeyboard` - For ReplayKeyboard, if the keyboard is actively grabbed by the client and is
-/// frozen as the result of an event having been sent to the client (either from
-/// the activation of a GrabKey or from a previous AllowEvents with mode
-/// SyncKeyboard but not from a GrabKeyboard), then the keyboard grab is released
-/// and that event is completely reprocessed, this time ignoring any passive grabs
-/// at or above (towards the root) the grab-window of the grab just released. The
-/// request has no effect if the keyboard is not grabbed by the client or if the
-/// keyboard is not frozen as the result of an event.
+/// * `SyncPointer` - For SyncPointer, if the pointer is frozen and actively grabbed by the client,
+/// pointer event processing continues normally until the next ButtonPress or
+/// ButtonRelease event is reported to the client, at which time the pointer again
+/// appears to freeze. However, if the reported event causes the pointer grab to be
+/// released, then the pointer does not freeze. SyncPointer has no effect if the
+/// pointer is not frozen by the client or if the pointer is not grabbed by the
+/// client.
 /// * `ReplayPointer` - For ReplayPointer, if the pointer is actively grabbed by the client and is
 /// frozen as the result of an event having been sent to the client (either from
 /// the activation of a GrabButton or from a previous AllowEvents with mode
@@ -11952,6 +12015,26 @@ where
 /// or above (towards the root) the grab-window of the grab just released. The
 /// request has no effect if the pointer is not grabbed by the client or if the
 /// pointer is not frozen as the result of an event.
+/// * `AsyncKeyboard` - For AsyncKeyboard, if the keyboard is frozen by the client, keyboard event
+/// processing continues normally. If the keyboard is frozen twice by the client on
+/// behalf of two separate grabs, AsyncKeyboard thaws for both. AsyncKeyboard has
+/// no effect if the keyboard is not frozen by the client, but the keyboard need
+/// not be grabbed by the client.
+/// * `SyncKeyboard` - For SyncKeyboard, if the keyboard is frozen and actively grabbed by the client,
+/// keyboard event processing continues normally until the next KeyPress or
+/// KeyRelease event is reported to the client, at which time the keyboard again
+/// appears to freeze. However, if the reported event causes the keyboard grab to
+/// be released, then the keyboard does not freeze. SyncKeyboard has no effect if
+/// the keyboard is not frozen by the client or if the keyboard is not grabbed by
+/// the client.
+/// * `ReplayKeyboard` - For ReplayKeyboard, if the keyboard is actively grabbed by the client and is
+/// frozen as the result of an event having been sent to the client (either from
+/// the activation of a GrabKey or from a previous AllowEvents with mode
+/// SyncKeyboard but not from a GrabKeyboard), then the keyboard grab is released
+/// and that event is completely reprocessed, this time ignoring any passive grabs
+/// at or above (towards the root) the grab-window of the grab just released. The
+/// request has no effect if the keyboard is not grabbed by the client or if the
+/// keyboard is not frozen as the result of an event.
 /// * `SyncBoth` - For SyncBoth, if both pointer and keyboard are frozen by the client, event
 /// processing (for both devices) continues normally until the next ButtonPress,
 /// ButtonRelease, KeyPress, or KeyRelease event is reported to the client for a
@@ -11963,20 +12046,10 @@ where
 /// keyboard are frozen by the client. If the pointer or keyboard is frozen twice
 /// by the client on behalf of two separate grabs, SyncBoth thaws for both (but a
 /// subsequent freeze for SyncBoth will only freeze each device once).
-/// * `SyncKeyboard` - For SyncKeyboard, if the keyboard is frozen and actively grabbed by the client,
-/// keyboard event processing continues normally until the next KeyPress or
-/// KeyRelease event is reported to the client, at which time the keyboard again
-/// appears to freeze. However, if the reported event causes the keyboard grab to
-/// be released, then the keyboard does not freeze. SyncKeyboard has no effect if
-/// the keyboard is not frozen by the client or if the keyboard is not grabbed by
-/// the client.
-/// * `SyncPointer` - For SyncPointer, if the pointer is frozen and actively grabbed by the client,
-/// pointer event processing continues normally until the next ButtonPress or
-/// ButtonRelease event is reported to the client, at which time the pointer again
-/// appears to freeze. However, if the reported event causes the pointer grab to be
-/// released, then the pointer does not freeze. SyncPointer has no effect if the
-/// pointer is not frozen by the client or if the pointer is not grabbed by the
-/// client.
+/// * `AsyncBoth` - For AsyncBoth, if the pointer and the keyboard are frozen by the client, event
+/// processing for both devices continues normally. If a device is frozen twice by
+/// the client on behalf of two separate grabs, AsyncBoth thaws for both. AsyncBoth
+/// has no effect unless both pointer and keyboard are frozen by the client.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum Allow {
@@ -12068,6 +12141,7 @@ pub const ALLOW_EVENTS_REQUEST: u8 = 35;
 ///
 /// # Fields
 ///
+/// * `mode` -
 /// * `time` - Timestamp to avoid race conditions when running X over the network.
 ///
 /// The special value `XCB_CURRENT_TIME` will be replaced with the current server
@@ -12076,10 +12150,12 @@ pub const ALLOW_EVENTS_REQUEST: u8 = 35;
 /// # Errors
 ///
 /// * `Value` - You specified an invalid `mode`.
-pub fn allow_events<Conn>(conn: &Conn, mode: Allow, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn allow_events<Conn, A>(conn: &Conn, mode: Allow, time: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<Timestamp>,
 {
+    let time: Timestamp = time.into();
     let length_so_far = 0;
     let mode_bytes = u8::from(mode).serialize();
     let time_bytes = time.serialize();
@@ -12178,27 +12254,25 @@ where
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
-/// BRIEF DESCRIPTION MISSING.
-///
 /// # Fields
 ///
-/// * `child` - The child window containing the pointer, if any, if `same_screen` is true. If
-/// `same_screen` is false, `XCB_NONE` is returned.
-/// * `mask` - The current logical state of the modifier keys and the buttons. Note that the
-/// logical state of a device (as seen by means of the protocol) may lag the
-/// physical state if device event processing is frozen.
-/// * `root` - The root window the pointer is logically on.
-/// * `root_x` - The pointer X position, relative to `root`.
-/// * `root_y` - The pointer Y position, relative to `root`.
 /// * `same_screen` - If `same_screen` is False, then the pointer is not on the same screen as the
 /// argument window, `child` is None, and `win_x` and `win_y` are zero. If
 /// `same_screen` is True, then `win_x` and `win_y` are the pointer coordinates
 /// relative to the argument window's origin, and child is the child containing the
 /// pointer, if any.
+/// * `root` - The root window the pointer is logically on.
+/// * `child` - The child window containing the pointer, if any, if `same_screen` is true. If
+/// `same_screen` is false, `XCB_NONE` is returned.
+/// * `root_x` - The pointer X position, relative to `root`.
+/// * `root_y` - The pointer Y position, relative to `root`.
 /// * `win_x` - The pointer X coordinate, relative to `child`, if `same_screen` is true. Zero
 /// otherwise.
 /// * `win_y` - The pointer Y coordinate, relative to `child`, if `same_screen` is true. Zero
 /// otherwise.
+/// * `mask` - The current logical state of the modifier keys and the buttons. Note that the
+/// logical state of a device (as seen by means of the protocol) may lag the
+/// physical state if device event processing is frozen.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryPointerReply {
     pub response_type: u8,
@@ -12286,10 +12360,14 @@ impl Serialize for Timecoord {
 
 /// Opcode for the GetMotionEvents request
 pub const GET_MOTION_EVENTS_REQUEST: u8 = 39;
-pub fn get_motion_events<Conn>(conn: &Conn, window: Window, start: Timestamp, stop: Timestamp) -> Result<Cookie<'_, Conn, GetMotionEventsReply>, ConnectionError>
+pub fn get_motion_events<Conn, A, B>(conn: &Conn, window: Window, start: A, stop: B) -> Result<Cookie<'_, Conn, GetMotionEventsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<Timestamp>,
+    B: Into<Timestamp>,
 {
+    let start: Timestamp = start.into();
+    let stop: Timestamp = stop.into();
     let length_so_far = 0;
     let window_bytes = window.serialize();
     let start_bytes = start.serialize();
@@ -12430,14 +12508,14 @@ pub const WARP_POINTER_REQUEST: u8 = 41;
 ///
 /// # Fields
 ///
-/// * `dst_window` - If `dst_window` is not `XCB_NONE` (TODO), the pointer will be moved to the
-/// offsets (`dst_x`, `dst_y`) relative to `dst_window`. If `dst_window` is
-/// `XCB_NONE` (TODO), the pointer will be moved by the offsets (`dst_x`, `dst_y`)
-/// relative to the current position of the pointer.
 /// * `src_window` - If `src_window` is not `XCB_NONE` (TODO), the move will only take place if the
 /// pointer is inside `src_window` and within the rectangle specified by (`src_x`,
 /// `src_y`, `src_width`, `src_height`). The rectangle coordinates are relative to
 /// `src_window`.
+/// * `dst_window` - If `dst_window` is not `XCB_NONE` (TODO), the pointer will be moved to the
+/// offsets (`dst_x`, `dst_y`) relative to `dst_window`. If `dst_window` is
+/// `XCB_NONE` (TODO), the pointer will be moved by the offsets (`dst_x`, `dst_y`)
+/// relative to the current position of the pointer.
 ///
 /// # Errors
 ///
@@ -12446,10 +12524,14 @@ pub const WARP_POINTER_REQUEST: u8 = 41;
 /// # See
 ///
 /// * `SetInputFocus`: request
-pub fn warp_pointer<Conn>(conn: &Conn, src_window: Window, dst_window: Window, src_x: i16, src_y: i16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn warp_pointer<Conn, A, B>(conn: &Conn, src_window: A, dst_window: B, src_x: i16, src_y: i16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<Window>,
+    B: Into<Window>,
 {
+    let src_window: Window = src_window.into();
+    let dst_window: Window = dst_window.into();
     let length_so_far = 0;
     let src_window_bytes = src_window.serialize();
     let dst_window_bytes = dst_window.serialize();
@@ -12492,17 +12574,15 @@ where
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
-/// BRIEF DESCRIPTION MISSING.
-///
 /// # Fields
 ///
-/// * `FollowKeyboard` - NOT YET DOCUMENTED. Only relevant for the xinput extension.
 /// * `None` - The focus reverts to `XCB_NONE`, so no window will have the input focus.
-/// * `Parent` - The focus reverts to the parent (or closest viewable ancestor) and the new
-/// revert_to value is `XCB_INPUT_FOCUS_NONE`.
 /// * `PointerRoot` - The focus reverts to `XCB_POINTER_ROOT` respectively. When the focus reverts,
 /// FocusIn and FocusOut events are generated, but the last-focus-change time is
 /// not changed.
+/// * `Parent` - The focus reverts to the parent (or closest viewable ancestor) and the new
+/// revert_to value is `XCB_INPUT_FOCUS_NONE`.
+/// * `FollowKeyboard` - NOT YET DOCUMENTED. Only relevant for the xinput extension.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
 pub enum InputFocus {
@@ -12591,27 +12671,31 @@ pub const SET_INPUT_FOCUS_REQUEST: u8 = 42;
 ///
 /// If `focus` is `XCB_POINTER_ROOT` (TODO), focus is on the root window of the
 /// screen on which the pointer is on currently.
-/// * `revert_to` - Specifies what happens when the `focus` window becomes unviewable (if `focus`
-/// is neither `XCB_NONE` nor `XCB_POINTER_ROOT`).
 /// * `time` - Timestamp to avoid race conditions when running X over the network.
 ///
 /// The special value `XCB_CURRENT_TIME` will be replaced with the current server
 /// time.
+/// * `revert_to` - Specifies what happens when the `focus` window becomes unviewable (if `focus`
+/// is neither `XCB_NONE` nor `XCB_POINTER_ROOT`).
 ///
 /// # Errors
 ///
+/// * `Window` - The specified `focus` window does not exist.
 /// * `Match` - The specified `focus` window is not viewable.
 /// * `Value` - TODO: Reasons?
-/// * `Window` - The specified `focus` window does not exist.
 ///
 /// # See
 ///
 /// * `FocusIn`: event
 /// * `FocusOut`: event
-pub fn set_input_focus<Conn>(conn: &Conn, revert_to: InputFocus, focus: Window, time: Timestamp) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn set_input_focus<Conn, A, B>(conn: &Conn, revert_to: InputFocus, focus: A, time: B) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<Window>,
+    B: Into<Timestamp>,
 {
+    let focus: Window = focus.into();
+    let time: Timestamp = time.into();
     let length_so_far = 0;
     let revert_to_bytes = u8::from(revert_to).serialize();
     let focus_bytes = focus.serialize();
@@ -12806,8 +12890,8 @@ pub const OPEN_FONT_REQUEST: u8 = 45;
 /// # Fields
 ///
 /// * `fid` - The ID with which you will refer to the font, created by `xcb_generate_id`.
-/// * `name` - A pattern describing an X core font.
 /// * `name_len` - Length (in bytes) of `name`.
+/// * `name` - A pattern describing an X core font.
 ///
 /// # Errors
 ///
@@ -12822,7 +12906,7 @@ where
 {
     let length_so_far = 0;
     let fid_bytes = fid.serialize();
-    let name_len: u16 = name.len().try_into()?;
+    let name_len = u16::try_from(name.len()).expect("`name` has too many elements");
     let name_len_bytes = name_len.serialize();
     let mut request0 = [
         OPEN_FONT_REQUEST,
@@ -13071,19 +13155,18 @@ where
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
-/// BRIEF DESCRIPTION MISSING.
-///
 /// # Fields
 ///
-/// * `all_chars_exist` - flag if all characters have nonzero size
+/// * `min_bounds` - minimum bounds over all existing char
+/// * `max_bounds` - maximum bounds over all existing char
+/// * `min_char_or_byte2` - first character
+/// * `max_char_or_byte2` - last character
 /// * `default_char` - char to print for undefined character
+/// * `properties_len` - how many properties there are
+/// * `all_chars_exist` - flag if all characters have nonzero size
 /// * `font_ascent` - baseline to top edge of raster
 /// * `font_descent` - baseline to bottom edge of raster
-/// * `max_bounds` - maximum bounds over all existing char
-/// * `max_char_or_byte2` - last character
-/// * `min_bounds` - minimum bounds over all existing char
-/// * `min_char_or_byte2` - first character
-/// * `properties_len` - how many properties there are
+/// * `draw_direction` -
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct QueryFontReply {
     pub response_type: u8,
@@ -13167,25 +13250,22 @@ pub const QUERY_TEXT_EXTENTS_REQUEST: u8 = 48;
 /// # Fields
 ///
 /// * `font` - The `font` to calculate text extents in. You can also pass a graphics context.
-/// * `string` - The text to get text extents for.
 /// * `string_len` - The number of characters in `string`.
+/// * `string` - The text to get text extents for.
 ///
 /// # Errors
 ///
-/// * `Font` - The specified `font` does not exist.
 /// * `GContext` - The specified graphics context does not exist.
+/// * `Font` - The specified `font` does not exist.
 pub fn query_text_extents<'c, Conn>(conn: &'c Conn, font: Fontable, string: &[Char2b]) -> Result<Cookie<'c, Conn, QueryTextExtentsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
+    let string_len = string.len();
     let length_so_far = 0;
-    let string_len: u32 = string.len().try_into()?;
-    // The following unwrap cannot fail since the value
-    // is either 0 or 1. Both fit into an u8.
-    let odd_length: u8 = ((string_len) & (1)).try_into().unwrap();
+    let odd_length = (string_len & 1) != 0;
     let odd_length_bytes = odd_length.serialize();
     let font_bytes = font.serialize();
-    let string_bytes = string.serialize();
     let mut request0 = [
         QUERY_TEXT_EXTENTS_REQUEST,
         odd_length_bytes[0],
@@ -13197,6 +13277,7 @@ where
         font_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let string_bytes = string.serialize();
     let length_so_far = length_so_far + string_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -13271,7 +13352,6 @@ impl Serialize for Str {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        bytes.reserve(1);
         let name_len = u8::try_from(self.name.len()).expect("`name` has too many elements");
         name_len.serialize_into(bytes);
         bytes.extend_from_slice(&self.name);
@@ -13286,20 +13366,20 @@ pub const LIST_FONTS_REQUEST: u8 = 49;
 ///
 /// # Fields
 ///
-/// * `max_names` - The maximum number of fonts to be returned.
+/// * `pattern_len` - The length (in bytes) of `pattern`.
 /// * `pattern` - A font pattern, for example "-misc-fixed-*".
 ///
 /// The asterisk (*) is a wildcard for any number of characters. The question mark
 /// (?) is a wildcard for a single character. Use of uppercase or lowercase does
 /// not matter.
-/// * `pattern_len` - The length (in bytes) of `pattern`.
+/// * `max_names` - The maximum number of fonts to be returned.
 pub fn list_fonts<'c, Conn>(conn: &'c Conn, max_names: u16, pattern: &[u8]) -> Result<Cookie<'c, Conn, ListFontsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
     let max_names_bytes = max_names.serialize();
-    let pattern_len: u16 = pattern.len().try_into()?;
+    let pattern_len = u16::try_from(pattern.len()).expect("`pattern` has too many elements");
     let pattern_len_bytes = pattern_len.serialize();
     let mut request0 = [
         LIST_FONTS_REQUEST,
@@ -13321,8 +13401,6 @@ where
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(pattern), IoSlice::new(&padding0)], vec![])?)
 }
 
-/// BRIEF DESCRIPTION MISSING.
-///
 /// # Fields
 ///
 /// * `names_len` - The number of font names.
@@ -13361,20 +13439,20 @@ pub const LIST_FONTS_WITH_INFO_REQUEST: u8 = 50;
 ///
 /// # Fields
 ///
-/// * `max_names` - The maximum number of fonts to be returned.
+/// * `pattern_len` - The length (in bytes) of `pattern`.
 /// * `pattern` - A font pattern, for example "-misc-fixed-*".
 ///
 /// The asterisk (*) is a wildcard for any number of characters. The question mark
 /// (?) is a wildcard for a single character. Use of uppercase or lowercase does
 /// not matter.
-/// * `pattern_len` - The length (in bytes) of `pattern`.
+/// * `max_names` - The maximum number of fonts to be returned.
 pub fn list_fonts_with_info<'c, Conn>(conn: &'c Conn, max_names: u16, pattern: &[u8]) -> Result<ListFontsWithInfoCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
     let max_names_bytes = max_names.serialize();
-    let pattern_len: u16 = pattern.len().try_into()?;
+    let pattern_len = u16::try_from(pattern.len()).expect("`pattern` has too many elements");
     let pattern_len_bytes = pattern_len.serialize();
     let mut request0 = [
         LIST_FONTS_WITH_INFO_REQUEST,
@@ -13396,23 +13474,22 @@ where
     Ok(ListFontsWithInfoCookie::new(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(pattern), IoSlice::new(&padding0)], vec![])?))
 }
 
-/// BRIEF DESCRIPTION MISSING.
-///
 /// # Fields
 ///
-/// * `all_chars_exist` - flag if all characters have nonzero size
+/// * `name_len` - The number of matched font names.
+/// * `min_bounds` - minimum bounds over all existing char
+/// * `max_bounds` - maximum bounds over all existing char
+/// * `min_char_or_byte2` - first character
+/// * `max_char_or_byte2` - last character
 /// * `default_char` - char to print for undefined character
+/// * `properties_len` - how many properties there are
+/// * `all_chars_exist` - flag if all characters have nonzero size
 /// * `font_ascent` - baseline to top edge of raster
 /// * `font_descent` - baseline to bottom edge of raster
-/// * `max_bounds` - maximum bounds over all existing char
-/// * `max_char_or_byte2` - last character
-/// * `min_bounds` - minimum bounds over all existing char
-/// * `min_char_or_byte2` - first character
-/// * `name_len` - The number of matched font names.
-/// * `properties_len` - how many properties there are
 /// * `replies_hint` - An indication of how many more fonts will be returned. This is only a hint and
 /// may be larger or smaller than the number of fonts actually returned. A zero
 /// value does not guarantee that no more fonts will be returned.
+/// * `draw_direction` -
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListFontsWithInfoReply {
     pub response_type: u8,
@@ -13474,9 +13551,8 @@ pub fn set_font_path<'c, Conn>(conn: &'c Conn, font: &[Str]) -> Result<VoidCooki
 where
     Conn: RequestConnection + ?Sized,
 {
-    let font_bytes = font.serialize();
     let length_so_far = 0;
-    let font_qty: u16 = font.len().try_into()?;
+    let font_qty = u16::try_from(font.len()).expect("`font` has too many elements");
     let font_qty_bytes = font_qty.serialize();
     let mut request0 = [
         SET_FONT_PATH_REQUEST,
@@ -13489,6 +13565,7 @@ where
         0,
     ];
     let length_so_far = length_so_far + request0.len();
+    let font_bytes = font.serialize();
     let length_so_far = length_so_far + font_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -13555,17 +13632,17 @@ pub const CREATE_PIXMAP_REQUEST: u8 = 53;
 /// # Fields
 ///
 /// * `depth` - TODO
-/// * `drawable` - Drawable to get the screen from.
-/// * `height` - The height of the new pixmap.
 /// * `pid` - The ID with which you will refer to the new pixmap, created by
 /// `xcb_generate_id`.
+/// * `drawable` - Drawable to get the screen from.
 /// * `width` - The width of the new pixmap.
+/// * `height` - The height of the new pixmap.
 ///
 /// # Errors
 ///
-/// * `Alloc` - The X server could not allocate the requested resources (no memory?).
-/// * `Drawable` - The specified `drawable` (Window or Pixmap) does not exist.
 /// * `Value` - TODO: reasons?
+/// * `Drawable` - The specified `drawable` (Window or Pixmap) does not exist.
+/// * `Alloc` - The X server could not allocate the requested resources (no memory?).
 ///
 /// # See
 ///
@@ -13642,12 +13719,26 @@ where
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
-/// BRIEF DESCRIPTION MISSING.
-///
 /// # Fields
 ///
-/// * `ArcMode` - TODO
+/// * `Function` - TODO: Refer to GX
+/// * `PlaneMask` - In graphics operations, given a source and destination pixel, the result is
+/// computed bitwise on corresponding bits of the pixels; that is, a Boolean
+/// operation is performed in each bit plane. The plane-mask restricts the
+/// operation to a subset of planes, so the result is:
+///
+/// ((src FUNC dst) AND plane-mask) OR (dst AND (NOT plane-mask))
+/// * `Foreground` - Foreground colorpixel.
 /// * `Background` - Background colorpixel.
+/// * `LineWidth` - The line-width is measured in pixels and can be greater than or equal to one, a wide line, or the
+/// special value zero, a thin line.
+/// * `LineStyle` - The line-style defines which sections of a line are drawn:
+/// Solid                The full path of the line is drawn.
+/// DoubleDash           The full path of the line is drawn, but the even dashes are filled differently
+/// than the odd dashes (see fill-style), with Butt cap-style used where even and
+/// odd dashes meet.
+/// OnOffDash            Only the even dashes are drawn, and cap-style applies to all internal ends of
+/// the individual dashes (except NotLast is treated as Butt).
 /// * `CapStyle` - The cap-style defines how the endpoints of a path are drawn:
 /// NotLast    The result is equivalent to Butt, except that for a line-width of zero the final
 /// endpoint is not drawn.
@@ -13658,17 +13749,12 @@ where
 /// Projecting The result is square at the end, but the path continues beyond the endpoint for
 /// a distance equal to half the line-width; it is equivalent to Butt for line-width
 /// zero.
-/// * `ClipMask` - The clip-mask restricts writes to the destination drawable. Only pixels where the clip-mask has
-/// bits set to 1 are drawn. Pixels are not drawn outside the area covered by the clip-mask or where
-/// the clip-mask has bits set to 0. The clip-mask affects all graphics requests, but it does not clip
-/// sources. The clip-mask origin is interpreted relative to the origin of whatever destination drawable is specified in a graphics request. If a pixmap is specified as the clip-mask, it must have
-/// depth 1 and have the same root as the gcontext (or a Match error results). If clip-mask is None,
-/// then pixels are always drawn, regardless of the clip origin. The clip-mask can also be set with the
-/// SetClipRectangles request.
-/// * `ClipOriginX` - TODO
-/// * `ClipOriginY` - TODO
-/// * `DashList` - TODO
-/// * `DashOffset` - TODO
+/// * `JoinStyle` - The join-style defines how corners are drawn for wide lines:
+/// Miter               The outer edges of the two lines extend to meet at an angle. However, if the
+/// angle is less than 11 degrees, a Bevel join-style is used instead.
+/// Round               The result is a circular arc with a diameter equal to the line-width, centered
+/// on the joinpoint.
+/// Bevel               The result is Butt endpoint styles, and then the triangular notch is filled.
 /// * `FillStyle` - The fill-style defines the contents of the source for line, text, and fill requests. For all text and fill
 /// requests (for example, PolyText8, PolyText16, PolyFillRectangle, FillPoly, and PolyFillArc)
 /// as well as for line requests with line-style Solid, (for example, PolyLine, PolySegment,
@@ -13685,34 +13771,8 @@ where
 /// Tiled                     Same as for even dashes
 /// OpaqueStippled            Same as for even dashes
 /// Stippled                  Background masked by stipple
-/// * `Font` - Which font to use for the `ImageText8` and `ImageText16` requests.
-/// * `Foreground` - Foreground colorpixel.
-/// * `Function` - TODO: Refer to GX
-/// * `GraphicsExposures` - Whether ExposureEvents should be generated (1) or not (0).
-///
-/// The default is 1.
-/// * `JoinStyle` - The join-style defines how corners are drawn for wide lines:
-/// Miter               The outer edges of the two lines extend to meet at an angle. However, if the
-/// angle is less than 11 degrees, a Bevel join-style is used instead.
-/// Round               The result is a circular arc with a diameter equal to the line-width, centered
-/// on the joinpoint.
-/// Bevel               The result is Butt endpoint styles, and then the triangular notch is filled.
-/// * `LineStyle` - The line-style defines which sections of a line are drawn:
-/// Solid                The full path of the line is drawn.
-/// DoubleDash           The full path of the line is drawn, but the even dashes are filled differently
-/// than the odd dashes (see fill-style), with Butt cap-style used where even and
-/// odd dashes meet.
-/// OnOffDash            Only the even dashes are drawn, and cap-style applies to all internal ends of
-/// the individual dashes (except NotLast is treated as Butt).
-/// * `LineWidth` - The line-width is measured in pixels and can be greater than or equal to one, a wide line, or the
-/// special value zero, a thin line.
-/// * `PlaneMask` - In graphics operations, given a source and destination pixel, the result is
-/// computed bitwise on corresponding bits of the pixels; that is, a Boolean
-/// operation is performed in each bit plane. The plane-mask restricts the
-/// operation to a subset of planes, so the result is:
-///
-/// ((src FUNC dst) AND plane-mask) OR (dst AND (NOT plane-mask))
-/// * `Stipple` - The tile/stipple represents an infinite two-dimensional plane with the tile/stipple replicated in all
+/// * `FillRule` -
+/// * `Tile` - The tile/stipple represents an infinite two-dimensional plane with the tile/stipple replicated in all
 /// dimensions. When that plane is superimposed on the drawable for use in a graphics operation,
 /// the upper-left corner of some instance of the tile/stipple is at the coordinates within the drawable
 /// specified by the tile/stipple origin. The tile/stipple and clip origins are interpreted relative to the
@@ -13724,14 +13784,7 @@ where
 /// additional clip mask to be ANDed with the clip-mask.
 /// Any size pixmap can be used for tiling or stippling, although some sizes may be faster to use than
 /// others.
-/// * `SubwindowMode` - For ClipByChildren, both source and destination windows are additionally
-/// clipped by all viewable InputOutput children. For IncludeInferiors, neither
-/// source nor destination window is
-/// clipped by inferiors. This will result in including subwindow contents in the source and drawing
-/// through subwindow boundaries of the destination. The use of IncludeInferiors with a source or
-/// destination window of one depth with mapped inferiors of differing depth is not illegal, but the
-/// semantics is undefined by the core protocol.
-/// * `Tile` - The tile/stipple represents an infinite two-dimensional plane with the tile/stipple replicated in all
+/// * `Stipple` - The tile/stipple represents an infinite two-dimensional plane with the tile/stipple replicated in all
 /// dimensions. When that plane is superimposed on the drawable for use in a graphics operation,
 /// the upper-left corner of some instance of the tile/stipple is at the coordinates within the drawable
 /// specified by the tile/stipple origin. The tile/stipple and clip origins are interpreted relative to the
@@ -13745,6 +13798,29 @@ where
 /// others.
 /// * `TileStippleOriginX` - TODO
 /// * `TileStippleOriginY` - TODO
+/// * `Font` - Which font to use for the `ImageText8` and `ImageText16` requests.
+/// * `SubwindowMode` - For ClipByChildren, both source and destination windows are additionally
+/// clipped by all viewable InputOutput children. For IncludeInferiors, neither
+/// source nor destination window is
+/// clipped by inferiors. This will result in including subwindow contents in the source and drawing
+/// through subwindow boundaries of the destination. The use of IncludeInferiors with a source or
+/// destination window of one depth with mapped inferiors of differing depth is not illegal, but the
+/// semantics is undefined by the core protocol.
+/// * `GraphicsExposures` - Whether ExposureEvents should be generated (1) or not (0).
+///
+/// The default is 1.
+/// * `ClipOriginX` - TODO
+/// * `ClipOriginY` - TODO
+/// * `ClipMask` - The clip-mask restricts writes to the destination drawable. Only pixels where the clip-mask has
+/// bits set to 1 are drawn. Pixels are not drawn outside the area covered by the clip-mask or where
+/// the clip-mask has bits set to 0. The clip-mask affects all graphics requests, but it does not clip
+/// sources. The clip-mask origin is interpreted relative to the origin of whatever destination drawable is specified in a graphics request. If a pixmap is specified as the clip-mask, it must have
+/// depth 1 and have the same root as the gcontext (or a Match error results). If clip-mask is None,
+/// then pixels are always drawn, regardless of the clip origin. The clip-mask can also be set with the
+/// SetClipRectangles request.
+/// * `DashOffset` - TODO
+/// * `DashList` - TODO
+/// * `ArcMode` - TODO
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
 pub enum GC {
@@ -14432,154 +14508,157 @@ impl Serialize for CreateGCAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.function {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(function) = self.function {
+            u32::from(function).serialize_into(bytes);
         }
-        if let Some(ref value) = self.plane_mask {
-            value.serialize_into(bytes);
+        if let Some(plane_mask) = self.plane_mask {
+            plane_mask.serialize_into(bytes);
         }
-        if let Some(ref value) = self.foreground {
-            value.serialize_into(bytes);
+        if let Some(foreground) = self.foreground {
+            foreground.serialize_into(bytes);
         }
-        if let Some(ref value) = self.background {
-            value.serialize_into(bytes);
+        if let Some(background) = self.background {
+            background.serialize_into(bytes);
         }
-        if let Some(ref value) = self.line_width {
-            value.serialize_into(bytes);
+        if let Some(line_width) = self.line_width {
+            line_width.serialize_into(bytes);
         }
-        if let Some(ref value) = self.line_style {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(line_style) = self.line_style {
+            u32::from(line_style).serialize_into(bytes);
         }
-        if let Some(ref value) = self.cap_style {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(cap_style) = self.cap_style {
+            u32::from(cap_style).serialize_into(bytes);
         }
-        if let Some(ref value) = self.join_style {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(join_style) = self.join_style {
+            u32::from(join_style).serialize_into(bytes);
         }
-        if let Some(ref value) = self.fill_style {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(fill_style) = self.fill_style {
+            u32::from(fill_style).serialize_into(bytes);
         }
-        if let Some(ref value) = self.fill_rule {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(fill_rule) = self.fill_rule {
+            u32::from(fill_rule).serialize_into(bytes);
         }
-        if let Some(ref value) = self.tile {
-            value.serialize_into(bytes);
+        if let Some(tile) = self.tile {
+            tile.serialize_into(bytes);
         }
-        if let Some(ref value) = self.stipple {
-            value.serialize_into(bytes);
+        if let Some(stipple) = self.stipple {
+            stipple.serialize_into(bytes);
         }
-        if let Some(ref value) = self.tile_stipple_x_origin {
-            value.serialize_into(bytes);
+        if let Some(tile_stipple_x_origin) = self.tile_stipple_x_origin {
+            tile_stipple_x_origin.serialize_into(bytes);
         }
-        if let Some(ref value) = self.tile_stipple_y_origin {
-            value.serialize_into(bytes);
+        if let Some(tile_stipple_y_origin) = self.tile_stipple_y_origin {
+            tile_stipple_y_origin.serialize_into(bytes);
         }
-        if let Some(ref value) = self.font {
-            value.serialize_into(bytes);
+        if let Some(font) = self.font {
+            font.serialize_into(bytes);
         }
-        if let Some(ref value) = self.subwindow_mode {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(subwindow_mode) = self.subwindow_mode {
+            u32::from(subwindow_mode).serialize_into(bytes);
         }
-        if let Some(ref value) = self.graphics_exposures {
-            value.serialize_into(bytes);
+        if let Some(graphics_exposures) = self.graphics_exposures {
+            graphics_exposures.serialize_into(bytes);
         }
-        if let Some(ref value) = self.clip_x_origin {
-            value.serialize_into(bytes);
+        if let Some(clip_x_origin) = self.clip_x_origin {
+            clip_x_origin.serialize_into(bytes);
         }
-        if let Some(ref value) = self.clip_y_origin {
-            value.serialize_into(bytes);
+        if let Some(clip_y_origin) = self.clip_y_origin {
+            clip_y_origin.serialize_into(bytes);
         }
-        if let Some(ref value) = self.clip_mask {
-            value.serialize_into(bytes);
+        if let Some(clip_mask) = self.clip_mask {
+            clip_mask.serialize_into(bytes);
         }
-        if let Some(ref value) = self.dash_offset {
-            value.serialize_into(bytes);
+        if let Some(dash_offset) = self.dash_offset {
+            dash_offset.serialize_into(bytes);
         }
-        if let Some(ref value) = self.dashes {
-            value.serialize_into(bytes);
+        if let Some(dashes) = self.dashes {
+            dashes.serialize_into(bytes);
         }
-        if let Some(ref value) = self.arc_mode {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(arc_mode) = self.arc_mode {
+            u32::from(arc_mode).serialize_into(bytes);
         }
+    }
+}
+impl CreateGCAux {
+    #[allow(dead_code)]
+    fn switch_expr(&self) -> u32 {
+        let mut expr_value: u32 = 0;
+        if self.function.is_some() {
+            expr_value |= u32::from(GC::Function);
+        }
+        if self.plane_mask.is_some() {
+            expr_value |= u32::from(GC::PlaneMask);
+        }
+        if self.foreground.is_some() {
+            expr_value |= u32::from(GC::Foreground);
+        }
+        if self.background.is_some() {
+            expr_value |= u32::from(GC::Background);
+        }
+        if self.line_width.is_some() {
+            expr_value |= u32::from(GC::LineWidth);
+        }
+        if self.line_style.is_some() {
+            expr_value |= u32::from(GC::LineStyle);
+        }
+        if self.cap_style.is_some() {
+            expr_value |= u32::from(GC::CapStyle);
+        }
+        if self.join_style.is_some() {
+            expr_value |= u32::from(GC::JoinStyle);
+        }
+        if self.fill_style.is_some() {
+            expr_value |= u32::from(GC::FillStyle);
+        }
+        if self.fill_rule.is_some() {
+            expr_value |= u32::from(GC::FillRule);
+        }
+        if self.tile.is_some() {
+            expr_value |= u32::from(GC::Tile);
+        }
+        if self.stipple.is_some() {
+            expr_value |= u32::from(GC::Stipple);
+        }
+        if self.tile_stipple_x_origin.is_some() {
+            expr_value |= u32::from(GC::TileStippleOriginX);
+        }
+        if self.tile_stipple_y_origin.is_some() {
+            expr_value |= u32::from(GC::TileStippleOriginY);
+        }
+        if self.font.is_some() {
+            expr_value |= u32::from(GC::Font);
+        }
+        if self.subwindow_mode.is_some() {
+            expr_value |= u32::from(GC::SubwindowMode);
+        }
+        if self.graphics_exposures.is_some() {
+            expr_value |= u32::from(GC::GraphicsExposures);
+        }
+        if self.clip_x_origin.is_some() {
+            expr_value |= u32::from(GC::ClipOriginX);
+        }
+        if self.clip_y_origin.is_some() {
+            expr_value |= u32::from(GC::ClipOriginY);
+        }
+        if self.clip_mask.is_some() {
+            expr_value |= u32::from(GC::ClipMask);
+        }
+        if self.dash_offset.is_some() {
+            expr_value |= u32::from(GC::DashOffset);
+        }
+        if self.dashes.is_some() {
+            expr_value |= u32::from(GC::DashList);
+        }
+        if self.arc_mode.is_some() {
+            expr_value |= u32::from(GC::ArcMode);
+        }
+        expr_value
     }
 }
 impl CreateGCAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
         Default::default()
-    }
-    fn value_mask(&self) -> u32 {
-        let mut mask = 0;
-        if self.function.is_some() {
-            mask |= u32::from(GC::Function);
-        }
-        if self.plane_mask.is_some() {
-            mask |= u32::from(GC::PlaneMask);
-        }
-        if self.foreground.is_some() {
-            mask |= u32::from(GC::Foreground);
-        }
-        if self.background.is_some() {
-            mask |= u32::from(GC::Background);
-        }
-        if self.line_width.is_some() {
-            mask |= u32::from(GC::LineWidth);
-        }
-        if self.line_style.is_some() {
-            mask |= u32::from(GC::LineStyle);
-        }
-        if self.cap_style.is_some() {
-            mask |= u32::from(GC::CapStyle);
-        }
-        if self.join_style.is_some() {
-            mask |= u32::from(GC::JoinStyle);
-        }
-        if self.fill_style.is_some() {
-            mask |= u32::from(GC::FillStyle);
-        }
-        if self.fill_rule.is_some() {
-            mask |= u32::from(GC::FillRule);
-        }
-        if self.tile.is_some() {
-            mask |= u32::from(GC::Tile);
-        }
-        if self.stipple.is_some() {
-            mask |= u32::from(GC::Stipple);
-        }
-        if self.tile_stipple_x_origin.is_some() {
-            mask |= u32::from(GC::TileStippleOriginX);
-        }
-        if self.tile_stipple_y_origin.is_some() {
-            mask |= u32::from(GC::TileStippleOriginY);
-        }
-        if self.font.is_some() {
-            mask |= u32::from(GC::Font);
-        }
-        if self.subwindow_mode.is_some() {
-            mask |= u32::from(GC::SubwindowMode);
-        }
-        if self.graphics_exposures.is_some() {
-            mask |= u32::from(GC::GraphicsExposures);
-        }
-        if self.clip_x_origin.is_some() {
-            mask |= u32::from(GC::ClipOriginX);
-        }
-        if self.clip_y_origin.is_some() {
-            mask |= u32::from(GC::ClipOriginY);
-        }
-        if self.clip_mask.is_some() {
-            mask |= u32::from(GC::ClipMask);
-        }
-        if self.dash_offset.is_some() {
-            mask |= u32::from(GC::DashOffset);
-        }
-        if self.dashes.is_some() {
-            mask |= u32::from(GC::DashList);
-        }
-        if self.arc_mode.is_some() {
-            mask |= u32::from(GC::ArcMode);
-        }
-        mask
     }
     /// Set the `function` field of this structure.
     pub fn function<I>(mut self, value: I) -> Self where I: Into<Option<GX>> {
@@ -14697,6 +14776,7 @@ impl CreateGCAux {
         self
     }
 }
+
 /// Creates a graphics context.
 ///
 /// Creates a graphics context. The graphics context can be used with any drawable
@@ -14710,12 +14790,12 @@ impl CreateGCAux {
 ///
 /// # Errors
 ///
-/// * `Alloc` - The X server could not allocate the requested resources (no memory?).
 /// * `Drawable` - The specified `drawable` (Window or Pixmap) does not exist.
-/// * `Font` - TODO: reasons?
 /// * `Match` - TODO: reasons?
+/// * `Font` - TODO: reasons?
 /// * `Pixmap` - TODO: reasons?
 /// * `Value` - TODO: reasons?
+/// * `Alloc` - The X server could not allocate the requested resources (no memory?).
 ///
 /// # See
 ///
@@ -14724,11 +14804,10 @@ pub fn create_gc<'c, Conn>(conn: &'c Conn, cid: Gcontext, drawable: Drawable, va
 where
     Conn: RequestConnection + ?Sized,
 {
-    let value_mask = value_list.value_mask();
-    let value_list_bytes = value_list.serialize();
     let length_so_far = 0;
     let cid_bytes = cid.serialize();
     let drawable_bytes = drawable.serialize();
+    let value_mask = value_list.switch_expr();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
         CREATE_GC_REQUEST,
@@ -14749,6 +14828,7 @@ where
         value_mask_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let value_list_bytes = value_list.serialize();
     let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -14795,154 +14875,157 @@ impl Serialize for ChangeGCAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.function {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(function) = self.function {
+            u32::from(function).serialize_into(bytes);
         }
-        if let Some(ref value) = self.plane_mask {
-            value.serialize_into(bytes);
+        if let Some(plane_mask) = self.plane_mask {
+            plane_mask.serialize_into(bytes);
         }
-        if let Some(ref value) = self.foreground {
-            value.serialize_into(bytes);
+        if let Some(foreground) = self.foreground {
+            foreground.serialize_into(bytes);
         }
-        if let Some(ref value) = self.background {
-            value.serialize_into(bytes);
+        if let Some(background) = self.background {
+            background.serialize_into(bytes);
         }
-        if let Some(ref value) = self.line_width {
-            value.serialize_into(bytes);
+        if let Some(line_width) = self.line_width {
+            line_width.serialize_into(bytes);
         }
-        if let Some(ref value) = self.line_style {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(line_style) = self.line_style {
+            u32::from(line_style).serialize_into(bytes);
         }
-        if let Some(ref value) = self.cap_style {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(cap_style) = self.cap_style {
+            u32::from(cap_style).serialize_into(bytes);
         }
-        if let Some(ref value) = self.join_style {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(join_style) = self.join_style {
+            u32::from(join_style).serialize_into(bytes);
         }
-        if let Some(ref value) = self.fill_style {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(fill_style) = self.fill_style {
+            u32::from(fill_style).serialize_into(bytes);
         }
-        if let Some(ref value) = self.fill_rule {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(fill_rule) = self.fill_rule {
+            u32::from(fill_rule).serialize_into(bytes);
         }
-        if let Some(ref value) = self.tile {
-            value.serialize_into(bytes);
+        if let Some(tile) = self.tile {
+            tile.serialize_into(bytes);
         }
-        if let Some(ref value) = self.stipple {
-            value.serialize_into(bytes);
+        if let Some(stipple) = self.stipple {
+            stipple.serialize_into(bytes);
         }
-        if let Some(ref value) = self.tile_stipple_x_origin {
-            value.serialize_into(bytes);
+        if let Some(tile_stipple_x_origin) = self.tile_stipple_x_origin {
+            tile_stipple_x_origin.serialize_into(bytes);
         }
-        if let Some(ref value) = self.tile_stipple_y_origin {
-            value.serialize_into(bytes);
+        if let Some(tile_stipple_y_origin) = self.tile_stipple_y_origin {
+            tile_stipple_y_origin.serialize_into(bytes);
         }
-        if let Some(ref value) = self.font {
-            value.serialize_into(bytes);
+        if let Some(font) = self.font {
+            font.serialize_into(bytes);
         }
-        if let Some(ref value) = self.subwindow_mode {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(subwindow_mode) = self.subwindow_mode {
+            u32::from(subwindow_mode).serialize_into(bytes);
         }
-        if let Some(ref value) = self.graphics_exposures {
-            value.serialize_into(bytes);
+        if let Some(graphics_exposures) = self.graphics_exposures {
+            graphics_exposures.serialize_into(bytes);
         }
-        if let Some(ref value) = self.clip_x_origin {
-            value.serialize_into(bytes);
+        if let Some(clip_x_origin) = self.clip_x_origin {
+            clip_x_origin.serialize_into(bytes);
         }
-        if let Some(ref value) = self.clip_y_origin {
-            value.serialize_into(bytes);
+        if let Some(clip_y_origin) = self.clip_y_origin {
+            clip_y_origin.serialize_into(bytes);
         }
-        if let Some(ref value) = self.clip_mask {
-            value.serialize_into(bytes);
+        if let Some(clip_mask) = self.clip_mask {
+            clip_mask.serialize_into(bytes);
         }
-        if let Some(ref value) = self.dash_offset {
-            value.serialize_into(bytes);
+        if let Some(dash_offset) = self.dash_offset {
+            dash_offset.serialize_into(bytes);
         }
-        if let Some(ref value) = self.dashes {
-            value.serialize_into(bytes);
+        if let Some(dashes) = self.dashes {
+            dashes.serialize_into(bytes);
         }
-        if let Some(ref value) = self.arc_mode {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(arc_mode) = self.arc_mode {
+            u32::from(arc_mode).serialize_into(bytes);
         }
+    }
+}
+impl ChangeGCAux {
+    #[allow(dead_code)]
+    fn switch_expr(&self) -> u32 {
+        let mut expr_value: u32 = 0;
+        if self.function.is_some() {
+            expr_value |= u32::from(GC::Function);
+        }
+        if self.plane_mask.is_some() {
+            expr_value |= u32::from(GC::PlaneMask);
+        }
+        if self.foreground.is_some() {
+            expr_value |= u32::from(GC::Foreground);
+        }
+        if self.background.is_some() {
+            expr_value |= u32::from(GC::Background);
+        }
+        if self.line_width.is_some() {
+            expr_value |= u32::from(GC::LineWidth);
+        }
+        if self.line_style.is_some() {
+            expr_value |= u32::from(GC::LineStyle);
+        }
+        if self.cap_style.is_some() {
+            expr_value |= u32::from(GC::CapStyle);
+        }
+        if self.join_style.is_some() {
+            expr_value |= u32::from(GC::JoinStyle);
+        }
+        if self.fill_style.is_some() {
+            expr_value |= u32::from(GC::FillStyle);
+        }
+        if self.fill_rule.is_some() {
+            expr_value |= u32::from(GC::FillRule);
+        }
+        if self.tile.is_some() {
+            expr_value |= u32::from(GC::Tile);
+        }
+        if self.stipple.is_some() {
+            expr_value |= u32::from(GC::Stipple);
+        }
+        if self.tile_stipple_x_origin.is_some() {
+            expr_value |= u32::from(GC::TileStippleOriginX);
+        }
+        if self.tile_stipple_y_origin.is_some() {
+            expr_value |= u32::from(GC::TileStippleOriginY);
+        }
+        if self.font.is_some() {
+            expr_value |= u32::from(GC::Font);
+        }
+        if self.subwindow_mode.is_some() {
+            expr_value |= u32::from(GC::SubwindowMode);
+        }
+        if self.graphics_exposures.is_some() {
+            expr_value |= u32::from(GC::GraphicsExposures);
+        }
+        if self.clip_x_origin.is_some() {
+            expr_value |= u32::from(GC::ClipOriginX);
+        }
+        if self.clip_y_origin.is_some() {
+            expr_value |= u32::from(GC::ClipOriginY);
+        }
+        if self.clip_mask.is_some() {
+            expr_value |= u32::from(GC::ClipMask);
+        }
+        if self.dash_offset.is_some() {
+            expr_value |= u32::from(GC::DashOffset);
+        }
+        if self.dashes.is_some() {
+            expr_value |= u32::from(GC::DashList);
+        }
+        if self.arc_mode.is_some() {
+            expr_value |= u32::from(GC::ArcMode);
+        }
+        expr_value
     }
 }
 impl ChangeGCAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
         Default::default()
-    }
-    fn value_mask(&self) -> u32 {
-        let mut mask = 0;
-        if self.function.is_some() {
-            mask |= u32::from(GC::Function);
-        }
-        if self.plane_mask.is_some() {
-            mask |= u32::from(GC::PlaneMask);
-        }
-        if self.foreground.is_some() {
-            mask |= u32::from(GC::Foreground);
-        }
-        if self.background.is_some() {
-            mask |= u32::from(GC::Background);
-        }
-        if self.line_width.is_some() {
-            mask |= u32::from(GC::LineWidth);
-        }
-        if self.line_style.is_some() {
-            mask |= u32::from(GC::LineStyle);
-        }
-        if self.cap_style.is_some() {
-            mask |= u32::from(GC::CapStyle);
-        }
-        if self.join_style.is_some() {
-            mask |= u32::from(GC::JoinStyle);
-        }
-        if self.fill_style.is_some() {
-            mask |= u32::from(GC::FillStyle);
-        }
-        if self.fill_rule.is_some() {
-            mask |= u32::from(GC::FillRule);
-        }
-        if self.tile.is_some() {
-            mask |= u32::from(GC::Tile);
-        }
-        if self.stipple.is_some() {
-            mask |= u32::from(GC::Stipple);
-        }
-        if self.tile_stipple_x_origin.is_some() {
-            mask |= u32::from(GC::TileStippleOriginX);
-        }
-        if self.tile_stipple_y_origin.is_some() {
-            mask |= u32::from(GC::TileStippleOriginY);
-        }
-        if self.font.is_some() {
-            mask |= u32::from(GC::Font);
-        }
-        if self.subwindow_mode.is_some() {
-            mask |= u32::from(GC::SubwindowMode);
-        }
-        if self.graphics_exposures.is_some() {
-            mask |= u32::from(GC::GraphicsExposures);
-        }
-        if self.clip_x_origin.is_some() {
-            mask |= u32::from(GC::ClipOriginX);
-        }
-        if self.clip_y_origin.is_some() {
-            mask |= u32::from(GC::ClipOriginY);
-        }
-        if self.clip_mask.is_some() {
-            mask |= u32::from(GC::ClipMask);
-        }
-        if self.dash_offset.is_some() {
-            mask |= u32::from(GC::DashOffset);
-        }
-        if self.dashes.is_some() {
-            mask |= u32::from(GC::DashList);
-        }
-        if self.arc_mode.is_some() {
-            mask |= u32::from(GC::ArcMode);
-        }
-        mask
     }
     /// Set the `function` field of this structure.
     pub fn function<I>(mut self, value: I) -> Self where I: Into<Option<GX>> {
@@ -15060,6 +15143,7 @@ impl ChangeGCAux {
         self
     }
 }
+
 /// change graphics context components.
 ///
 /// Changes the components specified by `value_mask` for the specified graphics context.
@@ -15067,18 +15151,19 @@ impl ChangeGCAux {
 /// # Fields
 ///
 /// * `gc` - The graphics context to change.
+/// * `value_mask` -
 /// * `value_list` - Values for each of the components specified in the bitmask `value_mask`. The
 /// order has to correspond to the order of possible `value_mask` bits. See the
 /// example.
 ///
 /// # Errors
 ///
-/// * `Alloc` - The X server could not allocate the requested resources (no memory?).
 /// * `Font` - TODO: reasons?
 /// * `GContext` - TODO: reasons?
 /// * `Match` - TODO: reasons?
 /// * `Pixmap` - TODO: reasons?
 /// * `Value` - TODO: reasons?
+/// * `Alloc` - The X server could not allocate the requested resources (no memory?).
 ///
 /// # Example
 ///
@@ -15108,10 +15193,9 @@ pub fn change_gc<'c, Conn>(conn: &'c Conn, gc: Gcontext, value_list: &ChangeGCAu
 where
     Conn: RequestConnection + ?Sized,
 {
-    let value_mask = value_list.value_mask();
-    let value_list_bytes = value_list.serialize();
     let length_so_far = 0;
     let gc_bytes = gc.serialize();
+    let value_mask = value_list.switch_expr();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
         CHANGE_GC_REQUEST,
@@ -15128,6 +15212,7 @@ where
         value_mask_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let value_list_bytes = value_list.serialize();
     let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -15139,10 +15224,12 @@ where
 
 /// Opcode for the CopyGC request
 pub const COPY_GC_REQUEST: u8 = 57;
-pub fn copy_gc<Conn>(conn: &Conn, src_gc: Gcontext, dst_gc: Gcontext, value_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn copy_gc<Conn, A>(conn: &Conn, src_gc: Gcontext, dst_gc: Gcontext, value_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<u32>,
 {
+    let value_mask: u32 = value_mask.into();
     let length_so_far = 0;
     let src_gc_bytes = src_gc.serialize();
     let dst_gc_bytes = dst_gc.serialize();
@@ -15181,7 +15268,7 @@ where
     let length_so_far = 0;
     let gc_bytes = gc.serialize();
     let dash_offset_bytes = dash_offset.serialize();
-    let dashes_len: u16 = dashes.len().try_into()?;
+    let dashes_len = u16::try_from(dashes.len()).expect("`dashes` has too many elements");
     let dashes_len_bytes = dashes_len.serialize();
     let mut request0 = [
         SET_DASHES_REQUEST,
@@ -15286,7 +15373,6 @@ where
     let gc_bytes = gc.serialize();
     let clip_x_origin_bytes = clip_x_origin.serialize();
     let clip_y_origin_bytes = clip_y_origin.serialize();
-    let rectangles_bytes = rectangles.serialize();
     let mut request0 = [
         SET_CLIP_RECTANGLES_REQUEST,
         ordering_bytes[0],
@@ -15302,6 +15388,7 @@ where
         clip_y_origin_bytes[1],
     ];
     let length_so_far = length_so_far + request0.len();
+    let rectangles_bytes = rectangles.serialize();
     let length_so_far = length_so_far + rectangles_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -15394,14 +15481,14 @@ pub const COPY_AREA_REQUEST: u8 = 62;
 /// # Fields
 ///
 /// * `dst_drawable` - The destination drawable (Window or Pixmap).
-/// * `dst_x` - The destination X coordinate.
-/// * `dst_y` - The destination Y coordinate.
-/// * `gc` - The graphics context to use.
-/// * `height` - The height of the area to copy (in pixels).
 /// * `src_drawable` - The source drawable (Window or Pixmap).
+/// * `gc` - The graphics context to use.
 /// * `src_x` - The source X coordinate.
 /// * `src_y` - The source Y coordinate.
+/// * `dst_x` - The destination X coordinate.
+/// * `dst_y` - The destination Y coordinate.
 /// * `width` - The width of the area to copy (in pixels).
+/// * `height` - The height of the area to copy (in pixels).
 ///
 /// # Errors
 ///
@@ -15517,8 +15604,6 @@ where
     Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![])?)
 }
 
-/// BRIEF DESCRIPTION MISSING.
-///
 /// # Fields
 ///
 /// * `Origin` - Treats all coordinates as relative to the origin.
@@ -15595,7 +15680,6 @@ where
     let coordinate_mode_bytes = u8::from(coordinate_mode).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
-    let points_bytes = points.serialize();
     let mut request0 = [
         POLY_POINT_REQUEST,
         coordinate_mode_bytes[0],
@@ -15611,6 +15695,7 @@ where
         gc_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let points_bytes = points.serialize();
     let length_so_far = length_so_far + points_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -15637,8 +15722,9 @@ pub const POLY_LINE_REQUEST: u8 = 65;
 ///
 /// * `drawable` - The drawable to draw the line(s) on.
 /// * `gc` - The graphics context to use.
-/// * `points` - An array of points.
 /// * `points_len` - The number of `xcb_point_t` structures in `points`.
+/// * `points` - An array of points.
+/// * `coordinate_mode` -
 ///
 /// # Errors
 ///
@@ -15668,7 +15754,6 @@ where
     let coordinate_mode_bytes = u8::from(coordinate_mode).serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
-    let points_bytes = points.serialize();
     let mut request0 = [
         POLY_LINE_REQUEST,
         coordinate_mode_bytes[0],
@@ -15684,6 +15769,7 @@ where
         gc_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let points_bytes = points.serialize();
     let length_so_far = length_so_far + points_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -15763,8 +15849,8 @@ pub const POLY_SEGMENT_REQUEST: u8 = 66;
 /// * `gc` - The graphics context to use.
 ///
 /// TODO: document which attributes of a gc are used
-/// * `segments` - An array of `xcb_segment_t` structures.
 /// * `segments_len` - The number of `xcb_segment_t` structures in `segments`.
+/// * `segments` - An array of `xcb_segment_t` structures.
 ///
 /// # Errors
 ///
@@ -15778,7 +15864,6 @@ where
     let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
-    let segments_bytes = segments.serialize();
     let mut request0 = [
         POLY_SEGMENT_REQUEST,
         0,
@@ -15794,6 +15879,7 @@ where
         gc_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let segments_bytes = segments.serialize();
     let length_so_far = length_so_far + segments_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -15812,7 +15898,6 @@ where
     let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
-    let rectangles_bytes = rectangles.serialize();
     let mut request0 = [
         POLY_RECTANGLE_REQUEST,
         0,
@@ -15828,6 +15913,7 @@ where
         gc_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let rectangles_bytes = rectangles.serialize();
     let length_so_far = length_so_far + rectangles_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -15846,7 +15932,6 @@ where
     let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
-    let arcs_bytes = arcs.serialize();
     let mut request0 = [
         POLY_ARC_REQUEST,
         0,
@@ -15862,6 +15947,7 @@ where
         gc_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let arcs_bytes = arcs.serialize();
     let length_so_far = length_so_far + arcs_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -15947,7 +16033,6 @@ where
     let gc_bytes = gc.serialize();
     let shape_bytes = u8::from(shape).serialize();
     let coordinate_mode_bytes = u8::from(coordinate_mode).serialize();
-    let points_bytes = points.serialize();
     let mut request0 = [
         FILL_POLY_REQUEST,
         0,
@@ -15967,6 +16052,7 @@ where
         0,
     ];
     let length_so_far = length_so_far + request0.len();
+    let points_bytes = points.serialize();
     let length_so_far = length_so_far + points_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -15995,8 +16081,8 @@ pub const POLY_FILL_RECTANGLE_REQUEST: u8 = 70;
 /// The following graphics context mode-dependent components are used:
 /// foreground, background, tile, stipple, tile-stipple-x-origin, and
 /// tile-stipple-y-origin.
-/// * `rectangles` - The rectangles to fill.
 /// * `rectangles_len` - The number of `xcb_rectangle_t` structures in `rectangles`.
+/// * `rectangles` - The rectangles to fill.
 ///
 /// # Errors
 ///
@@ -16010,7 +16096,6 @@ where
     let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
-    let rectangles_bytes = rectangles.serialize();
     let mut request0 = [
         POLY_FILL_RECTANGLE_REQUEST,
         0,
@@ -16026,6 +16111,7 @@ where
         gc_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let rectangles_bytes = rectangles.serialize();
     let length_so_far = length_so_far + rectangles_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -16044,7 +16130,6 @@ where
     let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
-    let arcs_bytes = arcs.serialize();
     let mut request0 = [
         POLY_FILL_ARC_REQUEST,
         0,
@@ -16060,6 +16145,7 @@ where
         gc_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let arcs_bytes = arcs.serialize();
     let length_so_far = length_so_far + arcs_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -16245,7 +16331,7 @@ impl TryParse for GetImageReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (visual, remaining) = Visualid::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * (4))?;
+        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
         let result = GetImageReply { response_type, depth, sequence, visual, data };
         Ok((result, remaining))
     }
@@ -16351,16 +16437,16 @@ pub const IMAGE_TEXT8_REQUEST: u8 = 76;
 /// # Fields
 ///
 /// * `drawable` - The drawable (Window or Pixmap) to draw text on.
+/// * `string_len` - The length of the `string`. Note that this parameter limited by 255 due to
+/// using 8 bits!
+/// * `string` - The string to draw. Only the first 255 characters are relevant due to the data
+/// type of `string_len`.
+/// * `x` - The x coordinate of the first character, relative to the origin of `drawable`.
+/// * `y` - The y coordinate of the first character, relative to the origin of `drawable`.
 /// * `gc` - The graphics context to use.
 ///
 /// The following graphics context components are used: plane-mask, foreground,
 /// background, font, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
-/// * `string` - The string to draw. Only the first 255 characters are relevant due to the data
-/// type of `string_len`.
-/// * `string_len` - The length of the `string`. Note that this parameter limited by 255 due to
-/// using 8 bits!
-/// * `x` - The x coordinate of the first character, relative to the origin of `drawable`.
-/// * `y` - The y coordinate of the first character, relative to the origin of `drawable`.
 ///
 /// # Errors
 ///
@@ -16376,7 +16462,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
-    let string_len: u8 = string.len().try_into()?;
+    let string_len = u8::try_from(string.len()).expect("`string` has too many elements");
     let string_len_bytes = string_len.serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
@@ -16426,17 +16512,17 @@ pub const IMAGE_TEXT16_REQUEST: u8 = 77;
 /// # Fields
 ///
 /// * `drawable` - The drawable (Window or Pixmap) to draw text on.
+/// * `string_len` - The length of the `string` in characters. Note that this parameter limited by
+/// 255 due to using 8 bits!
+/// * `string` - The string to draw. Only the first 255 characters are relevant due to the data
+/// type of `string_len`. Every character uses 2 bytes (hence the 16 in this
+/// request's name).
+/// * `x` - The x coordinate of the first character, relative to the origin of `drawable`.
+/// * `y` - The y coordinate of the first character, relative to the origin of `drawable`.
 /// * `gc` - The graphics context to use.
 ///
 /// The following graphics context components are used: plane-mask, foreground,
 /// background, font, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
-/// * `string` - The string to draw. Only the first 255 characters are relevant due to the data
-/// type of `string_len`. Every character uses 2 bytes (hence the 16 in this
-/// request's name).
-/// * `string_len` - The length of the `string` in characters. Note that this parameter limited by
-/// 255 due to using 8 bits!
-/// * `x` - The x coordinate of the first character, relative to the origin of `drawable`.
-/// * `y` - The y coordinate of the first character, relative to the origin of `drawable`.
 ///
 /// # Errors
 ///
@@ -16452,13 +16538,12 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
-    let string_len: u8 = string.len().try_into()?;
+    let string_len = u8::try_from(string.len()).expect("`string` has too many elements");
     let string_len_bytes = string_len.serialize();
     let drawable_bytes = drawable.serialize();
     let gc_bytes = gc.serialize();
     let x_bytes = x.serialize();
     let y_bytes = y.serialize();
-    let string_bytes = string.serialize();
     let mut request0 = [
         IMAGE_TEXT16_REQUEST,
         string_len_bytes[0],
@@ -16478,6 +16563,7 @@ where
         y_bytes[1],
     ];
     let length_so_far = length_so_far + request0.len();
+    let string_bytes = string.serialize();
     let length_so_far = length_so_far + string_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -16754,10 +16840,10 @@ pub const ALLOC_COLOR_REQUEST: u8 = 84;
 ///
 /// # Fields
 ///
-/// * `blue` - The blue value of your color.
 /// * `cmap` - TODO
-/// * `green` - The green value of your color.
 /// * `red` - The red value of your color.
+/// * `green` - The green value of your color.
+/// * `blue` - The blue value of your color.
 ///
 /// # Errors
 ///
@@ -16836,7 +16922,7 @@ where
 {
     let length_so_far = 0;
     let cmap_bytes = cmap.serialize();
-    let name_len: u16 = name.len().try_into()?;
+    let name_len = u16::try_from(name.len()).expect("`name` has too many elements");
     let name_len_bytes = name_len.serialize();
     let mut request0 = [
         ALLOC_NAMED_COLOR_REQUEST,
@@ -17042,7 +17128,6 @@ where
     let length_so_far = 0;
     let cmap_bytes = cmap.serialize();
     let plane_mask_bytes = plane_mask.serialize();
-    let pixels_bytes = pixels.serialize();
     let mut request0 = [
         FREE_COLORS_REQUEST,
         0,
@@ -17058,6 +17143,7 @@ where
         plane_mask_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let pixels_bytes = pixels.serialize();
     let length_so_far = length_so_far + pixels_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -17201,7 +17287,6 @@ where
 {
     let length_so_far = 0;
     let cmap_bytes = cmap.serialize();
-    let items_bytes = items.serialize();
     let mut request0 = [
         STORE_COLORS_REQUEST,
         0,
@@ -17213,6 +17298,7 @@ where
         cmap_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let items_bytes = items.serialize();
     let length_so_far = length_so_far + items_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -17224,15 +17310,17 @@ where
 
 /// Opcode for the StoreNamedColor request
 pub const STORE_NAMED_COLOR_REQUEST: u8 = 90;
-pub fn store_named_color<'c, Conn>(conn: &'c Conn, flags: u8, cmap: Colormap, pixel: u32, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn store_named_color<'c, Conn, A>(conn: &'c Conn, flags: A, cmap: Colormap, pixel: u32, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<u8>,
 {
+    let flags: u8 = flags.into();
     let length_so_far = 0;
     let flags_bytes = flags.serialize();
     let cmap_bytes = cmap.serialize();
     let pixel_bytes = pixel.serialize();
-    let name_len: u16 = name.len().try_into()?;
+    let name_len = u16::try_from(name.len()).expect("`name` has too many elements");
     let name_len_bytes = name_len.serialize();
     let mut request0 = [
         STORE_NAMED_COLOR_REQUEST,
@@ -17318,7 +17406,6 @@ where
 {
     let length_so_far = 0;
     let cmap_bytes = cmap.serialize();
-    let pixels_bytes = pixels.serialize();
     let mut request0 = [
         QUERY_COLORS_REQUEST,
         0,
@@ -17330,6 +17417,7 @@ where
         cmap_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let pixels_bytes = pixels.serialize();
     let length_so_far = length_so_far + pixels_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -17374,7 +17462,7 @@ where
 {
     let length_so_far = 0;
     let cmap_bytes = cmap.serialize();
-    let name_len: u16 = name.len().try_into()?;
+    let name_len = u16::try_from(name.len()).expect("`name` has too many elements");
     let name_len_bytes = name_len.serialize();
     let mut request0 = [
         LOOKUP_COLOR_REQUEST,
@@ -17496,10 +17584,12 @@ impl TryFrom<u32> for PixmapEnum {
 
 /// Opcode for the CreateCursor request
 pub const CREATE_CURSOR_REQUEST: u8 = 93;
-pub fn create_cursor<Conn>(conn: &Conn, cid: Cursor, source: Pixmap, mask: Pixmap, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_cursor<Conn, A>(conn: &Conn, cid: Cursor, source: Pixmap, mask: A, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<Pixmap>,
 {
+    let mask: Pixmap = mask.into();
     let length_so_far = 0;
     let cid_bytes = cid.serialize();
     let source_bytes = source.serialize();
@@ -17628,29 +17718,31 @@ pub const CREATE_GLYPH_CURSOR_REQUEST: u8 = 94;
 ///
 /// # Fields
 ///
-/// * `back_blue` - The blue value of the background color.
-/// * `back_green` - The green value of the background color.
-/// * `back_red` - The red value of the background color.
 /// * `cid` - The ID with which you will refer to the cursor, created by `xcb_generate_id`.
-/// * `fore_blue` - The blue value of the foreground color.
-/// * `fore_green` - The green value of the foreground color.
-/// * `fore_red` - The red value of the foreground color.
+/// * `source_font` - In which font to look for the cursor glyph.
+/// * `mask_font` - In which font to look for the mask glyph.
+/// * `source_char` - The glyph of `source_font` to use.
 /// * `mask_char` - The glyph of `mask_font` to use as a mask: Pixels which are set to 1 define
 /// which source pixels are displayed. All pixels which are set to 0 are not
 /// displayed.
-/// * `mask_font` - In which font to look for the mask glyph.
-/// * `source_char` - The glyph of `source_font` to use.
-/// * `source_font` - In which font to look for the cursor glyph.
+/// * `fore_red` - The red value of the foreground color.
+/// * `fore_green` - The green value of the foreground color.
+/// * `fore_blue` - The blue value of the foreground color.
+/// * `back_red` - The red value of the background color.
+/// * `back_green` - The green value of the background color.
+/// * `back_blue` - The blue value of the background color.
 ///
 /// # Errors
 ///
 /// * `Alloc` - The X server could not allocate the requested resources (no memory?).
 /// * `Font` - The specified `source_font` or `mask_font` does not exist.
 /// * `Value` - Either `source_char` or `mask_char` are not defined in `source_font` or `mask_font`, respectively.
-pub fn create_glyph_cursor<Conn>(conn: &Conn, cid: Cursor, source_font: Font, mask_font: Font, source_char: u16, mask_char: u16, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn create_glyph_cursor<Conn, A>(conn: &Conn, cid: Cursor, source_font: Font, mask_font: A, source_char: u16, mask_char: u16, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<Font>,
 {
+    let mask_font: Font = mask_font.into();
     let length_so_far = 0;
     let cid_bytes = cid.serialize();
     let source_font_bytes = source_font.serialize();
@@ -17924,20 +18016,20 @@ pub const QUERY_EXTENSION_REQUEST: u8 = 98;
 ///
 /// # Fields
 ///
+/// * `name_len` - The length of `name` in bytes.
 /// * `name` - The name of the extension to query, for example "RANDR". This is case
 /// sensitive!
-/// * `name_len` - The length of `name` in bytes.
 ///
 /// # See
 ///
-/// * `xcb_get_extension_data`: function
 /// * `xdpyinfo`: program
+/// * `xcb_get_extension_data`: function
 pub fn query_extension<'c, Conn>(conn: &'c Conn, name: &[u8]) -> Result<Cookie<'c, Conn, QueryExtensionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
-    let name_len: u16 = name.len().try_into()?;
+    let name_len = u16::try_from(name.len()).expect("`name` has too many elements");
     let name_len_bytes = name_len.serialize();
     let mut request0 = [
         QUERY_EXTENSION_REQUEST,
@@ -17959,14 +18051,12 @@ where
     Ok(conn.send_request_with_reply(&[IoSlice::new(&request0), IoSlice::new(name), IoSlice::new(&padding0)], vec![])?)
 }
 
-/// BRIEF DESCRIPTION MISSING.
-///
 /// # Fields
 ///
-/// * `first_error` - The first error code, if any.
-/// * `first_event` - The first event code, if any.
-/// * `major_opcode` - The major opcode for requests.
 /// * `present` - Whether the extension is present on this X11 server.
+/// * `major_opcode` - The major opcode for requests.
+/// * `first_event` - The first event code, if any.
+/// * `first_error` - The first error code, if any.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct QueryExtensionReply {
     pub response_type: u8,
@@ -18054,8 +18144,6 @@ where
     let keycode_count_bytes = keycode_count.serialize();
     let first_keycode_bytes = first_keycode.serialize();
     let keysyms_per_keycode_bytes = keysyms_per_keycode.serialize();
-    assert_eq!(keysyms.len(), (keycode_count as usize) * (keysyms_per_keycode as usize), "Argument keysyms has an incorrect length");
-    let keysyms_bytes = keysyms.serialize();
     let mut request0 = [
         CHANGE_KEYBOARD_MAPPING_REQUEST,
         keycode_count_bytes[0],
@@ -18067,6 +18155,8 @@ where
         0,
     ];
     let length_so_far = length_so_far + request0.len();
+    assert_eq!(keysyms.len(), (keycode_count as usize) * (keysyms_per_keycode as usize), "`keysyms` has an incorrect length");
+    let keysyms_bytes = keysyms.serialize();
     let length_so_far = length_so_far + keysyms_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -18092,7 +18182,7 @@ where
         0,
         first_keycode_bytes[0],
         count_bytes[0],
-        0 /* trailing padding */,
+        0,
         0,
     ];
     let length_so_far = length_so_far + request0.len();
@@ -18358,64 +18448,67 @@ impl Serialize for ChangeKeyboardControlAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.key_click_percent {
-            value.serialize_into(bytes);
+        if let Some(key_click_percent) = self.key_click_percent {
+            key_click_percent.serialize_into(bytes);
         }
-        if let Some(ref value) = self.bell_percent {
-            value.serialize_into(bytes);
+        if let Some(bell_percent) = self.bell_percent {
+            bell_percent.serialize_into(bytes);
         }
-        if let Some(ref value) = self.bell_pitch {
-            value.serialize_into(bytes);
+        if let Some(bell_pitch) = self.bell_pitch {
+            bell_pitch.serialize_into(bytes);
         }
-        if let Some(ref value) = self.bell_duration {
-            value.serialize_into(bytes);
+        if let Some(bell_duration) = self.bell_duration {
+            bell_duration.serialize_into(bytes);
         }
-        if let Some(ref value) = self.led {
-            value.serialize_into(bytes);
+        if let Some(led) = self.led {
+            led.serialize_into(bytes);
         }
-        if let Some(ref value) = self.led_mode {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(led_mode) = self.led_mode {
+            u32::from(led_mode).serialize_into(bytes);
         }
-        if let Some(ref value) = self.key {
-            value.serialize_into(bytes);
+        if let Some(key) = self.key {
+            key.serialize_into(bytes);
         }
-        if let Some(ref value) = self.auto_repeat_mode {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(auto_repeat_mode) = self.auto_repeat_mode {
+            u32::from(auto_repeat_mode).serialize_into(bytes);
         }
+    }
+}
+impl ChangeKeyboardControlAux {
+    #[allow(dead_code)]
+    fn switch_expr(&self) -> u32 {
+        let mut expr_value: u32 = 0;
+        if self.key_click_percent.is_some() {
+            expr_value |= u32::from(KB::KeyClickPercent);
+        }
+        if self.bell_percent.is_some() {
+            expr_value |= u32::from(KB::BellPercent);
+        }
+        if self.bell_pitch.is_some() {
+            expr_value |= u32::from(KB::BellPitch);
+        }
+        if self.bell_duration.is_some() {
+            expr_value |= u32::from(KB::BellDuration);
+        }
+        if self.led.is_some() {
+            expr_value |= u32::from(KB::Led);
+        }
+        if self.led_mode.is_some() {
+            expr_value |= u32::from(KB::LedMode);
+        }
+        if self.key.is_some() {
+            expr_value |= u32::from(KB::Key);
+        }
+        if self.auto_repeat_mode.is_some() {
+            expr_value |= u32::from(KB::AutoRepeatMode);
+        }
+        expr_value
     }
 }
 impl ChangeKeyboardControlAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
         Default::default()
-    }
-    fn value_mask(&self) -> u32 {
-        let mut mask = 0;
-        if self.key_click_percent.is_some() {
-            mask |= u32::from(KB::KeyClickPercent);
-        }
-        if self.bell_percent.is_some() {
-            mask |= u32::from(KB::BellPercent);
-        }
-        if self.bell_pitch.is_some() {
-            mask |= u32::from(KB::BellPitch);
-        }
-        if self.bell_duration.is_some() {
-            mask |= u32::from(KB::BellDuration);
-        }
-        if self.led.is_some() {
-            mask |= u32::from(KB::Led);
-        }
-        if self.led_mode.is_some() {
-            mask |= u32::from(KB::LedMode);
-        }
-        if self.key.is_some() {
-            mask |= u32::from(KB::Key);
-        }
-        if self.auto_repeat_mode.is_some() {
-            mask |= u32::from(KB::AutoRepeatMode);
-        }
-        mask
     }
     /// Set the `key_click_percent` field of this structure.
     pub fn key_click_percent<I>(mut self, value: I) -> Self where I: Into<Option<i32>> {
@@ -18458,13 +18551,13 @@ impl ChangeKeyboardControlAux {
         self
     }
 }
+
 pub fn change_keyboard_control<'c, Conn>(conn: &'c Conn, value_list: &ChangeKeyboardControlAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
-    let value_mask = value_list.value_mask();
-    let value_list_bytes = value_list.serialize();
     let length_so_far = 0;
+    let value_mask = value_list.switch_expr();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
         CHANGE_KEYBOARD_CONTROL_REQUEST,
@@ -18477,6 +18570,7 @@ where
         value_mask_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let value_list_bytes = value_list.serialize();
     let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -18865,7 +18959,7 @@ where
         interval_bytes[1],
         prefer_blanking_bytes[0],
         allow_exposures_bytes[0],
-        0 /* trailing padding */,
+        0,
         0,
     ];
     let length_so_far = length_so_far + request0.len();
@@ -19071,7 +19165,7 @@ where
     let length_so_far = 0;
     let mode_bytes = u8::from(mode).serialize();
     let family_bytes = u8::from(family).serialize();
-    let address_len: u16 = address.len().try_into()?;
+    let address_len = u16::try_from(address.len()).expect("`address` has too many elements");
     let address_len_bytes = address_len.serialize();
     let mut request0 = [
         CHANGE_HOSTS_REQUEST,
@@ -19436,10 +19530,12 @@ pub const KILL_CLIENT_REQUEST: u8 = 113;
 /// # See
 ///
 /// * `xkill`: program
-pub fn kill_client<Conn>(conn: &Conn, resource: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn kill_client<Conn, A>(conn: &Conn, resource: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<u32>,
 {
+    let resource: u32 = resource.into();
     let length_so_far = 0;
     let resource_bytes = resource.serialize();
     let mut request0 = [
@@ -19467,10 +19563,9 @@ where
 {
     let length_so_far = 0;
     let window_bytes = window.serialize();
-    let atoms_len: u16 = atoms.len().try_into()?;
+    let atoms_len = u16::try_from(atoms.len()).expect("`atoms` has too many elements");
     let atoms_len_bytes = atoms_len.serialize();
     let delta_bytes = delta.serialize();
-    let atoms_bytes = atoms.serialize();
     let mut request0 = [
         ROTATE_PROPERTIES_REQUEST,
         0,
@@ -19486,6 +19581,7 @@ where
         delta_bytes[1],
     ];
     let length_so_far = length_so_far + request0.len();
+    let atoms_bytes = atoms.serialize();
     let length_so_far = length_so_far + atoms_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -19650,7 +19746,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
-    let map_len: u8 = map.len().try_into()?;
+    let map_len = u8::try_from(map.len()).expect("`map` has too many elements");
     let map_len_bytes = map_len.serialize();
     let mut request0 = [
         SET_POINTER_MAPPING_REQUEST,
@@ -19826,8 +19922,8 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
-    assert_eq!(0, keycodes.len() % 8, "Argument keycodes_per_modifier has an incorrect length, must be a multiple of 8");
-    let keycodes_per_modifier = u8::try_from(keycodes.len() / 8).unwrap();
+    assert_eq!(keycodes.len() % 8, 0, "`keycodes` has an incorrect length, must be a multiple of 8");
+    let keycodes_per_modifier = u8::try_from(keycodes.len() / 8).expect("`keycodes` has too many elements");
     let keycodes_per_modifier_bytes = keycodes_per_modifier.serialize();
     let mut request0 = [
         SET_MODIFIER_MAPPING_REQUEST,
@@ -19904,7 +20000,7 @@ impl TryParse for GetModifierMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let (keycodes, remaining) = crate::x11_utils::parse_list::<Keycode>(remaining, (keycodes_per_modifier as usize) * (8))?;
+        let (keycodes, remaining) = crate::x11_utils::parse_list::<Keycode>(remaining, (keycodes_per_modifier as usize) * 8)?;
         let result = GetModifierMappingReply { response_type, sequence, length, keycodes };
         Ok((result, remaining))
     }
@@ -19957,40 +20053,41 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
-    /// * `border_width` - TODO:
-    ///
-    /// Must be zero if the `class` is `InputOnly` or a `xcb_match_error_t` occurs.
+    /// * `wid` - The ID with which you will refer to the new window, created by
+    /// `xcb_generate_id`.
     /// * `depth` - Specifies the new window's depth (TODO: what unit?).
     ///
     /// The special value `XCB_COPY_FROM_PARENT` means the depth is taken from the
     /// `parent` window.
-    /// * `height` - The height of the new window.
-    /// * `parent` - The parent window of the new window.
     /// * `visual` - Specifies the id for the new window's visual.
     ///
     /// The special value `XCB_COPY_FROM_PARENT` means the visual is taken from the
     /// `parent` window.
-    /// * `wid` - The ID with which you will refer to the new window, created by
-    /// `xcb_generate_id`.
-    /// * `width` - The width of the new window.
+    /// * `class` -
+    /// * `parent` - The parent window of the new window.
+    /// * `border_width` - TODO:
+    ///
+    /// Must be zero if the `class` is `InputOnly` or a `xcb_match_error_t` occurs.
     /// * `x` - The X coordinate of the new window.
     /// * `y` - The Y coordinate of the new window.
+    /// * `width` - The width of the new window.
+    /// * `height` - The height of the new window.
     ///
     /// # Errors
     ///
-    /// * `Alloc` - The X server could not allocate the requested resources (no memory?).
     /// * `Colormap` - TODO: reasons?
-    /// * `Cursor` - TODO: reasons?
     /// * `Match` - TODO: reasons?
+    /// * `Cursor` - TODO: reasons?
     /// * `Pixmap` - TODO: reasons?
     /// * `Value` - TODO: reasons?
     /// * `Window` - TODO: reasons?
+    /// * `Alloc` - The X server could not allocate the requested resources (no memory?).
     ///
     /// # See
     ///
-    /// * `CreateNotify`: event
-    /// * `MapWindow`: request
     /// * `xcb_generate_id`: function
+    /// * `MapWindow`: request
+    /// * `CreateNotify`: event
     fn create_window<'c>(&'c self, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_window(self, depth, wid, parent, x, y, width, height, border_width, class, visual, value_list)
@@ -20001,10 +20098,11 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
+    /// * `window` - The window to change.
+    /// * `value_mask` -
     /// * `value_list` - Values for each of the attributes specified in the bitmask `value_mask`. The
     /// order has to correspond to the order of possible `value_mask` bits. See the
     /// example.
-    /// * `window` - The window to change.
     ///
     /// # Errors
     ///
@@ -20029,8 +20127,8 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Errors
     ///
-    /// * `Drawable` - TODO: reasons?
     /// * `Window` - The specified `window` does not exist.
+    /// * `Drawable` - TODO: reasons?
     fn get_window_attributes(&self, window: Window) -> Result<Cookie<'_, Self, GetWindowAttributesReply>, ConnectionError>
     {
         get_window_attributes(self, window)
@@ -20080,7 +20178,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # Errors
     ///
     /// * `Match` - You created the specified window. This does not make sense, you can only add
-    ///windows created by other clients to your save set.
+    /// windows created by other clients to your save set.
     /// * `Value` - You specified an invalid mode.
     /// * `Window` - The specified window does not exist.
     ///
@@ -20102,26 +20200,26 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
-    /// * `parent` - The new parent of the window.
     /// * `window` - The window to reparent.
+    /// * `parent` - The new parent of the window.
     /// * `x` - The X position of the window within its new parent.
     /// * `y` - The Y position of the window within its new parent.
     ///
     /// # Errors
     ///
     /// * `Match` - The new parent window is not on the same screen as the old parent window.
-    ///
-    ///The new parent window is the specified window or an inferior of the specified window.
-    ///
-    ///The new parent is InputOnly and the window is not.
-    ///
-    ///The specified window has a ParentRelative background and the new parent window is not the same depth as the specified window.
+    /// 
+    /// The new parent window is the specified window or an inferior of the specified window.
+    /// 
+    /// The new parent is InputOnly and the window is not.
+    /// 
+    /// The specified window has a ParentRelative background and the new parent window is not the same depth as the specified window.
     /// * `Window` - The specified window does not exist.
     ///
     /// # See
     ///
-    /// * `MapWindow`: request
     /// * `ReparentNotify`: event
+    /// * `MapWindow`: request
     /// * `UnmapWindow`: request
     fn reparent_window(&self, window: Window, parent: Window, x: i16, y: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
@@ -20159,8 +20257,8 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * `Expose`: event
     /// * `MapNotify`: event
+    /// * `Expose`: event
     /// * `UnmapWindow`: request
     fn map_window(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
@@ -20188,9 +20286,9 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
+    /// * `UnmapNotify`: event
     /// * `Expose`: event
     /// * `MapWindow`: request
-    /// * `UnmapNotify`: event
     fn unmap_window(&self, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         unmap_window(self, window)
@@ -20205,22 +20303,22 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
+    /// * `window` - The window to configure.
+    /// * `value_mask` - Bitmask of attributes to change.
     /// * `value_list` - New values, corresponding to the attributes in value_mask. The order has to
     /// correspond to the order of possible `value_mask` bits. See the example.
-    /// * `value_mask` - Bitmask of attributes to change.
-    /// * `window` - The window to configure.
     ///
     /// # Errors
     ///
     /// * `Match` - You specified a Sibling without also specifying StackMode or the window is not
-    ///actually a Sibling.
-    /// * `Value` - TODO: reasons?
+    /// actually a Sibling.
     /// * `Window` - The specified window does not exist. TODO: any other reason?
+    /// * `Value` - TODO: reasons?
     ///
     /// # See
     ///
-    /// * `Expose`: event
     /// * `MapNotify`: event
+    /// * `Expose`: event
     ///
     /// # Example
     ///
@@ -20263,12 +20361,13 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
+    /// * `direction` -
     /// * `window` - The window to raise/lower (depending on `direction`).
     ///
     /// # Errors
     ///
-    /// * `Value` - The specified `direction` is invalid.
     /// * `Window` - The specified `window` does not exist.
+    /// * `Value` - The specified `direction` is invalid.
     fn circulate_window(&self, direction: Circulate, window: Window) -> Result<VoidCookie<'_, Self>, ConnectionError>
     {
         circulate_window(self, direction, window)
@@ -20366,8 +20465,8 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
-    /// * `name` - The name of the atom.
     /// * `name_len` - The length of the following `name`.
+    /// * `name` - The name of the atom.
     /// * `only_if_exists` - Return a valid atom id only if the atom already exists.
     ///
     /// # Errors
@@ -20377,8 +20476,8 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # See
     ///
-    /// * `GetAtomName`: request
     /// * `xlsatoms`: program
+    /// * `GetAtomName`: request
     ///
     /// # Example
     ///
@@ -20416,22 +20515,23 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
-    /// * `data` - The property data.
-    /// * `data_len` - Specifies the number of elements (see `format`).
+    /// * `window` - The window whose property you want to change.
+    /// * `mode` -
+    /// * `property` - The property you want to change (an atom).
+    /// * `type` - The type of the property you want to change (an atom).
     /// * `format` - Specifies whether the data should be viewed as a list of 8-bit, 16-bit or
     /// 32-bit quantities. Possible values are 8, 16 and 32. This information allows
     /// the X server to correctly perform byte-swap operations as necessary.
-    /// * `property` - The property you want to change (an atom).
-    /// * `type` - The type of the property you want to change (an atom).
-    /// * `window` - The window whose property you want to change.
+    /// * `data_len` - Specifies the number of elements (see `format`).
+    /// * `data` - The property data.
     ///
     /// # Errors
     ///
-    /// * `Alloc` - The X server could not store the property (no memory?).
-    /// * `Atom` - `property` or `type` do not refer to a valid atom.
     /// * `Match` - TODO: reasons?
     /// * `Value` - TODO: reasons?
     /// * `Window` - The specified `window` does not exist.
+    /// * `Atom` - `property` or `type` do not refer to a valid atom.
+    /// * `Alloc` - The X server could not store the property (no memory?).
     ///
     /// # See
     ///
@@ -20483,23 +20583,23 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
+    /// * `window` - The window whose property you want to get.
     /// * `delete` - Whether the property should actually be deleted. For deleting a property, the
     /// specified `type` has to match the actual property type.
-    /// * `long_length` - Specifies how many 32-bit multiples of data should be retrieved (e.g. if you
-    /// set `long_length` to 4, you will receive 16 bytes of data).
-    /// * `long_offset` - Specifies the offset (in 32-bit multiples) in the specified property where the
-    /// data is to be retrieved.
     /// * `property` - The property you want to get (an atom).
     /// * `type` - The type of the property you want to get (an atom).
-    /// * `window` - The window whose property you want to get.
+    /// * `long_offset` - Specifies the offset (in 32-bit multiples) in the specified property where the
+    /// data is to be retrieved.
+    /// * `long_length` - Specifies how many 32-bit multiples of data should be retrieved (e.g. if you
+    /// set `long_length` to 4, you will receive 16 bytes of data).
     ///
     /// # Errors
     ///
+    /// * `Window` - The specified `window` does not exist.
     /// * `Atom` - `property` or `type` do not refer to a valid atom.
     /// * `Value` - The specified `long_offset` is beyond the actual property length (e.g. the
-    ///property has a length of 3 bytes and you are setting `long_offset` to 1,
-    ///resulting in a byte offset of 4).
-    /// * `Window` - The specified `window` does not exist.
+    /// property has a length of 3 bytes and you are setting `long_offset` to 1,
+    /// resulting in a byte offset of 4).
     ///
     /// # See
     ///
@@ -20536,7 +20636,10 @@ pub trait ConnectionExt: RequestConnection {
     ///     free(reply);
     /// }
     /// ```
-    fn get_property(&self, delete: bool, window: Window, property: Atom, type_: Atom, long_offset: u32, long_length: u32) -> Result<Cookie<'_, Self, GetPropertyReply>, ConnectionError>
+    fn get_property<A, B>(&self, delete: bool, window: Window, property: A, type_: B, long_offset: u32, long_length: u32) -> Result<Cookie<'_, Self, GetPropertyReply>, ConnectionError>
+    where
+        A: Into<Atom>,
+        B: Into<Atom>,
     {
         get_property(self, delete, window, property, type_, long_offset, long_length)
     }
@@ -20553,10 +20656,10 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
+    /// * `selection` - The selection.
     /// * `owner` - The new owner of the selection.
     ///
     /// The special value `XCB_NONE` means that the selection will have no owner.
-    /// * `selection` - The selection.
     /// * `time` - Timestamp to avoid race conditions when running X over the network.
     ///
     /// The selection will not be changed if `time` is earlier than the current
@@ -20573,7 +20676,10 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * `SetSelectionOwner`: request
-    fn set_selection_owner(&self, owner: Window, selection: Atom, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn set_selection_owner<A, B>(&self, owner: A, selection: Atom, time: B) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<Window>,
+        B: Into<Timestamp>,
     {
         set_selection_owner(self, owner, selection, time)
     }
@@ -20598,7 +20704,10 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_selection_owner(self, selection)
     }
-    fn convert_selection(&self, requestor: Window, selection: Atom, target: Atom, property: Atom, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn convert_selection<A, B>(&self, requestor: Window, selection: Atom, target: Atom, property: A, time: B) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<Atom>,
+        B: Into<Timestamp>,
     {
         convert_selection(self, requestor, selection, target, property, time)
     }
@@ -20622,7 +20731,6 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// The special value `XCB_SEND_EVENT_DEST_ITEM_FOCUS` refers to the window which
     /// has the keyboard focus.
-    /// * `event` - The event to send to the specified `destination`.
     /// * `event_mask` - Event_mask for determining which clients should receive the specified event.
     /// See `destination` and `propagate`.
     /// * `propagate` - If `propagate` is true and no clients have selected any event on `destination`,
@@ -20633,11 +20741,12 @@ pub trait ConnectionExt: RequestConnection {
     /// `InputFocus` was originally specified as the destination, the event is not sent
     /// to any clients. Otherwise, the event is reported to every client selecting on
     /// the final destination any of the types specified in `event_mask`.
+    /// * `event` - The event to send to the specified `destination`.
     ///
     /// # Errors
     ///
-    /// * `Value` - The given `event` is neither a core event nor an event defined by an extension.
     /// * `Window` - The specified `destination` window does not exist.
+    /// * `Value` - The given `event` is neither a core event nor an event defined by an extension.
     ///
     /// # See
     ///
@@ -20675,9 +20784,11 @@ pub trait ConnectionExt: RequestConnection {
     ///     free(event);
     /// }
     /// ```
-    fn send_event<A>(&self, propagate: bool, destination: Window, event_mask: u32, event: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn send_event<A, B, C>(&self, propagate: bool, destination: A, event_mask: B, event: C) -> Result<VoidCookie<'_, Self>, ConnectionError>
     where
-        A: Into<[u8; 32]>,
+        A: Into<Window>,
+        B: Into<u32>,
+        C: Into<[u8; 32]>,
     {
         send_event(self, propagate, destination, event_mask, event)
     }
@@ -20687,18 +20798,18 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
+    /// * `event_mask` - Specifies which pointer events are reported to the client.
+    ///
+    /// TODO: which values?
     /// * `confine_to` - Specifies the window to confine the pointer in (the user will not be able to
     /// move the pointer out of that window).
     ///
     /// The special value `XCB_NONE` means don't confine the pointer.
     /// * `cursor` - Specifies the cursor that should be displayed or `XCB_NONE` to not change the
     /// cursor.
-    /// * `event_mask` - Specifies which pointer events are reported to the client.
-    ///
-    /// TODO: which values?
-    /// * `grab_window` - Specifies the window on which the pointer should be grabbed.
     /// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
     /// reported to the `grab_window`.
+    /// * `grab_window` - Specifies the window on which the pointer should be grabbed.
     /// * `time` - The time argument allows you to avoid certain circumstances that come up if
     /// applications take a long time to respond or if there are long network delays.
     /// Consider a situation where you have two applications, both of which normally
@@ -20710,6 +20821,8 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// The special value `XCB_CURRENT_TIME` will be replaced with the current server
     /// time.
+    /// * `pointer_mode` -
+    /// * `keyboard_mode` -
     ///
     /// # Errors
     ///
@@ -20750,7 +20863,12 @@ pub trait ConnectionExt: RequestConnection {
     ///     }
     /// }
     /// ```
-    fn grab_pointer(&self, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: Window, cursor: Cursor, time: Timestamp) -> Result<Cookie<'_, Self, GrabPointerReply>, ConnectionError>
+    fn grab_pointer<A, B, C, D>(&self, owner_events: bool, grab_window: Window, event_mask: A, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: B, cursor: C, time: D) -> Result<Cookie<'_, Self, GrabPointerReply>, ConnectionError>
+    where
+        A: Into<u16>,
+        B: Into<Window>,
+        C: Into<Cursor>,
+        D: Into<Timestamp>,
     {
         grab_pointer(self, owner_events, grab_window, event_mask, pointer_mode, keyboard_mode, confine_to, cursor, time)
     }
@@ -20764,20 +20882,22 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
-    /// * `name` - A pattern describing an X core font.
-    /// * `name_len` - Length (in bytes) of `name`.
     /// * `time` - Timestamp to avoid race conditions when running X over the network.
     ///
     /// The pointer will not be released if `time` is earlier than the
     /// last-pointer-grab time or later than the current X server time.
+    /// * `name_len` - Length (in bytes) of `name`.
+    /// * `name` - A pattern describing an X core font.
     ///
     /// # See
     ///
-    /// * `EnterNotify`: event
-    /// * `GrabButton`: request
     /// * `GrabPointer`: request
+    /// * `GrabButton`: request
+    /// * `EnterNotify`: event
     /// * `LeaveNotify`: event
-    fn ungrab_pointer(&self, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn ungrab_pointer<A>(&self, time: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<Timestamp>,
     {
         ungrab_pointer(self, time)
     }
@@ -20821,39 +20941,53 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
+    /// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
+    /// reported to the `grab_window`.
+    /// * `grab_window` - Specifies the window on which the pointer should be grabbed.
+    /// * `event_mask` - Specifies which pointer events are reported to the client.
+    ///
+    /// TODO: which values?
     /// * `confine_to` - Specifies the window to confine the pointer in (the user will not be able to
     /// move the pointer out of that window).
     ///
     /// The special value `XCB_NONE` means don't confine the pointer.
     /// * `cursor` - Specifies the cursor that should be displayed or `XCB_NONE` to not change the
     /// cursor.
-    /// * `event_mask` - Specifies which pointer events are reported to the client.
-    ///
-    /// TODO: which values?
-    /// * `grab_window` - Specifies the window on which the pointer should be grabbed.
     /// * `modifiers` - The modifiers to grab.
     ///
     /// Using the special value `XCB_MOD_MASK_ANY` means grab the pointer with all
     /// possible modifier combinations.
-    /// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
-    /// reported to the `grab_window`.
+    /// * `pointer_mode` -
+    /// * `keyboard_mode` -
+    /// * `button` -
     ///
     /// # Errors
     ///
     /// * `Access` - Another client has already issued a GrabButton with the same button/key
-    ///combination on the same window.
-    /// * `Cursor` - The specified `cursor` does not exist.
+    /// combination on the same window.
     /// * `Value` - TODO: reasons?
+    /// * `Cursor` - The specified `cursor` does not exist.
     /// * `Window` - The specified `window` does not exist.
-    fn grab_button(&self, owner_events: bool, grab_window: Window, event_mask: u16, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: Window, cursor: Cursor, button: ButtonIndex, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn grab_button<A, B, C, D>(&self, owner_events: bool, grab_window: Window, event_mask: A, pointer_mode: GrabMode, keyboard_mode: GrabMode, confine_to: B, cursor: C, button: ButtonIndex, modifiers: D) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<u16>,
+        B: Into<Window>,
+        C: Into<Cursor>,
+        D: Into<u16>,
     {
         grab_button(self, owner_events, grab_window, event_mask, pointer_mode, keyboard_mode, confine_to, cursor, button, modifiers)
     }
-    fn ungrab_button(&self, button: ButtonIndex, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn ungrab_button<A>(&self, button: ButtonIndex, grab_window: Window, modifiers: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<u16>,
     {
         ungrab_button(self, button, grab_window, modifiers)
     }
-    fn change_active_pointer_grab(&self, cursor: Cursor, time: Timestamp, event_mask: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn change_active_pointer_grab<A, B, C>(&self, cursor: A, time: B, event_mask: C) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<Cursor>,
+        B: Into<Timestamp>,
+        C: Into<u16>,
     {
         change_active_pointer_grab(self, cursor, time, event_mask)
     }
@@ -20872,13 +21006,15 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
-    /// * `grab_window` - Specifies the window on which the pointer should be grabbed.
     /// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
     /// reported to the `grab_window`.
+    /// * `grab_window` - Specifies the window on which the pointer should be grabbed.
     /// * `time` - Timestamp to avoid race conditions when running X over the network.
     ///
     /// The special value `XCB_CURRENT_TIME` will be replaced with the current server
     /// time.
+    /// * `pointer_mode` -
+    /// * `keyboard_mode` -
     ///
     /// # Errors
     ///
@@ -20917,11 +21053,15 @@ pub trait ConnectionExt: RequestConnection {
     ///     }
     /// }
     /// ```
-    fn grab_keyboard(&self, owner_events: bool, grab_window: Window, time: Timestamp, pointer_mode: GrabMode, keyboard_mode: GrabMode) -> Result<Cookie<'_, Self, GrabKeyboardReply>, ConnectionError>
+    fn grab_keyboard<A>(&self, owner_events: bool, grab_window: Window, time: A, pointer_mode: GrabMode, keyboard_mode: GrabMode) -> Result<Cookie<'_, Self, GrabKeyboardReply>, ConnectionError>
+    where
+        A: Into<Timestamp>,
     {
         grab_keyboard(self, owner_events, grab_window, time, pointer_mode, keyboard_mode)
     }
-    fn ungrab_keyboard(&self, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn ungrab_keyboard<A>(&self, time: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<Timestamp>,
     {
         ungrab_keyboard(self, time)
     }
@@ -20960,30 +21100,35 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
-    /// * `cursor` - Specifies the cursor that should be displayed or `XCB_NONE` to not change the
-    /// cursor.
+    /// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
+    /// reported to the `grab_window`.
     /// * `grab_window` - Specifies the window on which the pointer should be grabbed.
     /// * `key` - The keycode of the key to grab.
     ///
     /// The special value `XCB_GRAB_ANY` means grab any key.
+    /// * `cursor` - Specifies the cursor that should be displayed or `XCB_NONE` to not change the
+    /// cursor.
     /// * `modifiers` - The modifiers to grab.
     ///
     /// Using the special value `XCB_MOD_MASK_ANY` means grab the pointer with all
     /// possible modifier combinations.
-    /// * `owner_events` - If 1, the `grab_window` will still get the pointer events. If 0, events are not
-    /// reported to the `grab_window`.
+    /// * `pointer_mode` -
+    /// * `keyboard_mode` -
     ///
     /// # Errors
     ///
     /// * `Access` - Another client has already issued a GrabKey with the same button/key
-    ///combination on the same window.
+    /// combination on the same window.
     /// * `Value` - TODO: reasons?
     /// * `Window` - The specified `window` does not exist.
     ///
     /// # See
     ///
     /// * `GrabKeyboard`: request
-    fn grab_key(&self, owner_events: bool, grab_window: Window, modifiers: u16, key: Keycode, pointer_mode: GrabMode, keyboard_mode: GrabMode) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn grab_key<A, B>(&self, owner_events: bool, grab_window: Window, modifiers: A, key: B, pointer_mode: GrabMode, keyboard_mode: GrabMode) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<u16>,
+        B: Into<Keycode>,
     {
         grab_key(self, owner_events, grab_window, modifiers, key, pointer_mode, keyboard_mode)
     }
@@ -20994,10 +21139,10 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
-    /// * `grab_window` - The window on which the grabbed key combination will be released.
     /// * `key` - The keycode of the specified key combination.
     ///
     /// Using the special value `XCB_GRAB_ANY` means releasing all possible key codes.
+    /// * `grab_window` - The window on which the grabbed key combination will be released.
     /// * `modifiers` - The modifiers of the specified key combination.
     ///
     /// Using the special value `XCB_MOD_MASK_ANY` means releasing the key combination
@@ -21005,14 +21150,17 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Errors
     ///
-    /// * `Value` - TODO: reasons?
     /// * `Window` - The specified `grab_window` does not exist.
+    /// * `Value` - TODO: reasons?
     ///
     /// # See
     ///
     /// * `GrabKey`: request
     /// * `xev`: program
-    fn ungrab_key(&self, key: Keycode, grab_window: Window, modifiers: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn ungrab_key<A, B>(&self, key: A, grab_window: Window, modifiers: B) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<Keycode>,
+        B: Into<u16>,
     {
         ungrab_key(self, key, grab_window, modifiers)
     }
@@ -21025,6 +21173,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
+    /// * `mode` -
     /// * `time` - Timestamp to avoid race conditions when running X over the network.
     ///
     /// The special value `XCB_CURRENT_TIME` will be replaced with the current server
@@ -21033,7 +21182,9 @@ pub trait ConnectionExt: RequestConnection {
     /// # Errors
     ///
     /// * `Value` - You specified an invalid `mode`.
-    fn allow_events(&self, mode: Allow, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn allow_events<A>(&self, mode: Allow, time: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<Timestamp>,
     {
         allow_events(self, mode, time)
     }
@@ -21062,7 +21213,10 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_pointer(self, window)
     }
-    fn get_motion_events(&self, window: Window, start: Timestamp, stop: Timestamp) -> Result<Cookie<'_, Self, GetMotionEventsReply>, ConnectionError>
+    fn get_motion_events<A, B>(&self, window: Window, start: A, stop: B) -> Result<Cookie<'_, Self, GetMotionEventsReply>, ConnectionError>
+    where
+        A: Into<Timestamp>,
+        B: Into<Timestamp>,
     {
         get_motion_events(self, window, start, stop)
     }
@@ -21086,14 +21240,14 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
-    /// * `dst_window` - If `dst_window` is not `XCB_NONE` (TODO), the pointer will be moved to the
-    /// offsets (`dst_x`, `dst_y`) relative to `dst_window`. If `dst_window` is
-    /// `XCB_NONE` (TODO), the pointer will be moved by the offsets (`dst_x`, `dst_y`)
-    /// relative to the current position of the pointer.
     /// * `src_window` - If `src_window` is not `XCB_NONE` (TODO), the move will only take place if the
     /// pointer is inside `src_window` and within the rectangle specified by (`src_x`,
     /// `src_y`, `src_width`, `src_height`). The rectangle coordinates are relative to
     /// `src_window`.
+    /// * `dst_window` - If `dst_window` is not `XCB_NONE` (TODO), the pointer will be moved to the
+    /// offsets (`dst_x`, `dst_y`) relative to `dst_window`. If `dst_window` is
+    /// `XCB_NONE` (TODO), the pointer will be moved by the offsets (`dst_x`, `dst_y`)
+    /// relative to the current position of the pointer.
     ///
     /// # Errors
     ///
@@ -21102,7 +21256,10 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * `SetInputFocus`: request
-    fn warp_pointer(&self, src_window: Window, dst_window: Window, src_x: i16, src_y: i16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn warp_pointer<A, B>(&self, src_window: A, dst_window: B, src_x: i16, src_y: i16, src_width: u16, src_height: u16, dst_x: i16, dst_y: i16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<Window>,
+        B: Into<Window>,
     {
         warp_pointer(self, src_window, dst_window, src_x, src_y, src_width, src_height, dst_x, dst_y)
     }
@@ -21124,24 +21281,27 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// If `focus` is `XCB_POINTER_ROOT` (TODO), focus is on the root window of the
     /// screen on which the pointer is on currently.
-    /// * `revert_to` - Specifies what happens when the `focus` window becomes unviewable (if `focus`
-    /// is neither `XCB_NONE` nor `XCB_POINTER_ROOT`).
     /// * `time` - Timestamp to avoid race conditions when running X over the network.
     ///
     /// The special value `XCB_CURRENT_TIME` will be replaced with the current server
     /// time.
+    /// * `revert_to` - Specifies what happens when the `focus` window becomes unviewable (if `focus`
+    /// is neither `XCB_NONE` nor `XCB_POINTER_ROOT`).
     ///
     /// # Errors
     ///
+    /// * `Window` - The specified `focus` window does not exist.
     /// * `Match` - The specified `focus` window is not viewable.
     /// * `Value` - TODO: Reasons?
-    /// * `Window` - The specified `focus` window does not exist.
     ///
     /// # See
     ///
     /// * `FocusIn`: event
     /// * `FocusOut`: event
-    fn set_input_focus(&self, revert_to: InputFocus, focus: Window, time: Timestamp) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn set_input_focus<A, B>(&self, revert_to: InputFocus, focus: A, time: B) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<Window>,
+        B: Into<Timestamp>,
     {
         set_input_focus(self, revert_to, focus, time)
     }
@@ -21163,8 +21323,8 @@ pub trait ConnectionExt: RequestConnection {
     /// # Fields
     ///
     /// * `fid` - The ID with which you will refer to the font, created by `xcb_generate_id`.
-    /// * `name` - A pattern describing an X core font.
     /// * `name_len` - Length (in bytes) of `name`.
+    /// * `name` - A pattern describing an X core font.
     ///
     /// # Errors
     ///
@@ -21219,13 +21379,13 @@ pub trait ConnectionExt: RequestConnection {
     /// # Fields
     ///
     /// * `font` - The `font` to calculate text extents in. You can also pass a graphics context.
-    /// * `string` - The text to get text extents for.
     /// * `string_len` - The number of characters in `string`.
+    /// * `string` - The text to get text extents for.
     ///
     /// # Errors
     ///
-    /// * `Font` - The specified `font` does not exist.
     /// * `GContext` - The specified graphics context does not exist.
+    /// * `Font` - The specified `font` does not exist.
     fn query_text_extents<'c>(&'c self, font: Fontable, string: &[Char2b]) -> Result<Cookie<'c, Self, QueryTextExtentsReply>, ConnectionError>
     {
         query_text_extents(self, font, string)
@@ -21236,13 +21396,13 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
-    /// * `max_names` - The maximum number of fonts to be returned.
+    /// * `pattern_len` - The length (in bytes) of `pattern`.
     /// * `pattern` - A font pattern, for example "-misc-fixed-*".
     ///
     /// The asterisk (*) is a wildcard for any number of characters. The question mark
     /// (?) is a wildcard for a single character. Use of uppercase or lowercase does
     /// not matter.
-    /// * `pattern_len` - The length (in bytes) of `pattern`.
+    /// * `max_names` - The maximum number of fonts to be returned.
     fn list_fonts<'c>(&'c self, max_names: u16, pattern: &[u8]) -> Result<Cookie<'c, Self, ListFontsReply>, ConnectionError>
     {
         list_fonts(self, max_names, pattern)
@@ -21253,13 +21413,13 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
-    /// * `max_names` - The maximum number of fonts to be returned.
+    /// * `pattern_len` - The length (in bytes) of `pattern`.
     /// * `pattern` - A font pattern, for example "-misc-fixed-*".
     ///
     /// The asterisk (*) is a wildcard for any number of characters. The question mark
     /// (?) is a wildcard for a single character. Use of uppercase or lowercase does
     /// not matter.
-    /// * `pattern_len` - The length (in bytes) of `pattern`.
+    /// * `max_names` - The maximum number of fonts to be returned.
     fn list_fonts_with_info<'c>(&'c self, max_names: u16, pattern: &[u8]) -> Result<ListFontsWithInfoCookie<'c, Self>, ConnectionError>
     {
         list_fonts_with_info(self, max_names, pattern)
@@ -21280,17 +21440,17 @@ pub trait ConnectionExt: RequestConnection {
     /// # Fields
     ///
     /// * `depth` - TODO
-    /// * `drawable` - Drawable to get the screen from.
-    /// * `height` - The height of the new pixmap.
     /// * `pid` - The ID with which you will refer to the new pixmap, created by
     /// `xcb_generate_id`.
+    /// * `drawable` - Drawable to get the screen from.
     /// * `width` - The width of the new pixmap.
+    /// * `height` - The height of the new pixmap.
     ///
     /// # Errors
     ///
-    /// * `Alloc` - The X server could not allocate the requested resources (no memory?).
-    /// * `Drawable` - The specified `drawable` (Window or Pixmap) does not exist.
     /// * `Value` - TODO: reasons?
+    /// * `Drawable` - The specified `drawable` (Window or Pixmap) does not exist.
+    /// * `Alloc` - The X server could not allocate the requested resources (no memory?).
     ///
     /// # See
     ///
@@ -21328,12 +21488,12 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Errors
     ///
-    /// * `Alloc` - The X server could not allocate the requested resources (no memory?).
     /// * `Drawable` - The specified `drawable` (Window or Pixmap) does not exist.
-    /// * `Font` - TODO: reasons?
     /// * `Match` - TODO: reasons?
+    /// * `Font` - TODO: reasons?
     /// * `Pixmap` - TODO: reasons?
     /// * `Value` - TODO: reasons?
+    /// * `Alloc` - The X server could not allocate the requested resources (no memory?).
     ///
     /// # See
     ///
@@ -21349,18 +21509,19 @@ pub trait ConnectionExt: RequestConnection {
     /// # Fields
     ///
     /// * `gc` - The graphics context to change.
+    /// * `value_mask` -
     /// * `value_list` - Values for each of the components specified in the bitmask `value_mask`. The
     /// order has to correspond to the order of possible `value_mask` bits. See the
     /// example.
     ///
     /// # Errors
     ///
-    /// * `Alloc` - The X server could not allocate the requested resources (no memory?).
     /// * `Font` - TODO: reasons?
     /// * `GContext` - TODO: reasons?
     /// * `Match` - TODO: reasons?
     /// * `Pixmap` - TODO: reasons?
     /// * `Value` - TODO: reasons?
+    /// * `Alloc` - The X server could not allocate the requested resources (no memory?).
     ///
     /// # Example
     ///
@@ -21390,7 +21551,9 @@ pub trait ConnectionExt: RequestConnection {
     {
         change_gc(self, gc, value_list)
     }
-    fn copy_gc(&self, src_gc: Gcontext, dst_gc: Gcontext, value_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn copy_gc<A>(&self, src_gc: Gcontext, dst_gc: Gcontext, value_mask: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<u32>,
     {
         copy_gc(self, src_gc, dst_gc, value_mask)
     }
@@ -21428,14 +21591,14 @@ pub trait ConnectionExt: RequestConnection {
     /// # Fields
     ///
     /// * `dst_drawable` - The destination drawable (Window or Pixmap).
-    /// * `dst_x` - The destination X coordinate.
-    /// * `dst_y` - The destination Y coordinate.
-    /// * `gc` - The graphics context to use.
-    /// * `height` - The height of the area to copy (in pixels).
     /// * `src_drawable` - The source drawable (Window or Pixmap).
+    /// * `gc` - The graphics context to use.
     /// * `src_x` - The source X coordinate.
     /// * `src_y` - The source Y coordinate.
+    /// * `dst_x` - The destination X coordinate.
+    /// * `dst_y` - The destination Y coordinate.
     /// * `width` - The width of the area to copy (in pixels).
+    /// * `height` - The height of the area to copy (in pixels).
     ///
     /// # Errors
     ///
@@ -21469,8 +21632,9 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `drawable` - The drawable to draw the line(s) on.
     /// * `gc` - The graphics context to use.
-    /// * `points` - An array of points.
     /// * `points_len` - The number of `xcb_point_t` structures in `points`.
+    /// * `points` - An array of points.
+    /// * `coordinate_mode` -
     ///
     /// # Errors
     ///
@@ -21514,8 +21678,8 @@ pub trait ConnectionExt: RequestConnection {
     /// * `gc` - The graphics context to use.
     ///
     /// TODO: document which attributes of a gc are used
-    /// * `segments` - An array of `xcb_segment_t` structures.
     /// * `segments_len` - The number of `xcb_segment_t` structures in `segments`.
+    /// * `segments` - An array of `xcb_segment_t` structures.
     ///
     /// # Errors
     ///
@@ -21555,8 +21719,8 @@ pub trait ConnectionExt: RequestConnection {
     /// The following graphics context mode-dependent components are used:
     /// foreground, background, tile, stipple, tile-stipple-x-origin, and
     /// tile-stipple-y-origin.
-    /// * `rectangles` - The rectangles to fill.
     /// * `rectangles_len` - The number of `xcb_rectangle_t` structures in `rectangles`.
+    /// * `rectangles` - The rectangles to fill.
     ///
     /// # Errors
     ///
@@ -21601,16 +21765,16 @@ pub trait ConnectionExt: RequestConnection {
     /// # Fields
     ///
     /// * `drawable` - The drawable (Window or Pixmap) to draw text on.
+    /// * `string_len` - The length of the `string`. Note that this parameter limited by 255 due to
+    /// using 8 bits!
+    /// * `string` - The string to draw. Only the first 255 characters are relevant due to the data
+    /// type of `string_len`.
+    /// * `x` - The x coordinate of the first character, relative to the origin of `drawable`.
+    /// * `y` - The y coordinate of the first character, relative to the origin of `drawable`.
     /// * `gc` - The graphics context to use.
     ///
     /// The following graphics context components are used: plane-mask, foreground,
     /// background, font, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
-    /// * `string` - The string to draw. Only the first 255 characters are relevant due to the data
-    /// type of `string_len`.
-    /// * `string_len` - The length of the `string`. Note that this parameter limited by 255 due to
-    /// using 8 bits!
-    /// * `x` - The x coordinate of the first character, relative to the origin of `drawable`.
-    /// * `y` - The y coordinate of the first character, relative to the origin of `drawable`.
     ///
     /// # Errors
     ///
@@ -21639,17 +21803,17 @@ pub trait ConnectionExt: RequestConnection {
     /// # Fields
     ///
     /// * `drawable` - The drawable (Window or Pixmap) to draw text on.
+    /// * `string_len` - The length of the `string` in characters. Note that this parameter limited by
+    /// 255 due to using 8 bits!
+    /// * `string` - The string to draw. Only the first 255 characters are relevant due to the data
+    /// type of `string_len`. Every character uses 2 bytes (hence the 16 in this
+    /// request's name).
+    /// * `x` - The x coordinate of the first character, relative to the origin of `drawable`.
+    /// * `y` - The y coordinate of the first character, relative to the origin of `drawable`.
     /// * `gc` - The graphics context to use.
     ///
     /// The following graphics context components are used: plane-mask, foreground,
     /// background, font, subwindow-mode, clip-x-origin, clip-y-origin, and clip-mask.
-    /// * `string` - The string to draw. Only the first 255 characters are relevant due to the data
-    /// type of `string_len`. Every character uses 2 bytes (hence the 16 in this
-    /// request's name).
-    /// * `string_len` - The length of the `string` in characters. Note that this parameter limited by
-    /// 255 due to using 8 bits!
-    /// * `x` - The x coordinate of the first character, relative to the origin of `drawable`.
-    /// * `y` - The y coordinate of the first character, relative to the origin of `drawable`.
     ///
     /// # Errors
     ///
@@ -21698,10 +21862,10 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
-    /// * `blue` - The blue value of your color.
     /// * `cmap` - TODO
-    /// * `green` - The green value of your color.
     /// * `red` - The red value of your color.
+    /// * `green` - The green value of your color.
+    /// * `blue` - The blue value of your color.
     ///
     /// # Errors
     ///
@@ -21730,7 +21894,9 @@ pub trait ConnectionExt: RequestConnection {
     {
         store_colors(self, cmap, items)
     }
-    fn store_named_color<'c>(&'c self, flags: u8, cmap: Colormap, pixel: u32, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn store_named_color<'c, A>(&'c self, flags: A, cmap: Colormap, pixel: u32, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    where
+        A: Into<u8>,
     {
         store_named_color(self, flags, cmap, pixel, name)
     }
@@ -21742,7 +21908,9 @@ pub trait ConnectionExt: RequestConnection {
     {
         lookup_color(self, cmap, name)
     }
-    fn create_cursor(&self, cid: Cursor, source: Pixmap, mask: Pixmap, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn create_cursor<A>(&self, cid: Cursor, source: Pixmap, mask: A, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16, x: u16, y: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<Pixmap>,
     {
         create_cursor(self, cid, source, mask, fore_red, fore_green, fore_blue, back_red, back_green, back_blue, x, y)
     }
@@ -21760,26 +21928,28 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
-    /// * `back_blue` - The blue value of the background color.
-    /// * `back_green` - The green value of the background color.
-    /// * `back_red` - The red value of the background color.
     /// * `cid` - The ID with which you will refer to the cursor, created by `xcb_generate_id`.
-    /// * `fore_blue` - The blue value of the foreground color.
-    /// * `fore_green` - The green value of the foreground color.
-    /// * `fore_red` - The red value of the foreground color.
+    /// * `source_font` - In which font to look for the cursor glyph.
+    /// * `mask_font` - In which font to look for the mask glyph.
+    /// * `source_char` - The glyph of `source_font` to use.
     /// * `mask_char` - The glyph of `mask_font` to use as a mask: Pixels which are set to 1 define
     /// which source pixels are displayed. All pixels which are set to 0 are not
     /// displayed.
-    /// * `mask_font` - In which font to look for the mask glyph.
-    /// * `source_char` - The glyph of `source_font` to use.
-    /// * `source_font` - In which font to look for the cursor glyph.
+    /// * `fore_red` - The red value of the foreground color.
+    /// * `fore_green` - The green value of the foreground color.
+    /// * `fore_blue` - The blue value of the foreground color.
+    /// * `back_red` - The red value of the background color.
+    /// * `back_green` - The green value of the background color.
+    /// * `back_blue` - The blue value of the background color.
     ///
     /// # Errors
     ///
     /// * `Alloc` - The X server could not allocate the requested resources (no memory?).
     /// * `Font` - The specified `source_font` or `mask_font` does not exist.
     /// * `Value` - Either `source_char` or `mask_char` are not defined in `source_font` or `mask_font`, respectively.
-    fn create_glyph_cursor(&self, cid: Cursor, source_font: Font, mask_font: Font, source_char: u16, mask_char: u16, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn create_glyph_cursor<A>(&self, cid: Cursor, source_font: Font, mask_font: A, source_char: u16, mask_char: u16, fore_red: u16, fore_green: u16, fore_blue: u16, back_red: u16, back_green: u16, back_blue: u16) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<Font>,
     {
         create_glyph_cursor(self, cid, source_font, mask_font, source_char, mask_char, fore_red, fore_green, fore_blue, back_red, back_green, back_blue)
     }
@@ -21821,14 +21991,14 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// # Fields
     ///
+    /// * `name_len` - The length of `name` in bytes.
     /// * `name` - The name of the extension to query, for example "RANDR". This is case
     /// sensitive!
-    /// * `name_len` - The length of `name` in bytes.
     ///
     /// # See
     ///
-    /// * `xcb_get_extension_data`: function
     /// * `xdpyinfo`: program
+    /// * `xcb_get_extension_data`: function
     fn query_extension<'c>(&'c self, name: &[u8]) -> Result<Cookie<'c, Self, QueryExtensionReply>, ConnectionError>
     {
         query_extension(self, name)
@@ -21908,7 +22078,9 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * `xkill`: program
-    fn kill_client(&self, resource: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn kill_client<A>(&self, resource: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<u32>,
     {
         kill_client(self, resource)
     }

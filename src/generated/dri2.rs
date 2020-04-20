@@ -24,7 +24,6 @@ use crate::errors::{ConnectionError, ParseError};
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
-#[allow(unused_imports)]
 use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
@@ -475,7 +474,7 @@ impl TryParse for ConnectReply {
         let (device_name_length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
         let (driver_name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, driver_name_length as usize)?;
-        let (alignment_pad, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (((driver_name_length as usize) + (3)) & (!(3))) - (driver_name_length as usize))?;
+        let (alignment_pad, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (((driver_name_length as usize) + 3) & (!3)) - (driver_name_length as usize))?;
         let (device_name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, device_name_length as usize)?;
         let result = ConnectReply { response_type, sequence, length, driver_name, alignment_pad, device_name };
         Ok((result, remaining))
@@ -610,7 +609,6 @@ where
     let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let count_bytes = count.serialize();
-    let attachments_bytes = attachments.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_BUFFERS_REQUEST,
@@ -626,6 +624,7 @@ where
         count_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let attachments_bytes = attachments.serialize();
     let length_so_far = length_so_far + attachments_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -742,7 +741,6 @@ where
     let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let count_bytes = count.serialize();
-    let attachments_bytes = attachments.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         GET_BUFFERS_WITH_FORMAT_REQUEST,
@@ -758,6 +756,7 @@ where
         count_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let attachments_bytes = attachments.serialize();
     let length_so_far = length_so_far + attachments_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();

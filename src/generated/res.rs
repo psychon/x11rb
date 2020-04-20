@@ -24,7 +24,6 @@ use crate::errors::{ConnectionError, ParseError};
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
-#[allow(unused_imports)]
 use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
@@ -236,7 +235,7 @@ impl TryParse for ClientIdValue {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (spec, remaining) = ClientIdSpec::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (value, remaining) = crate::x11_utils::parse_list::<u32>(remaining, (length as usize) / (4))?;
+        let (value, remaining) = crate::x11_utils::parse_list::<u32>(remaining, (length as usize) / 4)?;
         let result = ClientIdValue { spec, value };
         Ok((result, remaining))
     }
@@ -257,7 +256,7 @@ impl Serialize for ClientIdValue {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(12);
         self.spec.serialize_into(bytes);
-        let length = u32::try_from(self.value.len()).expect("`value` has too many elements") * 4;
+        let length = u32::try_from(self.value.len()).ok().and_then(|len| len.checked_mul(4)).expect("`value` has too many elements");
         length.serialize_into(bytes);
         self.value.serialize_into(bytes);
     }
@@ -421,7 +420,7 @@ where
         0,
         client_major_bytes[0],
         client_minor_bytes[0],
-        0 /* trailing padding */,
+        0,
         0,
     ];
     let length_so_far = length_so_far + request0.len();
@@ -624,9 +623,8 @@ where
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let num_specs: u32 = specs.len().try_into()?;
+    let num_specs = u32::try_from(specs.len()).expect("`specs` has too many elements");
     let num_specs_bytes = num_specs.serialize();
-    let specs_bytes = specs.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         QUERY_CLIENT_IDS_REQUEST,
@@ -638,6 +636,7 @@ where
         num_specs_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let specs_bytes = specs.serialize();
     let length_so_far = length_so_far + specs_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -684,9 +683,8 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let client_bytes = client.serialize();
-    let num_specs: u32 = specs.len().try_into()?;
+    let num_specs = u32::try_from(specs.len()).expect("`specs` has too many elements");
     let num_specs_bytes = num_specs.serialize();
-    let specs_bytes = specs.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         QUERY_RESOURCE_BYTES_REQUEST,
@@ -702,6 +700,7 @@ where
         num_specs_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let specs_bytes = specs.serialize();
     let length_so_far = length_so_far + specs_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();

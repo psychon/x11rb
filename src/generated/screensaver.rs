@@ -24,7 +24,6 @@ use crate::errors::{ConnectionError, ParseError};
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
-#[allow(unused_imports)]
 use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
@@ -355,12 +354,14 @@ impl TryFrom<&[u8]> for QueryInfoReply {
 
 /// Opcode for the SelectInput request
 pub const SELECT_INPUT_REQUEST: u8 = 2;
-pub fn select_input<Conn>(conn: &Conn, drawable: xproto::Drawable, event_mask: u32) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn select_input<Conn, A>(conn: &Conn, drawable: xproto::Drawable, event_mask: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<u32>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let event_mask: u32 = event_mask.into();
     let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let event_mask_bytes = event_mask.serialize();
@@ -414,106 +415,109 @@ impl Serialize for SetAttributesAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.background_pixmap {
-            value.serialize_into(bytes);
+        if let Some(background_pixmap) = self.background_pixmap {
+            background_pixmap.serialize_into(bytes);
         }
-        if let Some(ref value) = self.background_pixel {
-            value.serialize_into(bytes);
+        if let Some(background_pixel) = self.background_pixel {
+            background_pixel.serialize_into(bytes);
         }
-        if let Some(ref value) = self.border_pixmap {
-            value.serialize_into(bytes);
+        if let Some(border_pixmap) = self.border_pixmap {
+            border_pixmap.serialize_into(bytes);
         }
-        if let Some(ref value) = self.border_pixel {
-            value.serialize_into(bytes);
+        if let Some(border_pixel) = self.border_pixel {
+            border_pixel.serialize_into(bytes);
         }
-        if let Some(ref value) = self.bit_gravity {
-            value.serialize_into(bytes);
+        if let Some(bit_gravity) = self.bit_gravity {
+            bit_gravity.serialize_into(bytes);
         }
-        if let Some(ref value) = self.win_gravity {
-            value.serialize_into(bytes);
+        if let Some(win_gravity) = self.win_gravity {
+            win_gravity.serialize_into(bytes);
         }
-        if let Some(ref value) = self.backing_store {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(backing_store) = self.backing_store {
+            u32::from(backing_store).serialize_into(bytes);
         }
-        if let Some(ref value) = self.backing_planes {
-            value.serialize_into(bytes);
+        if let Some(backing_planes) = self.backing_planes {
+            backing_planes.serialize_into(bytes);
         }
-        if let Some(ref value) = self.backing_pixel {
-            value.serialize_into(bytes);
+        if let Some(backing_pixel) = self.backing_pixel {
+            backing_pixel.serialize_into(bytes);
         }
-        if let Some(ref value) = self.override_redirect {
-            value.serialize_into(bytes);
+        if let Some(override_redirect) = self.override_redirect {
+            override_redirect.serialize_into(bytes);
         }
-        if let Some(ref value) = self.save_under {
-            value.serialize_into(bytes);
+        if let Some(save_under) = self.save_under {
+            save_under.serialize_into(bytes);
         }
-        if let Some(ref value) = self.event_mask {
-            value.serialize_into(bytes);
+        if let Some(event_mask) = self.event_mask {
+            event_mask.serialize_into(bytes);
         }
-        if let Some(ref value) = self.do_not_propogate_mask {
-            value.serialize_into(bytes);
+        if let Some(do_not_propogate_mask) = self.do_not_propogate_mask {
+            do_not_propogate_mask.serialize_into(bytes);
         }
-        if let Some(ref value) = self.colormap {
-            value.serialize_into(bytes);
+        if let Some(colormap) = self.colormap {
+            colormap.serialize_into(bytes);
         }
-        if let Some(ref value) = self.cursor {
-            value.serialize_into(bytes);
+        if let Some(cursor) = self.cursor {
+            cursor.serialize_into(bytes);
         }
+    }
+}
+impl SetAttributesAux {
+    #[allow(dead_code)]
+    fn switch_expr(&self) -> u32 {
+        let mut expr_value: u32 = 0;
+        if self.background_pixmap.is_some() {
+            expr_value |= u32::from(xproto::CW::BackPixmap);
+        }
+        if self.background_pixel.is_some() {
+            expr_value |= u32::from(xproto::CW::BackPixel);
+        }
+        if self.border_pixmap.is_some() {
+            expr_value |= u32::from(xproto::CW::BorderPixmap);
+        }
+        if self.border_pixel.is_some() {
+            expr_value |= u32::from(xproto::CW::BorderPixel);
+        }
+        if self.bit_gravity.is_some() {
+            expr_value |= u32::from(xproto::CW::BitGravity);
+        }
+        if self.win_gravity.is_some() {
+            expr_value |= u32::from(xproto::CW::WinGravity);
+        }
+        if self.backing_store.is_some() {
+            expr_value |= u32::from(xproto::CW::BackingStore);
+        }
+        if self.backing_planes.is_some() {
+            expr_value |= u32::from(xproto::CW::BackingPlanes);
+        }
+        if self.backing_pixel.is_some() {
+            expr_value |= u32::from(xproto::CW::BackingPixel);
+        }
+        if self.override_redirect.is_some() {
+            expr_value |= u32::from(xproto::CW::OverrideRedirect);
+        }
+        if self.save_under.is_some() {
+            expr_value |= u32::from(xproto::CW::SaveUnder);
+        }
+        if self.event_mask.is_some() {
+            expr_value |= u32::from(xproto::CW::EventMask);
+        }
+        if self.do_not_propogate_mask.is_some() {
+            expr_value |= u32::from(xproto::CW::DontPropagate);
+        }
+        if self.colormap.is_some() {
+            expr_value |= u32::from(xproto::CW::Colormap);
+        }
+        if self.cursor.is_some() {
+            expr_value |= u32::from(xproto::CW::Cursor);
+        }
+        expr_value
     }
 }
 impl SetAttributesAux {
     /// Create a new instance with all fields unset / not present.
     pub fn new() -> Self {
         Default::default()
-    }
-    fn value_mask(&self) -> u32 {
-        let mut mask = 0;
-        if self.background_pixmap.is_some() {
-            mask |= u32::from(xproto::CW::BackPixmap);
-        }
-        if self.background_pixel.is_some() {
-            mask |= u32::from(xproto::CW::BackPixel);
-        }
-        if self.border_pixmap.is_some() {
-            mask |= u32::from(xproto::CW::BorderPixmap);
-        }
-        if self.border_pixel.is_some() {
-            mask |= u32::from(xproto::CW::BorderPixel);
-        }
-        if self.bit_gravity.is_some() {
-            mask |= u32::from(xproto::CW::BitGravity);
-        }
-        if self.win_gravity.is_some() {
-            mask |= u32::from(xproto::CW::WinGravity);
-        }
-        if self.backing_store.is_some() {
-            mask |= u32::from(xproto::CW::BackingStore);
-        }
-        if self.backing_planes.is_some() {
-            mask |= u32::from(xproto::CW::BackingPlanes);
-        }
-        if self.backing_pixel.is_some() {
-            mask |= u32::from(xproto::CW::BackingPixel);
-        }
-        if self.override_redirect.is_some() {
-            mask |= u32::from(xproto::CW::OverrideRedirect);
-        }
-        if self.save_under.is_some() {
-            mask |= u32::from(xproto::CW::SaveUnder);
-        }
-        if self.event_mask.is_some() {
-            mask |= u32::from(xproto::CW::EventMask);
-        }
-        if self.do_not_propogate_mask.is_some() {
-            mask |= u32::from(xproto::CW::DontPropagate);
-        }
-        if self.colormap.is_some() {
-            mask |= u32::from(xproto::CW::Colormap);
-        }
-        if self.cursor.is_some() {
-            mask |= u32::from(xproto::CW::Cursor);
-        }
-        mask
     }
     /// Set the `background_pixmap` field of this structure.
     pub fn background_pixmap<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Pixmap>> {
@@ -591,14 +595,13 @@ impl SetAttributesAux {
         self
     }
 }
+
 pub fn set_attributes<'c, Conn>(conn: &'c Conn, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: xproto::WindowClass, depth: u8, visual: xproto::Visualid, value_list: &SetAttributesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let value_mask = value_list.value_mask();
-    let value_list_bytes = value_list.serialize();
     let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
     let x_bytes = x.serialize();
@@ -609,6 +612,7 @@ where
     let class_bytes = u8::from(class).serialize();
     let depth_bytes = depth.serialize();
     let visual_bytes = visual.serialize();
+    let value_mask = value_list.switch_expr();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -641,6 +645,7 @@ where
         value_mask_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let value_list_bytes = value_list.serialize();
     let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -815,7 +820,9 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_info(self, drawable)
     }
-    fn screensaver_select_input(&self, drawable: xproto::Drawable, event_mask: u32) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn screensaver_select_input<A>(&self, drawable: xproto::Drawable, event_mask: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<u32>,
     {
         select_input(self, drawable, event_mask)
     }

@@ -98,14 +98,7 @@ fn main() {
     .unwrap();
 
     let reply = conn
-        .get_property(
-            false,
-            win_id,
-            AtomEnum::WM_NAME.into(),
-            AtomEnum::STRING.into(),
-            0,
-            1024,
-        )
+        .get_property(false, win_id, AtomEnum::WM_NAME, AtomEnum::STRING, 0, 1024)
         .unwrap();
     let reply = reply.reply().unwrap();
     assert_eq!(reply.value, title.as_bytes());

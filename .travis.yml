@@ -1,5 +1,5 @@
 language: rust
-dist: bionic  # need at least xcb-proto 1.12, because commit a3da4e8c in xcb-proto changes our API
+dist: bionic # x11rb needs at least libxcb 1.12
 rust:
   # std::io::IoSlice was stabilised in 1.36.0, but 1.36.0 fails with a weird
   # error enabled by deny(single_use_lifetimes).
@@ -15,7 +15,6 @@ matrix:
 addons:
   apt:
     packages:
-      - pycodestyle
       - xvfb
 
 install:
@@ -33,11 +32,9 @@ install:
     }
 
 script:
-  # Check the code generator against python 2 and 3. Both versions should
-  # produce identical output.
-  - make PYTHON=python3
-  - if ! git diff --exit-code; then exit 1; fi
-  - make PYTHON=python2
+  # Check the code generator. Output should be identical to the
+  # commited version.
+  - make
   - if ! git diff --exit-code; then exit 1; fi
 
   - rustup component add clippy
@@ -52,8 +49,6 @@ script:
   - cargo build --verbose --all-targets --all-features
   - cargo test --verbose --all-features
   - cargo doc --verbose --all-features
-
-  - pycodestyle --show-pep8 --show-source $(git ls-files '*.py' | grep -v xcb-proto-1.14) --max-line-length=130
 
   # Run the examples as 'integration tests'.
   # Enable the 'all-extensions' feature or Cargo will complain

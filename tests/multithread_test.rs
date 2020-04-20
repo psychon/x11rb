@@ -39,7 +39,7 @@ fn multithread_test() {
         };
 
         conn1
-            .send_event(false, 0, EventMask::NoEvent.into(), &event)
+            .send_event(false, 0u32, EventMask::NoEvent, &event)
             .unwrap();
         conn1.flush().unwrap();
     });

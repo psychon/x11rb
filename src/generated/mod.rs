@@ -3,7 +3,14 @@
 
 use std::convert::{TryFrom, TryInto};
 use crate::errors::ParseError;
-use crate::x11_utils::{Event as _, ExtInfoProvider, GenericError, GenericEvent};
+use crate::x11_utils::{
+    Event as _,
+    ExtInfoProvider,
+    GenericError,
+    GenericEvent,
+};
+
+pub mod xproto;
 pub mod bigreq;
 #[cfg(feature = "composite")]
 pub mod composite;
@@ -53,7 +60,6 @@ pub mod xinput;
 pub mod xkb;
 #[cfg(feature = "xprint")]
 pub mod xprint;
-pub mod xproto;
 #[cfg(feature = "xselinux")]
 pub mod xselinux;
 #[cfg(feature = "xtest")]
@@ -67,6 +73,23 @@ pub mod xvmc;
 #[derive(Debug, Clone)]
 pub enum Error<B: std::fmt::Debug + AsRef<[u8]>> {
     Unknown(GenericError<B>),
+    Access(xproto::AccessError),
+    Alloc(xproto::AllocError),
+    Atom(xproto::AtomError),
+    Colormap(xproto::ColormapError),
+    Cursor(xproto::CursorError),
+    Drawable(xproto::DrawableError),
+    Font(xproto::FontError),
+    GContext(xproto::GContextError),
+    IDChoice(xproto::IDChoiceError),
+    Implementation(xproto::ImplementationError),
+    Length(xproto::LengthError),
+    Match(xproto::MatchError),
+    Name(xproto::NameError),
+    Pixmap(xproto::PixmapError),
+    Request(xproto::RequestError),
+    Value(xproto::ValueError),
+    Window(xproto::WindowError),
     #[cfg(feature = "damage")]
     DamageBadDamage(damage::BadDamageError),
     #[cfg(feature = "glx")]
@@ -155,23 +178,6 @@ pub enum Error<B: std::fmt::Debug + AsRef<[u8]>> {
     XprintBadContext(xprint::BadContextError),
     #[cfg(feature = "xprint")]
     XprintBadSequence(xprint::BadSequenceError),
-    Access(xproto::AccessError),
-    Alloc(xproto::AllocError),
-    Atom(xproto::AtomError),
-    Colormap(xproto::ColormapError),
-    Cursor(xproto::CursorError),
-    Drawable(xproto::DrawableError),
-    Font(xproto::FontError),
-    GContext(xproto::GContextError),
-    IDChoice(xproto::IDChoiceError),
-    Implementation(xproto::ImplementationError),
-    Length(xproto::LengthError),
-    Match(xproto::MatchError),
-    Name(xproto::NameError),
-    Pixmap(xproto::PixmapError),
-    Request(xproto::RequestError),
-    Value(xproto::ValueError),
-    Window(xproto::WindowError),
     #[cfg(feature = "xv")]
     XvBadControl(xv::BadControlError),
     #[cfg(feature = "xv")]
@@ -179,6 +185,7 @@ pub enum Error<B: std::fmt::Debug + AsRef<[u8]>> {
     #[cfg(feature = "xv")]
     XvBadPort(xv::BadPortError),
 }
+
 impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
     /// Parse a generic X11 error into a concrete error type.
     pub fn parse(
@@ -186,6 +193,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
         ext_info_provider: &dyn ExtInfoProvider,
     ) -> Result<Self, ParseError> {
         let error_code = error.error_code();
+
         // Check if this is a core protocol error
         match error_code {
             xproto::ACCESS_ERROR => return Ok(Self::Access(error.into())),
@@ -207,6 +215,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
             xproto::WINDOW_ERROR => return Ok(Self::Window(error.into())),
             _ => {}
         }
+
         // Find the extension that this error could belong to
         let ext_info = ext_info_provider.get_from_error_code(error_code);
         match ext_info {
@@ -343,6 +352,23 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
     pub fn wire_sequence_number(&self) -> u16 {
         match self {
             Error::Unknown(value) => value.raw_sequence_number().expect("Errors should always have a sequence number"),
+            Error::Access(value) => value.sequence,
+            Error::Alloc(value) => value.sequence,
+            Error::Atom(value) => value.sequence,
+            Error::Colormap(value) => value.sequence,
+            Error::Cursor(value) => value.sequence,
+            Error::Drawable(value) => value.sequence,
+            Error::Font(value) => value.sequence,
+            Error::GContext(value) => value.sequence,
+            Error::IDChoice(value) => value.sequence,
+            Error::Implementation(value) => value.sequence,
+            Error::Length(value) => value.sequence,
+            Error::Match(value) => value.sequence,
+            Error::Name(value) => value.sequence,
+            Error::Pixmap(value) => value.sequence,
+            Error::Request(value) => value.sequence,
+            Error::Value(value) => value.sequence,
+            Error::Window(value) => value.sequence,
             #[cfg(feature = "damage")]
             Error::DamageBadDamage(value) => value.sequence,
             #[cfg(feature = "glx")]
@@ -431,23 +457,6 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
             Error::XprintBadContext(value) => value.sequence,
             #[cfg(feature = "xprint")]
             Error::XprintBadSequence(value) => value.sequence,
-            Error::Access(value) => value.sequence,
-            Error::Alloc(value) => value.sequence,
-            Error::Atom(value) => value.sequence,
-            Error::Colormap(value) => value.sequence,
-            Error::Cursor(value) => value.sequence,
-            Error::Drawable(value) => value.sequence,
-            Error::Font(value) => value.sequence,
-            Error::GContext(value) => value.sequence,
-            Error::IDChoice(value) => value.sequence,
-            Error::Implementation(value) => value.sequence,
-            Error::Length(value) => value.sequence,
-            Error::Match(value) => value.sequence,
-            Error::Name(value) => value.sequence,
-            Error::Pixmap(value) => value.sequence,
-            Error::Request(value) => value.sequence,
-            Error::Value(value) => value.sequence,
-            Error::Window(value) => value.sequence,
             #[cfg(feature = "xv")]
             Error::XvBadControl(value) => value.sequence,
             #[cfg(feature = "xv")]
@@ -461,6 +470,23 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
     pub fn error_code(&self) -> u8 {
         match self {
             Error::Unknown(value) => value.error_code(),
+            Error::Access(value) => value.error_code,
+            Error::Alloc(value) => value.error_code,
+            Error::Atom(value) => value.error_code,
+            Error::Colormap(value) => value.error_code,
+            Error::Cursor(value) => value.error_code,
+            Error::Drawable(value) => value.error_code,
+            Error::Font(value) => value.error_code,
+            Error::GContext(value) => value.error_code,
+            Error::IDChoice(value) => value.error_code,
+            Error::Implementation(value) => value.error_code,
+            Error::Length(value) => value.error_code,
+            Error::Match(value) => value.error_code,
+            Error::Name(value) => value.error_code,
+            Error::Pixmap(value) => value.error_code,
+            Error::Request(value) => value.error_code,
+            Error::Value(value) => value.error_code,
+            Error::Window(value) => value.error_code,
             #[cfg(feature = "damage")]
             Error::DamageBadDamage(value) => value.error_code,
             #[cfg(feature = "glx")]
@@ -549,23 +575,6 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
             Error::XprintBadContext(value) => value.error_code,
             #[cfg(feature = "xprint")]
             Error::XprintBadSequence(value) => value.error_code,
-            Error::Access(value) => value.error_code,
-            Error::Alloc(value) => value.error_code,
-            Error::Atom(value) => value.error_code,
-            Error::Colormap(value) => value.error_code,
-            Error::Cursor(value) => value.error_code,
-            Error::Drawable(value) => value.error_code,
-            Error::Font(value) => value.error_code,
-            Error::GContext(value) => value.error_code,
-            Error::IDChoice(value) => value.error_code,
-            Error::Implementation(value) => value.error_code,
-            Error::Length(value) => value.error_code,
-            Error::Match(value) => value.error_code,
-            Error::Name(value) => value.error_code,
-            Error::Pixmap(value) => value.error_code,
-            Error::Request(value) => value.error_code,
-            Error::Value(value) => value.error_code,
-            Error::Window(value) => value.error_code,
             #[cfg(feature = "xv")]
             Error::XvBadControl(value) => value.error_code,
             #[cfg(feature = "xv")]
@@ -574,12 +583,30 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
             Error::XvBadPort(value) => value.error_code,
         }
     }
+
     /// Get the response type of this X11 error
     ///
     /// This is not `pub` because it should always be `0` for errors.
     fn raw_response_type(&self) -> u8 {
         match self {
             Error::Unknown(value) => value.response_type(),
+            Error::Access(value) => value.response_type,
+            Error::Alloc(value) => value.response_type,
+            Error::Atom(value) => value.response_type,
+            Error::Colormap(value) => value.response_type,
+            Error::Cursor(value) => value.response_type,
+            Error::Drawable(value) => value.response_type,
+            Error::Font(value) => value.response_type,
+            Error::GContext(value) => value.response_type,
+            Error::IDChoice(value) => value.response_type,
+            Error::Implementation(value) => value.response_type,
+            Error::Length(value) => value.response_type,
+            Error::Match(value) => value.response_type,
+            Error::Name(value) => value.response_type,
+            Error::Pixmap(value) => value.response_type,
+            Error::Request(value) => value.response_type,
+            Error::Value(value) => value.response_type,
+            Error::Window(value) => value.response_type,
             #[cfg(feature = "damage")]
             Error::DamageBadDamage(value) => value.response_type,
             #[cfg(feature = "glx")]
@@ -668,23 +695,6 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
             Error::XprintBadContext(value) => value.response_type,
             #[cfg(feature = "xprint")]
             Error::XprintBadSequence(value) => value.response_type,
-            Error::Access(value) => value.response_type,
-            Error::Alloc(value) => value.response_type,
-            Error::Atom(value) => value.response_type,
-            Error::Colormap(value) => value.response_type,
-            Error::Cursor(value) => value.response_type,
-            Error::Drawable(value) => value.response_type,
-            Error::Font(value) => value.response_type,
-            Error::GContext(value) => value.response_type,
-            Error::IDChoice(value) => value.response_type,
-            Error::Implementation(value) => value.response_type,
-            Error::Length(value) => value.response_type,
-            Error::Match(value) => value.response_type,
-            Error::Name(value) => value.response_type,
-            Error::Pixmap(value) => value.response_type,
-            Error::Request(value) => value.response_type,
-            Error::Value(value) => value.response_type,
-            Error::Window(value) => value.response_type,
             #[cfg(feature = "xv")]
             Error::XvBadControl(value) => value.response_type,
             #[cfg(feature = "xv")]
@@ -694,11 +704,46 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
         }
     }
 }
+
 /// Enumeration of all possible X11 events.
 #[derive(Debug, Clone)]
 pub enum Event<B: std::fmt::Debug + AsRef<[u8]>> {
     Unknown(GenericEvent<B>),
     Error(Error<B>),
+    ButtonPress(xproto::ButtonPressEvent),
+    ButtonRelease(xproto::ButtonReleaseEvent),
+    CirculateNotify(xproto::CirculateNotifyEvent),
+    CirculateRequest(xproto::CirculateRequestEvent),
+    ClientMessage(xproto::ClientMessageEvent),
+    ColormapNotify(xproto::ColormapNotifyEvent),
+    ConfigureNotify(xproto::ConfigureNotifyEvent),
+    ConfigureRequest(xproto::ConfigureRequestEvent),
+    CreateNotify(xproto::CreateNotifyEvent),
+    DestroyNotify(xproto::DestroyNotifyEvent),
+    EnterNotify(xproto::EnterNotifyEvent),
+    Expose(xproto::ExposeEvent),
+    FocusIn(xproto::FocusInEvent),
+    FocusOut(xproto::FocusOutEvent),
+    GeGeneric(xproto::GeGenericEvent),
+    GraphicsExposure(xproto::GraphicsExposureEvent),
+    GravityNotify(xproto::GravityNotifyEvent),
+    KeyPress(xproto::KeyPressEvent),
+    KeyRelease(xproto::KeyReleaseEvent),
+    KeymapNotify(xproto::KeymapNotifyEvent),
+    LeaveNotify(xproto::LeaveNotifyEvent),
+    MapNotify(xproto::MapNotifyEvent),
+    MapRequest(xproto::MapRequestEvent),
+    MappingNotify(xproto::MappingNotifyEvent),
+    MotionNotify(xproto::MotionNotifyEvent),
+    NoExposure(xproto::NoExposureEvent),
+    PropertyNotify(xproto::PropertyNotifyEvent),
+    ReparentNotify(xproto::ReparentNotifyEvent),
+    ResizeRequest(xproto::ResizeRequestEvent),
+    SelectionClear(xproto::SelectionClearEvent),
+    SelectionNotify(xproto::SelectionNotifyEvent),
+    SelectionRequest(xproto::SelectionRequestEvent),
+    UnmapNotify(xproto::UnmapNotifyEvent),
+    VisibilityNotify(xproto::VisibilityNotifyEvent),
     #[cfg(feature = "damage")]
     DamageNotify(damage::NotifyEvent),
     #[cfg(feature = "dri2")]
@@ -851,45 +896,12 @@ pub enum Event<B: std::fmt::Debug + AsRef<[u8]>> {
     XprintAttributNotify(xprint::AttributNotifyEvent),
     #[cfg(feature = "xprint")]
     XprintNotify(xprint::NotifyEvent),
-    ButtonPress(xproto::ButtonPressEvent),
-    ButtonRelease(xproto::ButtonReleaseEvent),
-    CirculateNotify(xproto::CirculateNotifyEvent),
-    CirculateRequest(xproto::CirculateRequestEvent),
-    ClientMessage(xproto::ClientMessageEvent),
-    ColormapNotify(xproto::ColormapNotifyEvent),
-    ConfigureNotify(xproto::ConfigureNotifyEvent),
-    ConfigureRequest(xproto::ConfigureRequestEvent),
-    CreateNotify(xproto::CreateNotifyEvent),
-    DestroyNotify(xproto::DestroyNotifyEvent),
-    EnterNotify(xproto::EnterNotifyEvent),
-    Expose(xproto::ExposeEvent),
-    FocusIn(xproto::FocusInEvent),
-    FocusOut(xproto::FocusOutEvent),
-    GeGeneric(xproto::GeGenericEvent),
-    GraphicsExposure(xproto::GraphicsExposureEvent),
-    GravityNotify(xproto::GravityNotifyEvent),
-    KeyPress(xproto::KeyPressEvent),
-    KeyRelease(xproto::KeyReleaseEvent),
-    KeymapNotify(xproto::KeymapNotifyEvent),
-    LeaveNotify(xproto::LeaveNotifyEvent),
-    MapNotify(xproto::MapNotifyEvent),
-    MapRequest(xproto::MapRequestEvent),
-    MappingNotify(xproto::MappingNotifyEvent),
-    MotionNotify(xproto::MotionNotifyEvent),
-    NoExposure(xproto::NoExposureEvent),
-    PropertyNotify(xproto::PropertyNotifyEvent),
-    ReparentNotify(xproto::ReparentNotifyEvent),
-    ResizeRequest(xproto::ResizeRequestEvent),
-    SelectionClear(xproto::SelectionClearEvent),
-    SelectionNotify(xproto::SelectionNotifyEvent),
-    SelectionRequest(xproto::SelectionRequestEvent),
-    UnmapNotify(xproto::UnmapNotifyEvent),
-    VisibilityNotify(xproto::VisibilityNotifyEvent),
     #[cfg(feature = "xv")]
     XvPortNotify(xv::PortNotifyEvent),
     #[cfg(feature = "xv")]
     XvVideoNotify(xv::VideoNotifyEvent),
 }
+
 impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
     /// Parse a generic X11 event into a concrete event type.
     #[allow(clippy::cognitive_complexity)]
@@ -897,9 +909,10 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
         event: GenericEvent<B>,
         ext_info_provider: &dyn ExtInfoProvider,
     ) -> Result<Self, ParseError> {
-        let event_type = event.response_type();
-        // Check if this is a core protocol error or from the generic event extension
-        match event_type {
+        let event_code = event.response_type();
+
+        // Check if this is a core protocol event or error, or from the generic event extension
+        match event_code {
             0 => return Ok(Self::Error(Error::parse(event.try_into()?, ext_info_provider)?)),
             xproto::BUTTON_PRESS_EVENT => return Ok(Self::ButtonPress(event.try_into()?)),
             xproto::BUTTON_RELEASE_EVENT => return Ok(Self::ButtonRelease(event.try_into()?)),
@@ -938,18 +951,18 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
             _ => {}
         }
         // Find the extension that this event could belong to
-        let ext_info = ext_info_provider.get_from_event_code(event_type);
+        let ext_info = ext_info_provider.get_from_event_code(event_code);
         match ext_info {
             #[cfg(feature = "damage")]
             Some((damage::X11_EXTENSION_NAME, ext_info)) => {
-                match event_type - ext_info.first_event {
+                match event_code - ext_info.first_event {
                     damage::NOTIFY_EVENT => Ok(Self::DamageNotify(event.try_into()?)),
                     _ => Ok(Self::Unknown(event)),
                 }
             }
             #[cfg(feature = "dri2")]
             Some((dri2::X11_EXTENSION_NAME, ext_info)) => {
-                match event_type - ext_info.first_event {
+                match event_code - ext_info.first_event {
                     dri2::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::Dri2BufferSwapComplete(event.try_into()?)),
                     dri2::INVALIDATE_BUFFERS_EVENT => Ok(Self::Dri2InvalidateBuffers(event.try_into()?)),
                     _ => Ok(Self::Unknown(event)),
@@ -957,7 +970,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
             }
             #[cfg(feature = "glx")]
             Some((glx::X11_EXTENSION_NAME, ext_info)) => {
-                match event_type - ext_info.first_event {
+                match event_code - ext_info.first_event {
                     glx::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::GlxBufferSwapComplete(event.try_into()?)),
                     glx::PBUFFER_CLOBBER_EVENT => Ok(Self::GlxPbufferClobber(event.try_into()?)),
                     _ => Ok(Self::Unknown(event)),
@@ -965,14 +978,14 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
             }
             #[cfg(feature = "present")]
             Some((present::X11_EXTENSION_NAME, ext_info)) => {
-                match event_type - ext_info.first_event {
+                match event_code - ext_info.first_event {
                     present::GENERIC_EVENT => Ok(Self::PresentGeneric(event.try_into()?)),
                     _ => Ok(Self::Unknown(event)),
                 }
             }
             #[cfg(feature = "randr")]
             Some((randr::X11_EXTENSION_NAME, ext_info)) => {
-                match event_type - ext_info.first_event {
+                match event_code - ext_info.first_event {
                     randr::NOTIFY_EVENT => Ok(Self::RandrNotify(event.try_into()?)),
                     randr::SCREEN_CHANGE_NOTIFY_EVENT => Ok(Self::RandrScreenChangeNotify(event.try_into()?)),
                     _ => Ok(Self::Unknown(event)),
@@ -980,28 +993,28 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
             }
             #[cfg(feature = "screensaver")]
             Some((screensaver::X11_EXTENSION_NAME, ext_info)) => {
-                match event_type - ext_info.first_event {
+                match event_code - ext_info.first_event {
                     screensaver::NOTIFY_EVENT => Ok(Self::ScreensaverNotify(event.try_into()?)),
                     _ => Ok(Self::Unknown(event)),
                 }
             }
             #[cfg(feature = "shape")]
             Some((shape::X11_EXTENSION_NAME, ext_info)) => {
-                match event_type - ext_info.first_event {
+                match event_code - ext_info.first_event {
                     shape::NOTIFY_EVENT => Ok(Self::ShapeNotify(event.try_into()?)),
                     _ => Ok(Self::Unknown(event)),
                 }
             }
             #[cfg(feature = "shm")]
             Some((shm::X11_EXTENSION_NAME, ext_info)) => {
-                match event_type - ext_info.first_event {
+                match event_code - ext_info.first_event {
                     shm::COMPLETION_EVENT => Ok(Self::ShmCompletion(event.try_into()?)),
                     _ => Ok(Self::Unknown(event)),
                 }
             }
             #[cfg(feature = "sync")]
             Some((sync::X11_EXTENSION_NAME, ext_info)) => {
-                match event_type - ext_info.first_event {
+                match event_code - ext_info.first_event {
                     sync::ALARM_NOTIFY_EVENT => Ok(Self::SyncAlarmNotify(event.try_into()?)),
                     sync::COUNTER_NOTIFY_EVENT => Ok(Self::SyncCounterNotify(event.try_into()?)),
                     _ => Ok(Self::Unknown(event)),
@@ -1009,7 +1022,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
             }
             #[cfg(feature = "xfixes")]
             Some((xfixes::X11_EXTENSION_NAME, ext_info)) => {
-                match event_type - ext_info.first_event {
+                match event_code - ext_info.first_event {
                     xfixes::CURSOR_NOTIFY_EVENT => Ok(Self::XfixesCursorNotify(event.try_into()?)),
                     xfixes::SELECTION_NOTIFY_EVENT => Ok(Self::XfixesSelectionNotify(event.try_into()?)),
                     _ => Ok(Self::Unknown(event)),
@@ -1017,7 +1030,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
             }
             #[cfg(feature = "xinput")]
             Some((xinput::X11_EXTENSION_NAME, ext_info)) => {
-                match event_type - ext_info.first_event {
+                match event_code - ext_info.first_event {
                     xinput::CHANGE_DEVICE_NOTIFY_EVENT => Ok(Self::XinputChangeDeviceNotify(event.try_into()?)),
                     xinput::DEVICE_BUTTON_PRESS_EVENT => Ok(Self::XinputDeviceButtonPress(event.try_into()?)),
                     xinput::DEVICE_BUTTON_RELEASE_EVENT => Ok(Self::XinputDeviceButtonRelease(event.try_into()?)),
@@ -1040,7 +1053,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
             }
             #[cfg(feature = "xkb")]
             Some((xkb::X11_EXTENSION_NAME, ext_info)) => {
-                if event_type != ext_info.first_event {
+                if event_code != ext_info.first_event {
                     return Ok(Self::Unknown(event));
                 }
                 match event.raw_bytes()[1] {
@@ -1061,7 +1074,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
             }
             #[cfg(feature = "xprint")]
             Some((xprint::X11_EXTENSION_NAME, ext_info)) => {
-                match event_type - ext_info.first_event {
+                match event_code - ext_info.first_event {
                     xprint::ATTRIBUT_NOTIFY_EVENT => Ok(Self::XprintAttributNotify(event.try_into()?)),
                     xprint::NOTIFY_EVENT => Ok(Self::XprintNotify(event.try_into()?)),
                     _ => Ok(Self::Unknown(event)),
@@ -1069,7 +1082,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
             }
             #[cfg(feature = "xv")]
             Some((xv::X11_EXTENSION_NAME, ext_info)) => {
-                match event_type - ext_info.first_event {
+                match event_code - ext_info.first_event {
                     xv::PORT_NOTIFY_EVENT => Ok(Self::XvPortNotify(event.try_into()?)),
                     xv::VIDEO_NOTIFY_EVENT => Ok(Self::XvVideoNotify(event.try_into()?)),
                     _ => Ok(Self::Unknown(event)),
@@ -1083,8 +1096,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
         event: GenericEvent<B>,
         ext_info_provider: &dyn ExtInfoProvider,
     ) -> Result<Self, ParseError> {
-        let bytes = event.raw_bytes();
-        let ge_event = xproto::GeGenericEvent::try_from(bytes)?;
+        let ge_event = xproto::GeGenericEvent::try_from(event.raw_bytes())?;
         let ext_name = ext_info_provider
             .get_from_major_opcode(ge_event.extension)
             .map(|(name, _)| name);
@@ -1140,6 +1152,40 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
         match self {
             Event::Unknown(value) => value.raw_sequence_number(),
             Event::Error(value) => Some(value.wire_sequence_number()),
+            Event::ButtonPress(value) => Some(value.sequence),
+            Event::ButtonRelease(value) => Some(value.sequence),
+            Event::CirculateNotify(value) => Some(value.sequence),
+            Event::CirculateRequest(value) => Some(value.sequence),
+            Event::ClientMessage(value) => Some(value.sequence),
+            Event::ColormapNotify(value) => Some(value.sequence),
+            Event::ConfigureNotify(value) => Some(value.sequence),
+            Event::ConfigureRequest(value) => Some(value.sequence),
+            Event::CreateNotify(value) => Some(value.sequence),
+            Event::DestroyNotify(value) => Some(value.sequence),
+            Event::EnterNotify(value) => Some(value.sequence),
+            Event::Expose(value) => Some(value.sequence),
+            Event::FocusIn(value) => Some(value.sequence),
+            Event::FocusOut(value) => Some(value.sequence),
+            Event::GeGeneric(value) => Some(value.sequence),
+            Event::GraphicsExposure(value) => Some(value.sequence),
+            Event::GravityNotify(value) => Some(value.sequence),
+            Event::KeyPress(value) => Some(value.sequence),
+            Event::KeyRelease(value) => Some(value.sequence),
+            Event::KeymapNotify(_) => None,
+            Event::LeaveNotify(value) => Some(value.sequence),
+            Event::MapNotify(value) => Some(value.sequence),
+            Event::MapRequest(value) => Some(value.sequence),
+            Event::MappingNotify(value) => Some(value.sequence),
+            Event::MotionNotify(value) => Some(value.sequence),
+            Event::NoExposure(value) => Some(value.sequence),
+            Event::PropertyNotify(value) => Some(value.sequence),
+            Event::ReparentNotify(value) => Some(value.sequence),
+            Event::ResizeRequest(value) => Some(value.sequence),
+            Event::SelectionClear(value) => Some(value.sequence),
+            Event::SelectionNotify(value) => Some(value.sequence),
+            Event::SelectionRequest(value) => Some(value.sequence),
+            Event::UnmapNotify(value) => Some(value.sequence),
+            Event::VisibilityNotify(value) => Some(value.sequence),
             #[cfg(feature = "damage")]
             Event::DamageNotify(value) => Some(value.sequence),
             #[cfg(feature = "dri2")]
@@ -1292,40 +1338,6 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
             Event::XprintAttributNotify(value) => Some(value.sequence),
             #[cfg(feature = "xprint")]
             Event::XprintNotify(value) => Some(value.sequence),
-            Event::ButtonPress(value) => Some(value.sequence),
-            Event::ButtonRelease(value) => Some(value.sequence),
-            Event::CirculateNotify(value) => Some(value.sequence),
-            Event::CirculateRequest(value) => Some(value.sequence),
-            Event::ClientMessage(value) => Some(value.sequence),
-            Event::ColormapNotify(value) => Some(value.sequence),
-            Event::ConfigureNotify(value) => Some(value.sequence),
-            Event::ConfigureRequest(value) => Some(value.sequence),
-            Event::CreateNotify(value) => Some(value.sequence),
-            Event::DestroyNotify(value) => Some(value.sequence),
-            Event::EnterNotify(value) => Some(value.sequence),
-            Event::Expose(value) => Some(value.sequence),
-            Event::FocusIn(value) => Some(value.sequence),
-            Event::FocusOut(value) => Some(value.sequence),
-            Event::GeGeneric(value) => Some(value.sequence),
-            Event::GraphicsExposure(value) => Some(value.sequence),
-            Event::GravityNotify(value) => Some(value.sequence),
-            Event::KeyPress(value) => Some(value.sequence),
-            Event::KeyRelease(value) => Some(value.sequence),
-            Event::KeymapNotify(_) => None,
-            Event::LeaveNotify(value) => Some(value.sequence),
-            Event::MapNotify(value) => Some(value.sequence),
-            Event::MapRequest(value) => Some(value.sequence),
-            Event::MappingNotify(value) => Some(value.sequence),
-            Event::MotionNotify(value) => Some(value.sequence),
-            Event::NoExposure(value) => Some(value.sequence),
-            Event::PropertyNotify(value) => Some(value.sequence),
-            Event::ReparentNotify(value) => Some(value.sequence),
-            Event::ResizeRequest(value) => Some(value.sequence),
-            Event::SelectionClear(value) => Some(value.sequence),
-            Event::SelectionNotify(value) => Some(value.sequence),
-            Event::SelectionRequest(value) => Some(value.sequence),
-            Event::UnmapNotify(value) => Some(value.sequence),
-            Event::VisibilityNotify(value) => Some(value.sequence),
             #[cfg(feature = "xv")]
             Event::XvPortNotify(value) => Some(value.sequence),
             #[cfg(feature = "xv")]
@@ -1344,6 +1356,40 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
         match self {
             Event::Unknown(value) => value.raw_response_type(),
             Event::Error(value) => value.raw_response_type(),
+            Event::ButtonPress(value) => value.response_type,
+            Event::ButtonRelease(value) => value.response_type,
+            Event::CirculateNotify(value) => value.response_type,
+            Event::CirculateRequest(value) => value.response_type,
+            Event::ClientMessage(value) => value.response_type,
+            Event::ColormapNotify(value) => value.response_type,
+            Event::ConfigureNotify(value) => value.response_type,
+            Event::ConfigureRequest(value) => value.response_type,
+            Event::CreateNotify(value) => value.response_type,
+            Event::DestroyNotify(value) => value.response_type,
+            Event::EnterNotify(value) => value.response_type,
+            Event::Expose(value) => value.response_type,
+            Event::FocusIn(value) => value.response_type,
+            Event::FocusOut(value) => value.response_type,
+            Event::GeGeneric(value) => value.response_type,
+            Event::GraphicsExposure(value) => value.response_type,
+            Event::GravityNotify(value) => value.response_type,
+            Event::KeyPress(value) => value.response_type,
+            Event::KeyRelease(value) => value.response_type,
+            Event::KeymapNotify(value) => value.response_type,
+            Event::LeaveNotify(value) => value.response_type,
+            Event::MapNotify(value) => value.response_type,
+            Event::MapRequest(value) => value.response_type,
+            Event::MappingNotify(value) => value.response_type,
+            Event::MotionNotify(value) => value.response_type,
+            Event::NoExposure(value) => value.response_type,
+            Event::PropertyNotify(value) => value.response_type,
+            Event::ReparentNotify(value) => value.response_type,
+            Event::ResizeRequest(value) => value.response_type,
+            Event::SelectionClear(value) => value.response_type,
+            Event::SelectionNotify(value) => value.response_type,
+            Event::SelectionRequest(value) => value.response_type,
+            Event::UnmapNotify(value) => value.response_type,
+            Event::VisibilityNotify(value) => value.response_type,
             #[cfg(feature = "damage")]
             Event::DamageNotify(value) => value.response_type,
             #[cfg(feature = "dri2")]
@@ -1496,40 +1542,6 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
             Event::XprintAttributNotify(value) => value.response_type,
             #[cfg(feature = "xprint")]
             Event::XprintNotify(value) => value.response_type,
-            Event::ButtonPress(value) => value.response_type,
-            Event::ButtonRelease(value) => value.response_type,
-            Event::CirculateNotify(value) => value.response_type,
-            Event::CirculateRequest(value) => value.response_type,
-            Event::ClientMessage(value) => value.response_type,
-            Event::ColormapNotify(value) => value.response_type,
-            Event::ConfigureNotify(value) => value.response_type,
-            Event::ConfigureRequest(value) => value.response_type,
-            Event::CreateNotify(value) => value.response_type,
-            Event::DestroyNotify(value) => value.response_type,
-            Event::EnterNotify(value) => value.response_type,
-            Event::Expose(value) => value.response_type,
-            Event::FocusIn(value) => value.response_type,
-            Event::FocusOut(value) => value.response_type,
-            Event::GeGeneric(value) => value.response_type,
-            Event::GraphicsExposure(value) => value.response_type,
-            Event::GravityNotify(value) => value.response_type,
-            Event::KeyPress(value) => value.response_type,
-            Event::KeyRelease(value) => value.response_type,
-            Event::KeymapNotify(value) => value.response_type,
-            Event::LeaveNotify(value) => value.response_type,
-            Event::MapNotify(value) => value.response_type,
-            Event::MapRequest(value) => value.response_type,
-            Event::MappingNotify(value) => value.response_type,
-            Event::MotionNotify(value) => value.response_type,
-            Event::NoExposure(value) => value.response_type,
-            Event::PropertyNotify(value) => value.response_type,
-            Event::ReparentNotify(value) => value.response_type,
-            Event::ResizeRequest(value) => value.response_type,
-            Event::SelectionClear(value) => value.response_type,
-            Event::SelectionNotify(value) => value.response_type,
-            Event::SelectionRequest(value) => value.response_type,
-            Event::UnmapNotify(value) => value.response_type,
-            Event::VisibilityNotify(value) => value.response_type,
             #[cfg(feature = "xv")]
             Event::XvPortNotify(value) => value.response_type,
             #[cfg(feature = "xv")]

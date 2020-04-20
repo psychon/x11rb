@@ -24,7 +24,6 @@ use crate::errors::{ConnectionError, ParseError};
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
-#[allow(unused_imports)]
 use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
@@ -56,7 +55,7 @@ where
         0,
         client_major_bytes[0],
         client_minor_bytes[0],
-        0 /* trailing padding */,
+        0,
         0,
     ];
     let length_so_far = length_so_far + request0.len();
@@ -102,7 +101,7 @@ where
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let context_len: u32 = context.len().try_into()?;
+    let context_len = u32::try_from(context.len()).expect("`context` has too many elements");
     let context_len_bytes = context_len.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -183,7 +182,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let device_bytes = device.serialize();
-    let context_len: u32 = context.len().try_into()?;
+    let context_len = u32::try_from(context.len()).expect("`context` has too many elements");
     let context_len_bytes = context_len.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -272,7 +271,7 @@ where
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let context_len: u32 = context.len().try_into()?;
+    let context_len = u32::try_from(context.len()).expect("`context` has too many elements");
     let context_len_bytes = context_len.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -459,7 +458,7 @@ where
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let context_len: u32 = context.len().try_into()?;
+    let context_len = u32::try_from(context.len()).expect("`context` has too many elements");
     let context_len_bytes = context_len.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -539,7 +538,7 @@ where
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let context_len: u32 = context.len().try_into()?;
+    let context_len = u32::try_from(context.len()).expect("`context` has too many elements");
     let context_len_bytes = context_len.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -791,7 +790,7 @@ where
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let context_len: u32 = context.len().try_into()?;
+    let context_len = u32::try_from(context.len()).expect("`context` has too many elements");
     let context_len_bytes = context_len.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -871,7 +870,7 @@ where
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let context_len: u32 = context.len().try_into()?;
+    let context_len = u32::try_from(context.len()).expect("`context` has too many elements");
     let context_len_bytes = context_len.serialize();
     let mut request0 = [
         extension_information.major_opcode,

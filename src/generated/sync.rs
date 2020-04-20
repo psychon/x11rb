@@ -24,7 +24,6 @@ use crate::errors::{ConnectionError, ParseError};
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
-#[allow(unused_imports)]
 use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
@@ -725,7 +724,7 @@ where
         0,
         desired_major_version_bytes[0],
         desired_minor_version_bytes[0],
-        0 /* trailing padding */,
+        0,
         0,
     ];
     let length_so_far = length_so_far + request0.len();
@@ -936,7 +935,6 @@ where
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let wait_list_bytes = wait_list.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         AWAIT_REQUEST,
@@ -944,6 +942,7 @@ where
         0,
     ];
     let length_so_far = length_so_far + request0.len();
+    let wait_list_bytes = wait_list.serialize();
     let length_so_far = length_so_far + wait_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -1045,24 +1044,49 @@ impl Serialize for CreateAlarmAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.counter {
-            value.serialize_into(bytes);
+        if let Some(counter) = self.counter {
+            counter.serialize_into(bytes);
         }
-        if let Some(ref value) = self.value_type {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(value_type) = self.value_type {
+            u32::from(value_type).serialize_into(bytes);
         }
         if let Some(ref value) = self.value {
             value.serialize_into(bytes);
         }
-        if let Some(ref value) = self.test_type {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(test_type) = self.test_type {
+            u32::from(test_type).serialize_into(bytes);
         }
-        if let Some(ref value) = self.delta {
-            value.serialize_into(bytes);
+        if let Some(ref delta) = self.delta {
+            delta.serialize_into(bytes);
         }
-        if let Some(ref value) = self.events {
-            value.serialize_into(bytes);
+        if let Some(events) = self.events {
+            events.serialize_into(bytes);
         }
+    }
+}
+impl CreateAlarmAux {
+    #[allow(dead_code)]
+    fn switch_expr(&self) -> u32 {
+        let mut expr_value: u32 = 0;
+        if self.counter.is_some() {
+            expr_value |= u32::from(CA::Counter);
+        }
+        if self.value_type.is_some() {
+            expr_value |= u32::from(CA::ValueType);
+        }
+        if self.value.is_some() {
+            expr_value |= u32::from(CA::Value);
+        }
+        if self.test_type.is_some() {
+            expr_value |= u32::from(CA::TestType);
+        }
+        if self.delta.is_some() {
+            expr_value |= u32::from(CA::Delta);
+        }
+        if self.events.is_some() {
+            expr_value |= u32::from(CA::Events);
+        }
+        expr_value
     }
 }
 impl CreateAlarmAux {
@@ -1070,34 +1094,12 @@ impl CreateAlarmAux {
     pub fn new() -> Self {
         Default::default()
     }
-    fn value_mask(&self) -> u32 {
-        let mut mask = 0;
-        if self.counter.is_some() {
-            mask |= u32::from(CA::Counter);
-        }
-        if self.value_type.is_some() {
-            mask |= u32::from(CA::ValueType);
-        }
-        if self.value.is_some() {
-            mask |= u32::from(CA::Value);
-        }
-        if self.test_type.is_some() {
-            mask |= u32::from(CA::TestType);
-        }
-        if self.delta.is_some() {
-            mask |= u32::from(CA::Delta);
-        }
-        if self.events.is_some() {
-            mask |= u32::from(CA::Events);
-        }
-        mask
-    }
     /// Set the `counter` field of this structure.
     pub fn counter<I>(mut self, value: I) -> Self where I: Into<Option<Counter>> {
         self.counter = value.into();
         self
     }
-    /// Set the `valueType` field of this structure.
+    /// Set the `value_type` field of this structure.
     pub fn value_type<I>(mut self, value: I) -> Self where I: Into<Option<VALUETYPE>> {
         self.value_type = value.into();
         self
@@ -1107,7 +1109,7 @@ impl CreateAlarmAux {
         self.value = value.into();
         self
     }
-    /// Set the `testType` field of this structure.
+    /// Set the `test_type` field of this structure.
     pub fn test_type<I>(mut self, value: I) -> Self where I: Into<Option<TESTTYPE>> {
         self.test_type = value.into();
         self
@@ -1123,16 +1125,16 @@ impl CreateAlarmAux {
         self
     }
 }
+
 pub fn create_alarm<'c, Conn>(conn: &'c Conn, id: Alarm, value_list: &CreateAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let value_mask = value_list.value_mask();
-    let value_list_bytes = value_list.serialize();
     let length_so_far = 0;
     let id_bytes = id.serialize();
+    let value_mask = value_list.switch_expr();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -1149,6 +1151,7 @@ where
         value_mask_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let value_list_bytes = value_list.serialize();
     let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -1178,24 +1181,49 @@ impl Serialize for ChangeAlarmAux {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        if let Some(ref value) = self.counter {
-            value.serialize_into(bytes);
+        if let Some(counter) = self.counter {
+            counter.serialize_into(bytes);
         }
-        if let Some(ref value) = self.value_type {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(value_type) = self.value_type {
+            u32::from(value_type).serialize_into(bytes);
         }
         if let Some(ref value) = self.value {
             value.serialize_into(bytes);
         }
-        if let Some(ref value) = self.test_type {
-            u32::from(*value).serialize_into(bytes);
+        if let Some(test_type) = self.test_type {
+            u32::from(test_type).serialize_into(bytes);
         }
-        if let Some(ref value) = self.delta {
-            value.serialize_into(bytes);
+        if let Some(ref delta) = self.delta {
+            delta.serialize_into(bytes);
         }
-        if let Some(ref value) = self.events {
-            value.serialize_into(bytes);
+        if let Some(events) = self.events {
+            events.serialize_into(bytes);
         }
+    }
+}
+impl ChangeAlarmAux {
+    #[allow(dead_code)]
+    fn switch_expr(&self) -> u32 {
+        let mut expr_value: u32 = 0;
+        if self.counter.is_some() {
+            expr_value |= u32::from(CA::Counter);
+        }
+        if self.value_type.is_some() {
+            expr_value |= u32::from(CA::ValueType);
+        }
+        if self.value.is_some() {
+            expr_value |= u32::from(CA::Value);
+        }
+        if self.test_type.is_some() {
+            expr_value |= u32::from(CA::TestType);
+        }
+        if self.delta.is_some() {
+            expr_value |= u32::from(CA::Delta);
+        }
+        if self.events.is_some() {
+            expr_value |= u32::from(CA::Events);
+        }
+        expr_value
     }
 }
 impl ChangeAlarmAux {
@@ -1203,34 +1231,12 @@ impl ChangeAlarmAux {
     pub fn new() -> Self {
         Default::default()
     }
-    fn value_mask(&self) -> u32 {
-        let mut mask = 0;
-        if self.counter.is_some() {
-            mask |= u32::from(CA::Counter);
-        }
-        if self.value_type.is_some() {
-            mask |= u32::from(CA::ValueType);
-        }
-        if self.value.is_some() {
-            mask |= u32::from(CA::Value);
-        }
-        if self.test_type.is_some() {
-            mask |= u32::from(CA::TestType);
-        }
-        if self.delta.is_some() {
-            mask |= u32::from(CA::Delta);
-        }
-        if self.events.is_some() {
-            mask |= u32::from(CA::Events);
-        }
-        mask
-    }
     /// Set the `counter` field of this structure.
     pub fn counter<I>(mut self, value: I) -> Self where I: Into<Option<Counter>> {
         self.counter = value.into();
         self
     }
-    /// Set the `valueType` field of this structure.
+    /// Set the `value_type` field of this structure.
     pub fn value_type<I>(mut self, value: I) -> Self where I: Into<Option<VALUETYPE>> {
         self.value_type = value.into();
         self
@@ -1240,7 +1246,7 @@ impl ChangeAlarmAux {
         self.value = value.into();
         self
     }
-    /// Set the `testType` field of this structure.
+    /// Set the `test_type` field of this structure.
     pub fn test_type<I>(mut self, value: I) -> Self where I: Into<Option<TESTTYPE>> {
         self.test_type = value.into();
         self
@@ -1256,16 +1262,16 @@ impl ChangeAlarmAux {
         self
     }
 }
+
 pub fn change_alarm<'c, Conn>(conn: &'c Conn, id: Alarm, value_list: &ChangeAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
-    let value_mask = value_list.value_mask();
-    let value_list_bytes = value_list.serialize();
     let length_so_far = 0;
     let id_bytes = id.serialize();
+    let value_mask = value_list.switch_expr();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -1282,6 +1288,7 @@ where
         value_mask_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let value_list_bytes = value_list.serialize();
     let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -1488,7 +1495,7 @@ where
         fence_bytes[2],
         fence_bytes[3],
         initially_triggered_bytes[0],
-        0 /* trailing padding */,
+        0,
         0,
         0,
     ];
@@ -1642,7 +1649,6 @@ where
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let fence_list_bytes = fence_list.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         AWAIT_FENCE_REQUEST,
@@ -1650,6 +1656,7 @@ where
         0,
     ];
     let length_so_far = length_so_far + request0.len();
+    let fence_list_bytes = fence_list.serialize();
     let length_so_far = length_so_far + fence_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();

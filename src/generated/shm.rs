@@ -24,7 +24,6 @@ use crate::errors::{ConnectionError, ParseError};
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
-#[allow(unused_imports)]
 use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
@@ -572,6 +571,7 @@ where
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let shm_fd: RawFdContainer = shm_fd.into();
     let length_so_far = 0;
     let shmseg_bytes = shmseg.serialize();
     let read_only_bytes = read_only.serialize();
@@ -593,8 +593,7 @@ where
     assert_eq!(length_so_far % 4, 0);
     let length = u16::try_from(length_so_far / 4).unwrap_or(0);
     request0[2..4].copy_from_slice(&length.to_ne_bytes());
-    let fds = vec!(shm_fd.into());
-    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], fds)?)
+    Ok(conn.send_request_without_reply(&[IoSlice::new(&request0)], vec![shm_fd])?)
 }
 
 /// Opcode for the CreateSegment request

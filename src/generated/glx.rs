@@ -22,7 +22,6 @@ use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError};
 #[allow(unused_imports)]
 use crate::x11_utils::GenericEvent;
-#[allow(unused_imports)]
 use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
@@ -1753,7 +1752,7 @@ where
     let context_tag_bytes = context_tag.serialize();
     let request_num_bytes = request_num.serialize();
     let request_total_bytes = request_total.serialize();
-    let data_len: u32 = data.len().try_into()?;
+    let data_len = u32::try_from(data.len()).expect("`data` has too many elements");
     let data_len_bytes = data_len.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -2158,7 +2157,6 @@ pub enum GC {
 impl From<GC> for u32 {
     fn from(input: GC) -> Self {
         match input {
-            GC::GL_ALL_ATTRIB_BITS => 16_777_215,
             GC::GL_CURRENT_BIT => 1 << 0,
             GC::GL_POINT_BIT => 1 << 1,
             GC::GL_LINE_BIT => 1 << 2,
@@ -2179,6 +2177,7 @@ impl From<GC> for u32 {
             GC::GL_LIST_BIT => 1 << 17,
             GC::GL_TEXTURE_BIT => 1 << 18,
             GC::GL_SCISSOR_BIT => 1 << 19,
+            GC::GL_ALL_ATTRIB_BITS => 16_777_215,
         }
     }
 }
@@ -2556,7 +2555,7 @@ impl TryParse for VendorPrivateWithReplyReply {
             data1_22,
             data1_23,
         ];
-        let (data2, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * (4))?;
+        let (data2, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
         let result = VendorPrivateWithReplyReply { response_type, sequence, retval, data1, data2 };
         Ok((result, remaining))
     }
@@ -2693,7 +2692,7 @@ where
     let length_so_far = 0;
     let major_version_bytes = major_version.serialize();
     let minor_version_bytes = minor_version.serialize();
-    let str_len: u32 = string.len().try_into()?;
+    let str_len = u32::try_from(string.len()).expect("`string` has too many elements");
     let str_len_bytes = str_len.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -2792,10 +2791,9 @@ where
     let fbconfig_bytes = fbconfig.serialize();
     let pixmap_bytes = pixmap.serialize();
     let glx_pixmap_bytes = glx_pixmap.serialize();
-    assert_eq!(0, attribs.len() % 2, "Argument num_attribs has an incorrect length, must be a multiple of 2");
-    let num_attribs = u32::try_from(attribs.len() / 2).unwrap();
+    assert_eq!(attribs.len() % 2, 0, "`attribs` has an incorrect length, must be a multiple of 2");
+    let num_attribs = u32::try_from(attribs.len() / 2).expect("`attribs` has too many elements");
     let num_attribs_bytes = num_attribs.serialize();
-    let attribs_bytes = attribs.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_PIXMAP_REQUEST,
@@ -2823,6 +2821,7 @@ where
         num_attribs_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let attribs_bytes = attribs.serialize();
     let length_so_far = length_so_far + attribs_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -2953,7 +2952,7 @@ impl TryParse for QueryContextReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_attribs, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, (num_attribs as usize) * (2))?;
+        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, (num_attribs as usize) * 2)?;
         let result = QueryContextReply { response_type, sequence, length, attribs };
         Ok((result, remaining))
     }
@@ -3045,10 +3044,9 @@ where
     let screen_bytes = screen.serialize();
     let fbconfig_bytes = fbconfig.serialize();
     let pbuffer_bytes = pbuffer.serialize();
-    assert_eq!(0, attribs.len() % 2, "Argument num_attribs has an incorrect length, must be a multiple of 2");
-    let num_attribs = u32::try_from(attribs.len() / 2).unwrap();
+    assert_eq!(attribs.len() % 2, 0, "`attribs` has an incorrect length, must be a multiple of 2");
+    let num_attribs = u32::try_from(attribs.len() / 2).expect("`attribs` has too many elements");
     let num_attribs_bytes = num_attribs.serialize();
-    let attribs_bytes = attribs.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_PBUFFER_REQUEST,
@@ -3072,6 +3070,7 @@ where
         num_attribs_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let attribs_bytes = attribs.serialize();
     let length_so_far = length_so_far + attribs_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -3150,7 +3149,7 @@ impl TryParse for GetDrawableAttributesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_attribs, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, (num_attribs as usize) * (2))?;
+        let (attribs, remaining) = crate::x11_utils::parse_list::<u32>(remaining, (num_attribs as usize) * 2)?;
         let result = GetDrawableAttributesReply { response_type, sequence, length, attribs };
         Ok((result, remaining))
     }
@@ -3172,10 +3171,9 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
-    assert_eq!(0, attribs.len() % 2, "Argument num_attribs has an incorrect length, must be a multiple of 2");
-    let num_attribs = u32::try_from(attribs.len() / 2).unwrap();
+    assert_eq!(attribs.len() % 2, 0, "`attribs` has an incorrect length, must be a multiple of 2");
+    let num_attribs = u32::try_from(attribs.len() / 2).expect("`attribs` has too many elements");
     let num_attribs_bytes = num_attribs.serialize();
-    let attribs_bytes = attribs.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CHANGE_DRAWABLE_ATTRIBUTES_REQUEST,
@@ -3191,6 +3189,7 @@ where
         num_attribs_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let attribs_bytes = attribs.serialize();
     let length_so_far = length_so_far + attribs_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -3213,10 +3212,9 @@ where
     let fbconfig_bytes = fbconfig.serialize();
     let window_bytes = window.serialize();
     let glx_window_bytes = glx_window.serialize();
-    assert_eq!(0, attribs.len() % 2, "Argument num_attribs has an incorrect length, must be a multiple of 2");
-    let num_attribs = u32::try_from(attribs.len() / 2).unwrap();
+    assert_eq!(attribs.len() % 2, 0, "`attribs` has an incorrect length, must be a multiple of 2");
+    let num_attribs = u32::try_from(attribs.len() / 2).expect("`attribs` has too many elements");
     let num_attribs_bytes = num_attribs.serialize();
-    let attribs_bytes = attribs.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_WINDOW_REQUEST,
@@ -3244,6 +3242,7 @@ where
         num_attribs_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let attribs_bytes = attribs.serialize();
     let length_so_far = length_so_far + attribs_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -3291,14 +3290,13 @@ where
     let length_so_far = 0;
     let major_version_bytes = major_version.serialize();
     let minor_version_bytes = minor_version.serialize();
-    assert_eq!(0, gl_versions.len() % 2, "Argument num_versions has an incorrect length, must be a multiple of 2");
-    let num_versions = u32::try_from(gl_versions.len() / 2).unwrap();
+    assert_eq!(gl_versions.len() % 2, 0, "`gl_versions` has an incorrect length, must be a multiple of 2");
+    let num_versions = u32::try_from(gl_versions.len() / 2).expect("`gl_versions` has too many elements");
     let num_versions_bytes = num_versions.serialize();
-    let gl_str_len: u32 = gl_extension_string.len().try_into()?;
+    let gl_str_len = u32::try_from(gl_extension_string.len()).expect("`gl_extension_string` has too many elements");
     let gl_str_len_bytes = gl_str_len.serialize();
-    let glx_str_len: u32 = glx_extension_string.len().try_into()?;
+    let glx_str_len = u32::try_from(glx_extension_string.len()).expect("`glx_extension_string` has too many elements");
     let glx_str_len_bytes = glx_str_len.serialize();
-    let gl_versions_bytes = gl_versions.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         SET_CLIENT_INFO_ARB_REQUEST,
@@ -3326,6 +3324,7 @@ where
         glx_str_len_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let gl_versions_bytes = gl_versions.serialize();
     let length_so_far = length_so_far + gl_versions_bytes.len();
     let length_so_far = length_so_far + gl_extension_string.len();
     let length_so_far = length_so_far + glx_extension_string.len();
@@ -3351,10 +3350,9 @@ where
     let screen_bytes = screen.serialize();
     let share_list_bytes = share_list.serialize();
     let is_direct_bytes = is_direct.serialize();
-    assert_eq!(0, attribs.len() % 2, "Argument num_attribs has an incorrect length, must be a multiple of 2");
-    let num_attribs = u32::try_from(attribs.len() / 2).unwrap();
+    assert_eq!(attribs.len() % 2, 0, "`attribs` has an incorrect length, must be a multiple of 2");
+    let num_attribs = u32::try_from(attribs.len() / 2).expect("`attribs` has too many elements");
     let num_attribs_bytes = num_attribs.serialize();
-    let attribs_bytes = attribs.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         CREATE_CONTEXT_ATTRIBS_ARB_REQUEST,
@@ -3386,6 +3384,7 @@ where
         num_attribs_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let attribs_bytes = attribs.serialize();
     let length_so_far = length_so_far + attribs_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -3406,14 +3405,13 @@ where
     let length_so_far = 0;
     let major_version_bytes = major_version.serialize();
     let minor_version_bytes = minor_version.serialize();
-    assert_eq!(0, gl_versions.len() % 3, "Argument num_versions has an incorrect length, must be a multiple of 3");
-    let num_versions = u32::try_from(gl_versions.len() / 3).unwrap();
+    assert_eq!(gl_versions.len() % 3, 0, "`gl_versions` has an incorrect length, must be a multiple of 3");
+    let num_versions = u32::try_from(gl_versions.len() / 3).expect("`gl_versions` has too many elements");
     let num_versions_bytes = num_versions.serialize();
-    let gl_str_len: u32 = gl_extension_string.len().try_into()?;
+    let gl_str_len = u32::try_from(gl_extension_string.len()).expect("`gl_extension_string` has too many elements");
     let gl_str_len_bytes = gl_str_len.serialize();
-    let glx_str_len: u32 = glx_extension_string.len().try_into()?;
+    let glx_str_len = u32::try_from(glx_extension_string.len()).expect("`glx_extension_string` has too many elements");
     let glx_str_len_bytes = glx_str_len.serialize();
-    let gl_versions_bytes = gl_versions.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         SET_CLIENT_INFO2_ARB_REQUEST,
@@ -3441,6 +3439,7 @@ where
         glx_str_len_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let gl_versions_bytes = gl_versions.serialize();
     let length_so_far = length_so_far + gl_versions_bytes.len();
     let length_so_far = length_so_far + gl_extension_string.len();
     let length_so_far = length_so_far + glx_extension_string.len();
@@ -3969,7 +3968,7 @@ where
         type_bytes[3],
         swap_bytes_bytes[0],
         lsb_first_bytes[0],
-        0 /* trailing padding */,
+        0,
         0,
     ];
     let length_so_far = length_so_far + request0.len();
@@ -3992,7 +3991,7 @@ impl TryParse for ReadPixelsReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * (4))?;
+        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
         let result = ReadPixelsReply { response_type, sequence, data };
         Ok((result, remaining))
     }
@@ -4042,7 +4041,7 @@ pub struct GetBooleanvReply {
     pub sequence: u16,
     pub length: u32,
     pub datum: bool,
-    pub data: Vec<u8>,
+    pub data: Vec<bool>,
 }
 impl TryParse for GetBooleanvReply {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -4054,7 +4053,7 @@ impl TryParse for GetBooleanvReply {
         let (n, remaining) = u32::try_parse(remaining)?;
         let (datum, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(15..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, n as usize)?;
+        let (data, remaining) = crate::x11_utils::parse_list::<bool>(remaining, n as usize)?;
         let result = GetBooleanvReply { response_type, sequence, length, datum, data };
         Ok((result, remaining))
     }
@@ -4111,7 +4110,7 @@ impl TryParse for GetClipPlaneReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<Float64>(remaining, (length as usize) / (2))?;
+        let (data, remaining) = crate::x11_utils::parse_list::<Float64>(remaining, (length as usize) / 2)?;
         let result = GetClipPlaneReply { response_type, sequence, data };
         Ok((result, remaining))
     }
@@ -5037,7 +5036,7 @@ where
         context_tag_bytes[2],
         context_tag_bytes[3],
         lsb_first_bytes[0],
-        0 /* trailing padding */,
+        0,
         0,
         0,
     ];
@@ -5061,7 +5060,7 @@ impl TryParse for GetPolygonStippleReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * (4))?;
+        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
         let result = GetPolygonStippleReply { response_type, sequence, data };
         Ok((result, remaining))
     }
@@ -5509,7 +5508,7 @@ where
         type_bytes[2],
         type_bytes[3],
         swap_bytes_bytes[0],
-        0 /* trailing padding */,
+        0,
         0,
         0,
     ];
@@ -5540,7 +5539,7 @@ impl TryParse for GetTexImageReply {
         let (height, remaining) = i32::try_parse(remaining)?;
         let (depth, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * (4))?;
+        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
         let result = GetTexImageReply { response_type, sequence, width, height, depth, data };
         Ok((result, remaining))
     }
@@ -5981,9 +5980,8 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let context_tag_bytes = context_tag.serialize();
-    let n: i32 = textures.len().try_into()?;
+    let n = i32::try_from(textures.len()).expect("`textures` has too many elements");
     let n_bytes = n.serialize();
-    let textures_bytes = textures.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         ARE_TEXTURES_RESIDENT_REQUEST,
@@ -5999,6 +5997,7 @@ where
         n_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let textures_bytes = textures.serialize();
     let length_so_far = length_so_far + textures_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -6013,7 +6012,7 @@ pub struct AreTexturesResidentReply {
     pub response_type: u8,
     pub sequence: u16,
     pub ret_val: Bool32,
-    pub data: Vec<u8>,
+    pub data: Vec<bool>,
 }
 impl TryParse for AreTexturesResidentReply {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
@@ -6023,7 +6022,7 @@ impl TryParse for AreTexturesResidentReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (ret_val, remaining) = Bool32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * (4))?;
+        let (data, remaining) = crate::x11_utils::parse_list::<bool>(remaining, (length as usize) * 4)?;
         let result = AreTexturesResidentReply { response_type, sequence, ret_val, data };
         Ok((result, remaining))
     }
@@ -6045,9 +6044,8 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let context_tag_bytes = context_tag.serialize();
-    let n: i32 = textures.len().try_into()?;
+    let n = i32::try_from(textures.len()).expect("`textures` has too many elements");
     let n_bytes = n.serialize();
-    let textures_bytes = textures.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         DELETE_TEXTURES_REQUEST,
@@ -6063,6 +6061,7 @@ where
         n_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let textures_bytes = textures.serialize();
     let length_so_far = length_so_far + textures_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -6222,7 +6221,7 @@ where
         type_bytes[2],
         type_bytes[3],
         swap_bytes_bytes[0],
-        0 /* trailing padding */,
+        0,
         0,
         0,
     ];
@@ -6249,7 +6248,7 @@ impl TryParse for GetColorTableReply {
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
         let (width, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * (4))?;
+        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
         let result = GetColorTableReply { response_type, sequence, width, data };
         Ok((result, remaining))
     }
@@ -6431,7 +6430,7 @@ where
         type_bytes[2],
         type_bytes[3],
         swap_bytes_bytes[0],
-        0 /* trailing padding */,
+        0,
         0,
         0,
     ];
@@ -6460,7 +6459,7 @@ impl TryParse for GetConvolutionFilterReply {
         let (width, remaining) = i32::try_parse(remaining)?;
         let (height, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * (4))?;
+        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
         let result = GetConvolutionFilterReply { response_type, sequence, width, height, data };
         Ok((result, remaining))
     }
@@ -6642,7 +6641,7 @@ where
         type_bytes[2],
         type_bytes[3],
         swap_bytes_bytes[0],
-        0 /* trailing padding */,
+        0,
         0,
         0,
     ];
@@ -6671,7 +6670,7 @@ impl TryParse for GetSeparableFilterReply {
         let (row_w, remaining) = i32::try_parse(remaining)?;
         let (col_h, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
-        let (rows_and_cols, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * (4))?;
+        let (rows_and_cols, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
         let result = GetSeparableFilterReply { response_type, sequence, row_w, col_h, rows_and_cols };
         Ok((result, remaining))
     }
@@ -6721,7 +6720,7 @@ where
         type_bytes[3],
         swap_bytes_bytes[0],
         reset_bytes[0],
-        0 /* trailing padding */,
+        0,
         0,
     ];
     let length_so_far = length_so_far + request0.len();
@@ -6747,7 +6746,7 @@ impl TryParse for GetHistogramReply {
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
         let (width, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * (4))?;
+        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
         let result = GetHistogramReply { response_type, sequence, width, data };
         Ok((result, remaining))
     }
@@ -6931,7 +6930,7 @@ where
         type_bytes[3],
         swap_bytes_bytes[0],
         reset_bytes[0],
-        0 /* trailing padding */,
+        0,
         0,
     ];
     let length_so_far = length_so_far + request0.len();
@@ -6954,7 +6953,7 @@ impl TryParse for GetMinmaxReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * (4))?;
+        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
         let result = GetMinmaxReply { response_type, sequence, data };
         Ok((result, remaining))
     }
@@ -7153,7 +7152,7 @@ impl TryParse for GetCompressedTexImageARBReply {
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
         let (size, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * (4))?;
+        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
         let result = GetCompressedTexImageARBReply { response_type, sequence, size, data };
         Ok((result, remaining))
     }
@@ -7175,9 +7174,8 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let context_tag_bytes = context_tag.serialize();
-    let n: i32 = ids.len().try_into()?;
+    let n = i32::try_from(ids.len()).expect("`ids` has too many elements");
     let n_bytes = n.serialize();
-    let ids_bytes = ids.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         DELETE_QUERIES_ARB_REQUEST,
@@ -7193,6 +7191,7 @@ where
         n_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
+    let ids_bytes = ids.serialize();
     let length_so_far = length_so_far + ids_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();

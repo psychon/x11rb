@@ -24,7 +24,6 @@ use crate::errors::{ConnectionError, ParseError};
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
-#[allow(unused_imports)]
 use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
@@ -348,7 +347,6 @@ where
     let destination_window_bytes = destination_window.serialize();
     let x_offset_bytes = x_offset.serialize();
     let y_offset_bytes = y_offset.serialize();
-    let rectangles_bytes = rectangles.serialize();
     let mut request0 = [
         extension_information.major_opcode,
         RECTANGLES_REQUEST,
@@ -368,6 +366,7 @@ where
         y_offset_bytes[1],
     ];
     let length_so_far = length_so_far + request0.len();
+    let rectangles_bytes = rectangles.serialize();
     let length_so_far = length_so_far + rectangles_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -379,12 +378,14 @@ where
 
 /// Opcode for the Mask request
 pub const MASK_REQUEST: u8 = 2;
-pub fn mask<Conn>(conn: &Conn, operation: SO, destination_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_bitmap: xproto::Pixmap) -> Result<VoidCookie<'_, Conn>, ConnectionError>
+pub fn mask<Conn, A>(conn: &Conn, operation: SO, destination_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_bitmap: A) -> Result<VoidCookie<'_, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
+    A: Into<xproto::Pixmap>,
 {
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
+    let source_bitmap: xproto::Pixmap = source_bitmap.into();
     let length_so_far = 0;
     let operation_bytes = Op::from(operation).serialize();
     let destination_kind_bytes = Kind::from(destination_kind).serialize();
@@ -729,7 +730,9 @@ pub trait ConnectionExt: RequestConnection {
     {
         self::rectangles(self, operation, destination_kind, ordering, destination_window, x_offset, y_offset, rectangles)
     }
-    fn shape_mask(&self, operation: SO, destination_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_bitmap: xproto::Pixmap) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    fn shape_mask<A>(&self, operation: SO, destination_kind: SK, destination_window: xproto::Window, x_offset: i16, y_offset: i16, source_bitmap: A) -> Result<VoidCookie<'_, Self>, ConnectionError>
+    where
+        A: Into<xproto::Pixmap>,
     {
         mask(self, operation, destination_kind, destination_window, x_offset, y_offset, source_bitmap)
     }

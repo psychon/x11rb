@@ -24,7 +24,6 @@ use crate::errors::{ConnectionError, ParseError};
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
-#[allow(unused_imports)]
 use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
@@ -78,7 +77,6 @@ impl Serialize for Printer {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        bytes.reserve(4);
         let name_len = u32::try_from(self.name.len()).expect("`name` has too many elements");
         name_len.serialize_into(bytes);
         bytes.extend_from_slice(&self.name);
@@ -429,9 +427,9 @@ where
     let extension_information = conn.extension_information(X11_EXTENSION_NAME)?
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
-    let printer_name_len: u32 = printer_name.len().try_into()?;
+    let printer_name_len = u32::try_from(printer_name.len()).expect("`printer_name` has too many elements");
     let printer_name_len_bytes = printer_name_len.serialize();
-    let locale_len: u32 = locale.len().try_into()?;
+    let locale_len = u32::try_from(locale.len()).expect("`locale` has too many elements");
     let locale_len_bytes = locale_len.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -517,9 +515,9 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let context_id_bytes = context_id.serialize();
-    let printer_name_len: u32 = printer_name.len().try_into()?;
+    let printer_name_len = u32::try_from(printer_name.len()).expect("`printer_name` has too many elements");
     let printer_name_len_bytes = printer_name_len.serialize();
-    let locale_len: u32 = locale.len().try_into()?;
+    let locale_len = u32::try_from(locale.len()).expect("`locale` has too many elements");
     let locale_len_bytes = locale_len.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -714,7 +712,7 @@ where
         0,
         0,
         output_mode_bytes[0],
-        0 /* trailing padding */,
+        0,
         0,
         0,
     ];
@@ -741,7 +739,7 @@ where
         0,
         0,
         cancel_bytes[0],
-        0 /* trailing padding */,
+        0,
         0,
         0,
     ];
@@ -768,7 +766,7 @@ where
         0,
         0,
         driver_mode_bytes[0],
-        0 /* trailing padding */,
+        0,
         0,
         0,
     ];
@@ -795,7 +793,7 @@ where
         0,
         0,
         cancel_bytes[0],
-        0 /* trailing padding */,
+        0,
         0,
         0,
     ];
@@ -816,11 +814,11 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let drawable_bytes = drawable.serialize();
-    let len_data: u32 = data.len().try_into()?;
+    let len_data = u32::try_from(data.len()).expect("`data` has too many elements");
     let len_data_bytes = len_data.serialize();
-    let len_fmt: u16 = doc_format.len().try_into()?;
+    let len_fmt = u16::try_from(doc_format.len()).expect("`doc_format` has too many elements");
     let len_fmt_bytes = len_fmt.serialize();
-    let len_options: u16 = options.len().try_into()?;
+    let len_options = u16::try_from(options.len()).expect("`options` has too many elements");
     let len_options_bytes = len_options.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -1124,7 +1122,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let context_bytes = context.serialize();
-    let name_len: u32 = name.len().try_into()?;
+    let name_len = u32::try_from(name.len()).expect("`name` has too many elements");
     let name_len_bytes = name_len.serialize();
     let pool_bytes = pool.serialize();
     let mut request0 = [
@@ -1356,7 +1354,7 @@ where
         context_bytes[3],
         image_resolution_bytes[0],
         image_resolution_bytes[1],
-        0 /* trailing padding */,
+        0,
         0,
     ];
     let length_so_far = length_so_far + request0.len();

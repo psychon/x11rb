@@ -24,14 +24,8 @@ use crate::errors::{ConnectionError, ParseError};
 use crate::x11_utils::GenericEvent;
 #[allow(unused_imports)]
 use crate::x11_utils::GenericError;
-#[allow(unused_imports)]
-use super::xproto;
-#[allow(unused_imports)]
-use super::render;
-#[allow(unused_imports)]
-use super::shape;
-#[allow(unused_imports)]
 use super::xfixes;
+use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
 pub const X11_EXTENSION_NAME: &str = "Composite";
