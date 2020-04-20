@@ -463,7 +463,6 @@ impl Serialize for SetAttributesAux {
     }
 }
 impl SetAttributesAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u32 {
         let mut expr_value: u32 = 0;
         if self.background_pixmap.is_some() {

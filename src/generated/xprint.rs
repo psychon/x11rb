@@ -96,6 +96,14 @@ pub enum GetDoc {
     Finished = 0,
     SecondConsumer = 1,
 }
+impl From<GetDoc> for bool {
+    fn from(input: GetDoc) -> Self {
+        match input {
+            GetDoc::Finished => false,
+            GetDoc::SecondConsumer => true,
+        }
+    }
+}
 impl From<GetDoc> for u8 {
     fn from(input: GetDoc) -> Self {
         match input {

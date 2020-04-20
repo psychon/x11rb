@@ -304,6 +304,14 @@ pub enum ValuatorMode {
     Relative = 0,
     Absolute = 1,
 }
+impl From<ValuatorMode> for bool {
+    fn from(input: ValuatorMode) -> Self {
+        match input {
+            ValuatorMode::Relative => false,
+            ValuatorMode::Absolute => true,
+        }
+    }
+}
 impl From<ValuatorMode> for u8 {
     fn from(input: ValuatorMode) -> Self {
         match input {
@@ -768,7 +776,6 @@ impl Serialize for InputInfoInfo {
     }
 }
 impl InputInfoInfo {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u8 {
         match self {
             InputInfoInfo::Key(_) => u8::from(InputClass::Key),
@@ -1188,6 +1195,14 @@ impl TryFrom<&[u8]> for GetSelectedExtensionEventsReply {
 pub enum PropagateMode {
     AddToList = 0,
     DeleteFromList = 1,
+}
+impl From<PropagateMode> for bool {
+    fn from(input: PropagateMode) -> Self {
+        match input {
+            PropagateMode::AddToList => false,
+            PropagateMode::DeleteFromList => true,
+        }
+    }
 }
 impl From<PropagateMode> for u8 {
     fn from(input: PropagateMode) -> Self {
@@ -3213,7 +3228,6 @@ impl Serialize for FeedbackStateData {
     }
 }
 impl FeedbackStateData {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u8 {
         match self {
             FeedbackStateData::Keyboard(_) => u8::from(FeedbackClass::Keyboard),
@@ -4029,7 +4043,6 @@ impl Serialize for FeedbackCtlData {
     }
 }
 impl FeedbackCtlData {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u8 {
         match self {
             FeedbackCtlData::Keyboard(_) => u8::from(FeedbackClass::Keyboard),
@@ -5278,7 +5291,6 @@ impl Serialize for InputStateData {
     }
 }
 impl InputStateData {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u8 {
         match self {
             InputStateData::Key(_) => u8::from(InputClass::Key),
@@ -6223,7 +6235,6 @@ impl Serialize for DeviceStateData {
     }
 }
 impl DeviceStateData {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u16 {
         match self {
             DeviceStateData::Resolution(_) => u16::from(DeviceControl::Resolution),
@@ -6971,7 +6982,6 @@ impl Serialize for DeviceCtlData {
     }
 }
 impl DeviceCtlData {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u16 {
         match self {
             DeviceCtlData::Resolution(_) => u16::from(DeviceControl::Resolution),
@@ -7250,7 +7260,6 @@ impl Serialize for ChangeDevicePropertyAux {
     }
 }
 impl ChangeDevicePropertyAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u8 {
         match self {
             ChangeDevicePropertyAux::Data8(_) => u8::from(PropertyFormat::M8Bits),
@@ -7497,6 +7506,14 @@ impl TryFrom<&[u8]> for GetDevicePropertyReply {
 pub enum Device {
     All = 0,
     AllMaster = 1,
+}
+impl From<Device> for bool {
+    fn from(input: Device) -> Self {
+        match input {
+            Device::All => false,
+            Device::AllMaster => true,
+        }
+    }
 }
 impl From<Device> for u8 {
     fn from(input: Device) -> Self {
@@ -8413,7 +8430,6 @@ impl Serialize for HierarchyChangeData {
     }
 }
 impl HierarchyChangeData {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u16 {
         match self {
             HierarchyChangeData::AddMaster(_) => u16::from(HierarchyChangeType::AddMaster),
@@ -9815,7 +9831,6 @@ impl Serialize for DeviceClassData {
     }
 }
 impl DeviceClassData {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u16 {
         match self {
             DeviceClassData::Keys(_) => u16::from(DeviceClassType::Key),
@@ -10864,7 +10879,6 @@ impl Serialize for XIChangePropertyAux {
     }
 }
 impl XIChangePropertyAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u8 {
         match self {
             XIChangePropertyAux::Data8(_) => u8::from(PropertyFormat::M8Bits),
@@ -12735,6 +12749,14 @@ impl From<DeviceMappingNotifyEvent> for [u8; 32] {
 pub enum ChangeDevice {
     NewPointer = 0,
     NewKeyboard = 1,
+}
+impl From<ChangeDevice> for bool {
+    fn from(input: ChangeDevice) -> Self {
+        match input {
+            ChangeDevice::NewPointer => false,
+            ChangeDevice::NewKeyboard => true,
+        }
+    }
 }
 impl From<ChangeDevice> for u8 {
     fn from(input: ChangeDevice) -> Self {

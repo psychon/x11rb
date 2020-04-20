@@ -887,6 +887,14 @@ pub enum ImageOrder {
     LSBFirst = 0,
     MSBFirst = 1,
 }
+impl From<ImageOrder> for bool {
+    fn from(input: ImageOrder) -> Self {
+        match input {
+            ImageOrder::LSBFirst => false,
+            ImageOrder::MSBFirst => true,
+        }
+    }
+}
 impl From<ImageOrder> for u8 {
     fn from(input: ImageOrder) -> Self {
         match input {
@@ -1868,6 +1876,14 @@ impl From<ButtonReleaseEvent> for [u8; 32] {
 pub enum Motion {
     Normal = 0,
     Hint = 1,
+}
+impl From<Motion> for bool {
+    fn from(input: Motion) -> Self {
+        match input {
+            Motion::Normal => false,
+            Motion::Hint => true,
+        }
+    }
 }
 impl From<Motion> for u8 {
     fn from(input: Motion) -> Self {
@@ -4345,6 +4361,14 @@ pub enum Place {
     OnTop = 0,
     OnBottom = 1,
 }
+impl From<Place> for bool {
+    fn from(input: Place) -> Self {
+        match input {
+            Place::OnTop => false,
+            Place::OnBottom => true,
+        }
+    }
+}
 impl From<Place> for u8 {
     fn from(input: Place) -> Self {
         match input {
@@ -4618,6 +4642,14 @@ impl From<CirculateRequestEvent> for [u8; 32] {
 pub enum Property {
     NewValue = 0,
     Delete = 1,
+}
+impl From<Property> for bool {
+    fn from(input: Property) -> Self {
+        match input {
+            Property::NewValue => false,
+            Property::Delete => true,
+        }
+    }
 }
 impl From<Property> for u8 {
     fn from(input: Property) -> Self {
@@ -5315,6 +5347,14 @@ impl From<SelectionNotifyEvent> for [u8; 32] {
 pub enum ColormapState {
     Uninstalled = 0,
     Installed = 1,
+}
+impl From<ColormapState> for bool {
+    fn from(input: ColormapState) -> Self {
+        match input {
+            ColormapState::Uninstalled => false,
+            ColormapState::Installed => true,
+        }
+    }
 }
 impl From<ColormapState> for u8 {
     fn from(input: ColormapState) -> Self {
@@ -7832,6 +7872,14 @@ pub enum BackPixmap {
     None = 0,
     ParentRelative = 1,
 }
+impl From<BackPixmap> for bool {
+    fn from(input: BackPixmap) -> Self {
+        match input {
+            BackPixmap::None => false,
+            BackPixmap::ParentRelative => true,
+        }
+    }
+}
 impl From<BackPixmap> for u8 {
     fn from(input: BackPixmap) -> Self {
         match input {
@@ -8024,7 +8072,6 @@ impl Serialize for CreateWindowAux {
     }
 }
 impl CreateWindowAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u32 {
         let mut expr_value: u32 = 0;
         if self.background_pixmap.is_some() {
@@ -8350,7 +8397,6 @@ impl Serialize for ChangeWindowAttributesAux {
     }
 }
 impl ChangeWindowAttributesAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u32 {
         let mut expr_value: u32 = 0;
         if self.background_pixmap.is_some() {
@@ -8788,6 +8834,14 @@ where
 pub enum SetMode {
     Insert = 0,
     Delete = 1,
+}
+impl From<SetMode> for bool {
+    fn from(input: SetMode) -> Self {
+        match input {
+            SetMode::Insert => false,
+            SetMode::Delete => true,
+        }
+    }
 }
 impl From<SetMode> for u8 {
     fn from(input: SetMode) -> Self {
@@ -9312,7 +9366,6 @@ impl Serialize for ConfigureWindowAux {
     }
 }
 impl ConfigureWindowAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u16 {
         let mut expr_value: u16 = 0;
         if self.x.is_some() {
@@ -9469,6 +9522,14 @@ where
 pub enum Circulate {
     RaiseLowest = 0,
     LowerHighest = 1,
+}
+impl From<Circulate> for bool {
+    fn from(input: Circulate) -> Self {
+        match input {
+            Circulate::RaiseLowest => false,
+            Circulate::LowerHighest => true,
+        }
+    }
 }
 impl From<Circulate> for u8 {
     fn from(input: Circulate) -> Self {
@@ -10770,6 +10831,14 @@ pub enum SendEventDest {
     PointerWindow = 0,
     ItemFocus = 1,
 }
+impl From<SendEventDest> for bool {
+    fn from(input: SendEventDest) -> Self {
+        match input {
+            SendEventDest::PointerWindow => false,
+            SendEventDest::ItemFocus => true,
+        }
+    }
+}
 impl From<SendEventDest> for u8 {
     fn from(input: SendEventDest) -> Self {
         match input {
@@ -10948,6 +11017,14 @@ where
 pub enum GrabMode {
     Sync = 0,
     Async = 1,
+}
+impl From<GrabMode> for bool {
+    fn from(input: GrabMode) -> Self {
+        match input {
+            GrabMode::Sync => false,
+            GrabMode::Async => true,
+        }
+    }
 }
 impl From<GrabMode> for u8 {
     fn from(input: GrabMode) -> Self {
@@ -12963,6 +13040,14 @@ pub enum FontDraw {
     LeftToRight = 0,
     RightToLeft = 1,
 }
+impl From<FontDraw> for bool {
+    fn from(input: FontDraw) -> Self {
+        match input {
+            FontDraw::LeftToRight => false,
+            FontDraw::RightToLeft => true,
+        }
+    }
+}
 impl From<FontDraw> for u8 {
     fn from(input: FontDraw) -> Self {
         match input {
@@ -14291,6 +14376,14 @@ pub enum FillRule {
     EvenOdd = 0,
     Winding = 1,
 }
+impl From<FillRule> for bool {
+    fn from(input: FillRule) -> Self {
+        match input {
+            FillRule::EvenOdd => false,
+            FillRule::Winding => true,
+        }
+    }
+}
 impl From<FillRule> for u8 {
     fn from(input: FillRule) -> Self {
         match input {
@@ -14353,6 +14446,14 @@ pub enum SubwindowMode {
     ClipByChildren = 0,
     IncludeInferiors = 1,
 }
+impl From<SubwindowMode> for bool {
+    fn from(input: SubwindowMode) -> Self {
+        match input {
+            SubwindowMode::ClipByChildren => false,
+            SubwindowMode::IncludeInferiors => true,
+        }
+    }
+}
 impl From<SubwindowMode> for u8 {
     fn from(input: SubwindowMode) -> Self {
         match input {
@@ -14414,6 +14515,14 @@ impl TryFrom<u32> for SubwindowMode {
 pub enum ArcMode {
     Chord = 0,
     PieSlice = 1,
+}
+impl From<ArcMode> for bool {
+    fn from(input: ArcMode) -> Self {
+        match input {
+            ArcMode::Chord => false,
+            ArcMode::PieSlice => true,
+        }
+    }
 }
 impl From<ArcMode> for u8 {
     fn from(input: ArcMode) -> Self {
@@ -14580,7 +14689,6 @@ impl Serialize for CreateGCAux {
     }
 }
 impl CreateGCAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u32 {
         let mut expr_value: u32 = 0;
         if self.function.is_some() {
@@ -14947,7 +15055,6 @@ impl Serialize for ChangeGCAux {
     }
 }
 impl ChangeGCAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u32 {
         let mut expr_value: u32 = 0;
         if self.function.is_some() {
@@ -15613,6 +15720,14 @@ where
 pub enum CoordMode {
     Origin = 0,
     Previous = 1,
+}
+impl From<CoordMode> for bool {
+    fn from(input: CoordMode) -> Self {
+        match input {
+            CoordMode::Origin => false,
+            CoordMode::Previous => true,
+        }
+    }
 }
 impl From<CoordMode> for u8 {
     fn from(input: CoordMode) -> Self {
@@ -16578,6 +16693,14 @@ where
 pub enum ColormapAlloc {
     None = 0,
     All = 1,
+}
+impl From<ColormapAlloc> for bool {
+    fn from(input: ColormapAlloc) -> Self {
+        match input {
+            ColormapAlloc::None => false,
+            ColormapAlloc::All => true,
+        }
+    }
 }
 impl From<ColormapAlloc> for u8 {
     fn from(input: ColormapAlloc) -> Self {
@@ -18305,6 +18428,14 @@ pub enum LedMode {
     Off = 0,
     On = 1,
 }
+impl From<LedMode> for bool {
+    fn from(input: LedMode) -> Self {
+        match input {
+            LedMode::Off => false,
+            LedMode::On => true,
+        }
+    }
+}
 impl From<LedMode> for u8 {
     fn from(input: LedMode) -> Self {
         match input {
@@ -18475,7 +18606,6 @@ impl Serialize for ChangeKeyboardControlAux {
     }
 }
 impl ChangeKeyboardControlAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u32 {
         let mut expr_value: u32 = 0;
         if self.key_click_percent.is_some() {
@@ -19029,6 +19159,14 @@ pub enum HostMode {
     Insert = 0,
     Delete = 1,
 }
+impl From<HostMode> for bool {
+    fn from(input: HostMode) -> Self {
+        match input {
+            HostMode::Insert => false,
+            HostMode::Delete => true,
+        }
+    }
+}
 impl From<HostMode> for u8 {
     fn from(input: HostMode) -> Self {
         match input {
@@ -19286,6 +19424,14 @@ impl TryFrom<&[u8]> for ListHostsReply {
 pub enum AccessControl {
     Disable = 0,
     Enable = 1,
+}
+impl From<AccessControl> for bool {
+    fn from(input: AccessControl) -> Self {
+        match input {
+            AccessControl::Disable => false,
+            AccessControl::Enable => true,
+        }
+    }
 }
 impl From<AccessControl> for u8 {
     fn from(input: AccessControl) -> Self {
@@ -19596,6 +19742,14 @@ where
 pub enum ScreenSaver {
     Reset = 0,
     Active = 1,
+}
+impl From<ScreenSaver> for bool {
+    fn from(input: ScreenSaver) -> Self {
+        match input {
+            ScreenSaver::Reset => false,
+            ScreenSaver::Active => true,
+        }
+    }
 }
 impl From<ScreenSaver> for u8 {
     fn from(input: ScreenSaver) -> Self {

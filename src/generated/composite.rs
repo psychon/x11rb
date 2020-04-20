@@ -44,6 +44,14 @@ pub enum Redirect {
     Automatic = 0,
     Manual = 1,
 }
+impl From<Redirect> for bool {
+    fn from(input: Redirect) -> Self {
+        match input {
+            Redirect::Automatic => false,
+            Redirect::Manual => true,
+        }
+    }
+}
 impl From<Redirect> for u8 {
     fn from(input: Redirect) -> Self {
         match input {

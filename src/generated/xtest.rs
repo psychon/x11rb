@@ -97,6 +97,14 @@ pub enum Cursor {
     None = 0,
     Current = 1,
 }
+impl From<Cursor> for bool {
+    fn from(input: Cursor) -> Self {
+        match input {
+            Cursor::None => false,
+            Cursor::Current => true,
+        }
+    }
+}
 impl From<Cursor> for u8 {
     fn from(input: Cursor) -> Self {
         match input {

@@ -327,6 +327,14 @@ pub enum CompleteKind {
     Pixmap = 0,
     NotifyMSC = 1,
 }
+impl From<CompleteKind> for bool {
+    fn from(input: CompleteKind) -> Self {
+        match input {
+            CompleteKind::Pixmap => false,
+            CompleteKind::NotifyMSC => true,
+        }
+    }
+}
 impl From<CompleteKind> for u8 {
     fn from(input: CompleteKind) -> Self {
         match input {

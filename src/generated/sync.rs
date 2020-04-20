@@ -182,6 +182,14 @@ pub enum VALUETYPE {
     Absolute = 0,
     Relative = 1,
 }
+impl From<VALUETYPE> for bool {
+    fn from(input: VALUETYPE) -> Self {
+        match input {
+            VALUETYPE::Absolute => false,
+            VALUETYPE::Relative => true,
+        }
+    }
+}
 impl From<VALUETYPE> for u8 {
     fn from(input: VALUETYPE) -> Self {
         match input {
@@ -1065,7 +1073,6 @@ impl Serialize for CreateAlarmAux {
     }
 }
 impl CreateAlarmAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u32 {
         let mut expr_value: u32 = 0;
         if self.counter.is_some() {
@@ -1202,7 +1209,6 @@ impl Serialize for ChangeAlarmAux {
     }
 }
 impl ChangeAlarmAux {
-    #[allow(dead_code)]
     fn switch_expr(&self) -> u32 {
         let mut expr_value: u32 = 0;
         if self.counter.is_some() {

@@ -105,6 +105,14 @@ pub enum SaveSetMode {
     Insert = 0,
     Delete = 1,
 }
+impl From<SaveSetMode> for bool {
+    fn from(input: SaveSetMode) -> Self {
+        match input {
+            SaveSetMode::Insert => false,
+            SaveSetMode::Delete => true,
+        }
+    }
+}
 impl From<SaveSetMode> for u8 {
     fn from(input: SaveSetMode) -> Self {
         match input {
@@ -167,6 +175,14 @@ pub enum SaveSetTarget {
     Nearest = 0,
     Root = 1,
 }
+impl From<SaveSetTarget> for bool {
+    fn from(input: SaveSetTarget) -> Self {
+        match input {
+            SaveSetTarget::Nearest => false,
+            SaveSetTarget::Root => true,
+        }
+    }
+}
 impl From<SaveSetTarget> for u8 {
     fn from(input: SaveSetTarget) -> Self {
         match input {
@@ -228,6 +244,14 @@ impl TryFrom<u32> for SaveSetTarget {
 pub enum SaveSetMapping {
     Map = 0,
     Unmap = 1,
+}
+impl From<SaveSetMapping> for bool {
+    fn from(input: SaveSetMapping) -> Self {
+        match input {
+            SaveSetMapping::Map => false,
+            SaveSetMapping::Unmap => true,
+        }
+    }
 }
 impl From<SaveSetMapping> for u8 {
     fn from(input: SaveSetMapping) -> Self {
