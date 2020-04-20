@@ -2118,15 +2118,33 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             assert_eq!(case_align.begin.offset % case_align.internal_align, 0);
 
             let case_deducible_fields = gather_deducible_fields(&*case.fields.borrow());
+            let mut single_field_index =
+                if self.case_has_single_visible_field(case, &case_deducible_fields) {
+                    Some(
+                        case.fields
+                            .borrow()
+                            .iter()
+                            .position(|field| self.field_is_visible(field, &case_deducible_fields))
+                            .unwrap(),
+                    )
+                } else {
+                    None
+                };
 
-            if self.case_has_single_visible_field(case, &case_deducible_fields) {
-                let field_index = case
-                    .fields
-                    .borrow()
-                    .iter()
-                    .position(|field| self.field_is_visible(field, &case_deducible_fields))
-                    .unwrap();
+            if let Some(field_index) = single_field_index {
+                if let Some(ref case_name) = case.name {
+                    let case_fields = case.fields.borrow();
+                    let single_field_name = case_fields[field_index].name().unwrap();
+                    if case_name != single_field_name {
+                        // The <(bit)case> has a name, which is different from
+                        // the name of the single field, so create a struct
+                        // anyways.
+                        single_field_index = None;
+                    }
+                }
+            }
 
+            if let Some(field_index) = single_field_index {
                 if let xcbdefs::FieldDef::Switch(ref switch_field) =
                     case.fields.borrow()[field_index]
                 {
