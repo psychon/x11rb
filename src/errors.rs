@@ -18,12 +18,6 @@ impl std::fmt::Display for ParseError {
     }
 }
 
-impl From<std::num::TryFromIntError> for ParseError {
-    fn from(_: std::num::TryFromIntError) -> Self {
-        ParseError::ParseError
-    }
-}
-
 /// An error that occurred while connecting to an X11 server
 #[derive(Debug)]
 pub enum ConnectError {
@@ -164,12 +158,6 @@ impl From<ParseError> for ConnectionError {
     }
 }
 
-impl From<std::num::TryFromIntError> for ConnectionError {
-    fn from(err: std::num::TryFromIntError) -> Self {
-        Self::from(ParseError::from(err))
-    }
-}
-
 impl From<std::io::Error> for ConnectionError {
     fn from(err: std::io::Error) -> Self {
         ConnectionError::IOError(err)
@@ -199,12 +187,6 @@ impl<B: AsRef<[u8]> + std::fmt::Debug> std::fmt::Display for ReplyError<B> {
 impl<B: AsRef<[u8]> + std::fmt::Debug> From<ParseError> for ReplyError<B> {
     fn from(err: ParseError) -> Self {
         Self::from(ConnectionError::from(err))
-    }
-}
-
-impl<B: AsRef<[u8]> + std::fmt::Debug> From<std::num::TryFromIntError> for ReplyError<B> {
-    fn from(err: std::num::TryFromIntError) -> Self {
-        Self::from(ParseError::from(err))
     }
 }
 
