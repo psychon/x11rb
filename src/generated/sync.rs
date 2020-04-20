@@ -182,6 +182,14 @@ pub enum VALUETYPE {
     Absolute = 0,
     Relative = 1,
 }
+impl From<VALUETYPE> for bool {
+    fn from(input: VALUETYPE) -> Self {
+        match input {
+            VALUETYPE::Absolute => false,
+            VALUETYPE::Relative => true,
+        }
+    }
+}
 impl From<VALUETYPE> for u8 {
     fn from(input: VALUETYPE) -> Self {
         match input {

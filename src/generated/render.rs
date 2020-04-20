@@ -43,6 +43,14 @@ pub enum PictType {
     Indexed = 0,
     Direct = 1,
 }
+impl From<PictType> for bool {
+    fn from(input: PictType) -> Self {
+        match input {
+            PictType::Indexed => false,
+            PictType::Direct => true,
+        }
+    }
+}
 impl From<PictType> for u8 {
     fn from(input: PictType) -> Self {
         match input {
@@ -379,6 +387,14 @@ pub enum PolyEdge {
     Sharp = 0,
     Smooth = 1,
 }
+impl From<PolyEdge> for bool {
+    fn from(input: PolyEdge) -> Self {
+        match input {
+            PolyEdge::Sharp => false,
+            PolyEdge::Smooth => true,
+        }
+    }
+}
 impl From<PolyEdge> for u8 {
     fn from(input: PolyEdge) -> Self {
         match input {
@@ -440,6 +456,14 @@ impl TryFrom<u32> for PolyEdge {
 pub enum PolyMode {
     Precise = 0,
     Imprecise = 1,
+}
+impl From<PolyMode> for bool {
+    fn from(input: PolyMode) -> Self {
+        match input {
+            PolyMode::Precise => false,
+            PolyMode::Imprecise => true,
+        }
+    }
 }
 impl From<PolyMode> for u8 {
     fn from(input: PolyMode) -> Self {

@@ -304,6 +304,14 @@ pub enum ValuatorMode {
     Relative = 0,
     Absolute = 1,
 }
+impl From<ValuatorMode> for bool {
+    fn from(input: ValuatorMode) -> Self {
+        match input {
+            ValuatorMode::Relative => false,
+            ValuatorMode::Absolute => true,
+        }
+    }
+}
 impl From<ValuatorMode> for u8 {
     fn from(input: ValuatorMode) -> Self {
         match input {
@@ -1187,6 +1195,14 @@ impl TryFrom<&[u8]> for GetSelectedExtensionEventsReply {
 pub enum PropagateMode {
     AddToList = 0,
     DeleteFromList = 1,
+}
+impl From<PropagateMode> for bool {
+    fn from(input: PropagateMode) -> Self {
+        match input {
+            PropagateMode::AddToList => false,
+            PropagateMode::DeleteFromList => true,
+        }
+    }
 }
 impl From<PropagateMode> for u8 {
     fn from(input: PropagateMode) -> Self {
@@ -7491,6 +7507,14 @@ pub enum Device {
     All = 0,
     AllMaster = 1,
 }
+impl From<Device> for bool {
+    fn from(input: Device) -> Self {
+        match input {
+            Device::All => false,
+            Device::AllMaster => true,
+        }
+    }
+}
 impl From<Device> for u8 {
     fn from(input: Device) -> Self {
         match input {
@@ -12725,6 +12749,14 @@ impl From<DeviceMappingNotifyEvent> for [u8; 32] {
 pub enum ChangeDevice {
     NewPointer = 0,
     NewKeyboard = 1,
+}
+impl From<ChangeDevice> for bool {
+    fn from(input: ChangeDevice) -> Self {
+        match input {
+            ChangeDevice::NewPointer => false,
+            ChangeDevice::NewKeyboard => true,
+        }
+    }
 }
 impl From<ChangeDevice> for u8 {
     fn from(input: ChangeDevice) -> Self {

@@ -121,6 +121,14 @@ pub enum ImageFormatInfoType {
     RGB = 0,
     YUV = 1,
 }
+impl From<ImageFormatInfoType> for bool {
+    fn from(input: ImageFormatInfoType) -> Self {
+        match input {
+            ImageFormatInfoType::RGB => false,
+            ImageFormatInfoType::YUV => true,
+        }
+    }
+}
 impl From<ImageFormatInfoType> for u8 {
     fn from(input: ImageFormatInfoType) -> Self {
         match input {
@@ -182,6 +190,14 @@ impl TryFrom<u32> for ImageFormatInfoType {
 pub enum ImageFormatInfoFormat {
     Packed = 0,
     Planar = 1,
+}
+impl From<ImageFormatInfoFormat> for bool {
+    fn from(input: ImageFormatInfoFormat) -> Self {
+        match input {
+            ImageFormatInfoFormat::Packed => false,
+            ImageFormatInfoFormat::Planar => true,
+        }
+    }
 }
 impl From<ImageFormatInfoFormat> for u8 {
     fn from(input: ImageFormatInfoFormat) -> Self {
@@ -378,6 +394,14 @@ impl TryFrom<u32> for VideoNotifyReason {
 pub enum ScanlineOrder {
     TopToBottom = 0,
     BottomToTop = 1,
+}
+impl From<ScanlineOrder> for bool {
+    fn from(input: ScanlineOrder) -> Self {
+        match input {
+            ScanlineOrder::TopToBottom => false,
+            ScanlineOrder::BottomToTop => true,
+        }
+    }
 }
 impl From<ScanlineOrder> for u8 {
     fn from(input: ScanlineOrder) -> Self {

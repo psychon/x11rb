@@ -200,6 +200,14 @@ pub enum Datatype {
     Unmodified = 0,
     Modified = 1,
 }
+impl From<Datatype> for bool {
+    fn from(input: Datatype) -> Self {
+        match input {
+            Datatype::Unmodified => false,
+            Datatype::Modified => true,
+        }
+    }
+}
 impl From<Datatype> for u8 {
     fn from(input: Datatype) -> Self {
         match input {

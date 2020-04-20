@@ -133,6 +133,14 @@ pub enum DriverType {
     DRI = 0,
     VDPAU = 1,
 }
+impl From<DriverType> for bool {
+    fn from(input: DriverType) -> Self {
+        match input {
+            DriverType::DRI => false,
+            DriverType::VDPAU => true,
+        }
+    }
+}
 impl From<DriverType> for u8 {
     fn from(input: DriverType) -> Self {
         match input {

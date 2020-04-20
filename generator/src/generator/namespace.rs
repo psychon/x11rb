@@ -1572,11 +1572,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         }
         outln!(out, "}}");
 
-        let ns = enum_def.namespace.upgrade().unwrap();
-        if enum_def.name == "GrabOwner" && ns.header == "xinput" {
-            assert_eq!(enum_def.items.len(), 2);
-
-            // Special case
+        if max_value == 1 && enum_def.items.len() == 2 {
             outln!(out, "impl From<{}> for bool {{", rust_name);
             out.indented(|out| {
                 outln!(out, "fn from(input: {}) -> Self {{", rust_name);
