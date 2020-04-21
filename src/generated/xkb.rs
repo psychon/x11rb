@@ -3901,8 +3901,8 @@ impl TryParse for DeviceLedInfo {
         let (maps_present, remaining) = u32::try_parse(remaining)?;
         let (phys_indicators, remaining) = u32::try_parse(remaining)?;
         let (state, remaining) = u32::try_parse(remaining)?;
-        let (names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from((names_present as usize).count_ones()).unwrap())?;
-        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, usize::try_from((maps_present as usize).count_ones()).unwrap())?;
+        let (names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from(names_present.count_ones()).unwrap())?;
+        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, usize::try_from(maps_present.count_ones()).unwrap())?;
         let led_class = led_class.try_into()?;
         let result = DeviceLedInfo { led_class, led_id, names_present, maps_present, phys_indicators, state, names, maps };
         Ok((result, remaining))
@@ -7418,7 +7418,7 @@ impl GetMapMap {
         let vmods_rtrn = if switch_expr & u16::from(MapPart::VirtualMods) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
-            let (vmods_rtrn, remaining) = crate::x11_utils::parse_list::<u8>(remaining, usize::try_from((virtual_mods as usize).count_ones()).unwrap())?;
+            let (vmods_rtrn, remaining) = crate::x11_utils::parse_list::<u8>(remaining, usize::try_from(virtual_mods.count_ones()).unwrap())?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
@@ -7837,7 +7837,7 @@ impl TryParse for GetCompatMapReply {
         let (n_total_si, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
         let (si_rtrn, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si_rtrn as usize)?;
-        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, usize::try_from((groups_rtrn as usize).count_ones()).unwrap())?;
+        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, usize::try_from(groups_rtrn.count_ones()).unwrap())?;
         let result = GetCompatMapReply { response_type, device_id, sequence, length, groups_rtrn, first_si_rtrn, n_total_si, si_rtrn, group_rtrn };
         Ok((result, remaining))
     }
@@ -7888,7 +7888,7 @@ where
     let length_so_far = length_so_far + request0.len();
     let si_bytes = si.serialize();
     let length_so_far = length_so_far + si_bytes.len();
-    assert_eq!(group_maps.len(), usize::try_from((groups as usize).count_ones()).unwrap(), "`group_maps` has an incorrect length");
+    assert_eq!(group_maps.len(), usize::try_from(groups.count_ones()).unwrap(), "`group_maps` has an incorrect length");
     let group_maps_bytes = group_maps.serialize();
     let length_so_far = length_so_far + group_maps_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
@@ -8006,7 +8006,7 @@ impl TryParse for GetIndicatorMapReply {
         let (real_indicators, remaining) = u32::try_parse(remaining)?;
         let (n_indicators, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(15..).ok_or(ParseError::ParseError)?;
-        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, usize::try_from((which as usize).count_ones()).unwrap())?;
+        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, usize::try_from(which.count_ones()).unwrap())?;
         let result = GetIndicatorMapReply { response_type, device_id, sequence, length, which, real_indicators, n_indicators, maps };
         Ok((result, remaining))
     }
@@ -8044,7 +8044,7 @@ where
         which_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    assert_eq!(maps.len(), usize::try_from((which as usize).count_ones()).unwrap(), "`maps` has an incorrect length");
+    assert_eq!(maps.len(), usize::try_from(which.count_ones()).unwrap(), "`maps` has an incorrect length");
     let maps_bytes = maps.serialize();
     let length_so_far = length_so_far + maps_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
@@ -8368,7 +8368,7 @@ impl GetNamesValueList {
         };
         let indicator_names = if switch_expr & u32::from(NameDetail::IndicatorNames) != 0 {
             let remaining = outer_remaining;
-            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from((indicators as usize).count_ones()).unwrap())?;
+            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from(indicators.count_ones()).unwrap())?;
             outer_remaining = remaining;
             Some(indicator_names)
         } else {
@@ -8376,7 +8376,7 @@ impl GetNamesValueList {
         };
         let virtual_mod_names = if switch_expr & u32::from(NameDetail::VirtualModNames) != 0 {
             let remaining = outer_remaining;
-            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from((virtual_mods as usize).count_ones()).unwrap())?;
+            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from(virtual_mods.count_ones()).unwrap())?;
             outer_remaining = remaining;
             Some(virtual_mod_names)
         } else {
@@ -8384,7 +8384,7 @@ impl GetNamesValueList {
         };
         let groups = if switch_expr & u32::from(NameDetail::GroupNames) != 0 {
             let remaining = outer_remaining;
-            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from((group_names as usize).count_ones()).unwrap())?;
+            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from(group_names.count_ones()).unwrap())?;
             outer_remaining = remaining;
             Some(groups)
         } else {
@@ -9025,7 +9025,7 @@ impl GetKbdByNameRepliesTypesMap {
         let vmods_rtrn = if switch_expr & u16::from(MapPart::VirtualMods) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
-            let (vmods_rtrn, remaining) = crate::x11_utils::parse_list::<u8>(remaining, usize::try_from((virtual_mods as usize).count_ones()).unwrap())?;
+            let (vmods_rtrn, remaining) = crate::x11_utils::parse_list::<u8>(remaining, usize::try_from(virtual_mods.count_ones()).unwrap())?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
@@ -9175,7 +9175,7 @@ impl TryParse for GetKbdByNameRepliesCompatMap {
         let (n_total_si, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
         let (si_rtrn, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si_rtrn as usize)?;
-        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, usize::try_from((groups_rtrn as usize).count_ones()).unwrap())?;
+        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, usize::try_from(groups_rtrn.count_ones()).unwrap())?;
         let result = GetKbdByNameRepliesCompatMap { compatmap_type, compat_device_id, compatmap_sequence, compatmap_length, groups_rtrn, first_si_rtrn, n_total_si, si_rtrn, group_rtrn };
         Ok((result, remaining))
     }
@@ -9322,7 +9322,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let indicator_names = if switch_expr & u32::from(NameDetail::IndicatorNames) != 0 {
             let remaining = outer_remaining;
-            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from((indicators as usize).count_ones()).unwrap())?;
+            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from(indicators.count_ones()).unwrap())?;
             outer_remaining = remaining;
             Some(indicator_names)
         } else {
@@ -9330,7 +9330,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let virtual_mod_names = if switch_expr & u32::from(NameDetail::VirtualModNames) != 0 {
             let remaining = outer_remaining;
-            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from((virtual_mods as usize).count_ones()).unwrap())?;
+            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from(virtual_mods.count_ones()).unwrap())?;
             outer_remaining = remaining;
             Some(virtual_mod_names)
         } else {
@@ -9338,7 +9338,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let groups = if switch_expr & u32::from(NameDetail::GroupNames) != 0 {
             let remaining = outer_remaining;
-            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from((group_names as usize).count_ones()).unwrap())?;
+            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from(group_names.count_ones()).unwrap())?;
             outer_remaining = remaining;
             Some(groups)
         } else {
