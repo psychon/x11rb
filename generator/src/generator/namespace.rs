@@ -3731,7 +3731,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 )
             }
             xcbdefs::Expression::PopCount(pop_count_expr) => {
-                let arg = self.expr_to_str(pop_count_expr, type_, true);
+                let arg = self.expr_to_str(pop_count_expr, None, true);
                 if let Some(type_) = type_ {
                     format!("{}::try_from({}.count_ones()).unwrap()", type_, arg)
                 } else {
