@@ -2505,57 +2505,10 @@ impl TryParse for VendorPrivateWithReplyReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let (retval, remaining) = u32::try_parse(remaining)?;
-        let (data1_0, remaining) = u8::try_parse(remaining)?;
-        let (data1_1, remaining) = u8::try_parse(remaining)?;
-        let (data1_2, remaining) = u8::try_parse(remaining)?;
-        let (data1_3, remaining) = u8::try_parse(remaining)?;
-        let (data1_4, remaining) = u8::try_parse(remaining)?;
-        let (data1_5, remaining) = u8::try_parse(remaining)?;
-        let (data1_6, remaining) = u8::try_parse(remaining)?;
-        let (data1_7, remaining) = u8::try_parse(remaining)?;
-        let (data1_8, remaining) = u8::try_parse(remaining)?;
-        let (data1_9, remaining) = u8::try_parse(remaining)?;
-        let (data1_10, remaining) = u8::try_parse(remaining)?;
-        let (data1_11, remaining) = u8::try_parse(remaining)?;
-        let (data1_12, remaining) = u8::try_parse(remaining)?;
-        let (data1_13, remaining) = u8::try_parse(remaining)?;
-        let (data1_14, remaining) = u8::try_parse(remaining)?;
-        let (data1_15, remaining) = u8::try_parse(remaining)?;
-        let (data1_16, remaining) = u8::try_parse(remaining)?;
-        let (data1_17, remaining) = u8::try_parse(remaining)?;
-        let (data1_18, remaining) = u8::try_parse(remaining)?;
-        let (data1_19, remaining) = u8::try_parse(remaining)?;
-        let (data1_20, remaining) = u8::try_parse(remaining)?;
-        let (data1_21, remaining) = u8::try_parse(remaining)?;
-        let (data1_22, remaining) = u8::try_parse(remaining)?;
-        let (data1_23, remaining) = u8::try_parse(remaining)?;
-        let data1 = [
-            data1_0,
-            data1_1,
-            data1_2,
-            data1_3,
-            data1_4,
-            data1_5,
-            data1_6,
-            data1_7,
-            data1_8,
-            data1_9,
-            data1_10,
-            data1_11,
-            data1_12,
-            data1_13,
-            data1_14,
-            data1_15,
-            data1_16,
-            data1_17,
-            data1_18,
-            data1_19,
-            data1_20,
-            data1_21,
-            data1_22,
-            data1_23,
-        ];
-        let (data2, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
+        let (data1, remaining) = crate::x11_utils::parse_u8_list(remaining, 24)?;
+        let data1 = <[u8; 24]>::try_from(data1).unwrap();
+        let (data2, remaining) = crate::x11_utils::parse_u8_list(remaining, (length as usize) * 4)?;
+        let data2 = data2.to_vec();
         let result = VendorPrivateWithReplyReply { response_type, sequence, retval, data1, data2 };
         Ok((result, remaining))
     }
@@ -2669,7 +2622,8 @@ impl TryParse for QueryServerStringReply {
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (str_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
-        let (string, remaining) = crate::x11_utils::parse_list::<u8>(remaining, str_len as usize)?;
+        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, str_len as usize)?;
+        let string = string.to_vec();
         let result = QueryServerStringReply { response_type, sequence, length, string };
         Ok((result, remaining))
     }
@@ -3991,7 +3945,8 @@ impl TryParse for ReadPixelsReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, (length as usize) * 4)?;
+        let data = data.to_vec();
         let result = ReadPixelsReply { response_type, sequence, data };
         Ok((result, remaining))
     }
@@ -5060,7 +5015,8 @@ impl TryParse for GetPolygonStippleReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, (length as usize) * 4)?;
+        let data = data.to_vec();
         let result = GetPolygonStippleReply { response_type, sequence, data };
         Ok((result, remaining))
     }
@@ -5120,7 +5076,8 @@ impl TryParse for GetStringReply {
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
         let (n, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
-        let (string, remaining) = crate::x11_utils::parse_list::<u8>(remaining, n as usize)?;
+        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, n as usize)?;
+        let string = string.to_vec();
         let result = GetStringReply { response_type, sequence, length, string };
         Ok((result, remaining))
     }
@@ -5539,7 +5496,8 @@ impl TryParse for GetTexImageReply {
         let (height, remaining) = i32::try_parse(remaining)?;
         let (depth, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, (length as usize) * 4)?;
+        let data = data.to_vec();
         let result = GetTexImageReply { response_type, sequence, width, height, depth, data };
         Ok((result, remaining))
     }
@@ -6248,7 +6206,8 @@ impl TryParse for GetColorTableReply {
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
         let (width, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, (length as usize) * 4)?;
+        let data = data.to_vec();
         let result = GetColorTableReply { response_type, sequence, width, data };
         Ok((result, remaining))
     }
@@ -6459,7 +6418,8 @@ impl TryParse for GetConvolutionFilterReply {
         let (width, remaining) = i32::try_parse(remaining)?;
         let (height, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, (length as usize) * 4)?;
+        let data = data.to_vec();
         let result = GetConvolutionFilterReply { response_type, sequence, width, height, data };
         Ok((result, remaining))
     }
@@ -6670,7 +6630,8 @@ impl TryParse for GetSeparableFilterReply {
         let (row_w, remaining) = i32::try_parse(remaining)?;
         let (col_h, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
-        let (rows_and_cols, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
+        let (rows_and_cols, remaining) = crate::x11_utils::parse_u8_list(remaining, (length as usize) * 4)?;
+        let rows_and_cols = rows_and_cols.to_vec();
         let result = GetSeparableFilterReply { response_type, sequence, row_w, col_h, rows_and_cols };
         Ok((result, remaining))
     }
@@ -6746,7 +6707,8 @@ impl TryParse for GetHistogramReply {
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
         let (width, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, (length as usize) * 4)?;
+        let data = data.to_vec();
         let result = GetHistogramReply { response_type, sequence, width, data };
         Ok((result, remaining))
     }
@@ -6953,7 +6915,8 @@ impl TryParse for GetMinmaxReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, (length as usize) * 4)?;
+        let data = data.to_vec();
         let result = GetMinmaxReply { response_type, sequence, data };
         Ok((result, remaining))
     }
@@ -7152,7 +7115,8 @@ impl TryParse for GetCompressedTexImageARBReply {
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
         let (size, remaining) = i32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, (length as usize) * 4)?;
+        let data = data.to_vec();
         let result = GetCompressedTexImageARBReply { response_type, sequence, size, data };
         Ok((result, remaining))
     }

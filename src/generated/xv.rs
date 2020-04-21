@@ -636,7 +636,8 @@ impl TryParse for AdaptorInfo {
         let (num_formats, remaining) = u16::try_parse(remaining)?;
         let (type_, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_size as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_size as usize)?;
+        let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
@@ -692,7 +693,8 @@ impl TryParse for EncodingInfo {
         let (height, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (rate, remaining) = Rational::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_size as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_size as usize)?;
+        let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
@@ -747,7 +749,8 @@ impl TryParse for Image {
         let (num_planes, remaining) = u32::try_parse(remaining)?;
         let (pitches, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes as usize)?;
         let (offsets, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes as usize)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, data_size as usize)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_size as usize)?;
+        let data = data.to_vec();
         let result = Image { id, width, height, num_planes, pitches, offsets, data };
         Ok((result, remaining))
     }
@@ -793,7 +796,8 @@ impl TryParse for AttributeInfo {
         let (min, remaining) = i32::try_parse(remaining)?;
         let (max, remaining) = i32::try_parse(remaining)?;
         let (size, remaining) = u32::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, size as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, size as usize)?;
+        let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
@@ -858,40 +862,8 @@ impl TryParse for ImageFormatInfo {
         let (type_, remaining) = u8::try_parse(remaining)?;
         let (byte_order, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (guid_0, remaining) = u8::try_parse(remaining)?;
-        let (guid_1, remaining) = u8::try_parse(remaining)?;
-        let (guid_2, remaining) = u8::try_parse(remaining)?;
-        let (guid_3, remaining) = u8::try_parse(remaining)?;
-        let (guid_4, remaining) = u8::try_parse(remaining)?;
-        let (guid_5, remaining) = u8::try_parse(remaining)?;
-        let (guid_6, remaining) = u8::try_parse(remaining)?;
-        let (guid_7, remaining) = u8::try_parse(remaining)?;
-        let (guid_8, remaining) = u8::try_parse(remaining)?;
-        let (guid_9, remaining) = u8::try_parse(remaining)?;
-        let (guid_10, remaining) = u8::try_parse(remaining)?;
-        let (guid_11, remaining) = u8::try_parse(remaining)?;
-        let (guid_12, remaining) = u8::try_parse(remaining)?;
-        let (guid_13, remaining) = u8::try_parse(remaining)?;
-        let (guid_14, remaining) = u8::try_parse(remaining)?;
-        let (guid_15, remaining) = u8::try_parse(remaining)?;
-        let guid = [
-            guid_0,
-            guid_1,
-            guid_2,
-            guid_3,
-            guid_4,
-            guid_5,
-            guid_6,
-            guid_7,
-            guid_8,
-            guid_9,
-            guid_10,
-            guid_11,
-            guid_12,
-            guid_13,
-            guid_14,
-            guid_15,
-        ];
+        let (guid, remaining) = crate::x11_utils::parse_u8_list(remaining, 16)?;
+        let guid = <[u8; 16]>::try_from(guid).unwrap();
         let (bpp, remaining) = u8::try_parse(remaining)?;
         let (num_planes, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
@@ -911,72 +883,8 @@ impl TryParse for ImageFormatInfo {
         let (vvert_y_period, remaining) = u32::try_parse(remaining)?;
         let (vvert_u_period, remaining) = u32::try_parse(remaining)?;
         let (vvert_v_period, remaining) = u32::try_parse(remaining)?;
-        let (vcomp_order_0, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_1, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_2, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_3, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_4, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_5, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_6, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_7, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_8, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_9, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_10, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_11, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_12, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_13, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_14, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_15, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_16, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_17, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_18, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_19, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_20, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_21, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_22, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_23, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_24, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_25, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_26, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_27, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_28, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_29, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_30, remaining) = u8::try_parse(remaining)?;
-        let (vcomp_order_31, remaining) = u8::try_parse(remaining)?;
-        let vcomp_order = [
-            vcomp_order_0,
-            vcomp_order_1,
-            vcomp_order_2,
-            vcomp_order_3,
-            vcomp_order_4,
-            vcomp_order_5,
-            vcomp_order_6,
-            vcomp_order_7,
-            vcomp_order_8,
-            vcomp_order_9,
-            vcomp_order_10,
-            vcomp_order_11,
-            vcomp_order_12,
-            vcomp_order_13,
-            vcomp_order_14,
-            vcomp_order_15,
-            vcomp_order_16,
-            vcomp_order_17,
-            vcomp_order_18,
-            vcomp_order_19,
-            vcomp_order_20,
-            vcomp_order_21,
-            vcomp_order_22,
-            vcomp_order_23,
-            vcomp_order_24,
-            vcomp_order_25,
-            vcomp_order_26,
-            vcomp_order_27,
-            vcomp_order_28,
-            vcomp_order_29,
-            vcomp_order_30,
-            vcomp_order_31,
-        ];
+        let (vcomp_order, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
+        let vcomp_order = <[u8; 32]>::try_from(vcomp_order).unwrap();
         let (vscanline_order, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
         let type_ = type_.try_into()?;

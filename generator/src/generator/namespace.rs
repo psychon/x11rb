@@ -2923,7 +2923,40 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             xcbdefs::FieldDef::List(list_field) => {
                 let rust_field_name = to_rust_variable_name(&list_field.name);
 
-                if self.can_use_simple_list_parsing(&list_field.element_type)
+                if self.rust_value_type_is_u8(&list_field.element_type) {
+                    // List of `u8`, use simple parsing
+                    if let Some(list_length) = list_field.length() {
+                        outln!(
+                            out,
+                            "let ({}, remaining) = crate::x11_utils::parse_u8_list(remaining, {})?;",
+                            rust_field_name,
+                            list_length,
+                        );
+                        outln!(
+                            out,
+                            "let {} = <[u8; {}]>::try_from({}).unwrap();",
+                            rust_field_name,
+                            list_length,
+                            rust_field_name,
+                        );
+                    } else if let Some(ref length_expr) = list_field.length_expr {
+                        outln!(
+                            out,
+                            "let ({}, remaining) = crate::x11_utils::parse_u8_list(remaining, {})?;",
+                            rust_field_name,
+                            self.expr_to_str(length_expr, Some("usize"), false),
+                        );
+                        outln!(
+                            out,
+                            "let {} = {}.to_vec();",
+                            rust_field_name,
+                            rust_field_name
+                        );
+                    } else {
+                        outln!(out, "let {} = remaining.to_vec();", rust_field_name);
+                        outln!(out, "let remaining = &remaining[remaining.len()..];");
+                    }
+                } else if self.can_use_simple_list_parsing(&list_field.element_type)
                     && list_field.length_expr.is_some()
                     && list_field.length().is_none()
                 {

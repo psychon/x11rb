@@ -752,12 +752,14 @@ impl TryParse for SetupRequest {
         let (authorization_protocol_name_len, remaining) = u16::try_parse(remaining)?;
         let (authorization_protocol_data_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (authorization_protocol_name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, authorization_protocol_name_len as usize)?;
+        let (authorization_protocol_name, remaining) = crate::x11_utils::parse_u8_list(remaining, authorization_protocol_name_len as usize)?;
+        let authorization_protocol_name = authorization_protocol_name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let (authorization_protocol_data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, authorization_protocol_data_len as usize)?;
+        let (authorization_protocol_data, remaining) = crate::x11_utils::parse_u8_list(remaining, authorization_protocol_data_len as usize)?;
+        let authorization_protocol_data = authorization_protocol_data.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
@@ -812,7 +814,8 @@ impl TryParse for SetupFailed {
         let (protocol_major_version, remaining) = u16::try_parse(remaining)?;
         let (protocol_minor_version, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u16::try_parse(remaining)?;
-        let (reason, remaining) = crate::x11_utils::parse_list::<u8>(remaining, reason_len as usize)?;
+        let (reason, remaining) = crate::x11_utils::parse_u8_list(remaining, reason_len as usize)?;
+        let reason = reason.to_vec();
         let result = SetupFailed { status, protocol_major_version, protocol_minor_version, length, reason };
         Ok((result, remaining))
     }
@@ -852,7 +855,8 @@ impl TryParse for SetupAuthenticate {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(5..).ok_or(ParseError::ParseError)?;
         let (length, remaining) = u16::try_parse(remaining)?;
-        let (reason, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
+        let (reason, remaining) = crate::x11_utils::parse_u8_list(remaining, (length as usize) * 4)?;
+        let reason = reason.to_vec();
         let result = SetupAuthenticate { status, reason };
         Ok((result, remaining))
     }
@@ -995,7 +999,8 @@ impl TryParse for Setup {
         let (min_keycode, remaining) = Keycode::try_parse(remaining)?;
         let (max_keycode, remaining) = Keycode::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (vendor, remaining) = crate::x11_utils::parse_list::<u8>(remaining, vendor_len as usize)?;
+        let (vendor, remaining) = crate::x11_utils::parse_u8_list(remaining, vendor_len as usize)?;
+        let vendor = vendor.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
@@ -2706,70 +2711,8 @@ pub struct KeymapNotifyEvent {
 impl TryParse for KeymapNotifyEvent {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (response_type, remaining) = u8::try_parse(remaining)?;
-        let (keys_0, remaining) = u8::try_parse(remaining)?;
-        let (keys_1, remaining) = u8::try_parse(remaining)?;
-        let (keys_2, remaining) = u8::try_parse(remaining)?;
-        let (keys_3, remaining) = u8::try_parse(remaining)?;
-        let (keys_4, remaining) = u8::try_parse(remaining)?;
-        let (keys_5, remaining) = u8::try_parse(remaining)?;
-        let (keys_6, remaining) = u8::try_parse(remaining)?;
-        let (keys_7, remaining) = u8::try_parse(remaining)?;
-        let (keys_8, remaining) = u8::try_parse(remaining)?;
-        let (keys_9, remaining) = u8::try_parse(remaining)?;
-        let (keys_10, remaining) = u8::try_parse(remaining)?;
-        let (keys_11, remaining) = u8::try_parse(remaining)?;
-        let (keys_12, remaining) = u8::try_parse(remaining)?;
-        let (keys_13, remaining) = u8::try_parse(remaining)?;
-        let (keys_14, remaining) = u8::try_parse(remaining)?;
-        let (keys_15, remaining) = u8::try_parse(remaining)?;
-        let (keys_16, remaining) = u8::try_parse(remaining)?;
-        let (keys_17, remaining) = u8::try_parse(remaining)?;
-        let (keys_18, remaining) = u8::try_parse(remaining)?;
-        let (keys_19, remaining) = u8::try_parse(remaining)?;
-        let (keys_20, remaining) = u8::try_parse(remaining)?;
-        let (keys_21, remaining) = u8::try_parse(remaining)?;
-        let (keys_22, remaining) = u8::try_parse(remaining)?;
-        let (keys_23, remaining) = u8::try_parse(remaining)?;
-        let (keys_24, remaining) = u8::try_parse(remaining)?;
-        let (keys_25, remaining) = u8::try_parse(remaining)?;
-        let (keys_26, remaining) = u8::try_parse(remaining)?;
-        let (keys_27, remaining) = u8::try_parse(remaining)?;
-        let (keys_28, remaining) = u8::try_parse(remaining)?;
-        let (keys_29, remaining) = u8::try_parse(remaining)?;
-        let (keys_30, remaining) = u8::try_parse(remaining)?;
-        let keys = [
-            keys_0,
-            keys_1,
-            keys_2,
-            keys_3,
-            keys_4,
-            keys_5,
-            keys_6,
-            keys_7,
-            keys_8,
-            keys_9,
-            keys_10,
-            keys_11,
-            keys_12,
-            keys_13,
-            keys_14,
-            keys_15,
-            keys_16,
-            keys_17,
-            keys_18,
-            keys_19,
-            keys_20,
-            keys_21,
-            keys_22,
-            keys_23,
-            keys_24,
-            keys_25,
-            keys_26,
-            keys_27,
-            keys_28,
-            keys_29,
-            keys_30,
-        ];
+        let (keys, remaining) = crate::x11_utils::parse_u8_list(remaining, 31)?;
+        let keys = <[u8; 31]>::try_from(keys).unwrap();
         let result = KeymapNotifyEvent { response_type, keys };
         Ok((result, remaining))
     }
@@ -5585,48 +5528,8 @@ pub struct ClientMessageData([u8; 20]);
 impl ClientMessageData {
     pub fn as_data8(&self) -> [u8; 20] {
         fn do_the_parse(remaining: &[u8]) -> Result<[u8; 20], ParseError> {
-            let (data8_0, remaining) = u8::try_parse(remaining)?;
-            let (data8_1, remaining) = u8::try_parse(remaining)?;
-            let (data8_2, remaining) = u8::try_parse(remaining)?;
-            let (data8_3, remaining) = u8::try_parse(remaining)?;
-            let (data8_4, remaining) = u8::try_parse(remaining)?;
-            let (data8_5, remaining) = u8::try_parse(remaining)?;
-            let (data8_6, remaining) = u8::try_parse(remaining)?;
-            let (data8_7, remaining) = u8::try_parse(remaining)?;
-            let (data8_8, remaining) = u8::try_parse(remaining)?;
-            let (data8_9, remaining) = u8::try_parse(remaining)?;
-            let (data8_10, remaining) = u8::try_parse(remaining)?;
-            let (data8_11, remaining) = u8::try_parse(remaining)?;
-            let (data8_12, remaining) = u8::try_parse(remaining)?;
-            let (data8_13, remaining) = u8::try_parse(remaining)?;
-            let (data8_14, remaining) = u8::try_parse(remaining)?;
-            let (data8_15, remaining) = u8::try_parse(remaining)?;
-            let (data8_16, remaining) = u8::try_parse(remaining)?;
-            let (data8_17, remaining) = u8::try_parse(remaining)?;
-            let (data8_18, remaining) = u8::try_parse(remaining)?;
-            let (data8_19, remaining) = u8::try_parse(remaining)?;
-            let data8 = [
-                data8_0,
-                data8_1,
-                data8_2,
-                data8_3,
-                data8_4,
-                data8_5,
-                data8_6,
-                data8_7,
-                data8_8,
-                data8_9,
-                data8_10,
-                data8_11,
-                data8_12,
-                data8_13,
-                data8_14,
-                data8_15,
-                data8_16,
-                data8_17,
-                data8_18,
-                data8_19,
-            ];
+            let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, 20)?;
+            let data8 = <[u8; 20]>::try_from(data8).unwrap();
             let _ = remaining;
             Ok(data8)
         }
@@ -9979,7 +9882,8 @@ impl TryParse for GetAtomNameReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_len as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len as usize)?;
+        let name = name.to_vec();
         let result = GetAtomNameReply { response_type, sequence, length, name };
         Ok((result, remaining))
     }
@@ -10574,7 +10478,8 @@ impl TryParse for GetPropertyReply {
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (value_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (value, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (value_len as usize) * ((format as usize) / 8))?;
+        let (value, remaining) = crate::x11_utils::parse_u8_list(remaining, (value_len as usize) * ((format as usize) / 8))?;
+        let value = value.to_vec();
         let result = GetPropertyReply { response_type, format, sequence, length, type_, bytes_after, value_len, value };
         Ok((result, remaining))
     }
@@ -12878,72 +12783,8 @@ impl TryParse for QueryKeymapReply {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
-        let (keys_0, remaining) = u8::try_parse(remaining)?;
-        let (keys_1, remaining) = u8::try_parse(remaining)?;
-        let (keys_2, remaining) = u8::try_parse(remaining)?;
-        let (keys_3, remaining) = u8::try_parse(remaining)?;
-        let (keys_4, remaining) = u8::try_parse(remaining)?;
-        let (keys_5, remaining) = u8::try_parse(remaining)?;
-        let (keys_6, remaining) = u8::try_parse(remaining)?;
-        let (keys_7, remaining) = u8::try_parse(remaining)?;
-        let (keys_8, remaining) = u8::try_parse(remaining)?;
-        let (keys_9, remaining) = u8::try_parse(remaining)?;
-        let (keys_10, remaining) = u8::try_parse(remaining)?;
-        let (keys_11, remaining) = u8::try_parse(remaining)?;
-        let (keys_12, remaining) = u8::try_parse(remaining)?;
-        let (keys_13, remaining) = u8::try_parse(remaining)?;
-        let (keys_14, remaining) = u8::try_parse(remaining)?;
-        let (keys_15, remaining) = u8::try_parse(remaining)?;
-        let (keys_16, remaining) = u8::try_parse(remaining)?;
-        let (keys_17, remaining) = u8::try_parse(remaining)?;
-        let (keys_18, remaining) = u8::try_parse(remaining)?;
-        let (keys_19, remaining) = u8::try_parse(remaining)?;
-        let (keys_20, remaining) = u8::try_parse(remaining)?;
-        let (keys_21, remaining) = u8::try_parse(remaining)?;
-        let (keys_22, remaining) = u8::try_parse(remaining)?;
-        let (keys_23, remaining) = u8::try_parse(remaining)?;
-        let (keys_24, remaining) = u8::try_parse(remaining)?;
-        let (keys_25, remaining) = u8::try_parse(remaining)?;
-        let (keys_26, remaining) = u8::try_parse(remaining)?;
-        let (keys_27, remaining) = u8::try_parse(remaining)?;
-        let (keys_28, remaining) = u8::try_parse(remaining)?;
-        let (keys_29, remaining) = u8::try_parse(remaining)?;
-        let (keys_30, remaining) = u8::try_parse(remaining)?;
-        let (keys_31, remaining) = u8::try_parse(remaining)?;
-        let keys = [
-            keys_0,
-            keys_1,
-            keys_2,
-            keys_3,
-            keys_4,
-            keys_5,
-            keys_6,
-            keys_7,
-            keys_8,
-            keys_9,
-            keys_10,
-            keys_11,
-            keys_12,
-            keys_13,
-            keys_14,
-            keys_15,
-            keys_16,
-            keys_17,
-            keys_18,
-            keys_19,
-            keys_20,
-            keys_21,
-            keys_22,
-            keys_23,
-            keys_24,
-            keys_25,
-            keys_26,
-            keys_27,
-            keys_28,
-            keys_29,
-            keys_30,
-            keys_31,
-        ];
+        let (keys, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
+        let keys = <[u8; 32]>::try_from(keys).unwrap();
         let result = QueryKeymapReply { response_type, sequence, length, keys };
         Ok((result, remaining))
     }
@@ -13418,7 +13259,8 @@ pub struct Str {
 impl TryParse for Str {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (name_len, remaining) = u8::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_len as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len as usize)?;
+        let name = name.to_vec();
         let result = Str { name };
         Ok((result, remaining))
     }
@@ -13617,7 +13459,8 @@ impl TryParse for ListFontsWithInfoReply {
         let (font_descent, remaining) = i16::try_parse(remaining)?;
         let (replies_hint, remaining) = u32::try_parse(remaining)?;
         let (properties, remaining) = crate::x11_utils::parse_list::<Fontprop>(remaining, properties_len as usize)?;
-        let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_len as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len as usize)?;
+        let name = name.to_vec();
         let draw_direction = draw_direction.try_into()?;
         let result = ListFontsWithInfoReply { response_type, sequence, length, min_bounds, max_bounds, min_char_or_byte2, max_char_or_byte2, default_char, draw_direction, min_byte1, max_byte1, all_chars_exist, font_ascent, font_descent, replies_hint, properties, name };
         Ok((result, remaining))
@@ -16446,7 +16289,8 @@ impl TryParse for GetImageReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (visual, remaining) = Visualid::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (length as usize) * 4)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, (length as usize) * 4)?;
+        let data = data.to_vec();
         let result = GetImageReply { response_type, depth, sequence, visual, data };
         Ok((result, remaining))
     }
@@ -18755,72 +18599,8 @@ impl TryParse for GetKeyboardControlReply {
         let (bell_pitch, remaining) = u16::try_parse(remaining)?;
         let (bell_duration, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (auto_repeats_0, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_1, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_2, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_3, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_4, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_5, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_6, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_7, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_8, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_9, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_10, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_11, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_12, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_13, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_14, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_15, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_16, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_17, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_18, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_19, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_20, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_21, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_22, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_23, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_24, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_25, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_26, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_27, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_28, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_29, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_30, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_31, remaining) = u8::try_parse(remaining)?;
-        let auto_repeats = [
-            auto_repeats_0,
-            auto_repeats_1,
-            auto_repeats_2,
-            auto_repeats_3,
-            auto_repeats_4,
-            auto_repeats_5,
-            auto_repeats_6,
-            auto_repeats_7,
-            auto_repeats_8,
-            auto_repeats_9,
-            auto_repeats_10,
-            auto_repeats_11,
-            auto_repeats_12,
-            auto_repeats_13,
-            auto_repeats_14,
-            auto_repeats_15,
-            auto_repeats_16,
-            auto_repeats_17,
-            auto_repeats_18,
-            auto_repeats_19,
-            auto_repeats_20,
-            auto_repeats_21,
-            auto_repeats_22,
-            auto_repeats_23,
-            auto_repeats_24,
-            auto_repeats_25,
-            auto_repeats_26,
-            auto_repeats_27,
-            auto_repeats_28,
-            auto_repeats_29,
-            auto_repeats_30,
-            auto_repeats_31,
-        ];
+        let (auto_repeats, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
+        let auto_repeats = <[u8; 32]>::try_from(auto_repeats).unwrap();
         let global_auto_repeat = global_auto_repeat.try_into()?;
         let result = GetKeyboardControlReply { response_type, global_auto_repeat, sequence, length, led_mask, key_click_percent, bell_percent, bell_pitch, bell_duration, auto_repeats };
         Ok((result, remaining))
@@ -19336,7 +19116,8 @@ impl TryParse for Host {
         let (family, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (address_len, remaining) = u16::try_parse(remaining)?;
-        let (address, remaining) = crate::x11_utils::parse_list::<u8>(remaining, address_len as usize)?;
+        let (address, remaining) = crate::x11_utils::parse_u8_list(remaining, address_len as usize)?;
+        let address = address.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
@@ -19977,7 +19758,8 @@ impl TryParse for GetPointerMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let (map, remaining) = crate::x11_utils::parse_list::<u8>(remaining, map_len as usize)?;
+        let (map, remaining) = crate::x11_utils::parse_u8_list(remaining, map_len as usize)?;
+        let map = map.to_vec();
         let result = GetPointerMappingReply { response_type, sequence, length, map };
         Ok((result, remaining))
     }
@@ -20154,7 +19936,8 @@ impl TryParse for GetModifierMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let (keycodes, remaining) = crate::x11_utils::parse_list::<Keycode>(remaining, (keycodes_per_modifier as usize) * 8)?;
+        let (keycodes, remaining) = crate::x11_utils::parse_u8_list(remaining, (keycodes_per_modifier as usize) * 8)?;
+        let keycodes = keycodes.to_vec();
         let result = GetModifierMappingReply { response_type, sequence, length, keycodes };
         Ok((result, remaining))
     }

@@ -375,7 +375,8 @@ impl TryParse for Systemcounter {
         let (counter, remaining) = Counter::try_parse(remaining)?;
         let (resolution, remaining) = Int64::try_parse(remaining)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_len as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len as usize)?;
+        let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;

@@ -48,13 +48,15 @@ impl TryParse for Printer {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
         let (name_len, remaining) = u32::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_list::<String8>(remaining, name_len as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len as usize)?;
+        let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
         let (desc_len, remaining) = u32::try_parse(remaining)?;
-        let (description, remaining) = crate::x11_utils::parse_list::<String8>(remaining, desc_len as usize)?;
+        let (description, remaining) = crate::x11_utils::parse_u8_list(remaining, desc_len as usize)?;
+        let description = description.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
@@ -909,7 +911,8 @@ impl TryParse for PrintGetDocumentDataReply {
         let (finished_flag, remaining) = u32::try_parse(remaining)?;
         let (data_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, data_len as usize)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_len as usize)?;
+        let data = data.to_vec();
         let result = PrintGetDocumentDataReply { response_type, sequence, length, status_code, finished_flag, data };
         Ok((result, remaining))
     }
@@ -1108,7 +1111,8 @@ impl TryParse for PrintGetAttributesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (string_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (attributes, remaining) = crate::x11_utils::parse_list::<String8>(remaining, string_len as usize)?;
+        let (attributes, remaining) = crate::x11_utils::parse_u8_list(remaining, string_len as usize)?;
+        let attributes = attributes.to_vec();
         let result = PrintGetAttributesReply { response_type, sequence, length, attributes };
         Ok((result, remaining))
     }
@@ -1176,7 +1180,8 @@ impl TryParse for PrintGetOneAttributesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (value_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (value, remaining) = crate::x11_utils::parse_list::<String8>(remaining, value_len as usize)?;
+        let (value, remaining) = crate::x11_utils::parse_u8_list(remaining, value_len as usize)?;
+        let value = value.to_vec();
         let result = PrintGetOneAttributesReply { response_type, sequence, length, value };
         Ok((result, remaining))
     }

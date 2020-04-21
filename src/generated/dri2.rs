@@ -481,9 +481,12 @@ impl TryParse for ConnectReply {
         let (driver_name_length, remaining) = u32::try_parse(remaining)?;
         let (device_name_length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
-        let (driver_name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, driver_name_length as usize)?;
-        let (alignment_pad, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (((driver_name_length as usize) + 3) & (!3)) - (driver_name_length as usize))?;
-        let (device_name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, device_name_length as usize)?;
+        let (driver_name, remaining) = crate::x11_utils::parse_u8_list(remaining, driver_name_length as usize)?;
+        let driver_name = driver_name.to_vec();
+        let (alignment_pad, remaining) = crate::x11_utils::parse_u8_list(remaining, (((driver_name_length as usize) + 3) & (!3)) - (driver_name_length as usize))?;
+        let alignment_pad = alignment_pad.to_vec();
+        let (device_name, remaining) = crate::x11_utils::parse_u8_list(remaining, device_name_length as usize)?;
+        let device_name = device_name.to_vec();
         let result = ConnectReply { response_type, sequence, length, driver_name, alignment_pad, device_name };
         Ok((result, remaining))
     }
