@@ -37,8 +37,11 @@ script:
   - make
   - if ! git diff --exit-code; then exit 1; fi
 
-  - rustup component add clippy
-  - cargo clippy --all-targets --all-features -- -D warnings
+  - |
+    if [ "x$TRAVIS_RUST_VERSION" != "x1.37.0" ]; then
+        rustup component add clippy
+        cargo clippy --all-targets --all-features -- -D warnings
+    fi
 
   - |
     if [ "x$TRAVIS_RUST_VERSION" != "x1.37.0" ]; then

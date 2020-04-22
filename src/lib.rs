@@ -81,6 +81,9 @@
 //! * `allow-unsafe-code`: Enable features that require `unsafe`. Without this flag,
 //!   `x11rb::xcb_ffi::XCBConnection` and some support code for it are unavailable.
 
+// This lint suggests a function that was added in Rust 1.40.0. Since our minimum supported version
+// is Rust 1.37.0, just disable the lint.
+#![allow(clippy::option_as_ref_deref)]
 #![deny(
     missing_copy_implementations,
     missing_debug_implementations,
