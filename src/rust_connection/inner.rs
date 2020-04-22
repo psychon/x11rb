@@ -154,7 +154,7 @@ where
         kind: RequestKind,
     ) -> Result<Option<SequenceNumber>, std::io::Error> {
         if self.next_reply_expected + SequenceNumber::from(u16::max_value())
-            <= self.last_sequence_written
+            <= self.last_sequence_written && kind != RequestKind::HasResponse
         {
             // The caller need to call send_sync(). Otherwise, we might not be able to reconstruct
             // full sequence numbers for received packets.
