@@ -555,6 +555,42 @@ mod test {
         Ok(())
     }
 
+    #[test]
+    fn insert_no_sync_when_already_syncing() -> Result<(), std::io::Error> {
+        // This test sends enough RequestKind::IsVoid requests that a sync becomes necessary on
+        // the next request. Then it sends a RequestKind::HasResponse request so that no sync is
+        // necessary. This is a regression test: Once upon a time, an unnecessary sync was done.
+
+        let length = 1u16.to_ne_bytes();
+        let no_operation = [127, 0, length[0], length[1]];
+        let get_input_focus = [43, 0, length[0], length[1]];
+
+        // Set up a connection that writes to this array
+        let mut written = [0; 0x10000 * 4];
+        let mut output = &mut written[..];
+        let mut connection = ConnectionInner::new(&mut output);
+
+        for num in 1..0x10000 {
+            let seqno = connection
+                .send_request(&[IoSlice::new(&no_operation)], RequestKind::IsVoid)?;
+            assert_eq!(Some(num), seqno);
+        }
+
+        let seqno = connection
+            .send_request(&[IoSlice::new(&get_input_focus)], RequestKind::HasResponse)?;
+        assert_eq!(Some(0x10000), seqno);
+
+        let mut expected: Vec<_> = std::iter::repeat(&no_operation)
+            .take(0xffff)
+            .flatten()
+            .copied()
+            .collect();
+        expected.extend_from_slice(&get_input_focus);
+
+        assert_eq!(&written[..], &expected[..]);
+        Ok(())
+    }
+
     fn partial_write_test(request: &[u8], expected_err: &str) {
         let mut written = [0x21; 2];
         let mut output = &mut written[..];
