@@ -165,6 +165,8 @@ impl<R: Read, W: Write> RustConnection<R, W> {
         if !fds.is_empty() {
             return Err(ConnectionError::FDPassingFailed);
         }
+        let mut storage = Default::default();
+        let bufs = compute_length_field(self, bufs, &mut storage)?;
         self.inner
             .lock()
             .unwrap()
@@ -251,9 +253,6 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
     where
         Reply: for<'a> TryFrom<&'a [u8], Error = ParseError>,
     {
-        let mut storage = Default::default();
-        let bufs = compute_length_field(self, bufs, &mut storage)?;
-
         Ok(Cookie::new(
             self,
             self.send_request(bufs, fds, RequestKind::HasResponse)?,
@@ -268,9 +267,6 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
     where
         Reply: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>,
     {
-        let mut storage = Default::default();
-        let bufs = compute_length_field(self, bufs, &mut storage)?;
-
         let _ = (bufs, fds);
         Err(ConnectionError::FDPassingFailed)
     }
@@ -280,9 +276,6 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         bufs: &[IoSlice<'_>],
         fds: Vec<RawFdContainer>,
     ) -> Result<VoidCookie<'_, Self>, ConnectionError> {
-        let mut storage = Default::default();
-        let bufs = compute_length_field(self, bufs, &mut storage)?;
-
         Ok(VoidCookie::new(
             self,
             self.send_request(bufs, fds, RequestKind::IsVoid)?,
