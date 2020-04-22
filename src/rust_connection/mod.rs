@@ -628,7 +628,7 @@ mod test {
         let mut output = &mut written[..];
         let (request1, request2) = ([0; 4], [0; 0]);
         let request = [IoSlice::new(&request1), IoSlice::new(&request2)];
-        let _ = write_all_vectored(&mut output, &request).unwrap();
+        write_all_vectored(&mut output, &request).unwrap();
     }
 
     #[test]
