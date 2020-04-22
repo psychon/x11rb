@@ -288,7 +288,7 @@ mod test {
     use crate::connection::RequestKind;
 
     #[test]
-    fn insert_sync_no_reply() -> Result<(), std::io::Error> {
+    fn insert_sync_no_reply() {
         // The connection must send a sync (GetInputFocus) request every 2^16 requests (that do not
         // have a reply). Thus, this test sends more than that and tests for the sync to appear.
 
@@ -310,12 +310,10 @@ mod test {
 
         let seqno = connection.send_request(RequestKind::IsVoid);
         assert_eq!(Some(0x10001), seqno);
-
-        Ok(())
     }
 
     #[test]
-    fn insert_no_sync_with_reply() -> Result<(), std::io::Error> {
+    fn insert_no_sync_with_reply() {
         // Compared to the previous test, this uses RequestKind::HasResponse, so no sync needs to
         // be inserted.
 
@@ -328,12 +326,10 @@ mod test {
             let seqno = connection.send_request(RequestKind::HasResponse);
             assert_eq!(Some(num), seqno);
         }
-
-        Ok(())
     }
 
     #[test]
-    fn insert_no_sync_when_already_syncing() -> Result<(), std::io::Error> {
+    fn insert_no_sync_when_already_syncing() {
         // This test sends enough RequestKind::IsVoid requests that a sync becomes necessary on
         // the next request. Then it sends a RequestKind::HasResponse request so that no sync is
         // necessary. This is a regression test: Once upon a time, an unnecessary sync was done.
@@ -350,7 +346,5 @@ mod test {
 
         let seqno = connection.send_request(RequestKind::HasResponse);
         assert_eq!(Some(0x10000), seqno);
-
-        Ok(())
     }
 }
