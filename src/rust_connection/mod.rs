@@ -387,9 +387,9 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
     ) -> Result<Option<GenericError>, ConnectionError> {
         let mut write = self.write.lock().unwrap();
         let mut inner = self.inner.lock().unwrap();
-        if !inner.prepare_check_for_reply_or_error(sequence) {
+        if inner.prepare_check_for_reply_or_error(sequence) {
             self.send_sync(&mut *inner, &mut *write)?;
-            assert!(inner.prepare_check_for_reply_or_error(sequence));
+            assert!(!inner.prepare_check_for_reply_or_error(sequence));
         }
         write.flush()?; // Ensure the request is sent
         drop(write);
