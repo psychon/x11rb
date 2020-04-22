@@ -179,7 +179,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
                     // Now actually send the buffers
                     // FIXME: We must always be able to read when we write
                     write_all_vectored(&mut *write, bufs)?;
-                    return Ok(seqno)
+                    return Ok(seqno);
                 }
                 None => self.send_sync(&mut *inner, &mut *write)?,
             }
@@ -191,7 +191,11 @@ impl<R: Read, W: Write> RustConnection<R, W> {
     /// This function sends a `GetInputFocus` request to the X11 server and arranges for its reply
     /// to be ignored. This ensures that a reply is expected (`ConnectionInner.next_reply_expected`
     /// increases).
-    fn send_sync(&self, inner: &mut inner::ConnectionInner, write: &mut W) -> Result<(), std::io::Error> {
+    fn send_sync(
+        &self,
+        inner: &mut inner::ConnectionInner,
+        write: &mut W,
+    ) -> Result<(), std::io::Error> {
         let length = 1u16.to_ne_bytes();
         let request = [
             GET_INPUT_FOCUS_REQUEST,
@@ -200,7 +204,8 @@ impl<R: Read, W: Write> RustConnection<R, W> {
             length[1],
         ];
 
-        let seqno = inner.send_request(RequestKind::HasResponse)
+        let seqno = inner
+            .send_request(RequestKind::HasResponse)
             .expect("Sending a HasResponse request should not be blocked by syncs");
         inner.discard_reply(seqno, DiscardMode::DiscardReplyAndError);
         write_all_vectored(write, &[IoSlice::new(&request)])?;
@@ -599,10 +604,10 @@ fn write_all_vectored(write: &mut impl Write, bufs: &[IoSlice<'_>]) -> Result<()
 mod test {
     use std::io::IoSlice;
 
-    use crate::errors::ConnectError;
-    use crate::xproto::{ImageOrder, Setup, SetupAuthenticate, SetupFailed};
-    use crate::x11_utils::Serialize;
     use super::{read_setup, write_all_vectored};
+    use crate::errors::ConnectError;
+    use crate::x11_utils::Serialize;
+    use crate::xproto::{ImageOrder, Setup, SetupAuthenticate, SetupFailed};
 
     fn partial_write_test(request: &[u8], expected_err: &str) {
         let mut written = [0x21; 2];

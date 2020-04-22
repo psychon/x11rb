@@ -23,8 +23,7 @@ struct SentRequest {
 }
 
 #[derive(Debug)]
-pub(crate) struct ConnectionInner
-{
+pub(crate) struct ConnectionInner {
     // The sequence number of the last request that was written
     last_sequence_written: SequenceNumber,
     // Sorted(!) list with information on requests that were written, but no answer received yet.
@@ -41,8 +40,7 @@ pub(crate) struct ConnectionInner
     pending_replies: VecDeque<(SequenceNumber, Vec<u8>)>,
 }
 
-impl ConnectionInner
-{
+impl ConnectionInner {
     /// Crate a new `ConnectionInner`.
     ///
     /// It is assumed that the connection was just established. This means that the next request
@@ -62,12 +60,10 @@ impl ConnectionInner
     ///
     /// When this returns `None`, a sync with the server is necessary. Afterwards, the caller
     /// should try again.
-    pub(crate) fn send_request(
-        &mut self,
-        kind: RequestKind,
-    ) -> Option<SequenceNumber> {
+    pub(crate) fn send_request(&mut self, kind: RequestKind) -> Option<SequenceNumber> {
         if self.next_reply_expected + SequenceNumber::from(u16::max_value())
-            <= self.last_sequence_written && kind != RequestKind::HasResponse
+            <= self.last_sequence_written
+            && kind != RequestKind::HasResponse
         {
             // The caller need to call send_sync(). Otherwise, we might not be able to reconstruct
             // full sequence numbers for received packets.
@@ -215,10 +211,7 @@ impl ConnectionInner
     /// higher sequence number will be received. Since the X11 server handles requests in-order,
     /// if the reply to a later request is received, this means that the earlier request did not
     /// fail.
-    pub(crate) fn prepare_check_for_reply_or_error(
-        &mut self,
-        sequence: SequenceNumber,
-    ) -> bool {
+    pub(crate) fn prepare_check_for_reply_or_error(&mut self, sequence: SequenceNumber) -> bool {
         if self.next_reply_expected < sequence {
             true
         } else {
