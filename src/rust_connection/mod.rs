@@ -167,10 +167,14 @@ impl<R: Read, W: Write> RustConnection<R, W> {
         }
         let mut storage = Default::default();
         let bufs = compute_length_field(self, bufs, &mut storage)?;
-        Ok(self.inner
-            .lock()
-            .unwrap()
-            .send_request(bufs, kind)?)
+
+        let mut guard = self.inner.lock().unwrap();
+        loop {
+            match guard.send_request(bufs, kind)? {
+                Some(seqno) => return Ok(seqno),
+                None => guard.send_sync()?,
+            }
+        }
     }
 
     /// Read a packet from the connection.
@@ -342,7 +346,10 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         sequence: SequenceNumber,
     ) -> Result<Option<GenericError>, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
-        inner.prepare_check_for_reply_or_error(sequence)?;
+        if !inner.prepare_check_for_reply_or_error(sequence) {
+            inner.send_sync()?;
+            assert!(inner.prepare_check_for_reply_or_error(sequence));
+        }
         inner.flush()?; // Ensure the request is sent
         loop {
             match inner.poll_check_for_reply_or_error(sequence) {

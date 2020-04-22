@@ -125,7 +125,7 @@ where
     ///
     /// This function sends a `GetInputFocus` request to the X11 server and arranges for its reply
     /// to be ignored. This causes `self.next_reply_expected` to be increased.
-    fn send_sync(&mut self) -> Result<(), std::io::Error> {
+    pub(crate) fn send_sync(&mut self) -> Result<(), std::io::Error> {
         let length = 1u16.to_ne_bytes();
         self.write.write_all(&[
             GET_INPUT_FOCUS_REQUEST,
@@ -145,17 +145,20 @@ where
     }
 
     /// Send a request to the X11 server.
+    ///
+    /// When this returns `None`, a sync with the server is necessary. Afterwards, the caller
+    /// should try again.
     pub(crate) fn send_request(
         &mut self,
         bufs: &[IoSlice<'_>],
         kind: RequestKind,
-    ) -> Result<SequenceNumber, std::io::Error> {
+    ) -> Result<Option<SequenceNumber>, std::io::Error> {
         if self.next_reply_expected + SequenceNumber::from(u16::max_value())
             <= self.last_sequence_written
         {
-            // Send a GetInputFocus request so that we can reliably reconstruct sequence numbers in
-            // received packets.
-            self.send_sync()?;
+            // The caller need to call send_sync(). Otherwise, we might not be able to reconstruct
+            // full sequence numbers for received packets.
+            return Ok(None);
         }
 
         self.last_sequence_written += 1;
@@ -199,7 +202,7 @@ where
             }
         }
 
-        Ok(seqno)
+        Ok(Some(seqno))
     }
 
     /// Ignore the reply for a request that was previously sent.
@@ -323,18 +326,20 @@ where
     /// reply to be received. However, this approach does not work for requests without errors:
     /// Success is indicated by the absence of an error.
     ///
-    /// Thus, this function ensures that a reply with a higher sequence number will be received.
-    /// Since the X11 server handles requests in-order, if the reply to a later request is
-    /// received, this means that the earlier request did not fail.
+    /// Thus, this function returns true if a sync is necessary to ensure that a reply with a
+    /// higher sequence number will be received. Since the X11 server handles requests in-order,
+    /// if the reply to a later request is received, this means that the earlier request did not
+    /// fail.
     pub(crate) fn prepare_check_for_reply_or_error(
         &mut self,
         sequence: SequenceNumber,
-    ) -> Result<(), std::io::Error> {
+    ) -> bool {
         if self.next_reply_expected < sequence {
-            self.send_sync()?;
+            true
+        } else {
+            assert!(self.next_reply_expected >= sequence);
+            false
         }
-        assert!(self.next_reply_expected >= sequence);
-        Ok(())
     }
 
     /// Check if the request with the given sequence number was already handled by the server.
@@ -500,11 +505,15 @@ mod test {
         for num in 1..0x10000 {
             let seqno =
                 connection.send_request(&[IoSlice::new(&no_operation)], RequestKind::IsVoid)?;
-            assert_eq!(num, seqno);
+            assert_eq!(Some(num), seqno);
         }
         // request 0x10000 should be a sync, hence the next one is 0x10001
         let seqno = connection.send_request(&[IoSlice::new(&no_operation)], RequestKind::IsVoid)?;
-        assert_eq!(0x10001, seqno);
+        assert_eq!(None, seqno);
+
+        connection.send_sync()?;
+        let seqno = connection.send_request(&[IoSlice::new(&no_operation)], RequestKind::IsVoid)?;
+        assert_eq!(Some(0x10001), seqno);
 
         let mut expected: Vec<_> = std::iter::repeat(&no_operation)
             .take(0xffff)
@@ -534,7 +543,7 @@ mod test {
         for num in 1..=0x10001 {
             let seqno = connection
                 .send_request(&[IoSlice::new(&get_input_focus)], RequestKind::HasResponse)?;
-            assert_eq!(num, seqno);
+            assert_eq!(Some(num), seqno);
         }
 
         let expected: Vec<_> = std::iter::repeat(&get_input_focus)
