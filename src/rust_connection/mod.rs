@@ -14,7 +14,7 @@ pub use crate::errors::{ConnectError, ConnectionError, ParseError};
 use crate::extension_manager::ExtensionManager;
 use crate::utils::RawFdContainer;
 use crate::x11_utils::ExtensionInformation;
-use crate::xproto::Setup;
+use crate::xproto::{Setup, GET_INPUT_FOCUS_REQUEST};
 
 mod id_allocator;
 mod inner;
@@ -172,9 +172,31 @@ impl<R: Read, W: Write> RustConnection<R, W> {
         loop {
             match guard.send_request(bufs, kind)? {
                 Some(seqno) => return Ok(seqno),
-                None => guard.send_sync()?,
+                None => self.send_sync(&mut guard)?,
             }
         }
+    }
+
+    /// Send a synchronisation packet to the X11 server.
+    ///
+    /// This function sends a `GetInputFocus` request to the X11 server and arranges for its reply
+    /// to be ignored. This ensures that a reply is expected (`ConnectionInner.next_reply_expected`
+    /// increases).
+    fn send_sync(&self, guard: &mut MutexGuardInner<'_, W>) -> Result<(), std::io::Error> {
+        let length = 1u16.to_ne_bytes();
+        let request = [
+            GET_INPUT_FOCUS_REQUEST,
+            0, /* pad */
+            length[0],
+            length[1],
+        ];
+
+        let bufs = [IoSlice::new(&request)];
+        let seqno = guard.send_request(&bufs, RequestKind::HasResponse)?
+            .expect("Sending a HasResponse request should not be blocked by syncs");
+        guard.discard_reply(seqno, DiscardMode::DiscardReplyAndError);
+
+        Ok(())
     }
 
     /// Read a packet from the connection.
@@ -347,7 +369,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
     ) -> Result<Option<GenericError>, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
         if !inner.prepare_check_for_reply_or_error(sequence) {
-            inner.send_sync()?;
+            self.send_sync(&mut inner)?;
             assert!(inner.prepare_check_for_reply_or_error(sequence));
         }
         inner.flush()?; // Ensure the request is sent

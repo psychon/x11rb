@@ -8,7 +8,7 @@ use super::RawEventAndSeqNumber;
 use crate::connection::{DiscardMode, RequestKind, SequenceNumber};
 use crate::errors::{ConnectError, ParseError};
 use crate::x11_utils::{GenericEvent, Serialize};
-use crate::xproto::{Setup, SetupRequest, GET_INPUT_FOCUS_REQUEST};
+use crate::xproto::{Setup, SetupRequest};
 
 #[derive(Debug, Clone)]
 pub(crate) enum PollReply {
@@ -118,29 +118,6 @@ where
         };
         write.write_all(&request.serialize())?;
         write.flush()?;
-        Ok(())
-    }
-
-    /// Send a synchronisation packet to the X11 server.
-    ///
-    /// This function sends a `GetInputFocus` request to the X11 server and arranges for its reply
-    /// to be ignored. This causes `self.next_reply_expected` to be increased.
-    pub(crate) fn send_sync(&mut self) -> Result<(), std::io::Error> {
-        let length = 1u16.to_ne_bytes();
-        self.write.write_all(&[
-            GET_INPUT_FOCUS_REQUEST,
-            0, /* pad */
-            length[0],
-            length[1],
-        ])?;
-
-        self.last_sequence_written += 1;
-        self.next_reply_expected = self.last_sequence_written;
-        self.sent_requests.push_back(SentRequest {
-            seqno: self.last_sequence_written,
-            discard_mode: Some(DiscardMode::DiscardReplyAndError),
-        });
-
         Ok(())
     }
 
@@ -511,7 +488,9 @@ mod test {
         let seqno = connection.send_request(&[IoSlice::new(&no_operation)], RequestKind::IsVoid)?;
         assert_eq!(None, seqno);
 
-        connection.send_sync()?;
+        let seqno = connection.send_request(&[IoSlice::new(&get_input_focus)], RequestKind::HasResponse)?;
+        assert_eq!(Some(0x10000), seqno);
+
         let seqno = connection.send_request(&[IoSlice::new(&no_operation)], RequestKind::IsVoid)?;
         assert_eq!(Some(0x10001), seqno);
 
