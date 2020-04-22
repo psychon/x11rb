@@ -1,14 +1,11 @@
 //! A pure-rust implementation of a connection to an X11 server.
 
 use std::collections::VecDeque;
-use std::convert::TryInto;
-use std::io::{Read, Write};
+use std::io::Write;
 
 use super::RawEventAndSeqNumber;
 use crate::connection::{DiscardMode, RequestKind, SequenceNumber};
-use crate::errors::{ConnectError, ParseError};
-use crate::x11_utils::{GenericEvent, Serialize};
-use crate::xproto::{Setup, SetupRequest};
+use crate::x11_utils::GenericEvent;
 
 #[derive(Debug, Clone)]
 pub(crate) enum PollReply {
@@ -55,28 +52,6 @@ impl<W> ConnectionInner<W>
 where
     W: Write,
 {
-    /// Create a `ConnectionInner` for the given connection.
-    ///
-    /// This function sends a setup request to the X11 server and waits for the reply. The received
-    /// `Setup` is returned to the caller, together with an instance of `ConnectionInner`.
-    ///
-    /// The `read` and `write` arguments describe the connection to the X11 server. `read` is only
-    /// borrowed and will be managed by the caller after this function read. Ownership of `write`
-    /// is transferred to the new `ConnectionInner` instance.
-    ///
-    /// `auth_name` and `auth_data` describe the authentication data that will be sent to the X11
-    /// server in the `SetupRequest`.
-    pub(crate) fn connect(
-        read: &mut impl Read,
-        mut write: W,
-        auth_name: Vec<u8>,
-        auth_data: Vec<u8>,
-    ) -> Result<(Self, Setup), ConnectError> {
-        Self::write_setup(&mut write, auth_name, auth_data)?;
-        let setup = read_setup(read)?;
-        Ok((Self::new(write), setup))
-    }
-
     /// Crate a `ConnectionInner` wrapping the given write stream.
     ///
     /// It is assumed that the connection was just established. This means that the next request
@@ -91,34 +66,6 @@ where
             pending_events: VecDeque::new(),
             pending_replies: VecDeque::new(),
         }
-    }
-
-    #[cfg(target_endian = "little")]
-    fn byte_order() -> u8 {
-        0x6c
-    }
-
-    #[cfg(target_endian = "big")]
-    fn byte_order() -> u8 {
-        0x42
-    }
-
-    /// Send a `SetupRequest` to the X11 server.
-    fn write_setup(
-        write: &mut W,
-        auth_name: Vec<u8>,
-        auth_data: Vec<u8>,
-    ) -> Result<(), std::io::Error> {
-        let request = SetupRequest {
-            byte_order: Self::byte_order(),
-            protocol_major_version: 11,
-            protocol_minor_version: 0,
-            authorization_protocol_name: auth_name,
-            authorization_protocol_data: auth_data,
-        };
-        write.write_all(&request.serialize())?;
-        write.flush()?;
-        Ok(())
     }
 
     /// Send a request to the X11 server.
@@ -335,99 +282,10 @@ where
     }
 }
 
-/// Read a `Setup` from the X11 server.
-///
-/// If the server sends a `SetupFailed` or `SetupAuthenticate` packet, these will be returned
-/// as errors.
-fn read_setup(read: &mut impl Read) -> Result<Setup, ConnectError> {
-    let mut setup = vec![0; 8];
-    read.read_exact(&mut setup)?;
-    let extra_length = usize::from(u16::from_ne_bytes([setup[6], setup[7]])) * 4;
-    // Use `Vec::reserve_exact` because this will be the final
-    // length of the vector.
-    setup.reserve_exact(extra_length);
-    setup.resize(8 + extra_length, 0);
-    read.read_exact(&mut setup[8..])?;
-    match setup[0] {
-        // 0 is SetupFailed
-        0 => Err(ConnectError::SetupFailed((&setup[..]).try_into()?)),
-        // Success
-        1 => Ok((&setup[..]).try_into()?),
-        // 2 is SetupAuthenticate
-        2 => Err(ConnectError::SetupAuthenticate((&setup[..]).try_into()?)),
-        // Uhm... no other cases are defined
-        _ => Err(ParseError::ParseError.into()),
-    }
-}
-
 #[cfg(test)]
 mod test {
-    use super::{read_setup, ConnectionInner};
+    use super::ConnectionInner;
     use crate::connection::RequestKind;
-    use crate::errors::ConnectError;
-    use crate::x11_utils::Serialize;
-    use crate::xproto::{ImageOrder, Setup, SetupAuthenticate, SetupFailed};
-
-    #[test]
-    fn read_setup_success() {
-        let mut setup = Setup {
-            status: 1,
-            protocol_major_version: 11,
-            protocol_minor_version: 0,
-            length: 0,
-            release_number: 0,
-            resource_id_base: 0,
-            resource_id_mask: 0,
-            motion_buffer_size: 0,
-            maximum_request_length: 0,
-            image_byte_order: ImageOrder::LSBFirst,
-            bitmap_format_bit_order: ImageOrder::LSBFirst,
-            bitmap_format_scanline_unit: 0,
-            bitmap_format_scanline_pad: 0,
-            min_keycode: 0,
-            max_keycode: 0,
-            vendor: vec![],
-            pixmap_formats: vec![],
-            roots: vec![],
-        };
-        setup.length = ((setup.serialize().len() - 8) / 4) as _;
-        let setup_bytes = setup.serialize();
-
-        let read = read_setup(&mut &setup_bytes[..]);
-        assert_eq!(setup, read.unwrap());
-    }
-
-    #[test]
-    fn read_setup_failed() {
-        let mut setup = SetupFailed {
-            status: 0,
-            protocol_major_version: 11,
-            protocol_minor_version: 0,
-            length: 0,
-            reason: b"whatever".to_vec(),
-        };
-        setup.length = ((setup.serialize().len() - 8) / 4) as _;
-        let setup_bytes = setup.serialize();
-
-        match read_setup(&mut &setup_bytes[..]) {
-            Err(ConnectError::SetupFailed(read)) => assert_eq!(setup, read),
-            value => panic!("Unexpected value {:?}", value),
-        }
-    }
-
-    #[test]
-    fn read_setup_authenticate() {
-        let setup = SetupAuthenticate {
-            status: 2,
-            reason: b"12345678".to_vec(),
-        };
-        let setup_bytes = setup.serialize();
-
-        match read_setup(&mut &setup_bytes[..]) {
-            Err(ConnectError::SetupAuthenticate(read)) => assert_eq!(setup, read),
-            value => panic!("Unexpected value {:?}", value),
-        }
-    }
 
     #[test]
     fn insert_sync_no_reply() -> Result<(), std::io::Error> {

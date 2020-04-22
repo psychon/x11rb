@@ -13,8 +13,8 @@ use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 pub use crate::errors::{ConnectError, ConnectionError, ParseError};
 use crate::extension_manager::ExtensionManager;
 use crate::utils::RawFdContainer;
-use crate::x11_utils::ExtensionInformation;
-use crate::xproto::{Setup, GET_INPUT_FOCUS_REQUEST};
+use crate::x11_utils::{ExtensionInformation, Serialize};
+use crate::xproto::{Setup, SetupRequest, GET_INPUT_FOCUS_REQUEST};
 
 mod id_allocator;
 mod inner;
@@ -108,13 +108,13 @@ impl<R: Read, W: Write> RustConnection<R, W> {
     /// is sent to the X11 server.
     pub fn connect_to_stream_with_auth_info(
         mut read: R,
-        write: W,
+        mut write: W,
         screen: usize,
         auth_name: Vec<u8>,
         auth_data: Vec<u8>,
     ) -> Result<Self, ConnectError> {
-        let (inner, setup) =
-            inner::ConnectionInner::connect(&mut read, write, auth_name, auth_data)?;
+        write_setup(&mut write, auth_name, auth_data)?;
+        let setup = read_setup(&mut read)?;
 
         // Check that we got a valid screen number
         if screen >= setup.roots.len() {
@@ -122,7 +122,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
         }
 
         // Success! Set up our state
-        Self::for_inner(read, inner, setup)
+        Self::for_connected_stream(read, write, setup)
     }
 
     /// Establish a new connection for an already connected stream.
@@ -500,6 +500,59 @@ fn read_packet(read: &mut impl Read) -> Result<Vec<u8>, std::io::Error> {
     Ok(buffer)
 }
 
+#[cfg(target_endian = "little")]
+fn byte_order() -> u8 {
+    0x6c
+}
+
+#[cfg(target_endian = "big")]
+fn byte_order() -> u8 {
+    0x42
+}
+
+/// Send a `SetupRequest` to the X11 server.
+fn write_setup(
+    write: &mut impl Write,
+    auth_name: Vec<u8>,
+    auth_data: Vec<u8>,
+) -> Result<(), std::io::Error> {
+    let request = SetupRequest {
+        byte_order: byte_order(),
+        protocol_major_version: 11,
+        protocol_minor_version: 0,
+        authorization_protocol_name: auth_name,
+        authorization_protocol_data: auth_data,
+    };
+    write.write_all(&request.serialize())?;
+    write.flush()?;
+    Ok(())
+}
+
+/// Read a `Setup` from the X11 server.
+///
+/// If the server sends a `SetupFailed` or `SetupAuthenticate` packet, these will be returned
+/// as errors.
+fn read_setup(read: &mut impl Read) -> Result<Setup, ConnectError> {
+    let mut setup = vec![0; 8];
+    read.read_exact(&mut setup)?;
+    let extra_length = usize::from(u16::from_ne_bytes([setup[6], setup[7]])) * 4;
+    // Use `Vec::reserve_exact` because this will be the final
+    // length of the vector.
+    setup.reserve_exact(extra_length);
+    setup.resize(8 + extra_length, 0);
+    read.read_exact(&mut setup[8..])?;
+    match setup[0] {
+        // 0 is SetupFailed
+        0 => Err(ConnectError::SetupFailed((&setup[..]).try_into()?)),
+        // Success
+        1 => Ok((&setup[..]).try_into()?),
+        // 2 is SetupAuthenticate
+        2 => Err(ConnectError::SetupAuthenticate((&setup[..]).try_into()?)),
+        // Uhm... no other cases are defined
+        _ => Err(ParseError::ParseError.into()),
+    }
+}
+
 /// Write a set of buffers on a Writer.
 ///
 /// This is basically `Write::write_all_vectored`, but on stable.
@@ -536,7 +589,10 @@ fn write_all_vectored(write: &mut impl Write, bufs: &[IoSlice<'_>]) -> Result<()
 mod test {
     use std::io::IoSlice;
 
-    use super::write_all_vectored;
+    use crate::errors::ConnectError;
+    use crate::xproto::{ImageOrder, Setup, SetupAuthenticate, SetupFailed};
+    use crate::x11_utils::Serialize;
+    use super::{read_setup, write_all_vectored};
 
     fn partial_write_test(request: &[u8], expected_err: &str) {
         let mut written = [0x21; 2];
@@ -563,5 +619,66 @@ mod test {
         let (request1, request2) = ([0; 4], [0; 0]);
         let request = [IoSlice::new(&request1), IoSlice::new(&request2)];
         let _ = write_all_vectored(&mut output, &request).unwrap();
+    }
+
+    #[test]
+    fn read_setup_success() {
+        let mut setup = Setup {
+            status: 1,
+            protocol_major_version: 11,
+            protocol_minor_version: 0,
+            length: 0,
+            release_number: 0,
+            resource_id_base: 0,
+            resource_id_mask: 0,
+            motion_buffer_size: 0,
+            maximum_request_length: 0,
+            image_byte_order: ImageOrder::LSBFirst,
+            bitmap_format_bit_order: ImageOrder::LSBFirst,
+            bitmap_format_scanline_unit: 0,
+            bitmap_format_scanline_pad: 0,
+            min_keycode: 0,
+            max_keycode: 0,
+            vendor: vec![],
+            pixmap_formats: vec![],
+            roots: vec![],
+        };
+        setup.length = ((setup.serialize().len() - 8) / 4) as _;
+        let setup_bytes = setup.serialize();
+
+        let read = read_setup(&mut &setup_bytes[..]);
+        assert_eq!(setup, read.unwrap());
+    }
+
+    #[test]
+    fn read_setup_failed() {
+        let mut setup = SetupFailed {
+            status: 0,
+            protocol_major_version: 11,
+            protocol_minor_version: 0,
+            length: 0,
+            reason: b"whatever".to_vec(),
+        };
+        setup.length = ((setup.serialize().len() - 8) / 4) as _;
+        let setup_bytes = setup.serialize();
+
+        match read_setup(&mut &setup_bytes[..]) {
+            Err(ConnectError::SetupFailed(read)) => assert_eq!(setup, read),
+            value => panic!("Unexpected value {:?}", value),
+        }
+    }
+
+    #[test]
+    fn read_setup_authenticate() {
+        let setup = SetupAuthenticate {
+            status: 2,
+            reason: b"12345678".to_vec(),
+        };
+        let setup_bytes = setup.serialize();
+
+        match read_setup(&mut &setup_bytes[..]) {
+            Err(ConnectError::SetupAuthenticate(read)) => assert_eq!(setup, read),
+            value => panic!("Unexpected value {:?}", value),
+        }
     }
 }
