@@ -22,7 +22,6 @@ pub(crate) enum PollReply {
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 struct SentRequest {
     seqno: SequenceNumber,
-    kind: RequestKind,
     discard_mode: Option<DiscardMode>,
 }
 
@@ -138,7 +137,6 @@ where
         self.next_reply_expected = self.last_sequence_written;
         self.sent_requests.push_back(SentRequest {
             seqno: self.last_sequence_written,
-            kind: RequestKind::HasResponse,
             discard_mode: Some(DiscardMode::DiscardReplyAndError),
         });
 
@@ -168,7 +166,6 @@ where
 
         let sent_request = SentRequest {
             seqno,
-            kind,
             discard_mode: None,
         };
         self.sent_requests.push_back(sent_request);
