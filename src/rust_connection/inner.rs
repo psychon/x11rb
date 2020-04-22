@@ -128,13 +128,13 @@ where
     pub(crate) fn send_request(
         &mut self,
         kind: RequestKind,
-    ) -> Result<Option<SequenceNumber>, std::io::Error> {
+    ) -> Option<SequenceNumber> {
         if self.next_reply_expected + SequenceNumber::from(u16::max_value())
             <= self.last_sequence_written && kind != RequestKind::HasResponse
         {
             // The caller need to call send_sync(). Otherwise, we might not be able to reconstruct
             // full sequence numbers for received packets.
-            return Ok(None);
+            return None;
         }
 
         self.last_sequence_written += 1;
@@ -150,7 +150,7 @@ where
         };
         self.sent_requests.push_back(sent_request);
 
-        Ok(Some(seqno))
+        Some(seqno)
     }
 
     /// Ignore the reply for a request that was previously sent.
@@ -440,17 +440,17 @@ mod test {
         let mut connection = ConnectionInner::new(&mut output);
 
         for num in 1..0x10000 {
-            let seqno = connection.send_request(RequestKind::IsVoid)?;
+            let seqno = connection.send_request(RequestKind::IsVoid);
             assert_eq!(Some(num), seqno);
         }
         // request 0x10000 should be a sync, hence the next one is 0x10001
-        let seqno = connection.send_request(RequestKind::IsVoid)?;
+        let seqno = connection.send_request(RequestKind::IsVoid);
         assert_eq!(None, seqno);
 
-        let seqno = connection.send_request(RequestKind::HasResponse)?;
+        let seqno = connection.send_request(RequestKind::HasResponse);
         assert_eq!(Some(0x10000), seqno);
 
-        let seqno = connection.send_request(RequestKind::IsVoid)?;
+        let seqno = connection.send_request(RequestKind::IsVoid);
         assert_eq!(Some(0x10001), seqno);
 
         Ok(())
@@ -467,7 +467,7 @@ mod test {
         let mut connection = ConnectionInner::new(&mut output);
 
         for num in 1..=0x10001 {
-            let seqno = connection.send_request(RequestKind::HasResponse)?;
+            let seqno = connection.send_request(RequestKind::HasResponse);
             assert_eq!(Some(num), seqno);
         }
 
@@ -486,11 +486,11 @@ mod test {
         let mut connection = ConnectionInner::new(&mut output);
 
         for num in 1..0x10000 {
-            let seqno = connection.send_request(RequestKind::IsVoid)?;
+            let seqno = connection.send_request(RequestKind::IsVoid);
             assert_eq!(Some(num), seqno);
         }
 
-        let seqno = connection.send_request(RequestKind::HasResponse)?;
+        let seqno = connection.send_request(RequestKind::HasResponse);
         assert_eq!(Some(0x10000), seqno);
 
         Ok(())

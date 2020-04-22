@@ -170,7 +170,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
 
         let mut guard = self.inner.lock().unwrap();
         loop {
-            match guard.send_request(kind)? {
+            match guard.send_request(kind) {
                 Some(seqno) => {
                     // Now actually send the buffers
                     // FIXME: We must always be able to read when we write
@@ -196,7 +196,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
             length[1],
         ];
 
-        let seqno = guard.send_request(RequestKind::HasResponse)?
+        let seqno = guard.send_request(RequestKind::HasResponse)
             .expect("Sending a HasResponse request should not be blocked by syncs");
         guard.discard_reply(seqno, DiscardMode::DiscardReplyAndError);
         write_all_vectored(&mut guard.write, &[IoSlice::new(&request)])?;
