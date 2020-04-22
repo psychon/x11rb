@@ -387,6 +387,15 @@ where
     Ok((result, remaining))
 }
 
+/// Parse a list of `u8` from the given data.
+pub fn parse_u8_list(data: &[u8], list_length: usize) -> Result<(&[u8], &[u8]), ParseError> {
+    if data.len() < list_length {
+        Err(ParseError::ParseError)
+    } else {
+        Ok(data.split_at(list_length))
+    }
+}
+
 impl<T: Serialize> Serialize for [T] {
     type Bytes = Vec<u8>;
     fn serialize(&self) -> Self::Bytes {

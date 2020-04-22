@@ -1278,7 +1278,8 @@ impl TryParse for GetScreenResourcesReply {
         let (crtcs, remaining) = crate::x11_utils::parse_list::<Crtc>(remaining, num_crtcs as usize)?;
         let (outputs, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_outputs as usize)?;
         let (modes, remaining) = crate::x11_utils::parse_list::<ModeInfo>(remaining, num_modes as usize)?;
-        let (names, remaining) = crate::x11_utils::parse_list::<u8>(remaining, names_len as usize)?;
+        let (names, remaining) = crate::x11_utils::parse_u8_list(remaining, names_len as usize)?;
+        let names = names.to_vec();
         let result = GetScreenResourcesReply { response_type, sequence, length, timestamp, config_timestamp, crtcs, outputs, modes, names };
         Ok((result, remaining))
     }
@@ -1425,7 +1426,8 @@ impl TryParse for GetOutputInfoReply {
         let (crtcs, remaining) = crate::x11_utils::parse_list::<Crtc>(remaining, num_crtcs as usize)?;
         let (modes, remaining) = crate::x11_utils::parse_list::<Mode>(remaining, num_modes as usize)?;
         let (clones, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_clones as usize)?;
-        let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_len as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len as usize)?;
+        let name = name.to_vec();
         let status = status.try_into()?;
         let connection = connection.try_into()?;
         let subpixel_order = subpixel_order.try_into()?;
@@ -1759,7 +1761,8 @@ impl TryParse for GetOutputPropertyReply {
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (num_items as usize) * ((format as usize) / 8))?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, (num_items as usize) * ((format as usize) / 8))?;
+        let data = data.to_vec();
         let result = GetOutputPropertyReply { response_type, format, sequence, length, type_, bytes_after, num_items, data };
         Ok((result, remaining))
     }
@@ -2327,7 +2330,8 @@ impl TryParse for GetScreenResourcesCurrentReply {
         let (crtcs, remaining) = crate::x11_utils::parse_list::<Crtc>(remaining, num_crtcs as usize)?;
         let (outputs, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_outputs as usize)?;
         let (modes, remaining) = crate::x11_utils::parse_list::<ModeInfo>(remaining, num_modes as usize)?;
-        let (names, remaining) = crate::x11_utils::parse_list::<u8>(remaining, names_len as usize)?;
+        let (names, remaining) = crate::x11_utils::parse_u8_list(remaining, names_len as usize)?;
+        let names = names.to_vec();
         let result = GetScreenResourcesCurrentReply { response_type, sequence, length, timestamp, config_timestamp, crtcs, outputs, modes, names };
         Ok((result, remaining))
     }
@@ -2541,13 +2545,15 @@ impl TryParse for GetCrtcTransformReply {
         let (pending_nparams, remaining) = u16::try_parse(remaining)?;
         let (current_len, remaining) = u16::try_parse(remaining)?;
         let (current_nparams, remaining) = u16::try_parse(remaining)?;
-        let (pending_filter_name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, pending_len as usize)?;
+        let (pending_filter_name, remaining) = crate::x11_utils::parse_u8_list(remaining, pending_len as usize)?;
+        let pending_filter_name = pending_filter_name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
         let (pending_params, remaining) = crate::x11_utils::parse_list::<render::Fixed>(remaining, pending_nparams as usize)?;
-        let (current_filter_name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, current_len as usize)?;
+        let (current_filter_name, remaining) = crate::x11_utils::parse_u8_list(remaining, current_len as usize)?;
+        let current_filter_name = current_filter_name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
@@ -3010,7 +3016,8 @@ impl TryParse for GetProviderInfoReply {
         let (outputs, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_outputs as usize)?;
         let (associated_providers, remaining) = crate::x11_utils::parse_list::<Provider>(remaining, num_associated_providers as usize)?;
         let (associated_capability, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_associated_providers as usize)?;
-        let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_len as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len as usize)?;
+        let name = name.to_vec();
         let result = GetProviderInfoReply { response_type, status, sequence, length, timestamp, capabilities, num_associated_providers, crtcs, outputs, associated_providers, associated_capability, name };
         Ok((result, remaining))
     }
@@ -3413,7 +3420,8 @@ impl TryParse for GetProviderPropertyReply {
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (num_items as usize) * ((format as usize) / 8))?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, (num_items as usize) * ((format as usize) / 8))?;
+        let data = data.to_vec();
         let result = GetProviderPropertyReply { response_type, format, sequence, length, type_, bytes_after, num_items, data };
         Ok((result, remaining))
     }

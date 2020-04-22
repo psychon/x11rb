@@ -483,7 +483,8 @@ impl TryParse for GetModeLineReply {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
-        let (private, remaining) = crate::x11_utils::parse_list::<u8>(remaining, privsize as usize)?;
+        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize as usize)?;
+        let private = private.to_vec();
         let result = GetModeLineReply { response_type, sequence, length, dotclock, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, private };
         Ok((result, remaining))
     }
@@ -658,9 +659,12 @@ impl TryParse for GetMonitorReply {
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
         let (hsync, remaining) = crate::x11_utils::parse_list::<Syncrange>(remaining, num_hsync as usize)?;
         let (vsync, remaining) = crate::x11_utils::parse_list::<Syncrange>(remaining, num_vsync as usize)?;
-        let (vendor, remaining) = crate::x11_utils::parse_list::<u8>(remaining, vendor_length as usize)?;
-        let (alignment_pad, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (((vendor_length as usize) + 3) & (!3)) - (vendor_length as usize))?;
-        let (model, remaining) = crate::x11_utils::parse_list::<u8>(remaining, model_length as usize)?;
+        let (vendor, remaining) = crate::x11_utils::parse_u8_list(remaining, vendor_length as usize)?;
+        let vendor = vendor.to_vec();
+        let (alignment_pad, remaining) = crate::x11_utils::parse_u8_list(remaining, (((vendor_length as usize) + 3) & (!3)) - (vendor_length as usize))?;
+        let alignment_pad = alignment_pad.to_vec();
+        let (model, remaining) = crate::x11_utils::parse_u8_list(remaining, model_length as usize)?;
+        let model = model.to_vec();
         let result = GetMonitorReply { response_type, sequence, length, hsync, vsync, vendor, alignment_pad, model };
         Ok((result, remaining))
     }

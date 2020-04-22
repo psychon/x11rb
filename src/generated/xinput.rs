@@ -856,7 +856,8 @@ pub struct DeviceName {
 impl TryParse for DeviceName {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (len, remaining) = u8::try_parse(remaining)?;
-        let (string, remaining) = crate::x11_utils::parse_list::<u8>(remaining, len as usize)?;
+        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, len as usize)?;
+        let string = string.to_vec();
         let result = DeviceName { string };
         Ok((result, remaining))
     }
@@ -2289,72 +2290,8 @@ impl TryParse for KbdFeedbackState {
         let (click, remaining) = u8::try_parse(remaining)?;
         let (percent, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (auto_repeats_0, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_1, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_2, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_3, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_4, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_5, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_6, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_7, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_8, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_9, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_10, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_11, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_12, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_13, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_14, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_15, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_16, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_17, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_18, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_19, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_20, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_21, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_22, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_23, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_24, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_25, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_26, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_27, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_28, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_29, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_30, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_31, remaining) = u8::try_parse(remaining)?;
-        let auto_repeats = [
-            auto_repeats_0,
-            auto_repeats_1,
-            auto_repeats_2,
-            auto_repeats_3,
-            auto_repeats_4,
-            auto_repeats_5,
-            auto_repeats_6,
-            auto_repeats_7,
-            auto_repeats_8,
-            auto_repeats_9,
-            auto_repeats_10,
-            auto_repeats_11,
-            auto_repeats_12,
-            auto_repeats_13,
-            auto_repeats_14,
-            auto_repeats_15,
-            auto_repeats_16,
-            auto_repeats_17,
-            auto_repeats_18,
-            auto_repeats_19,
-            auto_repeats_20,
-            auto_repeats_21,
-            auto_repeats_22,
-            auto_repeats_23,
-            auto_repeats_24,
-            auto_repeats_25,
-            auto_repeats_26,
-            auto_repeats_27,
-            auto_repeats_28,
-            auto_repeats_29,
-            auto_repeats_30,
-            auto_repeats_31,
-        ];
+        let (auto_repeats, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
+        let auto_repeats = <[u8; 32]>::try_from(auto_repeats).unwrap();
         let class_id = class_id.try_into()?;
         let result = KbdFeedbackState { class_id, feedback_id, len, pitch, duration, led_mask, led_values, global_auto_repeat, click, percent, auto_repeats };
         Ok((result, remaining))
@@ -2774,72 +2711,8 @@ impl TryParse for FeedbackStateDataKeyboard {
         let (click, remaining) = u8::try_parse(remaining)?;
         let (percent, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (auto_repeats_0, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_1, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_2, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_3, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_4, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_5, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_6, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_7, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_8, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_9, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_10, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_11, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_12, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_13, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_14, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_15, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_16, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_17, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_18, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_19, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_20, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_21, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_22, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_23, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_24, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_25, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_26, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_27, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_28, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_29, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_30, remaining) = u8::try_parse(remaining)?;
-        let (auto_repeats_31, remaining) = u8::try_parse(remaining)?;
-        let auto_repeats = [
-            auto_repeats_0,
-            auto_repeats_1,
-            auto_repeats_2,
-            auto_repeats_3,
-            auto_repeats_4,
-            auto_repeats_5,
-            auto_repeats_6,
-            auto_repeats_7,
-            auto_repeats_8,
-            auto_repeats_9,
-            auto_repeats_10,
-            auto_repeats_11,
-            auto_repeats_12,
-            auto_repeats_13,
-            auto_repeats_14,
-            auto_repeats_15,
-            auto_repeats_16,
-            auto_repeats_17,
-            auto_repeats_18,
-            auto_repeats_19,
-            auto_repeats_20,
-            auto_repeats_21,
-            auto_repeats_22,
-            auto_repeats_23,
-            auto_repeats_24,
-            auto_repeats_25,
-            auto_repeats_26,
-            auto_repeats_27,
-            auto_repeats_28,
-            auto_repeats_29,
-            auto_repeats_30,
-            auto_repeats_31,
-        ];
+        let (auto_repeats, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
+        let auto_repeats = <[u8; 32]>::try_from(auto_repeats).unwrap();
         let result = FeedbackStateDataKeyboard { pitch, duration, led_mask, led_values, global_auto_repeat, click, percent, auto_repeats };
         Ok((result, remaining))
     }
@@ -4413,7 +4286,8 @@ impl TryParse for GetDeviceModifierMappingReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (keycodes_per_modifier, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        let (keymaps, remaining) = crate::x11_utils::parse_list::<u8>(remaining, (keycodes_per_modifier as usize) * 8)?;
+        let (keymaps, remaining) = crate::x11_utils::parse_u8_list(remaining, (keycodes_per_modifier as usize) * 8)?;
+        let keymaps = keymaps.to_vec();
         let result = GetDeviceModifierMappingReply { response_type, xi_reply_type, sequence, length, keymaps };
         Ok((result, remaining))
     }
@@ -4530,7 +4404,8 @@ impl TryParse for GetDeviceButtonMappingReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (map_size, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        let (map, remaining) = crate::x11_utils::parse_list::<u8>(remaining, map_size as usize)?;
+        let (map, remaining) = crate::x11_utils::parse_u8_list(remaining, map_size as usize)?;
+        let map = map.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
@@ -4619,72 +4494,8 @@ impl TryParse for KeyState {
         let (len, remaining) = u8::try_parse(remaining)?;
         let (num_keys, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (keys_0, remaining) = u8::try_parse(remaining)?;
-        let (keys_1, remaining) = u8::try_parse(remaining)?;
-        let (keys_2, remaining) = u8::try_parse(remaining)?;
-        let (keys_3, remaining) = u8::try_parse(remaining)?;
-        let (keys_4, remaining) = u8::try_parse(remaining)?;
-        let (keys_5, remaining) = u8::try_parse(remaining)?;
-        let (keys_6, remaining) = u8::try_parse(remaining)?;
-        let (keys_7, remaining) = u8::try_parse(remaining)?;
-        let (keys_8, remaining) = u8::try_parse(remaining)?;
-        let (keys_9, remaining) = u8::try_parse(remaining)?;
-        let (keys_10, remaining) = u8::try_parse(remaining)?;
-        let (keys_11, remaining) = u8::try_parse(remaining)?;
-        let (keys_12, remaining) = u8::try_parse(remaining)?;
-        let (keys_13, remaining) = u8::try_parse(remaining)?;
-        let (keys_14, remaining) = u8::try_parse(remaining)?;
-        let (keys_15, remaining) = u8::try_parse(remaining)?;
-        let (keys_16, remaining) = u8::try_parse(remaining)?;
-        let (keys_17, remaining) = u8::try_parse(remaining)?;
-        let (keys_18, remaining) = u8::try_parse(remaining)?;
-        let (keys_19, remaining) = u8::try_parse(remaining)?;
-        let (keys_20, remaining) = u8::try_parse(remaining)?;
-        let (keys_21, remaining) = u8::try_parse(remaining)?;
-        let (keys_22, remaining) = u8::try_parse(remaining)?;
-        let (keys_23, remaining) = u8::try_parse(remaining)?;
-        let (keys_24, remaining) = u8::try_parse(remaining)?;
-        let (keys_25, remaining) = u8::try_parse(remaining)?;
-        let (keys_26, remaining) = u8::try_parse(remaining)?;
-        let (keys_27, remaining) = u8::try_parse(remaining)?;
-        let (keys_28, remaining) = u8::try_parse(remaining)?;
-        let (keys_29, remaining) = u8::try_parse(remaining)?;
-        let (keys_30, remaining) = u8::try_parse(remaining)?;
-        let (keys_31, remaining) = u8::try_parse(remaining)?;
-        let keys = [
-            keys_0,
-            keys_1,
-            keys_2,
-            keys_3,
-            keys_4,
-            keys_5,
-            keys_6,
-            keys_7,
-            keys_8,
-            keys_9,
-            keys_10,
-            keys_11,
-            keys_12,
-            keys_13,
-            keys_14,
-            keys_15,
-            keys_16,
-            keys_17,
-            keys_18,
-            keys_19,
-            keys_20,
-            keys_21,
-            keys_22,
-            keys_23,
-            keys_24,
-            keys_25,
-            keys_26,
-            keys_27,
-            keys_28,
-            keys_29,
-            keys_30,
-            keys_31,
-        ];
+        let (keys, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
+        let keys = <[u8; 32]>::try_from(keys).unwrap();
         let class_id = class_id.try_into()?;
         let result = KeyState { class_id, len, num_keys, keys };
         Ok((result, remaining))
@@ -4764,72 +4575,8 @@ impl TryParse for ButtonState {
         let (len, remaining) = u8::try_parse(remaining)?;
         let (num_buttons, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (buttons_0, remaining) = u8::try_parse(remaining)?;
-        let (buttons_1, remaining) = u8::try_parse(remaining)?;
-        let (buttons_2, remaining) = u8::try_parse(remaining)?;
-        let (buttons_3, remaining) = u8::try_parse(remaining)?;
-        let (buttons_4, remaining) = u8::try_parse(remaining)?;
-        let (buttons_5, remaining) = u8::try_parse(remaining)?;
-        let (buttons_6, remaining) = u8::try_parse(remaining)?;
-        let (buttons_7, remaining) = u8::try_parse(remaining)?;
-        let (buttons_8, remaining) = u8::try_parse(remaining)?;
-        let (buttons_9, remaining) = u8::try_parse(remaining)?;
-        let (buttons_10, remaining) = u8::try_parse(remaining)?;
-        let (buttons_11, remaining) = u8::try_parse(remaining)?;
-        let (buttons_12, remaining) = u8::try_parse(remaining)?;
-        let (buttons_13, remaining) = u8::try_parse(remaining)?;
-        let (buttons_14, remaining) = u8::try_parse(remaining)?;
-        let (buttons_15, remaining) = u8::try_parse(remaining)?;
-        let (buttons_16, remaining) = u8::try_parse(remaining)?;
-        let (buttons_17, remaining) = u8::try_parse(remaining)?;
-        let (buttons_18, remaining) = u8::try_parse(remaining)?;
-        let (buttons_19, remaining) = u8::try_parse(remaining)?;
-        let (buttons_20, remaining) = u8::try_parse(remaining)?;
-        let (buttons_21, remaining) = u8::try_parse(remaining)?;
-        let (buttons_22, remaining) = u8::try_parse(remaining)?;
-        let (buttons_23, remaining) = u8::try_parse(remaining)?;
-        let (buttons_24, remaining) = u8::try_parse(remaining)?;
-        let (buttons_25, remaining) = u8::try_parse(remaining)?;
-        let (buttons_26, remaining) = u8::try_parse(remaining)?;
-        let (buttons_27, remaining) = u8::try_parse(remaining)?;
-        let (buttons_28, remaining) = u8::try_parse(remaining)?;
-        let (buttons_29, remaining) = u8::try_parse(remaining)?;
-        let (buttons_30, remaining) = u8::try_parse(remaining)?;
-        let (buttons_31, remaining) = u8::try_parse(remaining)?;
-        let buttons = [
-            buttons_0,
-            buttons_1,
-            buttons_2,
-            buttons_3,
-            buttons_4,
-            buttons_5,
-            buttons_6,
-            buttons_7,
-            buttons_8,
-            buttons_9,
-            buttons_10,
-            buttons_11,
-            buttons_12,
-            buttons_13,
-            buttons_14,
-            buttons_15,
-            buttons_16,
-            buttons_17,
-            buttons_18,
-            buttons_19,
-            buttons_20,
-            buttons_21,
-            buttons_22,
-            buttons_23,
-            buttons_24,
-            buttons_25,
-            buttons_26,
-            buttons_27,
-            buttons_28,
-            buttons_29,
-            buttons_30,
-            buttons_31,
-        ];
+        let (buttons, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
+        let buttons = <[u8; 32]>::try_from(buttons).unwrap();
         let class_id = class_id.try_into()?;
         let result = ButtonState { class_id, len, num_buttons, buttons };
         Ok((result, remaining))
@@ -5011,72 +4758,8 @@ impl TryParse for InputStateDataKey {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_keys, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (keys_0, remaining) = u8::try_parse(remaining)?;
-        let (keys_1, remaining) = u8::try_parse(remaining)?;
-        let (keys_2, remaining) = u8::try_parse(remaining)?;
-        let (keys_3, remaining) = u8::try_parse(remaining)?;
-        let (keys_4, remaining) = u8::try_parse(remaining)?;
-        let (keys_5, remaining) = u8::try_parse(remaining)?;
-        let (keys_6, remaining) = u8::try_parse(remaining)?;
-        let (keys_7, remaining) = u8::try_parse(remaining)?;
-        let (keys_8, remaining) = u8::try_parse(remaining)?;
-        let (keys_9, remaining) = u8::try_parse(remaining)?;
-        let (keys_10, remaining) = u8::try_parse(remaining)?;
-        let (keys_11, remaining) = u8::try_parse(remaining)?;
-        let (keys_12, remaining) = u8::try_parse(remaining)?;
-        let (keys_13, remaining) = u8::try_parse(remaining)?;
-        let (keys_14, remaining) = u8::try_parse(remaining)?;
-        let (keys_15, remaining) = u8::try_parse(remaining)?;
-        let (keys_16, remaining) = u8::try_parse(remaining)?;
-        let (keys_17, remaining) = u8::try_parse(remaining)?;
-        let (keys_18, remaining) = u8::try_parse(remaining)?;
-        let (keys_19, remaining) = u8::try_parse(remaining)?;
-        let (keys_20, remaining) = u8::try_parse(remaining)?;
-        let (keys_21, remaining) = u8::try_parse(remaining)?;
-        let (keys_22, remaining) = u8::try_parse(remaining)?;
-        let (keys_23, remaining) = u8::try_parse(remaining)?;
-        let (keys_24, remaining) = u8::try_parse(remaining)?;
-        let (keys_25, remaining) = u8::try_parse(remaining)?;
-        let (keys_26, remaining) = u8::try_parse(remaining)?;
-        let (keys_27, remaining) = u8::try_parse(remaining)?;
-        let (keys_28, remaining) = u8::try_parse(remaining)?;
-        let (keys_29, remaining) = u8::try_parse(remaining)?;
-        let (keys_30, remaining) = u8::try_parse(remaining)?;
-        let (keys_31, remaining) = u8::try_parse(remaining)?;
-        let keys = [
-            keys_0,
-            keys_1,
-            keys_2,
-            keys_3,
-            keys_4,
-            keys_5,
-            keys_6,
-            keys_7,
-            keys_8,
-            keys_9,
-            keys_10,
-            keys_11,
-            keys_12,
-            keys_13,
-            keys_14,
-            keys_15,
-            keys_16,
-            keys_17,
-            keys_18,
-            keys_19,
-            keys_20,
-            keys_21,
-            keys_22,
-            keys_23,
-            keys_24,
-            keys_25,
-            keys_26,
-            keys_27,
-            keys_28,
-            keys_29,
-            keys_30,
-            keys_31,
-        ];
+        let (keys, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
+        let keys = <[u8; 32]>::try_from(keys).unwrap();
         let result = InputStateDataKey { num_keys, keys };
         Ok((result, remaining))
     }
@@ -5144,72 +4827,8 @@ impl TryParse for InputStateDataButton {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_buttons, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (buttons_0, remaining) = u8::try_parse(remaining)?;
-        let (buttons_1, remaining) = u8::try_parse(remaining)?;
-        let (buttons_2, remaining) = u8::try_parse(remaining)?;
-        let (buttons_3, remaining) = u8::try_parse(remaining)?;
-        let (buttons_4, remaining) = u8::try_parse(remaining)?;
-        let (buttons_5, remaining) = u8::try_parse(remaining)?;
-        let (buttons_6, remaining) = u8::try_parse(remaining)?;
-        let (buttons_7, remaining) = u8::try_parse(remaining)?;
-        let (buttons_8, remaining) = u8::try_parse(remaining)?;
-        let (buttons_9, remaining) = u8::try_parse(remaining)?;
-        let (buttons_10, remaining) = u8::try_parse(remaining)?;
-        let (buttons_11, remaining) = u8::try_parse(remaining)?;
-        let (buttons_12, remaining) = u8::try_parse(remaining)?;
-        let (buttons_13, remaining) = u8::try_parse(remaining)?;
-        let (buttons_14, remaining) = u8::try_parse(remaining)?;
-        let (buttons_15, remaining) = u8::try_parse(remaining)?;
-        let (buttons_16, remaining) = u8::try_parse(remaining)?;
-        let (buttons_17, remaining) = u8::try_parse(remaining)?;
-        let (buttons_18, remaining) = u8::try_parse(remaining)?;
-        let (buttons_19, remaining) = u8::try_parse(remaining)?;
-        let (buttons_20, remaining) = u8::try_parse(remaining)?;
-        let (buttons_21, remaining) = u8::try_parse(remaining)?;
-        let (buttons_22, remaining) = u8::try_parse(remaining)?;
-        let (buttons_23, remaining) = u8::try_parse(remaining)?;
-        let (buttons_24, remaining) = u8::try_parse(remaining)?;
-        let (buttons_25, remaining) = u8::try_parse(remaining)?;
-        let (buttons_26, remaining) = u8::try_parse(remaining)?;
-        let (buttons_27, remaining) = u8::try_parse(remaining)?;
-        let (buttons_28, remaining) = u8::try_parse(remaining)?;
-        let (buttons_29, remaining) = u8::try_parse(remaining)?;
-        let (buttons_30, remaining) = u8::try_parse(remaining)?;
-        let (buttons_31, remaining) = u8::try_parse(remaining)?;
-        let buttons = [
-            buttons_0,
-            buttons_1,
-            buttons_2,
-            buttons_3,
-            buttons_4,
-            buttons_5,
-            buttons_6,
-            buttons_7,
-            buttons_8,
-            buttons_9,
-            buttons_10,
-            buttons_11,
-            buttons_12,
-            buttons_13,
-            buttons_14,
-            buttons_15,
-            buttons_16,
-            buttons_17,
-            buttons_18,
-            buttons_19,
-            buttons_20,
-            buttons_21,
-            buttons_22,
-            buttons_23,
-            buttons_24,
-            buttons_25,
-            buttons_26,
-            buttons_27,
-            buttons_28,
-            buttons_29,
-            buttons_30,
-            buttons_31,
-        ];
+        let (buttons, remaining) = crate::x11_utils::parse_u8_list(remaining, 32)?;
+        let buttons = <[u8; 32]>::try_from(buttons).unwrap();
         let result = InputStateDataButton { num_buttons, buttons };
         Ok((result, remaining))
     }
@@ -7522,7 +7141,8 @@ impl GetDevicePropertyItems {
         if switch_expr == u8::from(PropertyFormat::M8Bits) {
             let remaining = outer_remaining;
             let value = remaining;
-            let (data8, remaining) = crate::x11_utils::parse_list::<u8>(remaining, num_items as usize)?;
+            let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items as usize)?;
+            let data8 = data8.to_vec();
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
@@ -8116,7 +7736,8 @@ impl TryParse for AddMaster {
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let (send_core, remaining) = bool::try_parse(remaining)?;
         let (enable, remaining) = bool::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_len as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len as usize)?;
+        let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
@@ -8330,7 +7951,8 @@ impl TryParse for HierarchyChangeDataAddMaster {
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let (send_core, remaining) = bool::try_parse(remaining)?;
         let (enable, remaining) = bool::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_len as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len as usize)?;
+        let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
@@ -10066,7 +9688,8 @@ impl TryParse for XIDeviceInfo {
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let (enabled, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, name_len as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len as usize)?;
+        let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
@@ -11201,7 +10824,8 @@ impl XIGetPropertyItems {
         if switch_expr == u8::from(PropertyFormat::M8Bits) {
             let remaining = outer_remaining;
             let value = remaining;
-            let (data8, remaining) = crate::x11_utils::parse_list::<u8>(remaining, num_items as usize)?;
+            let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items as usize)?;
+            let data8 = data8.to_vec();
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
@@ -12706,26 +12330,10 @@ impl TryParse for DeviceStateNotifyEvent {
         let (num_buttons, remaining) = u8::try_parse(remaining)?;
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
         let (classes_reported, remaining) = u8::try_parse(remaining)?;
-        let (buttons_0, remaining) = u8::try_parse(remaining)?;
-        let (buttons_1, remaining) = u8::try_parse(remaining)?;
-        let (buttons_2, remaining) = u8::try_parse(remaining)?;
-        let (buttons_3, remaining) = u8::try_parse(remaining)?;
-        let buttons = [
-            buttons_0,
-            buttons_1,
-            buttons_2,
-            buttons_3,
-        ];
-        let (keys_0, remaining) = u8::try_parse(remaining)?;
-        let (keys_1, remaining) = u8::try_parse(remaining)?;
-        let (keys_2, remaining) = u8::try_parse(remaining)?;
-        let (keys_3, remaining) = u8::try_parse(remaining)?;
-        let keys = [
-            keys_0,
-            keys_1,
-            keys_2,
-            keys_3,
-        ];
+        let (buttons, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
+        let buttons = <[u8; 4]>::try_from(buttons).unwrap();
+        let (keys, remaining) = crate::x11_utils::parse_u8_list(remaining, 4)?;
+        let keys = <[u8; 4]>::try_from(keys).unwrap();
         let (valuators_0, remaining) = u32::try_parse(remaining)?;
         let (valuators_1, remaining) = u32::try_parse(remaining)?;
         let (valuators_2, remaining) = u32::try_parse(remaining)?;
@@ -13085,64 +12693,8 @@ impl TryParse for DeviceKeyStateNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (keys_0, remaining) = u8::try_parse(remaining)?;
-        let (keys_1, remaining) = u8::try_parse(remaining)?;
-        let (keys_2, remaining) = u8::try_parse(remaining)?;
-        let (keys_3, remaining) = u8::try_parse(remaining)?;
-        let (keys_4, remaining) = u8::try_parse(remaining)?;
-        let (keys_5, remaining) = u8::try_parse(remaining)?;
-        let (keys_6, remaining) = u8::try_parse(remaining)?;
-        let (keys_7, remaining) = u8::try_parse(remaining)?;
-        let (keys_8, remaining) = u8::try_parse(remaining)?;
-        let (keys_9, remaining) = u8::try_parse(remaining)?;
-        let (keys_10, remaining) = u8::try_parse(remaining)?;
-        let (keys_11, remaining) = u8::try_parse(remaining)?;
-        let (keys_12, remaining) = u8::try_parse(remaining)?;
-        let (keys_13, remaining) = u8::try_parse(remaining)?;
-        let (keys_14, remaining) = u8::try_parse(remaining)?;
-        let (keys_15, remaining) = u8::try_parse(remaining)?;
-        let (keys_16, remaining) = u8::try_parse(remaining)?;
-        let (keys_17, remaining) = u8::try_parse(remaining)?;
-        let (keys_18, remaining) = u8::try_parse(remaining)?;
-        let (keys_19, remaining) = u8::try_parse(remaining)?;
-        let (keys_20, remaining) = u8::try_parse(remaining)?;
-        let (keys_21, remaining) = u8::try_parse(remaining)?;
-        let (keys_22, remaining) = u8::try_parse(remaining)?;
-        let (keys_23, remaining) = u8::try_parse(remaining)?;
-        let (keys_24, remaining) = u8::try_parse(remaining)?;
-        let (keys_25, remaining) = u8::try_parse(remaining)?;
-        let (keys_26, remaining) = u8::try_parse(remaining)?;
-        let (keys_27, remaining) = u8::try_parse(remaining)?;
-        let keys = [
-            keys_0,
-            keys_1,
-            keys_2,
-            keys_3,
-            keys_4,
-            keys_5,
-            keys_6,
-            keys_7,
-            keys_8,
-            keys_9,
-            keys_10,
-            keys_11,
-            keys_12,
-            keys_13,
-            keys_14,
-            keys_15,
-            keys_16,
-            keys_17,
-            keys_18,
-            keys_19,
-            keys_20,
-            keys_21,
-            keys_22,
-            keys_23,
-            keys_24,
-            keys_25,
-            keys_26,
-            keys_27,
-        ];
+        let (keys, remaining) = crate::x11_utils::parse_u8_list(remaining, 28)?;
+        let keys = <[u8; 28]>::try_from(keys).unwrap();
         let result = DeviceKeyStateNotifyEvent { response_type, device_id, sequence, keys };
         Ok((result, remaining))
     }
@@ -13227,64 +12779,8 @@ impl TryParse for DeviceButtonStateNotifyEvent {
         let (response_type, remaining) = u8::try_parse(remaining)?;
         let (device_id, remaining) = u8::try_parse(remaining)?;
         let (sequence, remaining) = u16::try_parse(remaining)?;
-        let (buttons_0, remaining) = u8::try_parse(remaining)?;
-        let (buttons_1, remaining) = u8::try_parse(remaining)?;
-        let (buttons_2, remaining) = u8::try_parse(remaining)?;
-        let (buttons_3, remaining) = u8::try_parse(remaining)?;
-        let (buttons_4, remaining) = u8::try_parse(remaining)?;
-        let (buttons_5, remaining) = u8::try_parse(remaining)?;
-        let (buttons_6, remaining) = u8::try_parse(remaining)?;
-        let (buttons_7, remaining) = u8::try_parse(remaining)?;
-        let (buttons_8, remaining) = u8::try_parse(remaining)?;
-        let (buttons_9, remaining) = u8::try_parse(remaining)?;
-        let (buttons_10, remaining) = u8::try_parse(remaining)?;
-        let (buttons_11, remaining) = u8::try_parse(remaining)?;
-        let (buttons_12, remaining) = u8::try_parse(remaining)?;
-        let (buttons_13, remaining) = u8::try_parse(remaining)?;
-        let (buttons_14, remaining) = u8::try_parse(remaining)?;
-        let (buttons_15, remaining) = u8::try_parse(remaining)?;
-        let (buttons_16, remaining) = u8::try_parse(remaining)?;
-        let (buttons_17, remaining) = u8::try_parse(remaining)?;
-        let (buttons_18, remaining) = u8::try_parse(remaining)?;
-        let (buttons_19, remaining) = u8::try_parse(remaining)?;
-        let (buttons_20, remaining) = u8::try_parse(remaining)?;
-        let (buttons_21, remaining) = u8::try_parse(remaining)?;
-        let (buttons_22, remaining) = u8::try_parse(remaining)?;
-        let (buttons_23, remaining) = u8::try_parse(remaining)?;
-        let (buttons_24, remaining) = u8::try_parse(remaining)?;
-        let (buttons_25, remaining) = u8::try_parse(remaining)?;
-        let (buttons_26, remaining) = u8::try_parse(remaining)?;
-        let (buttons_27, remaining) = u8::try_parse(remaining)?;
-        let buttons = [
-            buttons_0,
-            buttons_1,
-            buttons_2,
-            buttons_3,
-            buttons_4,
-            buttons_5,
-            buttons_6,
-            buttons_7,
-            buttons_8,
-            buttons_9,
-            buttons_10,
-            buttons_11,
-            buttons_12,
-            buttons_13,
-            buttons_14,
-            buttons_15,
-            buttons_16,
-            buttons_17,
-            buttons_18,
-            buttons_19,
-            buttons_20,
-            buttons_21,
-            buttons_22,
-            buttons_23,
-            buttons_24,
-            buttons_25,
-            buttons_26,
-            buttons_27,
-        ];
+        let (buttons, remaining) = crate::x11_utils::parse_u8_list(remaining, 28)?;
+        let buttons = <[u8; 28]>::try_from(buttons).unwrap();
         let result = DeviceButtonStateNotifyEvent { response_type, device_id, sequence, buttons };
         Ok((result, remaining))
     }

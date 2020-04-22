@@ -1797,7 +1797,8 @@ impl TryParse for GetCursorNameReply {
         let (atom, remaining) = xproto::Atom::try_parse(remaining)?;
         let (nbytes, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
-        let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, nbytes as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, nbytes as usize)?;
+        let name = name.to_vec();
         let result = GetCursorNameReply { response_type, sequence, length, atom, name };
         Ok((result, remaining))
     }
@@ -1864,7 +1865,8 @@ impl TryParse for GetCursorImageAndNameReply {
         let (nbytes, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (cursor_image, remaining) = crate::x11_utils::parse_list::<u32>(remaining, (width as usize) * (height as usize))?;
-        let (name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, nbytes as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, nbytes as usize)?;
+        let name = name.to_vec();
         let result = GetCursorImageAndNameReply { response_type, sequence, length, x, y, width, height, xhot, yhot, cursor_serial, cursor_atom, cursor_image, name };
         Ok((result, remaining))
     }

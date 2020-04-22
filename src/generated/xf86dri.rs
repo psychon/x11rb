@@ -235,7 +235,8 @@ impl TryParse for OpenConnectionReply {
         let (sarea_handle_high, remaining) = u32::try_parse(remaining)?;
         let (bus_id_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (bus_id, remaining) = crate::x11_utils::parse_list::<u8>(remaining, bus_id_len as usize)?;
+        let (bus_id, remaining) = crate::x11_utils::parse_u8_list(remaining, bus_id_len as usize)?;
+        let bus_id = bus_id.to_vec();
         let result = OpenConnectionReply { response_type, sequence, length, sarea_handle_low, sarea_handle_high, bus_id };
         Ok((result, remaining))
     }
@@ -322,7 +323,8 @@ impl TryParse for GetClientDriverNameReply {
         let (client_driver_patch_version, remaining) = u32::try_parse(remaining)?;
         let (client_driver_name_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
-        let (client_driver_name, remaining) = crate::x11_utils::parse_list::<u8>(remaining, client_driver_name_len as usize)?;
+        let (client_driver_name, remaining) = crate::x11_utils::parse_u8_list(remaining, client_driver_name_len as usize)?;
+        let client_driver_name = client_driver_name.to_vec();
         let result = GetClientDriverNameReply { response_type, sequence, length, client_driver_major_version, client_driver_minor_version, client_driver_patch_version, client_driver_name };
         Ok((result, remaining))
     }
