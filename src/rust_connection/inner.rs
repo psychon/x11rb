@@ -333,11 +333,6 @@ where
             .pop_front()
             .map(|(seqno, event)| (GenericEvent::new(event).unwrap(), seqno))
     }
-
-    /// Send all pending events by flushing the output buffer.
-    pub(crate) fn flush(&mut self) -> Result<(), std::io::Error> {
-        self.write.flush()
-    }
 }
 
 /// Read a `Setup` from the X11 server.
