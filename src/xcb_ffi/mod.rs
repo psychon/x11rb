@@ -304,10 +304,7 @@ impl XCBConnection {
         CSlice::new(error, 32)
     }
 
-    unsafe fn wrap_event(
-        &self,
-        event: *mut u8,
-    ) -> Result<(SequenceNumber, GenericEvent), ParseError> {
+    unsafe fn wrap_event(&self, event: *mut u8) -> Result<RawEventAndSeqNumber, ParseError> {
         let header = CSlice::new(event, 36);
         let mut length = 32;
         // XCB inserts a uint32_t with the sequence number after the first 32 bytes.
@@ -325,8 +322,8 @@ impl XCBConnection {
             std::ptr::copy(event.add(36), event.add(32), length_field * 4);
         }
         Ok((
-            seqno,
             GenericEvent::new(CSlice::new(header.into_ptr(), length))?,
+            seqno,
         ))
     }
 
@@ -518,7 +515,7 @@ impl RequestConnection for XCBConnection {
 impl Connection for XCBConnection {
     fn wait_for_raw_event_with_sequence(&self) -> Result<RawEventAndSeqNumber, ConnectionError> {
         if let Some(error) = self.errors.get(self) {
-            return Ok((error.0, error.1.into()));
+            return Ok((error.1.into(), error.0));
         }
         unsafe {
             let event = raw_ffi::xcb_wait_for_event(self.conn.as_ptr());
@@ -533,7 +530,7 @@ impl Connection for XCBConnection {
         &self,
     ) -> Result<Option<RawEventAndSeqNumber>, ConnectionError> {
         if let Some(error) = self.errors.get(self) {
-            return Ok(Some((error.0, error.1.into())));
+            return Ok(Some((error.1.into(), error.0)));
         }
         unsafe {
             let event = raw_ffi::xcb_poll_for_event(self.conn.as_ptr());

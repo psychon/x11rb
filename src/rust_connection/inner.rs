@@ -4,6 +4,7 @@ use std::collections::VecDeque;
 use std::convert::TryInto;
 use std::io::{ErrorKind, IoSlice, Read, Write};
 
+use super::RawEventAndSeqNumber;
 use crate::connection::{DiscardMode, RequestKind, SequenceNumber};
 use crate::errors::{ConnectError, ParseError};
 use crate::x11_utils::{GenericEvent, Serialize};
@@ -374,12 +375,10 @@ where
     }
 
     /// Get a pending event.
-    pub(crate) fn poll_for_event_with_sequence(
-        &mut self,
-    ) -> Option<(SequenceNumber, GenericEvent<Vec<u8>>)> {
+    pub(crate) fn poll_for_event_with_sequence(&mut self) -> Option<RawEventAndSeqNumber> {
         self.pending_events
             .pop_front()
-            .map(|(seqno, event)| (seqno, GenericEvent::new(event).unwrap()))
+            .map(|(seqno, event)| (GenericEvent::new(event).unwrap(), seqno))
     }
 
     /// Send all pending events by flushing the output buffer.
