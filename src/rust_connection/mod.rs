@@ -42,14 +42,15 @@ enum MaxRequestBytes {
     Known(usize),
 }
 
-type MutexGuardInner<'a, W> = MutexGuard<'a, inner::ConnectionInner<W>>;
+type MutexGuardInner<'a> = MutexGuard<'a, inner::ConnectionInner>;
 
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
 pub struct RustConnection<R: Read = BufReader<stream::Stream>, W: Write = BufWriter<stream::Stream>>
 {
-    inner: Mutex<inner::ConnectionInner<W>>,
+    inner: Mutex<inner::ConnectionInner>,
     read: Mutex<R>,
+    write: Mutex<W>,
     reader_condition: Condvar,
     id_allocator: Mutex<id_allocator::IDAllocator>,
     setup: Setup,
@@ -131,12 +132,13 @@ impl<R: Read, W: Write> RustConnection<R, W> {
     /// It is assumed that `setup` was just received from the server. Thus, the first reply to a
     /// request that is sent will have sequence number one.
     pub fn for_connected_stream(read: R, write: W, setup: Setup) -> Result<Self, ConnectError> {
-        Self::for_inner(read, inner::ConnectionInner::new(write), setup)
+        Self::for_inner(read, write, inner::ConnectionInner::new(), setup)
     }
 
     fn for_inner(
         read: R,
-        inner: inner::ConnectionInner<W>,
+        write: W,
+        inner: inner::ConnectionInner,
         setup: Setup,
     ) -> Result<Self, ConnectError> {
         let allocator =
@@ -144,6 +146,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
         Ok(RustConnection {
             inner: Mutex::new(inner),
             read: Mutex::new(read),
+            write: Mutex::new(write),
             reader_condition: Condvar::new(),
             id_allocator: Mutex::new(allocator),
             setup,
@@ -168,16 +171,17 @@ impl<R: Read, W: Write> RustConnection<R, W> {
         let mut storage = Default::default();
         let bufs = compute_length_field(self, bufs, &mut storage)?;
 
-        let mut guard = self.inner.lock().unwrap();
+        let mut write = self.write.lock().unwrap();
+        let mut inner = self.inner.lock().unwrap();
         loop {
-            match guard.send_request(kind) {
+            match inner.send_request(kind) {
                 Some(seqno) => {
                     // Now actually send the buffers
                     // FIXME: We must always be able to read when we write
-                    write_all_vectored(&mut guard.write, bufs)?;
+                    write_all_vectored(&mut *write, bufs)?;
                     return Ok(seqno)
                 }
-                None => self.send_sync(&mut guard)?,
+                None => self.send_sync(&mut *inner, &mut *write)?,
             }
         }
     }
@@ -187,7 +191,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
     /// This function sends a `GetInputFocus` request to the X11 server and arranges for its reply
     /// to be ignored. This ensures that a reply is expected (`ConnectionInner.next_reply_expected`
     /// increases).
-    fn send_sync(&self, guard: &mut MutexGuardInner<'_, W>) -> Result<(), std::io::Error> {
+    fn send_sync(&self, inner: &mut inner::ConnectionInner, write: &mut W) -> Result<(), std::io::Error> {
         let length = 1u16.to_ne_bytes();
         let request = [
             GET_INPUT_FOCUS_REQUEST,
@@ -196,10 +200,10 @@ impl<R: Read, W: Write> RustConnection<R, W> {
             length[1],
         ];
 
-        let seqno = guard.send_request(RequestKind::HasResponse)
+        let seqno = inner.send_request(RequestKind::HasResponse)
             .expect("Sending a HasResponse request should not be blocked by syncs");
-        guard.discard_reply(seqno, DiscardMode::DiscardReplyAndError);
-        write_all_vectored(&mut guard.write, &[IoSlice::new(&request)])?;
+        inner.discard_reply(seqno, DiscardMode::DiscardReplyAndError);
+        write_all_vectored(write, &[IoSlice::new(&request)])?;
 
         Ok(())
     }
@@ -212,8 +216,8 @@ impl<R: Read, W: Write> RustConnection<R, W> {
     /// again and returns a new `MutexGuard`.
     fn read_packet_and_enqueue<'a>(
         &'a self,
-        mut inner: MutexGuardInner<'a, W>,
-    ) -> Result<MutexGuardInner<'a, W>, std::io::Error> {
+        mut inner: MutexGuardInner<'a>,
+    ) -> Result<MutexGuardInner<'a>, std::io::Error> {
         // 0.1. Try to lock the `read` mutex.
         match self.read.try_lock() {
             Err(TryLockError::WouldBlock) => {
@@ -340,8 +344,10 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         &self,
         sequence: SequenceNumber,
     ) -> Result<ReplyOrError<Vec<u8>>, ConnectionError> {
+        let mut write = self.write.lock().unwrap();
         let mut inner = self.inner.lock().unwrap();
-        inner.write.flush()?; // Ensure the request is sent
+        write.flush()?; // Ensure the request is sent
+        drop(write);
         loop {
             if let Some(reply) = inner.poll_for_reply_or_error(sequence) {
                 if reply[0] == 0 {
@@ -356,8 +362,10 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
     }
 
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Vec<u8>>, ConnectionError> {
+        let mut write = self.write.lock().unwrap();
         let mut inner = self.inner.lock().unwrap();
-        inner.write.flush()?; // Ensure the request is sent
+        write.flush()?; // Ensure the request is sent
+        drop(write);
         loop {
             match inner.poll_for_reply(sequence) {
                 PollReply::TryAgain => {}
@@ -372,12 +380,14 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         &self,
         sequence: SequenceNumber,
     ) -> Result<Option<GenericError>, ConnectionError> {
+        let mut write = self.write.lock().unwrap();
         let mut inner = self.inner.lock().unwrap();
         if !inner.prepare_check_for_reply_or_error(sequence) {
-            self.send_sync(&mut inner)?;
+            self.send_sync(&mut *inner, &mut *write)?;
             assert!(inner.prepare_check_for_reply_or_error(sequence));
         }
-        inner.write.flush()?; // Ensure the request is sent
+        write.flush()?; // Ensure the request is sent
+        drop(write);
         loop {
             match inner.poll_check_for_reply_or_error(sequence) {
                 PollReply::TryAgain => {}
@@ -461,7 +471,7 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
     }
 
     fn flush(&self) -> Result<(), ConnectionError> {
-        self.inner.lock().unwrap().write.flush()?;
+        self.write.lock().unwrap().flush()?;
         Ok(())
     }
 

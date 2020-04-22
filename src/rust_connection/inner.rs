@@ -1,7 +1,6 @@
 //! A pure-rust implementation of a connection to an X11 server.
 
 use std::collections::VecDeque;
-use std::io::Write;
 
 use super::RawEventAndSeqNumber;
 use crate::connection::{DiscardMode, RequestKind, SequenceNumber};
@@ -24,14 +23,8 @@ struct SentRequest {
 }
 
 #[derive(Debug)]
-pub(crate) struct ConnectionInner<W>
-where
-    W: Write,
+pub(crate) struct ConnectionInner
 {
-    // The underlying byte stream used for writing to the X11 server. Reading is done outside of
-    // this struct (for synchronisation reasons).
-    pub(crate) write: W,
-
     // The sequence number of the last request that was written
     last_sequence_written: SequenceNumber,
     // Sorted(!) list with information on requests that were written, but no answer received yet.
@@ -48,17 +41,14 @@ where
     pending_replies: VecDeque<(SequenceNumber, Vec<u8>)>,
 }
 
-impl<W> ConnectionInner<W>
-where
-    W: Write,
+impl ConnectionInner
 {
-    /// Crate a `ConnectionInner` wrapping the given write stream.
+    /// Crate a new `ConnectionInner`.
     ///
     /// It is assumed that the connection was just established. This means that the next request
     /// that is sent will have sequence number one.
-    pub(crate) fn new(write: W) -> Self {
+    pub(crate) fn new() -> Self {
         ConnectionInner {
-            write,
             last_sequence_written: 0,
             next_reply_expected: 0,
             last_sequence_read: 0,
@@ -292,10 +282,7 @@ mod test {
         // The connection must send a sync (GetInputFocus) request every 2^16 requests (that do not
         // have a reply). Thus, this test sends more than that and tests for the sync to appear.
 
-        // Set up a connection that writes to this array
-        let mut written = [0; 0x10000 * 4 + 4];
-        let mut output = &mut written[..];
-        let mut connection = ConnectionInner::new(&mut output);
+        let mut connection = ConnectionInner::new();
 
         for num in 1..0x10000 {
             let seqno = connection.send_request(RequestKind::IsVoid);
@@ -317,10 +304,7 @@ mod test {
         // Compared to the previous test, this uses RequestKind::HasResponse, so no sync needs to
         // be inserted.
 
-        // Set up a connection that writes to this array
-        let mut written = [0; 0x10001 * 4];
-        let mut output = &mut written[..];
-        let mut connection = ConnectionInner::new(&mut output);
+        let mut connection = ConnectionInner::new();
 
         for num in 1..=0x10001 {
             let seqno = connection.send_request(RequestKind::HasResponse);
@@ -334,10 +318,7 @@ mod test {
         // the next request. Then it sends a RequestKind::HasResponse request so that no sync is
         // necessary. This is a regression test: Once upon a time, an unnecessary sync was done.
 
-        // Set up a connection that writes to this array
-        let mut written = [0; 0x10000 * 4];
-        let mut output = &mut written[..];
-        let mut connection = ConnectionInner::new(&mut output);
+        let mut connection = ConnectionInner::new();
 
         for num in 1..0x10000 {
             let seqno = connection.send_request(RequestKind::IsVoid);
