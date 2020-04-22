@@ -170,8 +170,13 @@ impl<R: Read, W: Write> RustConnection<R, W> {
 
         let mut guard = self.inner.lock().unwrap();
         loop {
-            match guard.send_request(bufs, kind)? {
-                Some(seqno) => return Ok(seqno),
+            match guard.send_request(kind)? {
+                Some(seqno) => {
+                    // Now actually send the buffers
+                    // FIXME: We must always be able to read when we write
+                    write_all_vectored(&mut guard.write, bufs)?;
+                    return Ok(seqno)
+                }
                 None => self.send_sync(&mut guard)?,
             }
         }
@@ -191,10 +196,10 @@ impl<R: Read, W: Write> RustConnection<R, W> {
             length[1],
         ];
 
-        let bufs = [IoSlice::new(&request)];
-        let seqno = guard.send_request(&bufs, RequestKind::HasResponse)?
+        let seqno = guard.send_request(RequestKind::HasResponse)?
             .expect("Sending a HasResponse request should not be blocked by syncs");
         guard.discard_reply(seqno, DiscardMode::DiscardReplyAndError);
+        write_all_vectored(&mut guard.write, &[IoSlice::new(&request)])?;
 
         Ok(())
     }
@@ -493,4 +498,70 @@ fn read_packet(read: &mut impl Read) -> Result<Vec<u8>, std::io::Error> {
     read.read_exact(&mut buffer[32..])?;
 
     Ok(buffer)
+}
+
+/// Write a set of buffers on a Writer.
+///
+/// This is basically `Write::write_all_vectored`, but on stable.
+fn write_all_vectored(write: &mut impl Write, bufs: &[IoSlice<'_>]) -> Result<(), std::io::Error> {
+    let mut bufs = bufs;
+    while !bufs.is_empty() {
+        let mut count = write.write_vectored(bufs)?;
+        if count == 0 {
+            return Err(std::io::Error::new(
+                std::io::ErrorKind::WriteZero,
+                "failed to write anything",
+            ));
+        }
+        while count > 0 {
+            if count >= bufs[0].len() {
+                count -= bufs[0].len();
+            } else {
+                let remaining = &bufs[0][count..];
+                write.write_all(remaining)?;
+                count = 0;
+            }
+            bufs = &bufs[1..];
+
+            // Skip empty slices
+            while bufs.first().map(|s| s.len()) == Some(0) {
+                bufs = &bufs[1..];
+            }
+        }
+    }
+    Ok(())
+}
+
+#[cfg(test)]
+mod test {
+    use std::io::IoSlice;
+
+    use super::write_all_vectored;
+
+    fn partial_write_test(request: &[u8], expected_err: &str) {
+        let mut written = [0x21; 2];
+        let mut output = &mut written[..];
+        let request = [IoSlice::new(&request), IoSlice::new(&request)];
+        let error = write_all_vectored(&mut output, &request).unwrap_err();
+        assert_eq!(expected_err, error.to_string());
+    }
+
+    #[test]
+    fn partial_write_larger_slice() {
+        partial_write_test(&[0; 4], "failed to write whole buffer");
+    }
+
+    #[test]
+    fn partial_write_slice_border() {
+        partial_write_test(&[0; 2], "failed to write anything");
+    }
+
+    #[test]
+    fn full_write_trailing_empty() {
+        let mut written = [0; 4];
+        let mut output = &mut written[..];
+        let (request1, request2) = ([0; 4], [0; 0]);
+        let request = [IoSlice::new(&request1), IoSlice::new(&request2)];
+        let _ = write_all_vectored(&mut output, &request).unwrap();
+    }
 }
