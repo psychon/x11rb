@@ -167,11 +167,10 @@ impl<R: Read, W: Write> RustConnection<R, W> {
         }
         let mut storage = Default::default();
         let bufs = compute_length_field(self, bufs, &mut storage)?;
-        self.inner
+        Ok(self.inner
             .lock()
             .unwrap()
-            .send_request(bufs, kind)
-            .or(Err(ConnectionError::UnknownError))
+            .send_request(bufs, kind)?)
     }
 
     /// Read a packet from the connection.
