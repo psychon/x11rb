@@ -212,12 +212,7 @@ impl ConnectionInner {
     /// if the reply to a later request is received, this means that the earlier request did not
     /// fail.
     pub(crate) fn prepare_check_for_reply_or_error(&mut self, sequence: SequenceNumber) -> bool {
-        if self.next_reply_expected < sequence {
-            true
-        } else {
-            assert!(self.next_reply_expected >= sequence);
-            false
-        }
+        self.next_reply_expected < sequence
     }
 
     /// Check if the request with the given sequence number was already handled by the server.
