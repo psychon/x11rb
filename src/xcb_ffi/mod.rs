@@ -22,8 +22,8 @@ use crate::connection::{
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 pub use crate::errors::{ConnectError, ConnectionError, ParseError};
 use crate::extension_manager::ExtensionManager;
-use crate::utils::{CSlice, RawFdContainer};
 use crate::protocol::xproto::Setup;
+use crate::utils::{CSlice, RawFdContainer};
 use crate::x11_utils::ExtensionInformation;
 
 mod pending_errors;

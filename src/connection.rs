@@ -45,8 +45,8 @@ use std::io::IoSlice;
 
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError, ReplyError, ReplyOrIdError};
-use crate::protocol::{Error, Event};
 use crate::protocol::xproto::Setup;
+use crate::protocol::{Error, Event};
 use crate::utils::RawFdContainer;
 use crate::x11_utils::{ExtensionInformation, GenericError, GenericEvent};
 

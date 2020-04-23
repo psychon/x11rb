@@ -4,8 +4,10 @@
 use std::process::exit;
 
 use x11rb::connection::{Connection as _, RequestConnection as _};
+use x11rb::protocol::xproto::{
+    ConfigureWindowAux, ConnectionExt as _, CreateWindowAux, WindowClass,
+};
 use x11rb::protocol::{present, Event};
-use x11rb::protocol::xproto::{ConfigureWindowAux, ConnectionExt as _, CreateWindowAux, WindowClass};
 use x11rb::COPY_DEPTH_FROM_PARENT;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

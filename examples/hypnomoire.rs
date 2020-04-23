@@ -11,8 +11,8 @@ use std::time::Duration;
 
 use x11rb::connection::Connection;
 use x11rb::errors::{ReplyError, ReplyOrIdError};
-use x11rb::protocol::Event;
 use x11rb::protocol::xproto::*;
+use x11rb::protocol::Event;
 use x11rb::COPY_DEPTH_FROM_PARENT;
 
 /// Lag angle for the follow line
