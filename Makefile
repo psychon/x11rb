@@ -1,5 +1,5 @@
 PROTO=xcb-proto-1.14-1-g2b3559c
-OUT=src/generated
+OUT=src/protocol
 
 generate:
 	mkdir -p "$(OUT)"

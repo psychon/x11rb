@@ -114,11 +114,11 @@ pub mod rust_connection;
 pub mod wrapper;
 
 #[rustfmt::skip]
-mod generated;
+mod protocol;
 
 use connection::Connection;
 use errors::ConnectError;
-pub use generated::*;
+pub use protocol::*;
 use xproto::{Keysym, Timestamp};
 
 /// Establish a new connection to an X11 server.
