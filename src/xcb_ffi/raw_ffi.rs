@@ -189,8 +189,8 @@ mod mock {
         iovec, xcb_connection_t, xcb_generic_error_t, xcb_generic_event_t, xcb_protocol_request_t,
         xcb_setup_t, xcb_void_cookie_t,
     };
+    use crate::protocol::xproto::{ImageOrder, Setup};
     use crate::x11_utils::Serialize;
-    use crate::xproto::{ImageOrder, Setup};
 
     #[repr(C)]
     struct ConnectionMock {

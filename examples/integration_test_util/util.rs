@@ -9,7 +9,7 @@ mod util {
     use std::time::Duration;
 
     use x11rb::connection::Connection;
-    use x11rb::xproto::{
+    use x11rb::protocol::xproto::{
         ClientMessageData, ClientMessageEvent, ConnectionExt as _, EventMask, CLIENT_MESSAGE_EVENT,
         Window,
     };

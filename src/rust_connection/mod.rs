@@ -4,7 +4,6 @@ use std::convert::{TryFrom, TryInto};
 use std::io::{BufReader, BufWriter, IoSlice, Read, Write};
 use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 
-use crate::bigreq::{ConnectionExt as _, EnableReply};
 use crate::connection::{
     compute_length_field, Connection, DiscardMode, ReplyOrError, RequestConnection, RequestKind,
     SequenceNumber,
@@ -12,9 +11,10 @@ use crate::connection::{
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 pub use crate::errors::{ConnectError, ConnectionError, ParseError};
 use crate::extension_manager::ExtensionManager;
+use crate::protocol::bigreq::{ConnectionExt as _, EnableReply};
+use crate::protocol::xproto::{Setup, SetupRequest, GET_INPUT_FOCUS_REQUEST};
 use crate::utils::RawFdContainer;
 use crate::x11_utils::{ExtensionInformation, Serialize};
-use crate::xproto::{Setup, SetupRequest, GET_INPUT_FOCUS_REQUEST};
 
 mod id_allocator;
 mod inner;
@@ -32,8 +32,8 @@ pub type GenericEvent = crate::x11_utils::GenericEvent<Buffer>;
 pub type EventAndSeqNumber = crate::connection::EventAndSeqNumber<Buffer>;
 pub type RawEventAndSeqNumber = crate::connection::RawEventAndSeqNumber<Buffer>;
 pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
-pub type Error = crate::Error<Buffer>;
-pub type Event = crate::Event<Buffer>;
+pub type Error = crate::protocol::Error<Buffer>;
+pub type Event = crate::protocol::Event<Buffer>;
 
 #[derive(Debug)]
 enum MaxRequestBytes {
@@ -497,7 +497,7 @@ fn read_packet(read: &mut impl Read) -> Result<Vec<u8>, std::io::Error> {
     let mut buffer = vec![0; 32];
     read.read_exact(&mut buffer)?;
 
-    use crate::xproto::GE_GENERIC_EVENT;
+    use crate::protocol::xproto::GE_GENERIC_EVENT;
     const REPLY: u8 = 1;
     const SENT_GE_GENERIC_EVENT: u8 = GE_GENERIC_EVENT | 0x80;
     let extra_length = match buffer[0] {
@@ -606,8 +606,8 @@ mod test {
 
     use super::{read_setup, write_all_vectored};
     use crate::errors::ConnectError;
+    use crate::protocol::xproto::{ImageOrder, Setup, SetupAuthenticate, SetupFailed};
     use crate::x11_utils::Serialize;
-    use crate::xproto::{ImageOrder, Setup, SetupAuthenticate, SetupFailed};
 
     fn partial_write_test(request: &[u8], expected_err: &str) {
         let mut written = [0x21; 2];

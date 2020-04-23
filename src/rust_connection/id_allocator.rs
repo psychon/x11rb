@@ -1,6 +1,6 @@
 use crate::connection::RequestConnection;
 use crate::errors::{ConnectError, ReplyOrIdError};
-use crate::xc_misc::{self, ConnectionExt as _};
+use crate::protocol::xc_misc::{self, ConnectionExt as _};
 
 /// An allocator for X11 IDs.
 ///
@@ -231,14 +231,14 @@ mod test {
         fn parse_error(
             &self,
             _error: GenericError<Self::Buf>,
-        ) -> Result<crate::Error<Self::Buf>, ParseError> {
+        ) -> Result<crate::protocol::Error<Self::Buf>, ParseError> {
             unimplemented!()
         }
 
         fn parse_event(
             &self,
             _event: crate::x11_utils::GenericEvent<Self::Buf>,
-        ) -> Result<crate::Event<Self::Buf>, ParseError> {
+        ) -> Result<crate::protocol::Event<Self::Buf>, ParseError> {
             unimplemented!()
         }
     }

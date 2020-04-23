@@ -15,7 +15,6 @@ use std::sync::{
 
 use libc::c_void;
 
-use super::xproto::Setup;
 use crate::connection::{
     compute_length_field, Connection, DiscardMode, ReplyOrError, RequestConnection, RequestKind,
     SequenceNumber,
@@ -24,6 +23,7 @@ use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 pub use crate::errors::{ConnectError, ConnectionError, ParseError};
 use crate::extension_manager::ExtensionManager;
 use crate::utils::{CSlice, RawFdContainer};
+use crate::protocol::xproto::Setup;
 use crate::x11_utils::ExtensionInformation;
 
 mod pending_errors;
@@ -37,8 +37,8 @@ pub type GenericEvent = crate::x11_utils::GenericEvent<Buffer>;
 pub type EventAndSeqNumber = crate::connection::EventAndSeqNumber<Buffer>;
 pub type RawEventAndSeqNumber = crate::connection::RawEventAndSeqNumber<Buffer>;
 pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
-pub type Error = crate::Error<Buffer>;
-pub type Event = crate::Event<Buffer>;
+pub type Error = crate::protocol::Error<Buffer>;
+pub type Event = crate::protocol::Event<Buffer>;
 
 /// A connection to an X11 server.
 ///
@@ -312,7 +312,7 @@ impl XCBConnection {
         let seqno = self.reconstruct_full_sequence(seqno);
 
         // The first byte contains the event type, check for XGE events
-        if (*event & 0x7f) == super::xproto::GE_GENERIC_EVENT {
+        if (*event & 0x7f) == super::protocol::xproto::GE_GENERIC_EVENT {
             // Read the length field of the event to get its length
             let length_field = u32::from_ne_bytes([header[4], header[5], header[6], header[7]]);
             let length_field: usize = length_field.try_into().or(Err(ParseError::ParseError))?;

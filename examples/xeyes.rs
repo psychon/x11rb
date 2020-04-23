@@ -4,10 +4,11 @@ extern crate x11rb;
 
 use x11rb::connection::{Connection, RequestConnection as _};
 use x11rb::errors::{ConnectionError, ReplyOrIdError};
-use x11rb::shape::{self, ConnectionExt as _};
+use x11rb::protocol::shape::{self, ConnectionExt as _};
+use x11rb::protocol::xproto::*;
+use x11rb::protocol::Event;
 use x11rb::wrapper::ConnectionExt as _;
-use x11rb::xproto::*;
-use x11rb::{Event, COPY_DEPTH_FROM_PARENT};
+use x11rb::COPY_DEPTH_FROM_PARENT;
 
 const PUPIL_SIZE: i16 = 50;
 const EYE_SIZE: i16 = 50;

@@ -117,7 +117,7 @@ impl ConnectionInner {
     // reply, an event, or an error. All of these have a u16 sequence number in bytes 2 and 3...
     // except for KeymapNotify events.
     fn extract_sequence_number(&mut self, buffer: &[u8]) -> Option<SequenceNumber> {
-        use crate::xproto::KEYMAP_NOTIFY_EVENT;
+        use crate::protocol::xproto::KEYMAP_NOTIFY_EVENT;
         if buffer[0] == KEYMAP_NOTIFY_EVENT {
             return None;
         }
