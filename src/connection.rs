@@ -45,10 +45,10 @@ use std::io::IoSlice;
 
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError, ReplyError, ReplyOrIdError};
+use crate::protocol::xproto::Setup;
+use crate::protocol::{Error, Event};
 use crate::utils::RawFdContainer;
 use crate::x11_utils::{ExtensionInformation, GenericError, GenericEvent};
-use crate::xproto::Setup;
-use crate::{Error, Event};
 
 /// Number type used for referring to things that were sent to the server in responses from the
 /// server.
@@ -303,9 +303,9 @@ pub trait RequestConnection {
     ///
     /// To prefetch the necessary information, you can do the following:
     /// ```no_run
-    /// use x11rb::bigreq;
     /// use x11rb::connection::RequestConnection;
     /// use x11rb::errors::ConnectionError;
+    /// use x11rb::protocol::bigreq;
     /// # fn do_it(conn: impl RequestConnection) -> Result<(), ConnectionError> {
     /// // conn is a RequestConnection
     /// conn.prefetch_extension_information(bigreq::X11_EXTENSION_NAME)?;
@@ -483,10 +483,10 @@ pub enum DiscardMode {
 ///     # fn prefetch_maximum_request_bytes(&self) {
 ///     #    unimplemented!()
 ///     # }
-///     # fn parse_error(&self, _error: GenericError<Self::Buf>) -> Result<x11rb::Error<Self::Buf>, ParseError> {
+///     # fn parse_error(&self, _error: GenericError<Self::Buf>) -> Result<x11rb::protocol::Error<Self::Buf>, ParseError> {
 ///     #     unimplemented!()
 ///     # }
-///     # fn parse_event(&self, _event: GenericEvent<Self::Buf>) -> Result<x11rb::Event<Self::Buf>, ParseError> {
+///     # fn parse_event(&self, _event: GenericEvent<Self::Buf>) -> Result<x11rb::protocol::Event<Self::Buf>, ParseError> {
 ///     #     unimplemented!()
 ///     # }
 ///

@@ -1,9 +1,9 @@
 extern crate x11rb;
 
 use x11rb::connection::Connection;
+use x11rb::protocol::xproto::*;
+use x11rb::protocol::Event;
 use x11rb::wrapper::ConnectionExt as _;
-use x11rb::xproto::*;
-use x11rb::Event;
 
 fn main() {
     let (conn, screen_num) = x11rb::connect(None).unwrap();

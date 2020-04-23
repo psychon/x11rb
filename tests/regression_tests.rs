@@ -9,11 +9,11 @@ use x11rb::connection::{
 };
 use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
 use x11rb::errors::{ConnectionError, ParseError, ReplyError};
-use x11rb::utils::RawFdContainer;
-use x11rb::x11_utils::{ExtensionInformation, GenericError, Serialize, TryParse};
-use x11rb::xproto::{
+use x11rb::protocol::xproto::{
     ClientMessageData, ConnectionExt, KeymapNotifyEvent, Segment, SetupAuthenticate,
 };
+use x11rb::utils::RawFdContainer;
+use x11rb::x11_utils::{ExtensionInformation, GenericError, Serialize, TryParse};
 
 #[derive(Debug)]
 struct SavedRequest {
@@ -154,14 +154,14 @@ impl RequestConnection for FakeConnection {
     fn parse_error(
         &self,
         _error: GenericError<Self::Buf>,
-    ) -> Result<x11rb::Error<Self::Buf>, ParseError> {
+    ) -> Result<x11rb::protocol::Error<Self::Buf>, ParseError> {
         unimplemented!()
     }
 
     fn parse_event(
         &self,
         _event: x11rb::x11_utils::GenericEvent<Self::Buf>,
-    ) -> Result<x11rb::Event<Self::Buf>, ParseError> {
+    ) -> Result<x11rb::protocol::Event<Self::Buf>, ParseError> {
         unimplemented!()
     }
 }
@@ -189,7 +189,7 @@ fn test_poly_segment() -> Result<(), ReplyError<Vec<u8>>> {
     conn.poly_segment(drawable, gc, &segments)?;
 
     let mut expected = Vec::new();
-    expected.push(x11rb::xproto::POLY_SEGMENT_REQUEST);
+    expected.push(x11rb::protocol::xproto::POLY_SEGMENT_REQUEST);
     expected.push(0); // padding
     expected.extend(&length.to_ne_bytes()); // length, not in the xml
     expected.extend(&drawable.to_ne_bytes());
@@ -215,7 +215,7 @@ fn test_big_requests() -> Result<(), ConnectionError> {
     conn.poly_text16(drawable, gc, x, y, &big_buffer)?;
 
     let mut expected = Vec::new();
-    expected.push(x11rb::xproto::POLY_TEXT16_REQUEST);
+    expected.push(x11rb::protocol::xproto::POLY_TEXT16_REQUEST);
     // padding
     expected.push(0);
     // Length of zero: we use big requests
@@ -268,7 +268,7 @@ fn test_send_event() -> Result<(), ConnectionError> {
     conn.send_event(propagate, destination, event_mask, event)?;
 
     let mut expected = Vec::new();
-    expected.push(x11rb::xproto::SEND_EVENT_REQUEST);
+    expected.push(x11rb::protocol::xproto::SEND_EVENT_REQUEST);
     expected.push(propagate as _);
     expected.extend(&((12u16 + 32u16) / 4).to_ne_bytes());
     expected.extend(&destination.to_ne_bytes());

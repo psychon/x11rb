@@ -42,8 +42,8 @@
 //! For example, here is how to create a new window with x11rb:
 //! ```no_run
 //! use x11rb::connection::Connection;
-//! use x11rb::xproto::*;
 //! use x11rb::errors::ReplyOrIdError;
+//! use x11rb::protocol::xproto::*;
 //! use x11rb::COPY_DEPTH_FROM_PARENT;
 //!
 //! fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -112,14 +112,12 @@ pub mod extension_manager;
 pub mod properties;
 pub mod rust_connection;
 pub mod wrapper;
-
 #[rustfmt::skip]
-mod generated;
+pub mod protocol;
 
 use connection::Connection;
 use errors::ConnectError;
-pub use generated::*;
-use xproto::{Keysym, Timestamp};
+use protocol::xproto::{Keysym, Timestamp};
 
 /// Establish a new connection to an X11 server.
 ///

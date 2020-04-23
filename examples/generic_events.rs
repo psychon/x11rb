@@ -4,9 +4,11 @@
 use std::process::exit;
 
 use x11rb::connection::{Connection as _, RequestConnection as _};
-use x11rb::present;
-use x11rb::xproto::{ConfigureWindowAux, ConnectionExt as _, CreateWindowAux, WindowClass};
-use x11rb::{Event, COPY_DEPTH_FROM_PARENT};
+use x11rb::protocol::xproto::{
+    ConfigureWindowAux, ConnectionExt as _, CreateWindowAux, WindowClass,
+};
+use x11rb::protocol::{present, Event};
+use x11rb::COPY_DEPTH_FROM_PARENT;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (conn, screen_num) = x11rb::connect(None)?;

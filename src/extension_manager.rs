@@ -5,8 +5,8 @@ use std::collections::{hash_map::Entry as HashMapEntry, HashMap};
 use crate::connection::{RequestConnection, SequenceNumber};
 use crate::cookie::Cookie;
 use crate::errors::{ConnectionError, ReplyError};
+use crate::protocol::xproto::{ConnectionExt, QueryExtensionReply};
 use crate::x11_utils::{ExtInfoProvider, ExtensionInformation};
-use crate::xproto::{ConnectionExt, QueryExtensionReply};
 
 /// Helper for implementing `RequestConnection::extension_information()`.
 ///
@@ -265,14 +265,14 @@ mod test {
         fn parse_error(
             &self,
             _error: GenericError<Self::Buf>,
-        ) -> Result<crate::Error<Self::Buf>, ParseError> {
+        ) -> Result<crate::protocol::Error<Self::Buf>, ParseError> {
             unimplemented!()
         }
 
         fn parse_event(
             &self,
             _event: crate::x11_utils::GenericEvent<Self::Buf>,
-        ) -> Result<crate::Event<Self::Buf>, ParseError> {
+        ) -> Result<crate::protocol::Event<Self::Buf>, ParseError> {
             unimplemented!()
         }
     }

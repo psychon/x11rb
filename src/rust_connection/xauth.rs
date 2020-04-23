@@ -2,7 +2,7 @@
 
 use std::io::Error;
 
-use crate::xproto::Family as X11Family;
+use crate::protocol::xproto::Family as X11Family;
 
 const MIT_MAGIC_COOKIE_1: &[u8] = b"MIT-MAGIC-COOKIE-1";
 

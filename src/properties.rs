@@ -5,8 +5,8 @@ use std::convert::TryInto;
 use crate::connection::RequestConnection;
 use crate::cookie::{Cookie, VoidCookie};
 use crate::errors::{ConnectionError, ParseError, ReplyError};
+use crate::protocol::xproto::{self, Atom, AtomEnum, GetPropertyReply, Window};
 use crate::x11_utils::{Serialize, TryParse};
-use crate::xproto::{self, Atom, AtomEnum, GetPropertyReply, Window};
 
 // WM_CLASS
 
@@ -55,7 +55,7 @@ where
 /// use x11rb::connection::Connection;
 /// use x11rb::errors::ConnectionError;
 /// use x11rb::properties::WmClass;
-/// use x11rb::xproto::Window;
+/// use x11rb::protocol::xproto::Window;
 ///
 /// fn print_class_instance(
 ///     conn: &impl Connection,
@@ -653,8 +653,8 @@ mod test {
     use std::convert::TryInto;
 
     use super::{WmClass, WmHints, WmHintsState, WmSizeHints};
+    use crate::protocol::xproto::{Atom, AtomEnum, GetPropertyReply, Gravity};
     use crate::x11_utils::Serialize;
-    use crate::xproto::{Atom, AtomEnum, GetPropertyReply, Gravity};
 
     fn get_property_reply(value: &[u8], format: u8, type_: impl Into<Atom>) -> GetPropertyReply {
         GetPropertyReply {

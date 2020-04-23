@@ -5,8 +5,8 @@ use std::marker::PhantomData;
 
 use super::cookie::VoidCookie;
 use super::errors::{ConnectionError, ReplyError};
+use super::protocol::xproto::{Atom, ConnectionExt as XProtoConnectionExt, PropMode, Window};
 use super::x11_utils::TryParse;
-use super::xproto::{Atom, ConnectionExt as XProtoConnectionExt, PropMode, Window};
 
 /// Iterator implementation used by `GetPropertyReply`.
 ///

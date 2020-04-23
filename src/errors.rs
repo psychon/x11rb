@@ -1,7 +1,7 @@
 //! This module contains the current mess that is error handling.
 
-use crate::xproto::{SetupAuthenticate, SetupFailed};
-use crate::Error;
+use crate::protocol::xproto::{SetupAuthenticate, SetupFailed};
+use crate::protocol::Error;
 
 /// An error occurred while parsing some data
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]

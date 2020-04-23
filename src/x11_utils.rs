@@ -67,7 +67,7 @@ pub trait Event {
     ///
     /// Not all packets contain a sequence number, so this function returns an `Option`.
     fn raw_sequence_number(&self) -> Option<u16> {
-        use crate::xproto::KEYMAP_NOTIFY_EVENT;
+        use crate::protocol::xproto::KEYMAP_NOTIFY_EVENT;
         match self.response_type() {
             KEYMAP_NOTIFY_EVENT => None,
             _ => {
@@ -87,7 +87,7 @@ pub struct GenericEvent<B: AsRef<[u8]>>(B);
 
 impl<B: AsRef<[u8]>> GenericEvent<B> {
     pub fn new(value: B) -> Result<Self, ParseError> {
-        use super::xproto::GE_GENERIC_EVENT;
+        use super::protocol::xproto::GE_GENERIC_EVENT;
         let value_slice = value.as_ref();
         if value_slice.len() < 32 {
             return Err(ParseError::ParseError);
@@ -444,7 +444,7 @@ macro_rules! bitmask_binop {
 ///
 /// If we need to use multiple atoms, one would normally write code such as
 /// ```
-/// # use x11rb::xproto::{Atom, ConnectionExt, InternAtomReply};
+/// # use x11rb::protocol::xproto::{Atom, ConnectionExt, InternAtomReply};
 /// # use x11rb::errors::{ConnectionError, ReplyError};
 /// # use x11rb::cookie::Cookie;
 /// #[allow(non_snake_case)]
@@ -511,10 +511,10 @@ macro_rules! atom_manager {
         // Cookie version
         #[allow(non_snake_case)]
         #[derive(Debug)]
-        $vis struct $cookie_name<'a, C: $crate::xproto::ConnectionExt> {
+        $vis struct $cookie_name<'a, C: $crate::protocol::xproto::ConnectionExt> {
             phantom: std::marker::PhantomData<&'a C>,
             $(
-                $field_name: $crate::cookie::Cookie<'a, C, $crate::xproto::InternAtomReply>,
+                $field_name: $crate::cookie::Cookie<'a, C, $crate::protocol::xproto::InternAtomReply>,
             )*
         }
 
@@ -523,12 +523,12 @@ macro_rules! atom_manager {
         #[derive(Debug, Clone, Copy)]
         $vis struct $struct_name {
             $(
-                $vis $field_name: $crate::xproto::Atom,
+                $vis $field_name: $crate::protocol::xproto::Atom,
             )*
         }
 
         impl $struct_name {
-            $vis fn new<C: $crate::xproto::ConnectionExt>(
+            $vis fn new<C: $crate::protocol::xproto::ConnectionExt>(
                 _conn: &C,
             ) -> ::std::result::Result<$cookie_name<'_, C>, $crate::errors::ConnectionError> {
                 Ok($cookie_name {
@@ -543,7 +543,7 @@ macro_rules! atom_manager {
             }
         }
 
-        impl<'a, C: $crate::xproto::ConnectionExt> $cookie_name<'a, C> {
+        impl<'a, C: $crate::protocol::xproto::ConnectionExt> $cookie_name<'a, C> {
             $vis fn reply(self) -> ::std::result::Result<$struct_name, $crate::errors::ReplyError<C::Buf>> {
                 Ok($struct_name {
                     $(
