@@ -1362,7 +1362,7 @@ impl TryParse for Pictdepth {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (num_visuals, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (visuals, remaining) = crate::x11_utils::parse_list::<Pictvisual>(remaining, num_visuals as usize)?;
+        let (visuals, remaining) = crate::x11_utils::parse_list::<Pictvisual>(remaining, num_visuals.try_into().or(Err(ParseError::ParseError))?)?;
         let result = Pictdepth { depth, visuals };
         Ok((result, remaining))
     }
@@ -1400,7 +1400,7 @@ impl TryParse for Pictscreen {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_depths, remaining) = u32::try_parse(remaining)?;
         let (fallback, remaining) = Pictformat::try_parse(remaining)?;
-        let (depths, remaining) = crate::x11_utils::parse_list::<Pictdepth>(remaining, num_depths as usize)?;
+        let (depths, remaining) = crate::x11_utils::parse_list::<Pictdepth>(remaining, num_depths.try_into().or(Err(ParseError::ParseError))?)?;
         let result = Pictscreen { fallback, depths };
         Ok((result, remaining))
     }
@@ -1938,10 +1938,10 @@ impl TryParse for QueryPictFormatsReply {
         let (num_visuals, remaining) = u32::try_parse(remaining)?;
         let (num_subpixel, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (formats, remaining) = crate::x11_utils::parse_list::<Pictforminfo>(remaining, num_formats as usize)?;
-        let (screens, remaining) = crate::x11_utils::parse_list::<Pictscreen>(remaining, num_screens as usize)?;
+        let (formats, remaining) = crate::x11_utils::parse_list::<Pictforminfo>(remaining, num_formats.try_into().or(Err(ParseError::ParseError))?)?;
+        let (screens, remaining) = crate::x11_utils::parse_list::<Pictscreen>(remaining, num_screens.try_into().or(Err(ParseError::ParseError))?)?;
         let mut remaining = remaining;
-        let list_length = num_subpixel as usize;
+        let list_length = usize::try_from(num_subpixel).or(Err(ParseError::ParseError))?;
         let mut subpixels = Vec::with_capacity(list_length);
         for _ in 0..list_length {
             let (v, new_remaining) = u32::try_parse(remaining)?;
@@ -2002,7 +2002,7 @@ impl TryParse for QueryPictIndexValuesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_values, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (values, remaining) = crate::x11_utils::parse_list::<Indexvalue>(remaining, num_values as usize)?;
+        let (values, remaining) = crate::x11_utils::parse_list::<Indexvalue>(remaining, num_values.try_into().or(Err(ParseError::ParseError))?)?;
         let result = QueryPictIndexValuesReply { response_type, sequence, length, values };
         Ok((result, remaining))
     }
@@ -2084,7 +2084,7 @@ impl Serialize for CreatePictureAux {
 }
 impl CreatePictureAux {
     fn switch_expr(&self) -> u32 {
-        let mut expr_value: u32 = 0;
+        let mut expr_value = 0;
         if self.repeat.is_some() {
             expr_value |= u32::from(CP::Repeat);
         }
@@ -2314,7 +2314,7 @@ impl Serialize for ChangePictureAux {
 }
 impl ChangePictureAux {
     fn switch_expr(&self) -> u32 {
-        let mut expr_value: u32 = 0;
+        let mut expr_value = 0;
         if self.repeat.is_some() {
             expr_value |= u32::from(CP::Repeat);
         }
@@ -2921,10 +2921,10 @@ where
         glyphs_len_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    assert_eq!(glyphids.len(), glyphs_len as usize, "`glyphids` has an incorrect length");
+    assert_eq!(glyphids.len(), usize::try_from(glyphs_len).unwrap(), "`glyphids` has an incorrect length");
     let glyphids_bytes = glyphids.serialize();
     let length_so_far = length_so_far + glyphids_bytes.len();
-    assert_eq!(glyphs.len(), glyphs_len as usize, "`glyphs` has an incorrect length");
+    assert_eq!(glyphs.len(), usize::try_from(glyphs_len).unwrap(), "`glyphs` has an incorrect length");
     let glyphs_bytes = glyphs.serialize();
     let length_so_far = length_so_far + glyphs_bytes.len();
     let length_so_far = length_so_far + data.len();
@@ -3424,8 +3424,8 @@ impl TryParse for QueryFiltersReply {
         let (num_aliases, remaining) = u32::try_parse(remaining)?;
         let (num_filters, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
-        let (aliases, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_aliases as usize)?;
-        let (filters, remaining) = crate::x11_utils::parse_list::<xproto::Str>(remaining, num_filters as usize)?;
+        let (aliases, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_aliases.try_into().or(Err(ParseError::ParseError))?)?;
+        let (filters, remaining) = crate::x11_utils::parse_list::<xproto::Str>(remaining, num_filters.try_into().or(Err(ParseError::ParseError))?)?;
         let result = QueryFiltersReply { response_type, sequence, length, aliases, filters };
         Ok((result, remaining))
     }
@@ -3775,10 +3775,10 @@ where
         num_stops_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    assert_eq!(stops.len(), num_stops as usize, "`stops` has an incorrect length");
+    assert_eq!(stops.len(), usize::try_from(num_stops).unwrap(), "`stops` has an incorrect length");
     let stops_bytes = stops.serialize();
     let length_so_far = length_so_far + stops_bytes.len();
-    assert_eq!(colors.len(), num_stops as usize, "`colors` has an incorrect length");
+    assert_eq!(colors.len(), usize::try_from(num_stops).unwrap(), "`colors` has an incorrect length");
     let colors_bytes = colors.serialize();
     let length_so_far = length_so_far + colors_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
@@ -3843,10 +3843,10 @@ where
         num_stops_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    assert_eq!(stops.len(), num_stops as usize, "`stops` has an incorrect length");
+    assert_eq!(stops.len(), usize::try_from(num_stops).unwrap(), "`stops` has an incorrect length");
     let stops_bytes = stops.serialize();
     let length_so_far = length_so_far + stops_bytes.len();
-    assert_eq!(colors.len(), num_stops as usize, "`colors` has an incorrect length");
+    assert_eq!(colors.len(), usize::try_from(num_stops).unwrap(), "`colors` has an incorrect length");
     let colors_bytes = colors.serialize();
     let length_so_far = length_so_far + colors_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
@@ -3897,10 +3897,10 @@ where
         num_stops_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    assert_eq!(stops.len(), num_stops as usize, "`stops` has an incorrect length");
+    assert_eq!(stops.len(), usize::try_from(num_stops).unwrap(), "`stops` has an incorrect length");
     let stops_bytes = stops.serialize();
     let length_so_far = length_so_far + stops_bytes.len();
-    assert_eq!(colors.len(), num_stops as usize, "`colors` has an incorrect length");
+    assert_eq!(colors.len(), usize::try_from(num_stops).unwrap(), "`colors` has an incorrect length");
     let colors_bytes = colors.serialize();
     let length_so_far = length_so_far + colors_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];

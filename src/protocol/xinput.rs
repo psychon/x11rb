@@ -586,7 +586,7 @@ impl TryParse for ValuatorInfo {
         let (axes_len, remaining) = u8::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (motion_size, remaining) = u32::try_parse(remaining)?;
-        let (axes, remaining) = crate::x11_utils::parse_list::<AxisInfo>(remaining, axes_len as usize)?;
+        let (axes, remaining) = crate::x11_utils::parse_list::<AxisInfo>(remaining, axes_len.try_into().or(Err(ParseError::ParseError))?)?;
         let class_id = class_id.try_into()?;
         let mode = mode.try_into()?;
         let result = ValuatorInfo { class_id, len, mode, motion_size, axes };
@@ -705,7 +705,7 @@ impl TryParse for InputInfoInfoValuator {
         let (axes_len, remaining) = u8::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
         let (motion_size, remaining) = u32::try_parse(remaining)?;
-        let (axes, remaining) = crate::x11_utils::parse_list::<AxisInfo>(remaining, axes_len as usize)?;
+        let (axes, remaining) = crate::x11_utils::parse_list::<AxisInfo>(remaining, axes_len.try_into().or(Err(ParseError::ParseError))?)?;
         let mode = mode.try_into()?;
         let result = InputInfoInfoValuator { mode, motion_size, axes };
         Ok((result, remaining))
@@ -741,22 +741,22 @@ pub enum InputInfoInfo {
 }
 impl InputInfoInfo {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = class_id;
+        let switch_expr = u32::from(class_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u8::from(InputClass::Key) {
+        if switch_expr == u32::from(InputClass::Key) {
             let (key, new_remaining) = InputInfoInfoKey::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputInfoInfo::Key(key));
         }
-        if switch_expr == u8::from(InputClass::Button) {
+        if switch_expr == u32::from(InputClass::Button) {
             let (button, new_remaining) = InputInfoInfoButton::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputInfoInfo::Button(button));
         }
-        if switch_expr == u8::from(InputClass::Valuator) {
+        if switch_expr == u32::from(InputClass::Valuator) {
             let (valuator, new_remaining) = InputInfoInfoValuator::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -804,11 +804,11 @@ impl Serialize for InputInfoInfo {
     }
 }
 impl InputInfoInfo {
-    fn switch_expr(&self) -> u8 {
+    fn switch_expr(&self) -> u32 {
         match self {
-            InputInfoInfo::Key(_) => u8::from(InputClass::Key),
-            InputInfoInfo::Button(_) => u8::from(InputClass::Button),
-            InputInfoInfo::Valuator(_) => u8::from(InputClass::Valuator),
+            InputInfoInfo::Key(_) => u32::from(InputClass::Key),
+            InputInfoInfo::Button(_) => u32::from(InputClass::Button),
+            InputInfoInfo::Valuator(_) => u32::from(InputClass::Valuator),
         }
     }
 }
@@ -856,7 +856,7 @@ pub struct DeviceName {
 impl TryParse for DeviceName {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (len, remaining) = u8::try_parse(remaining)?;
-        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, len as usize)?;
+        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, len.try_into().or(Err(ParseError::ParseError))?)?;
         let string = string.to_vec();
         let result = DeviceName { string };
         Ok((result, remaining))
@@ -924,9 +924,9 @@ impl TryParse for ListInputDevicesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (devices_len, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        let (devices, remaining) = crate::x11_utils::parse_list::<DeviceInfo>(remaining, devices_len as usize)?;
-        let (infos, remaining) = crate::x11_utils::parse_list::<InputInfo>(remaining, devices.iter().map(|x| x.num_class_info as usize).sum())?;
-        let (names, remaining) = crate::x11_utils::parse_list::<xproto::Str>(remaining, devices_len as usize)?;
+        let (devices, remaining) = crate::x11_utils::parse_list::<DeviceInfo>(remaining, devices_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (infos, remaining) = crate::x11_utils::parse_list::<InputInfo>(remaining, devices.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(x.num_class_info)).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (names, remaining) = crate::x11_utils::parse_list::<xproto::Str>(remaining, devices_len.try_into().or(Err(ParseError::ParseError))?)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
@@ -1025,7 +1025,7 @@ impl TryParse for OpenDeviceReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_classes, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        let (class_info, remaining) = crate::x11_utils::parse_list::<InputClassInfo>(remaining, num_classes as usize)?;
+        let (class_info, remaining) = crate::x11_utils::parse_list::<InputClassInfo>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
@@ -1206,8 +1206,8 @@ impl TryParse for GetSelectedExtensionEventsReply {
         let (num_this_classes, remaining) = u16::try_parse(remaining)?;
         let (num_all_classes, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (this_classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_this_classes as usize)?;
-        let (all_classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_all_classes as usize)?;
+        let (this_classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_this_classes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (all_classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_all_classes.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetSelectedExtensionEventsReply { response_type, xi_reply_type, sequence, length, this_classes, all_classes };
         Ok((result, remaining))
     }
@@ -1370,7 +1370,7 @@ impl TryParse for GetDeviceDontPropagateListReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_classes, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes as usize)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<EventClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetDeviceDontPropagateListReply { response_type, xi_reply_type, sequence, length, classes };
         Ok((result, remaining))
     }
@@ -1390,7 +1390,7 @@ pub struct DeviceTimeCoord {
 impl DeviceTimeCoord {
     pub fn try_parse(remaining: &[u8], num_axes: u8) -> Result<(Self, &[u8]), ParseError> {
         let (time, remaining) = xproto::Timestamp::try_parse(remaining)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_axes as usize)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_axes.try_into().or(Err(ParseError::ParseError))?)?;
         let result = DeviceTimeCoord { time, axisvalues };
         Ok((result, remaining))
     }
@@ -1469,7 +1469,7 @@ impl TryParse for GetDeviceMotionEventsReply {
         let (device_mode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
         let mut remaining = remaining;
-        let list_length = num_events as usize;
+        let list_length = usize::try_from(num_events).or(Err(ParseError::ParseError))?;
         let mut events = Vec::with_capacity(list_length);
         for _ in 0..list_length {
             let (v, new_remaining) = DeviceTimeCoord::try_parse(remaining, num_axes)?;
@@ -2535,7 +2535,7 @@ impl TryParse for StringFeedbackState {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (max_symbols, remaining) = u16::try_parse(remaining)?;
         let (num_keysyms, remaining) = u16::try_parse(remaining)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms as usize)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms.try_into().or(Err(ParseError::ParseError))?)?;
         let class_id = class_id.try_into()?;
         let result = StringFeedbackState { class_id, feedback_id, len, max_symbols, keysyms };
         Ok((result, remaining))
@@ -2853,7 +2853,7 @@ impl TryParse for FeedbackStateDataString {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (max_symbols, remaining) = u16::try_parse(remaining)?;
         let (num_keysyms, remaining) = u16::try_parse(remaining)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms as usize)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms.try_into().or(Err(ParseError::ParseError))?)?;
         let result = FeedbackStateDataString { max_symbols, keysyms };
         Ok((result, remaining))
     }
@@ -3027,40 +3027,40 @@ pub enum FeedbackStateData {
 }
 impl FeedbackStateData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = class_id;
+        let switch_expr = u32::from(class_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u8::from(FeedbackClass::Keyboard) {
+        if switch_expr == u32::from(FeedbackClass::Keyboard) {
             let (keyboard, new_remaining) = FeedbackStateDataKeyboard::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Keyboard(keyboard));
         }
-        if switch_expr == u8::from(FeedbackClass::Pointer) {
+        if switch_expr == u32::from(FeedbackClass::Pointer) {
             let (pointer, new_remaining) = FeedbackStateDataPointer::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Pointer(pointer));
         }
-        if switch_expr == u8::from(FeedbackClass::String) {
+        if switch_expr == u32::from(FeedbackClass::String) {
             let (string, new_remaining) = FeedbackStateDataString::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::String(string));
         }
-        if switch_expr == u8::from(FeedbackClass::Integer) {
+        if switch_expr == u32::from(FeedbackClass::Integer) {
             let (integer, new_remaining) = FeedbackStateDataInteger::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Integer(integer));
         }
-        if switch_expr == u8::from(FeedbackClass::Led) {
+        if switch_expr == u32::from(FeedbackClass::Led) {
             let (led, new_remaining) = FeedbackStateDataLed::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackStateData::Led(led));
         }
-        if switch_expr == u8::from(FeedbackClass::Bell) {
+        if switch_expr == u32::from(FeedbackClass::Bell) {
             let (bell, new_remaining) = FeedbackStateDataBell::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -3129,14 +3129,14 @@ impl Serialize for FeedbackStateData {
     }
 }
 impl FeedbackStateData {
-    fn switch_expr(&self) -> u8 {
+    fn switch_expr(&self) -> u32 {
         match self {
-            FeedbackStateData::Keyboard(_) => u8::from(FeedbackClass::Keyboard),
-            FeedbackStateData::Pointer(_) => u8::from(FeedbackClass::Pointer),
-            FeedbackStateData::String(_) => u8::from(FeedbackClass::String),
-            FeedbackStateData::Integer(_) => u8::from(FeedbackClass::Integer),
-            FeedbackStateData::Led(_) => u8::from(FeedbackClass::Led),
-            FeedbackStateData::Bell(_) => u8::from(FeedbackClass::Bell),
+            FeedbackStateData::Keyboard(_) => u32::from(FeedbackClass::Keyboard),
+            FeedbackStateData::Pointer(_) => u32::from(FeedbackClass::Pointer),
+            FeedbackStateData::String(_) => u32::from(FeedbackClass::String),
+            FeedbackStateData::Integer(_) => u32::from(FeedbackClass::Integer),
+            FeedbackStateData::Led(_) => u32::from(FeedbackClass::Led),
+            FeedbackStateData::Bell(_) => u32::from(FeedbackClass::Bell),
         }
     }
 }
@@ -3223,7 +3223,7 @@ impl TryParse for GetFeedbackControlReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_feedbacks, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (feedbacks, remaining) = crate::x11_utils::parse_list::<FeedbackState>(remaining, num_feedbacks as usize)?;
+        let (feedbacks, remaining) = crate::x11_utils::parse_list::<FeedbackState>(remaining, num_feedbacks.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetFeedbackControlReply { response_type, xi_reply_type, sequence, length, feedbacks };
         Ok((result, remaining))
     }
@@ -3456,7 +3456,7 @@ impl TryParse for StringFeedbackCtl {
         let (len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (num_keysyms, remaining) = u16::try_parse(remaining)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms as usize)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms.try_into().or(Err(ParseError::ParseError))?)?;
         let class_id = class_id.try_into()?;
         let result = StringFeedbackCtl { class_id, feedback_id, len, keysyms };
         Ok((result, remaining))
@@ -3739,7 +3739,7 @@ impl TryParse for FeedbackCtlDataString {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (num_keysyms, remaining) = u16::try_parse(remaining)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms as usize)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, num_keysyms.try_into().or(Err(ParseError::ParseError))?)?;
         let result = FeedbackCtlDataString { keysyms };
         Ok((result, remaining))
     }
@@ -3897,40 +3897,40 @@ pub enum FeedbackCtlData {
 }
 impl FeedbackCtlData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = class_id;
+        let switch_expr = u32::from(class_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u8::from(FeedbackClass::Keyboard) {
+        if switch_expr == u32::from(FeedbackClass::Keyboard) {
             let (keyboard, new_remaining) = FeedbackCtlDataKeyboard::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Keyboard(keyboard));
         }
-        if switch_expr == u8::from(FeedbackClass::Pointer) {
+        if switch_expr == u32::from(FeedbackClass::Pointer) {
             let (pointer, new_remaining) = FeedbackCtlDataPointer::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Pointer(pointer));
         }
-        if switch_expr == u8::from(FeedbackClass::String) {
+        if switch_expr == u32::from(FeedbackClass::String) {
             let (string, new_remaining) = FeedbackCtlDataString::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::String(string));
         }
-        if switch_expr == u8::from(FeedbackClass::Integer) {
+        if switch_expr == u32::from(FeedbackClass::Integer) {
             let (integer, new_remaining) = FeedbackCtlDataInteger::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Integer(integer));
         }
-        if switch_expr == u8::from(FeedbackClass::Led) {
+        if switch_expr == u32::from(FeedbackClass::Led) {
             let (led, new_remaining) = FeedbackCtlDataLed::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(FeedbackCtlData::Led(led));
         }
-        if switch_expr == u8::from(FeedbackClass::Bell) {
+        if switch_expr == u32::from(FeedbackClass::Bell) {
             let (bell, new_remaining) = FeedbackCtlDataBell::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -3999,14 +3999,14 @@ impl Serialize for FeedbackCtlData {
     }
 }
 impl FeedbackCtlData {
-    fn switch_expr(&self) -> u8 {
+    fn switch_expr(&self) -> u32 {
         match self {
-            FeedbackCtlData::Keyboard(_) => u8::from(FeedbackClass::Keyboard),
-            FeedbackCtlData::Pointer(_) => u8::from(FeedbackClass::Pointer),
-            FeedbackCtlData::String(_) => u8::from(FeedbackClass::String),
-            FeedbackCtlData::Integer(_) => u8::from(FeedbackClass::Integer),
-            FeedbackCtlData::Led(_) => u8::from(FeedbackClass::Led),
-            FeedbackCtlData::Bell(_) => u8::from(FeedbackClass::Bell),
+            FeedbackCtlData::Keyboard(_) => u32::from(FeedbackClass::Keyboard),
+            FeedbackCtlData::Pointer(_) => u32::from(FeedbackClass::Pointer),
+            FeedbackCtlData::String(_) => u32::from(FeedbackClass::String),
+            FeedbackCtlData::Integer(_) => u32::from(FeedbackClass::Integer),
+            FeedbackCtlData::Led(_) => u32::from(FeedbackClass::Led),
+            FeedbackCtlData::Bell(_) => u32::from(FeedbackClass::Bell),
         }
     }
 }
@@ -4196,7 +4196,7 @@ impl TryParse for GetDeviceKeyMappingReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (keysyms_per_keycode, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, length as usize)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, length.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetDeviceKeyMappingReply { response_type, xi_reply_type, sequence, keysyms_per_keycode, keysyms };
         Ok((result, remaining))
     }
@@ -4232,7 +4232,7 @@ where
         keycode_count_bytes[0],
     ];
     let length_so_far = length_so_far + request0.len();
-    assert_eq!(keysyms.len(), (keycode_count as usize) * (keysyms_per_keycode as usize), "`keysyms` has an incorrect length");
+    assert_eq!(keysyms.len(), usize::try_from(u32::from(keycode_count).checked_mul(u32::from(keysyms_per_keycode)).unwrap()).unwrap(), "`keysyms` has an incorrect length");
     let keysyms_bytes = keysyms.serialize();
     let length_so_far = length_so_far + keysyms_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
@@ -4286,7 +4286,7 @@ impl TryParse for GetDeviceModifierMappingReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (keycodes_per_modifier, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        let (keymaps, remaining) = crate::x11_utils::parse_u8_list(remaining, (keycodes_per_modifier as usize) * 8)?;
+        let (keymaps, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let keymaps = keymaps.to_vec();
         let result = GetDeviceModifierMappingReply { response_type, xi_reply_type, sequence, length, keymaps };
         Ok((result, remaining))
@@ -4404,7 +4404,7 @@ impl TryParse for GetDeviceButtonMappingReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (map_size, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        let (map, remaining) = crate::x11_utils::parse_u8_list(remaining, map_size as usize)?;
+        let (map, remaining) = crate::x11_utils::parse_u8_list(remaining, map_size.try_into().or(Err(ParseError::ParseError))?)?;
         let map = map.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -4719,7 +4719,7 @@ impl TryParse for ValuatorState {
         let (len, remaining) = u8::try_parse(remaining)?;
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
-        let (valuators, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_valuators as usize)?;
+        let (valuators, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
         let class_id = class_id.try_into()?;
         let result = ValuatorState { class_id, len, mode, valuators };
         Ok((result, remaining))
@@ -4896,7 +4896,7 @@ impl TryParse for InputStateDataValuator {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
         let (mode, remaining) = u8::try_parse(remaining)?;
-        let (valuators, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_valuators as usize)?;
+        let (valuators, remaining) = crate::x11_utils::parse_list::<i32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
         let result = InputStateDataValuator { mode, valuators };
         Ok((result, remaining))
     }
@@ -4930,22 +4930,22 @@ pub enum InputStateData {
 }
 impl InputStateData {
     fn try_parse(value: &[u8], class_id: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = class_id;
+        let switch_expr = u32::from(class_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u8::from(InputClass::Key) {
+        if switch_expr == u32::from(InputClass::Key) {
             let (key, new_remaining) = InputStateDataKey::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputStateData::Key(key));
         }
-        if switch_expr == u8::from(InputClass::Button) {
+        if switch_expr == u32::from(InputClass::Button) {
             let (button, new_remaining) = InputStateDataButton::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(InputStateData::Button(button));
         }
-        if switch_expr == u8::from(InputClass::Valuator) {
+        if switch_expr == u32::from(InputClass::Valuator) {
             let (valuator, new_remaining) = InputStateDataValuator::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -4993,11 +4993,11 @@ impl Serialize for InputStateData {
     }
 }
 impl InputStateData {
-    fn switch_expr(&self) -> u8 {
+    fn switch_expr(&self) -> u32 {
         match self {
-            InputStateData::Key(_) => u8::from(InputClass::Key),
-            InputStateData::Button(_) => u8::from(InputClass::Button),
-            InputStateData::Valuator(_) => u8::from(InputClass::Valuator),
+            InputStateData::Key(_) => u32::from(InputClass::Key),
+            InputStateData::Button(_) => u32::from(InputClass::Button),
+            InputStateData::Valuator(_) => u32::from(InputClass::Valuator),
         }
     }
 }
@@ -5081,7 +5081,7 @@ impl TryParse for QueryDeviceStateReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_classes, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(23..).ok_or(ParseError::ParseError)?;
-        let (classes, remaining) = crate::x11_utils::parse_list::<InputState>(remaining, num_classes as usize)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<InputState>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
         let result = QueryDeviceStateReply { response_type, xi_reply_type, sequence, length, classes };
         Ok((result, remaining))
     }
@@ -5270,9 +5270,9 @@ impl TryParse for DeviceResolutionState {
         let (control_id, remaining) = u16::try_parse(remaining)?;
         let (len, remaining) = u16::try_parse(remaining)?;
         let (num_valuators, remaining) = u32::try_parse(remaining)?;
-        let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
-        let (resolution_min, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
-        let (resolution_max, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
+        let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
+        let (resolution_min, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
+        let (resolution_max, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
         let control_id = control_id.try_into()?;
         let result = DeviceResolutionState { control_id, len, num_valuators, resolution_values, resolution_min, resolution_max };
         Ok((result, remaining))
@@ -5604,9 +5604,9 @@ pub struct DeviceStateDataResolution {
 impl TryParse for DeviceStateDataResolution {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_valuators, remaining) = u32::try_parse(remaining)?;
-        let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
-        let (resolution_min, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
-        let (resolution_max, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
+        let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
+        let (resolution_min, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
+        let (resolution_max, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
         let result = DeviceStateDataResolution { num_valuators, resolution_values, resolution_min, resolution_max };
         Ok((result, remaining))
     }
@@ -5842,28 +5842,28 @@ pub enum DeviceStateData {
 }
 impl DeviceStateData {
     fn try_parse(value: &[u8], control_id: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = control_id;
+        let switch_expr = u32::from(control_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u16::from(DeviceControl::Resolution) {
+        if switch_expr == u32::from(DeviceControl::Resolution) {
             let (resolution, new_remaining) = DeviceStateDataResolution::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Resolution(resolution));
         }
-        if switch_expr == u16::from(DeviceControl::Abscalib) {
+        if switch_expr == u32::from(DeviceControl::Abscalib) {
             let (abs_calib, new_remaining) = DeviceStateDataAbsCalib::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::AbsCalib(abs_calib));
         }
-        if switch_expr == u16::from(DeviceControl::Core) {
+        if switch_expr == u32::from(DeviceControl::Core) {
             let (core, new_remaining) = DeviceStateDataCore::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Core(core));
         }
-        if switch_expr == u16::from(DeviceControl::Enable) {
+        if switch_expr == u32::from(DeviceControl::Enable) {
             let remaining = outer_remaining;
             let (enable, remaining) = u8::try_parse(remaining)?;
             let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -5871,7 +5871,7 @@ impl DeviceStateData {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceStateData::Enable(enable));
         }
-        if switch_expr == u16::from(DeviceControl::Absarea) {
+        if switch_expr == u32::from(DeviceControl::Absarea) {
             let (abs_area, new_remaining) = DeviceStateDataAbsArea::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -5937,13 +5937,13 @@ impl Serialize for DeviceStateData {
     }
 }
 impl DeviceStateData {
-    fn switch_expr(&self) -> u16 {
+    fn switch_expr(&self) -> u32 {
         match self {
-            DeviceStateData::Resolution(_) => u16::from(DeviceControl::Resolution),
-            DeviceStateData::AbsCalib(_) => u16::from(DeviceControl::Abscalib),
-            DeviceStateData::Core(_) => u16::from(DeviceControl::Core),
-            DeviceStateData::Enable(_) => u16::from(DeviceControl::Enable),
-            DeviceStateData::AbsArea(_) => u16::from(DeviceControl::Absarea),
+            DeviceStateData::Resolution(_) => u32::from(DeviceControl::Resolution),
+            DeviceStateData::AbsCalib(_) => u32::from(DeviceControl::Abscalib),
+            DeviceStateData::Core(_) => u32::from(DeviceControl::Core),
+            DeviceStateData::Enable(_) => u32::from(DeviceControl::Enable),
+            DeviceStateData::AbsArea(_) => u32::from(DeviceControl::Absarea),
         }
     }
 }
@@ -6055,7 +6055,7 @@ impl TryParse for DeviceResolutionCtl {
         let (first_valuator, remaining) = u8::try_parse(remaining)?;
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
+        let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
         let control_id = control_id.try_into()?;
         let result = DeviceResolutionCtl { control_id, len, first_valuator, resolution_values };
         Ok((result, remaining))
@@ -6384,7 +6384,7 @@ impl TryParse for DeviceCtlDataResolution {
         let (first_valuator, remaining) = u8::try_parse(remaining)?;
         let (num_valuators, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators as usize)?;
+        let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
         let result = DeviceCtlDataResolution { first_valuator, resolution_values };
         Ok((result, remaining))
     }
@@ -6618,28 +6618,28 @@ pub enum DeviceCtlData {
 }
 impl DeviceCtlData {
     fn try_parse(value: &[u8], control_id: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = control_id;
+        let switch_expr = u32::from(control_id);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u16::from(DeviceControl::Resolution) {
+        if switch_expr == u32::from(DeviceControl::Resolution) {
             let (resolution, new_remaining) = DeviceCtlDataResolution::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Resolution(resolution));
         }
-        if switch_expr == u16::from(DeviceControl::Abscalib) {
+        if switch_expr == u32::from(DeviceControl::Abscalib) {
             let (abs_calib, new_remaining) = DeviceCtlDataAbsCalib::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::AbsCalib(abs_calib));
         }
-        if switch_expr == u16::from(DeviceControl::Core) {
+        if switch_expr == u32::from(DeviceControl::Core) {
             let (core, new_remaining) = DeviceCtlDataCore::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Core(core));
         }
-        if switch_expr == u16::from(DeviceControl::Enable) {
+        if switch_expr == u32::from(DeviceControl::Enable) {
             let remaining = outer_remaining;
             let (enable, remaining) = u8::try_parse(remaining)?;
             let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
@@ -6647,7 +6647,7 @@ impl DeviceCtlData {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceCtlData::Enable(enable));
         }
-        if switch_expr == u16::from(DeviceControl::Absarea) {
+        if switch_expr == u32::from(DeviceControl::Absarea) {
             let (abs_area, new_remaining) = DeviceCtlDataAbsArea::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -6713,13 +6713,13 @@ impl Serialize for DeviceCtlData {
     }
 }
 impl DeviceCtlData {
-    fn switch_expr(&self) -> u16 {
+    fn switch_expr(&self) -> u32 {
         match self {
-            DeviceCtlData::Resolution(_) => u16::from(DeviceControl::Resolution),
-            DeviceCtlData::AbsCalib(_) => u16::from(DeviceControl::Abscalib),
-            DeviceCtlData::Core(_) => u16::from(DeviceControl::Core),
-            DeviceCtlData::Enable(_) => u16::from(DeviceControl::Enable),
-            DeviceCtlData::AbsArea(_) => u16::from(DeviceControl::Absarea),
+            DeviceCtlData::Resolution(_) => u32::from(DeviceControl::Resolution),
+            DeviceCtlData::AbsCalib(_) => u32::from(DeviceControl::Abscalib),
+            DeviceCtlData::Core(_) => u32::from(DeviceControl::Core),
+            DeviceCtlData::Enable(_) => u32::from(DeviceControl::Enable),
+            DeviceCtlData::AbsArea(_) => u32::from(DeviceControl::Absarea),
         }
     }
 }
@@ -6862,7 +6862,7 @@ impl TryParse for ListDevicePropertiesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_atoms, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (atoms, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_atoms as usize)?;
+        let (atoms, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_atoms.try_into().or(Err(ParseError::ParseError))?)?;
         let result = ListDevicePropertiesReply { response_type, xi_reply_type, sequence, length, atoms };
         Ok((result, remaining))
     }
@@ -6991,11 +6991,11 @@ impl Serialize for ChangeDevicePropertyAux {
     }
 }
 impl ChangeDevicePropertyAux {
-    fn switch_expr(&self) -> u8 {
+    fn switch_expr(&self) -> u32 {
         match self {
-            ChangeDevicePropertyAux::Data8(_) => u8::from(PropertyFormat::M8Bits),
-            ChangeDevicePropertyAux::Data16(_) => u8::from(PropertyFormat::M16Bits),
-            ChangeDevicePropertyAux::Data32(_) => u8::from(PropertyFormat::M32Bits),
+            ChangeDevicePropertyAux::Data8(_) => u32::from(PropertyFormat::M8Bits),
+            ChangeDevicePropertyAux::Data16(_) => u32::from(PropertyFormat::M16Bits),
+            ChangeDevicePropertyAux::Data32(_) => u32::from(PropertyFormat::M32Bits),
         }
     }
 }
@@ -7135,13 +7135,13 @@ pub enum GetDevicePropertyItems {
 }
 impl GetDevicePropertyItems {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = format;
+        let switch_expr = u32::from(format);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u8::from(PropertyFormat::M8Bits) {
+        if switch_expr == u32::from(PropertyFormat::M8Bits) {
             let remaining = outer_remaining;
             let value = remaining;
-            let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items as usize)?;
+            let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
             let data8 = data8.to_vec();
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -7151,10 +7151,10 @@ impl GetDevicePropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(GetDevicePropertyItems::Data8(data8));
         }
-        if switch_expr == u8::from(PropertyFormat::M16Bits) {
+        if switch_expr == u32::from(PropertyFormat::M16Bits) {
             let remaining = outer_remaining;
             let value = remaining;
-            let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items as usize)?;
+            let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
@@ -7163,9 +7163,9 @@ impl GetDevicePropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(GetDevicePropertyItems::Data16(data16));
         }
-        if switch_expr == u8::from(PropertyFormat::M32Bits) {
+        if switch_expr == u32::from(PropertyFormat::M32Bits) {
             let remaining = outer_remaining;
-            let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items as usize)?;
+            let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(GetDevicePropertyItems::Data32(data32));
@@ -7474,7 +7474,7 @@ impl TryParse for XIQueryPointerReply {
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
-        let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
+        let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
         let result = XIQueryPointerReply { response_type, sequence, length, root, child, root_x, root_y, win_x, win_y, same_screen, mods, group, buttons };
         Ok((result, remaining))
     }
@@ -7736,7 +7736,7 @@ impl TryParse for AddMaster {
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let (send_core, remaining) = bool::try_parse(remaining)?;
         let (enable, remaining) = bool::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -7951,7 +7951,7 @@ impl TryParse for HierarchyChangeDataAddMaster {
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let (send_core, remaining) = bool::try_parse(remaining)?;
         let (enable, remaining) = bool::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -8117,28 +8117,28 @@ pub enum HierarchyChangeData {
 }
 impl HierarchyChangeData {
     fn try_parse(value: &[u8], type_: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = type_;
+        let switch_expr = u32::from(type_);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u16::from(HierarchyChangeType::AddMaster) {
+        if switch_expr == u32::from(HierarchyChangeType::AddMaster) {
             let (add_master, new_remaining) = HierarchyChangeDataAddMaster::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::AddMaster(add_master));
         }
-        if switch_expr == u16::from(HierarchyChangeType::RemoveMaster) {
+        if switch_expr == u32::from(HierarchyChangeType::RemoveMaster) {
             let (remove_master, new_remaining) = HierarchyChangeDataRemoveMaster::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::RemoveMaster(remove_master));
         }
-        if switch_expr == u16::from(HierarchyChangeType::AttachSlave) {
+        if switch_expr == u32::from(HierarchyChangeType::AttachSlave) {
             let (attach_slave, new_remaining) = HierarchyChangeDataAttachSlave::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(HierarchyChangeData::AttachSlave(attach_slave));
         }
-        if switch_expr == u16::from(HierarchyChangeType::DetachSlave) {
+        if switch_expr == u32::from(HierarchyChangeType::DetachSlave) {
             let (detach_slave, new_remaining) = HierarchyChangeDataDetachSlave::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -8193,12 +8193,12 @@ impl Serialize for HierarchyChangeData {
     }
 }
 impl HierarchyChangeData {
-    fn switch_expr(&self) -> u16 {
+    fn switch_expr(&self) -> u32 {
         match self {
-            HierarchyChangeData::AddMaster(_) => u16::from(HierarchyChangeType::AddMaster),
-            HierarchyChangeData::RemoveMaster(_) => u16::from(HierarchyChangeType::RemoveMaster),
-            HierarchyChangeData::AttachSlave(_) => u16::from(HierarchyChangeType::AttachSlave),
-            HierarchyChangeData::DetachSlave(_) => u16::from(HierarchyChangeType::DetachSlave),
+            HierarchyChangeData::AddMaster(_) => u32::from(HierarchyChangeType::AddMaster),
+            HierarchyChangeData::RemoveMaster(_) => u32::from(HierarchyChangeType::RemoveMaster),
+            HierarchyChangeData::AttachSlave(_) => u32::from(HierarchyChangeType::AttachSlave),
+            HierarchyChangeData::DetachSlave(_) => u32::from(HierarchyChangeType::DetachSlave),
         }
     }
 }
@@ -8473,7 +8473,7 @@ impl TryParse for EventMask {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (deviceid, remaining) = DeviceId::try_parse(remaining)?;
         let (mask_len, remaining) = u16::try_parse(remaining)?;
-        let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len as usize)?;
+        let (mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, mask_len.try_into().or(Err(ParseError::ParseError))?)?;
         let result = EventMask { deviceid, mask };
         Ok((result, remaining))
     }
@@ -8936,8 +8936,8 @@ impl TryParse for ButtonClass {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (num_buttons, remaining) = u16::try_parse(remaining)?;
-        let (state, remaining) = crate::x11_utils::parse_list::<u32>(remaining, ((num_buttons as usize) + 31) / 32)?;
-        let (labels, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_buttons as usize)?;
+        let (state, remaining) = crate::x11_utils::parse_list::<u32>(remaining, u32::from(num_buttons).checked_add(31u32).ok_or(ParseError::ParseError)?.checked_div(32u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (labels, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_buttons.try_into().or(Err(ParseError::ParseError))?)?;
         let type_ = type_.try_into()?;
         let result = ButtonClass { type_, len, sourceid, state, labels };
         Ok((result, remaining))
@@ -8981,7 +8981,7 @@ impl TryParse for KeyClass {
         let (len, remaining) = u16::try_parse(remaining)?;
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (num_keys, remaining) = u16::try_parse(remaining)?;
-        let (keys, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_keys as usize)?;
+        let (keys, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_keys.try_into().or(Err(ParseError::ParseError))?)?;
         let type_ = type_.try_into()?;
         let result = KeyClass { type_, len, sourceid, keys };
         Ok((result, remaining))
@@ -9270,7 +9270,7 @@ pub struct DeviceClassDataKey {
 impl TryParse for DeviceClassDataKey {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_keys, remaining) = u16::try_parse(remaining)?;
-        let (keys, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_keys as usize)?;
+        let (keys, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_keys.try_into().or(Err(ParseError::ParseError))?)?;
         let result = DeviceClassDataKey { keys };
         Ok((result, remaining))
     }
@@ -9302,8 +9302,8 @@ pub struct DeviceClassDataButton {
 impl TryParse for DeviceClassDataButton {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (num_buttons, remaining) = u16::try_parse(remaining)?;
-        let (state, remaining) = crate::x11_utils::parse_list::<u32>(remaining, ((num_buttons as usize) + 31) / 32)?;
-        let (labels, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_buttons as usize)?;
+        let (state, remaining) = crate::x11_utils::parse_list::<u32>(remaining, u32::from(num_buttons).checked_add(31u32).ok_or(ParseError::ParseError)?.checked_div(32u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (labels, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_buttons.try_into().or(Err(ParseError::ParseError))?)?;
         let result = DeviceClassDataButton { state, labels };
         Ok((result, remaining))
     }
@@ -9530,34 +9530,34 @@ pub enum DeviceClassData {
 }
 impl DeviceClassData {
     fn try_parse(value: &[u8], type_: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = type_;
+        let switch_expr = u32::from(type_);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u16::from(DeviceClassType::Key) {
+        if switch_expr == u32::from(DeviceClassType::Key) {
             let (key, new_remaining) = DeviceClassDataKey::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Key(key));
         }
-        if switch_expr == u16::from(DeviceClassType::Button) {
+        if switch_expr == u32::from(DeviceClassType::Button) {
             let (button, new_remaining) = DeviceClassDataButton::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Button(button));
         }
-        if switch_expr == u16::from(DeviceClassType::Valuator) {
+        if switch_expr == u32::from(DeviceClassType::Valuator) {
             let (valuator, new_remaining) = DeviceClassDataValuator::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Valuator(valuator));
         }
-        if switch_expr == u16::from(DeviceClassType::Scroll) {
+        if switch_expr == u32::from(DeviceClassType::Scroll) {
             let (scroll, new_remaining) = DeviceClassDataScroll::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(DeviceClassData::Scroll(scroll));
         }
-        if switch_expr == u16::from(DeviceClassType::Touch) {
+        if switch_expr == u32::from(DeviceClassType::Touch) {
             let (touch, new_remaining) = DeviceClassDataTouch::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
@@ -9619,13 +9619,13 @@ impl Serialize for DeviceClassData {
     }
 }
 impl DeviceClassData {
-    fn switch_expr(&self) -> u16 {
+    fn switch_expr(&self) -> u32 {
         match self {
-            DeviceClassData::Key(_) => u16::from(DeviceClassType::Key),
-            DeviceClassData::Button(_) => u16::from(DeviceClassType::Button),
-            DeviceClassData::Valuator(_) => u16::from(DeviceClassType::Valuator),
-            DeviceClassData::Scroll(_) => u16::from(DeviceClassType::Scroll),
-            DeviceClassData::Touch(_) => u16::from(DeviceClassType::Touch),
+            DeviceClassData::Key(_) => u32::from(DeviceClassType::Key),
+            DeviceClassData::Button(_) => u32::from(DeviceClassType::Button),
+            DeviceClassData::Valuator(_) => u32::from(DeviceClassType::Valuator),
+            DeviceClassData::Scroll(_) => u32::from(DeviceClassType::Scroll),
+            DeviceClassData::Touch(_) => u32::from(DeviceClassType::Touch),
         }
     }
 }
@@ -9688,13 +9688,13 @@ impl TryParse for XIDeviceInfo {
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let (enabled, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let (classes, remaining) = crate::x11_utils::parse_list::<DeviceClass>(remaining, num_classes as usize)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<DeviceClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
         let type_ = type_.try_into()?;
         let result = XIDeviceInfo { deviceid, type_, attachment, enabled, name, classes };
         Ok((result, remaining))
@@ -9774,7 +9774,7 @@ impl TryParse for XIQueryDeviceReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_infos, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (infos, remaining) = crate::x11_utils::parse_list::<XIDeviceInfo>(remaining, num_infos as usize)?;
+        let (infos, remaining) = crate::x11_utils::parse_list::<XIDeviceInfo>(remaining, num_infos.try_into().or(Err(ParseError::ParseError))?)?;
         let result = XIQueryDeviceReply { response_type, sequence, length, infos };
         Ok((result, remaining))
     }
@@ -10498,7 +10498,7 @@ impl TryParse for XIPassiveGrabDeviceReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_modifiers, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (modifiers, remaining) = crate::x11_utils::parse_list::<GrabModifierInfo>(remaining, num_modifiers as usize)?;
+        let (modifiers, remaining) = crate::x11_utils::parse_list::<GrabModifierInfo>(remaining, num_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
         let result = XIPassiveGrabDeviceReply { response_type, sequence, length, modifiers };
         Ok((result, remaining))
     }
@@ -10604,7 +10604,7 @@ impl TryParse for XIListPropertiesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_properties, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (properties, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_properties as usize)?;
+        let (properties, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_properties.try_into().or(Err(ParseError::ParseError))?)?;
         let result = XIListPropertiesReply { response_type, sequence, length, properties };
         Ok((result, remaining))
     }
@@ -10668,11 +10668,11 @@ impl Serialize for XIChangePropertyAux {
     }
 }
 impl XIChangePropertyAux {
-    fn switch_expr(&self) -> u8 {
+    fn switch_expr(&self) -> u32 {
         match self {
-            XIChangePropertyAux::Data8(_) => u8::from(PropertyFormat::M8Bits),
-            XIChangePropertyAux::Data16(_) => u8::from(PropertyFormat::M16Bits),
-            XIChangePropertyAux::Data32(_) => u8::from(PropertyFormat::M32Bits),
+            XIChangePropertyAux::Data8(_) => u32::from(PropertyFormat::M8Bits),
+            XIChangePropertyAux::Data16(_) => u32::from(PropertyFormat::M16Bits),
+            XIChangePropertyAux::Data32(_) => u32::from(PropertyFormat::M32Bits),
         }
     }
 }
@@ -10818,13 +10818,13 @@ pub enum XIGetPropertyItems {
 }
 impl XIGetPropertyItems {
     fn try_parse(value: &[u8], format: u8, num_items: u32) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = format;
+        let switch_expr = u32::from(format);
         let mut outer_remaining = value;
         let mut parse_result = None;
-        if switch_expr == u8::from(PropertyFormat::M8Bits) {
+        if switch_expr == u32::from(PropertyFormat::M8Bits) {
             let remaining = outer_remaining;
             let value = remaining;
-            let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items as usize)?;
+            let (data8, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
             let data8 = data8.to_vec();
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -10834,10 +10834,10 @@ impl XIGetPropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIGetPropertyItems::Data8(data8));
         }
-        if switch_expr == u8::from(PropertyFormat::M16Bits) {
+        if switch_expr == u32::from(PropertyFormat::M16Bits) {
             let remaining = outer_remaining;
             let value = remaining;
-            let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items as usize)?;
+            let (data16, remaining) = crate::x11_utils::parse_list::<u16>(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
@@ -10846,9 +10846,9 @@ impl XIGetPropertyItems {
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIGetPropertyItems::Data16(data16));
         }
-        if switch_expr == u8::from(PropertyFormat::M32Bits) {
+        if switch_expr == u32::from(PropertyFormat::M32Bits) {
             let remaining = outer_remaining;
-            let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items as usize)?;
+            let (data32, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_items.try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             assert!(parse_result.is_none(), "The XML should prevent more than one 'if' from matching");
             parse_result = Some(XIGetPropertyItems::Data32(data32));
@@ -10955,7 +10955,7 @@ impl TryParse for XIGetSelectedEventsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_masks, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (masks, remaining) = crate::x11_utils::parse_list::<EventMask>(remaining, num_masks as usize)?;
+        let (masks, remaining) = crate::x11_utils::parse_list::<EventMask>(remaining, num_masks.try_into().or(Err(ParseError::ParseError))?)?;
         let result = XIGetSelectedEventsReply { response_type, sequence, length, masks };
         Ok((result, remaining))
     }
@@ -13204,7 +13204,7 @@ impl TryParse for DeviceChangedEvent {
         let (sourceid, remaining) = DeviceId::try_parse(remaining)?;
         let (reason, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(11..).ok_or(ParseError::ParseError)?;
-        let (classes, remaining) = crate::x11_utils::parse_list::<DeviceClass>(remaining, num_classes as usize)?;
+        let (classes, remaining) = crate::x11_utils::parse_list::<DeviceClass>(remaining, num_classes.try_into().or(Err(ParseError::ParseError))?)?;
         let reason = reason.try_into()?;
         let result = DeviceChangedEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, reason, classes };
         Ok((result, remaining))
@@ -13309,9 +13309,9 @@ impl TryParse for KeyPressEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
-        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = KeyPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -13387,9 +13387,9 @@ impl TryParse for KeyReleaseEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
-        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = KeyReleaseEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -13493,9 +13493,9 @@ impl TryParse for ButtonPressEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
-        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = ButtonPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -13571,9 +13571,9 @@ impl TryParse for ButtonReleaseEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
-        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = ButtonReleaseEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -13649,9 +13649,9 @@ impl TryParse for MotionEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
-        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = MotionEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -13881,7 +13881,7 @@ impl TryParse for EnterEvent {
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
-        let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
+        let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
         let mode = mode.try_into()?;
         let detail = detail.try_into()?;
         let result = EnterEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, mode, detail, root, event, child, root_x, root_y, event_x, event_y, same_screen, focus, mods, group, buttons };
@@ -13959,7 +13959,7 @@ impl TryParse for LeaveEvent {
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
-        let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
+        let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
         let mode = mode.try_into()?;
         let detail = detail.try_into()?;
         let result = LeaveEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, mode, detail, root, event, child, root_x, root_y, event_x, event_y, same_screen, focus, mods, group, buttons };
@@ -14037,7 +14037,7 @@ impl TryParse for FocusInEvent {
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
-        let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
+        let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
         let mode = mode.try_into()?;
         let detail = detail.try_into()?;
         let result = FocusInEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, mode, detail, root, event, child, root_x, root_y, event_x, event_y, same_screen, focus, mods, group, buttons };
@@ -14115,7 +14115,7 @@ impl TryParse for FocusOutEvent {
         let (buttons_len, remaining) = u16::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
-        let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
+        let (buttons, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
         let mode = mode.try_into()?;
         let detail = detail.try_into()?;
         let result = FocusOutEvent { response_type, extension, sequence, length, event_type, deviceid, time, sourceid, mode, detail, root, event, child, root_x, root_y, event_x, event_y, same_screen, focus, mods, group, buttons };
@@ -14310,7 +14310,7 @@ impl TryParse for HierarchyEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (num_infos, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(10..).ok_or(ParseError::ParseError)?;
-        let (infos, remaining) = crate::x11_utils::parse_list::<HierarchyInfo>(remaining, num_infos as usize)?;
+        let (infos, remaining) = crate::x11_utils::parse_list::<HierarchyInfo>(remaining, num_infos.try_into().or(Err(ParseError::ParseError))?)?;
         let result = HierarchyEvent { response_type, extension, sequence, length, event_type, deviceid, time, flags, infos };
         Ok((result, remaining))
     }
@@ -14483,9 +14483,9 @@ impl TryParse for RawKeyPressEvent {
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = RawKeyPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -14542,9 +14542,9 @@ impl TryParse for RawKeyReleaseEvent {
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = RawKeyReleaseEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -14601,9 +14601,9 @@ impl TryParse for RawButtonPressEvent {
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = RawButtonPressEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -14660,9 +14660,9 @@ impl TryParse for RawButtonReleaseEvent {
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = RawButtonReleaseEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -14719,9 +14719,9 @@ impl TryParse for RawMotionEvent {
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = RawMotionEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -14828,9 +14828,9 @@ impl TryParse for TouchBeginEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
-        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = TouchBeginEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -14906,9 +14906,9 @@ impl TryParse for TouchUpdateEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
-        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = TouchUpdateEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -14984,9 +14984,9 @@ impl TryParse for TouchEndEvent {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let (mods, remaining) = ModifierInfo::try_parse(remaining)?;
         let (group, remaining) = GroupInfo::try_parse(remaining)?;
-        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len as usize)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
+        let (button_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, buttons_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = TouchEndEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, root, event, child, root_x, root_y, event_x, event_y, sourceid, flags, mods, group, button_mask, valuator_mask, axisvalues };
         Ok((result, remaining))
     }
@@ -15162,9 +15162,9 @@ impl TryParse for RawTouchBeginEvent {
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = RawTouchBeginEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -15221,9 +15221,9 @@ impl TryParse for RawTouchUpdateEvent {
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = RawTouchUpdateEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }
@@ -15280,9 +15280,9 @@ impl TryParse for RawTouchEndEvent {
         let (valuators_len, remaining) = u16::try_parse(remaining)?;
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len as usize)?;
-        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
-        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().map(|x| usize::try_from((*x).count_ones()).unwrap()).sum())?;
+        let (valuator_mask, remaining) = crate::x11_utils::parse_list::<u32>(remaining, valuators_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (axisvalues_raw, remaining) = crate::x11_utils::parse_list::<Fp3232>(remaining, valuator_mask.iter().try_fold(0u32, |acc, x| acc.checked_add((*x).count_ones()).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = RawTouchEndEvent { response_type, extension, sequence, length, event_type, deviceid, time, detail, sourceid, flags, valuator_mask, axisvalues, axisvalues_raw };
         Ok((result, remaining))
     }

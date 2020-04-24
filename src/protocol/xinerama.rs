@@ -395,7 +395,7 @@ impl TryParse for QueryScreensReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (number, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (screen_info, remaining) = crate::x11_utils::parse_list::<ScreenInfo>(remaining, number as usize)?;
+        let (screen_info, remaining) = crate::x11_utils::parse_list::<ScreenInfo>(remaining, number.try_into().or(Err(ParseError::ParseError))?)?;
         let result = QueryScreensReply { response_type, sequence, length, screen_info };
         Ok((result, remaining))
     }

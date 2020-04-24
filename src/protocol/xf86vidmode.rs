@@ -483,7 +483,7 @@ impl TryParse for GetModeLineReply {
         let (flags, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (privsize, remaining) = u32::try_parse(remaining)?;
-        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize as usize)?;
+        let (private, remaining) = crate::x11_utils::parse_u8_list(remaining, privsize.try_into().or(Err(ParseError::ParseError))?)?;
         let private = private.to_vec();
         let result = GetModeLineReply { response_type, sequence, length, dotclock, hdisplay, hsyncstart, hsyncend, htotal, hskew, vdisplay, vsyncstart, vsyncend, vtotal, flags, private };
         Ok((result, remaining))
@@ -657,13 +657,13 @@ impl TryParse for GetMonitorReply {
         let (num_hsync, remaining) = u8::try_parse(remaining)?;
         let (num_vsync, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (hsync, remaining) = crate::x11_utils::parse_list::<Syncrange>(remaining, num_hsync as usize)?;
-        let (vsync, remaining) = crate::x11_utils::parse_list::<Syncrange>(remaining, num_vsync as usize)?;
-        let (vendor, remaining) = crate::x11_utils::parse_u8_list(remaining, vendor_length as usize)?;
+        let (hsync, remaining) = crate::x11_utils::parse_list::<Syncrange>(remaining, num_hsync.try_into().or(Err(ParseError::ParseError))?)?;
+        let (vsync, remaining) = crate::x11_utils::parse_list::<Syncrange>(remaining, num_vsync.try_into().or(Err(ParseError::ParseError))?)?;
+        let (vendor, remaining) = crate::x11_utils::parse_u8_list(remaining, vendor_length.try_into().or(Err(ParseError::ParseError))?)?;
         let vendor = vendor.to_vec();
-        let (alignment_pad, remaining) = crate::x11_utils::parse_u8_list(remaining, (((vendor_length as usize) + 3) & (!3)) - (vendor_length as usize))?;
+        let (alignment_pad, remaining) = crate::x11_utils::parse_u8_list(remaining, (u32::from(vendor_length).checked_add(3u32).ok_or(ParseError::ParseError)? & (!3u32)).checked_sub(u32::from(vendor_length)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let alignment_pad = alignment_pad.to_vec();
-        let (model, remaining) = crate::x11_utils::parse_u8_list(remaining, model_length as usize)?;
+        let (model, remaining) = crate::x11_utils::parse_u8_list(remaining, model_length.try_into().or(Err(ParseError::ParseError))?)?;
         let model = model.to_vec();
         let result = GetMonitorReply { response_type, sequence, length, hsync, vsync, vendor, alignment_pad, model };
         Ok((result, remaining))
@@ -746,7 +746,7 @@ impl TryParse for GetAllModeLinesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (modecount, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (modeinfo, remaining) = crate::x11_utils::parse_list::<ModeInfo>(remaining, modecount as usize)?;
+        let (modeinfo, remaining) = crate::x11_utils::parse_list::<ModeInfo>(remaining, modecount.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetAllModeLinesReply { response_type, sequence, length, modeinfo };
         Ok((result, remaining))
     }
@@ -1332,7 +1332,7 @@ impl TryParse for GetDotClocksReply {
         let (clocks, remaining) = u32::try_parse(remaining)?;
         let (maxclocks, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (clock, remaining) = crate::x11_utils::parse_list::<u32>(remaining, (1 - ((flags as usize) & 1)) * (clocks as usize))?;
+        let (clock, remaining) = crate::x11_utils::parse_list::<u32>(remaining, 1u32.checked_sub(flags & 1u32).ok_or(ParseError::ParseError)?.checked_mul(clocks).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetDotClocksReply { response_type, sequence, length, flags, clocks, maxclocks, clock };
         Ok((result, remaining))
     }
@@ -1553,9 +1553,9 @@ impl TryParse for GetGammaRampReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (size, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (red, remaining) = crate::x11_utils::parse_list::<u16>(remaining, ((size as usize) + 1) & (!1))?;
-        let (green, remaining) = crate::x11_utils::parse_list::<u16>(remaining, ((size as usize) + 1) & (!1))?;
-        let (blue, remaining) = crate::x11_utils::parse_list::<u16>(remaining, ((size as usize) + 1) & (!1))?;
+        let (red, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
+        let (green, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
+        let (blue, remaining) = crate::x11_utils::parse_list::<u16>(remaining, (u32::from(size).checked_add(1u32).ok_or(ParseError::ParseError)? & (!1u32)).try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetGammaRampReply { response_type, sequence, length, size, red, green, blue };
         Ok((result, remaining))
     }
@@ -1589,13 +1589,13 @@ where
         size_bytes[1],
     ];
     let length_so_far = length_so_far + request0.len();
-    assert_eq!(red.len(), ((size as usize) + 1) & (!1), "`red` has an incorrect length");
+    assert_eq!(red.len(), usize::try_from(u32::from(size).checked_add(1u32).unwrap() & (!1u32)).unwrap(), "`red` has an incorrect length");
     let red_bytes = red.serialize();
     let length_so_far = length_so_far + red_bytes.len();
-    assert_eq!(green.len(), ((size as usize) + 1) & (!1), "`green` has an incorrect length");
+    assert_eq!(green.len(), usize::try_from(u32::from(size).checked_add(1u32).unwrap() & (!1u32)).unwrap(), "`green` has an incorrect length");
     let green_bytes = green.serialize();
     let length_so_far = length_so_far + green_bytes.len();
-    assert_eq!(blue.len(), ((size as usize) + 1) & (!1), "`blue` has an incorrect length");
+    assert_eq!(blue.len(), usize::try_from(u32::from(size).checked_add(1u32).unwrap() & (!1u32)).unwrap(), "`blue` has an incorrect length");
     let blue_bytes = blue.serialize();
     let length_so_far = length_so_far + blue_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];

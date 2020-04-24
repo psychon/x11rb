@@ -2612,9 +2612,9 @@ pub struct CountedString16 {
 impl TryParse for CountedString16 {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (length, remaining) = u16::try_parse(remaining)?;
-        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, length as usize)?;
+        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, length.try_into().or(Err(ParseError::ParseError))?)?;
         let string = string.to_vec();
-        let (alignment_pad, remaining) = crate::x11_utils::parse_u8_list(remaining, (((length as usize) + 5) & (!3)) - ((length as usize) + 2))?;
+        let (alignment_pad, remaining) = crate::x11_utils::parse_u8_list(remaining, (u32::from(length).checked_add(5u32).ok_or(ParseError::ParseError)? & (!3u32)).checked_sub(u32::from(length).checked_add(2u32).ok_or(ParseError::ParseError)?).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let alignment_pad = alignment_pad.to_vec();
         let result = CountedString16 { string, alignment_pad };
         Ok((result, remaining))
@@ -2716,8 +2716,8 @@ impl TryParse for KeyType {
         let (n_map_entries, remaining) = u8::try_parse(remaining)?;
         let (has_preserve, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (map, remaining) = crate::x11_utils::parse_list::<KTMapEntry>(remaining, n_map_entries as usize)?;
-        let (preserve, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, (has_preserve as usize) * (n_map_entries as usize))?;
+        let (map, remaining) = crate::x11_utils::parse_list::<KTMapEntry>(remaining, n_map_entries.try_into().or(Err(ParseError::ParseError))?)?;
+        let (preserve, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, u32::from(has_preserve).checked_mul(u32::from(n_map_entries)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = KeyType { mods_mask, mods_mods, mods_vmods, num_levels, has_preserve, map, preserve };
         Ok((result, remaining))
     }
@@ -2764,7 +2764,7 @@ impl TryParse for KeySymMap {
         let (group_info, remaining) = u8::try_parse(remaining)?;
         let (width, remaining) = u8::try_parse(remaining)?;
         let (n_syms, remaining) = u16::try_parse(remaining)?;
-        let (syms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, n_syms as usize)?;
+        let (syms, remaining) = crate::x11_utils::parse_list::<xproto::Keysym>(remaining, n_syms.try_into().or(Err(ParseError::ParseError))?)?;
         let result = KeySymMap { kt_index, group_info, width, syms };
         Ok((result, remaining))
     }
@@ -3385,8 +3385,8 @@ impl TryParse for SetKeyType {
         let (n_map_entries, remaining) = u8::try_parse(remaining)?;
         let (preserve, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (entries, remaining) = crate::x11_utils::parse_list::<KTSetMapEntry>(remaining, n_map_entries as usize)?;
-        let (preserve_entries, remaining) = crate::x11_utils::parse_list::<KTSetMapEntry>(remaining, (preserve as usize) * (n_map_entries as usize))?;
+        let (entries, remaining) = crate::x11_utils::parse_list::<KTSetMapEntry>(remaining, n_map_entries.try_into().or(Err(ParseError::ParseError))?)?;
+        let (preserve_entries, remaining) = crate::x11_utils::parse_list::<KTSetMapEntry>(remaining, u32::from(preserve).checked_mul(u32::from(n_map_entries)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = SetKeyType { mask, real_mods, virtual_mods, num_levels, preserve, entries, preserve_entries };
         Ok((result, remaining))
     }
@@ -3431,7 +3431,7 @@ impl TryParse for Outline {
         let (n_points, remaining) = u8::try_parse(remaining)?;
         let (corner_radius, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (points, remaining) = crate::x11_utils::parse_list::<xproto::Point>(remaining, n_points as usize)?;
+        let (points, remaining) = crate::x11_utils::parse_list::<xproto::Point>(remaining, n_points.try_into().or(Err(ParseError::ParseError))?)?;
         let result = Outline { corner_radius, points };
         Ok((result, remaining))
     }
@@ -3473,7 +3473,7 @@ impl TryParse for Shape {
         let (primary_ndx, remaining) = u8::try_parse(remaining)?;
         let (approx_ndx, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
-        let (outlines, remaining) = crate::x11_utils::parse_list::<Outline>(remaining, n_outlines as usize)?;
+        let (outlines, remaining) = crate::x11_utils::parse_list::<Outline>(remaining, n_outlines.try_into().or(Err(ParseError::ParseError))?)?;
         let result = Shape { name, primary_ndx, approx_ndx, outlines };
         Ok((result, remaining))
     }
@@ -3605,7 +3605,7 @@ impl TryParse for OverlayRow {
         let (row_under, remaining) = u8::try_parse(remaining)?;
         let (n_keys, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (keys, remaining) = crate::x11_utils::parse_list::<OverlayKey>(remaining, n_keys as usize)?;
+        let (keys, remaining) = crate::x11_utils::parse_list::<OverlayKey>(remaining, n_keys.try_into().or(Err(ParseError::ParseError))?)?;
         let result = OverlayRow { row_under, keys };
         Ok((result, remaining))
     }
@@ -3643,7 +3643,7 @@ impl TryParse for Overlay {
         let (name, remaining) = xproto::Atom::try_parse(remaining)?;
         let (n_rows, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
-        let (rows, remaining) = crate::x11_utils::parse_list::<OverlayRow>(remaining, n_rows as usize)?;
+        let (rows, remaining) = crate::x11_utils::parse_list::<OverlayRow>(remaining, n_rows.try_into().or(Err(ParseError::ParseError))?)?;
         let result = Overlay { name, rows };
         Ok((result, remaining))
     }
@@ -3685,7 +3685,7 @@ impl TryParse for Row {
         let (n_keys, remaining) = u8::try_parse(remaining)?;
         let (vertical, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (keys, remaining) = crate::x11_utils::parse_list::<Key>(remaining, n_keys as usize)?;
+        let (keys, remaining) = crate::x11_utils::parse_list::<Key>(remaining, n_keys.try_into().or(Err(ParseError::ParseError))?)?;
         let result = Row { top, left, vertical, keys };
         Ok((result, remaining))
     }
@@ -3796,7 +3796,7 @@ impl TryParse for Listing {
         let value = remaining;
         let (flags, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u16::try_parse(remaining)?;
-        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, length as usize)?;
+        let (string, remaining) = crate::x11_utils::parse_u8_list(remaining, length.try_into().or(Err(ParseError::ParseError))?)?;
         let string = string.to_vec();
         // Align offset to multiple of 2
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -3848,8 +3848,8 @@ impl TryParse for DeviceLedInfo {
         let (maps_present, remaining) = u32::try_parse(remaining)?;
         let (phys_indicators, remaining) = u32::try_parse(remaining)?;
         let (state, remaining) = u32::try_parse(remaining)?;
-        let (names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from(names_present.count_ones()).unwrap())?;
-        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, usize::try_from(maps_present.count_ones()).unwrap())?;
+        let (names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, names_present.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
+        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, maps_present.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
         let led_class = led_class.try_into()?;
         let result = DeviceLedInfo { led_class, led_id, names_present, maps_present, phys_indicators, state, names, maps };
         Ok((result, remaining))
@@ -6543,40 +6543,40 @@ impl Serialize for SelectEventsAux {
     }
 }
 impl SelectEventsAux {
-    fn switch_expr(&self) -> u16 {
-        let mut expr_value: u16 = 0;
+    fn switch_expr(&self) -> u32 {
+        let mut expr_value = 0;
         if self.bitcase1.is_some() {
-            expr_value |= u16::from(EventType::NewKeyboardNotify);
+            expr_value |= u32::from(EventType::NewKeyboardNotify);
         }
         if self.bitcase2.is_some() {
-            expr_value |= u16::from(EventType::StateNotify);
+            expr_value |= u32::from(EventType::StateNotify);
         }
         if self.bitcase3.is_some() {
-            expr_value |= u16::from(EventType::ControlsNotify);
+            expr_value |= u32::from(EventType::ControlsNotify);
         }
         if self.bitcase4.is_some() {
-            expr_value |= u16::from(EventType::IndicatorStateNotify);
+            expr_value |= u32::from(EventType::IndicatorStateNotify);
         }
         if self.bitcase5.is_some() {
-            expr_value |= u16::from(EventType::IndicatorMapNotify);
+            expr_value |= u32::from(EventType::IndicatorMapNotify);
         }
         if self.bitcase6.is_some() {
-            expr_value |= u16::from(EventType::NamesNotify);
+            expr_value |= u32::from(EventType::NamesNotify);
         }
         if self.bitcase7.is_some() {
-            expr_value |= u16::from(EventType::CompatMapNotify);
+            expr_value |= u32::from(EventType::CompatMapNotify);
         }
         if self.bitcase8.is_some() {
-            expr_value |= u16::from(EventType::BellNotify);
+            expr_value |= u32::from(EventType::BellNotify);
         }
         if self.bitcase9.is_some() {
-            expr_value |= u16::from(EventType::ActionMessage);
+            expr_value |= u32::from(EventType::ActionMessage);
         }
         if self.bitcase10.is_some() {
-            expr_value |= u16::from(EventType::AccessXNotify);
+            expr_value |= u32::from(EventType::AccessXNotify);
         }
         if self.bitcase11.is_some() {
-            expr_value |= u16::from(EventType::ExtensionDeviceNotify);
+            expr_value |= u32::from(EventType::ExtensionDeviceNotify);
         }
         expr_value
     }
@@ -6685,7 +6685,7 @@ where
         map_bytes[1],
     ];
     let length_so_far = length_so_far + request0.len();
-    assert_eq!(details.switch_expr(), affect_which & ((!clear) & (!select_all)), "expression `affect_which & ((!clear) & (!select_all))` must match the value of `details`");
+    assert_eq!(details.switch_expr(), u32::from(affect_which) & ((!u32::from(clear)) & (!u32::from(select_all))), "expression `u32::from(affect_which) & ((!u32::from(clear)) & (!u32::from(select_all)))` must match the value of `details`");
     let details_bytes = details.serialize();
     let length_so_far = length_so_far + details_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
@@ -7215,13 +7215,13 @@ pub struct GetMapMapBitcase3 {
 impl GetMapMapBitcase3 {
     pub fn try_parse(remaining: &[u8], n_key_actions: u8, total_actions: u16) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
-        let (acts_rtrn_count, remaining) = crate::x11_utils::parse_u8_list(remaining, n_key_actions as usize)?;
+        let (acts_rtrn_count, remaining) = crate::x11_utils::parse_u8_list(remaining, n_key_actions.try_into().or(Err(ParseError::ParseError))?)?;
         let acts_rtrn_count = acts_rtrn_count.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let (acts_rtrn_acts, remaining) = crate::x11_utils::parse_list::<Action>(remaining, total_actions as usize)?;
+        let (acts_rtrn_acts, remaining) = crate::x11_utils::parse_list::<Action>(remaining, total_actions.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetMapMapBitcase3 { acts_rtrn_count, acts_rtrn_acts };
         Ok((result, remaining))
     }
@@ -7240,43 +7240,43 @@ pub struct GetMapMap {
 }
 impl GetMapMap {
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = present;
+        let switch_expr = u32::from(present);
         let mut outer_remaining = value;
-        let types_rtrn = if switch_expr & u16::from(MapPart::KeyTypes) != 0 {
+        let types_rtrn = if switch_expr & u32::from(MapPart::KeyTypes) != 0 {
             let remaining = outer_remaining;
-            let (types_rtrn, remaining) = crate::x11_utils::parse_list::<KeyType>(remaining, n_types as usize)?;
+            let (types_rtrn, remaining) = crate::x11_utils::parse_list::<KeyType>(remaining, n_types.try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(types_rtrn)
         } else {
             None
         };
-        let syms_rtrn = if switch_expr & u16::from(MapPart::KeySyms) != 0 {
+        let syms_rtrn = if switch_expr & u32::from(MapPart::KeySyms) != 0 {
             let remaining = outer_remaining;
-            let (syms_rtrn, remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms as usize)?;
+            let (syms_rtrn, remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms.try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(syms_rtrn)
         } else {
             None
         };
-        let bitcase3 = if switch_expr & u16::from(MapPart::KeyActions) != 0 {
+        let bitcase3 = if switch_expr & u32::from(MapPart::KeyActions) != 0 {
             let (bitcase3, new_remaining) = GetMapMapBitcase3::try_parse(outer_remaining, n_key_actions, total_actions)?;
             outer_remaining = new_remaining;
             Some(bitcase3)
         } else {
             None
         };
-        let behaviors_rtrn = if switch_expr & u16::from(MapPart::KeyBehaviors) != 0 {
+        let behaviors_rtrn = if switch_expr & u32::from(MapPart::KeyBehaviors) != 0 {
             let remaining = outer_remaining;
-            let (behaviors_rtrn, remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors as usize)?;
+            let (behaviors_rtrn, remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors.try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(behaviors_rtrn)
         } else {
             None
         };
-        let vmods_rtrn = if switch_expr & u16::from(MapPart::VirtualMods) != 0 {
+        let vmods_rtrn = if switch_expr & u32::from(MapPart::VirtualMods) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
-            let (vmods_rtrn, remaining) = crate::x11_utils::parse_u8_list(remaining, usize::try_from(virtual_mods.count_ones()).unwrap())?;
+            let (vmods_rtrn, remaining) = crate::x11_utils::parse_u8_list(remaining, virtual_mods.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
             let vmods_rtrn = vmods_rtrn.to_vec();
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -7287,10 +7287,10 @@ impl GetMapMap {
         } else {
             None
         };
-        let explicit_rtrn = if switch_expr & u16::from(MapPart::ExplicitComponents) != 0 {
+        let explicit_rtrn = if switch_expr & u32::from(MapPart::ExplicitComponents) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
-            let (explicit_rtrn, remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit as usize)?;
+            let (explicit_rtrn, remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit.try_into().or(Err(ParseError::ParseError))?)?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
@@ -7300,10 +7300,10 @@ impl GetMapMap {
         } else {
             None
         };
-        let modmap_rtrn = if switch_expr & u16::from(MapPart::ModifierMap) != 0 {
+        let modmap_rtrn = if switch_expr & u32::from(MapPart::ModifierMap) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
-            let (modmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys as usize)?;
+            let (modmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys.try_into().or(Err(ParseError::ParseError))?)?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
@@ -7313,9 +7313,9 @@ impl GetMapMap {
         } else {
             None
         };
-        let vmodmap_rtrn = if switch_expr & u16::from(MapPart::VirtualModMap) != 0 {
+        let vmodmap_rtrn = if switch_expr & u32::from(MapPart::VirtualModMap) != 0 {
             let remaining = outer_remaining;
-            let (vmodmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys as usize)?;
+            let (vmodmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys.try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(vmodmap_rtrn)
         } else {
@@ -7471,31 +7471,31 @@ impl Serialize for SetMapAux {
     }
 }
 impl SetMapAux {
-    fn switch_expr(&self) -> u16 {
-        let mut expr_value: u16 = 0;
+    fn switch_expr(&self) -> u32 {
+        let mut expr_value = 0;
         if self.types.is_some() {
-            expr_value |= u16::from(MapPart::KeyTypes);
+            expr_value |= u32::from(MapPart::KeyTypes);
         }
         if self.syms.is_some() {
-            expr_value |= u16::from(MapPart::KeySyms);
+            expr_value |= u32::from(MapPart::KeySyms);
         }
         if self.bitcase3.is_some() {
-            expr_value |= u16::from(MapPart::KeyActions);
+            expr_value |= u32::from(MapPart::KeyActions);
         }
         if self.behaviors.is_some() {
-            expr_value |= u16::from(MapPart::KeyBehaviors);
+            expr_value |= u32::from(MapPart::KeyBehaviors);
         }
         if self.vmods.is_some() {
-            expr_value |= u16::from(MapPart::VirtualMods);
+            expr_value |= u32::from(MapPart::VirtualMods);
         }
         if self.explicit.is_some() {
-            expr_value |= u16::from(MapPart::ExplicitComponents);
+            expr_value |= u32::from(MapPart::ExplicitComponents);
         }
         if self.modmap.is_some() {
-            expr_value |= u16::from(MapPart::ModifierMap);
+            expr_value |= u32::from(MapPart::ModifierMap);
         }
         if self.vmodmap.is_some() {
-            expr_value |= u16::from(MapPart::VirtualModMap);
+            expr_value |= u32::from(MapPart::VirtualModMap);
         }
         expr_value
     }
@@ -7695,8 +7695,8 @@ impl TryParse for GetCompatMapReply {
         let (n_si_rtrn, remaining) = u16::try_parse(remaining)?;
         let (n_total_si, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
-        let (si_rtrn, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si_rtrn as usize)?;
-        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, usize::try_from(groups_rtrn.count_ones()).unwrap())?;
+        let (si_rtrn, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si_rtrn.try_into().or(Err(ParseError::ParseError))?)?;
+        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, groups_rtrn.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetCompatMapReply { response_type, device_id, sequence, length, groups_rtrn, first_si_rtrn, n_total_si, si_rtrn, group_rtrn };
         Ok((result, remaining))
     }
@@ -7865,7 +7865,7 @@ impl TryParse for GetIndicatorMapReply {
         let (real_indicators, remaining) = u32::try_parse(remaining)?;
         let (n_indicators, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(15..).ok_or(ParseError::ParseError)?;
-        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, usize::try_from(which.count_ones()).unwrap())?;
+        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, which.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetIndicatorMapReply { response_type, device_id, sequence, length, which, real_indicators, n_indicators, maps };
         Ok((result, remaining))
     }
@@ -8130,13 +8130,13 @@ pub struct GetNamesValueListBitcase8 {
 impl GetNamesValueListBitcase8 {
     pub fn try_parse(remaining: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
-        let (n_levels_per_type, remaining) = crate::x11_utils::parse_u8_list(remaining, n_types as usize)?;
+        let (n_levels_per_type, remaining) = crate::x11_utils::parse_u8_list(remaining, n_types.try_into().or(Err(ParseError::ParseError))?)?;
         let n_levels_per_type = n_levels_per_type.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let (kt_level_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_levels_per_type.iter().map(|&x| x as usize).sum())?;
+        let (kt_level_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_levels_per_type.iter().try_fold(0u32, |acc, &x| acc.checked_add(u32::from(x)).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetNamesValueListBitcase8 { n_levels_per_type, kt_level_names };
         Ok((result, remaining))
     }
@@ -8213,7 +8213,7 @@ impl GetNamesValueList {
         };
         let type_names = if switch_expr & u32::from(NameDetail::KeyTypeNames) != 0 {
             let remaining = outer_remaining;
-            let (type_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_types as usize)?;
+            let (type_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_types.try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(type_names)
         } else {
@@ -8228,7 +8228,7 @@ impl GetNamesValueList {
         };
         let indicator_names = if switch_expr & u32::from(NameDetail::IndicatorNames) != 0 {
             let remaining = outer_remaining;
-            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from(indicators.count_ones()).unwrap())?;
+            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, indicators.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(indicator_names)
         } else {
@@ -8236,7 +8236,7 @@ impl GetNamesValueList {
         };
         let virtual_mod_names = if switch_expr & u32::from(NameDetail::VirtualModNames) != 0 {
             let remaining = outer_remaining;
-            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from(virtual_mods.count_ones()).unwrap())?;
+            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, virtual_mods.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(virtual_mod_names)
         } else {
@@ -8244,7 +8244,7 @@ impl GetNamesValueList {
         };
         let groups = if switch_expr & u32::from(NameDetail::GroupNames) != 0 {
             let remaining = outer_remaining;
-            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from(group_names.count_ones()).unwrap())?;
+            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, group_names.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(groups)
         } else {
@@ -8252,7 +8252,7 @@ impl GetNamesValueList {
         };
         let key_names = if switch_expr & u32::from(NameDetail::KeyNames) != 0 {
             let remaining = outer_remaining;
-            let (key_names, remaining) = crate::x11_utils::parse_list::<KeyName>(remaining, n_keys as usize)?;
+            let (key_names, remaining) = crate::x11_utils::parse_list::<KeyName>(remaining, n_keys.try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(key_names)
         } else {
@@ -8260,7 +8260,7 @@ impl GetNamesValueList {
         };
         let key_aliases = if switch_expr & u32::from(NameDetail::KeyAliases) != 0 {
             let remaining = outer_remaining;
-            let (key_aliases, remaining) = crate::x11_utils::parse_list::<KeyAlias>(remaining, n_key_aliases as usize)?;
+            let (key_aliases, remaining) = crate::x11_utils::parse_list::<KeyAlias>(remaining, n_key_aliases.try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(key_aliases)
         } else {
@@ -8268,7 +8268,7 @@ impl GetNamesValueList {
         };
         let radio_group_names = if switch_expr & u32::from(NameDetail::RGNames) != 0 {
             let remaining = outer_remaining;
-            let (radio_group_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_radio_groups as usize)?;
+            let (radio_group_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_radio_groups.try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(radio_group_names)
         } else {
@@ -8421,7 +8421,7 @@ impl Serialize for SetNamesAux {
 }
 impl SetNamesAux {
     fn switch_expr(&self) -> u32 {
-        let mut expr_value: u32 = 0;
+        let mut expr_value = 0;
         if self.keycodes_name.is_some() {
             expr_value |= u32::from(NameDetail::Keycodes);
         }
@@ -8762,12 +8762,12 @@ impl TryParse for ListComponentsReply {
         let (n_geometries, remaining) = u16::try_parse(remaining)?;
         let (extra, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(10..).ok_or(ParseError::ParseError)?;
-        let (keymaps, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_keymaps as usize)?;
-        let (keycodes, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_keycodes as usize)?;
-        let (types, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_types as usize)?;
-        let (compat_maps, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_compat_maps as usize)?;
-        let (symbols, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_symbols as usize)?;
-        let (geometries, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_geometries as usize)?;
+        let (keymaps, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_keymaps.try_into().or(Err(ParseError::ParseError))?)?;
+        let (keycodes, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_keycodes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (types, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_types.try_into().or(Err(ParseError::ParseError))?)?;
+        let (compat_maps, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_compat_maps.try_into().or(Err(ParseError::ParseError))?)?;
+        let (symbols, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_symbols.try_into().or(Err(ParseError::ParseError))?)?;
+        let (geometries, remaining) = crate::x11_utils::parse_list::<Listing>(remaining, n_geometries.try_into().or(Err(ParseError::ParseError))?)?;
         let result = ListComponentsReply { response_type, device_id, sequence, length, extra, keymaps, keycodes, types, compat_maps, symbols, geometries };
         Ok((result, remaining))
     }
@@ -8825,13 +8825,13 @@ pub struct GetKbdByNameRepliesTypesMapBitcase3 {
 impl GetKbdByNameRepliesTypesMapBitcase3 {
     pub fn try_parse(remaining: &[u8], n_key_actions: u8, total_actions: u16) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
-        let (acts_rtrn_count, remaining) = crate::x11_utils::parse_u8_list(remaining, n_key_actions as usize)?;
+        let (acts_rtrn_count, remaining) = crate::x11_utils::parse_u8_list(remaining, n_key_actions.try_into().or(Err(ParseError::ParseError))?)?;
         let acts_rtrn_count = acts_rtrn_count.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let (acts_rtrn_acts, remaining) = crate::x11_utils::parse_list::<Action>(remaining, total_actions as usize)?;
+        let (acts_rtrn_acts, remaining) = crate::x11_utils::parse_list::<Action>(remaining, total_actions.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetKbdByNameRepliesTypesMapBitcase3 { acts_rtrn_count, acts_rtrn_acts };
         Ok((result, remaining))
     }
@@ -8850,43 +8850,43 @@ pub struct GetKbdByNameRepliesTypesMap {
 }
 impl GetKbdByNameRepliesTypesMap {
     fn try_parse(value: &[u8], present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = present;
+        let switch_expr = u32::from(present);
         let mut outer_remaining = value;
-        let types_rtrn = if switch_expr & u16::from(MapPart::KeyTypes) != 0 {
+        let types_rtrn = if switch_expr & u32::from(MapPart::KeyTypes) != 0 {
             let remaining = outer_remaining;
-            let (types_rtrn, remaining) = crate::x11_utils::parse_list::<KeyType>(remaining, n_types as usize)?;
+            let (types_rtrn, remaining) = crate::x11_utils::parse_list::<KeyType>(remaining, n_types.try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(types_rtrn)
         } else {
             None
         };
-        let syms_rtrn = if switch_expr & u16::from(MapPart::KeySyms) != 0 {
+        let syms_rtrn = if switch_expr & u32::from(MapPart::KeySyms) != 0 {
             let remaining = outer_remaining;
-            let (syms_rtrn, remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms as usize)?;
+            let (syms_rtrn, remaining) = crate::x11_utils::parse_list::<KeySymMap>(remaining, n_key_syms.try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(syms_rtrn)
         } else {
             None
         };
-        let bitcase3 = if switch_expr & u16::from(MapPart::KeyActions) != 0 {
+        let bitcase3 = if switch_expr & u32::from(MapPart::KeyActions) != 0 {
             let (bitcase3, new_remaining) = GetKbdByNameRepliesTypesMapBitcase3::try_parse(outer_remaining, n_key_actions, total_actions)?;
             outer_remaining = new_remaining;
             Some(bitcase3)
         } else {
             None
         };
-        let behaviors_rtrn = if switch_expr & u16::from(MapPart::KeyBehaviors) != 0 {
+        let behaviors_rtrn = if switch_expr & u32::from(MapPart::KeyBehaviors) != 0 {
             let remaining = outer_remaining;
-            let (behaviors_rtrn, remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors as usize)?;
+            let (behaviors_rtrn, remaining) = crate::x11_utils::parse_list::<SetBehavior>(remaining, total_key_behaviors.try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(behaviors_rtrn)
         } else {
             None
         };
-        let vmods_rtrn = if switch_expr & u16::from(MapPart::VirtualMods) != 0 {
+        let vmods_rtrn = if switch_expr & u32::from(MapPart::VirtualMods) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
-            let (vmods_rtrn, remaining) = crate::x11_utils::parse_u8_list(remaining, usize::try_from(virtual_mods.count_ones()).unwrap())?;
+            let (vmods_rtrn, remaining) = crate::x11_utils::parse_u8_list(remaining, virtual_mods.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
             let vmods_rtrn = vmods_rtrn.to_vec();
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -8897,10 +8897,10 @@ impl GetKbdByNameRepliesTypesMap {
         } else {
             None
         };
-        let explicit_rtrn = if switch_expr & u16::from(MapPart::ExplicitComponents) != 0 {
+        let explicit_rtrn = if switch_expr & u32::from(MapPart::ExplicitComponents) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
-            let (explicit_rtrn, remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit as usize)?;
+            let (explicit_rtrn, remaining) = crate::x11_utils::parse_list::<SetExplicit>(remaining, total_key_explicit.try_into().or(Err(ParseError::ParseError))?)?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
@@ -8910,10 +8910,10 @@ impl GetKbdByNameRepliesTypesMap {
         } else {
             None
         };
-        let modmap_rtrn = if switch_expr & u16::from(MapPart::ModifierMap) != 0 {
+        let modmap_rtrn = if switch_expr & u32::from(MapPart::ModifierMap) != 0 {
             let remaining = outer_remaining;
             let value = remaining;
-            let (modmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys as usize)?;
+            let (modmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyModMap>(remaining, total_mod_map_keys.try_into().or(Err(ParseError::ParseError))?)?;
             // Align offset to multiple of 4
             let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
             let misalignment = (4 - (offset % 4)) % 4;
@@ -8923,9 +8923,9 @@ impl GetKbdByNameRepliesTypesMap {
         } else {
             None
         };
-        let vmodmap_rtrn = if switch_expr & u16::from(MapPart::VirtualModMap) != 0 {
+        let vmodmap_rtrn = if switch_expr & u32::from(MapPart::VirtualModMap) != 0 {
             let remaining = outer_remaining;
-            let (vmodmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys as usize)?;
+            let (vmodmap_rtrn, remaining) = crate::x11_utils::parse_list::<KeyVModMap>(remaining, total_v_mod_map_keys.try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(vmodmap_rtrn)
         } else {
@@ -9036,8 +9036,8 @@ impl TryParse for GetKbdByNameRepliesCompatMap {
         let (n_si_rtrn, remaining) = u16::try_parse(remaining)?;
         let (n_total_si, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
-        let (si_rtrn, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si_rtrn as usize)?;
-        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, usize::try_from(groups_rtrn.count_ones()).unwrap())?;
+        let (si_rtrn, remaining) = crate::x11_utils::parse_list::<SymInterpret>(remaining, n_si_rtrn.try_into().or(Err(ParseError::ParseError))?)?;
+        let (group_rtrn, remaining) = crate::x11_utils::parse_list::<ModDef>(remaining, groups_rtrn.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetKbdByNameRepliesCompatMap { compatmap_type, compat_device_id, compatmap_sequence, compatmap_length, groups_rtrn, first_si_rtrn, n_total_si, si_rtrn, group_rtrn };
         Ok((result, remaining))
     }
@@ -9068,7 +9068,7 @@ impl TryParse for GetKbdByNameRepliesIndicatorMaps {
         let (real_indicators, remaining) = u32::try_parse(remaining)?;
         let (n_indicators, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(15..).ok_or(ParseError::ParseError)?;
-        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, n_indicators as usize)?;
+        let (maps, remaining) = crate::x11_utils::parse_list::<IndicatorMap>(remaining, n_indicators.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetKbdByNameRepliesIndicatorMaps { indicatormap_type, indicator_device_id, indicatormap_sequence, indicatormap_length, which, real_indicators, maps };
         Ok((result, remaining))
     }
@@ -9087,13 +9087,13 @@ pub struct GetKbdByNameRepliesKeyNamesValueListBitcase8 {
 impl GetKbdByNameRepliesKeyNamesValueListBitcase8 {
     pub fn try_parse(remaining: &[u8], n_types: u8) -> Result<(Self, &[u8]), ParseError> {
         let value = remaining;
-        let (n_levels_per_type, remaining) = crate::x11_utils::parse_u8_list(remaining, n_types as usize)?;
+        let (n_levels_per_type, remaining) = crate::x11_utils::parse_u8_list(remaining, n_types.try_into().or(Err(ParseError::ParseError))?)?;
         let n_levels_per_type = n_levels_per_type.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let (kt_level_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_levels_per_type.iter().map(|&x| x as usize).sum())?;
+        let (kt_level_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_levels_per_type.iter().try_fold(0u32, |acc, &x| acc.checked_add(u32::from(x)).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetKbdByNameRepliesKeyNamesValueListBitcase8 { n_levels_per_type, kt_level_names };
         Ok((result, remaining))
     }
@@ -9170,7 +9170,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let type_names = if switch_expr & u32::from(NameDetail::KeyTypeNames) != 0 {
             let remaining = outer_remaining;
-            let (type_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_types as usize)?;
+            let (type_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_types.try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(type_names)
         } else {
@@ -9185,7 +9185,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let indicator_names = if switch_expr & u32::from(NameDetail::IndicatorNames) != 0 {
             let remaining = outer_remaining;
-            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from(indicators.count_ones()).unwrap())?;
+            let (indicator_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, indicators.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(indicator_names)
         } else {
@@ -9193,7 +9193,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let virtual_mod_names = if switch_expr & u32::from(NameDetail::VirtualModNames) != 0 {
             let remaining = outer_remaining;
-            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from(virtual_mods.count_ones()).unwrap())?;
+            let (virtual_mod_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, virtual_mods.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(virtual_mod_names)
         } else {
@@ -9201,7 +9201,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let groups = if switch_expr & u32::from(NameDetail::GroupNames) != 0 {
             let remaining = outer_remaining;
-            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, usize::try_from(group_names.count_ones()).unwrap())?;
+            let (groups, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, group_names.count_ones().try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(groups)
         } else {
@@ -9209,7 +9209,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let key_names = if switch_expr & u32::from(NameDetail::KeyNames) != 0 {
             let remaining = outer_remaining;
-            let (key_names, remaining) = crate::x11_utils::parse_list::<KeyName>(remaining, n_keys as usize)?;
+            let (key_names, remaining) = crate::x11_utils::parse_list::<KeyName>(remaining, n_keys.try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(key_names)
         } else {
@@ -9217,7 +9217,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let key_aliases = if switch_expr & u32::from(NameDetail::KeyAliases) != 0 {
             let remaining = outer_remaining;
-            let (key_aliases, remaining) = crate::x11_utils::parse_list::<KeyAlias>(remaining, n_key_aliases as usize)?;
+            let (key_aliases, remaining) = crate::x11_utils::parse_list::<KeyAlias>(remaining, n_key_aliases.try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(key_aliases)
         } else {
@@ -9225,7 +9225,7 @@ impl GetKbdByNameRepliesKeyNamesValueList {
         };
         let radio_group_names = if switch_expr & u32::from(NameDetail::RGNames) != 0 {
             let remaining = outer_remaining;
-            let (radio_group_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_radio_groups as usize)?;
+            let (radio_group_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_radio_groups.try_into().or(Err(ParseError::ParseError))?)?;
             outer_remaining = remaining;
             Some(radio_group_names)
         } else {
@@ -9345,37 +9345,37 @@ pub struct GetKbdByNameReplies {
 }
 impl GetKbdByNameReplies {
     fn try_parse(value: &[u8], reported: u16) -> Result<(Self, &[u8]), ParseError> {
-        let switch_expr = reported;
+        let switch_expr = u32::from(reported);
         let mut outer_remaining = value;
-        let types = if switch_expr & u16::from(GBNDetail::Types) != 0 || switch_expr & u16::from(GBNDetail::ClientSymbols) != 0 || switch_expr & u16::from(GBNDetail::ServerSymbols) != 0 {
+        let types = if switch_expr & u32::from(GBNDetail::Types) != 0 || switch_expr & u32::from(GBNDetail::ClientSymbols) != 0 || switch_expr & u32::from(GBNDetail::ServerSymbols) != 0 {
             let (types, new_remaining) = GetKbdByNameRepliesTypes::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(types)
         } else {
             None
         };
-        let compat_map = if switch_expr & u16::from(GBNDetail::CompatMap) != 0 {
+        let compat_map = if switch_expr & u32::from(GBNDetail::CompatMap) != 0 {
             let (compat_map, new_remaining) = GetKbdByNameRepliesCompatMap::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(compat_map)
         } else {
             None
         };
-        let indicator_maps = if switch_expr & u16::from(GBNDetail::IndicatorMaps) != 0 {
+        let indicator_maps = if switch_expr & u32::from(GBNDetail::IndicatorMaps) != 0 {
             let (indicator_maps, new_remaining) = GetKbdByNameRepliesIndicatorMaps::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(indicator_maps)
         } else {
             None
         };
-        let key_names = if switch_expr & u16::from(GBNDetail::KeyNames) != 0 || switch_expr & u16::from(GBNDetail::OtherNames) != 0 {
+        let key_names = if switch_expr & u32::from(GBNDetail::KeyNames) != 0 || switch_expr & u32::from(GBNDetail::OtherNames) != 0 {
             let (key_names, new_remaining) = GetKbdByNameRepliesKeyNames::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(key_names)
         } else {
             None
         };
-        let geometry = if switch_expr & u16::from(GBNDetail::Geometry) != 0 {
+        let geometry = if switch_expr & u32::from(GBNDetail::Geometry) != 0 {
             let (geometry, new_remaining) = GetKbdByNameRepliesGeometry::try_parse(outer_remaining)?;
             outer_remaining = new_remaining;
             Some(geometry)
@@ -9514,14 +9514,14 @@ impl TryParse for GetDeviceInfoReply {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let (dev_type, remaining) = xproto::Atom::try_parse(remaining)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let name = name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let (btn_actions, remaining) = crate::x11_utils::parse_list::<Action>(remaining, n_btns_rtrn as usize)?;
-        let (leds, remaining) = crate::x11_utils::parse_list::<DeviceLedInfo>(remaining, n_device_led_f_bs as usize)?;
+        let (btn_actions, remaining) = crate::x11_utils::parse_list::<Action>(remaining, n_btns_rtrn.try_into().or(Err(ParseError::ParseError))?)?;
+        let (leds, remaining) = crate::x11_utils::parse_list::<DeviceLedInfo>(remaining, n_device_led_f_bs.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetDeviceInfoReply { response_type, device_id, sequence, length, present, supported, unsupported, first_btn_wanted, n_btns_wanted, first_btn_rtrn, total_btns, has_own_state, dflt_kbd_fb, dflt_led_fb, dev_type, name, btn_actions, leds };
         Ok((result, remaining))
     }

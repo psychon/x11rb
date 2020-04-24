@@ -464,7 +464,7 @@ impl Serialize for SetAttributesAux {
 }
 impl SetAttributesAux {
     fn switch_expr(&self) -> u32 {
-        let mut expr_value: u32 = 0;
+        let mut expr_value = 0;
         if self.background_pixmap.is_some() {
             expr_value |= u32::from(xproto::CW::BackPixmap);
         }
