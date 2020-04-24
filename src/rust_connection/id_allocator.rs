@@ -1,6 +1,6 @@
 use crate::connection::RequestConnection;
 use crate::errors::{ConnectError, ReplyOrIdError};
-use crate::protocol::xc_misc::{self, ConnectionExt as _};
+use crate::protocol::xc_misc::{self, ConnectionExt as _, GetXIDRangeReply};
 
 /// An allocator for X11 IDs.
 ///
@@ -37,20 +37,39 @@ impl IDAllocator {
     }
 
     /// Generate the next ID.
+    ///
+    /// The given connection is used to ask for more IDs if necessary.
     pub(crate) fn generate_id<C: RequestConnection>(
         &mut self,
         conn: &C,
     ) -> Result<u32, ReplyOrIdError<C::Buf>> {
-        if self.next_id > self.max_id {
+        self.generate_id_impl(|| {
             if conn
                 .extension_information(xc_misc::X11_EXTENSION_NAME)?
                 .is_none()
             {
                 // IDs are exhausted and XC-MISC is not available
-                return Err(ReplyOrIdError::IdsExhausted);
+                Err(ReplyOrIdError::IdsExhausted)
+            } else {
+                Ok(conn.xc_misc_get_xid_range()?.reply()?)
             }
+        })
+    }
+
+    /// Generate the next ID.
+    ///
+    /// The `get_xid_range` callback is used to request more IDs from the X11 server if necessary.
+    fn generate_id_impl<B, F>(
+        &mut self,
+        get_xid_range: F,
+    ) -> Result<u32, ReplyOrIdError<B>>
+    where
+        B: std::fmt::Debug + AsRef<[u8]>,
+        F: FnOnce() -> Result<GetXIDRangeReply, ReplyOrIdError<B>>,
+    {
+        if self.next_id > self.max_id {
             // Send an XC-MISC GetXIDRange request.
-            let xidrange = conn.xc_misc_get_xid_range()?.reply()?;
+            let xidrange = get_xid_range()?;
             let (start, count) = (xidrange.start_id, xidrange.count);
             // Apparently (0, 1) is how the server signals "I am out of IDs".
             // The second case avoids an underflow below and should never happen.
