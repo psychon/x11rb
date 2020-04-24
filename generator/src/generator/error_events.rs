@@ -42,6 +42,7 @@ fn generate_errors(out: &mut Output, module: &xcbgen::defs::Module) {
             out,
             "/// Parse a generic X11 error into a concrete error type."
         );
+        outln!(out, "#[allow(clippy::cognitive_complexity)]");
         outln!(out, "pub fn parse(");
         outln!(out.indent(), "error: GenericError<B>,");
         outln!(out.indent(), "ext_info_provider: &dyn ExtInfoProvider,");
@@ -57,7 +58,7 @@ fn generate_errors(out: &mut Output, module: &xcbgen::defs::Module) {
                 for err_name in error_defs.iter().map(|def| def.name()) {
                     outln!(
                         out,
-                        "xproto::{}_ERROR => return Ok(Self::{}(error.into())),",
+                        "xproto::{}_ERROR => return Ok(Self::{}(error.as_ref().try_into()?)),",
                         super::camel_case_to_upper_snake(err_name),
                         err_name,
                     );
@@ -97,7 +98,7 @@ fn generate_errors(out: &mut Output, module: &xcbgen::defs::Module) {
                         for err_name in error_defs.iter().map(|def| def.name()) {
                             outln!(
                                 out.indent(),
-                                "{}::{}_ERROR => Ok(Self::{}{}(error.into())),",
+                                "{}::{}_ERROR => Ok(Self::{}{}(error.as_ref().try_into()?)),",
                                 ns.header,
                                 super::camel_case_to_upper_snake(err_name),
                                 get_ns_name_prefix(ns),
@@ -272,7 +273,7 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
                     }
                     outln!(
                         out,
-                        "xproto::{}_EVENT => return Ok(Self::{}(event.try_into()?)),",
+                        "xproto::{}_EVENT => return Ok(Self::{}(event.as_ref().try_into()?)),",
                         super::camel_case_to_upper_snake(event_name),
                         event_name,
                     );
@@ -327,7 +328,7 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
                             }
                             outln!(
                                 out.indent(),
-                                "{}::{}_EVENT => Ok(Self::{}{}(event.try_into()?)),",
+                                "{}::{}_EVENT => Ok(Self::{}{}(event.as_ref().try_into()?)),",
                                 ns.header,
                                 super::camel_case_to_upper_snake(event_def.name()),
                                 get_ns_name_prefix(ns),
@@ -383,7 +384,7 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
                             }
                             outln!(
                                 out.indent(),
-                                "{}::{}_EVENT => Ok(Self::{}{}(event.try_into()?)),",
+                                "{}::{}_EVENT => Ok(Self::{}{}(event.as_ref().try_into()?)),",
                                 ns.header,
                                 super::camel_case_to_upper_snake(event_def.name()),
                                 get_ns_name_prefix(ns),

@@ -116,6 +116,12 @@ impl<B: AsRef<[u8]>> GenericEvent<B> {
     }
 }
 
+impl<B: AsRef<[u8]>> AsRef<[u8]> for GenericEvent<B> {
+    fn as_ref(&self) -> &[u8] {
+        self.0.as_ref()
+    }
+}
+
 impl<B: AsRef<[u8]>> Event for GenericEvent<B> {
     fn raw_bytes(&self) -> &[u8] {
         self.0.as_ref()
@@ -153,6 +159,12 @@ impl<B: AsRef<[u8]>> GenericError<B> {
     /// have their error codes dynamically assigned.
     pub fn error_code(&self) -> u8 {
         self.raw_bytes()[1]
+    }
+}
+
+impl<B: AsRef<[u8]>> AsRef<[u8]> for GenericError<B> {
+    fn as_ref(&self) -> &[u8] {
+        self.0.as_ref()
     }
 }
 
