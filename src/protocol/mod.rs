@@ -196,23 +196,23 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
 
         // Check if this is a core protocol error
         match error_code {
-            xproto::ACCESS_ERROR => return Ok(Self::Access(error.into())),
-            xproto::ALLOC_ERROR => return Ok(Self::Alloc(error.into())),
-            xproto::ATOM_ERROR => return Ok(Self::Atom(error.into())),
-            xproto::COLORMAP_ERROR => return Ok(Self::Colormap(error.into())),
-            xproto::CURSOR_ERROR => return Ok(Self::Cursor(error.into())),
-            xproto::DRAWABLE_ERROR => return Ok(Self::Drawable(error.into())),
-            xproto::FONT_ERROR => return Ok(Self::Font(error.into())),
-            xproto::G_CONTEXT_ERROR => return Ok(Self::GContext(error.into())),
-            xproto::ID_CHOICE_ERROR => return Ok(Self::IDChoice(error.into())),
-            xproto::IMPLEMENTATION_ERROR => return Ok(Self::Implementation(error.into())),
-            xproto::LENGTH_ERROR => return Ok(Self::Length(error.into())),
-            xproto::MATCH_ERROR => return Ok(Self::Match(error.into())),
-            xproto::NAME_ERROR => return Ok(Self::Name(error.into())),
-            xproto::PIXMAP_ERROR => return Ok(Self::Pixmap(error.into())),
-            xproto::REQUEST_ERROR => return Ok(Self::Request(error.into())),
-            xproto::VALUE_ERROR => return Ok(Self::Value(error.into())),
-            xproto::WINDOW_ERROR => return Ok(Self::Window(error.into())),
+            xproto::ACCESS_ERROR => return Ok(Self::Access(error.as_ref().try_into()?)),
+            xproto::ALLOC_ERROR => return Ok(Self::Alloc(error.as_ref().try_into()?)),
+            xproto::ATOM_ERROR => return Ok(Self::Atom(error.as_ref().try_into()?)),
+            xproto::COLORMAP_ERROR => return Ok(Self::Colormap(error.as_ref().try_into()?)),
+            xproto::CURSOR_ERROR => return Ok(Self::Cursor(error.as_ref().try_into()?)),
+            xproto::DRAWABLE_ERROR => return Ok(Self::Drawable(error.as_ref().try_into()?)),
+            xproto::FONT_ERROR => return Ok(Self::Font(error.as_ref().try_into()?)),
+            xproto::G_CONTEXT_ERROR => return Ok(Self::GContext(error.as_ref().try_into()?)),
+            xproto::ID_CHOICE_ERROR => return Ok(Self::IDChoice(error.as_ref().try_into()?)),
+            xproto::IMPLEMENTATION_ERROR => return Ok(Self::Implementation(error.as_ref().try_into()?)),
+            xproto::LENGTH_ERROR => return Ok(Self::Length(error.as_ref().try_into()?)),
+            xproto::MATCH_ERROR => return Ok(Self::Match(error.as_ref().try_into()?)),
+            xproto::NAME_ERROR => return Ok(Self::Name(error.as_ref().try_into()?)),
+            xproto::PIXMAP_ERROR => return Ok(Self::Pixmap(error.as_ref().try_into()?)),
+            xproto::REQUEST_ERROR => return Ok(Self::Request(error.as_ref().try_into()?)),
+            xproto::VALUE_ERROR => return Ok(Self::Value(error.as_ref().try_into()?)),
+            xproto::WINDOW_ERROR => return Ok(Self::Window(error.as_ref().try_into()?)),
             _ => {}
         }
 
@@ -222,125 +222,125 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
             #[cfg(feature = "damage")]
             Some((damage::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    damage::BAD_DAMAGE_ERROR => Ok(Self::DamageBadDamage(error.into())),
+                    damage::BAD_DAMAGE_ERROR => Ok(Self::DamageBadDamage(error.as_ref().try_into()?)),
                     _ => Ok(Self::Unknown(error)),
                 }
             }
             #[cfg(feature = "glx")]
             Some((glx::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    glx::BAD_CONTEXT_ERROR => Ok(Self::GlxBadContext(error.into())),
-                    glx::BAD_CONTEXT_STATE_ERROR => Ok(Self::GlxBadContextState(error.into())),
-                    glx::BAD_CONTEXT_TAG_ERROR => Ok(Self::GlxBadContextTag(error.into())),
-                    glx::BAD_CURRENT_DRAWABLE_ERROR => Ok(Self::GlxBadCurrentDrawable(error.into())),
-                    glx::BAD_CURRENT_WINDOW_ERROR => Ok(Self::GlxBadCurrentWindow(error.into())),
-                    glx::BAD_DRAWABLE_ERROR => Ok(Self::GlxBadDrawable(error.into())),
-                    glx::BAD_FB_CONFIG_ERROR => Ok(Self::GlxBadFBConfig(error.into())),
-                    glx::BAD_LARGE_REQUEST_ERROR => Ok(Self::GlxBadLargeRequest(error.into())),
-                    glx::BAD_PBUFFER_ERROR => Ok(Self::GlxBadPbuffer(error.into())),
-                    glx::BAD_PIXMAP_ERROR => Ok(Self::GlxBadPixmap(error.into())),
-                    glx::BAD_RENDER_REQUEST_ERROR => Ok(Self::GlxBadRenderRequest(error.into())),
-                    glx::BAD_WINDOW_ERROR => Ok(Self::GlxBadWindow(error.into())),
-                    glx::GLX_BAD_PROFILE_ARB_ERROR => Ok(Self::GlxGLXBadProfileARB(error.into())),
-                    glx::UNSUPPORTED_PRIVATE_REQUEST_ERROR => Ok(Self::GlxUnsupportedPrivateRequest(error.into())),
+                    glx::BAD_CONTEXT_ERROR => Ok(Self::GlxBadContext(error.as_ref().try_into()?)),
+                    glx::BAD_CONTEXT_STATE_ERROR => Ok(Self::GlxBadContextState(error.as_ref().try_into()?)),
+                    glx::BAD_CONTEXT_TAG_ERROR => Ok(Self::GlxBadContextTag(error.as_ref().try_into()?)),
+                    glx::BAD_CURRENT_DRAWABLE_ERROR => Ok(Self::GlxBadCurrentDrawable(error.as_ref().try_into()?)),
+                    glx::BAD_CURRENT_WINDOW_ERROR => Ok(Self::GlxBadCurrentWindow(error.as_ref().try_into()?)),
+                    glx::BAD_DRAWABLE_ERROR => Ok(Self::GlxBadDrawable(error.as_ref().try_into()?)),
+                    glx::BAD_FB_CONFIG_ERROR => Ok(Self::GlxBadFBConfig(error.as_ref().try_into()?)),
+                    glx::BAD_LARGE_REQUEST_ERROR => Ok(Self::GlxBadLargeRequest(error.as_ref().try_into()?)),
+                    glx::BAD_PBUFFER_ERROR => Ok(Self::GlxBadPbuffer(error.as_ref().try_into()?)),
+                    glx::BAD_PIXMAP_ERROR => Ok(Self::GlxBadPixmap(error.as_ref().try_into()?)),
+                    glx::BAD_RENDER_REQUEST_ERROR => Ok(Self::GlxBadRenderRequest(error.as_ref().try_into()?)),
+                    glx::BAD_WINDOW_ERROR => Ok(Self::GlxBadWindow(error.as_ref().try_into()?)),
+                    glx::GLX_BAD_PROFILE_ARB_ERROR => Ok(Self::GlxGLXBadProfileARB(error.as_ref().try_into()?)),
+                    glx::UNSUPPORTED_PRIVATE_REQUEST_ERROR => Ok(Self::GlxUnsupportedPrivateRequest(error.as_ref().try_into()?)),
                     _ => Ok(Self::Unknown(error)),
                 }
             }
             #[cfg(feature = "randr")]
             Some((randr::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    randr::BAD_CRTC_ERROR => Ok(Self::RandrBadCrtc(error.into())),
-                    randr::BAD_MODE_ERROR => Ok(Self::RandrBadMode(error.into())),
-                    randr::BAD_OUTPUT_ERROR => Ok(Self::RandrBadOutput(error.into())),
-                    randr::BAD_PROVIDER_ERROR => Ok(Self::RandrBadProvider(error.into())),
+                    randr::BAD_CRTC_ERROR => Ok(Self::RandrBadCrtc(error.as_ref().try_into()?)),
+                    randr::BAD_MODE_ERROR => Ok(Self::RandrBadMode(error.as_ref().try_into()?)),
+                    randr::BAD_OUTPUT_ERROR => Ok(Self::RandrBadOutput(error.as_ref().try_into()?)),
+                    randr::BAD_PROVIDER_ERROR => Ok(Self::RandrBadProvider(error.as_ref().try_into()?)),
                     _ => Ok(Self::Unknown(error)),
                 }
             }
             #[cfg(feature = "record")]
             Some((record::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    record::BAD_CONTEXT_ERROR => Ok(Self::RecordBadContext(error.into())),
+                    record::BAD_CONTEXT_ERROR => Ok(Self::RecordBadContext(error.as_ref().try_into()?)),
                     _ => Ok(Self::Unknown(error)),
                 }
             }
             #[cfg(feature = "render")]
             Some((render::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    render::GLYPH_ERROR => Ok(Self::RenderGlyph(error.into())),
-                    render::GLYPH_SET_ERROR => Ok(Self::RenderGlyphSet(error.into())),
-                    render::PICT_FORMAT_ERROR => Ok(Self::RenderPictFormat(error.into())),
-                    render::PICT_OP_ERROR => Ok(Self::RenderPictOp(error.into())),
-                    render::PICTURE_ERROR => Ok(Self::RenderPicture(error.into())),
+                    render::GLYPH_ERROR => Ok(Self::RenderGlyph(error.as_ref().try_into()?)),
+                    render::GLYPH_SET_ERROR => Ok(Self::RenderGlyphSet(error.as_ref().try_into()?)),
+                    render::PICT_FORMAT_ERROR => Ok(Self::RenderPictFormat(error.as_ref().try_into()?)),
+                    render::PICT_OP_ERROR => Ok(Self::RenderPictOp(error.as_ref().try_into()?)),
+                    render::PICTURE_ERROR => Ok(Self::RenderPicture(error.as_ref().try_into()?)),
                     _ => Ok(Self::Unknown(error)),
                 }
             }
             #[cfg(feature = "shm")]
             Some((shm::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    shm::BAD_SEG_ERROR => Ok(Self::ShmBadSeg(error.into())),
+                    shm::BAD_SEG_ERROR => Ok(Self::ShmBadSeg(error.as_ref().try_into()?)),
                     _ => Ok(Self::Unknown(error)),
                 }
             }
             #[cfg(feature = "sync")]
             Some((sync::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    sync::ALARM_ERROR => Ok(Self::SyncAlarm(error.into())),
-                    sync::COUNTER_ERROR => Ok(Self::SyncCounter(error.into())),
+                    sync::ALARM_ERROR => Ok(Self::SyncAlarm(error.as_ref().try_into()?)),
+                    sync::COUNTER_ERROR => Ok(Self::SyncCounter(error.as_ref().try_into()?)),
                     _ => Ok(Self::Unknown(error)),
                 }
             }
             #[cfg(feature = "xf86vidmode")]
             Some((xf86vidmode::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    xf86vidmode::BAD_CLOCK_ERROR => Ok(Self::Xf86vidmodeBadClock(error.into())),
-                    xf86vidmode::BAD_H_TIMINGS_ERROR => Ok(Self::Xf86vidmodeBadHTimings(error.into())),
-                    xf86vidmode::BAD_V_TIMINGS_ERROR => Ok(Self::Xf86vidmodeBadVTimings(error.into())),
-                    xf86vidmode::CLIENT_NOT_LOCAL_ERROR => Ok(Self::Xf86vidmodeClientNotLocal(error.into())),
-                    xf86vidmode::EXTENSION_DISABLED_ERROR => Ok(Self::Xf86vidmodeExtensionDisabled(error.into())),
-                    xf86vidmode::MODE_UNSUITABLE_ERROR => Ok(Self::Xf86vidmodeModeUnsuitable(error.into())),
-                    xf86vidmode::ZOOM_LOCKED_ERROR => Ok(Self::Xf86vidmodeZoomLocked(error.into())),
+                    xf86vidmode::BAD_CLOCK_ERROR => Ok(Self::Xf86vidmodeBadClock(error.as_ref().try_into()?)),
+                    xf86vidmode::BAD_H_TIMINGS_ERROR => Ok(Self::Xf86vidmodeBadHTimings(error.as_ref().try_into()?)),
+                    xf86vidmode::BAD_V_TIMINGS_ERROR => Ok(Self::Xf86vidmodeBadVTimings(error.as_ref().try_into()?)),
+                    xf86vidmode::CLIENT_NOT_LOCAL_ERROR => Ok(Self::Xf86vidmodeClientNotLocal(error.as_ref().try_into()?)),
+                    xf86vidmode::EXTENSION_DISABLED_ERROR => Ok(Self::Xf86vidmodeExtensionDisabled(error.as_ref().try_into()?)),
+                    xf86vidmode::MODE_UNSUITABLE_ERROR => Ok(Self::Xf86vidmodeModeUnsuitable(error.as_ref().try_into()?)),
+                    xf86vidmode::ZOOM_LOCKED_ERROR => Ok(Self::Xf86vidmodeZoomLocked(error.as_ref().try_into()?)),
                     _ => Ok(Self::Unknown(error)),
                 }
             }
             #[cfg(feature = "xfixes")]
             Some((xfixes::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    xfixes::BAD_REGION_ERROR => Ok(Self::XfixesBadRegion(error.into())),
+                    xfixes::BAD_REGION_ERROR => Ok(Self::XfixesBadRegion(error.as_ref().try_into()?)),
                     _ => Ok(Self::Unknown(error)),
                 }
             }
             #[cfg(feature = "xinput")]
             Some((xinput::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    xinput::CLASS_ERROR => Ok(Self::XinputClass(error.into())),
-                    xinput::DEVICE_ERROR => Ok(Self::XinputDevice(error.into())),
-                    xinput::DEVICE_BUSY_ERROR => Ok(Self::XinputDeviceBusy(error.into())),
-                    xinput::EVENT_ERROR => Ok(Self::XinputEvent(error.into())),
-                    xinput::MODE_ERROR => Ok(Self::XinputMode(error.into())),
+                    xinput::CLASS_ERROR => Ok(Self::XinputClass(error.as_ref().try_into()?)),
+                    xinput::DEVICE_ERROR => Ok(Self::XinputDevice(error.as_ref().try_into()?)),
+                    xinput::DEVICE_BUSY_ERROR => Ok(Self::XinputDeviceBusy(error.as_ref().try_into()?)),
+                    xinput::EVENT_ERROR => Ok(Self::XinputEvent(error.as_ref().try_into()?)),
+                    xinput::MODE_ERROR => Ok(Self::XinputMode(error.as_ref().try_into()?)),
                     _ => Ok(Self::Unknown(error)),
                 }
             }
             #[cfg(feature = "xkb")]
             Some((xkb::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    xkb::KEYBOARD_ERROR => Ok(Self::XkbKeyboard(error.into())),
+                    xkb::KEYBOARD_ERROR => Ok(Self::XkbKeyboard(error.as_ref().try_into()?)),
                     _ => Ok(Self::Unknown(error)),
                 }
             }
             #[cfg(feature = "xprint")]
             Some((xprint::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    xprint::BAD_CONTEXT_ERROR => Ok(Self::XprintBadContext(error.into())),
-                    xprint::BAD_SEQUENCE_ERROR => Ok(Self::XprintBadSequence(error.into())),
+                    xprint::BAD_CONTEXT_ERROR => Ok(Self::XprintBadContext(error.as_ref().try_into()?)),
+                    xprint::BAD_SEQUENCE_ERROR => Ok(Self::XprintBadSequence(error.as_ref().try_into()?)),
                     _ => Ok(Self::Unknown(error)),
                 }
             }
             #[cfg(feature = "xv")]
             Some((xv::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    xv::BAD_CONTROL_ERROR => Ok(Self::XvBadControl(error.into())),
-                    xv::BAD_ENCODING_ERROR => Ok(Self::XvBadEncoding(error.into())),
-                    xv::BAD_PORT_ERROR => Ok(Self::XvBadPort(error.into())),
+                    xv::BAD_CONTROL_ERROR => Ok(Self::XvBadControl(error.as_ref().try_into()?)),
+                    xv::BAD_ENCODING_ERROR => Ok(Self::XvBadEncoding(error.as_ref().try_into()?)),
+                    xv::BAD_PORT_ERROR => Ok(Self::XvBadPort(error.as_ref().try_into()?)),
                     _ => Ok(Self::Unknown(error)),
                 }
             }
