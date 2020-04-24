@@ -1,4 +1,4 @@
-#![allow(clippy::too_many_arguments)]
+#![allow(clippy::cognitive_complexity, clippy::option_as_ref_deref, clippy::too_many_arguments)]
 
 use std::cell::RefCell;
 use std::collections::hash_map::Entry as HashMapEntry;
