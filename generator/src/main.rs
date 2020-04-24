@@ -146,32 +146,14 @@ fn replace_file_if_different(file_path: &Path, data: &[u8]) -> Result<(), Error>
 }
 
 fn main2() -> Result<u8, Error> {
-    let args_defs = clap::App::new("x11rb generator")
-        .arg(
-            clap::Arg::with_name("input")
-                .short("i")
-                .value_name("INPUT_DIR")
-                .help("Input directory")
-                .required(true),
-        )
-        .arg(
-            clap::Arg::with_name("output")
-                .short("o")
-                .value_name("OUTPUT_DIR")
-                .help("Output directory")
-                .required(true),
-        );
-
-    let arg_matches = match args_defs.get_matches_safe() {
-        Ok(arg_matches) => arg_matches,
-        Err(e) => {
-            eprintln!("{}", e);
-            return Ok(1);
-        }
-    };
-
-    let input_dir_path = Path::new(arg_matches.value_of_os("input").unwrap());
-    let output_dir_path = Path::new(arg_matches.value_of_os("output").unwrap());
+    let args: Vec<_> = std::env::args_os().collect();
+    if args.len() != 3 {
+        eprintln!("USAGE:");
+        eprintln!("    {} <INPUT_DIR> <OUTPUT_DIR>", args[0].to_string_lossy());
+        return Ok(1);
+    }
+    let input_dir_path = Path::new(&args[1]);
+    let output_dir_path = Path::new(&args[2]);
 
     let xml_files = list_xmls(input_dir_path)?;
     let module = xcbgen::defs::Module::new();
