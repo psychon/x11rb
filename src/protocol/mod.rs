@@ -188,6 +188,7 @@ pub enum Error<B: std::fmt::Debug + AsRef<[u8]>> {
 
 impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
     /// Parse a generic X11 error into a concrete error type.
+    #[allow(clippy::cognitive_complexity)]
     pub fn parse(
         error: GenericError<B>,
         ext_info_provider: &dyn ExtInfoProvider,

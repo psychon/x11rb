@@ -42,6 +42,7 @@ fn generate_errors(out: &mut Output, module: &xcbgen::defs::Module) {
             out,
             "/// Parse a generic X11 error into a concrete error type."
         );
+        outln!(out, "#[allow(clippy::cognitive_complexity)]");
         outln!(out, "pub fn parse(");
         outln!(out.indent(), "error: GenericError<B>,");
         outln!(out.indent(), "ext_info_provider: &dyn ExtInfoProvider,");
