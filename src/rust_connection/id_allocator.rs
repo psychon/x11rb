@@ -88,52 +88,50 @@ impl IDAllocator {
 
 #[cfg(test)]
 mod test {
-    use std::convert::TryFrom;
-    use std::io::IoSlice;
-
-    use crate::connection::{
-        BufWithFds, DiscardMode, ReplyOrError, RequestConnection, RequestKind, SequenceNumber,
-    };
-    use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-    use crate::errors::{ConnectionError, ParseError};
-    use crate::utils::RawFdContainer;
-    use crate::x11_utils::{ExtensionInformation, GenericError};
+    use crate::errors::ReplyOrIdError;
+    use crate::protocol::xc_misc::GetXIDRangeReply;
 
     use super::IDAllocator;
 
+    fn unreachable_cb() -> Result<GetXIDRangeReply, ReplyOrIdError<[u8; 0]>> {
+        unreachable!()
+    }
+
     #[test]
     fn exhaustive() {
-        let conn = DummyConnection(None);
         let mut allocator = IDAllocator::new(0x2800, 0x1ff).unwrap();
         for expected in 0x2800..=0x29ff {
-            assert_eq!(expected, allocator.generate_id(&conn).unwrap());
+            assert_eq!(expected, allocator.generate_id_impl(unreachable_cb).unwrap());
         }
-        assert!(allocator.generate_id(&conn).is_err());
+        let cb = || -> Result<_, ReplyOrIdError<[u8; 0]>> { Err(ReplyOrIdError::IdsExhausted) };
+        assert!(allocator.generate_id_impl(cb).is_err());
     }
 
     #[test]
     fn increment() {
-        let conn = DummyConnection(None);
         let mut allocator = IDAllocator::new(0, 0b1100).unwrap();
-        assert_eq!(0b0000, allocator.generate_id(&conn).unwrap());
-        assert_eq!(0b0100, allocator.generate_id(&conn).unwrap());
-        assert_eq!(0b1000, allocator.generate_id(&conn).unwrap());
-        assert_eq!(0b1100, allocator.generate_id(&conn).unwrap());
-        assert!(allocator.generate_id(&conn).is_err());
+        assert_eq!(0b0000, allocator.generate_id_impl(unreachable_cb).unwrap());
+        assert_eq!(0b0100, allocator.generate_id_impl(unreachable_cb).unwrap());
+        assert_eq!(0b1000, allocator.generate_id_impl(unreachable_cb).unwrap());
+        assert_eq!(0b1100, allocator.generate_id_impl(unreachable_cb).unwrap());
+        let cb = || -> Result<_, ReplyOrIdError<[u8; 0]>> { Err(ReplyOrIdError::IdsExhausted) };
+        assert!(allocator.generate_id_impl(cb).is_err());
     }
 
     #[test]
     fn new_range() {
-        let conn = DummyConnection(Some(generate_get_xid_range_reply(0x13370, 3)));
+        let reply = generate_get_xid_range_reply(0x13370, 3);
         let mut allocator = IDAllocator::new(0x420, 2).unwrap();
-        assert_eq!(0x420, allocator.generate_id(&conn).unwrap());
-        assert_eq!(0x420 + 2, allocator.generate_id(&conn).unwrap());
+        assert_eq!(0x420, allocator.generate_id_impl(unreachable_cb).unwrap());
+        assert_eq!(0x420 + 2, allocator.generate_id_impl(unreachable_cb).unwrap());
         // At this point the range is exhausted and a GetXIDRange request is sent
-        assert_eq!(0x13370, allocator.generate_id(&conn).unwrap());
-        assert_eq!(0x13370 + 2, allocator.generate_id(&conn).unwrap());
-        assert_eq!(0x13370 + 4, allocator.generate_id(&conn).unwrap());
+        let cb = || -> Result<_, ReplyOrIdError<[u8; 0]>> { Ok(reply) };
+        assert_eq!(0x13370, allocator.generate_id_impl(cb).unwrap());
+        assert_eq!(0x13370 + 2, allocator.generate_id_impl(unreachable_cb).unwrap());
+        assert_eq!(0x13370 + 4, allocator.generate_id_impl(unreachable_cb).unwrap());
         // At this point the range is exhausted and a GetXIDRange request is sent
-        assert_eq!(0x13370, allocator.generate_id(&conn).unwrap());
+        let cb = || -> Result<_, ReplyOrIdError<[u8; 0]>> { Ok(reply) };
+        assert_eq!(0x13370, allocator.generate_id_impl(cb).unwrap());
     }
 
     #[test]
@@ -145,120 +143,13 @@ mod test {
         }
     }
 
-    fn generate_get_xid_range_reply(start_id: u32, count: u32) -> Vec<u8> {
-        let mut reply = vec![0; 8];
-        reply.extend(&start_id.to_ne_bytes());
-        reply.extend(&count.to_ne_bytes());
-        reply
-    }
-
-    // If the Option is None, the GetXIDRange request fails (unsupported extension). Otherwise,
-    // this is the raw reply that is received for that request.
-    struct DummyConnection(Option<Vec<u8>>);
-
-    impl RequestConnection for DummyConnection {
-        type Buf = Vec<u8>;
-
-        fn send_request_with_reply<R>(
-            &self,
-            _bufs: &[IoSlice<'_>],
-            _fds: Vec<RawFdContainer>,
-        ) -> Result<Cookie<'_, Self, R>, ConnectionError>
-        where
-            R: for<'a> TryFrom<&'a [u8], Error = ParseError>,
-        {
-            Ok(Cookie::new(self, 0))
-        }
-
-        fn send_request_with_reply_with_fds<R>(
-            &self,
-            _bufs: &[IoSlice<'_>],
-            _fds: Vec<RawFdContainer>,
-        ) -> Result<CookieWithFds<'_, Self, R>, ConnectionError>
-        where
-            R: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>,
-        {
-            unimplemented!()
-        }
-
-        fn send_request_without_reply(
-            &self,
-            _bufs: &[IoSlice<'_>],
-            _fds: Vec<RawFdContainer>,
-        ) -> Result<VoidCookie<'_, Self>, ConnectionError> {
-            unimplemented!()
-        }
-
-        fn discard_reply(&self, _sequence: SequenceNumber, _kind: RequestKind, _mode: DiscardMode) {
-            unimplemented!()
-        }
-
-        fn prefetch_extension_information(
-            &self,
-            _extension_name: &'static str,
-        ) -> Result<(), ConnectionError> {
-            unimplemented!();
-        }
-
-        fn extension_information(
-            &self,
-            _extension_name: &'static str,
-        ) -> Result<Option<ExtensionInformation>, ConnectionError> {
-            Ok(self.0.as_ref().map(|_| ExtensionInformation {
-                major_opcode: 127,
-                first_event: 0,
-                first_error: 0,
-            }))
-        }
-
-        fn wait_for_reply_or_raw_error(
-            &self,
-            _sequence: SequenceNumber,
-        ) -> Result<ReplyOrError<Vec<u8>>, ConnectionError> {
-            Ok(ReplyOrError::Reply(self.0.as_ref().unwrap().clone()))
-        }
-
-        fn wait_for_reply(
-            &self,
-            _sequence: SequenceNumber,
-        ) -> Result<Option<Vec<u8>>, ConnectionError> {
-            unimplemented!()
-        }
-
-        fn wait_for_reply_with_fds_raw(
-            &self,
-            _sequence: SequenceNumber,
-        ) -> Result<ReplyOrError<BufWithFds<Vec<u8>>, Vec<u8>>, ConnectionError> {
-            unimplemented!()
-        }
-
-        fn check_for_raw_error(
-            &self,
-            _sequence: SequenceNumber,
-        ) -> Result<Option<GenericError<Vec<u8>>>, ConnectionError> {
-            unimplemented!()
-        }
-
-        fn maximum_request_bytes(&self) -> usize {
-            unimplemented!()
-        }
-
-        fn prefetch_maximum_request_bytes(&self) {
-            unimplemented!()
-        }
-
-        fn parse_error(
-            &self,
-            _error: GenericError<Self::Buf>,
-        ) -> Result<crate::protocol::Error<Self::Buf>, ParseError> {
-            unimplemented!()
-        }
-
-        fn parse_event(
-            &self,
-            _event: crate::x11_utils::GenericEvent<Self::Buf>,
-        ) -> Result<crate::protocol::Event<Self::Buf>, ParseError> {
-            unimplemented!()
+    fn generate_get_xid_range_reply(start_id: u32, count: u32) -> GetXIDRangeReply {
+        GetXIDRangeReply {
+            response_type: 0,
+            sequence: 0,
+            length: 0,
+            start_id,
+            count,
         }
     }
 }
