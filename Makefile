@@ -3,6 +3,6 @@ OUT=src/protocol
 
 generate:
 	mkdir -p "$(OUT)"
-	cargo run -p x11rb-generator -- -i "$(PROTO)/src" -o "$(OUT)"
+	cargo run -p x11rb-generator -- "$(PROTO)/src" "$(OUT)"
 
 .PHONY: generate
