@@ -59,10 +59,7 @@ impl IDAllocator {
     /// Generate the next ID.
     ///
     /// The `get_xid_range` callback is used to request more IDs from the X11 server if necessary.
-    fn generate_id_impl<B, F>(
-        &mut self,
-        get_xid_range: F,
-    ) -> Result<u32, ReplyOrIdError<B>>
+    fn generate_id_impl<B, F>(&mut self, get_xid_range: F) -> Result<u32, ReplyOrIdError<B>>
     where
         B: std::fmt::Debug + AsRef<[u8]>,
         F: FnOnce() -> Result<GetXIDRangeReply, ReplyOrIdError<B>>,
@@ -101,7 +98,10 @@ mod test {
     fn exhaustive() {
         let mut allocator = IDAllocator::new(0x2800, 0x1ff).unwrap();
         for expected in 0x2800..=0x29ff {
-            assert_eq!(expected, allocator.generate_id_impl(unreachable_cb).unwrap());
+            assert_eq!(
+                expected,
+                allocator.generate_id_impl(unreachable_cb).unwrap()
+            );
         }
         let cb = || -> Result<_, ReplyOrIdError<[u8; 0]>> { Err(ReplyOrIdError::IdsExhausted) };
         assert!(allocator.generate_id_impl(cb).is_err());
@@ -123,12 +123,12 @@ mod test {
         let reply = generate_get_xid_range_reply(0x13370, 3);
         let mut allocator = IDAllocator::new(0x420, 2).unwrap();
         assert_eq!(0x420, allocator.generate_id_impl(unreachable_cb).unwrap());
-        assert_eq!(0x420 + 2, allocator.generate_id_impl(unreachable_cb).unwrap());
+        assert_eq!(0x422, allocator.generate_id_impl(unreachable_cb).unwrap());
         // At this point the range is exhausted and a GetXIDRange request is sent
         let cb = || -> Result<_, ReplyOrIdError<[u8; 0]>> { Ok(reply) };
         assert_eq!(0x13370, allocator.generate_id_impl(cb).unwrap());
-        assert_eq!(0x13370 + 2, allocator.generate_id_impl(unreachable_cb).unwrap());
-        assert_eq!(0x13370 + 4, allocator.generate_id_impl(unreachable_cb).unwrap());
+        assert_eq!(0x13372, allocator.generate_id_impl(unreachable_cb).unwrap());
+        assert_eq!(0x13374, allocator.generate_id_impl(unreachable_cb).unwrap());
         // At this point the range is exhausted and a GetXIDRange request is sent
         let cb = || -> Result<_, ReplyOrIdError<[u8; 0]>> { Ok(reply) };
         assert_eq!(0x13370, allocator.generate_id_impl(cb).unwrap());
