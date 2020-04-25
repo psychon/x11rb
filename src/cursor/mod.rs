@@ -4,19 +4,19 @@
 
 #![allow(unused_results)]
 
-use crate::NONE;
 use crate::connection::Connection;
 use crate::cookie::Cookie as X11Cookie;
 use crate::errors::{ConnectionError, ReplyOrIdError};
 #[cfg(feature = "render")]
 use crate::protocol::render::{self, Pictformat};
 use crate::protocol::xproto::{self, Font, Window};
+use crate::NONE;
 
 use std::fs::File;
 
+mod find_cursor;
 #[cfg(feature = "render")]
 mod parse_cursor;
-mod find_cursor;
 
 /// The level of cursor support of the X11 server
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -38,7 +38,10 @@ pub struct Cookie<'a, C: Connection> {
     screen: &'a xproto::Screen,
     resource_manager: X11Cookie<'a, C, xproto::GetPropertyReply>,
     #[cfg(feature = "render")]
-    render_info: Option<(X11Cookie<'a, C, render::QueryVersionReply>, X11Cookie<'a, C, render::QueryPictFormatsReply>)>,
+    render_info: Option<(
+        X11Cookie<'a, C, render::QueryVersionReply>,
+        X11Cookie<'a, C, render::QueryPictFormatsReply>,
+    )>,
 }
 
 impl<C: Connection> Cookie<'_, C> {
@@ -57,7 +60,13 @@ impl<C: Connection> Cookie<'_, C> {
                 picture_format = find_format(formats.reply()?);
             }
         }
-        Ok(Self::from_replies(self.conn, self.screen, resource_manager, render_version, picture_format)?)
+        Ok(Self::from_replies(
+            self.conn,
+            self.screen,
+            resource_manager,
+            render_version,
+            picture_format,
+        )?)
     }
 
     /// Get the handle from the replies from the X11 server
@@ -74,7 +83,7 @@ impl<C: Connection> Cookie<'_, C> {
                     (Some(version), Some(formats)) => {
                         render_version = (version.major_version, version.minor_version);
                         picture_format = find_format(formats);
-                    },
+                    }
                     _ => return Ok(None),
                 }
             }
@@ -83,7 +92,13 @@ impl<C: Connection> Cookie<'_, C> {
             None => return Ok(None),
             Some(resource_manager) => resource_manager,
         };
-        Ok(Some(Self::from_replies(self.conn, self.screen, resource_manager, render_version, picture_format)?))
+        Ok(Some(Self::from_replies(
+            self.conn,
+            self.screen,
+            resource_manager,
+            render_version,
+            picture_format,
+        )?))
     }
 
     fn from_replies(
@@ -153,7 +168,10 @@ impl Handle {
         let mut render_info = None;
         #[cfg(feature = "render")]
         {
-            if conn.extension_information(render::X11_EXTENSION_NAME)?.is_some() {
+            if conn
+                .extension_information(render::X11_EXTENSION_NAME)?
+                .is_some()
+            {
                 let render_version = render::query_version(conn, 0, 8)?;
                 let render_pict_format = render::query_pict_formats(conn)?;
                 render_info = Some((render_version, render_pict_format));
@@ -175,9 +193,13 @@ impl Handle {
 
     /// Loads the specified cursor, either from the cursor theme or by falling back to the X11
     /// "cursor" font.
-    pub fn load_cursor<C>(&self, conn: &C, name: &str) -> Result<xproto::Cursor, ReplyOrIdError<C::Buf>>
+    pub fn load_cursor<C>(
+        &self,
+        conn: &C,
+        name: &str,
+    ) -> Result<xproto::Cursor, ReplyOrIdError<C::Buf>>
     where
-        C: Connection
+        C: Connection,
     {
         load_cursor(conn, self, name)
     }
@@ -186,7 +208,7 @@ impl Handle {
 fn open_cursor(theme: &Option<String>, name: &str) -> Option<find_cursor::Cursor<File>> {
     if let Some(theme) = theme {
         if let Ok(cursor) = find_cursor::find_cursor(theme, name) {
-            return Some(cursor)
+            return Some(cursor);
         }
     }
     if let Ok(cursor) = find_cursor::find_cursor("default", name) {
@@ -196,7 +218,11 @@ fn open_cursor(theme: &Option<String>, name: &str) -> Option<find_cursor::Cursor
     }
 }
 
-fn create_core_cursor<C: Connection>(conn: &C, cursor_font: Font, cursor: u16) -> Result<xproto::Cursor, ReplyOrIdError<C::Buf>> {
+fn create_core_cursor<C: Connection>(
+    conn: &C,
+    cursor_font: Font,
+    cursor: u16,
+) -> Result<xproto::Cursor, ReplyOrIdError<C::Buf>> {
     let result = conn.generate_id()?;
     xproto::create_glyph_cursor(
         conn,
@@ -260,7 +286,13 @@ fn create_render_cursor<C: Connection>(
         &pixels,
     )?;
 
-    render::create_picture(conn, picture, pixmap, handle.picture_format, &Default::default())?;
+    render::create_picture(
+        conn,
+        picture,
+        pixmap,
+        handle.picture_format,
+        &Default::default(),
+    )?;
     render::create_cursor(conn, cursor, picture, image.x_hot, image.y_hot)?;
     render::free_picture(conn, picture)?;
 
@@ -270,11 +302,17 @@ fn create_render_cursor<C: Connection>(
     })
 }
 
-fn load_cursor<C: Connection>(conn: &C, handle: &Handle, name: &str) -> Result<xproto::Cursor, ReplyOrIdError<C::Buf>> {
+fn load_cursor<C: Connection>(
+    conn: &C,
+    handle: &Handle,
+    name: &str,
+) -> Result<xproto::Cursor, ReplyOrIdError<C::Buf>> {
     // Find the right cursor, load it directly if it is a core cursor
     let cursor_file = match open_cursor(&handle.theme, name) {
         None => return Ok(NONE),
-        Some(find_cursor::Cursor::CoreChar(c)) => return create_core_cursor(conn, handle.cursor_font, c),
+        Some(find_cursor::Cursor::CoreChar(c)) => {
+            return create_core_cursor(conn, handle.cursor_font, c)
+        }
         Some(find_cursor::Cursor::File(f)) => f,
     };
 
@@ -293,8 +331,9 @@ fn load_cursor<C: Connection>(conn: &C, handle: &Handle, name: &str) -> Result<x
     {
         // Load the cursor from the file
         use std::io::BufReader;
-        let images = parse_cursor::parse_cursor(&mut BufReader::new(cursor_file), handle.cursor_size)
-            .or(Err(crate::errors::ParseError::ParseError))?;
+        let images =
+            parse_cursor::parse_cursor(&mut BufReader::new(cursor_file), handle.cursor_size)
+                .or(Err(crate::errors::ParseError::ParseError))?;
         let mut images = &images[..];
 
         // No animated cursor support? Only use the first image
@@ -304,7 +343,8 @@ fn load_cursor<C: Connection>(conn: &C, handle: &Handle, name: &str) -> Result<x
 
         // Now transfer the cursors to the X11 server
         let mut storage = None;
-        let cursors = images.iter()
+        let cursors = images
+            .iter()
             .map(|image| create_render_cursor(conn, handle, image, &mut storage))
             .collect::<Result<Vec<_>, _>>()?;
         if let Some((pixmap, gc, _, _)) = storage {
@@ -327,19 +367,21 @@ fn load_cursor<C: Connection>(conn: &C, handle: &Handle, name: &str) -> Result<x
 
 #[cfg(feature = "render")]
 fn find_format(reply: render::QueryPictFormatsReply) -> Pictformat {
-    reply.formats.iter()
-        .filter(|format|
-                format.type_ == render::PictType::Direct &&
-                format.depth == 32 &&
-                format.direct.red_shift == 16 &&
-                format.direct.red_mask == 0xff &&
-                format.direct.green_shift == 8 &&
-                format.direct.green_mask == 0xff &&
-                format.direct.blue_shift == 0 &&
-                format.direct.blue_mask == 0xff &&
-                format.direct.alpha_shift == 24 &&
-                format.direct.alpha_mask == 0xff
-                )
+    reply
+        .formats
+        .iter()
+        .filter(|format| {
+            format.type_ == render::PictType::Direct
+                && format.depth == 32
+                && format.direct.red_shift == 16
+                && format.direct.red_mask == 0xff
+                && format.direct.green_shift == 8
+                && format.direct.green_mask == 0xff
+                && format.direct.blue_shift == 0
+                && format.direct.blue_mask == 0xff
+                && format.direct.alpha_shift == 24
+                && format.direct.alpha_mask == 0xff
+        })
         .map(|format| format.id)
         .next()
         .expect("The X11 server is missing the RENDER ARGB_32 standard format!")
@@ -350,9 +392,7 @@ fn parse_resource_manager(rm: &[u8]) -> (Option<String>, u32, u32) {
 
     for line in rm.split(|&c| c == b'\n') {
         // Split line at first ':'
-        let pos = match line.iter()
-            .enumerate()
-            .find(|&(_, &c)| c == b':') {
+        let pos = match line.iter().enumerate().find(|&(_, &c)| c == b':') {
             None => continue,
             Some((pos, _)) => pos,
         };
@@ -372,15 +412,15 @@ fn parse_resource_manager(rm: &[u8]) -> (Option<String>, u32, u32) {
                 b"Xcursor.theme" => theme = Some(value.to_string()),
                 b"Xcursor.size" => match value.parse() {
                     Ok(num) => cursor_size = num,
-                    _ => {},
-                }
+                    _ => {}
+                },
                 b"Xft.dpi" => match value.parse() {
                     Ok(num) => xft_dpi = num,
-                    _ => {},
-                }
-                _ => {},
-            }
-            _ => {},
+                    _ => {}
+                },
+                _ => {}
+            },
+            _ => {}
         }
     }
 
@@ -390,7 +430,7 @@ fn parse_resource_manager(rm: &[u8]) -> (Option<String>, u32, u32) {
 fn get_cursor_size(rm_cursor_size: u32, rm_xft_dpi: u32, screen: &xproto::Screen) -> u32 {
     match std::env::var("XCURSOR_SIZE").map(|s| s.parse()) {
         Ok(Ok(size)) => return size,
-        _ => {},
+        _ => {}
     }
     if rm_cursor_size > 0 {
         return rm_cursor_size;

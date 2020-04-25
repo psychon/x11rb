@@ -2,8 +2,8 @@ extern crate x11rb;
 
 use x11rb::connection::Connection;
 use x11rb::cursor::Handle as CursorHandle;
-use x11rb::protocol::Event;
 use x11rb::protocol::xproto::*;
+use x11rb::protocol::Event;
 use x11rb::wrapper::ConnectionExt as _;
 
 fn main() {

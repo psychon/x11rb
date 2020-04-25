@@ -125,27 +125,22 @@ pub(crate) enum Cursor<F> {
 }
 
 // Get the 'Inherits' entry from an index.theme file
-fn parse_inherits(filename: &Path)
--> Result<Vec<OsString>, IOError>
-{
+fn parse_inherits(filename: &Path) -> Result<Vec<OsString>, IOError> {
     let file = File::open(filename)?;
     let result = parse_inherits_impl(&mut BufReader::new(file))?;
     #[cfg(unix)]
     {
         use std::os::unix::ffi::OsStringExt;
-        let result = result.into_iter()
-            .map(|e| OsString::from_vec(e))
-            .collect();
+        let result = result.into_iter().map(|e| OsString::from_vec(e)).collect();
         Ok(result)
     }
     #[cfg(windows)]
     {
         use std::os::windows::ffi::OsStringExt;
-        let result = result.into_iter()
+        let result = result
+            .into_iter()
             .map(|e| {
-                let wide = e.into_iter()
-                    .map(u16::from)
-                    .collect::<Vec<_>>();
+                let wide = e.into_iter().map(u16::from).collect::<Vec<_>>();
                 OsString::from_wide(wide)
             })
             .collect();
@@ -154,10 +149,7 @@ fn parse_inherits(filename: &Path)
 }
 
 // Get the 'Inherits' entry from an index.theme file
-fn parse_inherits_impl(
-    input: &mut impl BufRead,
-) -> Result<Vec<Vec<u8>>, IOError>
-{
+fn parse_inherits_impl(input: &mut impl BufRead) -> Result<Vec<Vec<u8>>, IOError> {
     let mut buffer = Vec::new();
     loop {
         buffer.clear();
@@ -165,7 +157,7 @@ fn parse_inherits_impl(
         // Read a line
         if 0 == input.read_until(b'\n', &mut buffer)? {
             // End of file, return an empty result
-            return Ok(Default::default())
+            return Ok(Default::default());
         }
 
         // Remove end of line marker
@@ -212,7 +204,7 @@ fn parse_inherits_impl(
                             None => break,
                         };
                         if !should_skip(last) {
-                            break
+                            break;
                         }
                         part = rest;
                     }
@@ -233,15 +225,14 @@ mod test_parse_inherits {
 
     #[test]
     fn parse_inherits_successful() {
-        let input = b"Hi\nInherits = \t ; whatever ;,::; stuff : i s ,: \tthis \t \nInherits=ignored\n";
+        let input =
+            b"Hi\nInherits = \t ; whatever ;,::; stuff : i s ,: \tthis \t \nInherits=ignored\n";
         let mut input = Cursor::new(&input[..]);
         let result = parse_inherits_impl(&mut input).unwrap();
-        assert_eq!(result, vec![
-                   &b"whatever"[..],
-                   &b"stuff"[..],
-                   &b"i s"[..],
-                   &b"this"[..],
-        ]);
+        assert_eq!(
+            result,
+            vec![&b"whatever"[..], &b"stuff"[..], &b"i s"[..], &b"this"[..]]
+        );
     }
 }
 
@@ -283,7 +274,8 @@ fn split_at(input: &OsStr, separator: u8) -> Vec<OsString> {
     #[cfg(unix)]
     {
         use std::os::unix::ffi::OsStrExt;
-        input.as_bytes()
+        input
+            .as_bytes()
             .split(|&b| b == separator)
             .map(|chunk| OsStr::from_bytes(chunk).to_os_string())
             .collect()
@@ -292,7 +284,8 @@ fn split_at(input: &OsStr, separator: u8) -> Vec<OsString> {
     {
         use std::os::windows::ffi::{OsStrExt, OsStringExt};
         let separator = u16::from(separator);
-        input.encode_wide()
+        input
+            .encode_wide()
             .split(|&b| b == separator)
             .map(|chunk| OsString::from_wide(chunk))
             .collect()
@@ -305,11 +298,19 @@ pub(crate) fn find_cursor(theme: &str, name: &str) -> Result<Cursor<File>, Error
         Some(home) => home,
         None => return Err(Error::NoHomeDir),
     };
-    let cursor_path = var_os("XCURSOR_PATH")
-        .unwrap_or_else(|| "~/.icons:/usr/share/icons:/usr/share/pixmaps:/usr/X11R6/lib/X11/icons".into());
+    let cursor_path = var_os("XCURSOR_PATH").unwrap_or_else(|| {
+        "~/.icons:/usr/share/icons:/usr/share/pixmaps:/usr/X11R6/lib/X11/icons".into()
+    });
     let open_cursor = |file: &Path| File::open(file);
     let parse_inherits = |file: &Path| parse_inherits(file);
-    find_cursor_impl(&home, &cursor_path, theme, name, open_cursor, parse_inherits)
+    find_cursor_impl(
+        &home,
+        &cursor_path,
+        theme,
+        name,
+        open_cursor,
+        parse_inherits,
+    )
 }
 
 fn find_cursor_impl<F, G, H>(
@@ -376,17 +377,26 @@ where
 
 #[cfg(test)]
 mod test_find_cursor {
-    use super::{Cursor, Error, find_cursor_impl};
+    use super::{find_cursor_impl, Cursor, Error};
     use crate::errors::ConnectionError;
-    use std::path::Path;
     use std::io::{Error as IOError, ErrorKind};
+    use std::path::Path;
 
     #[test]
     fn core_cursor() {
         let cb1 = |_: &Path| -> Result<(), _> { unimplemented!() };
         let cb2 = |_: &Path| unimplemented!();
-        match find_cursor_impl("unused".as_ref(), "unused".as_ref(), "core", "heart", cb1, cb2).unwrap() {
-            Cursor::CoreChar(31) => {},
+        match find_cursor_impl(
+            "unused".as_ref(),
+            "unused".as_ref(),
+            "core",
+            "heart",
+            cb1,
+            cb2,
+        )
+        .unwrap()
+        {
+            Cursor::CoreChar(31) => {}
             e => panic!("Unexpected result {:?}", e),
         }
     }
@@ -397,26 +407,42 @@ mod test_find_cursor {
         let mut inherit_parsed = Vec::new();
         let cb1 = |path: &Path| -> Result<(), _> {
             opened.push(path.to_str().unwrap().to_owned());
-            Err(IOError::new(ErrorKind::Other, ConnectionError::UnknownError))
+            Err(IOError::new(
+                ErrorKind::Other,
+                ConnectionError::UnknownError,
+            ))
         };
         let cb2 = |path: &Path| {
             inherit_parsed.push(path.to_str().unwrap().to_owned());
             Ok(Vec::new())
         };
-        match find_cursor_impl("home".as_ref(), "path:~/some/:/entries".as_ref(), "theme", "theCursor", cb1, cb2) {
-            Err(Error::NothingFound) => {},
+        match find_cursor_impl(
+            "home".as_ref(),
+            "path:~/some/:/entries".as_ref(),
+            "theme",
+            "theCursor",
+            cb1,
+            cb2,
+        ) {
+            Err(Error::NothingFound) => {}
             e => panic!("Unexpected result {:?}", e),
         }
-        assert_eq!(opened, &[
-            "path/theme/cursors/theCursor",
-            "home/some/theme/cursors/theCursor",
-            "/entries/theme/cursors/theCursor",
-        ]);
-        assert_eq!(inherit_parsed, &[
-            "path/theme/index.theme",
-            "home/some/theme/index.theme",
-            "/entries/theme/index.theme",
-        ]);
+        assert_eq!(
+            opened,
+            &[
+                "path/theme/cursors/theCursor",
+                "home/some/theme/cursors/theCursor",
+                "/entries/theme/cursors/theCursor",
+            ]
+        );
+        assert_eq!(
+            inherit_parsed,
+            &[
+                "path/theme/index.theme",
+                "home/some/theme/index.theme",
+                "/entries/theme/index.theme",
+            ]
+        );
     }
 
     #[test]
@@ -424,7 +450,10 @@ mod test_find_cursor {
         let mut opened = Vec::new();
         let cb1 = |path: &Path| -> Result<(), _> {
             opened.push(path.to_str().unwrap().to_owned());
-            Err(IOError::new(ErrorKind::Other, ConnectionError::UnknownError))
+            Err(IOError::new(
+                ErrorKind::Other,
+                ConnectionError::UnknownError,
+            ))
         };
         let cb2 = |path: &Path| {
             if path.starts_with("base/theTheme") {
@@ -435,20 +464,30 @@ mod test_find_cursor {
                 Ok(vec![])
             }
         };
-        match find_cursor_impl("home".as_ref(), "path:base:tail".as_ref(), "theTheme", "theCursor", cb1, cb2) {
-            Err(Error::NothingFound) => {},
+        match find_cursor_impl(
+            "home".as_ref(),
+            "path:base:tail".as_ref(),
+            "theTheme",
+            "theCursor",
+            cb1,
+            cb2,
+        ) {
+            Err(Error::NothingFound) => {}
             e => panic!("Unexpected result {:?}", e),
         }
-        assert_eq!(opened, &[
-            "path/theTheme/cursors/theCursor",
-            "base/theTheme/cursors/theCursor",
-            "tail/theTheme/cursors/theCursor",
-            "path/inherited/cursors/theCursor",
-            "base/inherited/cursors/theCursor",
-            "tail/inherited/cursors/theCursor",
-            "path/theEnd/cursors/theCursor",
-            "base/theEnd/cursors/theCursor",
-            "tail/theEnd/cursors/theCursor",
-        ]);
+        assert_eq!(
+            opened,
+            &[
+                "path/theTheme/cursors/theCursor",
+                "base/theTheme/cursors/theCursor",
+                "tail/theTheme/cursors/theCursor",
+                "path/inherited/cursors/theCursor",
+                "base/inherited/cursors/theCursor",
+                "tail/inherited/cursors/theCursor",
+                "path/theEnd/cursors/theCursor",
+                "base/theEnd/cursors/theCursor",
+                "tail/theEnd/cursors/theCursor",
+            ]
+        );
     }
 }

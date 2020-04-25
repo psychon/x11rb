@@ -62,7 +62,12 @@ pub(crate) struct Image {
 impl Image {
     /// Read an `Image` from a reader
     fn read<R: Read>(read: &mut R, expected_kind: u32, expected_size: u32) -> Result<Self, Error> {
-        let (_header, kind, size, _version) = (read_u32(read)?, read_u32(read)?, read_u32(read)?, read_u32(read)?);
+        let (_header, kind, size, _version) = (
+            read_u32(read)?,
+            read_u32(read)?,
+            read_u32(read)?,
+            read_u32(read)?,
+        );
         if (kind, size) != (expected_kind, expected_size) {
             return Err(Error::CorruptImage);
         }
@@ -127,7 +132,7 @@ fn find_best_size(toc: &[TocEntry], desired_size: u32) -> Result<u32, Error> {
     fn is_better(desired_size: u32, entry: &TocEntry, result: &Result<u32, Error>) -> bool {
         match result {
             Err(_) => true,
-            Ok(size) => distance(entry.size, desired_size) < distance(*size, desired_size)
+            Ok(size) => distance(entry.size, desired_size) < distance(*size, desired_size),
         }
     }
 
@@ -145,9 +150,13 @@ fn find_best_size(toc: &[TocEntry], desired_size: u32) -> Result<u32, Error> {
 pub(crate) fn parse_cursor<R: Read + Seek>(
     input: &mut R,
     desired_size: u32,
-) -> Result<Vec<Image>, Error>
-{
-    let (magic, header, _version, ntoc) = (read_u32(input)?, read_u32(input)?, read_u32(input)?, read_u32(input)?);
+) -> Result<Vec<Image>, Error> {
+    let (magic, header, _version, ntoc) = (
+        read_u32(input)?,
+        read_u32(input)?,
+        read_u32(input)?,
+        read_u32(input)?,
+    );
 
     if magic != FILE_MAGIC {
         return Err(Error::InvalidMagic);
@@ -170,7 +179,7 @@ pub(crate) fn parse_cursor<R: Read + Seek>(
     let mut result = Vec::new();
     for entry in toc {
         if entry.kind != IMAGE_TYPE || entry.size != size {
-            continue
+            continue;
         }
         let _ = input.seek(SeekFrom::Start(entry.position.into()))?;
         result.push(Image::read(input, entry.kind, entry.size)?);
@@ -181,7 +190,7 @@ pub(crate) fn parse_cursor<R: Read + Seek>(
 
 #[cfg(test)]
 mod test {
-    use super::{Error, Image, TocEntry, IMAGE_TYPE, find_best_size, parse_cursor};
+    use super::{find_best_size, parse_cursor, Error, Image, TocEntry, IMAGE_TYPE};
     use std::io::{Cursor, ErrorKind};
 
     #[test]
@@ -197,20 +206,10 @@ mod test {
             0x08, 0x00, 0x00, 0x00, // y_hot 8
             0x2a, 0x00, 0x00, 0x00, // delay 42
             // pixels
-            0x01, 0x02, 0x03, 0x04,
-            0x05, 0x06, 0x07, 0x08,
-            0x09, 0x0a, 0x0b, 0x0c,
-            0x0d, 0x0e, 0x0f, 0x10,
-            0x11, 0x12, 0x13, 0x14,
-            0x15, 0x16, 0x17, 0x18,
-            0x19, 0x1a, 0x1b, 0x1c,
-            0x1d, 0x1e, 0x1f, 0x20,
-            0x21, 0x22, 0x23, 0x24,
-            0x25, 0x26, 0x27, 0x28,
-            0x29, 0x2a, 0x2b, 0x2c,
-            0x2d, 0x2e, 0x2f, 0x30,
-            0x31, 0x32, 0x33, 0x34,
-            0x35, 0x36, 0x37, 0x38,
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e,
+            0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c,
+            0x1d, 0x1e, 0x1f, 0x20, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2a,
+            0x2b, 0x2c, 0x2d, 0x2e, 0x2f, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
             0x39, 0x3a, 0x3b, 0x3c,
         ];
         let image = Image::read(&mut Cursor::new(&data[..]), IMAGE_TYPE, 4).unwrap();
@@ -219,12 +218,26 @@ mod test {
         assert_eq!(image.x_hot, 7);
         assert_eq!(image.y_hot, 8);
         assert_eq!(image.delay, 42);
-        assert_eq!(image.pixels, &[
-                   0x0403_0201, 0x0807_0605, 0x0c0b_0a09, 0x100f_0e0d,
-                   0x1413_1211, 0x1817_1615, 0x1c1b_1a19, 0x201f_1e1d,
-                   0x2423_2221, 0x2827_2625, 0x2c2b_2a29, 0x302f_2e2d,
-                   0x3433_3231, 0x3837_3635, 0x3c3b_3a39,
-        ]);
+        assert_eq!(
+            image.pixels,
+            &[
+                0x0403_0201,
+                0x0807_0605,
+                0x0c0b_0a09,
+                0x100f_0e0d,
+                0x1413_1211,
+                0x1817_1615,
+                0x1c1b_1a19,
+                0x201f_1e1d,
+                0x2423_2221,
+                0x2827_2625,
+                0x2c2b_2a29,
+                0x302f_2e2d,
+                0x3433_3231,
+                0x3837_3635,
+                0x3c3b_3a39,
+            ]
+        );
     }
 
     #[test]
@@ -241,7 +254,7 @@ mod test {
             0x00, 0x00, 0x00, 0x00, // delay 0
         ];
         match Image::read(&mut Cursor::new(&data[..]), IMAGE_TYPE, 4) {
-            Err(Error::CorruptImage) => {},
+            Err(Error::CorruptImage) => {}
             r => panic!("Unexpected result {:?}", r),
         }
     }
@@ -260,7 +273,7 @@ mod test {
             0x00, 0x00, 0x00, 0x00, // delay 0
         ];
         match Image::read(&mut Cursor::new(&data[..]), IMAGE_TYPE, 42) {
-            Err(Error::CorruptImage) => {},
+            Err(Error::CorruptImage) => {}
             r => panic!("Unexpected result {:?}", r),
         }
     }
@@ -279,7 +292,7 @@ mod test {
             0x00, 0x00, 0x00, 0x00, // delay 0
         ];
         match Image::read(&mut Cursor::new(&data[..]), IMAGE_TYPE, 4) {
-            Err(Error::ImageTooLarge) => {},
+            Err(Error::ImageTooLarge) => {}
             r => panic!("Unexpected result {:?}", r),
         }
     }
@@ -298,7 +311,7 @@ mod test {
             0x00, 0x00, 0x00, 0x00, // delay 0
         ];
         match Image::read(&mut Cursor::new(&data[..]), IMAGE_TYPE, 4) {
-            Err(Error::ImageTooLarge) => {},
+            Err(Error::ImageTooLarge) => {}
             r => panic!("Unexpected result {:?}", r),
         }
     }
@@ -307,7 +320,7 @@ mod test {
     fn read_image_too_short() {
         let data = [];
         match Image::read(&mut Cursor::new(&data[..]), IMAGE_TYPE, 4) {
-            Err(Error::IO(e)) if e.kind() == ErrorKind::UnexpectedEof => {},
+            Err(Error::IO(e)) if e.kind() == ErrorKind::UnexpectedEof => {}
             r => panic!("Unexpected result {:?}", r),
         }
     }
@@ -316,20 +329,18 @@ mod test {
     fn find_best_size_empty_input() {
         let res = find_best_size(&[], 42);
         match res {
-            Err(Error::NoImages) => {},
+            Err(Error::NoImages) => {}
             r => panic!("Unexpected result {:?}", r),
         }
     }
 
     #[test]
     fn find_best_size_one_input() {
-        let input = [
-            TocEntry {
-                kind: IMAGE_TYPE,
-                size: 42,
-                position: 42,
-            },
-        ];
+        let input = [TocEntry {
+            kind: IMAGE_TYPE,
+            size: 42,
+            position: 42,
+        }];
         assert_eq!(42, find_best_size(&input, 10).unwrap());
     }
 
@@ -369,7 +380,7 @@ mod test {
     fn parse_cursor_too_short() {
         let data = [];
         match parse_cursor(&mut Cursor::new(&data[..]), 10) {
-            Err(Error::IO(e)) if e.kind() == ErrorKind::UnexpectedEof => {},
+            Err(Error::IO(e)) if e.kind() == ErrorKind::UnexpectedEof => {}
             r => panic!("Unexpected result {:?}", r),
         }
     }
@@ -383,7 +394,7 @@ mod test {
             0x00, 0x00, 0x00, 0x00, // num TOC entries
         ];
         match parse_cursor(&mut Cursor::new(&data[..]), 10) {
-            Err(Error::InvalidMagic) =>  {},
+            Err(Error::InvalidMagic) => {}
             r => panic!("Unexpected result {:?}", r),
         }
     }
@@ -397,7 +408,7 @@ mod test {
             0x01, 0x00, 0x01, 0x00, // num TOC entries, limit + 1
         ];
         match parse_cursor(&mut Cursor::new(&data[..]), 10) {
-            Err(Error::TooManyEntries) =>  {},
+            Err(Error::TooManyEntries) => {}
             r => panic!("Unexpected result {:?}", r),
         }
     }
@@ -411,7 +422,7 @@ mod test {
             0x00, 0x00, 0x00, 0x00, // num TOC entries, 0
         ];
         match parse_cursor(&mut Cursor::new(&data[..]), 10) {
-            Err(Error::NoImages) => {},
+            Err(Error::NoImages) => {}
             r => panic!("Unexpected result {:?}", r),
         }
     }
@@ -438,16 +449,14 @@ mod test {
             0x00, 0x00, 0x00, 0x00, // y_hot 0
             0x00, 0x00, 0x00, 0x00, // delay 0
         ];
-        let expected = [
-            Image {
-                width: 0,
-                height: 0,
-                x_hot: 0,
-                y_hot: 0,
-                delay: 0,
-                pixels: vec![],
-            }
-        ];
+        let expected = [Image {
+            width: 0,
+            height: 0,
+            x_hot: 0,
+            y_hot: 0,
+            delay: 0,
+            pixels: vec![],
+        }];
         let actual = parse_cursor(&mut Cursor::new(&data[..]), 10).unwrap();
         assert_same_images(&expected, &actual);
     }
@@ -505,12 +514,54 @@ mod test {
     fn assert_same_images(a: &[Image], b: &[Image]) {
         assert_eq!(a.len(), b.len(), "{:?} == {:?}", a, b);
         for (i, (im1, im2)) in a.iter().zip(b.iter()).enumerate() {
-            assert_eq!(im1.width, im2.width, "Width image {}: {} == {}", i + 1, im1.width, im2.width);
-            assert_eq!(im1.height, im2.height, "Height image {}: {} == {}", i + 1, im1.height, im2.height);
-            assert_eq!(im1.x_hot, im2.x_hot, "X-hot image {}: {} == {}", i + 1, im1.x_hot, im2.x_hot);
-            assert_eq!(im1.y_hot, im2.y_hot, "Y-hot image {}: {} == {}", i + 1, im1.y_hot, im2.y_hot);
-            assert_eq!(im1.delay, im2.delay, "Delay image {}: {} == {}", i + 1, im1.delay, im2.delay);
-            assert_eq!(im1.pixels, im2.pixels, "Pixels image {}: {:?} == {:?}", i + 1, im1.pixels, im2.pixels);
+            assert_eq!(
+                im1.width,
+                im2.width,
+                "Width image {}: {} == {}",
+                i + 1,
+                im1.width,
+                im2.width
+            );
+            assert_eq!(
+                im1.height,
+                im2.height,
+                "Height image {}: {} == {}",
+                i + 1,
+                im1.height,
+                im2.height
+            );
+            assert_eq!(
+                im1.x_hot,
+                im2.x_hot,
+                "X-hot image {}: {} == {}",
+                i + 1,
+                im1.x_hot,
+                im2.x_hot
+            );
+            assert_eq!(
+                im1.y_hot,
+                im2.y_hot,
+                "Y-hot image {}: {} == {}",
+                i + 1,
+                im1.y_hot,
+                im2.y_hot
+            );
+            assert_eq!(
+                im1.delay,
+                im2.delay,
+                "Delay image {}: {} == {}",
+                i + 1,
+                im1.delay,
+                im2.delay
+            );
+            assert_eq!(
+                im1.pixels,
+                im2.pixels,
+                "Pixels image {}: {:?} == {:?}",
+                i + 1,
+                im1.pixels,
+                im2.pixels
+            );
         }
     }
 }
