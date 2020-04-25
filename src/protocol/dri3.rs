@@ -427,8 +427,8 @@ impl TryParse for GetSupportedModifiersReply {
         let (num_window_modifiers, remaining) = u32::try_parse(remaining)?;
         let (num_screen_modifiers, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
-        let (window_modifiers, remaining) = crate::x11_utils::parse_list::<u64>(remaining, num_window_modifiers as usize)?;
-        let (screen_modifiers, remaining) = crate::x11_utils::parse_list::<u64>(remaining, num_screen_modifiers as usize)?;
+        let (window_modifiers, remaining) = crate::x11_utils::parse_list::<u64>(remaining, num_window_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
+        let (screen_modifiers, remaining) = crate::x11_utils::parse_list::<u64>(remaining, num_screen_modifiers.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetSupportedModifiersReply { response_type, sequence, length, window_modifiers, screen_modifiers };
         Ok((result, remaining))
     }
@@ -594,9 +594,9 @@ impl BuffersFromPixmapReply {
         let (depth, remaining) = u8::try_parse(remaining)?;
         let (bpp, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(6..).ok_or(ParseError::ParseError)?;
-        let (strides, remaining) = crate::x11_utils::parse_list::<u32>(remaining, nfd as usize)?;
-        let (offsets, remaining) = crate::x11_utils::parse_list::<u32>(remaining, nfd as usize)?;
-        let fds_len = nfd as usize;
+        let (strides, remaining) = crate::x11_utils::parse_list::<u32>(remaining, nfd.try_into().or(Err(ParseError::ParseError))?)?;
+        let (offsets, remaining) = crate::x11_utils::parse_list::<u32>(remaining, nfd.try_into().or(Err(ParseError::ParseError))?)?;
+        let fds_len = usize::try_from(nfd).or(Err(ParseError::ParseError))?;
         if fds.len() < fds_len { return Err(ParseError::ParseError) }
         let mut buffers = fds.split_off(fds_len);
         std::mem::swap(fds, &mut buffers);

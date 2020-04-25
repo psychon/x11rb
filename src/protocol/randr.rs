@@ -504,7 +504,7 @@ pub struct RefreshRates {
 impl TryParse for RefreshRates {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (n_rates, remaining) = u16::try_parse(remaining)?;
-        let (rates, remaining) = crate::x11_utils::parse_list::<u16>(remaining, n_rates as usize)?;
+        let (rates, remaining) = crate::x11_utils::parse_list::<u16>(remaining, n_rates.try_into().or(Err(ParseError::ParseError))?)?;
         let result = RefreshRates { rates };
         Ok((result, remaining))
     }
@@ -915,8 +915,8 @@ impl TryParse for GetScreenInfoReply {
         let (rate, remaining) = u16::try_parse(remaining)?;
         let (n_info, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (sizes, remaining) = crate::x11_utils::parse_list::<ScreenSize>(remaining, n_sizes as usize)?;
-        let (rates, remaining) = crate::x11_utils::parse_list::<RefreshRates>(remaining, (n_info as usize) - (n_sizes as usize))?;
+        let (sizes, remaining) = crate::x11_utils::parse_list::<ScreenSize>(remaining, n_sizes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (rates, remaining) = crate::x11_utils::parse_list::<RefreshRates>(remaining, u32::from(n_info).checked_sub(u32::from(n_sizes)).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetScreenInfoReply { response_type, rotations, sequence, length, root, timestamp, config_timestamp, size_id, rotation, rate, n_info, sizes, rates };
         Ok((result, remaining))
     }
@@ -1275,10 +1275,10 @@ impl TryParse for GetScreenResourcesReply {
         let (num_modes, remaining) = u16::try_parse(remaining)?;
         let (names_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
-        let (crtcs, remaining) = crate::x11_utils::parse_list::<Crtc>(remaining, num_crtcs as usize)?;
-        let (outputs, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_outputs as usize)?;
-        let (modes, remaining) = crate::x11_utils::parse_list::<ModeInfo>(remaining, num_modes as usize)?;
-        let (names, remaining) = crate::x11_utils::parse_u8_list(remaining, names_len as usize)?;
+        let (crtcs, remaining) = crate::x11_utils::parse_list::<Crtc>(remaining, num_crtcs.try_into().or(Err(ParseError::ParseError))?)?;
+        let (outputs, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_outputs.try_into().or(Err(ParseError::ParseError))?)?;
+        let (modes, remaining) = crate::x11_utils::parse_list::<ModeInfo>(remaining, num_modes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (names, remaining) = crate::x11_utils::parse_u8_list(remaining, names_len.try_into().or(Err(ParseError::ParseError))?)?;
         let names = names.to_vec();
         let result = GetScreenResourcesReply { response_type, sequence, length, timestamp, config_timestamp, crtcs, outputs, modes, names };
         Ok((result, remaining))
@@ -1423,10 +1423,10 @@ impl TryParse for GetOutputInfoReply {
         let (num_preferred, remaining) = u16::try_parse(remaining)?;
         let (num_clones, remaining) = u16::try_parse(remaining)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
-        let (crtcs, remaining) = crate::x11_utils::parse_list::<Crtc>(remaining, num_crtcs as usize)?;
-        let (modes, remaining) = crate::x11_utils::parse_list::<Mode>(remaining, num_modes as usize)?;
-        let (clones, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_clones as usize)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len as usize)?;
+        let (crtcs, remaining) = crate::x11_utils::parse_list::<Crtc>(remaining, num_crtcs.try_into().or(Err(ParseError::ParseError))?)?;
+        let (modes, remaining) = crate::x11_utils::parse_list::<Mode>(remaining, num_modes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (clones, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_clones.try_into().or(Err(ParseError::ParseError))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let name = name.to_vec();
         let status = status.try_into()?;
         let connection = connection.try_into()?;
@@ -1484,7 +1484,7 @@ impl TryParse for ListOutputPropertiesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_atoms, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (atoms, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_atoms as usize)?;
+        let (atoms, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_atoms.try_into().or(Err(ParseError::ParseError))?)?;
         let result = ListOutputPropertiesReply { response_type, sequence, length, atoms };
         Ok((result, remaining))
     }
@@ -1547,7 +1547,7 @@ impl TryParse for QueryOutputPropertyReply {
         let (range, remaining) = bool::try_parse(remaining)?;
         let (immutable, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(21..).ok_or(ParseError::ParseError)?;
-        let (valid_values, remaining) = crate::x11_utils::parse_list::<i32>(remaining, length as usize)?;
+        let (valid_values, remaining) = crate::x11_utils::parse_list::<i32>(remaining, length.try_into().or(Err(ParseError::ParseError))?)?;
         let result = QueryOutputPropertyReply { response_type, sequence, pending, range, immutable, valid_values };
         Ok((result, remaining))
     }
@@ -1643,7 +1643,7 @@ where
         num_units_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    assert_eq!(data.len(), ((num_units as usize) * (format as usize)) / 8, "`data` has an incorrect length");
+    assert_eq!(data.len(), usize::try_from(num_units.checked_mul(u32::from(format)).unwrap().checked_div(8u32).unwrap()).unwrap(), "`data` has an incorrect length");
     let length_so_far = length_so_far + data.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -1761,7 +1761,7 @@ impl TryParse for GetOutputPropertyReply {
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, (num_items as usize) * ((format as usize) / 8))?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::ParseError)?).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let data = data.to_vec();
         let result = GetOutputPropertyReply { response_type, format, sequence, length, type_, bytes_after, num_items, data };
         Ok((result, remaining))
@@ -2019,8 +2019,8 @@ impl TryParse for GetCrtcInfoReply {
         let (rotations, remaining) = u16::try_parse(remaining)?;
         let (num_outputs, remaining) = u16::try_parse(remaining)?;
         let (num_possible_outputs, remaining) = u16::try_parse(remaining)?;
-        let (outputs, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_outputs as usize)?;
-        let (possible, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_possible_outputs as usize)?;
+        let (outputs, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_outputs.try_into().or(Err(ParseError::ParseError))?)?;
+        let (possible, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_possible_outputs.try_into().or(Err(ParseError::ParseError))?)?;
         let status = status.try_into()?;
         let result = GetCrtcInfoReply { response_type, status, sequence, length, timestamp, x, y, width, height, mode, rotation, rotations, outputs, possible };
         Ok((result, remaining))
@@ -2218,9 +2218,9 @@ impl TryParse for GetCrtcGammaReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (size, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (red, remaining) = crate::x11_utils::parse_list::<u16>(remaining, size as usize)?;
-        let (green, remaining) = crate::x11_utils::parse_list::<u16>(remaining, size as usize)?;
-        let (blue, remaining) = crate::x11_utils::parse_list::<u16>(remaining, size as usize)?;
+        let (red, remaining) = crate::x11_utils::parse_list::<u16>(remaining, size.try_into().or(Err(ParseError::ParseError))?)?;
+        let (green, remaining) = crate::x11_utils::parse_list::<u16>(remaining, size.try_into().or(Err(ParseError::ParseError))?)?;
+        let (blue, remaining) = crate::x11_utils::parse_list::<u16>(remaining, size.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetCrtcGammaReply { response_type, sequence, length, size, red, green, blue };
         Ok((result, remaining))
     }
@@ -2258,13 +2258,13 @@ where
         0,
     ];
     let length_so_far = length_so_far + request0.len();
-    assert_eq!(red.len(), size as usize, "`red` has an incorrect length");
+    assert_eq!(red.len(), usize::try_from(size).unwrap(), "`red` has an incorrect length");
     let red_bytes = red.serialize();
     let length_so_far = length_so_far + red_bytes.len();
-    assert_eq!(green.len(), size as usize, "`green` has an incorrect length");
+    assert_eq!(green.len(), usize::try_from(size).unwrap(), "`green` has an incorrect length");
     let green_bytes = green.serialize();
     let length_so_far = length_so_far + green_bytes.len();
-    assert_eq!(blue.len(), size as usize, "`blue` has an incorrect length");
+    assert_eq!(blue.len(), usize::try_from(size).unwrap(), "`blue` has an incorrect length");
     let blue_bytes = blue.serialize();
     let length_so_far = length_so_far + blue_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
@@ -2327,10 +2327,10 @@ impl TryParse for GetScreenResourcesCurrentReply {
         let (num_modes, remaining) = u16::try_parse(remaining)?;
         let (names_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
-        let (crtcs, remaining) = crate::x11_utils::parse_list::<Crtc>(remaining, num_crtcs as usize)?;
-        let (outputs, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_outputs as usize)?;
-        let (modes, remaining) = crate::x11_utils::parse_list::<ModeInfo>(remaining, num_modes as usize)?;
-        let (names, remaining) = crate::x11_utils::parse_u8_list(remaining, names_len as usize)?;
+        let (crtcs, remaining) = crate::x11_utils::parse_list::<Crtc>(remaining, num_crtcs.try_into().or(Err(ParseError::ParseError))?)?;
+        let (outputs, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_outputs.try_into().or(Err(ParseError::ParseError))?)?;
+        let (modes, remaining) = crate::x11_utils::parse_list::<ModeInfo>(remaining, num_modes.try_into().or(Err(ParseError::ParseError))?)?;
+        let (names, remaining) = crate::x11_utils::parse_u8_list(remaining, names_len.try_into().or(Err(ParseError::ParseError))?)?;
         let names = names.to_vec();
         let result = GetScreenResourcesCurrentReply { response_type, sequence, length, timestamp, config_timestamp, crtcs, outputs, modes, names };
         Ok((result, remaining))
@@ -2545,20 +2545,20 @@ impl TryParse for GetCrtcTransformReply {
         let (pending_nparams, remaining) = u16::try_parse(remaining)?;
         let (current_len, remaining) = u16::try_parse(remaining)?;
         let (current_nparams, remaining) = u16::try_parse(remaining)?;
-        let (pending_filter_name, remaining) = crate::x11_utils::parse_u8_list(remaining, pending_len as usize)?;
+        let (pending_filter_name, remaining) = crate::x11_utils::parse_u8_list(remaining, pending_len.try_into().or(Err(ParseError::ParseError))?)?;
         let pending_filter_name = pending_filter_name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let (pending_params, remaining) = crate::x11_utils::parse_list::<render::Fixed>(remaining, pending_nparams as usize)?;
-        let (current_filter_name, remaining) = crate::x11_utils::parse_u8_list(remaining, current_len as usize)?;
+        let (pending_params, remaining) = crate::x11_utils::parse_list::<render::Fixed>(remaining, pending_nparams.try_into().or(Err(ParseError::ParseError))?)?;
+        let (current_filter_name, remaining) = crate::x11_utils::parse_u8_list(remaining, current_len.try_into().or(Err(ParseError::ParseError))?)?;
         let current_filter_name = current_filter_name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let (current_params, remaining) = crate::x11_utils::parse_list::<render::Fixed>(remaining, current_nparams as usize)?;
+        let (current_params, remaining) = crate::x11_utils::parse_list::<render::Fixed>(remaining, current_nparams.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetCrtcTransformReply { response_type, sequence, length, pending_transform, has_transforms, current_transform, pending_filter_name, pending_params, current_filter_name, current_params };
         Ok((result, remaining))
     }
@@ -2871,7 +2871,7 @@ impl TryParse for GetProvidersReply {
         let (timestamp, remaining) = xproto::Timestamp::try_parse(remaining)?;
         let (num_providers, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(18..).ok_or(ParseError::ParseError)?;
-        let (providers, remaining) = crate::x11_utils::parse_list::<Provider>(remaining, num_providers as usize)?;
+        let (providers, remaining) = crate::x11_utils::parse_list::<Provider>(remaining, num_providers.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetProvidersReply { response_type, sequence, length, timestamp, providers };
         Ok((result, remaining))
     }
@@ -3012,11 +3012,11 @@ impl TryParse for GetProviderInfoReply {
         let (num_associated_providers, remaining) = u16::try_parse(remaining)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
-        let (crtcs, remaining) = crate::x11_utils::parse_list::<Crtc>(remaining, num_crtcs as usize)?;
-        let (outputs, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_outputs as usize)?;
-        let (associated_providers, remaining) = crate::x11_utils::parse_list::<Provider>(remaining, num_associated_providers as usize)?;
-        let (associated_capability, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_associated_providers as usize)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len as usize)?;
+        let (crtcs, remaining) = crate::x11_utils::parse_list::<Crtc>(remaining, num_crtcs.try_into().or(Err(ParseError::ParseError))?)?;
+        let (outputs, remaining) = crate::x11_utils::parse_list::<Output>(remaining, num_outputs.try_into().or(Err(ParseError::ParseError))?)?;
+        let (associated_providers, remaining) = crate::x11_utils::parse_list::<Provider>(remaining, num_associated_providers.try_into().or(Err(ParseError::ParseError))?)?;
+        let (associated_capability, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_associated_providers.try_into().or(Err(ParseError::ParseError))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let name = name.to_vec();
         let result = GetProviderInfoReply { response_type, status, sequence, length, timestamp, capabilities, num_associated_providers, crtcs, outputs, associated_providers, associated_capability, name };
         Ok((result, remaining))
@@ -3145,7 +3145,7 @@ impl TryParse for ListProviderPropertiesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (num_atoms, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (atoms, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_atoms as usize)?;
+        let (atoms, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, num_atoms.try_into().or(Err(ParseError::ParseError))?)?;
         let result = ListProviderPropertiesReply { response_type, sequence, length, atoms };
         Ok((result, remaining))
     }
@@ -3208,7 +3208,7 @@ impl TryParse for QueryProviderPropertyReply {
         let (range, remaining) = bool::try_parse(remaining)?;
         let (immutable, remaining) = bool::try_parse(remaining)?;
         let remaining = remaining.get(21..).ok_or(ParseError::ParseError)?;
-        let (valid_values, remaining) = crate::x11_utils::parse_list::<i32>(remaining, length as usize)?;
+        let (valid_values, remaining) = crate::x11_utils::parse_list::<i32>(remaining, length.try_into().or(Err(ParseError::ParseError))?)?;
         let result = QueryProviderPropertyReply { response_type, sequence, pending, range, immutable, valid_values };
         Ok((result, remaining))
     }
@@ -3304,7 +3304,7 @@ where
         num_items_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    assert_eq!(data.len(), (num_items as usize) * ((format as usize) / 8), "`data` has an incorrect length");
+    assert_eq!(data.len(), usize::try_from(num_items.checked_mul(u32::from(format).checked_div(8u32).unwrap()).unwrap()).unwrap(), "`data` has an incorrect length");
     let length_so_far = length_so_far + data.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -3420,7 +3420,7 @@ impl TryParse for GetProviderPropertyReply {
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (num_items, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, (num_items as usize) * ((format as usize) / 8))?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, num_items.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::ParseError)?).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let data = data.to_vec();
         let result = GetProviderPropertyReply { response_type, format, sequence, length, type_, bytes_after, num_items, data };
         Ok((result, remaining))
@@ -4118,7 +4118,7 @@ impl TryParse for MonitorInfo {
         let (height, remaining) = u16::try_parse(remaining)?;
         let (width_in_millimeters, remaining) = u32::try_parse(remaining)?;
         let (height_in_millimeters, remaining) = u32::try_parse(remaining)?;
-        let (outputs, remaining) = crate::x11_utils::parse_list::<Output>(remaining, n_output as usize)?;
+        let (outputs, remaining) = crate::x11_utils::parse_list::<Output>(remaining, n_output.try_into().or(Err(ParseError::ParseError))?)?;
         let result = MonitorInfo { name, primary, automatic, x, y, width, height, width_in_millimeters, height_in_millimeters, outputs };
         Ok((result, remaining))
     }
@@ -4204,7 +4204,7 @@ impl TryParse for GetMonitorsReply {
         let (n_monitors, remaining) = u32::try_parse(remaining)?;
         let (n_outputs, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (monitors, remaining) = crate::x11_utils::parse_list::<MonitorInfo>(remaining, n_monitors as usize)?;
+        let (monitors, remaining) = crate::x11_utils::parse_list::<MonitorInfo>(remaining, n_monitors.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetMonitorsReply { response_type, sequence, length, timestamp, n_outputs, monitors };
         Ok((result, remaining))
     }

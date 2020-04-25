@@ -460,7 +460,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     if let xcbdefs::FieldDef::VirtualLen(virtual_len_field) = field {
                         outln!(
                             out,
-                            "let {} = {}.len();",
+                            "let {} = u32::try_from({}.len()).unwrap();",
                             to_rust_variable_name(&virtual_len_field.name),
                             to_rust_variable_name(&virtual_len_field.list_name),
                         );
@@ -661,7 +661,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 out,
                                 "let {} = {} != 0;",
                                 rust_field_name,
-                                self.expr_to_str(&expr_field.expr, None, true),
+                                self.expr_to_str(&expr_field.expr, true, true, true),
                             );
                         } else {
                             // the only case found in the XML definitions is with a bool
@@ -2324,8 +2324,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         if generate_switch_expr_fn {
             outln!(out, "impl {} {{", name);
             out.indented(|out| {
-                let expr_type = self.get_switch_discriminant_rust_type(&switch.expr);
-                outln!(out, "fn switch_expr(&self) -> {} {{", expr_type);
+                outln!(out, "fn switch_expr(&self) -> u32 {{");
                 out.indented(|out| {
                     if switch.kind == xcbdefs::SwitchKind::Case {
                         outln!(out, "match self {{");
@@ -2344,12 +2343,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 "{}::{}(_) => {},",
                                 name,
                                 rust_field_name,
-                                self.expr_to_str(&case.exprs[0], Some(&expr_type), false),
+                                self.expr_to_str(&case.exprs[0], true, true, false),
                             );
                         }
                         outln!(out, "}}");
                     } else {
-                        outln!(out, "let mut expr_value: {} = 0;", expr_type);
+                        outln!(out, "let mut expr_value = 0;");
                         for (case, case_info) in switch.cases.iter().zip(case_infos.iter()) {
                             assert_eq!(case.exprs.len(), 1);
                             let rust_field_name = match case_info {
@@ -2364,7 +2363,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             outln!(
                                 out.indent(),
                                 "expr_value |= {};",
-                                self.expr_to_str(&case.exprs[0], Some(&expr_type), false),
+                                self.expr_to_str(&case.exprs[0], true, true, false),
                             );
                             outln!(out, "}}");
                         }
@@ -2387,7 +2386,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         out: &mut Output,
     ) {
         let external_params = switch.external_params.borrow();
-        let rust_switch_expr_type = self.get_switch_discriminant_rust_type(&switch.expr);
 
         if !external_params.is_empty() {
             outln!(out, "impl {} {{", name);
@@ -2419,11 +2417,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 outln!(
                     out,
                     "let switch_expr = {};",
-                    self.expr_to_str(
-                        &switch.expr,
-                        None, /*Some(&rust_switch_expr_type)*/
-                        false,
-                    ),
+                    self.expr_to_str(&switch.expr, false, true, false),
                 );
                 outln!(out, "let mut outer_remaining = value;");
                 if switch.kind == xcbdefs::SwitchKind::BitCase {
@@ -2431,14 +2425,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     for (case, case_info) in switch.cases.iter().zip(case_infos.iter()) {
                         let mut case_expr_str = format!(
                             "switch_expr & {} != 0",
-                            self.expr_to_str(&case.exprs[0], Some(&rust_switch_expr_type), true),
+                            self.expr_to_str(&case.exprs[0], false, true, true),
                         );
                         for expr in case.exprs[1..].iter() {
                             use std::fmt::Write as _;
                             write!(
                                 case_expr_str,
                                 " || switch_expr & {} != 0",
-                                self.expr_to_str(expr, Some(&rust_switch_expr_type), true),
+                                self.expr_to_str(expr, false, true, true),
                             )
                             .unwrap();
                         }
@@ -2506,14 +2500,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     for (case, case_info) in switch.cases.iter().zip(case_infos.iter()) {
                         let mut case_expr_str = format!(
                             "switch_expr == {}",
-                            self.expr_to_str(&case.exprs[0], Some(&rust_switch_expr_type), true),
+                            self.expr_to_str(&case.exprs[0], false, true, true),
                         );
                         for expr in case.exprs[1..].iter() {
                             use std::fmt::Write as _;
                             write!(
                                 case_expr_str,
                                 " || switch_expr == {}",
-                                self.expr_to_str(expr, Some(&rust_switch_expr_type), true),
+                                self.expr_to_str(expr, false, true, true),
                             )
                             .unwrap();
                         }
@@ -2942,9 +2936,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     } else if let Some(ref length_expr) = list_field.length_expr {
                         outln!(
                             out,
-                            "let ({}, remaining) = crate::x11_utils::parse_u8_list(remaining, {})?;",
+                            "let ({}, remaining) = crate::x11_utils\
+                            ::parse_u8_list(remaining, {}.try_into().or(Err(ParseError::ParseError))?)?;",
                             rust_field_name,
-                            self.expr_to_str(length_expr, Some("usize"), false),
+                            self.expr_to_str(length_expr, false, false, true),
                         );
                         outln!(
                             out,
@@ -2964,13 +2959,15 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         self.type_to_rust_type(list_field.element_type.type_.def.get().unwrap());
                     outln!(
                         out,
-                        "let ({}, remaining) = crate::x11_utils::parse_list::<{}>(remaining, {})?;",
+                        "let ({}, remaining) = crate::x11_utils\
+                        ::parse_list::<{}>(remaining, {}.try_into().or(Err(ParseError::ParseError))?)?;",
                         rust_field_name,
                         rust_element_type,
                         self.expr_to_str(
                             list_field.length_expr.as_ref().unwrap(),
-                            Some("usize"),
                             false,
+                            false,
+                            true,
                         ),
                     );
                 } else if let Some(list_len) = list_field.length() {
@@ -2995,8 +2992,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     if let Some(ref length_expr) = list_field.length_expr {
                         outln!(
                             out,
-                            "let list_length = {};",
-                            self.expr_to_str(length_expr, Some("usize"), false)
+                            "let list_length = usize::try_from({}).or(Err(ParseError::ParseError))?;",
+                            self.expr_to_str(length_expr, false, false, false),
                         );
                         outln!(
                             out,
@@ -3052,8 +3049,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
                 outln!(
                     out,
-                    "let fds_len = {};",
-                    self.expr_to_str(&fd_list_field.length_expr, Some("usize"), false),
+                    "let fds_len = usize::try_from({}).or(Err(ParseError::ParseError))?;",
+                    self.expr_to_str(&fd_list_field.length_expr, false, false, false),
                 );
                 outln!(
                     out,
@@ -3362,12 +3359,15 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     let rust_field_name = to_rust_variable_name(&list_field.name);
                     let length_expr_str = self.expr_to_str(
                         list_field.length_expr.as_ref().unwrap(),
-                        Some("usize"),
+                        true,
+                        false,
                         false,
                     );
                     outln!(
                         out,
-                        "assert_eq!({}{}.len(), {}, \"`{}` has an incorrect length\");",
+                        "assert_eq!({}{}.len(), \
+                        usize::try_from({}).unwrap(), \
+                        \"`{}` has an incorrect length\");",
                         obj_name,
                         rust_field_name,
                         length_expr_str,
@@ -3391,7 +3391,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
                 if needs_assert {
                     let rust_field_name = to_rust_variable_name(&switch_field.name);
-                    let switch_expr_str = self.expr_to_str(&switch_field.expr, None, false);
+                    let switch_expr_str = self.expr_to_str(&switch_field.expr, true, true, false);
                     outln!(
                         out,
                         "assert_eq!({}{}.switch_expr(), {}, \
@@ -3421,10 +3421,12 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 if needs_assert {
                     let rust_field_name = to_rust_variable_name(&fd_list_field.name);
                     let length_expr_str =
-                        self.expr_to_str(&fd_list_field.length_expr, Some("usize"), false);
+                        self.expr_to_str(&fd_list_field.length_expr, true, false, false);
                     outln!(
                         out,
-                        "assert_eq!({}{}.len(), {}, \"`{}` has an incorrect length\");",
+                        "assert_eq!({}{}.len(), \
+                        usize::try_from({}).unwrap(), \
+                        \"`{}` has an incorrect length\");",
                         obj_name,
                         rust_field_name,
                         length_expr_str,
@@ -3687,40 +3689,72 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     fn expr_to_str(
         &self,
         expr: &xcbdefs::Expression,
-        type_: Option<&str>,
+        panic_on_overflow: bool,
+        cast_to_u32: bool,
         needs_parens: bool,
     ) -> String {
         match expr {
             xcbdefs::Expression::BinaryOp(bin_op_expr) => {
-                let op_str = match bin_op_expr.operator {
-                    xcbdefs::BinaryOperator::Add => "+",
-                    xcbdefs::BinaryOperator::Sub => "-",
-                    xcbdefs::BinaryOperator::Mul => "*",
-                    xcbdefs::BinaryOperator::Div => "/",
-                    xcbdefs::BinaryOperator::And => "&",
-                    xcbdefs::BinaryOperator::Shl => "<<",
-                };
-                let lhs_str = self.expr_to_str(&bin_op_expr.lhs, type_, true);
-                let rhs_str = self.expr_to_str(&bin_op_expr.rhs, type_, true);
-                if needs_parens {
-                    format!("({} {} {})", lhs_str, op_str, rhs_str)
+                let err_handler = if panic_on_overflow {
+                    ".unwrap()"
                 } else {
-                    format!("{} {} {}", lhs_str, op_str, rhs_str)
+                    ".ok_or(ParseError::ParseError)?"
+                };
+                match bin_op_expr.operator {
+                    xcbdefs::BinaryOperator::Add => format!(
+                        "{}.checked_add({}){}",
+                        self.expr_to_str(&bin_op_expr.lhs, panic_on_overflow, true, true),
+                        self.expr_to_str(&bin_op_expr.rhs, panic_on_overflow, true, false),
+                        err_handler,
+                    ),
+                    xcbdefs::BinaryOperator::Sub => format!(
+                        "{}.checked_sub({}){}",
+                        self.expr_to_str(&bin_op_expr.lhs, panic_on_overflow, true, true),
+                        self.expr_to_str(&bin_op_expr.rhs, panic_on_overflow, true, false),
+                        err_handler,
+                    ),
+                    xcbdefs::BinaryOperator::Mul => format!(
+                        "{}.checked_mul({}){}",
+                        self.expr_to_str(&bin_op_expr.lhs, panic_on_overflow, true, true),
+                        self.expr_to_str(&bin_op_expr.rhs, panic_on_overflow, true, false),
+                        err_handler,
+                    ),
+                    xcbdefs::BinaryOperator::Div => format!(
+                        "{}.checked_div({}){}",
+                        self.expr_to_str(&bin_op_expr.lhs, panic_on_overflow, true, true),
+                        self.expr_to_str(&bin_op_expr.rhs, panic_on_overflow, true, false),
+                        err_handler,
+                    ),
+                    xcbdefs::BinaryOperator::And => {
+                        let lhs_str =
+                            self.expr_to_str(&bin_op_expr.lhs, panic_on_overflow, true, true);
+                        let rhs_str =
+                            self.expr_to_str(&bin_op_expr.rhs, panic_on_overflow, true, true);
+                        if needs_parens {
+                            format!("({} & {})", lhs_str, rhs_str)
+                        } else {
+                            format!("{} & {}", lhs_str, rhs_str)
+                        }
+                    }
+                    // I'm not sure know how to handle overflow here,
+                    // but this operator never appears in the XMLs
+                    xcbdefs::BinaryOperator::Shl => unimplemented!(),
                 }
             }
-            xcbdefs::Expression::UnaryOp(unary_op_expr) => {
-                let op_str = match unary_op_expr.operator {
-                    xcbdefs::UnaryOperator::Not => "!",
-                };
-                let rhs_str = self.expr_to_str(&unary_op_expr.rhs, type_, true);
-                if needs_parens {
-                    format!("({}{})", op_str, rhs_str)
-                } else {
-                    format!("{}{}", op_str, rhs_str)
+            xcbdefs::Expression::UnaryOp(unary_op_expr) => match unary_op_expr.operator {
+                xcbdefs::UnaryOperator::Not => {
+                    let rhs_str =
+                        self.expr_to_str(&unary_op_expr.rhs, panic_on_overflow, true, true);
+                    if needs_parens {
+                        format!("(!{})", rhs_str)
+                    } else {
+                        format!("!{}", rhs_str)
+                    }
                 }
-            }
+            },
             xcbdefs::Expression::FieldRef(field_ref_expr) => {
-                let value = match field_ref_expr.resolved.get().unwrap().ref_kind {
+                let resolved_field_ref = field_ref_expr.resolved.get().unwrap();
+                let value = match resolved_field_ref.ref_kind {
                     xcbdefs::FieldRefKind::LocalField => {
                         to_rust_variable_name(&field_ref_expr.field_name)
                     }
@@ -3731,24 +3765,24 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         format!("x.{}", to_rust_variable_name(&field_ref_expr.field_name))
                     }
                 };
-                if let Some(type_) = type_ {
-                    if needs_parens {
-                        format!("({} as {})", value, type_)
-                    } else {
-                        format!("{} as {}", value, type_)
-                    }
+                let field_is_card32 = match resolved_field_ref.field_type {
+                    xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card32) => true,
+                    _ => false,
+                };
+                if cast_to_u32 && !field_is_card32 {
+                    format!("u32::from({})", value)
                 } else {
                     value
                 }
             }
             xcbdefs::Expression::ParamRef(param_ref_expr) => {
                 let rust_field_name = to_rust_variable_name(&param_ref_expr.field_name);
-                if let Some(type_) = type_ {
-                    if needs_parens {
-                        format!("({} as {})", rust_field_name, type_)
-                    } else {
-                        format!("{} as {}", rust_field_name, type_)
-                    }
+                let param_is_card32 = match param_ref_expr.type_.def.get().unwrap() {
+                    xcbdefs::TypeRef::BuiltIn(xcbdefs::BuiltInType::Card32) => true,
+                    _ => false,
+                };
+                if cast_to_u32 && !param_is_card32 {
+                    format!("u32::from({})", rust_field_name)
                 } else {
                     rust_field_name
                 }
@@ -3756,20 +3790,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             xcbdefs::Expression::EnumRef(enum_ref_expr) => {
                 let rust_enum_type = self.type_to_rust_type(enum_ref_expr.enum_.def.get().unwrap());
                 let rust_variant_name = ename_to_rust(&enum_ref_expr.variant);
-                format!(
-                    "{}::from({}::{})",
-                    type_.unwrap(),
-                    rust_enum_type,
-                    rust_variant_name,
-                )
+                format!("u32::from({}::{})", rust_enum_type, rust_variant_name,)
             }
             xcbdefs::Expression::PopCount(pop_count_expr) => {
-                let arg = self.expr_to_str(pop_count_expr, None, true);
-                if let Some(type_) = type_ {
-                    format!("{}::try_from({}.count_ones()).unwrap()", type_, arg)
-                } else {
-                    format!("{}.count_ones()", arg)
-                }
+                let arg = self.expr_to_str(pop_count_expr, panic_on_overflow, false, true);
+                format!("{}.count_ones()", arg)
             }
             xcbdefs::Expression::SumOf(sum_of_expr) => {
                 // nested sum-of not supported
@@ -3778,27 +3803,53 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     xcbdefs::FieldRefKind::SumOfRef,
                 );
                 let rust_field_name = to_rust_variable_name(&sum_of_expr.field_name);
-                if let Some(ref operand) = sum_of_expr.operand {
-                    format!(
-                        "{}.iter().map(|x| {}).sum()",
-                        rust_field_name,
-                        self.expr_to_str(operand, type_, false),
-                    )
-                } else if let Some(type_) = type_ {
-                    format!("{}.iter().map(|&x| x as {}).sum()", rust_field_name, type_)
+                if panic_on_overflow {
+                    if let Some(ref operand) = sum_of_expr.operand {
+                        format!(
+                            "{}.iter().fold(0u32, |acc, x| acc.checked_add({}).unwrap())",
+                            rust_field_name,
+                            self.expr_to_str(operand, panic_on_overflow, true, true),
+                        )
+                    } else {
+                        format!(
+                            "{}.iter().try(0u32, |acc, &x| acc.checked_add(u32::from(x)).unwrap())",
+                            rust_field_name,
+                        )
+                    }
                 } else {
-                    format!("{}.iter().copied().sum()", rust_field_name)
+                    if let Some(ref operand) = sum_of_expr.operand {
+                        format!(
+                            "{}.iter().try_fold(0u32, |acc, x| \
+                            acc.checked_add({}).ok_or(ParseError::ParseError))?",
+                            rust_field_name,
+                            self.expr_to_str(operand, panic_on_overflow, true, true),
+                        )
+                    } else {
+                        format!(
+                            "{}.iter().try_fold(0u32, |acc, &x| \
+                            acc.checked_add(u32::from(x)).ok_or(ParseError::ParseError))?",
+                            rust_field_name,
+                        )
+                    }
                 }
             }
             xcbdefs::Expression::ListElementRef => {
-                if needs_parens {
+                if cast_to_u32 {
+                    "u32::from(*x)".into()
+                } else if needs_parens {
                     "(*x)".into()
                 } else {
                     "*x".into()
                 }
             }
-            xcbdefs::Expression::Value(value) => format_literal_integer(*value),
-            xcbdefs::Expression::Bit(bit) => format_literal_integer(1u32 << *bit),
+            xcbdefs::Expression::Value(value) => {
+                let value_str = format_literal_integer(*value);
+                format!("{}u32", value_str)
+            }
+            xcbdefs::Expression::Bit(bit) => {
+                let value_str = format_literal_integer(1u32 << *bit);
+                format!("{}u32", value_str)
+            }
         }
     }
 
@@ -3914,25 +3965,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 entry.insert(has_repeated);
                 has_repeated
             }
-        }
-    }
-
-    /// Given the switch expression `expr`, returns the Rust type of the switch
-    /// discriminant.
-    fn get_switch_discriminant_rust_type(&self, expr: &xcbdefs::Expression) -> String {
-        match expr {
-            xcbdefs::Expression::FieldRef(field_ref_expr) => {
-                self.type_to_rust_type(&field_ref_expr.resolved.get().unwrap().field_type)
-            }
-            xcbdefs::Expression::BinaryOp(bin_op_expr) => {
-                // special case in xkb SelectEvents
-                if let xcbdefs::Expression::FieldRef(field_ref_expr) = &*bin_op_expr.lhs {
-                    self.type_to_rust_type(&field_ref_expr.resolved.get().unwrap().field_type)
-                } else {
-                    unreachable!();
-                }
-            }
-            _ => unreachable!(),
         }
     }
 

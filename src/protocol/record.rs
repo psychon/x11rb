@@ -382,7 +382,7 @@ impl TryParse for ClientInfo {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (client_resource, remaining) = ClientSpec::try_parse(remaining)?;
         let (num_ranges, remaining) = u32::try_parse(remaining)?;
-        let (ranges, remaining) = crate::x11_utils::parse_list::<Range>(remaining, num_ranges as usize)?;
+        let (ranges, remaining) = crate::x11_utils::parse_list::<Range>(remaining, num_ranges.try_into().or(Err(ParseError::ParseError))?)?;
         let result = ClientInfo { client_resource, ranges };
         Ok((result, remaining))
     }
@@ -731,7 +731,7 @@ impl TryParse for GetContextReply {
         let remaining = remaining.get(3..).ok_or(ParseError::ParseError)?;
         let (num_intercepted_clients, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(16..).ok_or(ParseError::ParseError)?;
-        let (intercepted_clients, remaining) = crate::x11_utils::parse_list::<ClientInfo>(remaining, num_intercepted_clients as usize)?;
+        let (intercepted_clients, remaining) = crate::x11_utils::parse_list::<ClientInfo>(remaining, num_intercepted_clients.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetContextReply { response_type, enabled, sequence, length, element_header, intercepted_clients };
         Ok((result, remaining))
     }
@@ -795,7 +795,7 @@ impl TryParse for EnableContextReply {
         let (server_time, remaining) = u32::try_parse(remaining)?;
         let (rec_sequence_num, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, (length as usize) * 4)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let data = data.to_vec();
         let result = EnableContextReply { response_type, category, sequence, element_header, client_swapped, xid_base, server_time, rec_sequence_num, data };
         Ok((result, remaining))

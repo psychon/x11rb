@@ -235,7 +235,7 @@ impl TryParse for OpenConnectionReply {
         let (sarea_handle_high, remaining) = u32::try_parse(remaining)?;
         let (bus_id_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (bus_id, remaining) = crate::x11_utils::parse_u8_list(remaining, bus_id_len as usize)?;
+        let (bus_id, remaining) = crate::x11_utils::parse_u8_list(remaining, bus_id_len.try_into().or(Err(ParseError::ParseError))?)?;
         let bus_id = bus_id.to_vec();
         let result = OpenConnectionReply { response_type, sequence, length, sarea_handle_low, sarea_handle_high, bus_id };
         Ok((result, remaining))
@@ -323,7 +323,7 @@ impl TryParse for GetClientDriverNameReply {
         let (client_driver_patch_version, remaining) = u32::try_parse(remaining)?;
         let (client_driver_name_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
-        let (client_driver_name, remaining) = crate::x11_utils::parse_u8_list(remaining, client_driver_name_len as usize)?;
+        let (client_driver_name, remaining) = crate::x11_utils::parse_u8_list(remaining, client_driver_name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let client_driver_name = client_driver_name.to_vec();
         let result = GetClientDriverNameReply { response_type, sequence, length, client_driver_major_version, client_driver_minor_version, client_driver_patch_version, client_driver_name };
         Ok((result, remaining))
@@ -583,8 +583,8 @@ impl TryParse for GetDrawableInfoReply {
         let (back_x, remaining) = i16::try_parse(remaining)?;
         let (back_y, remaining) = i16::try_parse(remaining)?;
         let (num_back_clip_rects, remaining) = u32::try_parse(remaining)?;
-        let (clip_rects, remaining) = crate::x11_utils::parse_list::<DrmClipRect>(remaining, num_clip_rects as usize)?;
-        let (back_clip_rects, remaining) = crate::x11_utils::parse_list::<DrmClipRect>(remaining, num_back_clip_rects as usize)?;
+        let (clip_rects, remaining) = crate::x11_utils::parse_list::<DrmClipRect>(remaining, num_clip_rects.try_into().or(Err(ParseError::ParseError))?)?;
+        let (back_clip_rects, remaining) = crate::x11_utils::parse_list::<DrmClipRect>(remaining, num_back_clip_rects.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetDrawableInfoReply { response_type, sequence, length, drawable_table_index, drawable_table_stamp, drawable_origin_x, drawable_origin_y, drawable_size_w, drawable_size_h, back_x, back_y, clip_rects, back_clip_rects };
         Ok((result, remaining))
     }
@@ -647,7 +647,7 @@ impl TryParse for GetDeviceInfoReply {
         let (framebuffer_size, remaining) = u32::try_parse(remaining)?;
         let (framebuffer_stride, remaining) = u32::try_parse(remaining)?;
         let (device_private_size, remaining) = u32::try_parse(remaining)?;
-        let (device_private, remaining) = crate::x11_utils::parse_list::<u32>(remaining, device_private_size as usize)?;
+        let (device_private, remaining) = crate::x11_utils::parse_list::<u32>(remaining, device_private_size.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetDeviceInfoReply { response_type, sequence, length, framebuffer_handle_low, framebuffer_handle_high, framebuffer_origin_offset, framebuffer_size, framebuffer_stride, device_private };
         Ok((result, remaining))
     }

@@ -458,7 +458,7 @@ impl TryParse for Depth {
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (visuals_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (visuals, remaining) = crate::x11_utils::parse_list::<Visualtype>(remaining, visuals_len as usize)?;
+        let (visuals, remaining) = crate::x11_utils::parse_list::<Visualtype>(remaining, visuals_len.try_into().or(Err(ParseError::ParseError))?)?;
         let result = Depth { depth, visuals };
         Ok((result, remaining))
     }
@@ -692,7 +692,7 @@ impl TryParse for Screen {
         let (save_unders, remaining) = bool::try_parse(remaining)?;
         let (root_depth, remaining) = u8::try_parse(remaining)?;
         let (allowed_depths_len, remaining) = u8::try_parse(remaining)?;
-        let (allowed_depths, remaining) = crate::x11_utils::parse_list::<Depth>(remaining, allowed_depths_len as usize)?;
+        let (allowed_depths, remaining) = crate::x11_utils::parse_list::<Depth>(remaining, allowed_depths_len.try_into().or(Err(ParseError::ParseError))?)?;
         let backing_stores = backing_stores.try_into()?;
         let result = Screen { root, default_colormap, white_pixel, black_pixel, current_input_masks, width_in_pixels, height_in_pixels, width_in_millimeters, height_in_millimeters, min_installed_maps, max_installed_maps, root_visual, backing_stores, save_unders, root_depth, allowed_depths };
         Ok((result, remaining))
@@ -752,13 +752,13 @@ impl TryParse for SetupRequest {
         let (authorization_protocol_name_len, remaining) = u16::try_parse(remaining)?;
         let (authorization_protocol_data_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
-        let (authorization_protocol_name, remaining) = crate::x11_utils::parse_u8_list(remaining, authorization_protocol_name_len as usize)?;
+        let (authorization_protocol_name, remaining) = crate::x11_utils::parse_u8_list(remaining, authorization_protocol_name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let authorization_protocol_name = authorization_protocol_name.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let (authorization_protocol_data, remaining) = crate::x11_utils::parse_u8_list(remaining, authorization_protocol_data_len as usize)?;
+        let (authorization_protocol_data, remaining) = crate::x11_utils::parse_u8_list(remaining, authorization_protocol_data_len.try_into().or(Err(ParseError::ParseError))?)?;
         let authorization_protocol_data = authorization_protocol_data.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -814,7 +814,7 @@ impl TryParse for SetupFailed {
         let (protocol_major_version, remaining) = u16::try_parse(remaining)?;
         let (protocol_minor_version, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u16::try_parse(remaining)?;
-        let (reason, remaining) = crate::x11_utils::parse_u8_list(remaining, reason_len as usize)?;
+        let (reason, remaining) = crate::x11_utils::parse_u8_list(remaining, reason_len.try_into().or(Err(ParseError::ParseError))?)?;
         let reason = reason.to_vec();
         let result = SetupFailed { status, protocol_major_version, protocol_minor_version, length, reason };
         Ok((result, remaining))
@@ -855,7 +855,7 @@ impl TryParse for SetupAuthenticate {
         let (status, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(5..).ok_or(ParseError::ParseError)?;
         let (length, remaining) = u16::try_parse(remaining)?;
-        let (reason, remaining) = crate::x11_utils::parse_u8_list(remaining, (length as usize) * 4)?;
+        let (reason, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(length).checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let reason = reason.to_vec();
         let result = SetupAuthenticate { status, reason };
         Ok((result, remaining))
@@ -999,14 +999,14 @@ impl TryParse for Setup {
         let (min_keycode, remaining) = Keycode::try_parse(remaining)?;
         let (max_keycode, remaining) = Keycode::try_parse(remaining)?;
         let remaining = remaining.get(4..).ok_or(ParseError::ParseError)?;
-        let (vendor, remaining) = crate::x11_utils::parse_u8_list(remaining, vendor_len as usize)?;
+        let (vendor, remaining) = crate::x11_utils::parse_u8_list(remaining, vendor_len.try_into().or(Err(ParseError::ParseError))?)?;
         let vendor = vendor.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let (pixmap_formats, remaining) = crate::x11_utils::parse_list::<Format>(remaining, pixmap_formats_len as usize)?;
-        let (roots, remaining) = crate::x11_utils::parse_list::<Screen>(remaining, roots_len as usize)?;
+        let (pixmap_formats, remaining) = crate::x11_utils::parse_list::<Format>(remaining, pixmap_formats_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (roots, remaining) = crate::x11_utils::parse_list::<Screen>(remaining, roots_len.try_into().or(Err(ParseError::ParseError))?)?;
         let image_byte_order = image_byte_order.try_into()?;
         let bitmap_format_bit_order = bitmap_format_bit_order.try_into()?;
         let result = Setup { status, protocol_major_version, protocol_minor_version, length, release_number, resource_id_base, resource_id_mask, motion_buffer_size, maximum_request_length, image_byte_order, bitmap_format_bit_order, bitmap_format_scanline_unit, bitmap_format_scanline_pad, min_keycode, max_keycode, vendor, pixmap_formats, roots };
@@ -7976,7 +7976,7 @@ impl Serialize for CreateWindowAux {
 }
 impl CreateWindowAux {
     fn switch_expr(&self) -> u32 {
-        let mut expr_value: u32 = 0;
+        let mut expr_value = 0;
         if self.background_pixmap.is_some() {
             expr_value |= u32::from(CW::BackPixmap);
         }
@@ -8301,7 +8301,7 @@ impl Serialize for ChangeWindowAttributesAux {
 }
 impl ChangeWindowAttributesAux {
     fn switch_expr(&self) -> u32 {
-        let mut expr_value: u32 = 0;
+        let mut expr_value = 0;
         if self.background_pixmap.is_some() {
             expr_value |= u32::from(CW::BackPixmap);
         }
@@ -9269,28 +9269,28 @@ impl Serialize for ConfigureWindowAux {
     }
 }
 impl ConfigureWindowAux {
-    fn switch_expr(&self) -> u16 {
-        let mut expr_value: u16 = 0;
+    fn switch_expr(&self) -> u32 {
+        let mut expr_value = 0;
         if self.x.is_some() {
-            expr_value |= u16::from(ConfigWindow::X);
+            expr_value |= u32::from(ConfigWindow::X);
         }
         if self.y.is_some() {
-            expr_value |= u16::from(ConfigWindow::Y);
+            expr_value |= u32::from(ConfigWindow::Y);
         }
         if self.width.is_some() {
-            expr_value |= u16::from(ConfigWindow::Width);
+            expr_value |= u32::from(ConfigWindow::Width);
         }
         if self.height.is_some() {
-            expr_value |= u16::from(ConfigWindow::Height);
+            expr_value |= u32::from(ConfigWindow::Height);
         }
         if self.border_width.is_some() {
-            expr_value |= u16::from(ConfigWindow::BorderWidth);
+            expr_value |= u32::from(ConfigWindow::BorderWidth);
         }
         if self.sibling.is_some() {
-            expr_value |= u16::from(ConfigWindow::Sibling);
+            expr_value |= u32::from(ConfigWindow::Sibling);
         }
         if self.stack_mode.is_some() {
-            expr_value |= u16::from(ConfigWindow::StackMode);
+            expr_value |= u32::from(ConfigWindow::StackMode);
         }
         expr_value
     }
@@ -9730,7 +9730,7 @@ impl TryParse for QueryTreeReply {
         let (parent, remaining) = Window::try_parse(remaining)?;
         let (children_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(14..).ok_or(ParseError::ParseError)?;
-        let (children, remaining) = crate::x11_utils::parse_list::<Window>(remaining, children_len as usize)?;
+        let (children, remaining) = crate::x11_utils::parse_list::<Window>(remaining, children_len.try_into().or(Err(ParseError::ParseError))?)?;
         let result = QueryTreeReply { response_type, sequence, length, root, parent, children };
         Ok((result, remaining))
     }
@@ -9882,7 +9882,7 @@ impl TryParse for GetAtomNameReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (name_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let name = name.to_vec();
         let result = GetAtomNameReply { response_type, sequence, length, name };
         Ok((result, remaining))
@@ -10064,7 +10064,7 @@ where
         data_len_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    assert_eq!(data.len(), ((data_len as usize) * (format as usize)) / 8, "`data` has an incorrect length");
+    assert_eq!(data.len(), usize::try_from(data_len.checked_mul(u32::from(format)).unwrap().checked_div(8u32).unwrap()).unwrap(), "`data` has an incorrect length");
     let length_so_far = length_so_far + data.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -10478,7 +10478,7 @@ impl TryParse for GetPropertyReply {
         let (bytes_after, remaining) = u32::try_parse(remaining)?;
         let (value_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
-        let (value, remaining) = crate::x11_utils::parse_u8_list(remaining, (value_len as usize) * ((format as usize) / 8))?;
+        let (value, remaining) = crate::x11_utils::parse_u8_list(remaining, value_len.checked_mul(u32::from(format).checked_div(8u32).ok_or(ParseError::ParseError)?).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let value = value.to_vec();
         let result = GetPropertyReply { response_type, format, sequence, length, type_, bytes_after, value_len, value };
         Ok((result, remaining))
@@ -10531,7 +10531,7 @@ impl TryParse for ListPropertiesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (atoms_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (atoms, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, atoms_len as usize)?;
+        let (atoms, remaining) = crate::x11_utils::parse_list::<Atom>(remaining, atoms_len.try_into().or(Err(ParseError::ParseError))?)?;
         let result = ListPropertiesReply { response_type, sequence, length, atoms };
         Ok((result, remaining))
     }
@@ -12394,7 +12394,7 @@ impl TryParse for GetMotionEventsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (events_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (events, remaining) = crate::x11_utils::parse_list::<Timecoord>(remaining, events_len as usize)?;
+        let (events, remaining) = crate::x11_utils::parse_list::<Timecoord>(remaining, events_len.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetMotionEventsReply { response_type, sequence, length, events };
         Ok((result, remaining))
     }
@@ -13133,8 +13133,8 @@ impl TryParse for QueryFontReply {
         let (font_ascent, remaining) = i16::try_parse(remaining)?;
         let (font_descent, remaining) = i16::try_parse(remaining)?;
         let (char_infos_len, remaining) = u32::try_parse(remaining)?;
-        let (properties, remaining) = crate::x11_utils::parse_list::<Fontprop>(remaining, properties_len as usize)?;
-        let (char_infos, remaining) = crate::x11_utils::parse_list::<Charinfo>(remaining, char_infos_len as usize)?;
+        let (properties, remaining) = crate::x11_utils::parse_list::<Fontprop>(remaining, properties_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (char_infos, remaining) = crate::x11_utils::parse_list::<Charinfo>(remaining, char_infos_len.try_into().or(Err(ParseError::ParseError))?)?;
         let draw_direction = draw_direction.try_into()?;
         let result = QueryFontReply { response_type, sequence, length, min_bounds, max_bounds, min_char_or_byte2, max_char_or_byte2, default_char, draw_direction, min_byte1, max_byte1, all_chars_exist, font_ascent, font_descent, properties, char_infos };
         Ok((result, remaining))
@@ -13187,9 +13187,9 @@ pub fn query_text_extents<'c, Conn>(conn: &'c Conn, font: Fontable, string: &[Ch
 where
     Conn: RequestConnection + ?Sized,
 {
-    let string_len = string.len();
+    let string_len = u32::try_from(string.len()).unwrap();
     let length_so_far = 0;
-    let odd_length = (string_len & 1) != 0;
+    let odd_length = (string_len & 1u32) != 0;
     let odd_length_bytes = odd_length.serialize();
     let font_bytes = font.serialize();
     let mut request0 = [
@@ -13259,7 +13259,7 @@ pub struct Str {
 impl TryParse for Str {
     fn try_parse(remaining: &[u8]) -> Result<(Self, &[u8]), ParseError> {
         let (name_len, remaining) = u8::try_parse(remaining)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len as usize)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let name = name.to_vec();
         let result = Str { name };
         Ok((result, remaining))
@@ -13346,7 +13346,7 @@ impl TryParse for ListFontsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (names_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (names, remaining) = crate::x11_utils::parse_list::<Str>(remaining, names_len as usize)?;
+        let (names, remaining) = crate::x11_utils::parse_list::<Str>(remaining, names_len.try_into().or(Err(ParseError::ParseError))?)?;
         let result = ListFontsReply { response_type, sequence, length, names };
         Ok((result, remaining))
     }
@@ -13458,8 +13458,8 @@ impl TryParse for ListFontsWithInfoReply {
         let (font_ascent, remaining) = i16::try_parse(remaining)?;
         let (font_descent, remaining) = i16::try_parse(remaining)?;
         let (replies_hint, remaining) = u32::try_parse(remaining)?;
-        let (properties, remaining) = crate::x11_utils::parse_list::<Fontprop>(remaining, properties_len as usize)?;
-        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len as usize)?;
+        let (properties, remaining) = crate::x11_utils::parse_list::<Fontprop>(remaining, properties_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let name = name.to_vec();
         let draw_direction = draw_direction.try_into()?;
         let result = ListFontsWithInfoReply { response_type, sequence, length, min_bounds, max_bounds, min_char_or_byte2, max_char_or_byte2, default_char, draw_direction, min_byte1, max_byte1, all_chars_exist, font_ascent, font_descent, replies_hint, properties, name };
@@ -13538,7 +13538,7 @@ impl TryParse for GetFontPathReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (path_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (path, remaining) = crate::x11_utils::parse_list::<Str>(remaining, path_len as usize)?;
+        let (path, remaining) = crate::x11_utils::parse_list::<Str>(remaining, path_len.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetFontPathReply { response_type, sequence, length, path };
         Ok((result, remaining))
     }
@@ -14533,7 +14533,7 @@ impl Serialize for CreateGCAux {
 }
 impl CreateGCAux {
     fn switch_expr(&self) -> u32 {
-        let mut expr_value: u32 = 0;
+        let mut expr_value = 0;
         if self.function.is_some() {
             expr_value |= u32::from(GC::Function);
         }
@@ -14899,7 +14899,7 @@ impl Serialize for ChangeGCAux {
 }
 impl ChangeGCAux {
     fn switch_expr(&self) -> u32 {
-        let mut expr_value: u32 = 0;
+        let mut expr_value = 0;
         if self.function.is_some() {
             expr_value |= u32::from(GC::Function);
         }
@@ -16289,7 +16289,7 @@ impl TryParse for GetImageReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (visual, remaining) = Visualid::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, (length as usize) * 4)?;
+        let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, length.checked_mul(4u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let data = data.to_vec();
         let result = GetImageReply { response_type, depth, sequence, visual, data };
         Ok((result, remaining))
@@ -16783,7 +16783,7 @@ impl TryParse for ListInstalledColormapsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (cmaps_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (cmaps, remaining) = crate::x11_utils::parse_list::<Colormap>(remaining, cmaps_len as usize)?;
+        let (cmaps, remaining) = crate::x11_utils::parse_list::<Colormap>(remaining, cmaps_len.try_into().or(Err(ParseError::ParseError))?)?;
         let result = ListInstalledColormapsReply { response_type, sequence, length, cmaps };
         Ok((result, remaining))
     }
@@ -17001,8 +17001,8 @@ impl TryParse for AllocColorCellsReply {
         let (pixels_len, remaining) = u16::try_parse(remaining)?;
         let (masks_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (pixels, remaining) = crate::x11_utils::parse_list::<u32>(remaining, pixels_len as usize)?;
-        let (masks, remaining) = crate::x11_utils::parse_list::<u32>(remaining, masks_len as usize)?;
+        let (pixels, remaining) = crate::x11_utils::parse_list::<u32>(remaining, pixels_len.try_into().or(Err(ParseError::ParseError))?)?;
+        let (masks, remaining) = crate::x11_utils::parse_list::<u32>(remaining, masks_len.try_into().or(Err(ParseError::ParseError))?)?;
         let result = AllocColorCellsReply { response_type, sequence, length, pixels, masks };
         Ok((result, remaining))
     }
@@ -17074,7 +17074,7 @@ impl TryParse for AllocColorPlanesReply {
         let (green_mask, remaining) = u32::try_parse(remaining)?;
         let (blue_mask, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(8..).ok_or(ParseError::ParseError)?;
-        let (pixels, remaining) = crate::x11_utils::parse_list::<u32>(remaining, pixels_len as usize)?;
+        let (pixels, remaining) = crate::x11_utils::parse_list::<u32>(remaining, pixels_len.try_into().or(Err(ParseError::ParseError))?)?;
         let result = AllocColorPlanesReply { response_type, sequence, length, red_mask, green_mask, blue_mask, pixels };
         Ok((result, remaining))
     }
@@ -17409,7 +17409,7 @@ impl TryParse for QueryColorsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (colors_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (colors, remaining) = crate::x11_utils::parse_list::<Rgb>(remaining, colors_len as usize)?;
+        let (colors, remaining) = crate::x11_utils::parse_list::<Rgb>(remaining, colors_len.try_into().or(Err(ParseError::ParseError))?)?;
         let result = QueryColorsReply { response_type, sequence, length, colors };
         Ok((result, remaining))
     }
@@ -18089,7 +18089,7 @@ impl TryParse for ListExtensionsReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let (names, remaining) = crate::x11_utils::parse_list::<Str>(remaining, names_len as usize)?;
+        let (names, remaining) = crate::x11_utils::parse_list::<Str>(remaining, names_len.try_into().or(Err(ParseError::ParseError))?)?;
         let result = ListExtensionsReply { response_type, sequence, length, names };
         Ok((result, remaining))
     }
@@ -18122,7 +18122,7 @@ where
         0,
     ];
     let length_so_far = length_so_far + request0.len();
-    assert_eq!(keysyms.len(), (keycode_count as usize) * (keysyms_per_keycode as usize), "`keysyms` has an incorrect length");
+    assert_eq!(keysyms.len(), usize::try_from(u32::from(keycode_count).checked_mul(u32::from(keysyms_per_keycode)).unwrap()).unwrap(), "`keysyms` has an incorrect length");
     let keysyms_bytes = keysyms.serialize();
     let length_so_far = length_so_far + keysyms_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
@@ -18173,7 +18173,7 @@ impl TryParse for GetKeyboardMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, length as usize)?;
+        let (keysyms, remaining) = crate::x11_utils::parse_list::<Keysym>(remaining, length.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetKeyboardMappingReply { response_type, keysyms_per_keycode, sequence, keysyms };
         Ok((result, remaining))
     }
@@ -18451,7 +18451,7 @@ impl Serialize for ChangeKeyboardControlAux {
 }
 impl ChangeKeyboardControlAux {
     fn switch_expr(&self) -> u32 {
-        let mut expr_value: u32 = 0;
+        let mut expr_value = 0;
         if self.key_click_percent.is_some() {
             expr_value |= u32::from(KB::KeyClickPercent);
         }
@@ -19116,7 +19116,7 @@ impl TryParse for Host {
         let (family, remaining) = u8::try_parse(remaining)?;
         let remaining = remaining.get(1..).ok_or(ParseError::ParseError)?;
         let (address_len, remaining) = u16::try_parse(remaining)?;
-        let (address, remaining) = crate::x11_utils::parse_u8_list(remaining, address_len as usize)?;
+        let (address, remaining) = crate::x11_utils::parse_u8_list(remaining, address_len.try_into().or(Err(ParseError::ParseError))?)?;
         let address = address.to_vec();
         // Align offset to multiple of 4
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
@@ -19187,7 +19187,7 @@ impl TryParse for ListHostsReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (hosts_len, remaining) = u16::try_parse(remaining)?;
         let remaining = remaining.get(22..).ok_or(ParseError::ParseError)?;
-        let (hosts, remaining) = crate::x11_utils::parse_list::<Host>(remaining, hosts_len as usize)?;
+        let (hosts, remaining) = crate::x11_utils::parse_list::<Host>(remaining, hosts_len.try_into().or(Err(ParseError::ParseError))?)?;
         let mode = mode.try_into()?;
         let result = ListHostsReply { response_type, mode, sequence, length, hosts };
         Ok((result, remaining))
@@ -19758,7 +19758,7 @@ impl TryParse for GetPointerMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let (map, remaining) = crate::x11_utils::parse_u8_list(remaining, map_len as usize)?;
+        let (map, remaining) = crate::x11_utils::parse_u8_list(remaining, map_len.try_into().or(Err(ParseError::ParseError))?)?;
         let map = map.to_vec();
         let result = GetPointerMappingReply { response_type, sequence, length, map };
         Ok((result, remaining))
@@ -19936,7 +19936,7 @@ impl TryParse for GetModifierMappingReply {
         let (sequence, remaining) = u16::try_parse(remaining)?;
         let (length, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(24..).ok_or(ParseError::ParseError)?;
-        let (keycodes, remaining) = crate::x11_utils::parse_u8_list(remaining, (keycodes_per_modifier as usize) * 8)?;
+        let (keycodes, remaining) = crate::x11_utils::parse_u8_list(remaining, u32::from(keycodes_per_modifier).checked_mul(8u32).ok_or(ParseError::ParseError)?.try_into().or(Err(ParseError::ParseError))?)?;
         let keycodes = keycodes.to_vec();
         let result = GetModifierMappingReply { response_type, sequence, length, keycodes };
         Ok((result, remaining))

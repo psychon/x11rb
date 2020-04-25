@@ -707,7 +707,7 @@ impl TryParse for GetRectanglesReply {
         let (length, remaining) = u32::try_parse(remaining)?;
         let (rectangles_len, remaining) = u32::try_parse(remaining)?;
         let remaining = remaining.get(20..).ok_or(ParseError::ParseError)?;
-        let (rectangles, remaining) = crate::x11_utils::parse_list::<xproto::Rectangle>(remaining, rectangles_len as usize)?;
+        let (rectangles, remaining) = crate::x11_utils::parse_list::<xproto::Rectangle>(remaining, rectangles_len.try_into().or(Err(ParseError::ParseError))?)?;
         let ordering = ordering.try_into()?;
         let result = GetRectanglesReply { response_type, ordering, sequence, length, rectangles };
         Ok((result, remaining))
