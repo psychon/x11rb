@@ -265,7 +265,7 @@ fn create_render_cursor<C: Connection>(
     render::free_picture(conn, picture)?;
 
     Ok(render::Animcursorelt {
-        cursor: cursor,
+        cursor,
         delay: image.delay,
     })
 }

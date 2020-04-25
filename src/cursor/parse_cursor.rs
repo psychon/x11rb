@@ -7,8 +7,8 @@
 use std::convert::TryInto;
 use std::io::{Read, Seek, SeekFrom};
 
-const FILE_MAGIC: u32 = 0x72756358;
-const IMAGE_TYPE: u32 = 0xfffd0002;
+const FILE_MAGIC: u32 = 0x7275_6358;
+const IMAGE_TYPE: u32 = 0xfffd_0002;
 const IMAGE_MAX_SIZE: u32 = 0x7fff;
 
 /// An error that occurred while parsing
@@ -220,10 +220,10 @@ mod test {
         assert_eq!(image.y_hot, 8);
         assert_eq!(image.delay, 42);
         assert_eq!(image.pixels, &[
-                   0x04030201, 0x08070605, 0x0c0b0a09, 0x100f0e0d,
-                   0x14131211, 0x18171615, 0x1c1b1a19, 0x201f1e1d,
-                   0x24232221, 0x28272625, 0x2c2b2a29, 0x302f2e2d,
-                   0x34333231, 0x38373635, 0x3c3b3a39,
+                   0x0403_0201, 0x0807_0605, 0x0c0b_0a09, 0x100f_0e0d,
+                   0x1413_1211, 0x1817_1615, 0x1c1b_1a19, 0x201f_1e1d,
+                   0x2423_2221, 0x2827_2625, 0x2c2b_2a29, 0x302f_2e2d,
+                   0x3433_3231, 0x3837_3635, 0x3c3b_3a39,
         ]);
     }
 

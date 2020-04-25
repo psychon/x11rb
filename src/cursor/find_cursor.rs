@@ -13,7 +13,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader, Error as IOError};
 use std::path::{Path, PathBuf};
 
-static CORE_CURSORS: &'static [(&str, u16)] = &[
+static CORE_CURSORS: &[(&str, u16)] = &[
     ("X_cursor", 0),
     ("arrow", 1),
     ("based_arrow_down", 2),
