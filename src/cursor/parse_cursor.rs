@@ -4,6 +4,7 @@
 //   Copyright © 2013 Michael Stapelberg
 // and is covered by MIT/X Consortium License
 
+use std::convert::TryInto;
 use std::io::{Read, Seek, SeekFrom};
 
 const FILE_MAGIC: u32 = 0x72756358;
@@ -50,10 +51,10 @@ fn read_u32<R: Read>(read: &mut R) -> Result<u32, Error> {
 /// A single cursor image
 #[derive(Debug)]
 pub(crate) struct Image {
-    pub(crate) width: u32,
-    pub(crate) height: u32,
-    pub(crate) x_hot: u32,
-    pub(crate) y_hot: u32,
+    pub(crate) width: u16,
+    pub(crate) height: u16,
+    pub(crate) x_hot: u16,
+    pub(crate) y_hot: u16,
     pub(crate) delay: u32,
     pub(crate) pixels: Vec<u32>,
 }
@@ -73,10 +74,16 @@ impl Image {
         if width > IMAGE_MAX_SIZE || height > IMAGE_MAX_SIZE {
             return Err(Error::ImageTooLarge);
         }
+        let (width, height) = match (width.try_into(), height.try_into()) {
+            (Ok(w), Ok(h)) => (w, h),
+            _ => unreachable!("The check above makes sure u16 is enough"),
+        };
+        let (x_hot, y_hot) = match (x_hot.try_into(), y_hot.try_into()) {
+            (Ok(x), Ok(y)) => (x, y),
+            _ => return Err(Error::ImageTooLarge),
+        };
 
-        // IMAGE_MAX_SIZE fits into 15 bits, so the following multiplication cannot overflow
-        assert!(IMAGE_MAX_SIZE.checked_mul(IMAGE_MAX_SIZE).is_some());
-        let num_pixels = width * height;
+        let num_pixels = u32::from(width) * u32::from(height);
         let pixels = (0..num_pixels)
             .map(|_| read_u32(read))
             .collect::<Result<Vec<_>, _>>()?;
