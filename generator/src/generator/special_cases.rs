@@ -69,7 +69,6 @@ pub(super) fn handle_request(request_def: &xcbdefs::RequestDef, out: &mut Output
 /// }};
 /// assert!(reply.value{width}().is_none());
 /// ```
-#[allow(single_use_lifetimes, private_doc_tests)] // Work around a rustc bug and rustdoc bug
 pub fn value{width}<'a>(&'a self) -> Option<impl Iterator<Item=u{width}> + 'a> {{
     if self.format == {width} {{
         Some(crate::wrapper::PropertyIterator::new(&self.value))
