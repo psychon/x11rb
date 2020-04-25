@@ -152,6 +152,7 @@ impl Handle {
     ///
     /// If you want this function not to block, you should prefetch the RENDER extension's data on
     /// the connection.
+    #[allow(clippy::new_ret_no_self)]
     pub fn new<C: Connection>(conn: &C, screen: usize) -> Result<Cookie<'_, C>, ConnectionError> {
         let screen = &conn.setup().roots[screen];
         let root = screen.root;
@@ -407,20 +408,17 @@ fn parse_resource_manager(rm: &[u8]) -> (Option<String>, u32, u32) {
             value = &value[..value.len() - 1];
         }
 
-        match std::str::from_utf8(value) {
-            Ok(value) => match key {
+        if let Ok(value) = std::str::from_utf8(value) {
+            match key {
                 b"Xcursor.theme" => theme = Some(value.to_string()),
-                b"Xcursor.size" => match value.parse() {
-                    Ok(num) => cursor_size = num,
-                    _ => {}
+                b"Xcursor.size" => if let Ok(num) = value.parse() {
+                    cursor_size = num;
                 },
-                b"Xft.dpi" => match value.parse() {
-                    Ok(num) => xft_dpi = num,
-                    _ => {}
+                b"Xft.dpi" => if let Ok(num) = value.parse() {
+                    xft_dpi = num;
                 },
                 _ => {}
-            },
-            _ => {}
+            }
         }
     }
 
@@ -428,9 +426,8 @@ fn parse_resource_manager(rm: &[u8]) -> (Option<String>, u32, u32) {
 }
 
 fn get_cursor_size(rm_cursor_size: u32, rm_xft_dpi: u32, screen: &xproto::Screen) -> u32 {
-    match std::env::var("XCURSOR_SIZE").map(|s| s.parse()) {
-        Ok(Ok(size)) => return size,
-        _ => {}
+    if let Some(size) = std::env::var("XCURSOR_SIZE").ok().and_then(|s| s.parse().ok()) {
+        return size;
     }
     if rm_cursor_size > 0 {
         return rm_cursor_size;

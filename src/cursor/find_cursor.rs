@@ -131,7 +131,7 @@ fn parse_inherits(filename: &Path) -> Result<Vec<OsString>, IOError> {
     #[cfg(unix)]
     {
         use std::os::unix::ffi::OsStringExt;
-        let result = result.into_iter().map(|e| OsString::from_vec(e)).collect();
+        let result = result.into_iter().map(OsString::from_vec).collect();
         Ok(result)
     }
     #[cfg(windows)]
@@ -198,11 +198,7 @@ fn parse_inherits_impl(input: &mut impl BufRead) -> Result<Vec<Vec<u8>>, IOError
                     part = skip_while(part, should_skip);
 
                     // Skip all trailing whitespace
-                    loop {
-                        let (&last, rest) = match part.split_last() {
-                            Some(x) => x,
-                            None => break,
-                        };
+                    while let Some((&last, rest)) = part.split_last() {
                         if !should_skip(last) {
                             break;
                         }
@@ -343,7 +339,7 @@ where
                 // Calculate the path to the theme's directory
                 let mut theme_dir = PathBuf::new();
                 // Does the path begin with '~'?
-                if path.to_string_lossy().chars().next() == Some('~') {
+                if path.to_string_lossy().starts_with('~') {
                     theme_dir.push(&home);
                     theme_dir.push(strip_leading_tilde_slash(&path));
                 } else {
