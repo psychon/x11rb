@@ -411,12 +411,16 @@ fn parse_resource_manager(rm: &[u8]) -> (Option<String>, u32, u32) {
         if let Ok(value) = std::str::from_utf8(value) {
             match key {
                 b"Xcursor.theme" => theme = Some(value.to_string()),
-                b"Xcursor.size" => if let Ok(num) = value.parse() {
-                    cursor_size = num;
-                },
-                b"Xft.dpi" => if let Ok(num) = value.parse() {
-                    xft_dpi = num;
-                },
+                b"Xcursor.size" => {
+                    if let Ok(num) = value.parse() {
+                        cursor_size = num;
+                    }
+                }
+                b"Xft.dpi" => {
+                    if let Ok(num) = value.parse() {
+                        xft_dpi = num;
+                    }
+                }
                 _ => {}
             }
         }
@@ -426,7 +430,10 @@ fn parse_resource_manager(rm: &[u8]) -> (Option<String>, u32, u32) {
 }
 
 fn get_cursor_size(rm_cursor_size: u32, rm_xft_dpi: u32, screen: &xproto::Screen) -> u32 {
-    if let Some(size) = std::env::var("XCURSOR_SIZE").ok().and_then(|s| s.parse().ok()) {
+    if let Some(size) = std::env::var("XCURSOR_SIZE")
+        .ok()
+        .and_then(|s| s.parse().ok())
+    {
         return size;
     }
     if rm_cursor_size > 0 {
