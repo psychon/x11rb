@@ -50,6 +50,10 @@ script:
         cargo fmt --all -- --check || exit 1
     fi
 
+  # Build once with just the default features, i.e. without all the extensions
+  # to check that this works fine.
+  - cargo build --verbose --all-targets
+
   - cargo build --verbose --all-targets --all-features
   - cargo test --verbose --all-features
   - cargo doc --verbose --all-features

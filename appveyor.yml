@@ -12,6 +12,10 @@ install:
 
 build: false
 test_script:
+  # Build once with just the default features, i.e. without all the extensions
+  # to check that this works fine.
+  - cargo build --verbose --all-targets
+
   # We do not have libxcb and thus cannot build XCBConnection
   - cargo build --verbose --all-targets --no-default-features --features all-extensions
   - cargo test --verbose --no-default-features --features all-extensions
