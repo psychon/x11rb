@@ -320,7 +320,7 @@ mod test {
     fn read_image_too_short() {
         let data = [];
         match Image::read(&mut Cursor::new(&data[..]), IMAGE_TYPE, 4) {
-            Err(Error::IO(e)) if e.kind() == ErrorKind::UnexpectedEof => {}
+            Err(Error::IO(ref e)) if e.kind() == ErrorKind::UnexpectedEof => {}
             r => panic!("Unexpected result {:?}", r),
         }
     }
@@ -380,7 +380,7 @@ mod test {
     fn parse_cursor_too_short() {
         let data = [];
         match parse_cursor(&mut Cursor::new(&data[..]), 10) {
-            Err(Error::IO(e)) if e.kind() == ErrorKind::UnexpectedEof => {}
+            Err(Error::IO(ref e)) if e.kind() == ErrorKind::UnexpectedEof => {}
             r => panic!("Unexpected result {:?}", r),
         }
     }
