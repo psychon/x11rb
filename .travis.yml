@@ -47,8 +47,7 @@ install:
             else
                 rustup component add clippy || return 0
             fi
-            cargo clippy -p x11rb-generator --all-targets -- -D warnings || return 1
-            cargo clippy --all-targets --all-features -- -D warnings || return 1
+            cargo clippy --all --all-targets --all-features -- -D warnings || return 1
         fi
     }
 
