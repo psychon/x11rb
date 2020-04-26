@@ -9,7 +9,7 @@ use std::io::{Read, Seek, SeekFrom};
 
 const FILE_MAGIC: u32 = 0x7275_6358;
 const IMAGE_TYPE: u32 = 0xfffd_0002;
-const IMAGE_MAX_SIZE: u32 = 0x7fff;
+const IMAGE_MAX_SIZE: u16 = 0x7fff;
 
 /// An error that occurred while parsing
 #[derive(Debug)]
@@ -72,21 +72,18 @@ impl Image {
             return Err(Error::CorruptImage);
         }
 
-        let (width, height) = (read_u32(read)?, read_u32(read)?);
+        fn convert_size(size: u32) -> Result<u16, Error> {
+            size.try_into()
+                .ok()
+                .filter(|&size| size <= IMAGE_MAX_SIZE)
+                .ok_or(Error::ImageTooLarge)
+        }
+
+        let (width, height) = (convert_size(read_u32(read)?)?, convert_size(read_u32(read)?)?);
         let (x_hot, y_hot) = (read_u32(read)?, read_u32(read)?);
         let delay = read_u32(read)?;
-
-        if width > IMAGE_MAX_SIZE || height > IMAGE_MAX_SIZE {
-            return Err(Error::ImageTooLarge);
-        }
-        let (width, height) = match (width.try_into(), height.try_into()) {
-            (Ok(w), Ok(h)) => (w, h),
-            _ => unreachable!("The check above makes sure u16 is enough"),
-        };
-        let (x_hot, y_hot) = match (x_hot.try_into(), y_hot.try_into()) {
-            (Ok(x), Ok(y)) => (x, y),
-            _ => return Err(Error::ImageTooLarge),
-        };
+        let x_hot = x_hot.try_into().or(Err(Error::ImageTooLarge))?;
+        let y_hot = y_hot.try_into().or(Err(Error::ImageTooLarge))?;
 
         let num_pixels = u32::from(width) * u32::from(height);
         let pixels = (0..num_pixels)
