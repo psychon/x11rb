@@ -255,9 +255,7 @@ where
         }
     }
 
-    let cursor_path = cursor_path
-        .split(':')
-        .collect::<Vec<_>>();
+    let cursor_path = cursor_path.split(':').collect::<Vec<_>>();
 
     let mut next_inherits = Vec::new();
     let mut last_inherits = vec![theme.into()];
@@ -314,16 +312,7 @@ mod test_find_cursor {
     fn core_cursor() {
         let cb1 = |_: &Path| -> Result<(), _> { unimplemented!() };
         let cb2 = |_: &Path| unimplemented!();
-        match find_cursor_impl(
-            "unused".as_ref(),
-            "unused".as_ref(),
-            "core",
-            "heart",
-            cb1,
-            cb2,
-        )
-        .unwrap()
-        {
+        match find_cursor_impl("unused".as_ref(), "unused", "core", "heart", cb1, cb2).unwrap() {
             Cursor::CoreChar(31) => {}
             e => panic!("Unexpected result {:?}", e),
         }
@@ -346,7 +335,7 @@ mod test_find_cursor {
         };
         match find_cursor_impl(
             "home".as_ref(),
-            "path:~/some/:/entries".as_ref(),
+            "path:~/some/:/entries",
             "theme",
             "theCursor",
             cb1,
@@ -394,7 +383,7 @@ mod test_find_cursor {
         };
         match find_cursor_impl(
             "home".as_ref(),
-            "path:base:tail".as_ref(),
+            "path:base:tail",
             "theTheme",
             "theCursor",
             cb1,

@@ -79,7 +79,10 @@ impl Image {
                 .ok_or(Error::ImageTooLarge)
         }
 
-        let (width, height) = (convert_size(read_u32(read)?)?, convert_size(read_u32(read)?)?);
+        let (width, height) = (
+            convert_size(read_u32(read)?)?,
+            convert_size(read_u32(read)?)?,
+        );
         let (x_hot, y_hot) = (read_u32(read)?, read_u32(read)?);
         let delay = read_u32(read)?;
         let x_hot = x_hot.try_into().or(Err(Error::ImageTooLarge))?;
