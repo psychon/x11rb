@@ -3816,21 +3816,19 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             rust_field_name,
                         )
                     }
+                } else if let Some(ref operand) = sum_of_expr.operand {
+                    format!(
+                        "{}.iter().try_fold(0u32, |acc, x| \
+                        acc.checked_add({}).ok_or(ParseError::ParseError))?",
+                        rust_field_name,
+                        self.expr_to_str(operand, panic_on_overflow, true, true),
+                    )
                 } else {
-                    if let Some(ref operand) = sum_of_expr.operand {
-                        format!(
-                            "{}.iter().try_fold(0u32, |acc, x| \
-                            acc.checked_add({}).ok_or(ParseError::ParseError))?",
-                            rust_field_name,
-                            self.expr_to_str(operand, panic_on_overflow, true, true),
-                        )
-                    } else {
-                        format!(
-                            "{}.iter().try_fold(0u32, |acc, &x| \
-                            acc.checked_add(u32::from(x)).ok_or(ParseError::ParseError))?",
-                            rust_field_name,
-                        )
-                    }
+                    format!(
+                        "{}.iter().try_fold(0u32, |acc, &x| \
+                        acc.checked_add(u32::from(x)).ok_or(ParseError::ParseError))?",
+                        rust_field_name,
+                    )
                 }
             }
             xcbdefs::Expression::ListElementRef => {

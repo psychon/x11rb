@@ -40,8 +40,8 @@ script:
   - |
     if [ "x$TRAVIS_RUST_VERSION" != "x1.37.0" ]; then
         rustup component add clippy
-        cargo clippy -p x11rb-generator --all-targets -- -D warnings
-        cargo clippy --all-targets --all-features -- -D warnings
+        cargo clippy -p x11rb-generator --all-targets -- -D warnings || return 1
+        cargo clippy --all-targets --all-features -- -D warnings || return 1
     fi
 
   - |
