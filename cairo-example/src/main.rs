@@ -10,12 +10,12 @@
 use x11rb::atom_manager;
 use x11rb::connection::Connection;
 use x11rb::errors::ReplyOrIdError;
-use x11rb::protocol::xproto::*;
+use x11rb::protocol::xproto::{ConnectionExt as _, *};
 use x11rb::protocol::Event;
 use x11rb::wrapper::ConnectionExt;
 use x11rb::xcb_ffi::XCBConnection;
 
-/// A collection of the atoms we will need.
+// A collection of the atoms we will need.
 atom_manager! {
     pub AtomCollection: AtomCollectionCookie {
         WM_PROTOCOLS,
@@ -60,7 +60,7 @@ fn find_xcb_visualtype(conn: &impl Connection, visual_id: u32) -> Option<xcb_vis
         for depth in &root.allowed_depths {
             for visual in &depth.visuals {
                 if visual.visual_id == visual_id {
-                    return Some((*visual).into())
+                    return Some((*visual).into());
                 }
             }
         }
@@ -76,11 +76,11 @@ fn create_window<C>(
     (width, height): (u16, u16),
 ) -> Result<Window, ReplyOrIdError<C::Buf>>
 where
-     C: Connection
+    C: Connection,
 {
     let window = conn.generate_id()?;
-    let win_aux = CreateWindowAux::new()
-        .event_mask(EventMask::Exposure | EventMask::StructureNotify);
+    let win_aux =
+        CreateWindowAux::new().event_mask(EventMask::Exposure | EventMask::StructureNotify);
     conn.create_window(
         screen.root_depth,
         window,
@@ -139,13 +139,7 @@ fn do_draw(cr: &cairo::Context, (width, height): (f64, f64)) {
 
     // Everybody likes odd geometrical shapes, right?
     let radius = width.min(height) / 3.0;
-    cr.arc(
-        width / 2.0,
-        height / 2.0,
-        radius,
-        0.0,
-        PI * 3.0 / 2.0,
-    );
+    cr.arc(width / 2.0, height / 2.0, radius, 0.0, PI * 3.0 / 2.0);
     cr.rel_line_to(radius, 0.0);
     cr.close_path();
     cr.set_source_rgba(1.0, 0.0, 0.0, 0.3);
@@ -180,15 +174,17 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut visual = find_xcb_visualtype(&conn, screen.root_visual).unwrap();
     // SAFETY: cairo-rs just passes the pointer to C code and C code uses the xcb_connection_t, so
     // "nothing really" happens here, except that the borrow checked cannot check the lifetimes.
-    let cairo_conn = unsafe { cairo::XCBConnection::from_raw_none(conn.get_raw_xcb_connection() as _) };
+    let cairo_conn =
+        unsafe { cairo::XCBConnection::from_raw_none(conn.get_raw_xcb_connection() as _) };
     let visual = unsafe { cairo::XCBVisualType::from_raw_none(&mut visual as *mut _ as _) };
     let surface = cairo::XCBSurface::create(
         &cairo_conn,
         &cairo::XCBDrawable(window),
         &visual,
         width.into(),
-        height.into()
-    ).unwrap();
+        height.into(),
+    )
+    .unwrap();
 
     loop {
         conn.flush()?;
@@ -209,7 +205,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 }
                 Event::ClientMessage(event) => {
                     let data = event.data.as_data32();
-                    if event.format == 32 && event.window == window && data[0] == atoms.WM_DELETE_WINDOW {
+                    if event.format == 32
+                        && event.window == window
+                        && data[0] == atoms.WM_DELETE_WINDOW
+                    {
                         println!("Window was asked to close");
                         return Ok(());
                     }
