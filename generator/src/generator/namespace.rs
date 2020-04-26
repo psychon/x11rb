@@ -3523,11 +3523,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 }
             }
             DeducibleField::CaseSwitchExpr(switch_field_name) => {
-                if let xcbdefs::FieldDef::Normal(_) = field {
+                if let xcbdefs::FieldDef::Normal(normal_field) = field {
+                    let rust_field_type =
+                        self.type_to_rust_type(normal_field.type_.type_.def.get().unwrap());
                     outln!(
                         out,
-                        "let {} = {}{}.switch_expr();",
+                        "let {} = {}::try_from({}{}.switch_expr()).unwrap();",
                         dst_var_name,
+                        rust_field_type,
                         obj_name,
                         to_rust_variable_name(switch_field_name),
                     );
@@ -3536,12 +3539,15 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 }
             }
             DeducibleField::BitCaseSwitchExpr(switch_field_name) => {
-                if let xcbdefs::FieldDef::Normal(_) = field {
+                if let xcbdefs::FieldDef::Normal(normal_field) = field {
                     // TODO: Try to handle xkb::SelectEvents
+                    let rust_field_type =
+                        self.type_to_rust_type(normal_field.type_.type_.def.get().unwrap());
                     outln!(
                         out,
-                        "let {} = {}{}.switch_expr();",
+                        "let {} = {}::try_from({}{}.switch_expr()).unwrap();",
                         dst_var_name,
+                        rust_field_type,
                         obj_name,
                         to_rust_variable_name(switch_field_name),
                     )

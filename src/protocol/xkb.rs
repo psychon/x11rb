@@ -7559,7 +7559,7 @@ where
     let virtual_mods: u16 = virtual_mods.into();
     let length_so_far = 0;
     let device_spec_bytes = device_spec.serialize();
-    let present = values.switch_expr();
+    let present = u16::try_from(values.switch_expr()).unwrap();
     let present_bytes = present.serialize();
     let flags_bytes = flags.serialize();
     let min_key_code_bytes = min_key_code.serialize();
@@ -8557,7 +8557,7 @@ where
     let length_so_far = 0;
     let device_spec_bytes = device_spec.serialize();
     let virtual_mods_bytes = virtual_mods.serialize();
-    let which = values.switch_expr();
+    let which = u32::try_from(values.switch_expr()).unwrap();
     let which_bytes = which.serialize();
     let first_type_bytes = first_type.serialize();
     let n_types_bytes = n_types.serialize();

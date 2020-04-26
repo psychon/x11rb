@@ -8176,7 +8176,7 @@ where
     let border_width_bytes = border_width.serialize();
     let class_bytes = u16::from(class).serialize();
     let visual_bytes = visual.serialize();
-    let value_mask = value_list.switch_expr();
+    let value_mask = u32::try_from(value_list.switch_expr()).unwrap();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
         CREATE_WINDOW_REQUEST,
@@ -8459,7 +8459,7 @@ where
 {
     let length_so_far = 0;
     let window_bytes = window.serialize();
-    let value_mask = value_list.switch_expr();
+    let value_mask = u32::try_from(value_list.switch_expr()).unwrap();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
         CHANGE_WINDOW_ATTRIBUTES_REQUEST,
@@ -9393,7 +9393,7 @@ where
 {
     let length_so_far = 0;
     let window_bytes = window.serialize();
-    let value_mask = value_list.switch_expr();
+    let value_mask = u16::try_from(value_list.switch_expr()).unwrap();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
         CONFIGURE_WINDOW_REQUEST,
@@ -14755,7 +14755,7 @@ where
     let length_so_far = 0;
     let cid_bytes = cid.serialize();
     let drawable_bytes = drawable.serialize();
-    let value_mask = value_list.switch_expr();
+    let value_mask = u32::try_from(value_list.switch_expr()).unwrap();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
         CREATE_GC_REQUEST,
@@ -15142,7 +15142,7 @@ where
 {
     let length_so_far = 0;
     let gc_bytes = gc.serialize();
-    let value_mask = value_list.switch_expr();
+    let value_mask = u32::try_from(value_list.switch_expr()).unwrap();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
         CHANGE_GC_REQUEST,
@@ -18528,7 +18528,7 @@ where
     Conn: RequestConnection + ?Sized,
 {
     let length_so_far = 0;
-    let value_mask = value_list.switch_expr();
+    let value_mask = u32::try_from(value_list.switch_expr()).unwrap();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
         CHANGE_KEYBOARD_CONTROL_REQUEST,

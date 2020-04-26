@@ -842,7 +842,7 @@ impl Serialize for InputInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        let class_id = self.info.switch_expr();
+        let class_id = u8::try_from(self.info.switch_expr()).unwrap();
         class_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.info.serialize_into(bytes);
@@ -3172,7 +3172,7 @@ impl Serialize for FeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        let class_id = self.data.switch_expr();
+        let class_id = u8::try_from(self.data.switch_expr()).unwrap();
         class_id.serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
@@ -4042,7 +4042,7 @@ impl Serialize for FeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        let class_id = self.data.switch_expr();
+        let class_id = u8::try_from(self.data.switch_expr()).unwrap();
         class_id.serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
@@ -5031,7 +5031,7 @@ impl Serialize for InputState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        let class_id = self.data.switch_expr();
+        let class_id = u8::try_from(self.data.switch_expr()).unwrap();
         class_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes);
@@ -5977,7 +5977,7 @@ impl Serialize for DeviceState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        let control_id = self.data.switch_expr();
+        let control_id = u16::try_from(self.data.switch_expr()).unwrap();
         control_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes);
@@ -6753,7 +6753,7 @@ impl Serialize for DeviceCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        let control_id = self.data.switch_expr();
+        let control_id = u16::try_from(self.data.switch_expr()).unwrap();
         control_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes);
@@ -7010,7 +7010,7 @@ where
     let property_bytes = property.serialize();
     let type_bytes = type_.serialize();
     let device_id_bytes = device_id.serialize();
-    let format = items.switch_expr();
+    let format = u8::try_from(items.switch_expr()).unwrap();
     let format_bytes = format.serialize();
     let mode_bytes = u8::from(mode).serialize();
     let num_items_bytes = num_items.serialize();
@@ -8232,7 +8232,7 @@ impl Serialize for HierarchyChange {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        let type_ = self.data.switch_expr();
+        let type_ = u16::try_from(self.data.switch_expr()).unwrap();
         type_.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes);
@@ -9661,7 +9661,7 @@ impl Serialize for DeviceClass {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(6);
-        let type_ = self.data.switch_expr();
+        let type_ = u16::try_from(self.data.switch_expr()).unwrap();
         type_.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
@@ -10688,7 +10688,7 @@ where
     let length_so_far = 0;
     let deviceid_bytes = deviceid.serialize();
     let mode_bytes = u8::from(mode).serialize();
-    let format = items.switch_expr();
+    let format = u8::try_from(items.switch_expr()).unwrap();
     let format_bytes = format.serialize();
     let property_bytes = property.serialize();
     let type_bytes = type_.serialize();
