@@ -1,16 +1,21 @@
 language: rust
 dist: bionic # x11rb needs at least libxcb 1.12
-rust:
-  # std::io::IoSlice was stabilised in 1.36.0, but 1.36.0 fails with a weird
-  # error enabled by deny(single_use_lifetimes).
-  - 1.37.0
-  - stable
-  - beta
-  - nightly
-matrix:
+jobs:
+  fast_finish: true
+  include:
+    # std::io::IoSlice was stabilised in 1.36.0, but 1.36.0 fails with a weird
+    # error enabled by deny(single_use_lifetimes).
+    - rust: 1.37.0
+      env: CLIPPY_RUSTFMT=no
+    - rust: stable
+      env: CLIPPY_RUSTFMT=yes
+    - rust: beta
+      env: CLIPPY_RUSTFMT=yes
+    - rust: nightly
+      env: CLIPPY_RUSTFMT=if_available
   allow_failures:
     - rust: nightly
-  fast_finish: true
+      env: CLIPPY_RUSTFMT=if_available
 
 addons:
   apt:
@@ -31,24 +36,44 @@ install:
         done
     }
 
+  - |
+    # Run clippy unless $CLIPPY_RUSTFMT is set to "no". If it is set to
+    # "if_available", then this is skipped if clippy is not available. With
+    # "yes", unavailability counts as an error.
+    run_clippy() {
+        if [ "x$CLIPPY_RUSTFMT" != "xno" ]; then
+            if [ "x$CLIPPY_RUSTFMT" = "xyes" ]; then
+                rustup component add clippy || return 1
+            else
+                rustup component add clippy || return 0
+            fi
+            cargo clippy --all --all-targets --all-features -- -D warnings || return 1
+        fi
+    }
+
+  - |
+    # Run rustfmt unless $CLIPPY_RUSTFMT is set to "no". If it is set to
+    # "if_available", then this is skipped if clippy is not available. With
+    # "yes", unavailability counts as an error.
+    run_rustfmt() {
+        if [ "x$CLIPPY_RUSTFMT" != "xno" ]; then
+            if [ "x$CLIPPY_RUSTFMT" = "xyes" ]; then
+                rustup component add rustfmt || return 1
+            else
+                rustup component add rustfmt || return 0
+            fi
+            cargo fmt --all -- --check || return 1
+        fi
+    }
+
 script:
   # Check the code generator. Output should be identical to the
-  # commited version.
+  # committed version.
   - make
   - if ! git diff --exit-code; then exit 1; fi
 
-  - |
-    if [ "x$TRAVIS_RUST_VERSION" != "x1.37.0" ]; then
-        rustup component add clippy
-        cargo clippy -p x11rb-generator --all-targets -- -D warnings || return 1
-        cargo clippy --all-targets --all-features -- -D warnings || return 1
-    fi
-
-  - |
-    if [ "x$TRAVIS_RUST_VERSION" != "x1.37.0" ]; then
-        rustup component add rustfmt
-        cargo fmt --all -- --check || exit 1
-    fi
+  - run_clippy
+  - run_rustfmt
 
   - cargo build --verbose --all-targets --all-features
   - cargo test --verbose --all-features
