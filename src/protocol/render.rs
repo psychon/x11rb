@@ -2209,7 +2209,7 @@ where
     let pid_bytes = pid.serialize();
     let drawable_bytes = drawable.serialize();
     let format_bytes = format.serialize();
-    let value_mask = value_list.switch_expr();
+    let value_mask = u32::try_from(value_list.switch_expr()).unwrap();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -2437,7 +2437,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let picture_bytes = picture.serialize();
-    let value_mask = value_list.switch_expr();
+    let value_mask = u32::try_from(value_list.switch_expr()).unwrap();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
         extension_information.major_opcode,
