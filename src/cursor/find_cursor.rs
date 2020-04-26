@@ -7,8 +7,8 @@
 //
 // and is licensed under MIT/X Consortium License
 
-use std::env::var_os;
-use std::ffi::{OsStr, OsString};
+use std::env::{var, var_os};
+use std::ffi::OsStr;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Error as IOError};
 use std::path::{Path, PathBuf};
@@ -125,31 +125,13 @@ pub(crate) enum Cursor<F> {
 }
 
 // Get the 'Inherits' entry from an index.theme file
-fn parse_inherits(filename: &Path) -> Result<Vec<OsString>, IOError> {
+fn parse_inherits(filename: &Path) -> Result<Vec<String>, IOError> {
     let file = File::open(filename)?;
-    let result = parse_inherits_impl(&mut BufReader::new(file))?;
-    #[cfg(unix)]
-    {
-        use std::os::unix::ffi::OsStringExt;
-        let result = result.into_iter().map(OsString::from_vec).collect();
-        Ok(result)
-    }
-    #[cfg(windows)]
-    {
-        use std::os::windows::ffi::OsStringExt;
-        let result = result
-            .into_iter()
-            .map(|e| {
-                let wide = e.into_iter().map(u16::from).collect::<Vec<_>>();
-                OsString::from_wide(wide)
-            })
-            .collect();
-        Ok(result)
-    }
+    parse_inherits_impl(&mut BufReader::new(file))
 }
 
 // Get the 'Inherits' entry from an index.theme file
-fn parse_inherits_impl(input: &mut impl BufRead) -> Result<Vec<Vec<u8>>, IOError> {
+fn parse_inherits_impl(input: &mut impl BufRead) -> Result<Vec<String>, IOError> {
     let mut buffer = Vec::new();
     loop {
         buffer.clear();
@@ -205,7 +187,9 @@ fn parse_inherits_impl(input: &mut impl BufRead) -> Result<Vec<Vec<u8>>, IOError
                         part = rest;
                     }
                     if !part.is_empty() {
-                        result.push(part.to_vec());
+                        if let Ok(part) = std::str::from_utf8(part) {
+                            result.push(part.to_string());
+                        }
                     }
                 }
             }
@@ -227,64 +211,8 @@ mod test_parse_inherits {
         let result = parse_inherits_impl(&mut input).unwrap();
         assert_eq!(
             result,
-            vec![&b"whatever"[..], &b"stuff"[..], &b"i s"[..], &b"this"[..]]
+            vec![&"whatever"[..], &"stuff"[..], &"i s"[..], &"this"[..]]
         );
-    }
-}
-
-#[cfg(unix)]
-fn strip_leading_tilde_slash(path: &OsStr) -> &OsStr {
-    use std::os::unix::ffi::OsStrExt;
-    let path = path.as_bytes();
-    let mut path = &path[..];
-    if let Some(b'~') = path.get(0) {
-        if let Some(b'/') = path.get(1) {
-            path = &path[2..];
-        } else {
-            path = &path[1..];
-        }
-    }
-    OsStr::from_bytes(path)
-}
-
-#[cfg(windows)]
-fn strip_leading_tilde_slash(path: &OsStr) -> OsString {
-    use std::os::windows::ffi::{OsStrExt, OsStringExt};
-    let path = path.encode_wide.collect::<Vec<_>>();
-    let mut path = &path[..];
-    fn map_to_char(input: u16) -> u8 {
-        input.try_into().unwrap_or(0)
-    }
-    if let Some(b'~') = path.get(0).map(map_to_char) {
-        if let Some(b'/') = path.get(1).map(map_to_char) {
-            path = &path[2..];
-        } else {
-            path = &path[1..];
-        }
-    }
-    OsString::from_wide(path)
-}
-
-/// Split an `OsStr` at some separator byte
-fn split_at(input: &OsStr, separator: u8) -> Vec<OsString> {
-    #[cfg(unix)]
-    {
-        use std::os::unix::ffi::OsStrExt;
-        input
-            .as_bytes()
-            .split(|&b| b == separator)
-            .map(|chunk| OsStr::from_bytes(chunk).to_os_string())
-            .collect()
-    }
-    #[cfg(windows)]
-    {
-        use std::os::windows::ffi::{OsStrExt, OsStringExt};
-        let separator = u16::from(separator);
-        input
-            .encode_wide()
-            .split(|&b| b == separator)
-            .map(|chunk| OsString::from_wide(chunk))
-            .collect()
     }
 }
 
@@ -294,7 +222,7 @@ pub(crate) fn find_cursor(theme: &str, name: &str) -> Result<Cursor<File>, Error
         Some(home) => home,
         None => return Err(Error::NoHomeDir),
     };
-    let cursor_path = var_os("XCURSOR_PATH").unwrap_or_else(|| {
+    let cursor_path = var("XCURSOR_PATH").unwrap_or_else(|_| {
         "~/.icons:/usr/share/icons:/usr/share/pixmaps:/usr/X11R6/lib/X11/icons".into()
     });
     let open_cursor = |file: &Path| File::open(file);
@@ -311,7 +239,7 @@ pub(crate) fn find_cursor(theme: &str, name: &str) -> Result<Cursor<File>, Error
 
 fn find_cursor_impl<F, G, H>(
     home: &OsStr,
-    cursor_path: &OsStr,
+    cursor_path: &str,
     theme: &str,
     name: &str,
     mut open_cursor: G,
@@ -319,7 +247,7 @@ fn find_cursor_impl<F, G, H>(
 ) -> Result<Cursor<F>, Error>
 where
     G: FnMut(&Path) -> Result<F, IOError>,
-    H: FnMut(&Path) -> Result<Vec<OsString>, IOError>,
+    H: FnMut(&Path) -> Result<Vec<String>, IOError>,
 {
     if theme == "core" {
         if let Some(id) = cursor_shape_to_id(name) {
@@ -327,21 +255,25 @@ where
         }
     }
 
-    let cursor_path = split_at(&cursor_path, b':');
+    let cursor_path = cursor_path
+        .split(':')
+        .collect::<Vec<_>>();
 
-    let mut os_theme = OsString::new();
-    os_theme.push(theme);
     let mut next_inherits = Vec::new();
-    let mut last_inherits = vec![os_theme];
+    let mut last_inherits = vec![theme.into()];
     while !last_inherits.is_empty() {
         for theme in last_inherits {
             for path in &cursor_path {
                 // Calculate the path to the theme's directory
                 let mut theme_dir = PathBuf::new();
                 // Does the path begin with '~'?
-                if path.to_string_lossy().starts_with('~') {
+                if path.starts_with('~') {
                     theme_dir.push(&home);
-                    theme_dir.push(strip_leading_tilde_slash(&path));
+                    if path.starts_with("~/") {
+                        theme_dir.push(&path[2..]);
+                    } else {
+                        theme_dir.push(&path[1..]);
+                    }
                 } else {
                     theme_dir.push(path);
                 }
