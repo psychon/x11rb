@@ -395,8 +395,8 @@ pub struct SetAttributesAux {
     pub background_pixel: Option<u32>,
     pub border_pixmap: Option<xproto::Pixmap>,
     pub border_pixel: Option<u32>,
-    pub bit_gravity: Option<u32>,
-    pub win_gravity: Option<u32>,
+    pub bit_gravity: Option<xproto::Gravity>,
+    pub win_gravity: Option<xproto::Gravity>,
     pub backing_store: Option<xproto::BackingStore>,
     pub backing_planes: Option<u32>,
     pub backing_pixel: Option<u32>,
@@ -428,10 +428,10 @@ impl Serialize for SetAttributesAux {
             border_pixel.serialize_into(bytes);
         }
         if let Some(bit_gravity) = self.bit_gravity {
-            bit_gravity.serialize_into(bytes);
+            u32::from(bit_gravity).serialize_into(bytes);
         }
         if let Some(win_gravity) = self.win_gravity {
-            win_gravity.serialize_into(bytes);
+            u32::from(win_gravity).serialize_into(bytes);
         }
         if let Some(backing_store) = self.backing_store {
             u32::from(backing_store).serialize_into(bytes);
@@ -539,12 +539,12 @@ impl SetAttributesAux {
         self
     }
     /// Set the `bit_gravity` field of this structure.
-    pub fn bit_gravity<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn bit_gravity<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Gravity>> {
         self.bit_gravity = value.into();
         self
     }
     /// Set the `win_gravity` field of this structure.
-    pub fn win_gravity<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn win_gravity<I>(mut self, value: I) -> Self where I: Into<Option<xproto::Gravity>> {
         self.win_gravity = value.into();
         self
     }

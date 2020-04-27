@@ -7897,6 +7897,25 @@ impl From<Gravity> for Option<u32> {
         Some(u32::from(input))
     }
 }
+impl Gravity {
+    fn try_from(value: impl Into<u32>, value_for_zero: Self) -> Result<Self, ParseError> {
+        let value = value.into();
+        match value {
+            0 => Ok(value_for_zero),
+            1 => Ok(Gravity::NorthWest),
+            2 => Ok(Gravity::North),
+            3 => Ok(Gravity::NorthEast),
+            4 => Ok(Gravity::West),
+            5 => Ok(Gravity::Center),
+            6 => Ok(Gravity::East),
+            7 => Ok(Gravity::SouthWest),
+            8 => Ok(Gravity::South),
+            9 => Ok(Gravity::SouthEast),
+            10 => Ok(Gravity::Static),
+            _ => Err(ParseError::ParseError),
+        }
+    }
+}
 
 /// Opcode for the CreateWindow request
 pub const CREATE_WINDOW_REQUEST: u8 = 1;
@@ -7907,8 +7926,8 @@ pub struct CreateWindowAux {
     pub background_pixel: Option<u32>,
     pub border_pixmap: Option<Pixmap>,
     pub border_pixel: Option<u32>,
-    pub bit_gravity: Option<u32>,
-    pub win_gravity: Option<u32>,
+    pub bit_gravity: Option<Gravity>,
+    pub win_gravity: Option<Gravity>,
     pub backing_store: Option<BackingStore>,
     pub backing_planes: Option<u32>,
     pub backing_pixel: Option<u32>,
@@ -7940,10 +7959,10 @@ impl Serialize for CreateWindowAux {
             border_pixel.serialize_into(bytes);
         }
         if let Some(bit_gravity) = self.bit_gravity {
-            bit_gravity.serialize_into(bytes);
+            u32::from(bit_gravity).serialize_into(bytes);
         }
         if let Some(win_gravity) = self.win_gravity {
-            win_gravity.serialize_into(bytes);
+            u32::from(win_gravity).serialize_into(bytes);
         }
         if let Some(backing_store) = self.backing_store {
             u32::from(backing_store).serialize_into(bytes);
@@ -8051,12 +8070,12 @@ impl CreateWindowAux {
         self
     }
     /// Set the `bit_gravity` field of this structure.
-    pub fn bit_gravity<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn bit_gravity<I>(mut self, value: I) -> Self where I: Into<Option<Gravity>> {
         self.bit_gravity = value.into();
         self
     }
     /// Set the `win_gravity` field of this structure.
-    pub fn win_gravity<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn win_gravity<I>(mut self, value: I) -> Self where I: Into<Option<Gravity>> {
         self.win_gravity = value.into();
         self
     }
@@ -8232,8 +8251,8 @@ pub struct ChangeWindowAttributesAux {
     pub background_pixel: Option<u32>,
     pub border_pixmap: Option<Pixmap>,
     pub border_pixel: Option<u32>,
-    pub bit_gravity: Option<u32>,
-    pub win_gravity: Option<u32>,
+    pub bit_gravity: Option<Gravity>,
+    pub win_gravity: Option<Gravity>,
     pub backing_store: Option<BackingStore>,
     pub backing_planes: Option<u32>,
     pub backing_pixel: Option<u32>,
@@ -8265,10 +8284,10 @@ impl Serialize for ChangeWindowAttributesAux {
             border_pixel.serialize_into(bytes);
         }
         if let Some(bit_gravity) = self.bit_gravity {
-            bit_gravity.serialize_into(bytes);
+            u32::from(bit_gravity).serialize_into(bytes);
         }
         if let Some(win_gravity) = self.win_gravity {
-            win_gravity.serialize_into(bytes);
+            u32::from(win_gravity).serialize_into(bytes);
         }
         if let Some(backing_store) = self.backing_store {
             u32::from(backing_store).serialize_into(bytes);
@@ -8376,12 +8395,12 @@ impl ChangeWindowAttributesAux {
         self
     }
     /// Set the `bit_gravity` field of this structure.
-    pub fn bit_gravity<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn bit_gravity<I>(mut self, value: I) -> Self where I: Into<Option<Gravity>> {
         self.bit_gravity = value.into();
         self
     }
     /// Set the `win_gravity` field of this structure.
-    pub fn win_gravity<I>(mut self, value: I) -> Self where I: Into<Option<u32>> {
+    pub fn win_gravity<I>(mut self, value: I) -> Self where I: Into<Option<Gravity>> {
         self.win_gravity = value.into();
         self
     }
@@ -8612,8 +8631,8 @@ pub struct GetWindowAttributesReply {
     pub length: u32,
     pub visual: Visualid,
     pub class: WindowClass,
-    pub bit_gravity: u8,
-    pub win_gravity: u8,
+    pub bit_gravity: Gravity,
+    pub win_gravity: Gravity,
     pub backing_planes: u32,
     pub backing_pixel: u32,
     pub save_under: bool,
@@ -8648,6 +8667,8 @@ impl TryParse for GetWindowAttributesReply {
         let remaining = remaining.get(2..).ok_or(ParseError::ParseError)?;
         let backing_store = backing_store.try_into()?;
         let class = class.try_into()?;
+        let bit_gravity = Gravity::try_from(bit_gravity, Gravity::BitForget)?;
+        let win_gravity = Gravity::try_from(win_gravity, Gravity::WinUnmap)?;
         let map_state = map_state.try_into()?;
         let result = GetWindowAttributesReply { response_type, backing_store, sequence, length, visual, class, bit_gravity, win_gravity, backing_planes, backing_pixel, save_under, map_is_installed, map_state, override_redirect, colormap, all_event_masks, your_event_mask, do_not_propagate_mask };
         Ok((result, remaining))
