@@ -3624,10 +3624,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 xcbdefs::TypeRef::Enum(enum_def) => enum_def.upgrade().unwrap(),
                 _ => unreachable!(),
             };
-            if is_xproto_gravity(&enum_def) && self.ns.header == "xproto" {
-                return Some(enum_def)
-            }
-            if !self.enum_has_repeated_values(&enum_def) {
+            if !self.enum_has_repeated_values(&enum_def) || is_xproto_gravity(&enum_def) {
                 // The field can only have the values from the enum,
                 // use its type.
                 Some(enum_def)
