@@ -342,7 +342,7 @@ impl TryFrom<&[u8]> for Int64 {
 }
 impl Serialize for Int64 {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let hi_bytes = self.hi.serialize();
         let lo_bytes = self.lo.serialize();
         [
@@ -393,7 +393,7 @@ impl TryFrom<&[u8]> for Systemcounter {
 }
 impl Serialize for Systemcounter {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -436,7 +436,7 @@ impl TryFrom<&[u8]> for Trigger {
 }
 impl Serialize for Trigger {
     type Bytes = [u8; 20];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 20] {
         let counter_bytes = self.counter.serialize();
         let wait_type_bytes = u32::from(self.wait_type).serialize();
         let wait_value_bytes = self.wait_value.serialize();
@@ -494,7 +494,7 @@ impl TryFrom<&[u8]> for Waitcondition {
 }
 impl Serialize for Waitcondition {
     type Bytes = [u8; 28];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 28] {
         let trigger_bytes = self.trigger.serialize();
         let event_threshold_bytes = self.event_threshold.serialize();
         [
@@ -1047,7 +1047,7 @@ pub struct CreateAlarmAux {
 }
 impl Serialize for CreateAlarmAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -1183,7 +1183,7 @@ pub struct ChangeAlarmAux {
 }
 impl Serialize for ChangeAlarmAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result

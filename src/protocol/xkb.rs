@@ -2078,7 +2078,7 @@ impl TryFrom<&[u8]> for IndicatorMap {
 }
 impl Serialize for IndicatorMap {
     type Bytes = [u8; 12];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 12] {
         let flags_bytes = u8::from(self.flags).serialize();
         let which_groups_bytes = u8::from(self.which_groups).serialize();
         let groups_bytes = u8::from(self.groups).serialize();
@@ -2509,7 +2509,7 @@ impl TryFrom<&[u8]> for ModDef {
 }
 impl Serialize for ModDef {
     type Bytes = [u8; 4];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 4] {
         let mask_bytes = self.mask.serialize();
         let real_mods_bytes = self.real_mods.serialize();
         let vmods_bytes = self.vmods.serialize();
@@ -2548,7 +2548,7 @@ impl TryFrom<&[u8]> for KeyName {
 }
 impl Serialize for KeyName {
     type Bytes = [u8; 4];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 4] {
         [
             self.name[0],
             self.name[1],
@@ -2585,7 +2585,7 @@ impl TryFrom<&[u8]> for KeyAlias {
 }
 impl Serialize for KeyAlias {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         [
             self.real[0],
             self.real[1],
@@ -2628,7 +2628,7 @@ impl TryFrom<&[u8]> for CountedString16 {
 }
 impl Serialize for CountedString16 {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -2669,7 +2669,7 @@ impl TryFrom<&[u8]> for KTMapEntry {
 }
 impl Serialize for KTMapEntry {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let active_bytes = self.active.serialize();
         let mods_mask_bytes = self.mods_mask.serialize();
         let level_bytes = self.level.serialize();
@@ -2730,7 +2730,7 @@ impl TryFrom<&[u8]> for KeyType {
 }
 impl Serialize for KeyType {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -2777,7 +2777,7 @@ impl TryFrom<&[u8]> for KeySymMap {
 }
 impl Serialize for KeySymMap {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -2814,7 +2814,7 @@ impl TryFrom<&[u8]> for CommonBehavior {
 }
 impl Serialize for CommonBehavior {
     type Bytes = [u8; 2];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 2] {
         let type_bytes = self.type_.serialize();
         let data_bytes = self.data.serialize();
         [
@@ -2849,7 +2849,7 @@ impl TryFrom<&[u8]> for DefaultBehavior {
 }
 impl Serialize for DefaultBehavior {
     type Bytes = [u8; 2];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 2] {
         let type_bytes = self.type_.serialize();
         [
             type_bytes[0],
@@ -2886,7 +2886,7 @@ impl TryFrom<&[u8]> for RadioGroupBehavior {
 }
 impl Serialize for RadioGroupBehavior {
     type Bytes = [u8; 2];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 2] {
         let type_bytes = self.type_.serialize();
         let group_bytes = self.group.serialize();
         [
@@ -2922,7 +2922,7 @@ impl TryFrom<&[u8]> for OverlayBehavior {
 }
 impl Serialize for OverlayBehavior {
     type Bytes = [u8; 2];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 2] {
         let type_bytes = self.type_.serialize();
         let key_bytes = self.key.serialize();
         [
@@ -3037,7 +3037,7 @@ impl Behavior {
 }
 impl Serialize for Behavior {
     type Bytes = [u8; 2];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 2] {
         self.0
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
@@ -3194,7 +3194,7 @@ impl TryFrom<&[u8]> for SetBehavior {
 }
 impl Serialize for SetBehavior {
     type Bytes = [u8; 4];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 4] {
         let keycode_bytes = self.keycode.serialize();
         let behavior_bytes = self.behavior.serialize();
         [
@@ -3233,7 +3233,7 @@ impl TryFrom<&[u8]> for SetExplicit {
 }
 impl Serialize for SetExplicit {
     type Bytes = [u8; 2];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 2] {
         let keycode_bytes = self.keycode.serialize();
         let explicit_bytes = self.explicit.serialize();
         [
@@ -3269,7 +3269,7 @@ impl TryFrom<&[u8]> for KeyModMap {
 }
 impl Serialize for KeyModMap {
     type Bytes = [u8; 2];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 2] {
         let keycode_bytes = self.keycode.serialize();
         let mods_bytes = self.mods.serialize();
         [
@@ -3306,7 +3306,7 @@ impl TryFrom<&[u8]> for KeyVModMap {
 }
 impl Serialize for KeyVModMap {
     type Bytes = [u8; 4];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 4] {
         let keycode_bytes = self.keycode.serialize();
         let vmods_bytes = self.vmods.serialize();
         [
@@ -3347,7 +3347,7 @@ impl TryFrom<&[u8]> for KTSetMapEntry {
 }
 impl Serialize for KTSetMapEntry {
     type Bytes = [u8; 4];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 4] {
         let level_bytes = self.level.serialize();
         let real_mods_bytes = self.real_mods.serialize();
         let virtual_mods_bytes = self.virtual_mods.serialize();
@@ -3399,7 +3399,7 @@ impl TryFrom<&[u8]> for SetKeyType {
 }
 impl Serialize for SetKeyType {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -3444,7 +3444,7 @@ impl TryFrom<&[u8]> for Outline {
 }
 impl Serialize for Outline {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -3486,7 +3486,7 @@ impl TryFrom<&[u8]> for Shape {
 }
 impl Serialize for Shape {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -3529,7 +3529,7 @@ impl TryFrom<&[u8]> for Key {
 }
 impl Serialize for Key {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let gap_bytes = self.gap.serialize();
         let shape_ndx_bytes = self.shape_ndx.serialize();
         let color_ndx_bytes = self.color_ndx.serialize();
@@ -3576,7 +3576,7 @@ impl TryFrom<&[u8]> for OverlayKey {
 }
 impl Serialize for OverlayKey {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         [
             self.over[0],
             self.over[1],
@@ -3618,7 +3618,7 @@ impl TryFrom<&[u8]> for OverlayRow {
 }
 impl Serialize for OverlayRow {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -3656,7 +3656,7 @@ impl TryFrom<&[u8]> for Overlay {
 }
 impl Serialize for Overlay {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -3698,7 +3698,7 @@ impl TryFrom<&[u8]> for Row {
 }
 impl Serialize for Row {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -3814,7 +3814,7 @@ impl TryFrom<&[u8]> for Listing {
 }
 impl Serialize for Listing {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -3863,7 +3863,7 @@ impl TryFrom<&[u8]> for DeviceLedInfo {
 }
 impl Serialize for DeviceLedInfo {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -4220,7 +4220,7 @@ impl TryFrom<&[u8]> for SANoAction {
 }
 impl Serialize for SANoAction {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
         [
             type_bytes[0],
@@ -4271,7 +4271,7 @@ impl TryFrom<&[u8]> for SASetMods {
 }
 impl Serialize for SASetMods {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let mask_bytes = self.mask.serialize();
@@ -4330,7 +4330,7 @@ impl TryFrom<&[u8]> for SASetGroup {
 }
 impl Serialize for SASetGroup {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let group_bytes = self.group.serialize();
@@ -4455,7 +4455,7 @@ impl TryFrom<&[u8]> for SAMovePtr {
 }
 impl Serialize for SAMovePtr {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let x_high_bytes = self.x_high.serialize();
@@ -4512,7 +4512,7 @@ impl TryFrom<&[u8]> for SAPtrBtn {
 }
 impl Serialize for SAPtrBtn {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let count_bytes = self.count.serialize();
@@ -4564,7 +4564,7 @@ impl TryFrom<&[u8]> for SALockPtrBtn {
 }
 impl Serialize for SALockPtrBtn {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let button_bytes = self.button.serialize();
@@ -4679,7 +4679,7 @@ impl TryFrom<&[u8]> for SASetPtrDflt {
 }
 impl Serialize for SASetPtrDflt {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let affect_bytes = self.affect.serialize();
@@ -4854,7 +4854,7 @@ impl TryFrom<&[u8]> for SAIsoLock {
 }
 impl Serialize for SAIsoLock {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let mask_bytes = self.mask.serialize();
@@ -4908,7 +4908,7 @@ impl TryFrom<&[u8]> for SATerminate {
 }
 impl Serialize for SATerminate {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
         [
             type_bytes[0],
@@ -5016,7 +5016,7 @@ impl TryFrom<&[u8]> for SASwitchScreen {
 }
 impl Serialize for SASwitchScreen {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let new_screen_bytes = self.new_screen.serialize();
@@ -5219,7 +5219,7 @@ impl TryFrom<&[u8]> for SASetControls {
 }
 impl Serialize for SASetControls {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
         let bool_ctrls_high_bytes = self.bool_ctrls_high.serialize();
         let bool_ctrls_low_bytes = self.bool_ctrls_low.serialize();
@@ -5337,7 +5337,7 @@ impl TryFrom<&[u8]> for SAActionMessage {
 }
 impl Serialize for SAActionMessage {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         [
@@ -5393,7 +5393,7 @@ impl TryFrom<&[u8]> for SARedirectKey {
 }
 impl Serialize for SARedirectKey {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
         let newkey_bytes = self.newkey.serialize();
         let mask_bytes = self.mask.serialize();
@@ -5455,7 +5455,7 @@ impl TryFrom<&[u8]> for SADeviceBtn {
 }
 impl Serialize for SADeviceBtn {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let count_bytes = self.count.serialize();
@@ -5574,7 +5574,7 @@ impl TryFrom<&[u8]> for SALockDeviceBtn {
 }
 impl Serialize for SALockDeviceBtn {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
         let flags_bytes = self.flags.serialize();
         let button_bytes = self.button.serialize();
@@ -5711,7 +5711,7 @@ impl TryFrom<&[u8]> for SADeviceValuator {
 }
 impl Serialize for SADeviceValuator {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
         let device_bytes = self.device.serialize();
         let val1what_bytes = u8::from(self.val1what).serialize();
@@ -5767,7 +5767,7 @@ impl TryFrom<&[u8]> for SIAction {
 }
 impl Serialize for SIAction {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let type_bytes = u8::from(self.type_).serialize();
         [
             type_bytes[0],
@@ -5816,7 +5816,7 @@ impl TryFrom<&[u8]> for SymInterpret {
 }
 impl Serialize for SymInterpret {
     type Bytes = [u8; 16];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 16] {
         let sym_bytes = self.sym.serialize();
         let mods_bytes = self.mods.serialize();
         let match_bytes = self.match_.serialize();
@@ -6036,7 +6036,7 @@ impl Action {
 }
 impl Serialize for Action {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         self.0
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
@@ -6232,7 +6232,7 @@ pub struct SelectEventsAuxBitcase1 {
 }
 impl Serialize for SelectEventsAuxBitcase1 {
     type Bytes = [u8; 4];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 4] {
         let affect_new_keyboard_bytes = self.affect_new_keyboard.serialize();
         let new_keyboard_details_bytes = self.new_keyboard_details.serialize();
         [
@@ -6255,7 +6255,7 @@ pub struct SelectEventsAuxBitcase2 {
 }
 impl Serialize for SelectEventsAuxBitcase2 {
     type Bytes = [u8; 4];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 4] {
         let affect_state_bytes = self.affect_state.serialize();
         let state_details_bytes = self.state_details.serialize();
         [
@@ -6278,7 +6278,7 @@ pub struct SelectEventsAuxBitcase3 {
 }
 impl Serialize for SelectEventsAuxBitcase3 {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let affect_ctrls_bytes = self.affect_ctrls.serialize();
         let ctrl_details_bytes = self.ctrl_details.serialize();
         [
@@ -6305,7 +6305,7 @@ pub struct SelectEventsAuxBitcase4 {
 }
 impl Serialize for SelectEventsAuxBitcase4 {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let affect_indicator_state_bytes = self.affect_indicator_state.serialize();
         let indicator_state_details_bytes = self.indicator_state_details.serialize();
         [
@@ -6332,7 +6332,7 @@ pub struct SelectEventsAuxBitcase5 {
 }
 impl Serialize for SelectEventsAuxBitcase5 {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let affect_indicator_map_bytes = self.affect_indicator_map.serialize();
         let indicator_map_details_bytes = self.indicator_map_details.serialize();
         [
@@ -6359,7 +6359,7 @@ pub struct SelectEventsAuxBitcase6 {
 }
 impl Serialize for SelectEventsAuxBitcase6 {
     type Bytes = [u8; 4];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 4] {
         let affect_names_bytes = self.affect_names.serialize();
         let names_details_bytes = self.names_details.serialize();
         [
@@ -6382,7 +6382,7 @@ pub struct SelectEventsAuxBitcase7 {
 }
 impl Serialize for SelectEventsAuxBitcase7 {
     type Bytes = [u8; 2];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 2] {
         let affect_compat_bytes = self.affect_compat.serialize();
         let compat_details_bytes = self.compat_details.serialize();
         [
@@ -6403,7 +6403,7 @@ pub struct SelectEventsAuxBitcase8 {
 }
 impl Serialize for SelectEventsAuxBitcase8 {
     type Bytes = [u8; 2];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 2] {
         let affect_bell_bytes = self.affect_bell.serialize();
         let bell_details_bytes = self.bell_details.serialize();
         [
@@ -6424,7 +6424,7 @@ pub struct SelectEventsAuxBitcase9 {
 }
 impl Serialize for SelectEventsAuxBitcase9 {
     type Bytes = [u8; 2];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 2] {
         let affect_msg_details_bytes = self.affect_msg_details.serialize();
         let msg_details_bytes = self.msg_details.serialize();
         [
@@ -6445,7 +6445,7 @@ pub struct SelectEventsAuxBitcase10 {
 }
 impl Serialize for SelectEventsAuxBitcase10 {
     type Bytes = [u8; 4];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 4] {
         let affect_access_x_bytes = self.affect_access_x.serialize();
         let access_x_details_bytes = self.access_x_details.serialize();
         [
@@ -6468,7 +6468,7 @@ pub struct SelectEventsAuxBitcase11 {
 }
 impl Serialize for SelectEventsAuxBitcase11 {
     type Bytes = [u8; 4];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 4] {
         let affect_ext_dev_bytes = self.affect_ext_dev.serialize();
         let extdev_details_bytes = self.extdev_details.serialize();
         [
@@ -6501,7 +6501,7 @@ pub struct SelectEventsAux {
 }
 impl Serialize for SelectEventsAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -7412,7 +7412,7 @@ pub struct SetMapAuxBitcase3 {
 }
 impl Serialize for SetMapAuxBitcase3 {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -7437,7 +7437,7 @@ pub struct SetMapAux {
 }
 impl Serialize for SetMapAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -8338,7 +8338,7 @@ pub struct SetNamesAuxBitcase8 {
 }
 impl Serialize for SetNamesAuxBitcase8 {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -8369,7 +8369,7 @@ pub struct SetNamesAux {
 }
 impl Serialize for SetNamesAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result

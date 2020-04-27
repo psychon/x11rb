@@ -1261,7 +1261,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "impl Serialize for {} {{", rust_name);
         out.indented(|out| {
             outln!(out, "type Bytes = [u8; {}];", union_size);
-            outln!(out, "fn serialize(&self) -> Self::Bytes {{");
+            outln!(out, "fn serialize(&self) -> [u8; {}] {{", union_size);
             outln!(out.indent(), "self.0");
             outln!(out, "}}");
             outln!(out, "fn serialize_into(&self, bytes: &mut Vec<u8>) {{");
@@ -1439,7 +1439,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "impl Serialize for {} {{", rust_name);
         out.indented(|out| {
             outln!(out, "type Bytes = [u8; 32];");
-            outln!(out, "fn serialize(&self) -> Self::Bytes {{");
+            outln!(out, "fn serialize(&self) -> [u8; 32] {{");
             outln!(out.indent(), "self.0");
             outln!(out, "}}");
             outln!(out, "fn serialize_into(&self, bytes: &mut Vec<u8>) {{");
@@ -2002,7 +2002,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "impl Serialize for {} {{", name);
         out.indented(|out| {
             outln!(out, "type Bytes = [u8; {}];", size);
-            outln!(out, "fn serialize(&self) -> Self::Bytes {{");
+            outln!(out, "fn serialize(&self) -> [u8; {}] {{", size);
             out.indented(|out| {
                 // This gathers the bytes of the result
                 let mut result_bytes = Vec::new();
@@ -2051,7 +2051,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "impl Serialize for {} {{", name);
         out.indented(|out| {
             outln!(out, "type Bytes = Vec<u8>;");
-            outln!(out, "fn serialize(&self) -> Self::Bytes {{");
+            outln!(out, "fn serialize(&self) -> Vec<u8> {{");
             out.indented(|out| {
                 outln!(out, "let mut result = Vec::new();");
                 outln!(out, "self.serialize_into(&mut result);");
@@ -2598,7 +2598,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "impl Serialize for {} {{", name);
         out.indented(|out| {
             outln!(out, "type Bytes = [u8; {}];", size);
-            outln!(out, "fn serialize(&self) -> Self::Bytes {{");
+            outln!(out, "fn serialize(&self) -> [u8; {}] {{", size);
             out.indented(|out| {
                 outln!(out, "match self {{");
                 out.indented(|out| {
@@ -2718,7 +2718,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "impl Serialize for {} {{", name);
         out.indented(|out| {
             outln!(out, "type Bytes = Vec<u8>;");
-            outln!(out, "fn serialize(&self) -> Self::Bytes {{");
+            outln!(out, "fn serialize(&self) -> Vec<u8> {{");
             out.indented(|out| {
                 outln!(out, "let mut result = Vec::new();");
                 outln!(out, "self.serialize_into(&mut result);");

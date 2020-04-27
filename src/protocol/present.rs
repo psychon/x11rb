@@ -480,7 +480,7 @@ impl TryFrom<&[u8]> for Notify {
 }
 impl Serialize for Notify {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let window_bytes = self.window.serialize();
         let serial_bytes = self.serial.serialize();
         [

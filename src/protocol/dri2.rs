@@ -290,7 +290,7 @@ impl TryFrom<&[u8]> for DRI2Buffer {
 }
 impl Serialize for DRI2Buffer {
     type Bytes = [u8; 20];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 20] {
         let attachment_bytes = u32::from(self.attachment).serialize();
         let name_bytes = self.name.serialize();
         let pitch_bytes = self.pitch.serialize();
@@ -351,7 +351,7 @@ impl TryFrom<&[u8]> for AttachFormat {
 }
 impl Serialize for AttachFormat {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let attachment_bytes = u32::from(self.attachment).serialize();
         let format_bytes = self.format.serialize();
         [

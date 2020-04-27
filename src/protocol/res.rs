@@ -58,7 +58,7 @@ impl TryFrom<&[u8]> for Client {
 }
 impl Serialize for Client {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let resource_base_bytes = self.resource_base.serialize();
         let resource_mask_bytes = self.resource_mask.serialize();
         [
@@ -100,7 +100,7 @@ impl TryFrom<&[u8]> for Type {
 }
 impl Serialize for Type {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let resource_type_bytes = self.resource_type.serialize();
         let count_bytes = self.count.serialize();
         [
@@ -205,7 +205,7 @@ impl TryFrom<&[u8]> for ClientIdSpec {
 }
 impl Serialize for ClientIdSpec {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let client_bytes = self.client.serialize();
         let mask_bytes = self.mask.serialize();
         [
@@ -248,7 +248,7 @@ impl TryFrom<&[u8]> for ClientIdValue {
 }
 impl Serialize for ClientIdValue {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -283,7 +283,7 @@ impl TryFrom<&[u8]> for ResourceIdSpec {
 }
 impl Serialize for ResourceIdSpec {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let resource_bytes = self.resource.serialize();
         let type_bytes = self.type_.serialize();
         [
@@ -329,7 +329,7 @@ impl TryFrom<&[u8]> for ResourceSizeSpec {
 }
 impl Serialize for ResourceSizeSpec {
     type Bytes = [u8; 20];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 20] {
         let spec_bytes = self.spec.serialize();
         let bytes_bytes = self.bytes.serialize();
         let ref_count_bytes = self.ref_count.serialize();
@@ -388,7 +388,7 @@ impl TryFrom<&[u8]> for ResourceSizeValue {
 }
 impl Serialize for ResourceSizeValue {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result

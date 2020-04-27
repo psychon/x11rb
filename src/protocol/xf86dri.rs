@@ -61,7 +61,7 @@ impl TryFrom<&[u8]> for DrmClipRect {
 }
 impl Serialize for DrmClipRect {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let x1_bytes = self.x1.serialize();
         let y1_bytes = self.y1.serialize();
         let x2_bytes = self.x2.serialize();

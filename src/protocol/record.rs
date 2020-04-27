@@ -59,7 +59,7 @@ impl TryFrom<&[u8]> for Range8 {
 }
 impl Serialize for Range8 {
     type Bytes = [u8; 2];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 2] {
         let first_bytes = self.first.serialize();
         let last_bytes = self.last.serialize();
         [
@@ -95,7 +95,7 @@ impl TryFrom<&[u8]> for Range16 {
 }
 impl Serialize for Range16 {
     type Bytes = [u8; 4];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 4] {
         let first_bytes = self.first.serialize();
         let last_bytes = self.last.serialize();
         [
@@ -133,7 +133,7 @@ impl TryFrom<&[u8]> for ExtRange {
 }
 impl Serialize for ExtRange {
     type Bytes = [u8; 6];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 6] {
         let major_bytes = self.major.serialize();
         let minor_bytes = self.minor.serialize();
         [
@@ -187,7 +187,7 @@ impl TryFrom<&[u8]> for Range {
 }
 impl Serialize for Range {
     type Bytes = [u8; 24];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 24] {
         let core_requests_bytes = self.core_requests.serialize();
         let core_replies_bytes = self.core_replies.serialize();
         let ext_requests_bytes = self.ext_requests.serialize();
@@ -395,7 +395,7 @@ impl TryFrom<&[u8]> for ClientInfo {
 }
 impl Serialize for ClientInfo {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
