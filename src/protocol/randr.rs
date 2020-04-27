@@ -2205,7 +2205,6 @@ pub struct GetCrtcGammaReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub size: u16,
     pub red: Vec<u16>,
     pub green: Vec<u16>,
     pub blue: Vec<u16>,
@@ -2221,7 +2220,7 @@ impl TryParse for GetCrtcGammaReply {
         let (red, remaining) = crate::x11_utils::parse_list::<u16>(remaining, size.try_into().or(Err(ParseError::ParseError))?)?;
         let (green, remaining) = crate::x11_utils::parse_list::<u16>(remaining, size.try_into().or(Err(ParseError::ParseError))?)?;
         let (blue, remaining) = crate::x11_utils::parse_list::<u16>(remaining, size.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = GetCrtcGammaReply { response_type, sequence, length, size, red, green, blue };
+        let result = GetCrtcGammaReply { response_type, sequence, length, red, green, blue };
         Ok((result, remaining))
     }
 }
@@ -2234,7 +2233,7 @@ impl TryFrom<&[u8]> for GetCrtcGammaReply {
 
 /// Opcode for the SetCrtcGamma request
 pub const SET_CRTC_GAMMA_REQUEST: u8 = 24;
-pub fn set_crtc_gamma<'c, Conn>(conn: &'c Conn, crtc: Crtc, size: u16, red: &[u16], green: &[u16], blue: &[u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_crtc_gamma<'c, Conn>(conn: &'c Conn, crtc: Crtc, red: &[u16], green: &[u16], blue: &[u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -2242,6 +2241,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let crtc_bytes = crtc.serialize();
+    let size = u16::try_from(red.len()).expect("`red` has too many elements");
     let size_bytes = size.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -2258,7 +2258,6 @@ where
         0,
     ];
     let length_so_far = length_so_far + request0.len();
-    assert_eq!(red.len(), usize::try_from(size).unwrap(), "`red` has an incorrect length");
     let red_bytes = red.serialize();
     let length_so_far = length_so_far + red_bytes.len();
     assert_eq!(green.len(), usize::try_from(size).unwrap(), "`green` has an incorrect length");
@@ -2992,7 +2991,6 @@ pub struct GetProviderInfoReply {
     pub length: u32,
     pub timestamp: xproto::Timestamp,
     pub capabilities: u32,
-    pub num_associated_providers: u16,
     pub crtcs: Vec<Crtc>,
     pub outputs: Vec<Output>,
     pub associated_providers: Vec<Provider>,
@@ -3018,7 +3016,7 @@ impl TryParse for GetProviderInfoReply {
         let (associated_capability, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_associated_providers.try_into().or(Err(ParseError::ParseError))?)?;
         let (name, remaining) = crate::x11_utils::parse_u8_list(remaining, name_len.try_into().or(Err(ParseError::ParseError))?)?;
         let name = name.to_vec();
-        let result = GetProviderInfoReply { response_type, status, sequence, length, timestamp, capabilities, num_associated_providers, crtcs, outputs, associated_providers, associated_capability, name };
+        let result = GetProviderInfoReply { response_type, status, sequence, length, timestamp, capabilities, crtcs, outputs, associated_providers, associated_capability, name };
         Ok((result, remaining))
     }
 }
@@ -4765,9 +4763,9 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_crtc_gamma(self, crtc)
     }
-    fn randr_set_crtc_gamma<'c>(&'c self, crtc: Crtc, size: u16, red: &[u16], green: &[u16], blue: &[u16]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn randr_set_crtc_gamma<'c>(&'c self, crtc: Crtc, red: &[u16], green: &[u16], blue: &[u16]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
-        set_crtc_gamma(self, crtc, size, red, green, blue)
+        set_crtc_gamma(self, crtc, red, green, blue)
     }
     fn randr_get_screen_resources_current(&self, window: xproto::Window) -> Result<Cookie<'_, Self, GetScreenResourcesCurrentReply>, ConnectionError>
     {

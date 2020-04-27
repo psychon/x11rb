@@ -735,7 +735,6 @@ pub struct Image {
     pub id: u32,
     pub width: u16,
     pub height: u16,
-    pub num_planes: u32,
     pub pitches: Vec<u32>,
     pub offsets: Vec<u32>,
     pub data: Vec<u8>,
@@ -751,7 +750,7 @@ impl TryParse for Image {
         let (offsets, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes.try_into().or(Err(ParseError::ParseError))?)?;
         let (data, remaining) = crate::x11_utils::parse_u8_list(remaining, data_size.try_into().or(Err(ParseError::ParseError))?)?;
         let data = data.to_vec();
-        let result = Image { id, width, height, num_planes, pitches, offsets, data };
+        let result = Image { id, width, height, pitches, offsets, data };
         Ok((result, remaining))
     }
 }
@@ -775,7 +774,8 @@ impl Serialize for Image {
         self.height.serialize_into(bytes);
         let data_size = u32::try_from(self.data.len()).expect("`data` has too many elements");
         data_size.serialize_into(bytes);
-        self.num_planes.serialize_into(bytes);
+        let num_planes = u32::try_from(self.pitches.len()).expect("`pitches` has too many elements");
+        num_planes.serialize_into(bytes);
         self.pitches.serialize_into(bytes);
         self.offsets.serialize_into(bytes);
         bytes.extend_from_slice(&self.data);
@@ -2426,7 +2426,6 @@ pub struct QueryImageAttributesReply {
     pub response_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub num_planes: u32,
     pub data_size: u32,
     pub width: u16,
     pub height: u16,
@@ -2446,7 +2445,7 @@ impl TryParse for QueryImageAttributesReply {
         let remaining = remaining.get(12..).ok_or(ParseError::ParseError)?;
         let (pitches, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes.try_into().or(Err(ParseError::ParseError))?)?;
         let (offsets, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_planes.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = QueryImageAttributesReply { response_type, sequence, length, num_planes, data_size, width, height, pitches, offsets };
+        let result = QueryImageAttributesReply { response_type, sequence, length, data_size, width, height, pitches, offsets };
         Ok((result, remaining))
     }
 }
