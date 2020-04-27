@@ -267,11 +267,12 @@ where
                 // Does the path begin with '~'?
                 if path.starts_with('~') {
                     theme_dir.push(&home);
-                    if path.starts_with("~/") {
-                        theme_dir.push(&path[2..]);
-                    } else {
-                        theme_dir.push(&path[1..]);
+                    let mut path = &path[1..];
+                    // Skip a path separator if there is one
+                    if path.chars().next().map(std::path::is_separator) == Some(true) {
+                        path = &path[1..];
                     }
+                    theme_dir.push(path);
                 } else {
                     theme_dir.push(path);
                 }
