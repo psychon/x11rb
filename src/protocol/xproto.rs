@@ -7897,6 +7897,25 @@ impl From<Gravity> for Option<u32> {
         Some(u32::from(input))
     }
 }
+impl Gravity {
+    fn try_from(value: impl Into<u32>, value_for_zero: Self) -> Result<Self, ParseError> {
+        let value = value.into();
+        match value {
+            0 => Ok(value_for_zero),
+            1 => Ok(Gravity::NorthWest),
+            2 => Ok(Gravity::North),
+            3 => Ok(Gravity::NorthEast),
+            4 => Ok(Gravity::West),
+            5 => Ok(Gravity::Center),
+            6 => Ok(Gravity::East),
+            7 => Ok(Gravity::SouthWest),
+            8 => Ok(Gravity::South),
+            9 => Ok(Gravity::SouthEast),
+            10 => Ok(Gravity::Static),
+            _ => Err(ParseError::ParseError),
+        }
+    }
+}
 
 /// Opcode for the CreateWindow request
 pub const CREATE_WINDOW_REQUEST: u8 = 1;
