@@ -2033,14 +2033,14 @@ pub struct CreatePictureAux {
     pub dither: Option<xproto::Atom>,
     pub componentalpha: Option<u32>,
 }
-impl Serialize for CreatePictureAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl CreatePictureAux {
+    fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, value_mask);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
         if let Some(repeat) = self.repeat {
             u32::from(repeat).serialize_into(bytes);
         }
@@ -2234,7 +2234,7 @@ where
         value_mask_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    let value_list_bytes = value_list.serialize();
+    let value_list_bytes = value_list.serialize(value_mask);
     let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -2263,14 +2263,14 @@ pub struct ChangePictureAux {
     pub dither: Option<xproto::Atom>,
     pub componentalpha: Option<u32>,
 }
-impl Serialize for ChangePictureAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl ChangePictureAux {
+    fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, value_mask);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
         if let Some(repeat) = self.repeat {
             u32::from(repeat).serialize_into(bytes);
         }
@@ -2454,7 +2454,7 @@ where
         value_mask_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    let value_list_bytes = value_list.serialize();
+    let value_list_bytes = value_list.serialize(value_mask);
     let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();

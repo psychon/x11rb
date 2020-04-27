@@ -246,14 +246,20 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             request_def.name,
         );
 
+        let deducible_fields = gather_deducible_fields(&*request_fields);
+
         if switch_fields.len() == 1 {
             if let Some(aux_start_align) = switch_fields[0].required_start_align {
                 assert_eq!(aux_start_align.offset, 0);
             }
-            self.generate_aux(request_def, switch_fields[0], &function_name, out);
+            self.generate_aux(
+                request_def,
+                &deducible_fields,
+                switch_fields[0],
+                &function_name,
+                out,
+            );
         }
-
-        let deducible_fields = gather_deducible_fields(&*request_fields);
 
         let gathered = self.gather_request_fields(request_def, &deducible_fields);
 
@@ -285,6 +291,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 false,
                 true,
                 false,
+                false,
                 reply.doc.as_ref(),
                 out,
             );
@@ -296,6 +303,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     fn generate_aux(
         &self,
         request_def: &xcbdefs::RequestDef,
+        deducible_fields: &FxHashMap<String, DeducibleField>,
         switch_field: &xcbdefs::SwitchField,
         function_name: &str,
         out: &mut Output,
@@ -303,14 +311,29 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         let aux_name = format!("{}Aux", request_def.name);
 
         if switch_field.kind == xcbdefs::SwitchKind::Case {
-            self.emit_switch_type(switch_field, &aux_name, false, true, None, out);
+            self.emit_switch_type(
+                switch_field,
+                &aux_name,
+                deducible_fields,
+                false,
+                true,
+                None,
+                out,
+            );
         } else {
             let doc = format!(
                 "Auxiliary and optional information for the `{}` function",
                 function_name,
             );
-            let cases_infos =
-                self.emit_switch_type(switch_field, &aux_name, false, true, Some(&doc), out);
+            let cases_infos = self.emit_switch_type(
+                switch_field,
+                &aux_name,
+                deducible_fields,
+                false,
+                true,
+                Some(&doc),
+                out,
+            );
 
             outln!(out, "impl {} {{", aux_name);
             out.indented(|out| {
@@ -618,7 +641,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             } else {
                                 let bytes_name = postfix_var_name(&rust_field_name, "bytes");
                                 outln!(tmp_out, "let mut {} = Vec::new();", bytes_name);
-                                outln!(tmp_out, "for element in {}.iter() {{", rust_field_name,);
+                                outln!(tmp_out, "for element in {}.iter() {{", rust_field_name);
                                 tmp_out.indented(|tmp_out| {
                                     self.emit_value_serialize_into(
                                         &list_field.element_type,
@@ -638,9 +661,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         let bytes_name = postfix_var_name(&rust_field_name, "bytes");
                         outln!(
                             tmp_out,
-                            "let {} = {}.serialize();",
+                            "let {} = {}.serialize({});",
                             bytes_name,
                             rust_field_name,
+                            self.ext_params_to_call_args(
+                                false,
+                                to_rust_variable_name,
+                                &*switch_field.external_params.borrow(),
+                            )
                         );
                         if let Some(field_size) = switch_field.size() {
                             for i in 0..field_size {
@@ -661,7 +689,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 out,
                                 "let {} = {} != 0;",
                                 rust_field_name,
-                                self.expr_to_str(&expr_field.expr, true, true, true),
+                                self.expr_to_str(
+                                    &expr_field.expr,
+                                    to_rust_variable_name,
+                                    true,
+                                    true,
+                                    true,
+                                ),
                             );
                         } else {
                             // the only case found in the XML definitions is with a bool
@@ -994,6 +1028,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             false,
             true,
             false,
+            true,
             event_full_def.doc.as_ref(),
             out,
         );
@@ -1090,6 +1125,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             false,
             true,
             false,
+            true,
             None,
             out,
         );
@@ -1205,6 +1241,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             &*struct_def.fields.borrow(),
             &*struct_def.external_params.borrow(),
             false,
+            true,
             true,
             true,
             None,
@@ -1792,6 +1829,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         name_prefix: &str,
         fields: &[xcbdefs::FieldDef],
+        parent_deducible_fields: &FxHashMap<String, DeducibleField>,
         generate_try_parse: bool,
         generate_serialize: bool,
         out: &mut Output,
@@ -1801,6 +1839,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 self.generate_switch(
                     name_prefix,
                     switch_field,
+                    parent_deducible_fields,
                     generate_try_parse,
                     generate_serialize,
                     out,
@@ -1813,6 +1852,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         name_prefix: &str,
         switch: &xcbdefs::SwitchField,
+        parent_deducible_fields: &FxHashMap<String, DeducibleField>,
         generate_try_parse: bool,
         generate_serialize: bool,
         out: &mut Output,
@@ -1821,6 +1861,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         self.emit_switch_type(
             switch,
             &switch_name,
+            parent_deducible_fields,
             generate_try_parse,
             generate_serialize,
             None,
@@ -1840,18 +1881,22 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         skip_length_field: bool,
         generate_try_parse: bool,
         generate_serialize: bool,
+        fields_need_serialize: bool,
         doc: Option<&xcbdefs::Doc>,
         out: &mut Output,
     ) {
+        assert!(!(generate_serialize && !fields_need_serialize));
+
+        let deducible_fields = gather_deducible_fields(fields);
+
         self.generate_switches_for_fields(
             switch_prefix,
             fields,
+            &deducible_fields,
             generate_try_parse,
-            generate_serialize,
+            fields_need_serialize,
             out,
         );
-
-        let deducible_fields = gather_deducible_fields(fields);
 
         if let Some(doc) = doc {
             self.emit_doc(doc, out);
@@ -1996,6 +2041,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 self.emit_fixed_size_struct_serialize(
                     name,
                     fields,
+                    external_params,
                     &deducible_fields,
                     skip_length_field,
                     size,
@@ -2005,6 +2051,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 self.emit_variable_size_struct_serialize(
                     name,
                     fields,
+                    external_params,
                     &deducible_fields,
                     skip_length_field,
                     out,
@@ -2017,15 +2064,30 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         name: &str,
         fields: &[xcbdefs::FieldDef],
+        external_params: &[xcbdefs::ExternalParam],
         deducible_fields: &FxHashMap<String, DeducibleField>,
         skip_length_field: bool,
         size: u32,
         out: &mut Output,
     ) {
-        outln!(out, "impl Serialize for {} {{", name);
+        let ext_params_arg_defs = self.ext_params_to_arg_defs(true, external_params);
+
+        if external_params.is_empty() {
+            outln!(out, "impl Serialize for {} {{", name);
+        } else {
+            outln!(out, "#[allow(dead_code, unused_variables)]");
+            outln!(out, "impl {} {{", name);
+        }
         out.indented(|out| {
-            outln!(out, "type Bytes = [u8; {}];", size);
-            outln!(out, "fn serialize(&self) -> [u8; {}] {{", size);
+            if external_params.is_empty() {
+                outln!(out, "type Bytes = [u8; {}];", size);
+            }
+            outln!(
+                out,
+                "fn serialize(&self{}) -> [u8; {}] {{",
+                ext_params_arg_defs,
+                size,
+            );
             out.indented(|out| {
                 // This gathers the bytes of the result
                 let mut result_bytes = Vec::new();
@@ -2048,7 +2110,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 outln!(out, "]");
             });
             outln!(out, "}}");
-            outln!(out, "fn serialize_into(&self, bytes: &mut Vec<u8>) {{");
+            outln!(
+                out,
+                "fn serialize_into(&self, bytes: &mut Vec<u8>{}) {{",
+                ext_params_arg_defs
+            );
             out.indented(|out| {
                 outln!(out, "bytes.reserve({});", size);
                 for field in fields.iter() {
@@ -2067,21 +2133,45 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         name: &str,
         fields: &[xcbdefs::FieldDef],
+        external_params: &[xcbdefs::ExternalParam],
         deducible_fields: &FxHashMap<String, DeducibleField>,
         skip_length_field: bool,
         out: &mut Output,
     ) {
-        outln!(out, "impl Serialize for {} {{", name);
+        let ext_params_arg_defs = self.ext_params_to_arg_defs(true, external_params);
+        let ext_params_call_args =
+            self.ext_params_to_call_args(true, to_rust_variable_name, external_params);
+
+        if external_params.is_empty() {
+            outln!(out, "impl Serialize for {} {{", name);
+        } else {
+            outln!(out, "#[allow(dead_code, unused_variables)]");
+            outln!(out, "impl {} {{", name);
+        }
         out.indented(|out| {
-            outln!(out, "type Bytes = Vec<u8>;");
-            outln!(out, "fn serialize(&self) -> Vec<u8> {{");
+            if external_params.is_empty() {
+                outln!(out, "type Bytes = Vec<u8>;");
+            }
+            outln!(
+                out,
+                "fn serialize(&self{}) -> Vec<u8> {{",
+                ext_params_arg_defs,
+            );
             out.indented(|out| {
                 outln!(out, "let mut result = Vec::new();");
-                outln!(out, "self.serialize_into(&mut result);");
+                outln!(
+                    out,
+                    "self.serialize_into(&mut result{});",
+                    ext_params_call_args,
+                );
                 outln!(out, "result");
             });
             outln!(out, "}}");
-            outln!(out, "fn serialize_into(&self, bytes: &mut Vec<u8>) {{");
+            outln!(
+                out,
+                "fn serialize_into(&self, bytes: &mut Vec<u8>{}) {{",
+                ext_params_arg_defs
+            );
             out.indented(|out| {
                 // Variable size structures usually have some fixed size
                 // fields at the beginning. Gather the total size of those
@@ -2118,6 +2208,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         switch: &xcbdefs::SwitchField,
         name: &str,
+        parent_deducible_fields: &FxHashMap<String, DeducibleField>,
         generate_try_parse: bool,
         generate_serialize: bool,
         doc: Option<&str>,
@@ -2170,6 +2261,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     self.generate_switch(
                         name,
                         switch_field,
+                        &case_deducible_fields,
                         generate_try_parse,
                         generate_serialize,
                         out,
@@ -2203,6 +2295,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     &*ext_params,
                     false,
                     generate_try_parse,
+                    generate_serialize,
                     generate_serialize,
                     None,
                     out,
@@ -2317,7 +2410,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         rust_case_type,
                     );
                     out.indented(|out| {
-                        outln!(out, "match self {{",);
+                        outln!(out, "match self {{");
                         outln!(
                             out.indent(),
                             "{}::{}(value) => Some(value),",
@@ -2335,9 +2428,22 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
         if generate_serialize {
             if let Some(size) = switch.size() {
-                self.emit_fixed_size_switch_serialize(switch, name, &case_infos, size, out);
+                self.emit_fixed_size_switch_serialize(
+                    switch,
+                    name,
+                    parent_deducible_fields,
+                    &case_infos,
+                    size,
+                    out,
+                );
             } else {
-                self.emit_variable_size_switch_serialize(switch, name, &case_infos, out);
+                self.emit_variable_size_switch_serialize(
+                    switch,
+                    name,
+                    parent_deducible_fields,
+                    &case_infos,
+                    out,
+                );
             }
         }
 
@@ -2366,7 +2472,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                                 "{}::{}(_) => {},",
                                 name,
                                 rust_field_name,
-                                self.expr_to_str(&case.exprs[0], true, true, false),
+                                self.expr_to_str(
+                                    &case.exprs[0],
+                                    to_rust_variable_name,
+                                    true,
+                                    true,
+                                    false,
+                                ),
                             );
                         }
                         outln!(out, "}}");
@@ -2386,7 +2498,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             outln!(
                                 out.indent(),
                                 "expr_value |= {};",
-                                self.expr_to_str(&case.exprs[0], true, true, false),
+                                self.expr_to_str(
+                                    &case.exprs[0],
+                                    to_rust_variable_name,
+                                    true,
+                                    true,
+                                    false,
+                                ),
                             );
                             outln!(out, "}}");
                         }
@@ -2440,7 +2558,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 outln!(
                     out,
                     "let switch_expr = {};",
-                    self.expr_to_str(&switch.expr, false, true, false),
+                    self.expr_to_str(&switch.expr, to_rust_variable_name, false, true, false),
                 );
                 outln!(out, "let mut outer_remaining = value;");
                 if switch.kind == xcbdefs::SwitchKind::BitCase {
@@ -2448,16 +2566,24 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     for (case, case_info) in switch.cases.iter().zip(case_infos.iter()) {
                         let mut case_expr_str = format!(
                             "switch_expr & {} != 0",
-                            self.expr_to_str(&case.exprs[0], false, true, true),
+                            self.expr_to_str(
+                                &case.exprs[0],
+                                to_rust_variable_name,
+                                false,
+                                true,
+                                true,
+                            ),
                         );
                         for expr in case.exprs[1..].iter() {
-                            use std::fmt::Write as _;
-                            write!(
-                                case_expr_str,
-                                " || switch_expr & {} != 0",
-                                self.expr_to_str(expr, false, true, true),
-                            )
-                            .unwrap();
+                            case_expr_str.push_str(" || switch_expr & ");
+                            case_expr_str.push_str(&self.expr_to_str(
+                                expr,
+                                to_rust_variable_name,
+                                false,
+                                true,
+                                true,
+                            ));
+                            case_expr_str.push_str(" != 0");
                         }
 
                         let rust_case_name = match case_info {
@@ -2523,16 +2649,23 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     for (case, case_info) in switch.cases.iter().zip(case_infos.iter()) {
                         let mut case_expr_str = format!(
                             "switch_expr == {}",
-                            self.expr_to_str(&case.exprs[0], false, true, true),
+                            self.expr_to_str(
+                                &case.exprs[0],
+                                to_rust_variable_name,
+                                false,
+                                true,
+                                true,
+                            ),
                         );
                         for expr in case.exprs[1..].iter() {
-                            use std::fmt::Write as _;
-                            write!(
-                                case_expr_str,
-                                " || switch_expr == {}",
-                                self.expr_to_str(expr, false, true, true),
-                            )
-                            .unwrap();
+                            case_expr_str.push_str(" || switch_expr == ");
+                            case_expr_str.push_str(&self.expr_to_str(
+                                expr,
+                                to_rust_variable_name,
+                                false,
+                                true,
+                                true,
+                            ));
                         }
 
                         let (rust_case_type_name, rust_case_var_name) = match case_info {
@@ -2613,16 +2746,36 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         switch: &xcbdefs::SwitchField,
         name: &str,
+        parent_deducible_fields: &FxHashMap<String, DeducibleField>,
         case_infos: &[CaseInfo],
         size: u32,
         out: &mut Output,
     ) {
         assert!(switch.kind == xcbdefs::SwitchKind::Case);
-        outln!(out, "impl Serialize for {} {{", name);
+
+        let external_params = switch.external_params.borrow();
+        let ext_params_arg_defs = self.ext_params_to_arg_defs(true, &*external_params);
+        //let ext_params_call_args =
+        //    self.ext_params_to_call_args(true, to_rust_variable_name, &*external_params);
+
+        if external_params.is_empty() {
+            outln!(out, "impl Serialize for {} {{", name);
+        } else {
+            outln!(out, "#[allow(dead_code, unused_variables)]");
+            outln!(out, "impl {} {{", name);
+        }
         out.indented(|out| {
-            outln!(out, "type Bytes = [u8; {}];", size);
-            outln!(out, "fn serialize(&self) -> [u8; {}] {{", size);
+            if external_params.is_empty() {
+                outln!(out, "type Bytes = [u8; {}];", size);
+            }
+            outln!(
+                out,
+                "fn serialize(&self{}) -> [u8; {}] {{",
+                ext_params_arg_defs,
+                size,
+            );
             out.indented(|out| {
+                self.emit_assert_for_switch_serialize(switch, parent_deducible_fields, out);
                 outln!(out, "match self {{");
                 out.indented(|out| {
                     for (case, case_info) in switch.cases.iter().zip(case_infos.iter()) {
@@ -2675,7 +2828,11 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 outln!(out, "}}");
             });
             outln!(out, "}}");
-            outln!(out, "fn serialize_into(&self, bytes: &mut Vec<u8>) {{");
+            outln!(
+                out,
+                "fn serialize_into(&self, bytes: &mut Vec<u8>{}) {{",
+                ext_params_arg_defs
+            );
             out.indented(|out| {
                 outln!(out, "match *self {{");
                 for (case, case_info) in switch.cases.iter().zip(case_infos.iter()) {
@@ -2735,21 +2892,47 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         switch: &xcbdefs::SwitchField,
         name: &str,
+        parent_deducible_fields: &FxHashMap<String, DeducibleField>,
         case_infos: &[CaseInfo],
         out: &mut Output,
     ) {
-        outln!(out, "impl Serialize for {} {{", name);
+        let external_params = switch.external_params.borrow();
+        let ext_params_arg_defs = self.ext_params_to_arg_defs(true, &*external_params);
+        let ext_params_call_args =
+            self.ext_params_to_call_args(true, to_rust_variable_name, &*external_params);
+
+        if external_params.is_empty() {
+            outln!(out, "impl Serialize for {} {{", name);
+        } else {
+            outln!(out, "#[allow(dead_code, unused_variables)]");
+            outln!(out, "impl {} {{", name);
+        }
         out.indented(|out| {
-            outln!(out, "type Bytes = Vec<u8>;");
-            outln!(out, "fn serialize(&self) -> Vec<u8> {{");
+            if external_params.is_empty() {
+                outln!(out, "type Bytes = Vec<u8>;");
+            }
+            outln!(
+                out,
+                "fn serialize(&self{}) -> Vec<u8> {{",
+                ext_params_arg_defs,
+            );
             out.indented(|out| {
                 outln!(out, "let mut result = Vec::new();");
-                outln!(out, "self.serialize_into(&mut result);");
+                outln!(
+                    out,
+                    "self.serialize_into(&mut result{});",
+                    ext_params_call_args,
+                );
                 outln!(out, "result");
             });
             outln!(out, "}}");
-            outln!(out, "fn serialize_into(&self, bytes: &mut Vec<u8>) {{");
+            outln!(
+                out,
+                "fn serialize_into(&self, bytes: &mut Vec<u8>{}) {{",
+                ext_params_arg_defs
+            );
             out.indented(|out| {
+                self.emit_assert_for_switch_serialize(switch, parent_deducible_fields, out);
                 if switch.kind == xcbdefs::SwitchKind::BitCase {
                     for (case, case_info) in switch.cases.iter().zip(case_infos.iter()) {
                         match case_info {
@@ -2804,13 +2987,23 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             }
                             CaseInfo::MultiField(field_name, _) => {
                                 let rust_field_name = to_rust_variable_name(field_name);
+                                let ext_params_call_args = self.ext_params_to_call_args(
+                                    true,
+                                    to_rust_variable_name,
+                                    &*case.external_params.borrow(),
+                                );
                                 outln!(
                                     out,
                                     "if let Some(ref {}) = self.{} {{",
                                     rust_field_name,
                                     rust_field_name,
                                 );
-                                outln!(out.indent(), "{}.serialize_into(bytes);", rust_field_name);
+                                outln!(
+                                    out.indent(),
+                                    "{}.serialize_into(bytes{});",
+                                    rust_field_name,
+                                    ext_params_call_args,
+                                );
                                 outln!(out, "}}");
                             }
                         }
@@ -2960,9 +3153,16 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         outln!(
                             out,
                             "let ({}, remaining) = crate::x11_utils\
-                            ::parse_u8_list(remaining, {}.try_into().or(Err(ParseError::ParseError))?)?;",
+                            ::parse_u8_list(remaining, \
+                            {}.try_into().or(Err(ParseError::ParseError))?)?;",
                             rust_field_name,
-                            self.expr_to_str(length_expr, false, false, true),
+                            self.expr_to_str(
+                                length_expr,
+                                to_rust_variable_name,
+                                false,
+                                false,
+                                true,
+                            ),
                         );
                         outln!(
                             out,
@@ -2983,11 +3183,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     outln!(
                         out,
                         "let ({}, remaining) = crate::x11_utils\
-                        ::parse_list::<{}>(remaining, {}.try_into().or(Err(ParseError::ParseError))?)?;",
+                        ::parse_list::<{}>(remaining, \
+                        {}.try_into().or(Err(ParseError::ParseError))?)?;",
                         rust_field_name,
                         rust_element_type,
                         self.expr_to_str(
                             list_field.length_expr.as_ref().unwrap(),
+                            to_rust_variable_name,
                             false,
                             false,
                             true,
@@ -3015,8 +3217,15 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     if let Some(ref length_expr) = list_field.length_expr {
                         outln!(
                             out,
-                            "let list_length = usize::try_from({}).or(Err(ParseError::ParseError))?;",
-                            self.expr_to_str(length_expr, false, false, false),
+                            "let list_length = \
+                            usize::try_from({}).or(Err(ParseError::ParseError))?;",
+                            self.expr_to_str(
+                                length_expr,
+                                to_rust_variable_name,
+                                false,
+                                false,
+                                false,
+                            ),
                         );
                         outln!(
                             out,
@@ -3073,7 +3282,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 outln!(
                     out,
                     "let fds_len = usize::try_from({}).or(Err(ParseError::ParseError))?;",
-                    self.expr_to_str(&fd_list_field.length_expr, false, false, false),
+                    self.expr_to_str(
+                        &fd_list_field.length_expr,
+                        to_rust_variable_name,
+                        false,
+                        false,
+                        false,
+                    ),
                 );
                 outln!(
                     out,
@@ -3162,10 +3377,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         &self,
         field: &xcbdefs::FieldDef,
         deducible_fields: &FxHashMap<String, DeducibleField>,
-        obj_name: &str,
+        obj_prefix: &str,
         result_bytes: &mut Vec<String>,
         out: &mut Output,
     ) -> Option<String> {
+        // Should only be used in fixed size fields
+        assert!(field.size().is_some());
+        // Just in case, but for fixed size fields it should not emit anything.
+        self.emit_assert_for_field_serialize(field, deducible_fields, obj_prefix, out);
         match field {
             xcbdefs::FieldDef::Pad(pad_field) => {
                 match pad_field.kind {
@@ -3188,7 +3407,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     self.emit_calc_deducible_field(
                         field,
                         deducible_field,
-                        obj_name,
+                        obj_prefix,
                         &rust_field_name,
                         out,
                     );
@@ -3199,7 +3418,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         self.emit_value_serialize(&normal_field.type_, &rust_field_name, true),
                     );
                 } else {
-                    let src_value = format!("{}{}", obj_name, rust_field_name);
+                    let src_value = format!("{}{}", obj_prefix, rust_field_name);
                     outln!(
                         out,
                         "let {} = {};",
@@ -3218,13 +3437,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 if self.rust_value_type_is_u8(&list_field.element_type) {
                     // Fixed-sized list with `u8` members
                     for i in 0..list_length {
-                        result_bytes.push(format!("{}{}[{}]", obj_name, rust_field_name, i));
+                        result_bytes.push(format!("{}{}[{}]", obj_prefix, rust_field_name, i));
                     }
-                    Some(format!("{}{}", obj_name, rust_field_name))
+                    Some(format!("{}{}", obj_prefix, rust_field_name))
                 } else {
                     let element_size = list_field.element_type.size().unwrap();
                     for i in 0..list_length {
-                        let src_value = format!("{}{}[{}]", obj_name, rust_field_name, i);
+                        let src_value = format!("{}{}[{}]", obj_prefix, rust_field_name, i);
                         let bytes_name =
                             postfix_var_name(&rust_field_name, &format!("{}_bytes", i));
                         outln!(
@@ -3248,7 +3467,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     out,
                     "let {} = {}{}.serialize();",
                     bytes_name,
-                    obj_name,
+                    obj_prefix,
                     rust_field_name,
                 );
                 for i in 0..field_size {
@@ -3270,6 +3489,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         bytes_name: &str,
         out: &mut Output,
     ) {
+        self.emit_assert_for_field_serialize(field, deducible_fields, obj_name, out);
         match field {
             xcbdefs::FieldDef::Pad(pad_field) => match pad_field.kind {
                 xcbdefs::PadKind::Bytes(pad_size) => {
@@ -3354,12 +3574,18 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             }
             xcbdefs::FieldDef::Switch(switch_field) => {
                 let rust_field_name = to_rust_variable_name(&switch_field.name);
+                let ext_params_args = self.ext_params_to_call_args(
+                    true,
+                    to_rust_variable_name,
+                    &*switch_field.external_params.borrow(),
+                );
                 outln!(
                     out,
-                    "{}{}.serialize_into({});",
+                    "{}{}.serialize_into({}{});",
                     obj_name,
                     rust_field_name,
-                    bytes_name
+                    bytes_name,
+                    ext_params_args,
                 );
             }
             // the reamining field types are only used in request and replies,
@@ -3368,15 +3594,23 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         }
     }
 
-    /// Emits an assert that checks the consistency of list lengths
-    /// or switch discriminator.
+    /// Emits an assert that checks the consistency of expressions
     fn emit_assert_for_field_serialize(
         &self,
         field: &xcbdefs::FieldDef,
         deducible_fields: &FxHashMap<String, DeducibleField>,
-        obj_name: &str,
+        obj_prefix: &str,
         out: &mut Output,
     ) {
+        let wrap_field_ref = |field_name: &str| -> String {
+            let rust_field_name = to_rust_variable_name(field_name);
+            if !deducible_fields.contains_key(field_name) {
+                format!("{}{}", obj_prefix, rust_field_name)
+            } else {
+                rust_field_name
+            }
+        };
+
         match field {
             xcbdefs::FieldDef::Pad(_) => {}
             xcbdefs::FieldDef::Normal(_) => {}
@@ -3396,6 +3630,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     let rust_field_name = to_rust_variable_name(&list_field.name);
                     let length_expr_str = self.expr_to_str(
                         list_field.length_expr.as_ref().unwrap(),
+                        wrap_field_ref,
                         true,
                         false,
                         false,
@@ -3405,42 +3640,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                         "assert_eq!({}{}.len(), \
                         usize::try_from({}).unwrap(), \
                         \"`{}` has an incorrect length\");",
-                        obj_name,
+                        obj_prefix,
                         rust_field_name,
                         length_expr_str,
                         rust_field_name,
                     );
                 }
             }
-            xcbdefs::FieldDef::Switch(switch_field) => {
-                let needs_assert =
-                    !deducible_fields
-                        .values()
-                        .any(|deducible_field| match deducible_field {
-                            DeducibleField::LengthOf(_, _) => false,
-                            DeducibleField::CaseSwitchExpr(switch_name) => {
-                                *switch_name == switch_field.name
-                            }
-                            DeducibleField::BitCaseSwitchExpr(switch_name) => {
-                                *switch_name == switch_field.name
-                            }
-                        });
-
-                if needs_assert {
-                    let rust_field_name = to_rust_variable_name(&switch_field.name);
-                    let switch_expr_str = self.expr_to_str(&switch_field.expr, true, true, false);
-                    outln!(
-                        out,
-                        "assert_eq!({}{}.switch_expr(), {}, \
-                        \"expression `{}` must match the value of `{}`\");",
-                        obj_name,
-                        rust_field_name,
-                        switch_expr_str,
-                        switch_expr_str,
-                        rust_field_name,
-                    );
-                }
-            }
+            xcbdefs::FieldDef::Switch(_) => {}
             xcbdefs::FieldDef::Fd(_) => {}
             xcbdefs::FieldDef::FdList(fd_list_field) => {
                 let needs_assert =
@@ -3457,14 +3664,19 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
                 if needs_assert {
                     let rust_field_name = to_rust_variable_name(&fd_list_field.name);
-                    let length_expr_str =
-                        self.expr_to_str(&fd_list_field.length_expr, true, false, false);
+                    let length_expr_str = self.expr_to_str(
+                        &fd_list_field.length_expr,
+                        wrap_field_ref,
+                        true,
+                        false,
+                        false,
+                    );
                     outln!(
                         out,
                         "assert_eq!({}{}.len(), \
                         usize::try_from({}).unwrap(), \
                         \"`{}` has an incorrect length\");",
-                        obj_name,
+                        obj_prefix,
                         rust_field_name,
                         length_expr_str,
                         rust_field_name,
@@ -3473,6 +3685,36 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             }
             xcbdefs::FieldDef::Expr(_) => {}
             xcbdefs::FieldDef::VirtualLen(_) => {}
+        }
+    }
+
+    /// Emits an assert that checks the consistency of switch expressions
+    fn emit_assert_for_switch_serialize(
+        &self,
+        switch: &xcbdefs::SwitchField,
+        parent_deducible_fields: &FxHashMap<String, DeducibleField>,
+        out: &mut Output,
+    ) {
+        let needs_expr_assert =
+            !parent_deducible_fields
+                .values()
+                .any(|deducible_field| match deducible_field {
+                    DeducibleField::LengthOf(_, _) => false,
+                    DeducibleField::CaseSwitchExpr(switch_name) => *switch_name == switch.name,
+                    DeducibleField::BitCaseSwitchExpr(switch_name) => *switch_name == switch.name,
+                });
+
+        if needs_expr_assert {
+            let rust_field_name = to_rust_variable_name(&switch.name);
+            let switch_expr_str =
+                self.expr_to_str(&switch.expr, to_rust_variable_name, true, true, false);
+            outln!(
+                out,
+                "assert_eq!(self.switch_expr(), {}, \
+                \"switch `{}` has an inconsistent discriminant\");",
+                switch_expr_str,
+                rust_field_name,
+            );
         }
     }
 
@@ -3729,9 +3971,28 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         assert!(has_doc);
     }
 
+    #[inline]
     fn expr_to_str(
         &self,
         expr: &xcbdefs::Expression,
+        mut wrap_field_ref: impl FnMut(&str) -> String,
+        panic_on_overflow: bool,
+        cast_to_u32: bool,
+        needs_parens: bool,
+    ) -> String {
+        self.expr_to_str_impl(
+            expr,
+            &mut wrap_field_ref,
+            panic_on_overflow,
+            cast_to_u32,
+            needs_parens,
+        )
+    }
+
+    fn expr_to_str_impl(
+        &self,
+        expr: &xcbdefs::Expression,
+        wrap_field_ref: &mut dyn FnMut(&str) -> String,
         panic_on_overflow: bool,
         cast_to_u32: bool,
         needs_parens: bool,
@@ -3746,33 +4007,91 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 match bin_op_expr.operator {
                     xcbdefs::BinaryOperator::Add => format!(
                         "{}.checked_add({}){}",
-                        self.expr_to_str(&bin_op_expr.lhs, panic_on_overflow, true, true),
-                        self.expr_to_str(&bin_op_expr.rhs, panic_on_overflow, true, false),
+                        self.expr_to_str_impl(
+                            &bin_op_expr.lhs,
+                            wrap_field_ref,
+                            panic_on_overflow,
+                            true,
+                            true,
+                        ),
+                        self.expr_to_str_impl(
+                            &bin_op_expr.rhs,
+                            wrap_field_ref,
+                            panic_on_overflow,
+                            true,
+                            false,
+                        ),
                         err_handler,
                     ),
                     xcbdefs::BinaryOperator::Sub => format!(
                         "{}.checked_sub({}){}",
-                        self.expr_to_str(&bin_op_expr.lhs, panic_on_overflow, true, true),
-                        self.expr_to_str(&bin_op_expr.rhs, panic_on_overflow, true, false),
+                        self.expr_to_str_impl(
+                            &bin_op_expr.lhs,
+                            wrap_field_ref,
+                            panic_on_overflow,
+                            true,
+                            true,
+                        ),
+                        self.expr_to_str_impl(
+                            &bin_op_expr.rhs,
+                            wrap_field_ref,
+                            panic_on_overflow,
+                            true,
+                            false,
+                        ),
                         err_handler,
                     ),
                     xcbdefs::BinaryOperator::Mul => format!(
                         "{}.checked_mul({}){}",
-                        self.expr_to_str(&bin_op_expr.lhs, panic_on_overflow, true, true),
-                        self.expr_to_str(&bin_op_expr.rhs, panic_on_overflow, true, false),
+                        self.expr_to_str_impl(
+                            &bin_op_expr.lhs,
+                            wrap_field_ref,
+                            panic_on_overflow,
+                            true,
+                            true,
+                        ),
+                        self.expr_to_str_impl(
+                            &bin_op_expr.rhs,
+                            wrap_field_ref,
+                            panic_on_overflow,
+                            true,
+                            false,
+                        ),
                         err_handler,
                     ),
                     xcbdefs::BinaryOperator::Div => format!(
                         "{}.checked_div({}){}",
-                        self.expr_to_str(&bin_op_expr.lhs, panic_on_overflow, true, true),
-                        self.expr_to_str(&bin_op_expr.rhs, panic_on_overflow, true, false),
+                        self.expr_to_str_impl(
+                            &bin_op_expr.lhs,
+                            wrap_field_ref,
+                            panic_on_overflow,
+                            true,
+                            true,
+                        ),
+                        self.expr_to_str_impl(
+                            &bin_op_expr.rhs,
+                            wrap_field_ref,
+                            panic_on_overflow,
+                            true,
+                            false,
+                        ),
                         err_handler,
                     ),
                     xcbdefs::BinaryOperator::And => {
-                        let lhs_str =
-                            self.expr_to_str(&bin_op_expr.lhs, panic_on_overflow, true, true);
-                        let rhs_str =
-                            self.expr_to_str(&bin_op_expr.rhs, panic_on_overflow, true, true);
+                        let lhs_str = self.expr_to_str_impl(
+                            &bin_op_expr.lhs,
+                            wrap_field_ref,
+                            panic_on_overflow,
+                            true,
+                            true,
+                        );
+                        let rhs_str = self.expr_to_str_impl(
+                            &bin_op_expr.rhs,
+                            wrap_field_ref,
+                            panic_on_overflow,
+                            true,
+                            true,
+                        );
                         if needs_parens {
                             format!("({} & {})", lhs_str, rhs_str)
                         } else {
@@ -3786,8 +4105,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             }
             xcbdefs::Expression::UnaryOp(unary_op_expr) => match unary_op_expr.operator {
                 xcbdefs::UnaryOperator::Not => {
-                    let rhs_str =
-                        self.expr_to_str(&unary_op_expr.rhs, panic_on_overflow, true, true);
+                    let rhs_str = self.expr_to_str_impl(
+                        &unary_op_expr.rhs,
+                        wrap_field_ref,
+                        panic_on_overflow,
+                        true,
+                        true,
+                    );
                     if needs_parens {
                         format!("(!{})", rhs_str)
                     } else {
@@ -3798,9 +4122,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             xcbdefs::Expression::FieldRef(field_ref_expr) => {
                 let resolved_field_ref = field_ref_expr.resolved.get().unwrap();
                 let value = match resolved_field_ref.ref_kind {
-                    xcbdefs::FieldRefKind::LocalField => {
-                        to_rust_variable_name(&field_ref_expr.field_name)
-                    }
+                    xcbdefs::FieldRefKind::LocalField => wrap_field_ref(&field_ref_expr.field_name),
                     xcbdefs::FieldRefKind::ExtParam => {
                         to_rust_variable_name(&field_ref_expr.field_name)
                     }
@@ -3833,44 +4155,69 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             xcbdefs::Expression::EnumRef(enum_ref_expr) => {
                 let rust_enum_type = self.type_to_rust_type(enum_ref_expr.enum_.def.get().unwrap());
                 let rust_variant_name = ename_to_rust(&enum_ref_expr.variant);
-                format!("u32::from({}::{})", rust_enum_type, rust_variant_name,)
+                format!("u32::from({}::{})", rust_enum_type, rust_variant_name)
             }
             xcbdefs::Expression::PopCount(pop_count_expr) => {
-                let arg = self.expr_to_str(pop_count_expr, panic_on_overflow, false, true);
+                let arg = self.expr_to_str_impl(
+                    pop_count_expr,
+                    wrap_field_ref,
+                    panic_on_overflow,
+                    false,
+                    true,
+                );
                 format!("{}.count_ones()", arg)
             }
             xcbdefs::Expression::SumOf(sum_of_expr) => {
                 // nested sum-of not supported
                 assert_ne!(
                     sum_of_expr.resolved_field.get().unwrap().ref_kind,
-                    xcbdefs::FieldRefKind::SumOfRef,
+                    xcbdefs::FieldRefKind::SumOfRef
                 );
-                let rust_field_name = to_rust_variable_name(&sum_of_expr.field_name);
+                let field_value = match sum_of_expr.resolved_field.get().unwrap().ref_kind {
+                    xcbdefs::FieldRefKind::LocalField => wrap_field_ref(&sum_of_expr.field_name),
+                    xcbdefs::FieldRefKind::ExtParam => {
+                        to_rust_variable_name(&sum_of_expr.field_name)
+                    }
+                    // nested sum-of not supported
+                    xcbdefs::FieldRefKind::SumOfRef => unreachable!(),
+                };
                 if panic_on_overflow {
                     if let Some(ref operand) = sum_of_expr.operand {
                         format!(
                             "{}.iter().fold(0u32, |acc, x| acc.checked_add({}).unwrap())",
-                            rust_field_name,
-                            self.expr_to_str(operand, panic_on_overflow, true, true),
+                            field_value,
+                            self.expr_to_str_impl(
+                                operand,
+                                wrap_field_ref,
+                                panic_on_overflow,
+                                true,
+                                true,
+                            ),
                         )
                     } else {
                         format!(
-                            "{}.iter().try(0u32, |acc, &x| acc.checked_add(u32::from(x)).unwrap())",
-                            rust_field_name,
+                            "{}.iter().fold(0u32, |acc, &x| acc.checked_add(u32::from(x)).unwrap())",
+                            field_value,
                         )
                     }
                 } else if let Some(ref operand) = sum_of_expr.operand {
                     format!(
                         "{}.iter().try_fold(0u32, |acc, x| \
                         acc.checked_add({}).ok_or(ParseError::ParseError))?",
-                        rust_field_name,
-                        self.expr_to_str(operand, panic_on_overflow, true, true),
+                        field_value,
+                        self.expr_to_str_impl(
+                            operand,
+                            wrap_field_ref,
+                            panic_on_overflow,
+                            true,
+                            true,
+                        ),
                     )
                 } else {
                     format!(
                         "{}.iter().try_fold(0u32, |acc, &x| \
                         acc.checked_add(u32::from(x)).ok_or(ParseError::ParseError))?",
-                        rust_field_name,
+                        field_value,
                     )
                 }
             }
@@ -4009,31 +4356,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         }
     }
 
-    /// Returns the Rust type for `field`.
-    fn field_to_rust_type(&self, field: &xcbdefs::FieldDef, switch_prefix: &str) -> String {
-        match field {
-            xcbdefs::FieldDef::Pad(_) => unreachable!(),
-            xcbdefs::FieldDef::Normal(normal_field) => {
-                self.field_value_type_to_rust_type(&normal_field.type_)
-            }
-            xcbdefs::FieldDef::List(list_field) => {
-                let element_type = self.field_value_type_to_rust_type(&list_field.element_type);
-                if let Some(list_len) = list_field.length() {
-                    format!("[{}; {}]", element_type, list_len)
-                } else {
-                    format!("Vec<{}>", element_type)
-                }
-            }
-            xcbdefs::FieldDef::Switch(switch_field) => {
-                format!("{}{}", switch_prefix, to_rust_type_name(&switch_field.name))
-            }
-            xcbdefs::FieldDef::Fd(_) => "RawFdContainer".into(),
-            xcbdefs::FieldDef::FdList(_) => "Vec<RawFdContainer>".into(),
-            xcbdefs::FieldDef::Expr(_) => unreachable!(),
-            xcbdefs::FieldDef::VirtualLen(_) => unreachable!(),
-        }
-    }
-
     /// Gathers information about the fields of a request,
     /// returning a `GatheredRequestFields`.
     fn gather_request_fields(
@@ -4164,6 +4486,64 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             preamble,
             single_fds,
             fd_lists,
+        }
+    }
+
+    fn ext_params_to_arg_defs(
+        &self,
+        begin_with_comma: bool,
+        ext_params: &[xcbdefs::ExternalParam],
+    ) -> String {
+        let mut s = String::new();
+        for (i, ext_param) in ext_params.iter().enumerate() {
+            if i != 0 || begin_with_comma {
+                s.push_str(", ");
+            }
+            s.push_str(&to_rust_variable_name(&ext_param.name));
+            s.push_str(": ");
+            s.push_str(&self.type_to_rust_type(&ext_param.type_))
+        }
+        s
+    }
+
+    fn ext_params_to_call_args(
+        &self,
+        begin_with_comma: bool,
+        mut wrap_name: impl FnMut(&str) -> String,
+        ext_params: &[xcbdefs::ExternalParam],
+    ) -> String {
+        let mut s = String::new();
+        for (i, ext_param) in ext_params.iter().enumerate() {
+            if i != 0 || begin_with_comma {
+                s.push_str(", ");
+            }
+            s.push_str(&wrap_name(&ext_param.name));
+        }
+        s
+    }
+
+    /// Returns the Rust type for `field`.
+    fn field_to_rust_type(&self, field: &xcbdefs::FieldDef, switch_prefix: &str) -> String {
+        match field {
+            xcbdefs::FieldDef::Pad(_) => unreachable!(),
+            xcbdefs::FieldDef::Normal(normal_field) => {
+                self.field_value_type_to_rust_type(&normal_field.type_)
+            }
+            xcbdefs::FieldDef::List(list_field) => {
+                let element_type = self.field_value_type_to_rust_type(&list_field.element_type);
+                if let Some(list_len) = list_field.length() {
+                    format!("[{}; {}]", element_type, list_len)
+                } else {
+                    format!("Vec<{}>", element_type)
+                }
+            }
+            xcbdefs::FieldDef::Switch(switch_field) => {
+                format!("{}{}", switch_prefix, to_rust_type_name(&switch_field.name))
+            }
+            xcbdefs::FieldDef::Fd(_) => "RawFdContainer".into(),
+            xcbdefs::FieldDef::FdList(_) => "Vec<RawFdContainer>".into(),
+            xcbdefs::FieldDef::Expr(_) => unreachable!(),
+            xcbdefs::FieldDef::VirtualLen(_) => unreachable!(),
         }
     }
 

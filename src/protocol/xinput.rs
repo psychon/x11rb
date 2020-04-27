@@ -788,14 +788,14 @@ impl InputInfoInfo {
         }
     }
 }
-impl Serialize for InputInfoInfo {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl InputInfoInfo {
+    fn serialize(&self, class_id: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, class_id);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
         match self {
             InputInfoInfo::Key(key) => key.serialize_into(bytes),
             InputInfoInfo::Button(button) => button.serialize_into(bytes),
@@ -845,7 +845,7 @@ impl Serialize for InputInfo {
         let class_id = u8::try_from(self.info.switch_expr()).unwrap();
         class_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
-        self.info.serialize_into(bytes);
+        self.info.serialize_into(bytes, class_id);
     }
 }
 
@@ -1395,15 +1395,16 @@ impl DeviceTimeCoord {
     }
 }
 // Skipping TryFrom implementations because of unresolved members
-impl Serialize for DeviceTimeCoord {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl DeviceTimeCoord {
+    fn serialize(&self, num_axes: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, num_axes);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, num_axes: u8) {
         self.time.serialize_into(bytes);
+        assert_eq!(self.axisvalues.len(), usize::try_from(num_axes).unwrap(), "`axisvalues` has an incorrect length");
         self.axisvalues.serialize_into(bytes);
     }
 }
@@ -3109,14 +3110,14 @@ impl FeedbackStateData {
         }
     }
 }
-impl Serialize for FeedbackStateData {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl FeedbackStateData {
+    fn serialize(&self, class_id: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, class_id);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
         match self {
             FeedbackStateData::Keyboard(keyboard) => keyboard.serialize_into(bytes),
             FeedbackStateData::Pointer(pointer) => pointer.serialize_into(bytes),
@@ -3175,7 +3176,7 @@ impl Serialize for FeedbackState {
         class_id.serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
-        self.data.serialize_into(bytes);
+        self.data.serialize_into(bytes, class_id);
     }
 }
 
@@ -3979,14 +3980,14 @@ impl FeedbackCtlData {
         }
     }
 }
-impl Serialize for FeedbackCtlData {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl FeedbackCtlData {
+    fn serialize(&self, class_id: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, class_id);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
         match self {
             FeedbackCtlData::Keyboard(keyboard) => keyboard.serialize_into(bytes),
             FeedbackCtlData::Pointer(pointer) => pointer.serialize_into(bytes),
@@ -4045,7 +4046,7 @@ impl Serialize for FeedbackCtl {
         class_id.serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
-        self.data.serialize_into(bytes);
+        self.data.serialize_into(bytes, class_id);
     }
 }
 
@@ -4976,14 +4977,14 @@ impl InputStateData {
         }
     }
 }
-impl Serialize for InputStateData {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl InputStateData {
+    fn serialize(&self, class_id: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, class_id);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, class_id: u8) {
         match self {
             InputStateData::Key(key) => key.serialize_into(bytes),
             InputStateData::Button(button) => button.serialize_into(bytes),
@@ -5033,7 +5034,7 @@ impl Serialize for InputState {
         let class_id = u8::try_from(self.data.switch_expr()).unwrap();
         class_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
-        self.data.serialize_into(bytes);
+        self.data.serialize_into(bytes, class_id);
     }
 }
 
@@ -5296,7 +5297,9 @@ impl Serialize for DeviceResolutionState {
         let num_valuators = u32::try_from(self.resolution_values.len()).expect("`resolution_values` has too many elements");
         num_valuators.serialize_into(bytes);
         self.resolution_values.serialize_into(bytes);
+        assert_eq!(self.resolution_min.len(), usize::try_from(num_valuators).unwrap(), "`resolution_min` has an incorrect length");
         self.resolution_min.serialize_into(bytes);
+        assert_eq!(self.resolution_max.len(), usize::try_from(num_valuators).unwrap(), "`resolution_max` has an incorrect length");
         self.resolution_max.serialize_into(bytes);
     }
 }
@@ -5626,7 +5629,9 @@ impl Serialize for DeviceStateDataResolution {
         let num_valuators = u32::try_from(self.resolution_values.len()).expect("`resolution_values` has too many elements");
         num_valuators.serialize_into(bytes);
         self.resolution_values.serialize_into(bytes);
+        assert_eq!(self.resolution_min.len(), usize::try_from(num_valuators).unwrap(), "`resolution_min` has an incorrect length");
         self.resolution_min.serialize_into(bytes);
+        assert_eq!(self.resolution_max.len(), usize::try_from(num_valuators).unwrap(), "`resolution_max` has an incorrect length");
         self.resolution_max.serialize_into(bytes);
     }
 }
@@ -5914,14 +5919,14 @@ impl DeviceStateData {
         }
     }
 }
-impl Serialize for DeviceStateData {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl DeviceStateData {
+    fn serialize(&self, control_id: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, control_id);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, control_id: u16) {
         match self {
             DeviceStateData::Resolution(resolution) => resolution.serialize_into(bytes),
             DeviceStateData::AbsCalib(abs_calib) => abs_calib.serialize_into(bytes),
@@ -5979,7 +5984,7 @@ impl Serialize for DeviceState {
         let control_id = u16::try_from(self.data.switch_expr()).unwrap();
         control_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
-        self.data.serialize_into(bytes);
+        self.data.serialize_into(bytes, control_id);
     }
 }
 
@@ -6690,14 +6695,14 @@ impl DeviceCtlData {
         }
     }
 }
-impl Serialize for DeviceCtlData {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl DeviceCtlData {
+    fn serialize(&self, control_id: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, control_id);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, control_id: u16) {
         match self {
             DeviceCtlData::Resolution(resolution) => resolution.serialize_into(bytes),
             DeviceCtlData::AbsCalib(abs_calib) => abs_calib.serialize_into(bytes),
@@ -6755,7 +6760,7 @@ impl Serialize for DeviceCtl {
         let control_id = u16::try_from(self.data.switch_expr()).unwrap();
         control_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
-        self.data.serialize_into(bytes);
+        self.data.serialize_into(bytes, control_id);
     }
 }
 
@@ -6966,24 +6971,27 @@ impl ChangeDevicePropertyAux {
         }
     }
 }
-impl Serialize for ChangeDevicePropertyAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl ChangeDevicePropertyAux {
+    fn serialize(&self, format: u8, num_items: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, format, num_items);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, format: u8, num_items: u32) {
         match self {
             ChangeDevicePropertyAux::Data8(data8) => {
+                assert_eq!(data8.len(), usize::try_from(num_items).unwrap(), "`data8` has an incorrect length");
                 bytes.extend_from_slice(&data8);
                 bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
             }
             ChangeDevicePropertyAux::Data16(data16) => {
+                assert_eq!(data16.len(), usize::try_from(num_items).unwrap(), "`data16` has an incorrect length");
                 data16.serialize_into(bytes);
                 bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
             }
             ChangeDevicePropertyAux::Data32(data32) => {
+                assert_eq!(data32.len(), usize::try_from(num_items).unwrap(), "`data32` has an incorrect length");
                 data32.serialize_into(bytes);
             }
         }
@@ -7036,7 +7044,7 @@ where
         num_items_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    let items_bytes = items.serialize();
+    let items_bytes = items.serialize(format, num_items);
     let length_so_far = length_so_far + items_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -8175,14 +8183,14 @@ impl HierarchyChangeData {
         }
     }
 }
-impl Serialize for HierarchyChangeData {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl HierarchyChangeData {
+    fn serialize(&self, type_: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, type_);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, type_: u16) {
         match self {
             HierarchyChangeData::AddMaster(add_master) => add_master.serialize_into(bytes),
             HierarchyChangeData::RemoveMaster(remove_master) => remove_master.serialize_into(bytes),
@@ -8234,7 +8242,7 @@ impl Serialize for HierarchyChange {
         let type_ = u16::try_from(self.data.switch_expr()).unwrap();
         type_.serialize_into(bytes);
         self.len.serialize_into(bytes);
-        self.data.serialize_into(bytes);
+        self.data.serialize_into(bytes, type_);
     }
 }
 
@@ -8962,6 +8970,7 @@ impl Serialize for ButtonClass {
         self.sourceid.serialize_into(bytes);
         let num_buttons = u16::try_from(self.labels.len()).expect("`labels` has too many elements");
         num_buttons.serialize_into(bytes);
+        assert_eq!(self.state.len(), usize::try_from(u32::from(num_buttons).checked_add(31u32).unwrap().checked_div(32u32).unwrap()).unwrap(), "`state` has an incorrect length");
         self.state.serialize_into(bytes);
         self.labels.serialize_into(bytes);
     }
@@ -9323,6 +9332,7 @@ impl Serialize for DeviceClassDataButton {
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         let num_buttons = u16::try_from(self.labels.len()).expect("`labels` has too many elements");
         num_buttons.serialize_into(bytes);
+        assert_eq!(self.state.len(), usize::try_from(u32::from(num_buttons).checked_add(31u32).unwrap().checked_div(32u32).unwrap()).unwrap(), "`state` has an incorrect length");
         self.state.serialize_into(bytes);
         self.labels.serialize_into(bytes);
     }
@@ -9600,14 +9610,14 @@ impl DeviceClassData {
         }
     }
 }
-impl Serialize for DeviceClassData {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl DeviceClassData {
+    fn serialize(&self, type_: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, type_);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, type_: u16) {
         match self {
             DeviceClassData::Key(key) => key.serialize_into(bytes),
             DeviceClassData::Button(button) => button.serialize_into(bytes),
@@ -9664,7 +9674,7 @@ impl Serialize for DeviceClass {
         type_.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
-        self.data.serialize_into(bytes);
+        self.data.serialize_into(bytes, type_);
     }
 }
 
@@ -10643,24 +10653,27 @@ impl XIChangePropertyAux {
         }
     }
 }
-impl Serialize for XIChangePropertyAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl XIChangePropertyAux {
+    fn serialize(&self, format: u8, num_items: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, format, num_items);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, format: u8, num_items: u32) {
         match self {
             XIChangePropertyAux::Data8(data8) => {
+                assert_eq!(data8.len(), usize::try_from(num_items).unwrap(), "`data8` has an incorrect length");
                 bytes.extend_from_slice(&data8);
                 bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
             }
             XIChangePropertyAux::Data16(data16) => {
+                assert_eq!(data16.len(), usize::try_from(num_items).unwrap(), "`data16` has an incorrect length");
                 data16.serialize_into(bytes);
                 bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
             }
             XIChangePropertyAux::Data32(data32) => {
+                assert_eq!(data32.len(), usize::try_from(num_items).unwrap(), "`data32` has an incorrect length");
                 data32.serialize_into(bytes);
             }
         }
@@ -10715,7 +10728,7 @@ where
         num_items_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    let items_bytes = items.serialize();
+    let items_bytes = items.serialize(format, num_items);
     let length_so_far = length_so_far + items_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();

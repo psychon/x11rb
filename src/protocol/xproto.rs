@@ -7938,14 +7938,14 @@ pub struct CreateWindowAux {
     pub colormap: Option<Colormap>,
     pub cursor: Option<Cursor>,
 }
-impl Serialize for CreateWindowAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl CreateWindowAux {
+    fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, value_mask);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
         if let Some(background_pixmap) = self.background_pixmap {
             background_pixmap.serialize_into(bytes);
         }
@@ -8232,7 +8232,7 @@ where
         value_mask_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    let value_list_bytes = value_list.serialize();
+    let value_list_bytes = value_list.serialize(value_mask);
     let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -8263,14 +8263,14 @@ pub struct ChangeWindowAttributesAux {
     pub colormap: Option<Colormap>,
     pub cursor: Option<Cursor>,
 }
-impl Serialize for ChangeWindowAttributesAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl ChangeWindowAttributesAux {
+    fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, value_mask);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
         if let Some(background_pixmap) = self.background_pixmap {
             background_pixmap.serialize_into(bytes);
         }
@@ -8495,7 +8495,7 @@ where
         value_mask_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    let value_list_bytes = value_list.serialize();
+    let value_list_bytes = value_list.serialize(value_mask);
     let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -9258,14 +9258,14 @@ pub struct ConfigureWindowAux {
     pub sibling: Option<Window>,
     pub stack_mode: Option<StackMode>,
 }
-impl Serialize for ConfigureWindowAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl ConfigureWindowAux {
+    fn serialize(&self, value_mask: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, value_mask);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u16) {
         if let Some(x) = self.x {
             x.serialize_into(bytes);
         }
@@ -9431,7 +9431,7 @@ where
         0,
     ];
     let length_so_far = length_so_far + request0.len();
-    let value_list_bytes = value_list.serialize();
+    let value_list_bytes = value_list.serialize(value_mask);
     let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -14470,14 +14470,14 @@ pub struct CreateGCAux {
     pub dashes: Option<u32>,
     pub arc_mode: Option<ArcMode>,
 }
-impl Serialize for CreateGCAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl CreateGCAux {
+    fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, value_mask);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
         if let Some(function) = self.function {
             u32::from(function).serialize_into(bytes);
         }
@@ -14797,7 +14797,7 @@ where
         value_mask_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    let value_list_bytes = value_list.serialize();
+    let value_list_bytes = value_list.serialize(value_mask);
     let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -14836,14 +14836,14 @@ pub struct ChangeGCAux {
     pub dashes: Option<u32>,
     pub arc_mode: Option<ArcMode>,
 }
-impl Serialize for ChangeGCAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl ChangeGCAux {
+    fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, value_mask);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
         if let Some(function) = self.function {
             u32::from(function).serialize_into(bytes);
         }
@@ -15180,7 +15180,7 @@ where
         value_mask_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    let value_list_bytes = value_list.serialize();
+    let value_list_bytes = value_list.serialize(value_mask);
     let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -18433,14 +18433,14 @@ pub struct ChangeKeyboardControlAux {
     pub key: Option<Keycode32>,
     pub auto_repeat_mode: Option<AutoRepeatMode>,
 }
-impl Serialize for ChangeKeyboardControlAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl ChangeKeyboardControlAux {
+    fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, value_mask);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
         if let Some(key_click_percent) = self.key_click_percent {
             key_click_percent.serialize_into(bytes);
         }
@@ -18562,7 +18562,7 @@ where
         value_mask_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    let value_list_bytes = value_list.serialize();
+    let value_list_bytes = value_list.serialize(value_mask);
     let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
