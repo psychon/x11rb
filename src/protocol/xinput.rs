@@ -842,7 +842,7 @@ impl Serialize for InputInfo {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        let class_id = self.info.switch_expr();
+        let class_id = u8::try_from(self.info.switch_expr()).unwrap();
         class_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.info.serialize_into(bytes);
@@ -910,7 +910,6 @@ pub struct ListInputDevicesReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub devices_len: u8,
     pub devices: Vec<DeviceInfo>,
     pub infos: Vec<InputInfo>,
     pub names: Vec<xproto::Str>,
@@ -931,7 +930,7 @@ impl TryParse for ListInputDevicesReply {
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let result = ListInputDevicesReply { response_type, xi_reply_type, sequence, length, devices_len, devices, infos, names };
+        let result = ListInputDevicesReply { response_type, xi_reply_type, sequence, length, devices, infos, names };
         Ok((result, remaining))
     }
 }
@@ -3172,7 +3171,7 @@ impl Serialize for FeedbackState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        let class_id = self.data.switch_expr();
+        let class_id = u8::try_from(self.data.switch_expr()).unwrap();
         class_id.serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
@@ -4042,7 +4041,7 @@ impl Serialize for FeedbackCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        let class_id = self.data.switch_expr();
+        let class_id = u8::try_from(self.data.switch_expr()).unwrap();
         class_id.serialize_into(bytes);
         self.feedback_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
@@ -5031,7 +5030,7 @@ impl Serialize for InputState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(2);
-        let class_id = self.data.switch_expr();
+        let class_id = u8::try_from(self.data.switch_expr()).unwrap();
         class_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes);
@@ -5260,7 +5259,6 @@ impl TryFrom<u32> for DeviceControl {
 pub struct DeviceResolutionState {
     pub control_id: DeviceControl,
     pub len: u16,
-    pub num_valuators: u32,
     pub resolution_values: Vec<u32>,
     pub resolution_min: Vec<u32>,
     pub resolution_max: Vec<u32>,
@@ -5274,7 +5272,7 @@ impl TryParse for DeviceResolutionState {
         let (resolution_min, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
         let (resolution_max, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
         let control_id = control_id.try_into()?;
-        let result = DeviceResolutionState { control_id, len, num_valuators, resolution_values, resolution_min, resolution_max };
+        let result = DeviceResolutionState { control_id, len, resolution_values, resolution_min, resolution_max };
         Ok((result, remaining))
     }
 }
@@ -5295,7 +5293,8 @@ impl Serialize for DeviceResolutionState {
         bytes.reserve(8);
         u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
-        self.num_valuators.serialize_into(bytes);
+        let num_valuators = u32::try_from(self.resolution_values.len()).expect("`resolution_values` has too many elements");
+        num_valuators.serialize_into(bytes);
         self.resolution_values.serialize_into(bytes);
         self.resolution_min.serialize_into(bytes);
         self.resolution_max.serialize_into(bytes);
@@ -5596,7 +5595,6 @@ impl Serialize for DeviceEnableState {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DeviceStateDataResolution {
-    pub num_valuators: u32,
     pub resolution_values: Vec<u32>,
     pub resolution_min: Vec<u32>,
     pub resolution_max: Vec<u32>,
@@ -5607,7 +5605,7 @@ impl TryParse for DeviceStateDataResolution {
         let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
         let (resolution_min, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
         let (resolution_max, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = DeviceStateDataResolution { num_valuators, resolution_values, resolution_min, resolution_max };
+        let result = DeviceStateDataResolution { resolution_values, resolution_min, resolution_max };
         Ok((result, remaining))
     }
 }
@@ -5625,7 +5623,8 @@ impl Serialize for DeviceStateDataResolution {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        self.num_valuators.serialize_into(bytes);
+        let num_valuators = u32::try_from(self.resolution_values.len()).expect("`resolution_values` has too many elements");
+        num_valuators.serialize_into(bytes);
         self.resolution_values.serialize_into(bytes);
         self.resolution_min.serialize_into(bytes);
         self.resolution_max.serialize_into(bytes);
@@ -5977,7 +5976,7 @@ impl Serialize for DeviceState {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        let control_id = self.data.switch_expr();
+        let control_id = u16::try_from(self.data.switch_expr()).unwrap();
         control_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes);
@@ -6753,7 +6752,7 @@ impl Serialize for DeviceCtl {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        let control_id = self.data.switch_expr();
+        let control_id = u16::try_from(self.data.switch_expr()).unwrap();
         control_id.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes);
@@ -7010,7 +7009,7 @@ where
     let property_bytes = property.serialize();
     let type_bytes = type_.serialize();
     let device_id_bytes = device_id.serialize();
-    let format = items.switch_expr();
+    let format = u8::try_from(items.switch_expr()).unwrap();
     let format_bytes = format.serialize();
     let mode_bytes = u8::from(mode).serialize();
     let num_items_bytes = num_items.serialize();
@@ -8232,7 +8231,7 @@ impl Serialize for HierarchyChange {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(4);
-        let type_ = self.data.switch_expr();
+        let type_ = u16::try_from(self.data.switch_expr()).unwrap();
         type_.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.data.serialize_into(bytes);
@@ -9661,7 +9660,7 @@ impl Serialize for DeviceClass {
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
         bytes.reserve(6);
-        let type_ = self.data.switch_expr();
+        let type_ = u16::try_from(self.data.switch_expr()).unwrap();
         type_.serialize_into(bytes);
         self.len.serialize_into(bytes);
         self.sourceid.serialize_into(bytes);
@@ -10688,7 +10687,7 @@ where
     let length_so_far = 0;
     let deviceid_bytes = deviceid.serialize();
     let mode_bytes = u8::from(mode).serialize();
-    let format = items.switch_expr();
+    let format = u8::try_from(items.switch_expr()).unwrap();
     let format_bytes = format.serialize();
     let property_bytes = property.serialize();
     let type_bytes = type_.serialize();

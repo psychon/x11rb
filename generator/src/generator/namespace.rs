@@ -3523,11 +3523,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 }
             }
             DeducibleField::CaseSwitchExpr(switch_field_name) => {
-                if let xcbdefs::FieldDef::Normal(_) = field {
+                if let xcbdefs::FieldDef::Normal(normal_field) = field {
+                    let rust_field_type =
+                        self.type_to_rust_type(normal_field.type_.type_.def.get().unwrap());
                     outln!(
                         out,
-                        "let {} = {}{}.switch_expr();",
+                        "let {} = {}::try_from({}{}.switch_expr()).unwrap();",
                         dst_var_name,
+                        rust_field_type,
                         obj_name,
                         to_rust_variable_name(switch_field_name),
                     );
@@ -3536,12 +3539,15 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 }
             }
             DeducibleField::BitCaseSwitchExpr(switch_field_name) => {
-                if let xcbdefs::FieldDef::Normal(_) = field {
+                if let xcbdefs::FieldDef::Normal(normal_field) = field {
                     // TODO: Try to handle xkb::SelectEvents
+                    let rust_field_type =
+                        self.type_to_rust_type(normal_field.type_.type_.def.get().unwrap());
                     outln!(
                         out,
-                        "let {} = {}{}.switch_expr();",
+                        "let {} = {}::try_from({}{}.switch_expr()).unwrap();",
                         dst_var_name,
+                        rust_field_type,
                         obj_name,
                         to_rust_variable_name(switch_field_name),
                     )
@@ -3816,21 +3822,19 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             rust_field_name,
                         )
                     }
+                } else if let Some(ref operand) = sum_of_expr.operand {
+                    format!(
+                        "{}.iter().try_fold(0u32, |acc, x| \
+                        acc.checked_add({}).ok_or(ParseError::ParseError))?",
+                        rust_field_name,
+                        self.expr_to_str(operand, panic_on_overflow, true, true),
+                    )
                 } else {
-                    if let Some(ref operand) = sum_of_expr.operand {
-                        format!(
-                            "{}.iter().try_fold(0u32, |acc, x| \
-                            acc.checked_add({}).ok_or(ParseError::ParseError))?",
-                            rust_field_name,
-                            self.expr_to_str(operand, panic_on_overflow, true, true),
-                        )
-                    } else {
-                        format!(
-                            "{}.iter().try_fold(0u32, |acc, &x| \
-                            acc.checked_add(u32::from(x)).ok_or(ParseError::ParseError))?",
-                            rust_field_name,
-                        )
-                    }
+                    format!(
+                        "{}.iter().try_fold(0u32, |acc, &x| \
+                        acc.checked_add(u32::from(x)).ok_or(ParseError::ParseError))?",
+                        rust_field_name,
+                    )
                 }
             }
             xcbdefs::Expression::ListElementRef => {
@@ -4550,24 +4554,26 @@ fn gather_deducible_fields(fields: &[xcbdefs::FieldDef]) -> FxHashMap<String, De
         };
 
         if let Some((field_name, deducible_field)) = deducible_field {
-            match deducible_fields.entry(field_name) {
-                HashMapEntry::Occupied(mut entry) => {
-                    // field used more than once,
-                    // do not deduce it
-                    *entry.get_mut() = None;
-                }
-                HashMapEntry::Vacant(entry) => {
-                    entry.insert(Some(deducible_field));
+            let is_not_ext_param = fields
+                .iter()
+                .any(|field| field.name() == Some(field_name.as_str()));
+
+            if is_not_ext_param {
+                match deducible_fields.entry(field_name) {
+                    HashMapEntry::Occupied(_) => {
+                        // field used more than once,
+                        // deduce it from the first use
+                        // (do not replace entry)
+                    }
+                    HashMapEntry::Vacant(entry) => {
+                        entry.insert(deducible_field);
+                    }
                 }
             }
         }
     }
 
-    // filter out `None`s
     deducible_fields
-        .into_iter()
-        .filter_map(|(k, v)| v.map(|v| (k, v)))
-        .collect()
 }
 
 /// Some information about the fields of a request.

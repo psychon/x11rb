@@ -611,7 +611,7 @@ where
     let class_bytes = u8::from(class).serialize();
     let depth_bytes = depth.serialize();
     let visual_bytes = visual.serialize();
-    let value_mask = value_list.switch_expr();
+    let value_mask = u32::try_from(value_list.switch_expr()).unwrap();
     let value_mask_bytes = value_mask.serialize();
     let mut request0 = [
         extension_information.major_opcode,

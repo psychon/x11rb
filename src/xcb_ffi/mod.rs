@@ -469,7 +469,7 @@ impl RequestConnection for XCBConnection {
     #[cfg(not(unix))]
     fn wait_for_reply_with_fds_raw(
         &self,
-        sequence: SequenceNumber,
+        _sequence: SequenceNumber,
     ) -> Result<ReplyOrError<BufWithFds, Buffer>, ConnectionError> {
         unimplemented!("FD passing is currently only implemented on Unix-like systems")
     }

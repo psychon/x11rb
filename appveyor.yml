@@ -12,9 +12,13 @@ install:
 
 build: false
 test_script:
-  # Build once with just the default features, i.e. without all the extensions
-  # to check that this works fine.
-  - cargo build --verbose --all-targets
+  # Build once with the 'allow-unsafe-code' feature to
+  # check that this works fine. Use 'check' instead of 'build' because
+  # a full build requires the libxcb library
+  - cargo check --verbose --all-targets --features all-extensions
+
+  # Also build once without any feature
+  - cargo build --verbose --all-targets --no-default-features
 
   # We do not have libxcb and thus cannot build XCBConnection
   - cargo build --verbose --all-targets --no-default-features --features all-extensions

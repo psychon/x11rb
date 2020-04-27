@@ -569,7 +569,6 @@ where
 #[derive(Debug, PartialEq, Eq)]
 pub struct BuffersFromPixmapReply {
     pub response_type: u8,
-    pub nfd: u8,
     pub sequence: u16,
     pub length: u32,
     pub width: u16,
@@ -600,7 +599,7 @@ impl BuffersFromPixmapReply {
         if fds.len() < fds_len { return Err(ParseError::ParseError) }
         let mut buffers = fds.split_off(fds_len);
         std::mem::swap(fds, &mut buffers);
-        let result = BuffersFromPixmapReply { response_type, nfd, sequence, length, width, height, modifier, depth, bpp, strides, offsets, buffers };
+        let result = BuffersFromPixmapReply { response_type, sequence, length, width, height, modifier, depth, bpp, strides, offsets, buffers };
         Ok((result, remaining))
     }
 }

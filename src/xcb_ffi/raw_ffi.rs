@@ -11,8 +11,8 @@ use libc::{c_char, c_int, c_uint};
 #[derive(Copy, Clone, Debug)]
 #[repr(C)]
 pub(crate) struct iovec {
-    iov_base: *mut c_void,
-    iov_len: c_int,
+    pub(crate) iov_base: *mut c_void,
+    pub(crate) iov_len: c_int,
 }
 
 #[allow(non_camel_case_types)]
