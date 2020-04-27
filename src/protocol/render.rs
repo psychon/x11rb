@@ -1191,7 +1191,7 @@ impl TryFrom<&[u8]> for Directformat {
 }
 impl Serialize for Directformat {
     type Bytes = [u8; 16];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 16] {
         let red_shift_bytes = self.red_shift.serialize();
         let red_mask_bytes = self.red_mask.serialize();
         let green_shift_bytes = self.green_shift.serialize();
@@ -1261,7 +1261,7 @@ impl TryFrom<&[u8]> for Pictforminfo {
 }
 impl Serialize for Pictforminfo {
     type Bytes = [u8; 28];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 28] {
         let id_bytes = self.id.serialize();
         let type_bytes = u8::from(self.type_).serialize();
         let depth_bytes = self.depth.serialize();
@@ -1330,7 +1330,7 @@ impl TryFrom<&[u8]> for Pictvisual {
 }
 impl Serialize for Pictvisual {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let visual_bytes = self.visual.serialize();
         let format_bytes = self.format.serialize();
         [
@@ -1375,7 +1375,7 @@ impl TryFrom<&[u8]> for Pictdepth {
 }
 impl Serialize for Pictdepth {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -1413,7 +1413,7 @@ impl TryFrom<&[u8]> for Pictscreen {
 }
 impl Serialize for Pictscreen {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -1454,7 +1454,7 @@ impl TryFrom<&[u8]> for Indexvalue {
 }
 impl Serialize for Indexvalue {
     type Bytes = [u8; 12];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 12] {
         let pixel_bytes = self.pixel.serialize();
         let red_bytes = self.red.serialize();
         let green_bytes = self.green.serialize();
@@ -1510,7 +1510,7 @@ impl TryFrom<&[u8]> for Color {
 }
 impl Serialize for Color {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let red_bytes = self.red.serialize();
         let green_bytes = self.green.serialize();
         let blue_bytes = self.blue.serialize();
@@ -1556,7 +1556,7 @@ impl TryFrom<&[u8]> for Pointfix {
 }
 impl Serialize for Pointfix {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let x_bytes = self.x.serialize();
         let y_bytes = self.y.serialize();
         [
@@ -1598,7 +1598,7 @@ impl TryFrom<&[u8]> for Linefix {
 }
 impl Serialize for Linefix {
     type Bytes = [u8; 16];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 16] {
         let p1_bytes = self.p1.serialize();
         let p2_bytes = self.p2.serialize();
         [
@@ -1650,7 +1650,7 @@ impl TryFrom<&[u8]> for Triangle {
 }
 impl Serialize for Triangle {
     type Bytes = [u8; 24];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 24] {
         let p1_bytes = self.p1.serialize();
         let p2_bytes = self.p2.serialize();
         let p3_bytes = self.p3.serialize();
@@ -1714,7 +1714,7 @@ impl TryFrom<&[u8]> for Trapezoid {
 }
 impl Serialize for Trapezoid {
     type Bytes = [u8; 40];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 40] {
         let top_bytes = self.top.serialize();
         let bottom_bytes = self.bottom.serialize();
         let left_bytes = self.left.serialize();
@@ -1800,7 +1800,7 @@ impl TryFrom<&[u8]> for Glyphinfo {
 }
 impl Serialize for Glyphinfo {
     type Bytes = [u8; 12];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 12] {
         let width_bytes = self.width.serialize();
         let height_bytes = self.height.serialize();
         let x_bytes = self.x.serialize();
@@ -2035,7 +2035,7 @@ pub struct CreatePictureAux {
 }
 impl Serialize for CreatePictureAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -2265,7 +2265,7 @@ pub struct ChangePictureAux {
 }
 impl Serialize for ChangePictureAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -3253,7 +3253,7 @@ impl TryFrom<&[u8]> for Transform {
 }
 impl Serialize for Transform {
     type Bytes = [u8; 36];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 36] {
         let matrix11_bytes = self.matrix11.serialize();
         let matrix12_bytes = self.matrix12.serialize();
         let matrix13_bytes = self.matrix13.serialize();
@@ -3498,7 +3498,7 @@ impl TryFrom<&[u8]> for Animcursorelt {
 }
 impl Serialize for Animcursorelt {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let cursor_bytes = self.cursor.serialize();
         let delay_bytes = self.delay.serialize();
         [
@@ -3573,7 +3573,7 @@ impl TryFrom<&[u8]> for Spanfix {
 }
 impl Serialize for Spanfix {
     type Bytes = [u8; 12];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 12] {
         let l_bytes = self.l.serialize();
         let r_bytes = self.r.serialize();
         let y_bytes = self.y.serialize();
@@ -3621,7 +3621,7 @@ impl TryFrom<&[u8]> for Trap {
 }
 impl Serialize for Trap {
     type Bytes = [u8; 24];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 24] {
         let top_bytes = self.top.serialize();
         let bot_bytes = self.bot.serialize();
         [

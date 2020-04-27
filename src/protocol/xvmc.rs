@@ -78,7 +78,7 @@ impl TryFrom<&[u8]> for SurfaceInfo {
 }
 impl Serialize for SurfaceInfo {
     type Bytes = [u8; 24];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 24] {
         let id_bytes = self.id.serialize();
         let chroma_format_bytes = self.chroma_format.serialize();
         let pad0_bytes = self.pad0.serialize();

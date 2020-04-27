@@ -472,7 +472,7 @@ impl TryFrom<&[u8]> for ScreenSize {
 }
 impl Serialize for ScreenSize {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let width_bytes = self.width.serialize();
         let height_bytes = self.height.serialize();
         let mwidth_bytes = self.mwidth.serialize();
@@ -517,7 +517,7 @@ impl TryFrom<&[u8]> for RefreshRates {
 }
 impl Serialize for RefreshRates {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -1156,7 +1156,7 @@ impl TryFrom<&[u8]> for ModeInfo {
 }
 impl Serialize for ModeInfo {
     type Bytes = [u8; 32];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 32] {
         let id_bytes = self.id.serialize();
         let width_bytes = self.width.serialize();
         let height_bytes = self.height.serialize();
@@ -3658,7 +3658,7 @@ impl TryFrom<&[u8]> for CrtcChange {
 }
 impl Serialize for CrtcChange {
     type Bytes = [u8; 28];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 28] {
         let timestamp_bytes = self.timestamp.serialize();
         let window_bytes = self.window.serialize();
         let crtc_bytes = self.crtc.serialize();
@@ -3751,7 +3751,7 @@ impl TryFrom<&[u8]> for OutputChange {
 }
 impl Serialize for OutputChange {
     type Bytes = [u8; 28];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 28] {
         let timestamp_bytes = self.timestamp.serialize();
         let config_timestamp_bytes = self.config_timestamp.serialize();
         let window_bytes = self.window.serialize();
@@ -3835,7 +3835,7 @@ impl TryFrom<&[u8]> for OutputProperty {
 }
 impl Serialize for OutputProperty {
     type Bytes = [u8; 28];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 28] {
         let window_bytes = self.window.serialize();
         let output_bytes = self.output.serialize();
         let atom_bytes = self.atom.serialize();
@@ -3907,7 +3907,7 @@ impl TryFrom<&[u8]> for ProviderChange {
 }
 impl Serialize for ProviderChange {
     type Bytes = [u8; 28];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 28] {
         let timestamp_bytes = self.timestamp.serialize();
         let window_bytes = self.window.serialize();
         let provider_bytes = self.provider.serialize();
@@ -3979,7 +3979,7 @@ impl TryFrom<&[u8]> for ProviderProperty {
 }
 impl Serialize for ProviderProperty {
     type Bytes = [u8; 28];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 28] {
         let window_bytes = self.window.serialize();
         let provider_bytes = self.provider.serialize();
         let atom_bytes = self.atom.serialize();
@@ -4049,7 +4049,7 @@ impl TryFrom<&[u8]> for ResourceChange {
 }
 impl Serialize for ResourceChange {
     type Bytes = [u8; 28];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 28] {
         let timestamp_bytes = self.timestamp.serialize();
         let window_bytes = self.window.serialize();
         [
@@ -4129,7 +4129,7 @@ impl TryFrom<&[u8]> for MonitorInfo {
 }
 impl Serialize for MonitorInfo {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -4410,7 +4410,7 @@ impl TryFrom<&[u8]> for LeaseNotify {
 }
 impl Serialize for LeaseNotify {
     type Bytes = [u8; 28];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 28] {
         let timestamp_bytes = self.timestamp.serialize();
         let window_bytes = self.window.serialize();
         let lease_bytes = self.lease.serialize();
@@ -4518,7 +4518,7 @@ impl NotifyData {
 }
 impl Serialize for NotifyData {
     type Bytes = [u8; 28];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 28] {
         self.0
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {

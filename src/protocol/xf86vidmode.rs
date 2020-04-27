@@ -286,7 +286,7 @@ impl TryFrom<&[u8]> for ModeInfo {
 }
 impl Serialize for ModeInfo {
     type Bytes = [u8; 48];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 48] {
         let dotclock_bytes = self.dotclock.serialize();
         let hdisplay_bytes = self.hdisplay.serialize();
         let hsyncstart_bytes = self.hsyncstart.serialize();

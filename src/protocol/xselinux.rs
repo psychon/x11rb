@@ -436,7 +436,7 @@ impl TryFrom<&[u8]> for ListItem {
 }
 impl Serialize for ListItem {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result

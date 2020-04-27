@@ -282,7 +282,7 @@ impl TryFrom<&[u8]> for Event {
 }
 impl Serialize for Event {
     type Bytes = [u8; 32];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 32] {
         [
             0,
             0,

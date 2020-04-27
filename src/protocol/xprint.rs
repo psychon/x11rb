@@ -73,7 +73,7 @@ impl TryFrom<&[u8]> for Printer {
 }
 impl Serialize for Printer {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result

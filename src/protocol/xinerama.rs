@@ -62,7 +62,7 @@ impl TryFrom<&[u8]> for ScreenInfo {
 }
 impl Serialize for ScreenInfo {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let x_org_bytes = self.x_org.serialize();
         let y_org_bytes = self.y_org.serialize();
         let width_bytes = self.width.serialize();

@@ -554,7 +554,7 @@ impl TryFrom<&[u8]> for Rational {
 }
 impl Serialize for Rational {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let numerator_bytes = self.numerator.serialize();
         let denominator_bytes = self.denominator.serialize();
         [
@@ -597,7 +597,7 @@ impl TryFrom<&[u8]> for Format {
 }
 impl Serialize for Format {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let visual_bytes = self.visual.serialize();
         let depth_bytes = self.depth.serialize();
         [
@@ -655,7 +655,7 @@ impl TryFrom<&[u8]> for AdaptorInfo {
 }
 impl Serialize for AdaptorInfo {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -711,7 +711,7 @@ impl TryFrom<&[u8]> for EncodingInfo {
 }
 impl Serialize for EncodingInfo {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -762,7 +762,7 @@ impl TryFrom<&[u8]> for Image {
 }
 impl Serialize for Image {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -814,7 +814,7 @@ impl TryFrom<&[u8]> for AttributeInfo {
 }
 impl Serialize for AttributeInfo {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -903,7 +903,7 @@ impl TryFrom<&[u8]> for ImageFormatInfo {
 }
 impl Serialize for ImageFormatInfo {
     type Bytes = [u8; 128];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 128] {
         let id_bytes = self.id.serialize();
         let type_bytes = u8::from(self.type_).serialize();
         let byte_order_bytes = u8::from(self.byte_order).serialize();

@@ -67,7 +67,7 @@ impl TryFrom<&[u8]> for Fp3232 {
 }
 impl Serialize for Fp3232 {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let integral_bytes = self.integral.serialize();
         let frac_bytes = self.frac.serialize();
         [
@@ -395,7 +395,7 @@ impl TryFrom<&[u8]> for DeviceInfo {
 }
 impl Serialize for DeviceInfo {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let device_type_bytes = self.device_type.serialize();
         let device_id_bytes = self.device_id.serialize();
         let num_class_info_bytes = self.num_class_info.serialize();
@@ -450,7 +450,7 @@ impl TryFrom<&[u8]> for KeyInfo {
 }
 impl Serialize for KeyInfo {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let class_id_bytes = u8::from(self.class_id).serialize();
         let len_bytes = self.len.serialize();
         let min_keycode_bytes = self.min_keycode.serialize();
@@ -502,7 +502,7 @@ impl TryFrom<&[u8]> for ButtonInfo {
 }
 impl Serialize for ButtonInfo {
     type Bytes = [u8; 4];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 4] {
         let class_id_bytes = u8::from(self.class_id).serialize();
         let len_bytes = self.len.serialize();
         let num_buttons_bytes = self.num_buttons.serialize();
@@ -544,7 +544,7 @@ impl TryFrom<&[u8]> for AxisInfo {
 }
 impl Serialize for AxisInfo {
     type Bytes = [u8; 12];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 12] {
         let resolution_bytes = self.resolution.serialize();
         let minimum_bytes = self.minimum.serialize();
         let maximum_bytes = self.maximum.serialize();
@@ -601,7 +601,7 @@ impl TryFrom<&[u8]> for ValuatorInfo {
 }
 impl Serialize for ValuatorInfo {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -642,7 +642,7 @@ impl TryFrom<&[u8]> for InputInfoInfoKey {
 }
 impl Serialize for InputInfoInfoKey {
     type Bytes = [u8; 6];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 6] {
         let min_keycode_bytes = self.min_keycode.serialize();
         let max_keycode_bytes = self.max_keycode.serialize();
         let num_keys_bytes = self.num_keys.serialize();
@@ -682,7 +682,7 @@ impl TryFrom<&[u8]> for InputInfoInfoButton {
 }
 impl Serialize for InputInfoInfoButton {
     type Bytes = [u8; 2];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 2] {
         let num_buttons_bytes = self.num_buttons.serialize();
         [
             num_buttons_bytes[0],
@@ -719,7 +719,7 @@ impl TryFrom<&[u8]> for InputInfoInfoValuator {
 }
 impl Serialize for InputInfoInfoValuator {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -790,7 +790,7 @@ impl InputInfoInfo {
 }
 impl Serialize for InputInfoInfo {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -835,7 +835,7 @@ impl TryFrom<&[u8]> for InputInfo {
 }
 impl Serialize for InputInfo {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -870,7 +870,7 @@ impl TryFrom<&[u8]> for DeviceName {
 }
 impl Serialize for DeviceName {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -965,7 +965,7 @@ impl TryFrom<&[u8]> for InputClassInfo {
 }
 impl Serialize for InputClassInfo {
     type Bytes = [u8; 2];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 2] {
         let class_id_bytes = u8::from(self.class_id).serialize();
         let event_type_base_bytes = self.event_type_base.serialize();
         [
@@ -1397,7 +1397,7 @@ impl DeviceTimeCoord {
 // Skipping TryFrom implementations because of unresolved members
 impl Serialize for DeviceTimeCoord {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -2304,7 +2304,7 @@ impl TryFrom<&[u8]> for KbdFeedbackState {
 }
 impl Serialize for KbdFeedbackState {
     type Bytes = [u8; 52];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 52] {
         let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
@@ -2418,7 +2418,7 @@ impl TryFrom<&[u8]> for PtrFeedbackState {
 }
 impl Serialize for PtrFeedbackState {
     type Bytes = [u8; 12];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 12] {
         let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
@@ -2482,7 +2482,7 @@ impl TryFrom<&[u8]> for IntegerFeedbackState {
 }
 impl Serialize for IntegerFeedbackState {
     type Bytes = [u8; 16];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 16] {
         let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
@@ -2548,7 +2548,7 @@ impl TryFrom<&[u8]> for StringFeedbackState {
 }
 impl Serialize for StringFeedbackState {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -2596,7 +2596,7 @@ impl TryFrom<&[u8]> for BellFeedbackState {
 }
 impl Serialize for BellFeedbackState {
     type Bytes = [u8; 12];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 12] {
         let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
@@ -2658,7 +2658,7 @@ impl TryFrom<&[u8]> for LedFeedbackState {
 }
 impl Serialize for LedFeedbackState {
     type Bytes = [u8; 12];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 12] {
         let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
@@ -2724,7 +2724,7 @@ impl TryFrom<&[u8]> for FeedbackStateDataKeyboard {
 }
 impl Serialize for FeedbackStateDataKeyboard {
     type Bytes = [u8; 48];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 48] {
         let pitch_bytes = self.pitch.serialize();
         let duration_bytes = self.duration.serialize();
         let led_mask_bytes = self.led_mask.serialize();
@@ -2820,7 +2820,7 @@ impl TryFrom<&[u8]> for FeedbackStateDataPointer {
 }
 impl Serialize for FeedbackStateDataPointer {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let accel_num_bytes = self.accel_num.serialize();
         let accel_denom_bytes = self.accel_denom.serialize();
         let threshold_bytes = self.threshold.serialize();
@@ -2865,7 +2865,7 @@ impl TryFrom<&[u8]> for FeedbackStateDataString {
 }
 impl Serialize for FeedbackStateDataString {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -2901,7 +2901,7 @@ impl TryFrom<&[u8]> for FeedbackStateDataInteger {
 }
 impl Serialize for FeedbackStateDataInteger {
     type Bytes = [u8; 12];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 12] {
         let resolution_bytes = self.resolution.serialize();
         let min_value_bytes = self.min_value.serialize();
         let max_value_bytes = self.max_value.serialize();
@@ -2948,7 +2948,7 @@ impl TryFrom<&[u8]> for FeedbackStateDataLed {
 }
 impl Serialize for FeedbackStateDataLed {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let led_mask_bytes = self.led_mask.serialize();
         let led_values_bytes = self.led_values.serialize();
         [
@@ -2992,7 +2992,7 @@ impl TryFrom<&[u8]> for FeedbackStateDataBell {
 }
 impl Serialize for FeedbackStateDataBell {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let percent_bytes = self.percent.serialize();
         let pitch_bytes = self.pitch.serialize();
         let duration_bytes = self.duration.serialize();
@@ -3111,7 +3111,7 @@ impl FeedbackStateData {
 }
 impl Serialize for FeedbackStateData {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -3164,7 +3164,7 @@ impl TryFrom<&[u8]> for FeedbackState {
 }
 impl Serialize for FeedbackState {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -3274,7 +3274,7 @@ impl TryFrom<&[u8]> for KbdFeedbackCtl {
 }
 impl Serialize for KbdFeedbackCtl {
     type Bytes = [u8; 20];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 20] {
         let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
@@ -3356,7 +3356,7 @@ impl TryFrom<&[u8]> for PtrFeedbackCtl {
 }
 impl Serialize for PtrFeedbackCtl {
     type Bytes = [u8; 12];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 12] {
         let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
@@ -3416,7 +3416,7 @@ impl TryFrom<&[u8]> for IntegerFeedbackCtl {
 }
 impl Serialize for IntegerFeedbackCtl {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
@@ -3469,7 +3469,7 @@ impl TryFrom<&[u8]> for StringFeedbackCtl {
 }
 impl Serialize for StringFeedbackCtl {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -3517,7 +3517,7 @@ impl TryFrom<&[u8]> for BellFeedbackCtl {
 }
 impl Serialize for BellFeedbackCtl {
     type Bytes = [u8; 12];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 12] {
         let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
@@ -3579,7 +3579,7 @@ impl TryFrom<&[u8]> for LedFeedbackCtl {
 }
 impl Serialize for LedFeedbackCtl {
     type Bytes = [u8; 12];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 12] {
         let class_id_bytes = u8::from(self.class_id).serialize();
         let feedback_id_bytes = self.feedback_id.serialize();
         let len_bytes = self.len.serialize();
@@ -3643,7 +3643,7 @@ impl TryFrom<&[u8]> for FeedbackCtlDataKeyboard {
 }
 impl Serialize for FeedbackCtlDataKeyboard {
     type Bytes = [u8; 16];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 16] {
         let key_bytes = self.key.serialize();
         let auto_repeat_mode_bytes = self.auto_repeat_mode.serialize();
         let key_click_percent_bytes = self.key_click_percent.serialize();
@@ -3707,7 +3707,7 @@ impl TryFrom<&[u8]> for FeedbackCtlDataPointer {
 }
 impl Serialize for FeedbackCtlDataPointer {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let num_bytes = self.num.serialize();
         let denom_bytes = self.denom.serialize();
         let threshold_bytes = self.threshold.serialize();
@@ -3751,7 +3751,7 @@ impl TryFrom<&[u8]> for FeedbackCtlDataString {
 }
 impl Serialize for FeedbackCtlDataString {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -3783,7 +3783,7 @@ impl TryFrom<&[u8]> for FeedbackCtlDataInteger {
 }
 impl Serialize for FeedbackCtlDataInteger {
     type Bytes = [u8; 4];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 4] {
         let int_to_display_bytes = self.int_to_display.serialize();
         [
             int_to_display_bytes[0],
@@ -3818,7 +3818,7 @@ impl TryFrom<&[u8]> for FeedbackCtlDataLed {
 }
 impl Serialize for FeedbackCtlDataLed {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let led_mask_bytes = self.led_mask.serialize();
         let led_values_bytes = self.led_values.serialize();
         [
@@ -3862,7 +3862,7 @@ impl TryFrom<&[u8]> for FeedbackCtlDataBell {
 }
 impl Serialize for FeedbackCtlDataBell {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let percent_bytes = self.percent.serialize();
         let pitch_bytes = self.pitch.serialize();
         let duration_bytes = self.duration.serialize();
@@ -3981,7 +3981,7 @@ impl FeedbackCtlData {
 }
 impl Serialize for FeedbackCtlData {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -4034,7 +4034,7 @@ impl TryFrom<&[u8]> for FeedbackCtl {
 }
 impl Serialize for FeedbackCtl {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -4508,7 +4508,7 @@ impl TryFrom<&[u8]> for KeyState {
 }
 impl Serialize for KeyState {
     type Bytes = [u8; 36];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 36] {
         let class_id_bytes = u8::from(self.class_id).serialize();
         let len_bytes = self.len.serialize();
         let num_keys_bytes = self.num_keys.serialize();
@@ -4589,7 +4589,7 @@ impl TryFrom<&[u8]> for ButtonState {
 }
 impl Serialize for ButtonState {
     type Bytes = [u8; 36];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 36] {
         let class_id_bytes = u8::from(self.class_id).serialize();
         let len_bytes = self.len.serialize();
         let num_buttons_bytes = self.num_buttons.serialize();
@@ -4732,7 +4732,7 @@ impl TryFrom<&[u8]> for ValuatorState {
 }
 impl Serialize for ValuatorState {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -4771,7 +4771,7 @@ impl TryFrom<&[u8]> for InputStateDataKey {
 }
 impl Serialize for InputStateDataKey {
     type Bytes = [u8; 34];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 34] {
         let num_keys_bytes = self.num_keys.serialize();
         [
             num_keys_bytes[0],
@@ -4840,7 +4840,7 @@ impl TryFrom<&[u8]> for InputStateDataButton {
 }
 impl Serialize for InputStateDataButton {
     type Bytes = [u8; 34];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 34] {
         let num_buttons_bytes = self.num_buttons.serialize();
         [
             num_buttons_bytes[0],
@@ -4908,7 +4908,7 @@ impl TryFrom<&[u8]> for InputStateDataValuator {
 }
 impl Serialize for InputStateDataValuator {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -4978,7 +4978,7 @@ impl InputStateData {
 }
 impl Serialize for InputStateData {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -5023,7 +5023,7 @@ impl TryFrom<&[u8]> for InputState {
 }
 impl Serialize for InputState {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -5284,7 +5284,7 @@ impl TryFrom<&[u8]> for DeviceResolutionState {
 }
 impl Serialize for DeviceResolutionState {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -5339,7 +5339,7 @@ impl TryFrom<&[u8]> for DeviceAbsCalibState {
 }
 impl Serialize for DeviceAbsCalibState {
     type Bytes = [u8; 36];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 36] {
         let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let min_x_bytes = self.min_x.serialize();
@@ -5438,7 +5438,7 @@ impl TryFrom<&[u8]> for DeviceAbsAreaState {
 }
 impl Serialize for DeviceAbsAreaState {
     type Bytes = [u8; 28];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 28] {
         let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let offset_x_bytes = self.offset_x.serialize();
@@ -5518,7 +5518,7 @@ impl TryFrom<&[u8]> for DeviceCoreState {
 }
 impl Serialize for DeviceCoreState {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let status_bytes = self.status.serialize();
@@ -5569,7 +5569,7 @@ impl TryFrom<&[u8]> for DeviceEnableState {
 }
 impl Serialize for DeviceEnableState {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let enable_bytes = self.enable.serialize();
@@ -5617,7 +5617,7 @@ impl TryFrom<&[u8]> for DeviceStateDataResolution {
 }
 impl Serialize for DeviceStateDataResolution {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -5663,7 +5663,7 @@ impl TryFrom<&[u8]> for DeviceStateDataAbsCalib {
 }
 impl Serialize for DeviceStateDataAbsCalib {
     type Bytes = [u8; 32];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 32] {
         let min_x_bytes = self.min_x.serialize();
         let max_x_bytes = self.max_x.serialize();
         let min_y_bytes = self.min_y.serialize();
@@ -5741,7 +5741,7 @@ impl TryFrom<&[u8]> for DeviceStateDataCore {
 }
 impl Serialize for DeviceStateDataCore {
     type Bytes = [u8; 4];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 4] {
         let status_bytes = self.status.serialize();
         let iscore_bytes = self.iscore.serialize();
         [
@@ -5787,7 +5787,7 @@ impl TryFrom<&[u8]> for DeviceStateDataAbsArea {
 }
 impl Serialize for DeviceStateDataAbsArea {
     type Bytes = [u8; 24];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 24] {
         let offset_x_bytes = self.offset_x.serialize();
         let offset_y_bytes = self.offset_y.serialize();
         let width_bytes = self.width.serialize();
@@ -5916,7 +5916,7 @@ impl DeviceStateData {
 }
 impl Serialize for DeviceStateData {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -5969,7 +5969,7 @@ impl TryFrom<&[u8]> for DeviceState {
 }
 impl Serialize for DeviceState {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -6068,7 +6068,7 @@ impl TryFrom<&[u8]> for DeviceResolutionCtl {
 }
 impl Serialize for DeviceResolutionCtl {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -6123,7 +6123,7 @@ impl TryFrom<&[u8]> for DeviceAbsCalibCtl {
 }
 impl Serialize for DeviceAbsCalibCtl {
     type Bytes = [u8; 36];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 36] {
         let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let min_x_bytes = self.min_x.serialize();
@@ -6222,7 +6222,7 @@ impl TryFrom<&[u8]> for DeviceAbsAreaCtrl {
 }
 impl Serialize for DeviceAbsAreaCtrl {
     type Bytes = [u8; 28];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 28] {
         let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let offset_x_bytes = self.offset_x.serialize();
@@ -6300,7 +6300,7 @@ impl TryFrom<&[u8]> for DeviceCoreCtrl {
 }
 impl Serialize for DeviceCoreCtrl {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let status_bytes = self.status.serialize();
@@ -6349,7 +6349,7 @@ impl TryFrom<&[u8]> for DeviceEnableCtrl {
 }
 impl Serialize for DeviceEnableCtrl {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let control_id_bytes = u16::from(self.control_id).serialize();
         let len_bytes = self.len.serialize();
         let enable_bytes = self.enable.serialize();
@@ -6396,7 +6396,7 @@ impl TryFrom<&[u8]> for DeviceCtlDataResolution {
 }
 impl Serialize for DeviceCtlDataResolution {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -6443,7 +6443,7 @@ impl TryFrom<&[u8]> for DeviceCtlDataAbsCalib {
 }
 impl Serialize for DeviceCtlDataAbsCalib {
     type Bytes = [u8; 32];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 32] {
         let min_x_bytes = self.min_x.serialize();
         let max_x_bytes = self.max_x.serialize();
         let min_y_bytes = self.min_y.serialize();
@@ -6519,7 +6519,7 @@ impl TryFrom<&[u8]> for DeviceCtlDataCore {
 }
 impl Serialize for DeviceCtlDataCore {
     type Bytes = [u8; 4];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 4] {
         let status_bytes = self.status.serialize();
         [
             status_bytes[0],
@@ -6563,7 +6563,7 @@ impl TryFrom<&[u8]> for DeviceCtlDataAbsArea {
 }
 impl Serialize for DeviceCtlDataAbsArea {
     type Bytes = [u8; 24];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 24] {
         let offset_x_bytes = self.offset_x.serialize();
         let offset_y_bytes = self.offset_y.serialize();
         let width_bytes = self.width.serialize();
@@ -6692,7 +6692,7 @@ impl DeviceCtlData {
 }
 impl Serialize for DeviceCtlData {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -6745,7 +6745,7 @@ impl TryFrom<&[u8]> for DeviceCtl {
 }
 impl Serialize for DeviceCtl {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -6968,7 +6968,7 @@ impl ChangeDevicePropertyAux {
 }
 impl Serialize for ChangeDevicePropertyAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -7327,7 +7327,7 @@ impl TryFrom<&[u8]> for GroupInfo {
 }
 impl Serialize for GroupInfo {
     type Bytes = [u8; 4];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 4] {
         let base_bytes = self.base.serialize();
         let latched_bytes = self.latched.serialize();
         let locked_bytes = self.locked.serialize();
@@ -7373,7 +7373,7 @@ impl TryFrom<&[u8]> for ModifierInfo {
 }
 impl Serialize for ModifierInfo {
     type Bytes = [u8; 16];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 16] {
         let base_bytes = self.base.serialize();
         let latched_bytes = self.latched.serialize();
         let locked_bytes = self.locked.serialize();
@@ -7754,7 +7754,7 @@ impl TryFrom<&[u8]> for AddMaster {
 }
 impl Serialize for AddMaster {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -7804,7 +7804,7 @@ impl TryFrom<&[u8]> for RemoveMaster {
 }
 impl Serialize for RemoveMaster {
     type Bytes = [u8; 12];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 12] {
         let type_bytes = u16::from(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let deviceid_bytes = self.deviceid.serialize();
@@ -7864,7 +7864,7 @@ impl TryFrom<&[u8]> for AttachSlave {
 }
 impl Serialize for AttachSlave {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let type_bytes = u16::from(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let deviceid_bytes = self.deviceid.serialize();
@@ -7914,7 +7914,7 @@ impl TryFrom<&[u8]> for DetachSlave {
 }
 impl Serialize for DetachSlave {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let type_bytes = u16::from(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let deviceid_bytes = self.deviceid.serialize();
@@ -7968,7 +7968,7 @@ impl TryFrom<&[u8]> for HierarchyChangeDataAddMaster {
 }
 impl Serialize for HierarchyChangeDataAddMaster {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -8010,7 +8010,7 @@ impl TryFrom<&[u8]> for HierarchyChangeDataRemoveMaster {
 }
 impl Serialize for HierarchyChangeDataRemoveMaster {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let deviceid_bytes = self.deviceid.serialize();
         let return_mode_bytes = u8::from(self.return_mode).serialize();
         let return_pointer_bytes = self.return_pointer.serialize();
@@ -8056,7 +8056,7 @@ impl TryFrom<&[u8]> for HierarchyChangeDataAttachSlave {
 }
 impl Serialize for HierarchyChangeDataAttachSlave {
     type Bytes = [u8; 4];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 4] {
         let deviceid_bytes = self.deviceid.serialize();
         let master_bytes = self.master.serialize();
         [
@@ -8092,7 +8092,7 @@ impl TryFrom<&[u8]> for HierarchyChangeDataDetachSlave {
 }
 impl Serialize for HierarchyChangeDataDetachSlave {
     type Bytes = [u8; 4];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 4] {
         let deviceid_bytes = self.deviceid.serialize();
         [
             deviceid_bytes[0],
@@ -8177,7 +8177,7 @@ impl HierarchyChangeData {
 }
 impl Serialize for HierarchyChangeData {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -8224,7 +8224,7 @@ impl TryFrom<&[u8]> for HierarchyChange {
 }
 impl Serialize for HierarchyChange {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -8485,7 +8485,7 @@ impl TryFrom<&[u8]> for EventMask {
 }
 impl Serialize for EventMask {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -8950,7 +8950,7 @@ impl TryFrom<&[u8]> for ButtonClass {
 }
 impl Serialize for ButtonClass {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -8994,7 +8994,7 @@ impl TryFrom<&[u8]> for KeyClass {
 }
 impl Serialize for KeyClass {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -9044,7 +9044,7 @@ impl TryFrom<&[u8]> for ScrollClass {
 }
 impl Serialize for ScrollClass {
     type Bytes = [u8; 24];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 24] {
         let type_bytes = u16::from(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let sourceid_bytes = self.sourceid.serialize();
@@ -9121,7 +9121,7 @@ impl TryFrom<&[u8]> for TouchClass {
 }
 impl Serialize for TouchClass {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let type_bytes = u16::from(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let sourceid_bytes = self.sourceid.serialize();
@@ -9188,7 +9188,7 @@ impl TryFrom<&[u8]> for ValuatorClass {
 }
 impl Serialize for ValuatorClass {
     type Bytes = [u8; 44];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 44] {
         let type_bytes = u16::from(self.type_).serialize();
         let len_bytes = self.len.serialize();
         let sourceid_bytes = self.sourceid.serialize();
@@ -9282,7 +9282,7 @@ impl TryFrom<&[u8]> for DeviceClassDataKey {
 }
 impl Serialize for DeviceClassDataKey {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -9315,7 +9315,7 @@ impl TryFrom<&[u8]> for DeviceClassDataButton {
 }
 impl Serialize for DeviceClassDataButton {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -9360,7 +9360,7 @@ impl TryFrom<&[u8]> for DeviceClassDataValuator {
 }
 impl Serialize for DeviceClassDataValuator {
     type Bytes = [u8; 38];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 38] {
         let number_bytes = self.number.serialize();
         let label_bytes = self.label.serialize();
         let min_bytes = self.min.serialize();
@@ -9448,7 +9448,7 @@ impl TryFrom<&[u8]> for DeviceClassDataScroll {
 }
 impl Serialize for DeviceClassDataScroll {
     type Bytes = [u8; 18];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 18] {
         let number_bytes = self.number.serialize();
         let scroll_type_bytes = u16::from(self.scroll_type).serialize();
         let flags_bytes = self.flags.serialize();
@@ -9505,7 +9505,7 @@ impl TryFrom<&[u8]> for DeviceClassDataTouch {
 }
 impl Serialize for DeviceClassDataTouch {
     type Bytes = [u8; 2];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 2] {
         let mode_bytes = u8::from(self.mode).serialize();
         let num_touches_bytes = self.num_touches.serialize();
         [
@@ -9602,7 +9602,7 @@ impl DeviceClassData {
 }
 impl Serialize for DeviceClassData {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -9653,7 +9653,7 @@ impl TryFrom<&[u8]> for DeviceClass {
 }
 impl Serialize for DeviceClass {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -9707,7 +9707,7 @@ impl TryFrom<&[u8]> for XIDeviceInfo {
 }
 impl Serialize for XIDeviceInfo {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -10387,7 +10387,7 @@ impl TryFrom<&[u8]> for GrabModifierInfo {
 }
 impl Serialize for GrabModifierInfo {
     type Bytes = [u8; 8];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 8] {
         let modifiers_bytes = self.modifiers.serialize();
         let status_bytes = u8::from(self.status).serialize();
         [
@@ -10645,7 +10645,7 @@ impl XIChangePropertyAux {
 }
 impl Serialize for XIChangePropertyAux {
     type Bytes = Vec<u8>;
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> Vec<u8> {
         let mut result = Vec::new();
         self.serialize_into(&mut result);
         result
@@ -10990,7 +10990,7 @@ impl TryFrom<&[u8]> for BarrierReleasePointerInfo {
 }
 impl Serialize for BarrierReleasePointerInfo {
     type Bytes = [u8; 12];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 12] {
         let deviceid_bytes = self.deviceid.serialize();
         let barrier_bytes = self.barrier.serialize();
         let eventid_bytes = self.eventid.serialize();
@@ -14251,7 +14251,7 @@ impl TryFrom<&[u8]> for HierarchyInfo {
 }
 impl Serialize for HierarchyInfo {
     type Bytes = [u8; 12];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 12] {
         let deviceid_bytes = self.deviceid.serialize();
         let attachment_bytes = self.attachment.serialize();
         let type_bytes = u8::from(self.type_).serialize();
@@ -15596,7 +15596,7 @@ impl EventForSend {
 }
 impl Serialize for EventForSend {
     type Bytes = [u8; 32];
-    fn serialize(&self) -> Self::Bytes {
+    fn serialize(&self) -> [u8; 32] {
         self.0
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
