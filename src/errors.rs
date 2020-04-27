@@ -231,6 +231,12 @@ impl<B: AsRef<[u8]> + std::fmt::Debug> std::fmt::Display for ReplyOrIdError<B> {
 
 impl<B: AsRef<[u8]> + std::fmt::Debug> std::error::Error for ReplyOrIdError<B> {}
 
+impl<B: AsRef<[u8]> + std::fmt::Debug> From<ParseError> for ReplyOrIdError<B> {
+    fn from(err: ParseError) -> Self {
+        ConnectionError::from(err).into()
+    }
+}
+
 impl<B: AsRef<[u8]> + std::fmt::Debug> From<ConnectionError> for ReplyOrIdError<B> {
     fn from(err: ConnectionError) -> Self {
         ReplyOrIdError::ConnectionError(err)

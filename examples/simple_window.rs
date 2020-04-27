@@ -1,6 +1,7 @@
 extern crate x11rb;
 
 use x11rb::connection::Connection;
+use x11rb::cursor::Handle as CursorHandle;
 use x11rb::protocol::xproto::*;
 use x11rb::protocol::Event;
 use x11rb::wrapper::ConnectionExt as _;
@@ -15,6 +16,7 @@ fn main() {
     let screen = &conn.setup().roots[screen_num];
     let win_id = conn.generate_id().unwrap();
     let gc_id = conn.generate_id().unwrap();
+    let cursor_handle = CursorHandle::new(conn, screen_num).unwrap();
 
     let wm_protocols = conn.intern_atom(false, b"WM_PROTOCOLS").unwrap();
     let wm_delete_window = conn.intern_atom(false, b"WM_DELETE_WINDOW").unwrap();
@@ -24,11 +26,14 @@ fn main() {
     let wm_delete_window = wm_delete_window.reply().unwrap().atom;
     let net_wm_name = net_wm_name.reply().unwrap().atom;
     let utf8_string = utf8_string.reply().unwrap().atom;
+    let cursor_handle = cursor_handle.reply().unwrap();
 
     let win_aux = CreateWindowAux::new()
         .event_mask(EventMask::Exposure | EventMask::StructureNotify | EventMask::NoEvent)
         .background_pixel(screen.white_pixel)
-        .win_gravity(Gravity::NorthWest);
+        .win_gravity(Gravity::NorthWest)
+        // Just because, we set the cursor to "wait"
+        .cursor(cursor_handle.load_cursor(conn, "wait").unwrap());
 
     let gc_aux = CreateGCAux::new().foreground(screen.black_pixel);
 

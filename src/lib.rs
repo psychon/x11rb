@@ -107,6 +107,7 @@ pub mod xcb_ffi;
 pub mod x11_utils;
 pub mod connection;
 pub mod cookie;
+pub mod cursor;
 pub mod errors;
 pub mod extension_manager;
 pub mod properties;
