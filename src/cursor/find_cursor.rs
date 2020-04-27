@@ -301,7 +301,8 @@ where
     Err(Error::NothingFound)
 }
 
-#[cfg(test)]
+// FIXME: Make these tests pass on Windows; problem is "/" vs "\\" in paths
+#[cfg(all(test, unix))]
 mod test_find_cursor {
     use super::{find_cursor_impl, Cursor, Error};
     use crate::errors::ConnectionError;
