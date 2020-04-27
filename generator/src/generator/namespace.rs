@@ -1670,7 +1670,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
         // Values can only be parsed if they are unique.
         // As a special case, xproto's Gravity enum gets special API.
-        let is_xproto_gravity = rust_name == "Gravity" && enum_def.namespace.upgrade().unwrap().header == "xproto";
+        let is_xproto_gravity = is_xproto_gravity(enum_def);
         if !self.enum_has_repeated_values(enum_def) || is_xproto_gravity {
             if !is_xproto_gravity {
                 outln!(out, "impl TryFrom<{}> for {} {{", to_type, rust_name);
@@ -3120,6 +3120,20 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             if !self.enum_has_repeated_values(&enum_def) {
                 outln!(out, "let {} = {}.try_into()?;", var_name, var_name);
             }
+            if is_xproto_gravity(&enum_def) {
+                let zero_type = match var_name {
+                    "bit_gravity" => "Gravity::BitForget",
+                    "win_gravity" => "Gravity::WinUnmap",
+                    _ => unreachable!(),
+                };
+                outln!(
+                    out,
+                    "let {} = Gravity::try_from({}, {})?;",
+                    var_name,
+                    var_name,
+                    zero_type,
+                );
+            }
         }
     }
 
@@ -3610,6 +3624,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 xcbdefs::TypeRef::Enum(enum_def) => enum_def.upgrade().unwrap(),
                 _ => unreachable!(),
             };
+            if is_xproto_gravity(&enum_def) && self.ns.header == "xproto" {
+                return Some(enum_def)
+            }
             if !self.enum_has_repeated_values(&enum_def) {
                 // The field can only have the values from the enum,
                 // use its type.
@@ -4754,4 +4771,9 @@ fn ename_to_rust(name: &str) -> String {
     }
     name[..1].make_ascii_uppercase();
     name
+}
+
+/// Check if an enum definition is xproto's Gravity enum.
+fn is_xproto_gravity(enum_def: &xcbdefs::EnumDef) -> bool {
+    enum_def.name == "Gravity" && enum_def.namespace.upgrade().unwrap().header == "xproto"
 }
