@@ -4554,14 +4554,20 @@ fn gather_deducible_fields(fields: &[xcbdefs::FieldDef]) -> FxHashMap<String, De
         };
 
         if let Some((field_name, deducible_field)) = deducible_field {
-            match deducible_fields.entry(field_name) {
-                HashMapEntry::Occupied(_) => {
-                    // field used more than once,
-                    // deduce it from the first use
-                    // (do not replace entry)
-                }
-                HashMapEntry::Vacant(entry) => {
-                    entry.insert(deducible_field);
+            let is_not_ext_param = fields
+                .iter()
+                .any(|field| field.name() == Some(field_name.as_str()));
+
+            if is_not_ext_param {
+                match deducible_fields.entry(field_name) {
+                    HashMapEntry::Occupied(_) => {
+                        // field used more than once,
+                        // deduce it from the first use
+                        // (do not replace entry)
+                    }
+                    HashMapEntry::Vacant(entry) => {
+                        entry.insert(deducible_field);
+                    }
                 }
             }
         }
