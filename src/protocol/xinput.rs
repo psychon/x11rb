@@ -910,7 +910,6 @@ pub struct ListInputDevicesReply {
     pub xi_reply_type: u8,
     pub sequence: u16,
     pub length: u32,
-    pub devices_len: u8,
     pub devices: Vec<DeviceInfo>,
     pub infos: Vec<InputInfo>,
     pub names: Vec<xproto::Str>,
@@ -931,7 +930,7 @@ impl TryParse for ListInputDevicesReply {
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let result = ListInputDevicesReply { response_type, xi_reply_type, sequence, length, devices_len, devices, infos, names };
+        let result = ListInputDevicesReply { response_type, xi_reply_type, sequence, length, devices, infos, names };
         Ok((result, remaining))
     }
 }
@@ -5260,7 +5259,6 @@ impl TryFrom<u32> for DeviceControl {
 pub struct DeviceResolutionState {
     pub control_id: DeviceControl,
     pub len: u16,
-    pub num_valuators: u32,
     pub resolution_values: Vec<u32>,
     pub resolution_min: Vec<u32>,
     pub resolution_max: Vec<u32>,
@@ -5274,7 +5272,7 @@ impl TryParse for DeviceResolutionState {
         let (resolution_min, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
         let (resolution_max, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
         let control_id = control_id.try_into()?;
-        let result = DeviceResolutionState { control_id, len, num_valuators, resolution_values, resolution_min, resolution_max };
+        let result = DeviceResolutionState { control_id, len, resolution_values, resolution_min, resolution_max };
         Ok((result, remaining))
     }
 }
@@ -5295,7 +5293,8 @@ impl Serialize for DeviceResolutionState {
         bytes.reserve(8);
         u16::from(self.control_id).serialize_into(bytes);
         self.len.serialize_into(bytes);
-        self.num_valuators.serialize_into(bytes);
+        let num_valuators = u32::try_from(self.resolution_values.len()).expect("`resolution_values` has too many elements");
+        num_valuators.serialize_into(bytes);
         self.resolution_values.serialize_into(bytes);
         self.resolution_min.serialize_into(bytes);
         self.resolution_max.serialize_into(bytes);
@@ -5596,7 +5595,6 @@ impl Serialize for DeviceEnableState {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DeviceStateDataResolution {
-    pub num_valuators: u32,
     pub resolution_values: Vec<u32>,
     pub resolution_min: Vec<u32>,
     pub resolution_max: Vec<u32>,
@@ -5607,7 +5605,7 @@ impl TryParse for DeviceStateDataResolution {
         let (resolution_values, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
         let (resolution_min, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
         let (resolution_max, remaining) = crate::x11_utils::parse_list::<u32>(remaining, num_valuators.try_into().or(Err(ParseError::ParseError))?)?;
-        let result = DeviceStateDataResolution { num_valuators, resolution_values, resolution_min, resolution_max };
+        let result = DeviceStateDataResolution { resolution_values, resolution_min, resolution_max };
         Ok((result, remaining))
     }
 }
@@ -5625,7 +5623,8 @@ impl Serialize for DeviceStateDataResolution {
         result
     }
     fn serialize_into(&self, bytes: &mut Vec<u8>) {
-        self.num_valuators.serialize_into(bytes);
+        let num_valuators = u32::try_from(self.resolution_values.len()).expect("`resolution_values` has too many elements");
+        num_valuators.serialize_into(bytes);
         self.resolution_values.serialize_into(bytes);
         self.resolution_min.serialize_into(bytes);
         self.resolution_max.serialize_into(bytes);

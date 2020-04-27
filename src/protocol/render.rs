@@ -2897,7 +2897,7 @@ where
 
 /// Opcode for the AddGlyphs request
 pub const ADD_GLYPHS_REQUEST: u8 = 20;
-pub fn add_glyphs<'c, Conn>(conn: &'c Conn, glyphset: Glyphset, glyphs_len: u32, glyphids: &[u32], glyphs: &[Glyphinfo], data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn add_glyphs<'c, Conn>(conn: &'c Conn, glyphset: Glyphset, glyphids: &[u32], glyphs: &[Glyphinfo], data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -2905,6 +2905,7 @@ where
         .ok_or(ConnectionError::UnsupportedExtension)?;
     let length_so_far = 0;
     let glyphset_bytes = glyphset.serialize();
+    let glyphs_len = u32::try_from(glyphids.len()).expect("`glyphids` has too many elements");
     let glyphs_len_bytes = glyphs_len.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -2921,7 +2922,6 @@ where
         glyphs_len_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    assert_eq!(glyphids.len(), usize::try_from(glyphs_len).unwrap(), "`glyphids` has an incorrect length");
     let glyphids_bytes = glyphids.serialize();
     let length_so_far = length_so_far + glyphids_bytes.len();
     assert_eq!(glyphs.len(), usize::try_from(glyphs_len).unwrap(), "`glyphs` has an incorrect length");
@@ -3733,7 +3733,7 @@ where
 
 /// Opcode for the CreateLinearGradient request
 pub const CREATE_LINEAR_GRADIENT_REQUEST: u8 = 34;
-pub fn create_linear_gradient<'c, Conn>(conn: &'c Conn, picture: Picture, p1: Pointfix, p2: Pointfix, num_stops: u32, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_linear_gradient<'c, Conn>(conn: &'c Conn, picture: Picture, p1: Pointfix, p2: Pointfix, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -3743,6 +3743,7 @@ where
     let picture_bytes = picture.serialize();
     let p1_bytes = p1.serialize();
     let p2_bytes = p2.serialize();
+    let num_stops = u32::try_from(stops.len()).expect("`stops` has too many elements");
     let num_stops_bytes = num_stops.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -3775,7 +3776,6 @@ where
         num_stops_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    assert_eq!(stops.len(), usize::try_from(num_stops).unwrap(), "`stops` has an incorrect length");
     let stops_bytes = stops.serialize();
     let length_so_far = length_so_far + stops_bytes.len();
     assert_eq!(colors.len(), usize::try_from(num_stops).unwrap(), "`colors` has an incorrect length");
@@ -3791,7 +3791,7 @@ where
 
 /// Opcode for the CreateRadialGradient request
 pub const CREATE_RADIAL_GRADIENT_REQUEST: u8 = 35;
-pub fn create_radial_gradient<'c, Conn>(conn: &'c Conn, picture: Picture, inner: Pointfix, outer: Pointfix, inner_radius: Fixed, outer_radius: Fixed, num_stops: u32, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_radial_gradient<'c, Conn>(conn: &'c Conn, picture: Picture, inner: Pointfix, outer: Pointfix, inner_radius: Fixed, outer_radius: Fixed, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -3803,6 +3803,7 @@ where
     let outer_bytes = outer.serialize();
     let inner_radius_bytes = inner_radius.serialize();
     let outer_radius_bytes = outer_radius.serialize();
+    let num_stops = u32::try_from(stops.len()).expect("`stops` has too many elements");
     let num_stops_bytes = num_stops.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -3843,7 +3844,6 @@ where
         num_stops_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    assert_eq!(stops.len(), usize::try_from(num_stops).unwrap(), "`stops` has an incorrect length");
     let stops_bytes = stops.serialize();
     let length_so_far = length_so_far + stops_bytes.len();
     assert_eq!(colors.len(), usize::try_from(num_stops).unwrap(), "`colors` has an incorrect length");
@@ -3859,7 +3859,7 @@ where
 
 /// Opcode for the CreateConicalGradient request
 pub const CREATE_CONICAL_GRADIENT_REQUEST: u8 = 36;
-pub fn create_conical_gradient<'c, Conn>(conn: &'c Conn, picture: Picture, center: Pointfix, angle: Fixed, num_stops: u32, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_conical_gradient<'c, Conn>(conn: &'c Conn, picture: Picture, center: Pointfix, angle: Fixed, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -3869,6 +3869,7 @@ where
     let picture_bytes = picture.serialize();
     let center_bytes = center.serialize();
     let angle_bytes = angle.serialize();
+    let num_stops = u32::try_from(stops.len()).expect("`stops` has too many elements");
     let num_stops_bytes = num_stops.serialize();
     let mut request0 = [
         extension_information.major_opcode,
@@ -3897,7 +3898,6 @@ where
         num_stops_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    assert_eq!(stops.len(), usize::try_from(num_stops).unwrap(), "`stops` has an incorrect length");
     let stops_bytes = stops.serialize();
     let length_so_far = length_so_far + stops_bytes.len();
     assert_eq!(colors.len(), usize::try_from(num_stops).unwrap(), "`colors` has an incorrect length");
@@ -3975,9 +3975,9 @@ pub trait ConnectionExt: RequestConnection {
     {
         free_glyph_set(self, glyphset)
     }
-    fn render_add_glyphs<'c>(&'c self, glyphset: Glyphset, glyphs_len: u32, glyphids: &[u32], glyphs: &[Glyphinfo], data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_add_glyphs<'c>(&'c self, glyphset: Glyphset, glyphids: &[u32], glyphs: &[Glyphinfo], data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
-        add_glyphs(self, glyphset, glyphs_len, glyphids, glyphs, data)
+        add_glyphs(self, glyphset, glyphids, glyphs, data)
     }
     fn render_free_glyphs<'c>(&'c self, glyphset: Glyphset, glyphs: &[Glyph]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
@@ -4027,17 +4027,17 @@ pub trait ConnectionExt: RequestConnection {
     {
         create_solid_fill(self, picture, color)
     }
-    fn render_create_linear_gradient<'c>(&'c self, picture: Picture, p1: Pointfix, p2: Pointfix, num_stops: u32, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_create_linear_gradient<'c>(&'c self, picture: Picture, p1: Pointfix, p2: Pointfix, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
-        create_linear_gradient(self, picture, p1, p2, num_stops, stops, colors)
+        create_linear_gradient(self, picture, p1, p2, stops, colors)
     }
-    fn render_create_radial_gradient<'c>(&'c self, picture: Picture, inner: Pointfix, outer: Pointfix, inner_radius: Fixed, outer_radius: Fixed, num_stops: u32, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_create_radial_gradient<'c>(&'c self, picture: Picture, inner: Pointfix, outer: Pointfix, inner_radius: Fixed, outer_radius: Fixed, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
-        create_radial_gradient(self, picture, inner, outer, inner_radius, outer_radius, num_stops, stops, colors)
+        create_radial_gradient(self, picture, inner, outer, inner_radius, outer_radius, stops, colors)
     }
-    fn render_create_conical_gradient<'c>(&'c self, picture: Picture, center: Pointfix, angle: Fixed, num_stops: u32, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn render_create_conical_gradient<'c>(&'c self, picture: Picture, center: Pointfix, angle: Fixed, stops: &[Fixed], colors: &[Color]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
-        create_conical_gradient(self, picture, center, angle, num_stops, stops, colors)
+        create_conical_gradient(self, picture, center, angle, stops, colors)
     }
 }
 

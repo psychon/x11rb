@@ -4555,23 +4555,19 @@ fn gather_deducible_fields(fields: &[xcbdefs::FieldDef]) -> FxHashMap<String, De
 
         if let Some((field_name, deducible_field)) = deducible_field {
             match deducible_fields.entry(field_name) {
-                HashMapEntry::Occupied(mut entry) => {
+                HashMapEntry::Occupied(_) => {
                     // field used more than once,
-                    // do not deduce it
-                    *entry.get_mut() = None;
+                    // deduce it from the first use
+                    // (do not replace entry)
                 }
                 HashMapEntry::Vacant(entry) => {
-                    entry.insert(Some(deducible_field));
+                    entry.insert(deducible_field);
                 }
             }
         }
     }
 
-    // filter out `None`s
     deducible_fields
-        .into_iter()
-        .filter_map(|(k, v)| v.map(|v| (k, v)))
-        .collect()
 }
 
 /// Some information about the fields of a request.
