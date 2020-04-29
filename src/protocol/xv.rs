@@ -777,6 +777,7 @@ impl Serialize for Image {
         let num_planes = u32::try_from(self.pitches.len()).expect("`pitches` has too many elements");
         num_planes.serialize_into(bytes);
         self.pitches.serialize_into(bytes);
+        assert_eq!(self.offsets.len(), usize::try_from(num_planes).unwrap(), "`offsets` has an incorrect length");
         self.offsets.serialize_into(bytes);
         bytes.extend_from_slice(&self.data);
     }

@@ -2637,6 +2637,7 @@ impl Serialize for CountedString16 {
         let length = u16::try_from(self.string.len()).expect("`string` has too many elements");
         length.serialize_into(bytes);
         bytes.extend_from_slice(&self.string);
+        assert_eq!(self.alignment_pad.len(), usize::try_from((u32::from(length).checked_add(5u32).unwrap() & (!3u32)).checked_sub(u32::from(length).checked_add(2u32).unwrap()).unwrap()).unwrap(), "`alignment_pad` has an incorrect length");
         bytes.extend_from_slice(&self.alignment_pad);
     }
 }
@@ -2746,6 +2747,7 @@ impl Serialize for KeyType {
         self.has_preserve.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         self.map.serialize_into(bytes);
+        assert_eq!(self.preserve.len(), usize::try_from(u32::from(self.has_preserve).checked_mul(u32::from(n_map_entries)).unwrap()).unwrap(), "`preserve` has an incorrect length");
         self.preserve.serialize_into(bytes);
     }
 }
@@ -3415,6 +3417,7 @@ impl Serialize for SetKeyType {
         self.preserve.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         self.entries.serialize_into(bytes);
+        assert_eq!(self.preserve_entries.len(), usize::try_from(u32::from(self.preserve).checked_mul(u32::from(n_map_entries)).unwrap()).unwrap(), "`preserve_entries` has an incorrect length");
         self.preserve_entries.serialize_into(bytes);
     }
 }
@@ -3876,7 +3879,9 @@ impl Serialize for DeviceLedInfo {
         self.maps_present.serialize_into(bytes);
         self.phys_indicators.serialize_into(bytes);
         self.state.serialize_into(bytes);
+        assert_eq!(self.names.len(), usize::try_from(self.names_present.count_ones()).unwrap(), "`names` has an incorrect length");
         self.names.serialize_into(bytes);
+        assert_eq!(self.maps.len(), usize::try_from(self.maps_present.count_ones()).unwrap(), "`maps` has an incorrect length");
         self.maps.serialize_into(bytes);
     }
 }
@@ -6499,14 +6504,15 @@ pub struct SelectEventsAux {
     pub bitcase10: Option<SelectEventsAuxBitcase10>,
     pub bitcase11: Option<SelectEventsAuxBitcase11>,
 }
-impl Serialize for SelectEventsAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl SelectEventsAux {
+    fn serialize(&self, affect_which: u16, clear: u16, select_all: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, affect_which, clear, select_all);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, affect_which: u16, clear: u16, select_all: u16) {
+        assert_eq!(self.switch_expr(), u32::from(affect_which) & ((!u32::from(clear)) & (!u32::from(select_all))), "switch `details` has an inconsistent discriminant");
         if let Some(ref bitcase1) = self.bitcase1 {
             bitcase1.serialize_into(bytes);
         }
@@ -6685,8 +6691,7 @@ where
         map_bytes[1],
     ];
     let length_so_far = length_so_far + request0.len();
-    assert_eq!(details.switch_expr(), u32::from(affect_which) & ((!u32::from(clear)) & (!u32::from(select_all))), "expression `u32::from(affect_which) & ((!u32::from(clear)) & (!u32::from(select_all)))` must match the value of `details`");
-    let details_bytes = details.serialize();
+    let details_bytes = details.serialize(affect_which, clear, select_all);
     let length_so_far = length_so_far + details_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -7410,16 +7415,18 @@ pub struct SetMapAuxBitcase3 {
     pub actions_count: Vec<u8>,
     pub actions: Vec<Action>,
 }
-impl Serialize for SetMapAuxBitcase3 {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl SetMapAuxBitcase3 {
+    fn serialize(&self, n_key_actions: u8, total_actions: u16) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, n_key_actions, total_actions);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, n_key_actions: u8, total_actions: u16) {
+        assert_eq!(self.actions_count.len(), usize::try_from(n_key_actions).unwrap(), "`actions_count` has an incorrect length");
         bytes.extend_from_slice(&self.actions_count);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
+        assert_eq!(self.actions.len(), usize::try_from(total_actions).unwrap(), "`actions` has an incorrect length");
         self.actions.serialize_into(bytes);
     }
 }
@@ -7435,37 +7442,44 @@ pub struct SetMapAux {
     pub modmap: Option<Vec<KeyModMap>>,
     pub vmodmap: Option<Vec<KeyVModMap>>,
 }
-impl Serialize for SetMapAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl SetMapAux {
+    fn serialize(&self, present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, present: u16, n_types: u8, n_key_syms: u8, n_key_actions: u8, total_actions: u16, total_key_behaviors: u8, virtual_mods: u16, total_key_explicit: u8, total_mod_map_keys: u8, total_v_mod_map_keys: u8) {
         if let Some(ref types) = self.types {
+            assert_eq!(types.len(), usize::try_from(n_types).unwrap(), "`types` has an incorrect length");
             types.serialize_into(bytes);
         }
         if let Some(ref syms) = self.syms {
+            assert_eq!(syms.len(), usize::try_from(n_key_syms).unwrap(), "`syms` has an incorrect length");
             syms.serialize_into(bytes);
         }
         if let Some(ref bitcase3) = self.bitcase3 {
-            bitcase3.serialize_into(bytes);
+            bitcase3.serialize_into(bytes, n_key_actions, total_actions);
         }
         if let Some(ref behaviors) = self.behaviors {
+            assert_eq!(behaviors.len(), usize::try_from(total_key_behaviors).unwrap(), "`behaviors` has an incorrect length");
             behaviors.serialize_into(bytes);
         }
         if let Some(ref vmods) = self.vmods {
+            assert_eq!(vmods.len(), usize::try_from(virtual_mods.count_ones()).unwrap(), "`vmods` has an incorrect length");
             bytes.extend_from_slice(&vmods);
             bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         }
         if let Some(ref explicit) = self.explicit {
+            assert_eq!(explicit.len(), usize::try_from(total_key_explicit).unwrap(), "`explicit` has an incorrect length");
             explicit.serialize_into(bytes);
         }
         if let Some(ref modmap) = self.modmap {
+            assert_eq!(modmap.len(), usize::try_from(total_mod_map_keys).unwrap(), "`modmap` has an incorrect length");
             modmap.serialize_into(bytes);
         }
         if let Some(ref vmodmap) = self.vmodmap {
+            assert_eq!(vmodmap.len(), usize::try_from(total_v_mod_map_keys).unwrap(), "`vmodmap` has an incorrect length");
             vmodmap.serialize_into(bytes);
         }
     }
@@ -7624,7 +7638,7 @@ where
         virtual_mods_bytes[1],
     ];
     let length_so_far = length_so_far + request0.len();
-    let values_bytes = values.serialize();
+    let values_bytes = values.serialize(present, n_types, n_key_syms, n_key_actions, total_actions, total_key_behaviors, virtual_mods, total_key_explicit, total_mod_map_keys, total_v_mod_map_keys);
     let length_so_far = length_so_far + values_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
@@ -8336,16 +8350,18 @@ pub struct SetNamesAuxBitcase8 {
     pub n_levels_per_type: Vec<u8>,
     pub kt_level_names: Vec<xproto::Atom>,
 }
-impl Serialize for SetNamesAuxBitcase8 {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl SetNamesAuxBitcase8 {
+    fn serialize(&self, n_types: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, n_types);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, n_types: u8) {
+        assert_eq!(self.n_levels_per_type.len(), usize::try_from(n_types).unwrap(), "`n_levels_per_type` has an incorrect length");
         bytes.extend_from_slice(&self.n_levels_per_type);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
+        assert_eq!(self.kt_level_names.len(), usize::try_from(self.n_levels_per_type.iter().fold(0u32, |acc, &x| acc.checked_add(u32::from(x)).unwrap())).unwrap(), "`kt_level_names` has an incorrect length");
         self.kt_level_names.serialize_into(bytes);
     }
 }
@@ -8367,14 +8383,14 @@ pub struct SetNamesAux {
     pub key_aliases: Option<Vec<KeyAlias>>,
     pub radio_group_names: Option<Vec<xproto::Atom>>,
 }
-impl Serialize for SetNamesAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl SetNamesAux {
+    fn serialize(&self, which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, which: u32, n_types: u8, indicators: u32, virtual_mods: u16, group_names: u8, n_keys: u8, n_key_aliases: u8, n_radio_groups: u8) {
         if let Some(keycodes_name) = self.keycodes_name {
             keycodes_name.serialize_into(bytes);
         }
@@ -8394,27 +8410,34 @@ impl Serialize for SetNamesAux {
             compat_name.serialize_into(bytes);
         }
         if let Some(ref type_names) = self.type_names {
+            assert_eq!(type_names.len(), usize::try_from(n_types).unwrap(), "`type_names` has an incorrect length");
             type_names.serialize_into(bytes);
         }
         if let Some(ref bitcase8) = self.bitcase8 {
-            bitcase8.serialize_into(bytes);
+            bitcase8.serialize_into(bytes, n_types);
         }
         if let Some(ref indicator_names) = self.indicator_names {
+            assert_eq!(indicator_names.len(), usize::try_from(indicators.count_ones()).unwrap(), "`indicator_names` has an incorrect length");
             indicator_names.serialize_into(bytes);
         }
         if let Some(ref virtual_mod_names) = self.virtual_mod_names {
+            assert_eq!(virtual_mod_names.len(), usize::try_from(virtual_mods.count_ones()).unwrap(), "`virtual_mod_names` has an incorrect length");
             virtual_mod_names.serialize_into(bytes);
         }
         if let Some(ref groups) = self.groups {
+            assert_eq!(groups.len(), usize::try_from(group_names.count_ones()).unwrap(), "`groups` has an incorrect length");
             groups.serialize_into(bytes);
         }
         if let Some(ref key_names) = self.key_names {
+            assert_eq!(key_names.len(), usize::try_from(n_keys).unwrap(), "`key_names` has an incorrect length");
             key_names.serialize_into(bytes);
         }
         if let Some(ref key_aliases) = self.key_aliases {
+            assert_eq!(key_aliases.len(), usize::try_from(n_key_aliases).unwrap(), "`key_aliases` has an incorrect length");
             key_aliases.serialize_into(bytes);
         }
         if let Some(ref radio_group_names) = self.radio_group_names {
+            assert_eq!(radio_group_names.len(), usize::try_from(n_radio_groups).unwrap(), "`radio_group_names` has an incorrect length");
             radio_group_names.serialize_into(bytes);
         }
     }
@@ -8601,7 +8624,7 @@ where
         total_kt_level_names_bytes[1],
     ];
     let length_so_far = length_so_far + request0.len();
-    let values_bytes = values.serialize();
+    let values_bytes = values.serialize(which, n_types, indicators, virtual_mods, group_names, n_keys, n_key_aliases, n_radio_groups);
     let length_so_far = length_so_far + values_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();

@@ -407,14 +407,14 @@ pub struct SetAttributesAux {
     pub colormap: Option<xproto::Colormap>,
     pub cursor: Option<xproto::Cursor>,
 }
-impl Serialize for SetAttributesAux {
-    type Bytes = Vec<u8>;
-    fn serialize(&self) -> Vec<u8> {
+#[allow(dead_code, unused_variables)]
+impl SetAttributesAux {
+    fn serialize(&self, value_mask: u32) -> Vec<u8> {
         let mut result = Vec::new();
-        self.serialize_into(&mut result);
+        self.serialize_into(&mut result, value_mask);
         result
     }
-    fn serialize_into(&self, bytes: &mut Vec<u8>) {
+    fn serialize_into(&self, bytes: &mut Vec<u8>, value_mask: u32) {
         if let Some(background_pixmap) = self.background_pixmap {
             background_pixmap.serialize_into(bytes);
         }
@@ -644,7 +644,7 @@ where
         value_mask_bytes[3],
     ];
     let length_so_far = length_so_far + request0.len();
-    let value_list_bytes = value_list.serialize();
+    let value_list_bytes = value_list.serialize(value_mask);
     let length_so_far = length_so_far + value_list_bytes.len();
     let padding0 = &[0; 3][..(4 - (length_so_far % 4)) % 4];
     let length_so_far = length_so_far + padding0.len();
