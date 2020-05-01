@@ -475,7 +475,7 @@ impl RequestConnection for XCBConnection {
     fn check_for_raw_error(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<Option<GenericError>, ConnectionError> {
+    ) -> Result<Option<Buffer>, ConnectionError> {
         let cookie = raw_ffi::xcb_void_cookie_t {
             sequence: sequence as _,
         };
@@ -484,9 +484,7 @@ impl RequestConnection for XCBConnection {
             Ok(None)
         } else {
             unsafe {
-                Ok(Some(GenericError::new(
-                    self.wrap_error(error as _, sequence),
-                )?))
+                Ok(Some(self.wrap_error(error as _, sequence)))
             }
         }
     }

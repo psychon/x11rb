@@ -158,7 +158,7 @@ mod test {
     use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
     use crate::errors::{ConnectionError, ParseError};
     use crate::utils::RawFdContainer;
-    use crate::x11_utils::{ExtInfoProvider, ExtensionInformation, GenericError};
+    use crate::x11_utils::{ExtInfoProvider, ExtensionInformation};
 
     use super::{CheckState, ExtensionManager};
 
@@ -250,7 +250,7 @@ mod test {
         fn check_for_raw_error(
             &self,
             _sequence: SequenceNumber,
-        ) -> Result<Option<GenericError<Vec<u8>>>, ConnectionError> {
+        ) -> Result<Option<Vec<u8>>, ConnectionError> {
             unimplemented!()
         }
 

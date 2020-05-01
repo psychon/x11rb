@@ -383,7 +383,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
     fn check_for_raw_error(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<Option<GenericError>, ConnectionError> {
+    ) -> Result<Option<Buffer>, ConnectionError> {
         let mut write = self.write.lock().unwrap();
         let mut inner = self.inner.lock().unwrap();
         if inner.prepare_check_for_reply_or_error(sequence) {
@@ -396,7 +396,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
             match inner.poll_check_for_reply_or_error(sequence) {
                 PollReply::TryAgain => {}
                 PollReply::NoReply => return Ok(None),
-                PollReply::Reply(buffer) => return Ok(GenericError::new(buffer).ok()),
+                PollReply::Reply(buffer) => return Ok(Some(buffer)),
             }
             inner = self.read_packet_and_enqueue(inner)?;
         }

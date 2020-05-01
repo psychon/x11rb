@@ -13,7 +13,7 @@ use x11rb::protocol::xproto::{
     ClientMessageData, ConnectionExt, KeymapNotifyEvent, Segment, SetupAuthenticate,
 };
 use x11rb::utils::RawFdContainer;
-use x11rb::x11_utils::{ExtensionInformation, GenericError, Serialize, TryParse};
+use x11rb::x11_utils::{ExtensionInformation, Serialize, TryParse};
 
 #[derive(Debug)]
 struct SavedRequest {
@@ -138,7 +138,7 @@ impl RequestConnection for FakeConnection {
     fn check_for_raw_error(
         &self,
         _sequence: SequenceNumber,
-    ) -> Result<Option<GenericError<Vec<u8>>>, ConnectionError> {
+    ) -> Result<Option<Vec<u8>>, ConnectionError> {
         unimplemented!()
     }
 

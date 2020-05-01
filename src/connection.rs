@@ -48,7 +48,7 @@ use crate::errors::{ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::protocol::xproto::Setup;
 use crate::protocol::{Error, Event};
 use crate::utils::RawFdContainer;
-use crate::x11_utils::{ExtensionInformation, GenericError};
+use crate::x11_utils::ExtensionInformation;
 
 /// Number type used for referring to things that were sent to the server in responses from the
 /// server.
@@ -271,7 +271,7 @@ pub trait RequestConnection {
     fn check_for_error(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<Option<Error<GenericError<Self::Buf>>>, ConnectionError> {
+    ) -> Result<Option<Error<Self::Buf>>, ConnectionError> {
         let res = self.check_for_raw_error(sequence)?;
         let res = res.map(|e| self.parse_error(e)).transpose()?;
         Ok(res)
@@ -285,7 +285,7 @@ pub trait RequestConnection {
     fn check_for_raw_error(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<Option<GenericError<Self::Buf>>, ConnectionError>;
+    ) -> Result<Option<Self::Buf>, ConnectionError>;
 
     /// Prefetches the maximum request length.
     ///
@@ -441,7 +441,7 @@ pub enum DiscardMode {
 /// use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
 /// use x11rb::errors::{ParseError, ConnectionError};
 /// use x11rb::utils::RawFdContainer;
-/// use x11rb::x11_utils::{ExtensionInformation, GenericError};
+/// use x11rb::x11_utils::ExtensionInformation;
 /// # use x11rb::connection::ReplyOrError;
 ///
 /// struct MyConnection();
@@ -478,7 +478,7 @@ pub enum DiscardMode {
 ///     #    unimplemented!()
 ///     # }
 ///     # fn check_for_raw_error(&self, sequence: SequenceNumber)
-///     # ->Result<Option<x11rb::x11_utils::GenericError<Vec<u8>>>, ConnectionError> {
+///     # ->Result<Option<Vec<u8>>, ConnectionError> {
 ///     #    unimplemented!()
 ///     # }
 ///     # fn maximum_request_bytes(&self) -> usize {
