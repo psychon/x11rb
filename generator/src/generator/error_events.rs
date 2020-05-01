@@ -228,6 +228,38 @@ fn generate_errors(out: &mut Output, module: &xcbgen::defs::Module) {
             }
             outln!(out, "}}");
         });
+        outln!(out, "}}");
+        outln!(out, "");
+        outln!(out, "/// FIXME: Remove this");
+        outln!(out, "pub(crate) fn map_unknown<N>(self, mapper: impl FnOnce(B) -> N) -> Error<N>");
+        outln!(out, "where");
+        outln!(out.indent(), "N: std::fmt::Debug + AsRef<[u8]>,");
+        outln!(out, "{{");
+        out.indented(|out| {
+            outln!(out, "match self {{");
+            out.indented(|out| {
+                outln!(out, "Error::Unknown(buff) => Error::Unknown(mapper(buff)),");
+                for ns in namespaces.iter() {
+                    let has_feature = super::ext_has_feature(&ns.header);
+                    let error_defs = sorted_errors(ns);
+
+                    for err_name in error_defs.iter().map(|def| def.name()) {
+                        if has_feature {
+                            outln!(out, "#[cfg(feature = \"{}\")]", ns.header);
+                        }
+                        outln!(
+                            out,
+                            "Error::{}{}(e) => Error::{}{}(e),",
+                            get_ns_name_prefix(ns),
+                            err_name,
+                            get_ns_name_prefix(ns),
+                            err_name,
+                        );
+                    }
+                }
+            });
+            outln!(out, "}}")
+        });
         outln!(out, "}}")
     });
     outln!(out, "}}");
