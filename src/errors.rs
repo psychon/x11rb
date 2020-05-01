@@ -2,7 +2,6 @@
 
 use crate::protocol::xproto::{SetupAuthenticate, SetupFailed};
 use crate::protocol::Error;
-use crate::x11_utils::GenericError;
 
 /// An error occurred while parsing some data
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
@@ -171,7 +170,7 @@ pub enum ReplyError<B: AsRef<[u8]> + std::fmt::Debug> {
     /// Some error occurred on the X11 connection.
     ConnectionError(ConnectionError),
     /// The X11 server sent an error in response to the request.
-    X11Error(Error<GenericError<B>>),
+    X11Error(Error<B>),
 }
 
 impl<B: AsRef<[u8]> + std::fmt::Debug> std::error::Error for ReplyError<B> {}
@@ -203,8 +202,8 @@ impl<B: AsRef<[u8]> + std::fmt::Debug> From<ConnectionError> for ReplyError<B> {
     }
 }
 
-impl<B: AsRef<[u8]> + std::fmt::Debug> From<Error<GenericError<B>>> for ReplyError<B> {
-    fn from(err: Error<GenericError<B>>) -> Self {
+impl<B: AsRef<[u8]> + std::fmt::Debug> From<Error<B>> for ReplyError<B> {
+    fn from(err: Error<B>) -> Self {
         Self::X11Error(err)
     }
 }
@@ -217,7 +216,7 @@ pub enum ReplyOrIdError<B: AsRef<[u8]> + std::fmt::Debug> {
     /// Some error occurred on the X11 connection.
     ConnectionError(ConnectionError),
     /// The X11 server sent an error in response to a XC-MISC request.
-    X11Error(Error<GenericError<B>>),
+    X11Error(Error<B>),
 }
 
 impl<B: AsRef<[u8]> + std::fmt::Debug> std::fmt::Display for ReplyOrIdError<B> {
@@ -244,8 +243,8 @@ impl<B: AsRef<[u8]> + std::fmt::Debug> From<ConnectionError> for ReplyOrIdError<
     }
 }
 
-impl<B: AsRef<[u8]> + std::fmt::Debug> From<Error<GenericError<B>>> for ReplyOrIdError<B> {
-    fn from(err: Error<GenericError<B>>) -> Self {
+impl<B: AsRef<[u8]> + std::fmt::Debug> From<Error<B>> for ReplyOrIdError<B> {
+    fn from(err: Error<B>) -> Self {
         ReplyOrIdError::X11Error(err)
     }
 }

@@ -10,6 +10,7 @@ use x11rb::connection::{Connection, RequestConnection};
 use x11rb::errors::{ReplyError, ReplyOrIdError};
 use x11rb::protocol::xproto::*;
 use x11rb::protocol::{Error, Event};
+use x11rb::x11_utils::GenericError;
 use x11rb::{COPY_DEPTH_FROM_PARENT, CURRENT_TIME};
 
 const TITLEBAR_HEIGHT: u16 = 20;
@@ -322,7 +323,7 @@ impl<'a, C: Connection> WMState<'a, C> {
     }
 }
 
-fn become_wm<C: Connection>(conn: &C, screen: &Screen) -> Result<(), ReplyError<C::Buf>> {
+fn become_wm<C: Connection>(conn: &C, screen: &Screen) -> Result<(), ReplyError<GenericError<C::Buf>>> {
     // Try to become the window manager. This causes an error if there is already another WM.
     let change = ChangeWindowAttributesAux::default().event_mask(
         EventMask::SubstructureRedirect | EventMask::SubstructureNotify | EventMask::EnterWindow,

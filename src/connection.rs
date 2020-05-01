@@ -211,9 +211,7 @@ pub trait RequestConnection {
     ) -> Result<Self::Buf, ReplyError<Self::Buf>> {
         match self.wait_for_reply_or_raw_error(sequence)? {
             ReplyOrError::Reply(reply) => Ok(reply),
-            ReplyOrError::Error(error) => Err(ReplyError::X11Error(
-                    self.parse_error(error)?.map_unknown(|e| GenericError::new(e).unwrap()),
-            )),
+            ReplyOrError::Error(error) => Err(ReplyError::X11Error(self.parse_error(error)?)),
         }
     }
 
@@ -251,9 +249,7 @@ pub trait RequestConnection {
     ) -> Result<BufWithFds<Self::Buf>, ReplyError<Self::Buf>> {
         match self.wait_for_reply_with_fds_raw(sequence)? {
             ReplyOrError::Reply(reply) => Ok(reply),
-            ReplyOrError::Error(error) => Err(ReplyError::X11Error(
-                    self.parse_error(error)?.map_unknown(|e| GenericError::new(e).unwrap()),
-            )),
+            ReplyOrError::Error(error) => Err(ReplyError::X11Error(self.parse_error(error)?)),
         }
     }
 
