@@ -1570,7 +1570,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
 /// Get the response type out of the raw bytes of an X11 error or event.
 fn response_type(raw_bytes: &[u8]) -> Result<u8, ParseError> {
     raw_bytes.get(0)
-        .copied()
+        .map(|x| x & 0x7f)
         .ok_or(ParseError::ParseError)
 }
 

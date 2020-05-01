@@ -9,7 +9,7 @@ pub(super) fn generate(out: &mut Output, module: &xcbgen::defs::Module) {
     outln!(out, "fn response_type(raw_bytes: &[u8]) -> Result<u8, ParseError> {{");
     out.indented(|out| {
         outln!(out, "raw_bytes.get(0)");
-        outln!(out.indent(), ".copied()");
+        outln!(out.indent(), ".map(|x| x & 0x7f)");
         outln!(out.indent(), ".ok_or(ParseError::ParseError)");
     });
     outln!(out, "}}");
