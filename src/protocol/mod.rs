@@ -3,11 +3,7 @@
 
 use std::convert::{TryFrom, TryInto};
 use crate::errors::ParseError;
-use crate::x11_utils::{
-    Event as _,
-    ExtInfoProvider,
-    GenericEvent,
-};
+use crate::x11_utils::ExtInfoProvider;
 
 pub mod xproto;
 pub mod bigreq;
@@ -902,14 +898,14 @@ pub enum Event<B: std::fmt::Debug + AsRef<[u8]>> {
     XvVideoNotify(xv::VideoNotifyEvent),
 }
 
-impl<B: std::fmt::Debug + AsRef<[u8]>> Event<GenericEvent<B>> {
+impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
     /// Parse a generic X11 event into a concrete event type.
     #[allow(clippy::cognitive_complexity)]
     pub fn parse(
-        event: GenericEvent<B>,
+        event: B,
         ext_info_provider: &dyn ExtInfoProvider,
     ) -> Result<Self, ParseError> {
-        let event_code = event.response_type();
+        let event_code = response_type(event.as_ref())?;
 
         // Check if this is a core protocol event or error, or from the generic event extension
         match event_code {
@@ -1056,7 +1052,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<GenericEvent<B>> {
                 if event_code != ext_info.first_event {
                     return Ok(Self::Unknown(event));
                 }
-                match event.raw_bytes()[1] {
+                match event.as_ref()[1] {
                     xkb::ACCESS_X_NOTIFY_EVENT => Ok(Self::XkbAccessXNotify(event.as_ref().try_into()?)),
                     xkb::ACTION_MESSAGE_EVENT => Ok(Self::XkbActionMessage(event.as_ref().try_into()?)),
                     xkb::BELL_NOTIFY_EVENT => Ok(Self::XkbBellNotify(event.as_ref().try_into()?)),
@@ -1093,10 +1089,10 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<GenericEvent<B>> {
     }
 
     fn from_generic_event(
-        event: GenericEvent<B>,
+        event: B,
         ext_info_provider: &dyn ExtInfoProvider,
     ) -> Result<Self, ParseError> {
-        let ge_event = xproto::GeGenericEvent::try_from(event.raw_bytes())?;
+        let ge_event = xproto::GeGenericEvent::try_from(event.as_ref())?;
         let ext_name = ext_info_provider
             .get_from_major_opcode(ge_event.extension)
             .map(|(name, _)| name);
@@ -1150,7 +1146,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<GenericEvent<B>> {
     /// Get the sequence number contained in this X11 event
     pub fn wire_sequence_number(&self) -> Option<u16> {
         match self {
-            Event::Unknown(value) => value.raw_sequence_number(),
+            Event::Unknown(value) => sequence_number(value.as_ref()).ok(),
             Event::Error(value) => Some(value.wire_sequence_number()),
             Event::ButtonPress(value) => Some(value.sequence),
             Event::ButtonRelease(value) => Some(value.sequence),
@@ -1354,7 +1350,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<GenericEvent<B>> {
     /// See also the `response_type()`, `server_generated()` and `sent_event()` methods.
     pub fn raw_response_type(&self) -> u8 {
         match self {
-            Event::Unknown(value) => value.raw_response_type(),
+            Event::Unknown(value) => response_type(value.as_ref()).unwrap(),
             Event::Error(value) => value.raw_response_type(),
             Event::ButtonPress(value) => value.response_type,
             Event::ButtonRelease(value) => value.response_type,

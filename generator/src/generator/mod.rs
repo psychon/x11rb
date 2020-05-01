@@ -18,11 +18,7 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> FxHashMap<PathBuf, Stri
     write_code_header(&mut main_out);
     outln!(main_out, "use std::convert::{{TryFrom, TryInto}};");
     outln!(main_out, "use crate::errors::ParseError;");
-    outln!(main_out, "use crate::x11_utils::{{");
-    outln!(main_out.indent(), "Event as _,");
-    outln!(main_out.indent(), "ExtInfoProvider,");
-    outln!(main_out.indent(), "GenericEvent,");
-    outln!(main_out, "}};");
+    outln!(main_out, "use crate::x11_utils::ExtInfoProvider;");
     outln!(main_out, "");
 
     let caches = RefCell::new(namespace::Caches::default());

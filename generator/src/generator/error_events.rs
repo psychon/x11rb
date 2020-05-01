@@ -263,9 +263,7 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
     });
     outln!(out, "}}");
     outln!(out, "");
-    // FIXME: Change this back
-    //outln!(out, "impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {{");
-    outln!(out, "impl<B: std::fmt::Debug + AsRef<[u8]>> Event<GenericEvent<B>> {{");
+    outln!(out, "impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {{");
     out.indented(|out| {
         outln!(
             out,
@@ -273,11 +271,11 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
         );
         outln!(out, "#[allow(clippy::cognitive_complexity)]");
         outln!(out, "pub fn parse(");
-        outln!(out.indent(), "event: GenericEvent<B>,");
+        outln!(out.indent(), "event: B,");
         outln!(out.indent(), "ext_info_provider: &dyn ExtInfoProvider,");
         outln!(out, ") -> Result<Self, ParseError> {{");
         out.indented(|out| {
-            outln!(out, "let event_code = event.response_type();");
+            outln!(out, "let event_code = response_type(event.as_ref())?;");
             outln!(out, "");
             outln!(
                 out,
@@ -345,7 +343,8 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
                             outln!(out, "if event_code != ext_info.first_event {{");
                             outln!(out.indent(), "return Ok(Self::Unknown(event));");
                             outln!(out, "}}");
-                            outln!(out, "match event.raw_bytes()[1] {{");
+                            // FIXME: Use .get(1) instead of [1]
+                            outln!(out, "match event.as_ref()[1] {{");
                         } else {
                             outln!(out, "match event_code - ext_info.first_event {{");
                         }
@@ -375,13 +374,13 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
         outln!(out, "");
 
         outln!(out, "fn from_generic_event(");
-        outln!(out.indent(), "event: GenericEvent<B>,");
+        outln!(out.indent(), "event: B,");
         outln!(out.indent(), "ext_info_provider: &dyn ExtInfoProvider,");
         outln!(out, ") -> Result<Self, ParseError> {{");
         out.indented(|out| {
             outln!(
                 out,
-                "let ge_event = xproto::GeGenericEvent::try_from(event.raw_bytes())?;"
+                "let ge_event = xproto::GeGenericEvent::try_from(event.as_ref())?;"
             );
             outln!(out, "let ext_name = ext_info_provider");
             outln!(out.indent(), ".get_from_major_opcode(ge_event.extension)");
@@ -439,7 +438,7 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
             outln!(out, "match self {{");
             outln!(
                 out.indent(),
-                "Event::Unknown(value) => value.raw_sequence_number(),",
+                "Event::Unknown(value) => sequence_number(value.as_ref()).ok(),",
             );
             outln!(
                 out.indent(),
@@ -495,7 +494,7 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
             outln!(out, "match self {{");
             outln!(
                 out.indent(),
-                "Event::Unknown(value) => value.raw_response_type(),",
+                "Event::Unknown(value) => response_type(value.as_ref()).unwrap(),",
             );
             outln!(
                 out.indent(),
