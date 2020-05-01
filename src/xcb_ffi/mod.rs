@@ -321,10 +321,7 @@ impl XCBConnection {
             // the 32-byte boundary.
             std::ptr::copy(event.add(36), event.add(32), length_field * 4);
         }
-        Ok((
-            CSlice::new(header.into_ptr(), length),
-            seqno,
-        ))
+        Ok((CSlice::new(header.into_ptr(), length), seqno))
     }
 
     /// Reconstruct a full sequence number based on a partial value.
@@ -483,9 +480,7 @@ impl RequestConnection for XCBConnection {
         if error.is_null() {
             Ok(None)
         } else {
-            unsafe {
-                Ok(Some(self.wrap_error(error as _, sequence)))
-            }
+            unsafe { Ok(Some(self.wrap_error(error as _, sequence))) }
         }
     }
 

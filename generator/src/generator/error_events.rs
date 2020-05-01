@@ -5,8 +5,14 @@ pub(super) fn generate(out: &mut Output, module: &xcbgen::defs::Module) {
     outln!(out, "");
     generate_events(out, module);
     outln!(out, "");
-    outln!(out, "/// Get the response type out of the raw bytes of an X11 error or event.");
-    outln!(out, "fn response_type(raw_bytes: &[u8]) -> Result<u8, ParseError> {{");
+    outln!(
+        out,
+        "/// Get the response type out of the raw bytes of an X11 error or event."
+    );
+    outln!(
+        out,
+        "fn response_type(raw_bytes: &[u8]) -> Result<u8, ParseError> {{"
+    );
     out.indented(|out| {
         outln!(out, "raw_bytes.get(0)");
         outln!(out.indent(), ".map(|x| x & 0x7f)");
@@ -14,8 +20,14 @@ pub(super) fn generate(out: &mut Output, module: &xcbgen::defs::Module) {
     });
     outln!(out, "}}");
     outln!(out, "");
-    outln!(out, "/// Get the error code out of the raw bytes of an X11 error.");
-    outln!(out, "fn error_code(raw_bytes: &[u8]) -> Result<u8, ParseError> {{");
+    outln!(
+        out,
+        "/// Get the error code out of the raw bytes of an X11 error."
+    );
+    outln!(
+        out,
+        "fn error_code(raw_bytes: &[u8]) -> Result<u8, ParseError> {{"
+    );
     out.indented(|out| {
         outln!(out, "raw_bytes.get(1)");
         outln!(out.indent(), ".copied()");
@@ -24,10 +36,16 @@ pub(super) fn generate(out: &mut Output, module: &xcbgen::defs::Module) {
     outln!(out, "}}");
     outln!(out, "");
     outln!(out, "/// Get the sequence number out of an X11 packet.");
-    outln!(out, "fn sequence_number(raw_bytes: &[u8]) -> Result<u16, ParseError> {{");
+    outln!(
+        out,
+        "fn sequence_number(raw_bytes: &[u8]) -> Result<u16, ParseError> {{"
+    );
     out.indented(|out| {
         outln!(out, "raw_bytes.get(2..4)");
-        outln!(out.indent(), ".map(|b| u16::from_ne_bytes(b.try_into().unwrap()))");
+        outln!(
+            out.indent(),
+            ".map(|b| u16::from_ne_bytes(b.try_into().unwrap()))"
+        );
         outln!(out.indent(), ".ok_or(ParseError::ParseError)");
     });
     outln!(out, "}}");
@@ -178,7 +196,10 @@ fn generate_errors(out: &mut Output, module: &xcbgen::defs::Module) {
         outln!(out, "pub fn error_code(&self) -> u8 {{");
         out.indented(|out| {
             outln!(out, "match self {{");
-            outln!(out.indent(), "Error::Unknown(value) => error_code(value.as_ref()).unwrap(),");
+            outln!(
+                out.indent(),
+                "Error::Unknown(value) => error_code(value.as_ref()).unwrap(),"
+            );
             for ns in namespaces.iter() {
                 let has_feature = super::ext_has_feature(&ns.header);
                 let error_defs = sorted_errors(ns);
@@ -343,7 +364,10 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
                             outln!(out, "if event_code != ext_info.first_event {{");
                             outln!(out.indent(), "return Ok(Self::Unknown(event));");
                             outln!(out, "}}");
-                            outln!(out, "match *event.as_ref().get(1).ok_or(ParseError::ParseError)? {{");
+                            outln!(
+                                out,
+                                "match *event.as_ref().get(1).ok_or(ParseError::ParseError)? {{"
+                            );
                         } else {
                             outln!(out, "match event_code - ext_info.first_event {{");
                         }
