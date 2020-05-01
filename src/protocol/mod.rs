@@ -186,14 +186,14 @@ pub enum Error<B: std::fmt::Debug + AsRef<[u8]>> {
     XvBadPort(xv::BadPortError),
 }
 
-impl<B: std::fmt::Debug + AsRef<[u8]>> Error<GenericError<B>> {
+impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
     /// Parse a generic X11 error into a concrete error type.
     #[allow(clippy::cognitive_complexity)]
     pub fn parse(
-        error: GenericError<B>,
+        error: B,
         ext_info_provider: &dyn ExtInfoProvider,
     ) -> Result<Self, ParseError> {
-        let error_code = error.error_code();
+        let error_code = error_code(error.as_ref())?;
 
         // Check if this is a core protocol error
         match error_code {
@@ -352,7 +352,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<GenericError<B>> {
     /// Get the sequence number contained in this X11 error
     pub fn wire_sequence_number(&self) -> u16 {
         match self {
-            Error::Unknown(value) => value.raw_sequence_number().expect("Errors should always have a sequence number"),
+            Error::Unknown(value) => sequence_number(value.as_ref()).unwrap(),
             Error::Access(value) => value.sequence,
             Error::Alloc(value) => value.sequence,
             Error::Atom(value) => value.sequence,
@@ -470,7 +470,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<GenericError<B>> {
     /// Get the error code of this X11 error
     pub fn error_code(&self) -> u8 {
         match self {
-            Error::Unknown(value) => value.error_code(),
+            Error::Unknown(value) => error_code(value.as_ref()).unwrap(),
             Error::Access(value) => value.error_code,
             Error::Alloc(value) => value.error_code,
             Error::Atom(value) => value.error_code,
@@ -590,7 +590,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<GenericError<B>> {
     /// This is not `pub` because it should always be `0` for errors.
     fn raw_response_type(&self) -> u8 {
         match self {
-            Error::Unknown(value) => value.response_type(),
+            Error::Unknown(value) => response_type(value.as_ref()).unwrap(),
             Error::Access(value) => value.response_type,
             Error::Alloc(value) => value.response_type,
             Error::Atom(value) => value.response_type,
@@ -1570,4 +1570,25 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
     pub fn sent_event(&self) -> bool {
         self.raw_response_type() & 0x80 != 0
     }
+}
+
+/// Get the response type out of the raw bytes of an X11 error or event.
+fn response_type(raw_bytes: &[u8]) -> Result<u8, ParseError> {
+    raw_bytes.get(0)
+        .copied()
+        .ok_or(ParseError::ParseError)
+}
+
+/// Get the error code out of the raw bytes of an X11 error.
+fn error_code(raw_bytes: &[u8]) -> Result<u8, ParseError> {
+    raw_bytes.get(1)
+        .copied()
+        .ok_or(ParseError::ParseError)
+}
+
+/// Get the sequence number out of an X11 packet.
+fn sequence_number(raw_bytes: &[u8]) -> Result<u16, ParseError> {
+    raw_bytes.get(2..4)
+        .map(|b| u16::from_ne_bytes(b.try_into().unwrap()))
+        .ok_or(ParseError::ParseError)
 }
