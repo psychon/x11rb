@@ -38,7 +38,7 @@ pub type EventAndSeqNumber = crate::connection::EventAndSeqNumber<Buffer>;
 pub type RawEventAndSeqNumber = crate::connection::RawEventAndSeqNumber<Buffer>;
 pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
 pub type Error = crate::protocol::Error<GenericError>;
-pub type Event = crate::protocol::Event<Buffer>;
+pub type Event = crate::protocol::Event<GenericEvent>;
 
 /// A connection to an X11 server.
 ///

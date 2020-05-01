@@ -61,7 +61,7 @@ pub type SequenceNumber = u64;
 
 // Used to avoid too-complex types.
 pub type BufWithFds<B> = (B, Vec<RawFdContainer>);
-pub type EventAndSeqNumber<B> = (Event<B>, SequenceNumber);
+pub type EventAndSeqNumber<B> = (Event<GenericEvent<B>>, SequenceNumber);
 pub type RawEventAndSeqNumber<B> = (GenericEvent<B>, SequenceNumber);
 
 /// Either a raw reply or a raw error response to an X11 request.
@@ -321,13 +321,13 @@ pub trait RequestConnection {
     fn parse_error(&self, error: GenericError<Self::Buf>) -> Result<Error<GenericError<Self::Buf>>, ParseError>;
 
     /// Parse a generic event.
-    fn parse_event(&self, event: GenericEvent<Self::Buf>) -> Result<Event<Self::Buf>, ParseError>;
+    fn parse_event(&self, event: GenericEvent<Self::Buf>) -> Result<Event<GenericEvent<Self::Buf>>, ParseError>;
 }
 
 /// A connection to an X11 server.
 pub trait Connection: RequestConnection {
     /// Wait for a new event from the X11 server.
-    fn wait_for_event(&self) -> Result<Event<Self::Buf>, ConnectionError> {
+    fn wait_for_event(&self) -> Result<Event<GenericEvent<Self::Buf>>, ConnectionError> {
         Ok(self.wait_for_event_with_sequence()?.0)
     }
 
@@ -351,7 +351,7 @@ pub trait Connection: RequestConnection {
     ) -> Result<RawEventAndSeqNumber<Self::Buf>, ConnectionError>;
 
     /// Poll for a new event from the X11 server.
-    fn poll_for_event(&self) -> Result<Option<Event<Self::Buf>>, ConnectionError> {
+    fn poll_for_event(&self) -> Result<Option<Event<GenericEvent<Self::Buf>>>, ConnectionError> {
         Ok(self.poll_for_event_with_sequence()?.map(|r| r.0))
     }
 
@@ -486,7 +486,7 @@ pub enum DiscardMode {
 ///     # fn parse_error(&self, _error: GenericError<Self::Buf>) -> Result<x11rb::protocol::Error<GenericError<Self::Buf>>, ParseError> {
 ///     #     unimplemented!()
 ///     # }
-///     # fn parse_event(&self, _event: GenericEvent<Self::Buf>) -> Result<x11rb::protocol::Event<Self::Buf>, ParseError> {
+///     # fn parse_event(&self, _event: GenericEvent<Self::Buf>) -> Result<x11rb::protocol::Event<GenericEvent<Self::Buf>>, ParseError> {
 ///     #     unimplemented!()
 ///     # }
 ///

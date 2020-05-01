@@ -10,7 +10,7 @@ use x11rb::connection::{Connection, RequestConnection};
 use x11rb::errors::{ReplyError, ReplyOrIdError};
 use x11rb::protocol::xproto::*;
 use x11rb::protocol::{Error, Event};
-use x11rb::x11_utils::Event as _;
+use x11rb::x11_utils::{Event as _, GenericEvent};
 use x11rb::{COPY_DEPTH_FROM_PARENT, CURRENT_TIME};
 
 const TITLEBAR_HEIGHT: u16 = 20;
@@ -227,7 +227,7 @@ impl<'a, C: Connection> WMState<'a, C> {
     }
 
     /// Handle the given event
-    fn handle_event(&mut self, event: Event<C::Buf>) -> Result<(), ReplyOrIdError<C::Buf>> {
+    fn handle_event(&mut self, event: Event<GenericEvent<C::Buf>>) -> Result<(), ReplyOrIdError<C::Buf>> {
         println!("Got event {:?}", event);
         match event {
             Event::UnmapNotify(event) => self.handle_unmap_notify(event)?,

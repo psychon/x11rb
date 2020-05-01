@@ -240,10 +240,8 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
     outln!(out, "#[derive(Debug, Clone)]");
     outln!(out, "pub enum Event<B: std::fmt::Debug + AsRef<[u8]>> {{");
     out.indented(|out| {
-        outln!(out, "Unknown(GenericEvent<B>),");
-        // FIXME: Change this back
-        //outln!(out, "Error(Error<B>),");
-        outln!(out, "Error(Error<GenericError<B>>),");
+        outln!(out, "Unknown(B),");
+        outln!(out, "Error(Error<B>),");
 
         for ns in namespaces.iter() {
             let has_feature = super::ext_has_feature(&ns.header);
@@ -265,7 +263,9 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
     });
     outln!(out, "}}");
     outln!(out, "");
-    outln!(out, "impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {{");
+    // FIXME: Change this back
+    //outln!(out, "impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {{");
+    outln!(out, "impl<B: std::fmt::Debug + AsRef<[u8]>> Event<GenericEvent<B>> {{");
     out.indented(|out| {
         outln!(
             out,
@@ -289,7 +289,7 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
                 outln!(
                     out,
                     "0 => return Ok({}),",
-                    "Self::Error(Error::parse(event.try_into()?, ext_info_provider)?)",
+                    "Self::Error(Error::parse(event, ext_info_provider)?)",
                 );
                 let xproto_ns = module.namespace("xproto").unwrap();
                 let event_defs = sorted_events(&xproto_ns);

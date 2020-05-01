@@ -6,7 +6,6 @@ use crate::errors::ParseError;
 use crate::x11_utils::{
     Event as _,
     ExtInfoProvider,
-    GenericError,
     GenericEvent,
 };
 
@@ -709,8 +708,8 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
 /// Enumeration of all possible X11 events.
 #[derive(Debug, Clone)]
 pub enum Event<B: std::fmt::Debug + AsRef<[u8]>> {
-    Unknown(GenericEvent<B>),
-    Error(Error<GenericError<B>>),
+    Unknown(B),
+    Error(Error<B>),
     ButtonPress(xproto::ButtonPressEvent),
     ButtonRelease(xproto::ButtonReleaseEvent),
     CirculateNotify(xproto::CirculateNotifyEvent),
@@ -903,7 +902,7 @@ pub enum Event<B: std::fmt::Debug + AsRef<[u8]>> {
     XvVideoNotify(xv::VideoNotifyEvent),
 }
 
-impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
+impl<B: std::fmt::Debug + AsRef<[u8]>> Event<GenericEvent<B>> {
     /// Parse a generic X11 event into a concrete event type.
     #[allow(clippy::cognitive_complexity)]
     pub fn parse(
@@ -914,7 +913,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
 
         // Check if this is a core protocol event or error, or from the generic event extension
         match event_code {
-            0 => return Ok(Self::Error(Error::parse(event.try_into()?, ext_info_provider)?)),
+            0 => return Ok(Self::Error(Error::parse(event, ext_info_provider)?)),
             xproto::BUTTON_PRESS_EVENT => return Ok(Self::ButtonPress(event.as_ref().try_into()?)),
             xproto::BUTTON_RELEASE_EVENT => return Ok(Self::ButtonRelease(event.as_ref().try_into()?)),
             xproto::CIRCULATE_NOTIFY_EVENT => return Ok(Self::CirculateNotify(event.as_ref().try_into()?)),
