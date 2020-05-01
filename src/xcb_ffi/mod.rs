@@ -436,7 +436,7 @@ impl RequestConnection for XCBConnection {
         match self.wait_for_reply_or_raw_error(sequence)? {
             ReplyOrError::Reply(reply) => Ok(Some(reply)),
             ReplyOrError::Error(error) => {
-                self.errors.append_error((sequence, error));
+                self.errors.append_error((sequence, error.into_buffer()));
                 Ok(None)
             }
         }
@@ -521,7 +521,7 @@ impl RequestConnection for XCBConnection {
 impl Connection for XCBConnection {
     fn wait_for_raw_event_with_sequence(&self) -> Result<RawEventAndSeqNumber, ConnectionError> {
         if let Some(error) = self.errors.get(self) {
-            return Ok((error.1.into_buffer(), error.0));
+            return Ok((error.1, error.0));
         }
         unsafe {
             let event = raw_ffi::xcb_wait_for_event(self.conn.as_ptr());
@@ -536,7 +536,7 @@ impl Connection for XCBConnection {
         &self,
     ) -> Result<Option<RawEventAndSeqNumber>, ConnectionError> {
         if let Some(error) = self.errors.get(self) {
-            return Ok(Some((error.1.into_buffer(), error.0)));
+            return Ok(Some((error.1, error.0)));
         }
         unsafe {
             let event = raw_ffi::xcb_poll_for_event(self.conn.as_ptr());
