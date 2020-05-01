@@ -423,9 +423,7 @@ impl RequestConnection for XCBConnection {
             match (reply.is_null(), error.is_null()) {
                 (true, true) => Err(Self::connection_error_from_connection(self.conn.as_ptr())),
                 (false, true) => Ok(ReplyOrError::Reply(self.wrap_reply(reply as _, sequence))),
-                (true, false) => Ok(ReplyOrError::Error(GenericError::new(
-                    self.wrap_error(error as _, sequence),
-                )?)),
+                (true, false) => Ok(ReplyOrError::Error(self.wrap_error(error as _, sequence))),
                 // At least one of these pointers must be NULL.
                 (false, false) => unreachable!(),
             }
@@ -436,7 +434,7 @@ impl RequestConnection for XCBConnection {
         match self.wait_for_reply_or_raw_error(sequence)? {
             ReplyOrError::Reply(reply) => Ok(Some(reply)),
             ReplyOrError::Error(error) => {
-                self.errors.append_error((sequence, error.into_buffer()));
+                self.errors.append_error((sequence, error));
                 Ok(None)
             }
         }

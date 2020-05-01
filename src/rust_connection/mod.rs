@@ -356,8 +356,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         loop {
             if let Some(reply) = inner.poll_for_reply_or_error(sequence) {
                 if reply[0] == 0 {
-                    let error = GenericError::new(reply)?;
-                    return Ok(ReplyOrError::Error(error));
+                    return Ok(ReplyOrError::Error(reply));
                 } else {
                     return Ok(ReplyOrError::Reply(reply));
                 }
