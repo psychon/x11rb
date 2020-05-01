@@ -48,7 +48,7 @@ use crate::errors::{ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::protocol::xproto::Setup;
 use crate::protocol::{Error, Event};
 use crate::utils::RawFdContainer;
-use crate::x11_utils::{ExtensionInformation, GenericError, GenericEvent};
+use crate::x11_utils::{ExtensionInformation, GenericError};
 
 /// Number type used for referring to things that were sent to the server in responses from the
 /// server.
@@ -61,8 +61,8 @@ pub type SequenceNumber = u64;
 
 // Used to avoid too-complex types.
 pub type BufWithFds<B> = (B, Vec<RawFdContainer>);
-pub type EventAndSeqNumber<B> = (Event<GenericEvent<B>>, SequenceNumber);
-pub type RawEventAndSeqNumber<B> = (GenericEvent<B>, SequenceNumber);
+pub type EventAndSeqNumber<B> = (Event<B>, SequenceNumber);
+pub type RawEventAndSeqNumber<B> = (B, SequenceNumber);
 
 /// Either a raw reply or a raw error response to an X11 request.
 #[derive(Debug)]
@@ -331,12 +331,12 @@ pub trait RequestConnection {
 /// A connection to an X11 server.
 pub trait Connection: RequestConnection {
     /// Wait for a new event from the X11 server.
-    fn wait_for_event(&self) -> Result<Event<GenericEvent<Self::Buf>>, ConnectionError> {
+    fn wait_for_event(&self) -> Result<Event<Self::Buf>, ConnectionError> {
         Ok(self.wait_for_event_with_sequence()?.0)
     }
 
     /// Wait for a new raw/unparsed event from the X11 server.
-    fn wait_for_raw_event(&self) -> Result<GenericEvent<Self::Buf>, ConnectionError> {
+    fn wait_for_raw_event(&self) -> Result<Self::Buf, ConnectionError> {
         Ok(self.wait_for_raw_event_with_sequence()?.0)
     }
 
@@ -355,12 +355,12 @@ pub trait Connection: RequestConnection {
     ) -> Result<RawEventAndSeqNumber<Self::Buf>, ConnectionError>;
 
     /// Poll for a new event from the X11 server.
-    fn poll_for_event(&self) -> Result<Option<Event<GenericEvent<Self::Buf>>>, ConnectionError> {
+    fn poll_for_event(&self) -> Result<Option<Event<Self::Buf>>, ConnectionError> {
         Ok(self.poll_for_event_with_sequence()?.map(|r| r.0))
     }
 
     /// Poll for a new raw/unparsed event from the X11 server.
-    fn poll_for_raw_event(&self) -> Result<Option<GenericEvent<Self::Buf>>, ConnectionError> {
+    fn poll_for_raw_event(&self) -> Result<Option<Self::Buf>, ConnectionError> {
         Ok(self.poll_for_raw_event_with_sequence()?.map(|r| r.0))
     }
 
@@ -441,7 +441,7 @@ pub enum DiscardMode {
 /// use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
 /// use x11rb::errors::{ParseError, ConnectionError};
 /// use x11rb::utils::RawFdContainer;
-/// use x11rb::x11_utils::{ExtensionInformation, GenericError, GenericEvent};
+/// use x11rb::x11_utils::{ExtensionInformation, GenericError};
 /// # use x11rb::connection::ReplyOrError;
 ///
 /// struct MyConnection();
