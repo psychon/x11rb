@@ -158,7 +158,7 @@ mod test {
     use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
     use crate::errors::{ConnectionError, ParseError};
     use crate::utils::RawFdContainer;
-    use crate::x11_utils::{ExtInfoProvider, ExtensionInformation, GenericError, GenericEvent};
+    use crate::x11_utils::{ExtInfoProvider, ExtensionInformation, GenericError};
 
     use super::{CheckState, ExtensionManager};
 
@@ -262,17 +262,17 @@ mod test {
             unimplemented!()
         }
 
-        fn parse_error(
-            &self,
-            _error: GenericError<Self::Buf>,
-        ) -> Result<crate::protocol::Error<GenericError<Self::Buf>>, ParseError> {
+        fn parse_error<E>(&self, _error: E) -> Result<crate::protocol::Error<E>, ParseError>
+        where
+            E: std::fmt::Debug + AsRef<[u8]>,
+        {
             unimplemented!()
         }
 
-        fn parse_event(
-            &self,
-            _event: GenericEvent<Self::Buf>,
-        ) -> Result<crate::protocol::Event<GenericEvent<Self::Buf>>, ParseError> {
+        fn parse_event<E>(&self, _event: E) -> Result<crate::protocol::Event<E>, ParseError>
+        where
+            E: std::fmt::Debug + AsRef<[u8]>,
+        {
             unimplemented!()
         }
     }

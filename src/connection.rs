@@ -318,10 +318,14 @@ pub trait RequestConnection {
     fn maximum_request_bytes(&self) -> usize;
 
     /// Parse a generic error.
-    fn parse_error(&self, error: GenericError<Self::Buf>) -> Result<Error<GenericError<Self::Buf>>, ParseError>;
+    fn parse_error<E>(&self, error: E) -> Result<Error<E>, ParseError>
+    where
+        E: std::fmt::Debug + AsRef<[u8]>;
 
     /// Parse a generic event.
-    fn parse_event(&self, event: GenericEvent<Self::Buf>) -> Result<Event<GenericEvent<Self::Buf>>, ParseError>;
+    fn parse_event<E>(&self, event: E) -> Result<Event<E>, ParseError>
+    where
+        E: std::fmt::Debug + AsRef<[u8]>;
 }
 
 /// A connection to an X11 server.
@@ -483,10 +487,14 @@ pub enum DiscardMode {
 ///     # fn prefetch_maximum_request_bytes(&self) {
 ///     #    unimplemented!()
 ///     # }
-///     # fn parse_error(&self, _error: GenericError<Self::Buf>) -> Result<x11rb::protocol::Error<GenericError<Self::Buf>>, ParseError> {
+///     # fn parse_error<E>(&self, _error: E) -> Result<x11rb::protocol::Error<E>, ParseError>
+///     # where E: std::fmt::Debug + AsRef<[u8]>,
+///     # {
 ///     #     unimplemented!()
 ///     # }
-///     # fn parse_event(&self, _event: GenericEvent<Self::Buf>) -> Result<x11rb::protocol::Event<GenericEvent<Self::Buf>>, ParseError> {
+///     # fn parse_event<E>(&self, _event: E) -> Result<x11rb::protocol::Event<E>, ParseError>
+///     # where E: std::fmt::Debug + AsRef<[u8]>,
+///     # {
 ///     #     unimplemented!()
 ///     # }
 ///

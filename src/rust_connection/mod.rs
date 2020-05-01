@@ -447,14 +447,20 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         self.prefetch_maximum_request_bytes_impl(&mut max_bytes);
     }
 
-    fn parse_error(&self, error: GenericError) -> Result<Error, ParseError> {
+    fn parse_error<E>(&self, error: E) -> Result<crate::protocol::Error<E>, ParseError>
+    where
+        E: std::fmt::Debug + AsRef<[u8]>,
+    {
         let ext_mgr = self.extension_manager.lock().unwrap();
-        Error::parse(error, &*ext_mgr)
+        crate::protocol::Error::parse(error, &*ext_mgr)
     }
 
-    fn parse_event(&self, event: GenericEvent) -> Result<Event, ParseError> {
+    fn parse_event<E>(&self, event: E) -> Result<crate::protocol::Event<E>, ParseError>
+    where
+        E: std::fmt::Debug + AsRef<[u8]>,
+    {
         let ext_mgr = self.extension_manager.lock().unwrap();
-        Event::parse(event, &*ext_mgr)
+        crate::protocol::Event::parse(event, &*ext_mgr)
     }
 }
 

@@ -13,7 +13,7 @@ use x11rb::protocol::xproto::{
     ClientMessageData, ConnectionExt, KeymapNotifyEvent, Segment, SetupAuthenticate,
 };
 use x11rb::utils::RawFdContainer;
-use x11rb::x11_utils::{ExtensionInformation, GenericError, GenericEvent, Serialize, TryParse};
+use x11rb::x11_utils::{ExtensionInformation, GenericError, Serialize, TryParse};
 
 #[derive(Debug)]
 struct SavedRequest {
@@ -151,17 +151,17 @@ impl RequestConnection for FakeConnection {
         unimplemented!()
     }
 
-    fn parse_error(
-        &self,
-        _error: GenericError<Self::Buf>,
-    ) -> Result<x11rb::protocol::Error<GenericError<Self::Buf>>, ParseError> {
+    fn parse_error<E>(&self, _error: E) -> Result<x11rb::protocol::Error<E>, ParseError>
+    where
+        E: std::fmt::Debug + AsRef<[u8]>,
+    {
         unimplemented!()
     }
 
-    fn parse_event(
-        &self,
-        _event: x11rb::x11_utils::GenericEvent<Self::Buf>,
-    ) -> Result<x11rb::protocol::Event<GenericEvent<Self::Buf>>, ParseError> {
+    fn parse_event<E>(&self, _event: E) -> Result<x11rb::protocol::Event<E>, ParseError>
+    where
+        E: std::fmt::Debug + AsRef<[u8]>,
+    {
         unimplemented!()
     }
 }

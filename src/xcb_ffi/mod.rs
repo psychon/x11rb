@@ -501,14 +501,20 @@ impl RequestConnection for XCBConnection {
         unsafe { raw_ffi::xcb_prefetch_maximum_request_length(self.conn.as_ptr()) };
     }
 
-    fn parse_error(&self, error: GenericError) -> Result<Error, ParseError> {
+    fn parse_error<E>(&self, error: E) -> Result<crate::protocol::Error<E>, ParseError>
+    where
+        E: std::fmt::Debug + AsRef<[u8]>,
+    {
         let ext_mgr = self.ext_mgr.lock().unwrap();
-        Error::parse(error, &*ext_mgr)
+        crate::protocol::Error::parse(error, &*ext_mgr)
     }
 
-    fn parse_event(&self, event: GenericEvent) -> Result<Event, ParseError> {
+    fn parse_event<E>(&self, event: E) -> Result<crate::protocol::Event<E>, ParseError>
+    where
+        E: std::fmt::Debug + AsRef<[u8]>,
+    {
         let ext_mgr = self.ext_mgr.lock().unwrap();
-        Event::parse(event, &*ext_mgr)
+        crate::protocol::Event::parse(event, &*ext_mgr)
     }
 }
 
