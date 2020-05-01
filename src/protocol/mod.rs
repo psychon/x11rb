@@ -1052,7 +1052,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
                 if event_code != ext_info.first_event {
                     return Ok(Self::Unknown(event));
                 }
-                match event.as_ref()[1] {
+                match *event.as_ref().get(1).ok_or(ParseError::ParseError)? {
                     xkb::ACCESS_X_NOTIFY_EVENT => Ok(Self::XkbAccessXNotify(event.as_ref().try_into()?)),
                     xkb::ACTION_MESSAGE_EVENT => Ok(Self::XkbActionMessage(event.as_ref().try_into()?)),
                     xkb::BELL_NOTIFY_EVENT => Ok(Self::XkbBellNotify(event.as_ref().try_into()?)),

@@ -343,8 +343,7 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
                             outln!(out, "if event_code != ext_info.first_event {{");
                             outln!(out.indent(), "return Ok(Self::Unknown(event));");
                             outln!(out, "}}");
-                            // FIXME: Use .get(1) instead of [1]
-                            outln!(out, "match event.as_ref()[1] {{");
+                            outln!(out, "match *event.as_ref().get(1).ok_or(ParseError::ParseError)? {{");
                         } else {
                             outln!(out, "match event_code - ext_info.first_event {{");
                         }
