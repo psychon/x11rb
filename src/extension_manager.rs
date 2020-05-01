@@ -265,7 +265,7 @@ mod test {
         fn parse_error(
             &self,
             _error: GenericError<Self::Buf>,
-        ) -> Result<crate::protocol::Error<Self::Buf>, ParseError> {
+        ) -> Result<crate::protocol::Error<GenericError<Self::Buf>>, ParseError> {
             unimplemented!()
         }
 

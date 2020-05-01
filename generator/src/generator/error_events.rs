@@ -13,7 +13,7 @@ fn generate_errors(out: &mut Output, module: &xcbgen::defs::Module) {
     outln!(out, "#[derive(Debug, Clone)]");
     outln!(out, "pub enum Error<B: std::fmt::Debug + AsRef<[u8]>> {{");
     out.indented(|out| {
-        outln!(out, "Unknown(GenericError<B>),");
+        outln!(out, "Unknown(B),");
 
         for ns in namespaces.iter() {
             let has_feature = super::ext_has_feature(&ns.header);
@@ -36,7 +36,9 @@ fn generate_errors(out: &mut Output, module: &xcbgen::defs::Module) {
     });
     outln!(out, "}}");
     outln!(out, "");
-    outln!(out, "impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {{");
+    // FIXME: Change this back
+    //outln!(out, "impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {{");
+    outln!(out, "impl<B: std::fmt::Debug + AsRef<[u8]>> Error<GenericError<B>> {{");
     out.indented(|out| {
         outln!(
             out,
@@ -216,7 +218,9 @@ fn generate_events(out: &mut Output, module: &xcbgen::defs::Module) {
     outln!(out, "pub enum Event<B: std::fmt::Debug + AsRef<[u8]>> {{");
     out.indented(|out| {
         outln!(out, "Unknown(GenericEvent<B>),");
-        outln!(out, "Error(Error<B>),");
+        // FIXME: Change this back
+        //outln!(out, "Error(Error<GenericError<B>>),");
+        outln!(out, "Error(Error<GenericError<B>>),");
 
         for ns in namespaces.iter() {
             let has_feature = super::ext_has_feature(&ns.header);

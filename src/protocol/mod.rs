@@ -72,7 +72,7 @@ pub mod xvmc;
 /// Enumeration of all possible X11 errors.
 #[derive(Debug, Clone)]
 pub enum Error<B: std::fmt::Debug + AsRef<[u8]>> {
-    Unknown(GenericError<B>),
+    Unknown(B),
     Access(xproto::AccessError),
     Alloc(xproto::AllocError),
     Atom(xproto::AtomError),
@@ -186,7 +186,7 @@ pub enum Error<B: std::fmt::Debug + AsRef<[u8]>> {
     XvBadPort(xv::BadPortError),
 }
 
-impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
+impl<B: std::fmt::Debug + AsRef<[u8]>> Error<GenericError<B>> {
     /// Parse a generic X11 error into a concrete error type.
     #[allow(clippy::cognitive_complexity)]
     pub fn parse(
@@ -710,7 +710,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
 #[derive(Debug, Clone)]
 pub enum Event<B: std::fmt::Debug + AsRef<[u8]>> {
     Unknown(GenericEvent<B>),
-    Error(Error<B>),
+    Error(Error<GenericError<B>>),
     ButtonPress(xproto::ButtonPressEvent),
     ButtonRelease(xproto::ButtonReleaseEvent),
     CirculateNotify(xproto::CirculateNotifyEvent),

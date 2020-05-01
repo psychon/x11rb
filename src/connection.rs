@@ -271,7 +271,7 @@ pub trait RequestConnection {
     fn check_for_error(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<Option<Error<Self::Buf>>, ConnectionError> {
+    ) -> Result<Option<Error<GenericError<Self::Buf>>>, ConnectionError> {
         let res = self.check_for_raw_error(sequence)?;
         let res = res.map(|e| self.parse_error(e)).transpose()?;
         Ok(res)
@@ -318,7 +318,7 @@ pub trait RequestConnection {
     fn maximum_request_bytes(&self) -> usize;
 
     /// Parse a generic error.
-    fn parse_error(&self, error: GenericError<Self::Buf>) -> Result<Error<Self::Buf>, ParseError>;
+    fn parse_error(&self, error: GenericError<Self::Buf>) -> Result<Error<GenericError<Self::Buf>>, ParseError>;
 
     /// Parse a generic event.
     fn parse_event(&self, event: GenericEvent<Self::Buf>) -> Result<Event<Self::Buf>, ParseError>;
@@ -483,7 +483,7 @@ pub enum DiscardMode {
 ///     # fn prefetch_maximum_request_bytes(&self) {
 ///     #    unimplemented!()
 ///     # }
-///     # fn parse_error(&self, _error: GenericError<Self::Buf>) -> Result<x11rb::protocol::Error<Self::Buf>, ParseError> {
+///     # fn parse_error(&self, _error: GenericError<Self::Buf>) -> Result<x11rb::protocol::Error<GenericError<Self::Buf>>, ParseError> {
 ///     #     unimplemented!()
 ///     # }
 ///     # fn parse_event(&self, _event: GenericEvent<Self::Buf>) -> Result<x11rb::protocol::Event<Self::Buf>, ParseError> {

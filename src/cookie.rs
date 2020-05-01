@@ -8,6 +8,7 @@ use crate::errors::{ConnectionError, ParseError, ReplyError};
 use crate::protocol::xproto::ListFontsWithInfoReply;
 use crate::protocol::Error;
 use crate::utils::RawFdContainer;
+use crate::x11_utils::GenericError;
 
 /// A handle to a possible error from the X11 server.
 ///
@@ -49,7 +50,7 @@ where
     }
 
     /// Check if the original request caused an X11 error.
-    pub fn check(self) -> Result<Option<Error<C::Buf>>, ConnectionError> {
+    pub fn check(self) -> Result<Option<Error<GenericError<C::Buf>>>, ConnectionError> {
         let (connection, sequence) = self.consume();
         connection.check_for_error(sequence)
     }

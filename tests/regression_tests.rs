@@ -154,7 +154,7 @@ impl RequestConnection for FakeConnection {
     fn parse_error(
         &self,
         _error: GenericError<Self::Buf>,
-    ) -> Result<x11rb::protocol::Error<Self::Buf>, ParseError> {
+    ) -> Result<x11rb::protocol::Error<GenericError<Self::Buf>>, ParseError> {
         unimplemented!()
     }
 
