@@ -225,3 +225,51 @@ impl<R: Read + std::fmt::Debug> ReadFD for ReadFDWrapper<R> {
         self.0.read_exact(buf)
     }
 }
+
+/// A version of [`std::io::BufReader`] that supports receiving file descriptors.
+#[derive(Debug)]
+pub struct BufReadFD<R: ReadFD + std::fmt::Debug> {
+    inner: R,
+    buf: Box<[u8]>,
+    // The following two variables describe the range of available data in `buf`
+    start: usize,
+    end: usize,
+}
+
+impl<R: ReadFD + std::fmt::Debug> BufReadFD<R> {
+    /// Creates a new `BufReadFD` with a default buffer capacity.
+    pub fn new(inner: R) -> Self {
+        // Chosen by checking what libxcb does
+        let default = 4096;
+        Self::with_capacity(default, inner)
+    }
+
+    /// Creates a new `BufReadFD` with the specified buffer capacity.
+    pub fn with_capacity(capacity: usize, inner: R) -> Self {
+        Self {
+            inner,
+            buf: vec![0; capacity].into_boxed_slice(),
+            start: 0,
+            end: 0,
+        }
+    }
+}
+
+impl<R: ReadFD + std::fmt::Debug> ReadFD for BufReadFD<R> {
+    fn read(&mut self, buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> Result<usize> {
+        if self.start >= self.end {
+            // We have no data buffered
+            if buf.len() >= self.buf.len() {
+                // This is a large read, bypass our buffer
+                return self.inner.read(buf, fd_storage);
+            }
+            // Read something new from the inner reader
+            self.end = self.inner.read(&mut self.buf, fd_storage)?;
+            self.start = 0;
+        }
+        // Read data from our buffer
+        let nread = (&self.buf[self.start..self.end]).read(buf)?;
+        self.start += nread;
+        Ok(nread)
+    }
+}
