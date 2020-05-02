@@ -2,6 +2,12 @@ use once_cell::unsync::OnceCell;
 
 use crate::defs;
 
+/// Create synthesised fields in the module.
+///
+/// This function creates virtual fields in structures that are not part of the XML. This includes
+/// generic fields in errors, events, requests, and replies that are present in all such types.
+/// This function also creates virtual length fields for lists without a length.  Because these
+/// added fields are so generic, they are not explicitly present in the XML description.
 pub(super) fn run(module: &defs::Module) {
     for ns in module.namespaces.borrow().values() {
         for request_def in ns.request_defs.borrow().values() {

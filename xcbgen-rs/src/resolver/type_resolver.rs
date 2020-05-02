@@ -1,5 +1,9 @@
 use crate::{defs, ResolveError};
 
+/// Resolve references to types.
+///
+/// This function looks at named references to other types in the module and adds a reference to
+/// the actual type.
 #[inline]
 pub(super) fn resolve(module: &defs::Module) -> Result<(), ResolveError> {
     TypeResolver::new(module).resolve()
