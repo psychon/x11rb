@@ -16,6 +16,7 @@ use crate::protocol::xproto::{Setup, SetupRequest, GET_INPUT_FOCUS_REQUEST};
 use crate::utils::RawFdContainer;
 use crate::x11_utils::{ExtensionInformation, Serialize};
 
+pub mod fd_read_write;
 mod id_allocator;
 mod inner;
 mod parse_display;
