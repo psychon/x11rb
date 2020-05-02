@@ -589,21 +589,15 @@ fn read_setup(read: &mut impl ReadFD) -> Result<Setup, ConnectError> {
 
 /// Write a set of buffers on a Writer.
 ///
-/// This is basically `Write::write_all_vectored`, but on stable.
+/// This is basically `Write::write_all_vectored`, but on stable and for `WriteFD`.
 fn write_all_vectored(
     write: &mut impl WriteFD,
     bufs: &[IoSlice<'_>],
     mut fds: Vec<RawFdContainer>,
 ) -> Result<(), std::io::Error> {
-    // FIXME: Introduce a write_vectored() method on WriteFD (or even better: write_all_vectored())
-    for buf in bufs {
-        write.write_all(&**buf, fds)?;
-        fds = Vec::new();
-    }
-    /*
     let mut bufs = bufs;
     while !bufs.is_empty() {
-        let mut count = write.write_vectored(bufs)?;
+        let mut count = write.write_vectored(bufs, &mut fds)?;
         if count == 0 {
             return Err(std::io::Error::new(
                 std::io::ErrorKind::WriteZero,
@@ -615,7 +609,8 @@ fn write_all_vectored(
                 count -= bufs[0].len();
             } else {
                 let remaining = &bufs[0][count..];
-                write.write_all(remaining)?;
+                write.write_all(remaining, fds)?;
+                fds = Vec::new();
                 count = 0;
             }
             bufs = &bufs[1..];
@@ -626,7 +621,9 @@ fn write_all_vectored(
             }
         }
     }
-    */
+    if !fds.is_empty() {
+        write.write_all(&[], fds)?;
+    }
     Ok(())
 }
 
@@ -678,8 +675,8 @@ mod test {
 
     #[test]
     fn partial_write_slice_border() {
-        // This tries to write 2+x bytes into a buffer of size 2
-        partial_write_test(&[0; 2], "failed to write whole buffer");
+        // This tries to write 2+2 bytes into a buffer of size 2
+        partial_write_test(&[0; 2], "failed to write anything");
     }
 
     #[test]
