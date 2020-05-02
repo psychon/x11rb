@@ -158,6 +158,7 @@ extern "C" {
         vector: *mut iovec,
         request: *const xcb_protocol_request_t,
     ) -> u64;
+    #[cfg(unix)]
     pub(crate) fn xcb_send_request_with_fds64(
         c: *mut xcb_connection_t,
         flags: c_int,
@@ -305,6 +306,7 @@ mod mock {
         unimplemented!();
     }
 
+    #[cfg(unix)]
     pub(crate) unsafe fn xcb_send_request_with_fds64(
         _c: *mut xcb_connection_t,
         _flags: c_int,

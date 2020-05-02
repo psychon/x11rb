@@ -212,19 +212,26 @@ impl XCBConnection {
                 )
             }
         } else {
-            // Convert the FDs into an array of ints. libxcb will close the FDs.
-            let mut fds: Vec<_> = fds.into_iter().map(RawFdContainer::into_raw_fd).collect();
-            let num_fds = fds.len().try_into().unwrap();
-            let fds_ptr = fds.as_mut_ptr();
-            unsafe {
-                raw_ffi::xcb_send_request_with_fds64(
-                    self.conn.as_ptr(),
-                    flags,
-                    &mut new_bufs_ffi[2],
-                    &protocol_request,
-                    num_fds,
-                    fds_ptr,
-                )
+            #[cfg(unix)]
+            {
+                // Convert the FDs into an array of ints. libxcb will close the FDs.
+                let mut fds: Vec<_> = fds.into_iter().map(RawFdContainer::into_raw_fd).collect();
+                let num_fds = fds.len().try_into().unwrap();
+                let fds_ptr = fds.as_mut_ptr();
+                unsafe {
+                    raw_ffi::xcb_send_request_with_fds64(
+                        self.conn.as_ptr(),
+                        flags,
+                        &mut new_bufs_ffi[2],
+                        &protocol_request,
+                        num_fds,
+                        fds_ptr,
+                    )
+                }
+            }
+            #[cfg(not(unix))]
+            {
+                unreachable!("it is not possible to create a `RawFdContainer` on non-unix");
             }
         };
         if seqno == 0 {
@@ -451,10 +458,10 @@ impl RequestConnection for XCBConnection {
         let fd_ptr = (unsafe { buffer.as_ptr().add(buffer.len()) }) as *const RawFd;
 
         // The number of FDs is in the second byte (= buffer[1]) in all replies.
-        let vector = unsafe { std::slice::from_raw_parts(fd_ptr, usize::from(buffer[1])) };
-        let vector = vector.iter().map(|&fd| RawFdContainer::new(fd)).collect();
+        let fd_slice = unsafe { std::slice::from_raw_parts(fd_ptr, usize::from(buffer[1])) };
+        let fd_vec = fd_slice.iter().map(|&fd| RawFdContainer::new(fd)).collect();
 
-        Ok(ReplyOrError::Reply((buffer, vector)))
+        Ok(ReplyOrError::Reply((buffer, fd_vec)))
     }
 
     #[cfg(not(unix))]
