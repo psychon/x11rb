@@ -1,4 +1,4 @@
-use std::io::Result;
+use std::io::{IoSlice, Result};
 use std::net::{Ipv4Addr, SocketAddr, TcpStream};
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, RawFd};
@@ -133,31 +133,37 @@ impl Stream {
     }
 }
 
+#[cfg(unix)]
+fn do_write(fd: RawFd, bufs: &[IoSlice<'_>], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
+    use nix::sys::{
+        socket::{ControlMessage, MsgFlags, sendmsg},
+        uio::IoVec,
+    };
+
+    let iov = bufs.iter()
+        .map(|b| IoVec::from_slice(&**b))
+        .collect::<Vec<_>>();
+    let res = if !fds.is_empty() {
+        let fds = fds.iter().map(|fd| fd.as_raw_fd()).collect::<Vec<_>>();
+        let cmsgs = [ControlMessage::ScmRights(&fds[..])];
+        sendmsg(fd, &iov, &cmsgs, MsgFlags::empty(), None)
+    } else {
+        sendmsg(fd, &iov, &[], MsgFlags::empty(), None)
+    };
+    // Nothing touched errno since sendmsg() failed
+    let res = res.map_err(|_| std::io::Error::last_os_error())?;
+
+    // We successfully sent all FDs
+    fds.clear();
+
+    Ok(res)
+}
+
 impl WriteFD for Stream {
     fn write(&mut self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
         #[cfg(unix)]
         {
-            use nix::sys::{
-                socket::{ControlMessage, MsgFlags, sendmsg},
-                uio::IoVec,
-            };
-
-            let iov = [IoVec::from_slice(buf)];
-            let fd = self.as_raw_fd();
-            let res = if !fds.is_empty() {
-                let fds = fds.iter().map(|fd| fd.as_raw_fd()).collect::<Vec<_>>();
-                let cmsgs = [ControlMessage::ScmRights(&fds[..])];
-                sendmsg(fd, &iov, &cmsgs, MsgFlags::empty(), None)
-            } else {
-                sendmsg(fd, &iov, &[], MsgFlags::empty(), None)
-            };
-            // Nothing touched errno since sendmsg() failed
-            let res = res.map_err(|_| std::io::Error::last_os_error())?;
-
-            // We successfully sent all FDs
-            fds.clear();
-
-            Ok(res)
+            do_write(self.as_raw_fd(), &[IoSlice::new(buf)], fds)
         }
         #[cfg(not(unix))]
         {
@@ -166,6 +172,22 @@ impl WriteFD for Stream {
             }
             match self {
                 Stream::TcpStream(stream) => stream.write(buf),
+            }
+        }
+    }
+
+    fn write_vectored(&mut self, bufs: &[IoSlice<'_>], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
+        #[cfg(unix)]
+        {
+            do_write(self.as_raw_fd(), bufs, fds)
+        }
+        #[cfg(not(unix))]
+        {
+            if !fds.is_empty() {
+                return Err(Error::new(ErrorKind::Other, "FD passing is unsupported"));
+            }
+            match self {
+                Stream::TcpStream(stream) => stream.write_vectored(bufs),
             }
         }
     }

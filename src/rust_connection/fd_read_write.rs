@@ -3,7 +3,7 @@
 //! This module contains variants of `std::io::Read` and `std::io::Write` that also support passing
 //! file descriptors.
 
-use std::io::{Error, ErrorKind, Read, Result, Write};
+use std::io::{Error, ErrorKind, IoSlice, Read, Result, Write};
 
 use crate::utils::RawFdContainer;
 
@@ -57,6 +57,20 @@ pub trait WriteFD {
         Ok(())
     }
 
+    /// Like `write`, except that it writes from a slice of buffers.
+    ///
+    /// This method must behave as a call to `write` with the buffers concatenated would.
+    ///
+    /// The default implementation calls `write` with the first nonempty buffer provided.
+    fn write_vectored(&mut self, bufs: &[IoSlice<'_>], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
+        for buf in bufs {
+            if !buf.is_empty() {
+                return self.write(&**buf, fds)
+            }
+        }
+        Ok(0)
+    }
+
     /// Flush this output stream, ensuring that all buffered contents are written out.
     fn flush(&mut self) -> Result<()>;
 }
@@ -83,6 +97,11 @@ impl<W: Write + std::fmt::Debug> WriteFD for WriteFDWrapper<W> {
     fn write_all(&mut self, bufs: &[u8], fds: Vec<RawFdContainer>) -> Result<()> {
         check_no_fds(&fds)?;
         self.0.write_all(bufs)
+    }
+
+    fn write_vectored(&mut self, bufs: &[IoSlice<'_>], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
+        check_no_fds(&fds)?;
+        self.0.write_vectored(bufs)
     }
 
     fn flush(&mut self) -> Result<()> {
@@ -173,6 +192,20 @@ impl<W: WriteFD + std::fmt::Debug> WriteFD for BufWriteFD<W> {
             self.inner.write(buf, &mut self.fd_buf)
         } else {
             self.data_buf.write(buf)
+        }
+    }
+
+    fn write_vectored(&mut self, bufs: &[IoSlice<'_>], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
+        self.fd_buf.extend(fds.drain(..));
+
+        let total_len: usize = bufs.iter().map(|b| b.len()).sum();
+        if self.data_buf.len() + total_len > self.data_buf.capacity() {
+            self.flush_buffer()?;
+        }
+        if total_len >= self.data_buf.capacity() {
+            self.inner.write_vectored(bufs, &mut self.fd_buf)
+        } else {
+            self.data_buf.write_vectored(bufs)
         }
     }
 
