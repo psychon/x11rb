@@ -2,7 +2,7 @@
 
 use std::collections::VecDeque;
 
-use super::{RawEventAndSeqNumber, ReplyFDKind};
+use super::{BufWithFds, RawEventAndSeqNumber, ReplyFDKind};
 use crate::connection::{DiscardMode, SequenceNumber};
 use crate::utils::RawFdContainer;
 use crate::x11_utils::GenericEvent;
@@ -39,7 +39,7 @@ pub(crate) struct ConnectionInner {
     // Events that were read, but not yet returned to the API user
     pending_events: VecDeque<(SequenceNumber, Vec<u8>)>,
     // Replies that were read, but not yet returned to the API user
-    pending_replies: VecDeque<(SequenceNumber, Vec<u8>)>,
+    pending_replies: VecDeque<(SequenceNumber, (Vec<u8>, Vec<RawFdContainer>))>,
 
     // FDs that were read, but not yet assigned to any reply
     pending_fds: VecDeque<RawFdContainer>,
@@ -114,9 +114,9 @@ impl ConnectionInner {
                         .is_some()
                     {
                         if let Some((_, packet)) = self.pending_replies.remove(index) {
-                            if packet[0] == 0 {
+                            if packet.0[0] == 0 {
                                 // This is an error
-                                self.pending_events.push_back((seqno, packet));
+                                self.pending_events.push_back((seqno, packet.0));
                             }
                         }
                     }
@@ -183,7 +183,7 @@ impl ConnectionInner {
                     Some(DiscardMode::DiscardReply) => {
                         self.pending_events.push_back((seqno, packet))
                     }
-                    None => self.pending_replies.push_back((seqno, packet)),
+                    None => self.pending_replies.push_back((seqno, (packet, Vec::new()))),
                 }
             } else {
                 // Unexpected error, send to main loop
@@ -206,13 +206,12 @@ impl ConnectionInner {
             } else {
                 fds = Vec::new();
             }
-            let _ = fds; // FIXME implement more
 
             // It is a reply
             if request.filter(|r| r.discard_mode.is_some()).is_some() {
                 // This reply should be discarded
             } else {
-                self.pending_replies.push_back((seqno, packet));
+                self.pending_replies.push_back((seqno, (packet, fds)));
             }
         } else {
             // It is an event
@@ -224,7 +223,7 @@ impl ConnectionInner {
     ///
     /// This function is meant to be used for requests that have a reply. Such requests always
     /// cause a reply or an error to be sent.
-    pub(crate) fn poll_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Option<Vec<u8>> {
+    pub(crate) fn poll_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Option<BufWithFds> {
         for (index, (seqno, _packet)) in self.pending_replies.iter().enumerate() {
             if *seqno == sequence {
                 return Some(self.pending_replies.remove(index).unwrap().1);
@@ -255,7 +254,7 @@ impl ConnectionInner {
     /// This function can be used for requests with and without a reply.
     pub(crate) fn poll_check_for_reply_or_error(&mut self, sequence: SequenceNumber) -> PollReply {
         if let Some(result) = self.poll_for_reply_or_error(sequence) {
-            return PollReply::Reply(result);
+            return PollReply::Reply(result.0);
         }
 
         if self.last_sequence_read > sequence {
@@ -273,11 +272,11 @@ impl ConnectionInner {
     /// latter call to `poll_for_event()` will return it.
     pub(crate) fn poll_for_reply(&mut self, sequence: SequenceNumber) -> PollReply {
         if let Some(reply) = self.poll_for_reply_or_error(sequence) {
-            if reply[0] == 0 {
-                self.pending_events.push_back((sequence, reply));
+            if reply.0[0] == 0 {
+                self.pending_events.push_back((sequence, reply.0));
                 PollReply::NoReply
             } else {
-                PollReply::Reply(reply)
+                PollReply::Reply(reply.0)
             }
         } else {
             PollReply::TryAgain

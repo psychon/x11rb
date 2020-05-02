@@ -364,20 +364,9 @@ impl<R: ReadFD, W: WriteFD> RequestConnection for RustConnection<R, W> {
         &self,
         sequence: SequenceNumber,
     ) -> Result<ReplyOrError<Vec<u8>>, ConnectionError> {
-        let mut write = self.write.lock().unwrap();
-        let mut inner = self.inner.lock().unwrap();
-        write.flush()?; // Ensure the request is sent
-        drop(write);
-        loop {
-            if let Some(reply) = inner.poll_for_reply_or_error(sequence) {
-                if reply[0] == 0 {
-                    let error = GenericError::new(reply)?;
-                    return Ok(ReplyOrError::Error(error));
-                } else {
-                    return Ok(ReplyOrError::Reply(reply));
-                }
-            }
-            inner = self.read_packet_and_enqueue(inner)?;
+        match self.wait_for_reply_with_fds_raw(sequence)? {
+            ReplyOrError::Reply((reply, _fds)) => Ok(ReplyOrError::Reply(reply)),
+            ReplyOrError::Error(e) => Ok(ReplyOrError::Error(e)),
         }
     }
 
@@ -420,12 +409,23 @@ impl<R: ReadFD, W: WriteFD> RequestConnection for RustConnection<R, W> {
 
     fn wait_for_reply_with_fds_raw(
         &self,
-        _sequence: SequenceNumber,
+        sequence: SequenceNumber,
     ) -> Result<ReplyOrError<BufWithFds, Buffer>, ConnectionError> {
-        unreachable!(
-            "To wait for a reply containing FDs, a successful call to \
-        send_request_with_reply_with_fds() is necessary. However, this function never succeeds."
-        );
+        let mut write = self.write.lock().unwrap();
+        let mut inner = self.inner.lock().unwrap();
+        write.flush()?; // Ensure the request is sent
+        drop(write);
+        loop {
+            if let Some(reply) = inner.poll_for_reply_or_error(sequence) {
+                if reply.0[0] == 0 {
+                    let error = GenericError::new(reply.0)?;
+                    return Ok(ReplyOrError::Error(error));
+                } else {
+                    return Ok(ReplyOrError::Reply(reply));
+                }
+            }
+            inner = self.read_packet_and_enqueue(inner)?;
+        }
     }
 
     fn maximum_request_bytes(&self) -> usize {
