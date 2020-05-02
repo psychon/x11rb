@@ -13,17 +13,11 @@ use std::io::IoSlice;
 #[allow(unused_imports)]
 use crate::utils::RawFdContainer;
 #[allow(unused_imports)]
-use crate::x11_utils::Event as _;
-#[allow(unused_imports)]
 use crate::x11_utils::{Serialize, TryParse};
 use crate::connection::RequestConnection;
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError};
-#[allow(unused_imports)]
-use crate::x11_utils::GenericEvent;
-#[allow(unused_imports)]
-use crate::x11_utils::GenericError;
 use super::render;
 use super::shape;
 use super::xproto;
@@ -509,19 +503,6 @@ impl TryFrom<&[u8]> for SelectionNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for SelectionNotifyEvent {
-    type Error = ParseError;
-
-    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
-impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for SelectionNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
 impl From<&SelectionNotifyEvent> for [u8; 32] {
     fn from(input: &SelectionNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -765,19 +746,6 @@ impl TryFrom<&[u8]> for CursorNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for CursorNotifyEvent {
-    type Error = ParseError;
-
-    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
-impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for CursorNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
 impl From<&CursorNotifyEvent> for [u8; 32] {
     fn from(input: &CursorNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -948,16 +916,6 @@ impl TryFrom<&[u8]> for BadRegionError {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
-    }
-}
-impl<B: AsRef<[u8]>> From<GenericError<B>> for BadRegionError {
-    fn from(value: GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
-impl<B: AsRef<[u8]>> From<&GenericError<B>> for BadRegionError {
-    fn from(value: &GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
     }
 }
 impl From<&BadRegionError> for [u8; 32] {

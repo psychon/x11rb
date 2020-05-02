@@ -48,7 +48,7 @@ use crate::errors::{ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::protocol::xproto::Setup;
 use crate::protocol::{Error, Event};
 use crate::utils::RawFdContainer;
-use crate::x11_utils::{ExtensionInformation, GenericError, GenericEvent};
+use crate::x11_utils::ExtensionInformation;
 
 /// Number type used for referring to things that were sent to the server in responses from the
 /// server.
@@ -62,7 +62,7 @@ pub type SequenceNumber = u64;
 // Used to avoid too-complex types.
 pub type BufWithFds<B> = (B, Vec<RawFdContainer>);
 pub type EventAndSeqNumber<B> = (Event<B>, SequenceNumber);
-pub type RawEventAndSeqNumber<B> = (GenericEvent<B>, SequenceNumber);
+pub type RawEventAndSeqNumber<B> = (B, SequenceNumber);
 
 /// Either a raw reply or a raw error response to an X11 request.
 #[derive(Debug)]
@@ -72,7 +72,7 @@ where
     E: AsRef<[u8]> + std::fmt::Debug,
 {
     Reply(R),
-    Error(GenericError<E>),
+    Error(E),
 }
 
 /// A connection to an X11 server for sending requests.
@@ -285,7 +285,7 @@ pub trait RequestConnection {
     fn check_for_raw_error(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<Option<GenericError<Self::Buf>>, ConnectionError>;
+    ) -> Result<Option<Self::Buf>, ConnectionError>;
 
     /// Prefetches the maximum request length.
     ///
@@ -318,10 +318,14 @@ pub trait RequestConnection {
     fn maximum_request_bytes(&self) -> usize;
 
     /// Parse a generic error.
-    fn parse_error(&self, error: GenericError<Self::Buf>) -> Result<Error<Self::Buf>, ParseError>;
+    fn parse_error<E>(&self, error: E) -> Result<Error<E>, ParseError>
+    where
+        E: std::fmt::Debug + AsRef<[u8]>;
 
     /// Parse a generic event.
-    fn parse_event(&self, event: GenericEvent<Self::Buf>) -> Result<Event<Self::Buf>, ParseError>;
+    fn parse_event<E>(&self, event: E) -> Result<Event<E>, ParseError>
+    where
+        E: std::fmt::Debug + AsRef<[u8]>;
 }
 
 /// A connection to an X11 server.
@@ -332,7 +336,7 @@ pub trait Connection: RequestConnection {
     }
 
     /// Wait for a new raw/unparsed event from the X11 server.
-    fn wait_for_raw_event(&self) -> Result<GenericEvent<Self::Buf>, ConnectionError> {
+    fn wait_for_raw_event(&self) -> Result<Self::Buf, ConnectionError> {
         Ok(self.wait_for_raw_event_with_sequence()?.0)
     }
 
@@ -356,7 +360,7 @@ pub trait Connection: RequestConnection {
     }
 
     /// Poll for a new raw/unparsed event from the X11 server.
-    fn poll_for_raw_event(&self) -> Result<Option<GenericEvent<Self::Buf>>, ConnectionError> {
+    fn poll_for_raw_event(&self) -> Result<Option<Self::Buf>, ConnectionError> {
         Ok(self.poll_for_raw_event_with_sequence()?.map(|r| r.0))
     }
 
@@ -437,7 +441,7 @@ pub enum DiscardMode {
 /// use x11rb::cookie::{Cookie, CookieWithFds, VoidCookie};
 /// use x11rb::errors::{ParseError, ConnectionError};
 /// use x11rb::utils::RawFdContainer;
-/// use x11rb::x11_utils::{ExtensionInformation, GenericError, GenericEvent};
+/// use x11rb::x11_utils::ExtensionInformation;
 /// # use x11rb::connection::ReplyOrError;
 ///
 /// struct MyConnection();
@@ -474,7 +478,7 @@ pub enum DiscardMode {
 ///     #    unimplemented!()
 ///     # }
 ///     # fn check_for_raw_error(&self, sequence: SequenceNumber)
-///     # ->Result<Option<x11rb::x11_utils::GenericError<Vec<u8>>>, ConnectionError> {
+///     # ->Result<Option<Vec<u8>>, ConnectionError> {
 ///     #    unimplemented!()
 ///     # }
 ///     # fn maximum_request_bytes(&self) -> usize {
@@ -483,10 +487,14 @@ pub enum DiscardMode {
 ///     # fn prefetch_maximum_request_bytes(&self) {
 ///     #    unimplemented!()
 ///     # }
-///     # fn parse_error(&self, _error: GenericError<Self::Buf>) -> Result<x11rb::protocol::Error<Self::Buf>, ParseError> {
+///     # fn parse_error<E>(&self, _error: E) -> Result<x11rb::protocol::Error<E>, ParseError>
+///     # where E: std::fmt::Debug + AsRef<[u8]>,
+///     # {
 ///     #     unimplemented!()
 ///     # }
-///     # fn parse_event(&self, _event: GenericEvent<Self::Buf>) -> Result<x11rb::protocol::Event<Self::Buf>, ParseError> {
+///     # fn parse_event<E>(&self, _event: E) -> Result<x11rb::protocol::Event<E>, ParseError>
+///     # where E: std::fmt::Debug + AsRef<[u8]>,
+///     # {
 ///     #     unimplemented!()
 ///     # }
 ///

@@ -4,7 +4,6 @@ use std::collections::VecDeque;
 
 use super::RawEventAndSeqNumber;
 use crate::connection::{DiscardMode, RequestKind, SequenceNumber};
-use crate::x11_utils::GenericEvent;
 
 #[derive(Debug, Clone)]
 pub(crate) enum PollReply {
@@ -256,7 +255,7 @@ impl ConnectionInner {
     pub(crate) fn poll_for_event_with_sequence(&mut self) -> Option<RawEventAndSeqNumber> {
         self.pending_events
             .pop_front()
-            .map(|(seqno, event)| (GenericEvent::new(event).unwrap(), seqno))
+            .map(|(seqno, event)| (event, seqno))
     }
 }
 

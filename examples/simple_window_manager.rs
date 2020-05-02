@@ -6,11 +6,10 @@ extern crate x11rb;
 use std::collections::HashSet;
 use std::process::exit;
 
-use x11rb::connection::{Connection, RequestConnection};
+use x11rb::connection::Connection;
 use x11rb::errors::{ReplyError, ReplyOrIdError};
 use x11rb::protocol::xproto::*;
 use x11rb::protocol::{Error, Event};
-use x11rb::x11_utils::Event as _;
 use x11rb::{COPY_DEPTH_FROM_PARENT, CURRENT_TIME};
 
 const TITLEBAR_HEIGHT: u16 = 20;
@@ -364,17 +363,16 @@ fn main() {
         wm_state.refresh().unwrap();
         conn.flush().unwrap();
 
-        let event = conn.wait_for_raw_event().unwrap();
+        let event = conn.wait_for_event().unwrap();
         let mut event_option = Some(event);
         while let Some(event) = event_option {
-            if event.response_type() == CLIENT_MESSAGE_EVENT {
+            if let Event::ClientMessage(_) = event {
                 // This is start_timeout_thread() signaling us to close (most likely).
                 return;
             }
 
-            let event = conn.parse_event(event).unwrap();
             wm_state.handle_event(event).unwrap();
-            event_option = conn.poll_for_raw_event().unwrap();
+            event_option = conn.poll_for_event().unwrap();
         }
     }
 }

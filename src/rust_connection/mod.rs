@@ -27,13 +27,9 @@ use inner::PollReply;
 type Buffer = <RustConnection as RequestConnection>::Buf;
 pub type ReplyOrIdError = crate::errors::ReplyOrIdError<Buffer>;
 pub type ReplyError = crate::errors::ReplyError<Buffer>;
-pub type GenericError = crate::x11_utils::GenericError<Buffer>;
-pub type GenericEvent = crate::x11_utils::GenericEvent<Buffer>;
 pub type EventAndSeqNumber = crate::connection::EventAndSeqNumber<Buffer>;
 pub type RawEventAndSeqNumber = crate::connection::RawEventAndSeqNumber<Buffer>;
 pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
-pub type Error = crate::protocol::Error<Buffer>;
-pub type Event = crate::protocol::Event<Buffer>;
 
 #[derive(Debug)]
 enum MaxRequestBytes {
@@ -356,8 +352,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         loop {
             if let Some(reply) = inner.poll_for_reply_or_error(sequence) {
                 if reply[0] == 0 {
-                    let error = GenericError::new(reply)?;
-                    return Ok(ReplyOrError::Error(error));
+                    return Ok(ReplyOrError::Error(reply));
                 } else {
                     return Ok(ReplyOrError::Reply(reply));
                 }
@@ -384,7 +379,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
     fn check_for_raw_error(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<Option<GenericError>, ConnectionError> {
+    ) -> Result<Option<Buffer>, ConnectionError> {
         let mut write = self.write.lock().unwrap();
         let mut inner = self.inner.lock().unwrap();
         if inner.prepare_check_for_reply_or_error(sequence) {
@@ -397,7 +392,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
             match inner.poll_check_for_reply_or_error(sequence) {
                 PollReply::TryAgain => {}
                 PollReply::NoReply => return Ok(None),
-                PollReply::Reply(buffer) => return Ok(GenericError::new(buffer).ok()),
+                PollReply::Reply(buffer) => return Ok(Some(buffer)),
             }
             inner = self.read_packet_and_enqueue(inner)?;
         }
@@ -447,14 +442,20 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         self.prefetch_maximum_request_bytes_impl(&mut max_bytes);
     }
 
-    fn parse_error(&self, error: GenericError) -> Result<Error, ParseError> {
+    fn parse_error<E>(&self, error: E) -> Result<crate::protocol::Error<E>, ParseError>
+    where
+        E: std::fmt::Debug + AsRef<[u8]>,
+    {
         let ext_mgr = self.extension_manager.lock().unwrap();
-        Error::parse(error, &*ext_mgr)
+        crate::protocol::Error::parse(error, &*ext_mgr)
     }
 
-    fn parse_event(&self, event: GenericEvent) -> Result<Event, ParseError> {
+    fn parse_event<E>(&self, event: E) -> Result<crate::protocol::Event<E>, ParseError>
+    where
+        E: std::fmt::Debug + AsRef<[u8]>,
+    {
         let ext_mgr = self.extension_manager.lock().unwrap();
-        Event::parse(event, &*ext_mgr)
+        crate::protocol::Event::parse(event, &*ext_mgr)
     }
 }
 

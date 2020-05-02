@@ -32,13 +32,9 @@ mod raw_ffi;
 type Buffer = <XCBConnection as RequestConnection>::Buf;
 pub type ReplyOrIdError = crate::errors::ReplyOrIdError<Buffer>;
 pub type ReplyError = crate::errors::ReplyError<Buffer>;
-pub type GenericError = crate::x11_utils::GenericError<Buffer>;
-pub type GenericEvent = crate::x11_utils::GenericEvent<Buffer>;
 pub type EventAndSeqNumber = crate::connection::EventAndSeqNumber<Buffer>;
 pub type RawEventAndSeqNumber = crate::connection::RawEventAndSeqNumber<Buffer>;
 pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
-pub type Error = crate::protocol::Error<Buffer>;
-pub type Event = crate::protocol::Event<Buffer>;
 
 /// A connection to an X11 server.
 ///
@@ -321,10 +317,7 @@ impl XCBConnection {
             // the 32-byte boundary.
             std::ptr::copy(event.add(36), event.add(32), length_field * 4);
         }
-        Ok((
-            GenericEvent::new(CSlice::new(header.into_ptr(), length))?,
-            seqno,
-        ))
+        Ok((CSlice::new(header.into_ptr(), length), seqno))
     }
 
     /// Reconstruct a full sequence number based on a partial value.
@@ -423,9 +416,7 @@ impl RequestConnection for XCBConnection {
             match (reply.is_null(), error.is_null()) {
                 (true, true) => Err(Self::connection_error_from_connection(self.conn.as_ptr())),
                 (false, true) => Ok(ReplyOrError::Reply(self.wrap_reply(reply as _, sequence))),
-                (true, false) => Ok(ReplyOrError::Error(GenericError::new(
-                    self.wrap_error(error as _, sequence),
-                )?)),
+                (true, false) => Ok(ReplyOrError::Error(self.wrap_error(error as _, sequence))),
                 // At least one of these pointers must be NULL.
                 (false, false) => unreachable!(),
             }
@@ -477,7 +468,7 @@ impl RequestConnection for XCBConnection {
     fn check_for_raw_error(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<Option<GenericError>, ConnectionError> {
+    ) -> Result<Option<Buffer>, ConnectionError> {
         let cookie = raw_ffi::xcb_void_cookie_t {
             sequence: sequence as _,
         };
@@ -485,11 +476,7 @@ impl RequestConnection for XCBConnection {
         if error.is_null() {
             Ok(None)
         } else {
-            unsafe {
-                Ok(Some(GenericError::new(
-                    self.wrap_error(error as _, sequence),
-                )?))
-            }
+            unsafe { Ok(Some(self.wrap_error(error as _, sequence))) }
         }
     }
 
@@ -501,21 +488,27 @@ impl RequestConnection for XCBConnection {
         unsafe { raw_ffi::xcb_prefetch_maximum_request_length(self.conn.as_ptr()) };
     }
 
-    fn parse_error(&self, error: GenericError) -> Result<Error, ParseError> {
+    fn parse_error<E>(&self, error: E) -> Result<crate::protocol::Error<E>, ParseError>
+    where
+        E: std::fmt::Debug + AsRef<[u8]>,
+    {
         let ext_mgr = self.ext_mgr.lock().unwrap();
-        Error::parse(error, &*ext_mgr)
+        crate::protocol::Error::parse(error, &*ext_mgr)
     }
 
-    fn parse_event(&self, event: GenericEvent) -> Result<Event, ParseError> {
+    fn parse_event<E>(&self, event: E) -> Result<crate::protocol::Event<E>, ParseError>
+    where
+        E: std::fmt::Debug + AsRef<[u8]>,
+    {
         let ext_mgr = self.ext_mgr.lock().unwrap();
-        Event::parse(event, &*ext_mgr)
+        crate::protocol::Event::parse(event, &*ext_mgr)
     }
 }
 
 impl Connection for XCBConnection {
     fn wait_for_raw_event_with_sequence(&self) -> Result<RawEventAndSeqNumber, ConnectionError> {
         if let Some(error) = self.errors.get(self) {
-            return Ok((error.1.into(), error.0));
+            return Ok((error.1, error.0));
         }
         unsafe {
             let event = raw_ffi::xcb_wait_for_event(self.conn.as_ptr());
@@ -530,7 +523,7 @@ impl Connection for XCBConnection {
         &self,
     ) -> Result<Option<RawEventAndSeqNumber>, ConnectionError> {
         if let Some(error) = self.errors.get(self) {
-            return Ok(Some((error.1.into(), error.0)));
+            return Ok(Some((error.1, error.0)));
         }
         unsafe {
             let event = raw_ffi::xcb_poll_for_event(self.conn.as_ptr());
