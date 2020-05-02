@@ -1,3 +1,8 @@
+//! Parser for protocol XML descriptions.
+//!
+//! This module contains the [`Parser`] that allows parsing a [`roxmltree::Node`] into a
+//! [`defs::Module`].
+
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::str::FromStr;
@@ -6,27 +11,56 @@ use once_cell::unsync::OnceCell;
 
 use crate::defs;
 
+/// An error that occurred while parsing an error.
 #[derive(Debug)]
 pub enum ParseError {
+    /// The XML tree is in some way malformed.
+    ///
+    /// Possible errors include missing or duplicate tags, or tags that were not understood, among
+    /// others.
     InvalidXml,
+
+    /// The module already contains a namespace with this header name.
     RepeatedHeaderName,
-    RepeatedRequestName,
-    RepeatedEventName,
-    RepeatedErrorName,
+
+    /// Some type was specified multiple times.
+    ///
+    /// An example for this error is two requests with the same name.
     RepeatedTypeName,
+
+    /// A `<pad>` field is invalid.
+    ///
+    /// A `<pad>` must contain either a `bytes` or `align` attribute. This property was violated.
     InvalidPad,
+
+    /// A `<field>` contains an invalid set of properties.
+    ///
+    /// At most one of the attributes `enum`, `altenum`, `mask`, or `altmask` may be present.
+    /// However, some field had more than this.
     InvalidFieldValueSet,
 }
 
+/// A `Parser` that adds namespaces to a module.
+///
+/// One instance of this struct can be used to parse multiple namespaces, one after another.
 pub struct Parser {
     module: Rc<defs::Module>,
 }
 
 impl Parser {
+    /// Create a new parser that adds its information to the given module
     pub fn new(module: Rc<defs::Module>) -> Self {
         Self { module }
     }
 
+    /// Parse an XML tree.
+    ///
+    /// This function parses the XML tree that is described by the given `node`. This `node` must
+    /// describe a complete namespace, which means that it should correspond to the root tag of an
+    /// XML document.
+    ///
+    /// The resulting namespace is added to the module that this parser was constructed for. A
+    /// reference to the namespace is also returned.
     pub fn parse_namespace(
         &mut self,
         node: roxmltree::Node<'_, '_>,
