@@ -1,10 +1,3 @@
-use std::mem::forget;
-#[cfg(unix)]
-use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
-
-#[cfg(not(unix))]
-type RawFd = std::os::raw::c_int;
-
 #[cfg(feature = "allow-unsafe-code")]
 mod unsafe_code {
     use std::mem::forget;
@@ -93,55 +86,86 @@ mod unsafe_code {
 #[cfg(feature = "allow-unsafe-code")]
 pub use unsafe_code::CSlice;
 
-/// A simple wrapper around RawFd that closes the fd on drop.
-#[derive(Debug, Hash, PartialEq, Eq)]
-pub struct RawFdContainer(RawFd);
+#[cfg(unix)]
+mod raw_fd_container {
+    use std::mem::forget;
+    #[cfg(unix)]
+    use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
 
-impl Drop for RawFdContainer {
-    fn drop(&mut self) {
-        #[cfg(unix)]
-        {
-            use nix::unistd::close;
-            close(self.0).expect("Close failed in some RawFdContainer");
+    /// A simple wrapper around RawFd that closes the fd on drop.
+    ///
+    /// On non-unix systems, this type is empty and does not provide
+    /// any method.
+    #[derive(Debug, Hash, PartialEq, Eq)]
+    pub struct RawFdContainer(RawFd);
+
+    impl Drop for RawFdContainer {
+        fn drop(&mut self) {
+            let _ = nix::unistd::close(self.0);
         }
     }
-}
 
-impl RawFdContainer {
-    /// Create a new `RawFdContainer` for the given `RawFd`.
-    ///
-    /// The `RawFdContainer` takes ownership of the `RawFd` and closes it on drop.
-    ///
-    /// This function panics on non-unix systems.
-    pub fn new(fd: RawFd) -> RawFdContainer {
-        if cfg!(unix) {
+    impl RawFdContainer {
+        /// Create a new `RawFdContainer` for the given `RawFd`.
+        ///
+        /// The `RawFdContainer` takes ownership of the `RawFd` and closes it on drop.
+        pub fn new(fd: RawFd) -> Self {
             RawFdContainer(fd)
-        } else {
-            unimplemented!("RawFdContainer is only implemented on Unix-like systems");
+        }
+
+        /// Tries to clone the `RawFdContainer` creating a new FD
+        /// with `dup`. The new `RawFdContainer` will take ownership
+        /// of the `dup`ed version, whereas the original `RawFdContainer`
+        /// will keep the ownership of its FD.
+        pub fn try_clone(&self) -> Result<Self, std::io::Error> {
+            Ok(Self::new(
+                nix::unistd::dup(self.0).map_err(|_| std::io::Error::last_os_error())?,
+            ))
+        }
+
+        /// Get the `RawFd` out of this `RawFdContainer`.
+        ///
+        /// This function would be an implementation of `IntoRawFd` if that were possible. However, it
+        /// causes a conflict with an `impl` from libcore...
+        pub fn into_raw_fd(self) -> RawFd {
+            let fd = self.0;
+            forget(self);
+            fd
+        }
+
+        /// Consumes the `RawFdContainer` and closes the wrapped FD with
+        /// the `close` system call.
+        ///
+        /// This is similar to dropping the `RawFdContainer`, but it allows
+        /// the caller to handle errors.
+        pub fn close(self) -> Result<(), std::io::Error> {
+            let fd = self.into_raw_fd();
+            nix::unistd::close(fd).map_err(|_| std::io::Error::last_os_error())
         }
     }
 
-    /// Get the `RawFd` out of this `RawFdContainer`.
+    impl<T: IntoRawFd> From<T> for RawFdContainer {
+        fn from(fd: T) -> Self {
+            Self::new(fd.into_raw_fd())
+        }
+    }
+
+    impl AsRawFd for RawFdContainer {
+        fn as_raw_fd(&self) -> RawFd {
+            self.0
+        }
+    }
+}
+
+#[cfg(not(unix))]
+mod raw_fd_container {
+    /// A simple wrapper around RawFd that closes the fd on drop.
     ///
-    /// This function would be an implementation of `IntoRawFd` if that were possible. However, it
-    /// causes a conflict with an `impl` from libcore...
-    pub fn into_raw_fd(self) -> RawFd {
-        let fd = self.0;
-        forget(self);
-        fd
-    }
+    /// On non-unix systems, this type is empty and does not provide
+    /// any method.
+    #[allow(missing_copy_implementations)]
+    #[derive(Debug, Hash, PartialEq, Eq)]
+    pub struct RawFdContainer(());
 }
 
-#[cfg(unix)]
-impl<T: IntoRawFd> From<T> for RawFdContainer {
-    fn from(fd: T) -> RawFdContainer {
-        RawFdContainer::new(fd.into_raw_fd())
-    }
-}
-
-#[cfg(unix)]
-impl AsRawFd for RawFdContainer {
-    fn as_raw_fd(&self) -> RawFd {
-        self.0
-    }
-}
+pub use raw_fd_container::RawFdContainer;
