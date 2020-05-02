@@ -168,6 +168,7 @@ impl WriteFD for Stream {
         }
         #[cfg(not(unix))]
         {
+            use std::io::{Error, ErrorKind, Write};
             if !fds.is_empty() {
                 return Err(Error::new(ErrorKind::Other, "FD passing is unsupported"));
             }
@@ -188,6 +189,7 @@ impl WriteFD for Stream {
         }
         #[cfg(not(unix))]
         {
+            use std::io::{Error, ErrorKind, Write};
             if !fds.is_empty() {
                 return Err(Error::new(ErrorKind::Other, "FD passing is unsupported"));
             }
@@ -235,6 +237,7 @@ impl ReadFD for Stream {
         }
         #[cfg(not(unix))]
         {
+            use std::io::Read;
             match self {
                 Stream::TcpStream(stream) => stream.read(buf),
             }
