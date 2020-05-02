@@ -32,8 +32,6 @@ pub type GenericEvent = crate::x11_utils::GenericEvent<Buffer>;
 pub type EventAndSeqNumber = crate::connection::EventAndSeqNumber<Buffer>;
 pub type RawEventAndSeqNumber = crate::connection::RawEventAndSeqNumber<Buffer>;
 pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
-pub type Error = crate::protocol::Error<GenericError>;
-pub type Event = crate::protocol::Event<GenericEvent>;
 
 #[derive(Debug)]
 enum MaxRequestBytes {
