@@ -99,7 +99,7 @@ mod fake_stream {
         let (send, recv) = channel();
         let pending = Vec::new();
         let read = FakeStreamRead { recv, pending };
-        let write = FakeStreamWrite { send, seqno: 0 };
+        let write = FakeStreamWrite { send, seqno: 0, skip: 0 };
         (read, write)
     }
 
@@ -153,10 +153,17 @@ mod fake_stream {
     pub(crate) struct FakeStreamWrite {
         send: Sender<Packet>,
         seqno: SequenceNumber,
+        skip: usize
     }
 
     impl Write for FakeStreamWrite {
         fn write(&mut self, buf: &[u8]) -> Result<usize, std::io::Error> {
+            if self.skip > 0 {
+                assert_eq!(self.skip, buf.len());
+                self.skip = 0;
+                return Ok(buf.len());
+            }
+
             self.seqno += 1;
             match buf[0] {
                 GET_INPUT_FOCUS_REQUEST => self
@@ -166,6 +173,8 @@ mod fake_stream {
                 SEND_EVENT_REQUEST => self.send.send(Packet::Event).unwrap(),
                 _ => unimplemented!(),
             }
+            // Compute how much of the package was not yet received
+            self.skip = usize::from(u16::from_ne_bytes([buf[2], buf[3]])) * 4 - buf.len();
             Ok(buf.len())
         }
 
