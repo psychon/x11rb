@@ -1412,7 +1412,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 outln!(out, "}}");
             }
         }
-        // TODO: `From` impl for each event.
 
         outln!(out, "");
     }
