@@ -44,7 +44,10 @@ pub trait WriteFD {
             let old_fds_len = fds.len();
             match self.write(buf, &mut fds) {
                 Ok(0) if fds.len() == old_fds_len => {
-                    return Err(Error::new(ErrorKind::WriteZero, "failed to write whole buffer"));
+                    return Err(Error::new(
+                        ErrorKind::WriteZero,
+                        "failed to write whole buffer",
+                    ));
                 }
                 Ok(n) => buf = &buf[n..],
                 Err(ref e) if e.kind() == ErrorKind::Interrupted => {}
@@ -90,10 +93,7 @@ impl<W: Write + std::fmt::Debug> WriteFD for WriteFDWrapper<W> {
 // Check that the given argument is an empty slice
 fn check_no_fds(fds: &[RawFdContainer]) -> Result<()> {
     if !fds.is_empty() {
-        Err(Error::new(
-            ErrorKind::Other,
-            "FD passing is unsupported",
-        ))
+        Err(Error::new(ErrorKind::Other, "FD passing is unsupported"))
     } else {
         Ok(())
     }
@@ -128,13 +128,22 @@ impl<W: WriteFD + std::fmt::Debug> BufWriteFD<W> {
         let mut written = 0;
         let mut ret = Ok(());
         while written < self.data_buf.len() || !self.fd_buf.is_empty() {
-            match self.inner.write(&self.data_buf[written..], &mut self.fd_buf) {
+            match self
+                .inner
+                .write(&self.data_buf[written..], &mut self.fd_buf)
+            {
                 Ok(0) => {
                     if written == self.data_buf.len() {
                         assert!(!self.fd_buf.is_empty());
-                        ret = Err(Error::new(ErrorKind::WriteZero, "failed to write the buffered FDs"));
+                        ret = Err(Error::new(
+                            ErrorKind::WriteZero,
+                            "failed to write the buffered FDs",
+                        ));
                     } else {
-                        ret = Err(Error::new(ErrorKind::WriteZero, "failed to write the buffered data"));
+                        ret = Err(Error::new(
+                            ErrorKind::WriteZero,
+                            "failed to write the buffered data",
+                        ));
                     }
                     break;
                 }
@@ -194,10 +203,19 @@ pub trait ReadFD {
     /// with which they are received. However, file descriptors may not be received later than the
     /// data that was sent at the same time. Instead, file descriptors may only be received
     /// earlier.
-    fn read_exact(&mut self, mut buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> Result<()> {
+    fn read_exact(
+        &mut self,
+        mut buf: &mut [u8],
+        fd_storage: &mut Vec<RawFdContainer>,
+    ) -> Result<()> {
         while !buf.is_empty() {
             match self.read(buf, fd_storage) {
-                Ok(0) => return Err(Error::new(ErrorKind::UnexpectedEof, "failed to fill the whole buffer")),
+                Ok(0) => {
+                    return Err(Error::new(
+                        ErrorKind::UnexpectedEof,
+                        "failed to fill the whole buffer",
+                    ))
+                }
                 Ok(n) => buf = &mut buf[n..],
                 Err(ref e) if e.kind() == ErrorKind::Interrupted => {}
                 Err(e) => return Err(e),

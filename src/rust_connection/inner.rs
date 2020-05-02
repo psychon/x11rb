@@ -183,7 +183,9 @@ impl ConnectionInner {
                     Some(DiscardMode::DiscardReply) => {
                         self.pending_events.push_back((seqno, packet))
                     }
-                    None => self.pending_replies.push_back((seqno, (packet, Vec::new()))),
+                    None => self
+                        .pending_replies
+                        .push_back((seqno, (packet, Vec::new()))),
                 }
             } else {
                 // Unexpected error, send to main loop
@@ -200,9 +202,7 @@ impl ConnectionInner {
                     // likely poison some Mutex and produce an error state that way).
                     panic!("FIXME: The server sent us too few FDs. The connection is now unusable since we will never be sure again which FD belongs to which reply.");
                 }
-                fds = self.pending_fds
-                    .drain(..num_fds)
-                    .collect();
+                fds = self.pending_fds.drain(..num_fds).collect();
             } else {
                 fds = Vec::new();
             }
@@ -223,7 +223,10 @@ impl ConnectionInner {
     ///
     /// This function is meant to be used for requests that have a reply. Such requests always
     /// cause a reply or an error to be sent.
-    pub(crate) fn poll_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Option<BufWithFds> {
+    pub(crate) fn poll_for_reply_or_error(
+        &mut self,
+        sequence: SequenceNumber,
+    ) -> Option<BufWithFds> {
         for (index, (seqno, _packet)) in self.pending_replies.iter().enumerate() {
             if *seqno == sequence {
                 return Some(self.pending_replies.remove(index).unwrap().1);

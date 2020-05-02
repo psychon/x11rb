@@ -23,15 +23,8 @@ mod parse_display;
 mod stream;
 mod xauth;
 
+pub use fd_read_write::{BufReadFD, BufWriteFD, ReadFD, ReadFDWrapper, WriteFD, WriteFDWrapper};
 use inner::PollReply;
-pub use fd_read_write::{
-    BufReadFD,
-    BufWriteFD,
-    ReadFD,
-    ReadFDWrapper,
-    WriteFD,
-    WriteFDWrapper,
-};
 
 type Buffer = <RustConnection as RequestConnection>::Buf;
 pub type ReplyOrIdError = crate::errors::ReplyOrIdError<Buffer>;
@@ -62,8 +55,10 @@ pub(crate) enum ReplyFDKind {
 
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
-pub struct RustConnection<R: ReadFD = BufReadFD<stream::Stream>, W: WriteFD = BufWriteFD<stream::Stream>>
-{
+pub struct RustConnection<
+    R: ReadFD = BufReadFD<stream::Stream>,
+    W: WriteFD = BufWriteFD<stream::Stream>,
+> {
     inner: Mutex<inner::ConnectionInner>,
     read: Mutex<R>,
     write: Mutex<W>,
@@ -577,7 +572,8 @@ fn read_setup(read: &mut impl ReadFD) -> Result<Setup, ConnectError> {
         return Err(std::io::Error::new(
             std::io::ErrorKind::Other,
             "unexpectedly received FDs in connection setup",
-        ).into());
+        )
+        .into());
     }
     match setup[0] {
         // 0 is SetupFailed
@@ -594,7 +590,11 @@ fn read_setup(read: &mut impl ReadFD) -> Result<Setup, ConnectError> {
 /// Write a set of buffers on a Writer.
 ///
 /// This is basically `Write::write_all_vectored`, but on stable.
-fn write_all_vectored(write: &mut impl WriteFD, bufs: &[IoSlice<'_>], mut fds: Vec<RawFdContainer>) -> Result<(), std::io::Error> {
+fn write_all_vectored(
+    write: &mut impl WriteFD,
+    bufs: &[IoSlice<'_>],
+    mut fds: Vec<RawFdContainer>,
+) -> Result<(), std::io::Error> {
     // FIXME: Introduce a write_vectored() method on WriteFD (or even better: write_all_vectored())
     for buf in bufs {
         write.write_all(&**buf, fds)?;
@@ -634,7 +634,7 @@ fn write_all_vectored(write: &mut impl WriteFD, bufs: &[IoSlice<'_>], mut fds: V
 mod test {
     use std::io::{IoSlice, Read, Result, Write};
 
-    use super::{ReadFD, WriteFD, read_setup, write_all_vectored};
+    use super::{read_setup, write_all_vectored, ReadFD, WriteFD};
     use crate::errors::ConnectError;
     use crate::protocol::xproto::{ImageOrder, Setup, SetupAuthenticate, SetupFailed};
     use crate::utils::RawFdContainer;

@@ -99,7 +99,11 @@ mod fake_stream {
         let (send, recv) = channel();
         let pending = Vec::new();
         let read = FakeStreamRead { recv, pending };
-        let write = FakeStreamWrite { send, seqno: 0, skip: 0 };
+        let write = FakeStreamWrite {
+            send,
+            seqno: 0,
+            skip: 0,
+        };
         (read, write)
     }
 
@@ -136,7 +140,11 @@ mod fake_stream {
     }
 
     impl ReadFD for FakeStreamRead {
-        fn read(&mut self, buf: &mut [u8], _fd_storage: &mut Vec<RawFdContainer>) -> Result<usize, std::io::Error> {
+        fn read(
+            &mut self,
+            buf: &mut [u8],
+            _fd_storage: &mut Vec<RawFdContainer>,
+        ) -> Result<usize, std::io::Error> {
             if self.pending.is_empty() {
                 let packet = self.recv.recv().unwrap();
                 self.pending.extend(packet.to_raw());
@@ -153,11 +161,15 @@ mod fake_stream {
     pub(crate) struct FakeStreamWrite {
         send: Sender<Packet>,
         seqno: SequenceNumber,
-        skip: usize
+        skip: usize,
     }
 
     impl WriteFD for FakeStreamWrite {
-        fn write(&mut self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize, std::io::Error> {
+        fn write(
+            &mut self,
+            buf: &[u8],
+            fds: &mut Vec<RawFdContainer>,
+        ) -> Result<usize, std::io::Error> {
             assert!(fds.is_empty());
             if self.skip > 0 {
                 assert_eq!(self.skip, buf.len());

@@ -1,9 +1,9 @@
 use std::io::Result;
 use std::net::{Ipv4Addr, SocketAddr, TcpStream};
 #[cfg(unix)]
-use std::os::unix::net::UnixStream;
-#[cfg(unix)]
 use std::os::unix::io::{AsRawFd, RawFd};
+#[cfg(unix)]
+use std::os::unix::net::UnixStream;
 
 use super::fd_read_write::{ReadFD, WriteFD};
 use super::xauth::Family;
@@ -137,14 +137,15 @@ impl WriteFD for Stream {
     fn write(&mut self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
         #[cfg(unix)]
         {
-            use nix::sys::{socket::{ControlMessage, MsgFlags, sendmsg}, uio::IoVec};
+            use nix::sys::{
+                socket::{ControlMessage, MsgFlags, sendmsg},
+                uio::IoVec,
+            };
 
             let iov = [IoVec::from_slice(buf)];
             let fd = self.as_raw_fd();
             let res = if !fds.is_empty() {
-                let fds = fds.iter()
-                    .map(|fd| fd.as_raw_fd())
-                    .collect::<Vec<_>>();
+                let fds = fds.iter().map(|fd| fd.as_raw_fd()).collect::<Vec<_>>();
                 let cmsgs = [ControlMessage::ScmRights(&fds[..])];
                 sendmsg(fd, &iov, &cmsgs, MsgFlags::empty(), None)
             } else {
@@ -161,10 +162,7 @@ impl WriteFD for Stream {
         #[cfg(not(unix))]
         {
             if !fds.is_empty() {
-                return Err(Error::new(
-                    ErrorKind::Other,
-                    "FD passing is unsupported",
-                ));
+                return Err(Error::new(ErrorKind::Other, "FD passing is unsupported"));
             }
             match self {
                 Stream::TcpStream(stream) => stream.write(buf),
@@ -182,7 +180,10 @@ impl ReadFD for Stream {
     fn read(&mut self, buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> Result<usize> {
         #[cfg(unix)]
         {
-            use nix::sys::{socket::{ControlMessageOwned, MsgFlags, recvmsg}, uio::IoVec};
+            use nix::sys::{
+                socket::{ControlMessageOwned, MsgFlags, recvmsg},
+                uio::IoVec,
+            };
 
             // Chosen by checking what libxcb does
             const MAX_FDS_RECEIVED: usize = 16;
@@ -194,7 +195,8 @@ impl ReadFD for Stream {
             // Nothing touched errno since recvmsg() failed
             let msg = msg.map_err(|_| std::io::Error::last_os_error())?;
 
-            let fds_received = msg.cmsgs()
+            let fds_received = msg
+                .cmsgs()
                 .flat_map(|cmsg| match cmsg {
                     ControlMessageOwned::ScmRights(r) => r,
                     _ => Vec::new(),
