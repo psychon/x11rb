@@ -158,7 +158,7 @@ mod test {
     use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
     use crate::errors::{ConnectionError, ParseError};
     use crate::utils::RawFdContainer;
-    use crate::x11_utils::{ExtInfoProvider, ExtensionInformation, GenericError};
+    use crate::x11_utils::{ExtInfoProvider, ExtensionInformation};
 
     use super::{CheckState, ExtensionManager};
 
@@ -250,7 +250,7 @@ mod test {
         fn check_for_raw_error(
             &self,
             _sequence: SequenceNumber,
-        ) -> Result<Option<GenericError<Vec<u8>>>, ConnectionError> {
+        ) -> Result<Option<Vec<u8>>, ConnectionError> {
             unimplemented!()
         }
 
@@ -262,17 +262,17 @@ mod test {
             unimplemented!()
         }
 
-        fn parse_error(
-            &self,
-            _error: GenericError<Self::Buf>,
-        ) -> Result<crate::protocol::Error<Self::Buf>, ParseError> {
+        fn parse_error<E>(&self, _error: E) -> Result<crate::protocol::Error<E>, ParseError>
+        where
+            E: std::fmt::Debug + AsRef<[u8]>,
+        {
             unimplemented!()
         }
 
-        fn parse_event(
-            &self,
-            _event: crate::x11_utils::GenericEvent<Self::Buf>,
-        ) -> Result<crate::protocol::Event<Self::Buf>, ParseError> {
+        fn parse_event<E>(&self, _event: E) -> Result<crate::protocol::Event<E>, ParseError>
+        where
+            E: std::fmt::Debug + AsRef<[u8]>,
+        {
             unimplemented!()
         }
     }

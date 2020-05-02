@@ -29,12 +29,6 @@ struct NamespaceGenerator<'ns, 'c> {
 
     /// `Option` or `std::option::Option`
     option_name: &'static str,
-
-    /// `GenericEvent` or `crate::x11_utils::GenericEvent`
-    generic_event_name: &'static str,
-
-    /// `GenericError` or `crate::x11_utils::GenericError`
-    generic_error_name: &'static str,
 }
 
 impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
@@ -45,22 +39,10 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         } else {
             "Option"
         };
-        let generic_event_name = if ns.header == "present" {
-            "crate::x11_utils::GenericEvent"
-        } else {
-            "GenericEvent"
-        };
-        let generic_error_name = if ns.header == "glx" {
-            "crate::x11_utils::GenericError"
-        } else {
-            "GenericError"
-        };
         NamespaceGenerator {
             ns,
             caches,
             option_name,
-            generic_event_name,
-            generic_error_name,
         }
     }
 
@@ -78,8 +60,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "#[allow(unused_imports)]");
         outln!(out, "use crate::utils::RawFdContainer;");
         outln!(out, "#[allow(unused_imports)]");
-        outln!(out, "use crate::x11_utils::Event as _;");
-        outln!(out, "#[allow(unused_imports)]");
         outln!(out, "use crate::x11_utils::{{Serialize, TryParse}};");
         outln!(out, "use crate::connection::RequestConnection;");
         outln!(out, "#[allow(unused_imports)]");
@@ -91,14 +71,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             outln!(out, "use crate::cookie::ListFontsWithInfoCookie;");
         }
         outln!(out, "use crate::errors::{{ConnectionError, ParseError}};");
-        if self.ns.header != "present" {
-            outln!(out, "#[allow(unused_imports)]");
-            outln!(out, "use crate::x11_utils::GenericEvent;");
-        }
-        if self.ns.header != "glx" {
-            outln!(out, "#[allow(unused_imports)]");
-            outln!(out, "use crate::x11_utils::GenericError;");
-        }
 
         let mut imports = self
             .ns
@@ -1033,43 +1005,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             out,
         );
 
-        outln!(
-            out,
-            "impl<B: AsRef<[u8]>> TryFrom<{}<B>> for {} {{",
-            self.generic_event_name,
-            full_name,
-        );
-        out.indented(|out| {
-            outln!(out, "type Error = ParseError;");
-            outln!(out, "");
-            outln!(
-                out,
-                "fn try_from(value: {}<B>) -> Result<Self, Self::Error> {{",
-                self.generic_event_name,
-            );
-            outln!(out.indent(), "Self::try_from(value.raw_bytes())");
-            outln!(out, "}}");
-        });
-        outln!(out, "}}");
-
-        outln!(
-            out,
-            "impl<B: AsRef<[u8]>> TryFrom<&{}<B>> for {} {{",
-            self.generic_event_name,
-            full_name,
-        );
-        out.indented(|out| {
-            outln!(out, "type Error = ParseError;");
-            outln!(
-                out,
-                "fn try_from(value: &{}<B>) -> Result<Self, Self::Error> {{",
-                self.generic_event_name
-            );
-            outln!(out.indent(), "Self::try_from(value.raw_bytes())");
-            outln!(out, "}}");
-        });
-        outln!(out, "}}");
-
         if !event_full_def.xge {
             let deducible_fields = gather_deducible_fields(&*fields);
             self.emit_event_or_error_serialize(&full_name, &*fields, &deducible_fields, out);
@@ -1129,48 +1064,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             None,
             out,
         );
-
-        let msg = "Buffer should be large enough so that parsing cannot fail";
-        outln!(
-            out,
-            "impl<B: AsRef<[u8]>> From<{}<B>> for {} {{",
-            self.generic_error_name,
-            full_name,
-        );
-        out.indented(|out| {
-            outln!(
-                out,
-                "fn from(value: {}<B>) -> Self {{",
-                self.generic_error_name,
-            );
-            outln!(
-                out.indent(),
-                "Self::try_from(value.raw_bytes()).expect(\"{}\")",
-                msg,
-            );
-            outln!(out, "}}");
-        });
-        outln!(out, "}}");
-        outln!(
-            out,
-            "impl<B: AsRef<[u8]>> From<&{}<B>> for {} {{",
-            self.generic_error_name,
-            full_name
-        );
-        out.indented(|out| {
-            outln!(
-                out,
-                "fn from(value: &{}<B>) -> Self {{",
-                self.generic_error_name,
-            );
-            outln!(
-                out.indent(),
-                "Self::try_from(value.raw_bytes()).expect(\"{}\")",
-                msg
-            );
-            outln!(out, "}}");
-        });
-        outln!(out, "}}");
 
         let deducible_fields = gather_deducible_fields(&*fields);
         self.emit_event_or_error_serialize(&full_name, &*fields, &deducible_fields, out);

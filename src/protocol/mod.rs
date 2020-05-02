@@ -3,12 +3,7 @@
 
 use std::convert::{TryFrom, TryInto};
 use crate::errors::ParseError;
-use crate::x11_utils::{
-    Event as _,
-    ExtInfoProvider,
-    GenericError,
-    GenericEvent,
-};
+use crate::x11_utils::ExtInfoProvider;
 
 pub mod xproto;
 pub mod bigreq;
@@ -72,7 +67,7 @@ pub mod xvmc;
 /// Enumeration of all possible X11 errors.
 #[derive(Debug, Clone)]
 pub enum Error<B: std::fmt::Debug + AsRef<[u8]>> {
-    Unknown(GenericError<B>),
+    Unknown(B),
     Access(xproto::AccessError),
     Alloc(xproto::AllocError),
     Atom(xproto::AtomError),
@@ -190,10 +185,10 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
     /// Parse a generic X11 error into a concrete error type.
     #[allow(clippy::cognitive_complexity)]
     pub fn parse(
-        error: GenericError<B>,
+        error: B,
         ext_info_provider: &dyn ExtInfoProvider,
     ) -> Result<Self, ParseError> {
-        let error_code = error.error_code();
+        let error_code = error_code(error.as_ref())?;
 
         // Check if this is a core protocol error
         match error_code {
@@ -352,7 +347,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
     /// Get the sequence number contained in this X11 error
     pub fn wire_sequence_number(&self) -> u16 {
         match self {
-            Error::Unknown(value) => value.raw_sequence_number().expect("Errors should always have a sequence number"),
+            Error::Unknown(value) => sequence_number(value.as_ref()).unwrap(),
             Error::Access(value) => value.sequence,
             Error::Alloc(value) => value.sequence,
             Error::Atom(value) => value.sequence,
@@ -470,7 +465,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
     /// Get the error code of this X11 error
     pub fn error_code(&self) -> u8 {
         match self {
-            Error::Unknown(value) => value.error_code(),
+            Error::Unknown(value) => error_code(value.as_ref()).unwrap(),
             Error::Access(value) => value.error_code,
             Error::Alloc(value) => value.error_code,
             Error::Atom(value) => value.error_code,
@@ -590,7 +585,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
     /// This is not `pub` because it should always be `0` for errors.
     fn raw_response_type(&self) -> u8 {
         match self {
-            Error::Unknown(value) => value.response_type(),
+            Error::Unknown(value) => response_type(value.as_ref()).unwrap(),
             Error::Access(value) => value.response_type,
             Error::Alloc(value) => value.response_type,
             Error::Atom(value) => value.response_type,
@@ -709,7 +704,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
 /// Enumeration of all possible X11 events.
 #[derive(Debug, Clone)]
 pub enum Event<B: std::fmt::Debug + AsRef<[u8]>> {
-    Unknown(GenericEvent<B>),
+    Unknown(B),
     Error(Error<B>),
     ButtonPress(xproto::ButtonPressEvent),
     ButtonRelease(xproto::ButtonReleaseEvent),
@@ -907,14 +902,14 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
     /// Parse a generic X11 event into a concrete event type.
     #[allow(clippy::cognitive_complexity)]
     pub fn parse(
-        event: GenericEvent<B>,
+        event: B,
         ext_info_provider: &dyn ExtInfoProvider,
     ) -> Result<Self, ParseError> {
-        let event_code = event.response_type();
+        let event_code = response_type(event.as_ref())?;
 
         // Check if this is a core protocol event or error, or from the generic event extension
         match event_code {
-            0 => return Ok(Self::Error(Error::parse(event.try_into()?, ext_info_provider)?)),
+            0 => return Ok(Self::Error(Error::parse(event, ext_info_provider)?)),
             xproto::BUTTON_PRESS_EVENT => return Ok(Self::ButtonPress(event.as_ref().try_into()?)),
             xproto::BUTTON_RELEASE_EVENT => return Ok(Self::ButtonRelease(event.as_ref().try_into()?)),
             xproto::CIRCULATE_NOTIFY_EVENT => return Ok(Self::CirculateNotify(event.as_ref().try_into()?)),
@@ -1057,7 +1052,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
                 if event_code != ext_info.first_event {
                     return Ok(Self::Unknown(event));
                 }
-                match event.raw_bytes()[1] {
+                match *event.as_ref().get(1).ok_or(ParseError::ParseError)? {
                     xkb::ACCESS_X_NOTIFY_EVENT => Ok(Self::XkbAccessXNotify(event.as_ref().try_into()?)),
                     xkb::ACTION_MESSAGE_EVENT => Ok(Self::XkbActionMessage(event.as_ref().try_into()?)),
                     xkb::BELL_NOTIFY_EVENT => Ok(Self::XkbBellNotify(event.as_ref().try_into()?)),
@@ -1094,10 +1089,10 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
     }
 
     fn from_generic_event(
-        event: GenericEvent<B>,
+        event: B,
         ext_info_provider: &dyn ExtInfoProvider,
     ) -> Result<Self, ParseError> {
-        let ge_event = xproto::GeGenericEvent::try_from(event.raw_bytes())?;
+        let ge_event = xproto::GeGenericEvent::try_from(event.as_ref())?;
         let ext_name = ext_info_provider
             .get_from_major_opcode(ge_event.extension)
             .map(|(name, _)| name);
@@ -1151,7 +1146,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
     /// Get the sequence number contained in this X11 event
     pub fn wire_sequence_number(&self) -> Option<u16> {
         match self {
-            Event::Unknown(value) => value.raw_sequence_number(),
+            Event::Unknown(value) => sequence_number(value.as_ref()).ok(),
             Event::Error(value) => Some(value.wire_sequence_number()),
             Event::ButtonPress(value) => Some(value.sequence),
             Event::ButtonRelease(value) => Some(value.sequence),
@@ -1355,7 +1350,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
     /// See also the `response_type()`, `server_generated()` and `sent_event()` methods.
     pub fn raw_response_type(&self) -> u8 {
         match self {
-            Event::Unknown(value) => value.raw_response_type(),
+            Event::Unknown(value) => response_type(value.as_ref()).unwrap(),
             Event::Error(value) => value.raw_response_type(),
             Event::ButtonPress(value) => value.response_type,
             Event::ButtonRelease(value) => value.response_type,
@@ -1570,4 +1565,25 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
     pub fn sent_event(&self) -> bool {
         self.raw_response_type() & 0x80 != 0
     }
+}
+
+/// Get the response type out of the raw bytes of an X11 error or event.
+fn response_type(raw_bytes: &[u8]) -> Result<u8, ParseError> {
+    raw_bytes.get(0)
+        .map(|x| x & 0x7f)
+        .ok_or(ParseError::ParseError)
+}
+
+/// Get the error code out of the raw bytes of an X11 error.
+fn error_code(raw_bytes: &[u8]) -> Result<u8, ParseError> {
+    raw_bytes.get(1)
+        .copied()
+        .ok_or(ParseError::ParseError)
+}
+
+/// Get the sequence number out of an X11 packet.
+fn sequence_number(raw_bytes: &[u8]) -> Result<u16, ParseError> {
+    raw_bytes.get(2..4)
+        .map(|b| u16::from_ne_bytes(b.try_into().unwrap()))
+        .ok_or(ParseError::ParseError)
 }

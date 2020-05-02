@@ -4,7 +4,6 @@ use x11rb::connection::Connection as _;
 use x11rb::protocol::xproto::{
     ClientMessageData, ClientMessageEvent, ConnectionExt as _, EventMask, CLIENT_MESSAGE_EVENT,
 };
-use x11rb::x11_utils::Event as _;
 
 // Regression test for https://github.com/psychon/x11rb/issues/231
 #[test]
@@ -47,7 +46,7 @@ fn multithread_test() {
     // Main thread: wait for events until finished
     loop {
         let event = conn.wait_for_raw_event().unwrap();
-        if event.response_type() == CLIENT_MESSAGE_EVENT {
+        if event[0] == CLIENT_MESSAGE_EVENT {
             break;
         }
     }
