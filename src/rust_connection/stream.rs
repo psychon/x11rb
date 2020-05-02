@@ -2,8 +2,12 @@ use std::io::{IoSlice, IoSliceMut, Read, Result, Write};
 use std::net::{Ipv4Addr, SocketAddr, TcpStream};
 #[cfg(unix)]
 use std::os::unix::net::UnixStream;
+#[cfg(unix)]
+use std::os::unix::io::{AsRawFd, RawFd};
 
+use super::fd_read_write::{ReadFD, WriteFD};
 use super::xauth::Family;
+use crate::utils::RawFdContainer;
 
 /// A wrapper around a `TcpStream` or `UnixStream`.
 #[derive(Debug)]
@@ -117,6 +121,92 @@ impl Stream {
             Stream::TcpStream(stream) => Ok(Stream::TcpStream(stream.try_clone()?)),
             #[cfg(unix)]
             Stream::UnixStream(stream) => Ok(Stream::UnixStream(stream.try_clone()?)),
+        }
+    }
+
+    #[cfg(unix)]
+    fn as_raw_fd(&self) -> RawFd {
+        match self {
+            Stream::TcpStream(stream) => stream.as_raw_fd(),
+            Stream::UnixStream(stream) => stream.as_raw_fd(),
+        }
+    }
+}
+
+impl WriteFD for Stream {
+    fn write(&mut self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
+        #[cfg(unix)]
+        {
+            use nix::sys::{socket::{ControlMessage, MsgFlags, sendmsg}, uio::IoVec};
+
+            let iov = [IoVec::from_slice(buf)];
+            let fd = self.as_raw_fd();
+            let res = if !fds.is_empty() {
+                let fds = fds.iter()
+                    .map(|fd| fd.as_raw_fd())
+                    .collect::<Vec<_>>();
+                let cmsgs = [ControlMessage::ScmRights(&fds[..])];
+                sendmsg(fd, &iov, &cmsgs, MsgFlags::empty(), None)
+            } else {
+                sendmsg(fd, &iov, &[], MsgFlags::empty(), None)
+            };
+            match res {
+                Ok(n) => Ok(n),
+                // Nothing touched errno since sendmsg() failed
+                Err(_) => Err(std::io::Error::last_os_error()),
+            }
+        }
+        #[cfg(not(unix))]
+        {
+            if !fds.is_empty() {
+                return Err(Error::new(
+                    ErrorKind::Other,
+                    "FD passing is unsupported",
+                ));
+            }
+            match self {
+                Stream::TcpStream(stream) => stream.write(buf),
+            }
+        }
+    }
+
+    fn flush(&mut self) -> Result<()> {
+        // We do no buffering
+        Ok(())
+    }
+}
+
+impl ReadFD for Stream {
+    fn read(&mut self, buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> Result<usize> {
+        #[cfg(unix)]
+        {
+            use nix::sys::{socket::{ControlMessageOwned, MsgFlags, recvmsg}, uio::IoVec};
+
+            // Chosen by checking what libxcb does
+            const MAX_FDS_RECEIVED: usize = 16;
+            let mut cmsg = nix::cmsg_space!([RawFd; MAX_FDS_RECEIVED]);
+            let iov = [IoVec::from_mut_slice(buf)];
+
+            let fd = self.as_raw_fd();
+            let msg = recvmsg(fd, &iov[..], Some(&mut cmsg), MsgFlags::empty());
+            // Nothing touched errno since recvmsg() failed
+            let msg = msg.map_err(|_| std::io::Error::last_os_error())?;
+
+            let fds_received = msg.cmsgs()
+                .flat_map(|cmsg| match cmsg {
+                    ControlMessageOwned::ScmRights(r) => r,
+                    _ => Vec::new(),
+                })
+                .map(RawFdContainer::new);
+            fd_storage.extend(fds_received);
+
+            Ok(msg.bytes)
+        }
+        #[cfg(not(unix))]
+        {
+            match self {
+                Stream::TcpStream(stream) => stream.read(buf),
+            }
         }
     }
 }
