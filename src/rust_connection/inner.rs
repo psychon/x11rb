@@ -4,6 +4,7 @@ use std::collections::VecDeque;
 
 use super::RawEventAndSeqNumber;
 use crate::connection::{DiscardMode, RequestKind, SequenceNumber};
+use crate::utils::RawFdContainer;
 use crate::x11_utils::GenericEvent;
 
 #[derive(Debug, Clone)]
@@ -38,6 +39,9 @@ pub(crate) struct ConnectionInner {
     pending_events: VecDeque<(SequenceNumber, Vec<u8>)>,
     // Replies that were read, but not yet returned to the API user
     pending_replies: VecDeque<(SequenceNumber, Vec<u8>)>,
+
+    // FDs that were read, but not yet assigned to any reply
+    pending_fds: VecDeque<RawFdContainer>,
 }
 
 impl ConnectionInner {
@@ -53,6 +57,7 @@ impl ConnectionInner {
             sent_requests: VecDeque::new(),
             pending_events: VecDeque::new(),
             pending_replies: VecDeque::new(),
+            pending_fds: VecDeque::new(),
         }
     }
 
@@ -142,7 +147,9 @@ impl ConnectionInner {
     }
 
     /// An X11 packet was received from the connection and is now enqueued into our state.
-    pub(crate) fn enqueue_packet(&mut self, packet: Vec<u8>) {
+    pub(crate) fn enqueue_packet(&mut self, packet: Vec<u8>, fds: Vec<RawFdContainer>) {
+        self.pending_fds.extend(fds);
+
         let kind = packet[0];
 
         // extract_sequence_number() updates our state and is thus important to call even when we

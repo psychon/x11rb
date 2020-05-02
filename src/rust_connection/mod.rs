@@ -249,7 +249,7 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
                 drop(inner);
 
                 // 2.2. Block the thread until a packet is received.
-                let packet = read_packet(&mut *lock)?;
+                let (packet, fds) = read_packet(&mut *lock)?;
 
                 // 2.3. Relock `inner` to enqueue the packet.
                 inner = self.inner.lock().unwrap();
@@ -264,7 +264,7 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
                 drop(lock);
 
                 // 2.5. Actually enqueue the read packet.
-                inner.enqueue_packet(packet);
+                inner.enqueue_packet(packet, fds);
 
                 // 2.6. Notify threads that a packet has been enqueued,
                 // so other threads waiting on 1.1 can return.
@@ -499,8 +499,7 @@ impl<R: ReadFD, W: WriteFD> Connection for RustConnection<R, W> {
 //
 // This function only supports errors, events, and replies. Namely, this cannot be used to receive
 // the initial setup reply from the X11 server.
-fn read_packet(read: &mut impl ReadFD) -> Result<Vec<u8>, std::io::Error> {
-    // FIXME: Do something with the received FDs
+fn read_packet(read: &mut impl ReadFD) -> Result<(Vec<u8>, Vec<RawFdContainer>), std::io::Error> {
     let mut fds = Vec::new();
     let mut buffer = vec![0; 32];
     read.read_exact(&mut buffer, &mut fds)?;
@@ -520,7 +519,7 @@ fn read_packet(read: &mut impl ReadFD) -> Result<Vec<u8>, std::io::Error> {
     buffer.resize(32 + extra_length, 0);
     read.read_exact(&mut buffer[32..], &mut fds)?;
 
-    Ok(buffer)
+    Ok((buffer, fds))
 }
 
 #[cfg(target_endian = "little")]
