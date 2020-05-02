@@ -1,4 +1,4 @@
-use std::io::{IoSlice, IoSliceMut, Read, Result, Write};
+use std::io::Result;
 use std::net::{Ipv4Addr, SocketAddr, TcpStream};
 #[cfg(unix)]
 use std::os::unix::net::UnixStream;
@@ -207,66 +207,6 @@ impl ReadFD for Stream {
             match self {
                 Stream::TcpStream(stream) => stream.read(buf),
             }
-        }
-    }
-}
-
-impl Read for Stream {
-    // Implementation basically copied from impl Read for TcpStream/UnixStream
-
-    fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
-        match self {
-            Stream::TcpStream(stream) => stream.read(buf),
-            #[cfg(unix)]
-            Stream::UnixStream(stream) => stream.read(buf),
-        }
-    }
-
-    fn read_vectored(&mut self, bufs: &mut [IoSliceMut<'_>]) -> Result<usize> {
-        match self {
-            Stream::TcpStream(stream) => stream.read_vectored(bufs),
-            #[cfg(unix)]
-            Stream::UnixStream(stream) => stream.read_vectored(bufs),
-        }
-    }
-
-    /*
-     * Initializer is unstable: https://github.com/rust-lang/rust/issues/42788
-    #[inline]
-    unsafe fn initializer(&self) -> Initializer {
-        match self {
-            Stream::TcpStream(stream) => stream.initializer(),
-            #[cfg(unix)]
-            Stream::UnixStream(stream) => stream.initializer(),
-        }
-    }
-    */
-}
-
-impl Write for Stream {
-    // Implementation basically copied from impl Write for TcpStream/UnixStream
-
-    fn write(&mut self, buf: &[u8]) -> Result<usize> {
-        match self {
-            Stream::TcpStream(stream) => stream.write(buf),
-            #[cfg(unix)]
-            Stream::UnixStream(stream) => stream.write(buf),
-        }
-    }
-
-    fn write_vectored(&mut self, bufs: &[IoSlice<'_>]) -> Result<usize> {
-        match self {
-            Stream::TcpStream(stream) => stream.write_vectored(bufs),
-            #[cfg(unix)]
-            Stream::UnixStream(stream) => stream.write_vectored(bufs),
-        }
-    }
-
-    fn flush(&mut self) -> Result<()> {
-        match self {
-            Stream::TcpStream(stream) => stream.flush(),
-            #[cfg(unix)]
-            Stream::UnixStream(stream) => stream.flush(),
         }
     }
 }
