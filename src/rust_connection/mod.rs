@@ -174,9 +174,6 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
         fds: Vec<RawFdContainer>,
         kind: RequestKind,
     ) -> Result<SequenceNumber, ConnectionError> {
-        if !fds.is_empty() {
-            return Err(ConnectionError::FDPassingFailed);
-        }
         let mut storage = Default::default();
         let bufs = compute_length_field(self, bufs, &mut storage)?;
 
@@ -187,7 +184,7 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
                 Some(seqno) => {
                     // Now actually send the buffers
                     // FIXME: We must always be able to read when we write
-                    write_all_vectored(&mut *write, bufs)?;
+                    write_all_vectored(&mut *write, bufs, fds)?;
                     return Ok(seqno);
                 }
                 None => self.send_sync(&mut *inner, &mut *write)?,
@@ -217,7 +214,7 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
             .send_request(RequestKind::HasResponse)
             .expect("Sending a HasResponse request should not be blocked by syncs");
         inner.discard_reply(seqno, DiscardMode::DiscardReplyAndError);
-        write_all_vectored(write, &[IoSlice::new(&request)])?;
+        write_all_vectored(write, &[IoSlice::new(&request)], Vec::new())?;
 
         Ok(())
     }
@@ -589,10 +586,11 @@ fn read_setup(read: &mut impl ReadFD) -> Result<Setup, ConnectError> {
 /// Write a set of buffers on a Writer.
 ///
 /// This is basically `Write::write_all_vectored`, but on stable.
-fn write_all_vectored(write: &mut impl WriteFD, bufs: &[IoSlice<'_>]) -> Result<(), std::io::Error> {
+fn write_all_vectored(write: &mut impl WriteFD, bufs: &[IoSlice<'_>], mut fds: Vec<RawFdContainer>) -> Result<(), std::io::Error> {
     // FIXME: Introduce a write_vectored() method on WriteFD (or even better: write_all_vectored())
     for buf in bufs {
-        write.write_all(&**buf, Vec::new())?;
+        write.write_all(&**buf, fds)?;
+        fds = Vec::new();
     }
     /*
     let mut bufs = bufs;
@@ -660,7 +658,7 @@ mod test {
         let mut output = &mut written[..];
         let request = [IoSlice::new(&request), IoSlice::new(&request)];
         let mut writer = WriteFDSlice(&mut output);
-        let error = write_all_vectored(&mut writer, &request).unwrap_err();
+        let error = write_all_vectored(&mut writer, &request, Vec::new()).unwrap_err();
         assert_eq!(expected_err, error.to_string());
     }
 
@@ -683,7 +681,7 @@ mod test {
         let (request1, request2) = ([0; 4], [0; 0]);
         let request = [IoSlice::new(&request1), IoSlice::new(&request2)];
         let mut writer = WriteFDSlice(&mut output);
-        write_all_vectored(&mut writer, &request).unwrap();
+        write_all_vectored(&mut writer, &request, Vec::new()).unwrap();
     }
 
     #[test]
