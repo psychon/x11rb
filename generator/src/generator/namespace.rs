@@ -60,8 +60,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "#[allow(unused_imports)]");
         outln!(out, "use crate::utils::RawFdContainer;");
         outln!(out, "#[allow(unused_imports)]");
-        outln!(out, "use crate::x11_utils::Event as _;");
-        outln!(out, "#[allow(unused_imports)]");
         outln!(out, "use crate::x11_utils::{{Serialize, TryParse}};");
         outln!(out, "use crate::connection::RequestConnection;");
         outln!(out, "#[allow(unused_imports)]");

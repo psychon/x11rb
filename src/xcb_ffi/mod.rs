@@ -32,8 +32,6 @@ mod raw_ffi;
 type Buffer = <XCBConnection as RequestConnection>::Buf;
 pub type ReplyOrIdError = crate::errors::ReplyOrIdError<Buffer>;
 pub type ReplyError = crate::errors::ReplyError<Buffer>;
-pub type GenericError = crate::x11_utils::GenericError<Buffer>;
-pub type GenericEvent = crate::x11_utils::GenericEvent<Buffer>;
 pub type EventAndSeqNumber = crate::connection::EventAndSeqNumber<Buffer>;
 pub type RawEventAndSeqNumber = crate::connection::RawEventAndSeqNumber<Buffer>;
 pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
