@@ -62,10 +62,14 @@ pub trait WriteFD {
     /// This method must behave as a call to `write` with the buffers concatenated would.
     ///
     /// The default implementation calls `write` with the first nonempty buffer provided.
-    fn write_vectored(&mut self, bufs: &[IoSlice<'_>], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
+    fn write_vectored(
+        &mut self,
+        bufs: &[IoSlice<'_>],
+        fds: &mut Vec<RawFdContainer>,
+    ) -> Result<usize> {
         for buf in bufs {
             if !buf.is_empty() {
-                return self.write(&**buf, fds)
+                return self.write(&**buf, fds);
             }
         }
         Ok(0)
@@ -99,7 +103,11 @@ impl<W: Write + std::fmt::Debug> WriteFD for WriteFDWrapper<W> {
         self.0.write_all(bufs)
     }
 
-    fn write_vectored(&mut self, bufs: &[IoSlice<'_>], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
+    fn write_vectored(
+        &mut self,
+        bufs: &[IoSlice<'_>],
+        fds: &mut Vec<RawFdContainer>,
+    ) -> Result<usize> {
         check_no_fds(&fds)?;
         self.0.write_vectored(bufs)
     }
@@ -195,7 +203,11 @@ impl<W: WriteFD + std::fmt::Debug> WriteFD for BufWriteFD<W> {
         }
     }
 
-    fn write_vectored(&mut self, bufs: &[IoSlice<'_>], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
+    fn write_vectored(
+        &mut self,
+        bufs: &[IoSlice<'_>],
+        fds: &mut Vec<RawFdContainer>,
+    ) -> Result<usize> {
         self.fd_buf.extend(fds.drain(..));
 
         let total_len: usize = bufs.iter().map(|b| b.len()).sum();

@@ -136,11 +136,12 @@ impl Stream {
 #[cfg(unix)]
 fn do_write(fd: RawFd, bufs: &[IoSlice<'_>], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
     use nix::sys::{
-        socket::{ControlMessage, MsgFlags, sendmsg},
+        socket::{sendmsg, ControlMessage, MsgFlags},
         uio::IoVec,
     };
 
-    let iov = bufs.iter()
+    let iov = bufs
+        .iter()
         .map(|b| IoVec::from_slice(&**b))
         .collect::<Vec<_>>();
     let res = if !fds.is_empty() {
@@ -176,7 +177,11 @@ impl WriteFD for Stream {
         }
     }
 
-    fn write_vectored(&mut self, bufs: &[IoSlice<'_>], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
+    fn write_vectored(
+        &mut self,
+        bufs: &[IoSlice<'_>],
+        fds: &mut Vec<RawFdContainer>,
+    ) -> Result<usize> {
         #[cfg(unix)]
         {
             do_write(self.as_raw_fd(), bufs, fds)
@@ -203,7 +208,7 @@ impl ReadFD for Stream {
         #[cfg(unix)]
         {
             use nix::sys::{
-                socket::{ControlMessageOwned, MsgFlags, recvmsg},
+                socket::{recvmsg, ControlMessageOwned, MsgFlags},
                 uio::IoVec,
             };
 
