@@ -16,7 +16,7 @@ use crate::protocol::xproto::{Setup, SetupRequest, GET_INPUT_FOCUS_REQUEST};
 use crate::utils::RawFdContainer;
 use crate::x11_utils::{ExtensionInformation, Serialize};
 
-pub mod fd_read_write;
+mod fd_read_write;
 mod id_allocator;
 mod inner;
 mod parse_display;
@@ -24,6 +24,14 @@ mod stream;
 mod xauth;
 
 use inner::PollReply;
+pub use fd_read_write::{
+    BufReadFD,
+    BufWriteFD,
+    ReadFD,
+    ReadFDWrapper,
+    WriteFD,
+    WriteFDWrapper,
+};
 
 type Buffer = <RustConnection as RequestConnection>::Buf;
 pub type ReplyOrIdError = crate::errors::ReplyOrIdError<Buffer>;
