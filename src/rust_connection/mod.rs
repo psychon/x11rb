@@ -53,6 +53,13 @@ enum MaxRequestBytes {
 
 type MutexGuardInner<'a> = MutexGuard<'a, inner::ConnectionInner>;
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub(crate) enum ReplyFDKind {
+    NoReply,
+    ReplyWithoutFDs,
+    ReplyWithFDs,
+}
+
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
 pub struct RustConnection<R: ReadFD = BufReadFD<stream::Stream>, W: WriteFD = BufWriteFD<stream::Stream>>
@@ -172,7 +179,7 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
         &self,
         bufs: &[IoSlice<'_>],
         fds: Vec<RawFdContainer>,
-        kind: RequestKind,
+        kind: ReplyFDKind,
     ) -> Result<SequenceNumber, ConnectionError> {
         let mut storage = Default::default();
         let bufs = compute_length_field(self, bufs, &mut storage)?;
@@ -211,7 +218,7 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
         ];
 
         let seqno = inner
-            .send_request(RequestKind::HasResponse)
+            .send_request(ReplyFDKind::ReplyWithoutFDs)
             .expect("Sending a HasResponse request should not be blocked by syncs");
         inner.discard_reply(seqno, DiscardMode::DiscardReplyAndError);
         write_all_vectored(write, &[IoSlice::new(&request)], Vec::new())?;
@@ -300,7 +307,7 @@ impl<R: ReadFD, W: WriteFD> RequestConnection for RustConnection<R, W> {
     {
         Ok(Cookie::new(
             self,
-            self.send_request(bufs, fds, RequestKind::HasResponse)?,
+            self.send_request(bufs, fds, ReplyFDKind::ReplyWithoutFDs)?,
         ))
     }
 
@@ -312,8 +319,10 @@ impl<R: ReadFD, W: WriteFD> RequestConnection for RustConnection<R, W> {
     where
         Reply: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>,
     {
-        let _ = (bufs, fds);
-        Err(ConnectionError::FDPassingFailed)
+        Ok(CookieWithFds::new(
+            self,
+            self.send_request(bufs, fds, ReplyFDKind::ReplyWithFDs)?,
+        ))
     }
 
     fn send_request_without_reply(
@@ -323,7 +332,7 @@ impl<R: ReadFD, W: WriteFD> RequestConnection for RustConnection<R, W> {
     ) -> Result<VoidCookie<'_, Self>, ConnectionError> {
         Ok(VoidCookie::new(
             self,
-            self.send_request(bufs, fds, RequestKind::IsVoid)?,
+            self.send_request(bufs, fds, ReplyFDKind::NoReply)?,
         ))
     }
 
