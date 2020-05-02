@@ -1341,11 +1341,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         out.indented(|out| {
             for allowed in event_struct_def.alloweds.iter() {
                 for event in allowed.resolved.borrow().iter() {
-                    let event = event.as_event_def();
-                    let event_name = event.name();
-                    let event_ns = event.namespace();
-                    let rust_event_name = format!("{}Event", to_rust_type_name(event_name));
-                    let rust_event_type = self.type_name_to_rust_type(&rust_event_name, &event_ns);
+                    let rust_event_name = format!("{}Event", to_rust_type_name(event.as_event_def().name()));
+                    let rust_event_type = self.event_to_rust_type(event);
                     outln!(
                         out,
                         "pub fn {}(&self) -> {} {{",
@@ -1398,11 +1395,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
         for allowed in event_struct_def.alloweds.iter() {
             for event in allowed.resolved.borrow().iter() {
-                let event = event.as_event_def();
-                let event_name = event.name();
-                let event_ns = event.namespace();
-                let rust_event_name = format!("{}Event", to_rust_type_name(event_name));
-                let rust_event_type = self.type_name_to_rust_type(&rust_event_name, &event_ns);
+                let rust_event_type = self.event_to_rust_type(event);
                 outln!(out, "impl From<{}> for {} {{", rust_event_type, rust_name);
                 out.indented(|out| {
                     outln!(out, "fn from(value: {}) -> Self {{", rust_event_type);
@@ -4524,6 +4517,22 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             // Different namespace, requires specfying the module
             format!("{}::{}", ns.header, name)
         }
+    }
+
+    fn event_to_rust_type(&self, event: &xcbdefs::EventRef) -> String {
+        let event = event.as_event_def();
+        let name = event.name();
+        let namespace = event.namespace();
+        let rust_name = format!("{}Event", to_rust_type_name(name));
+        self.type_name_to_rust_type(&rust_name, &namespace)
+    }
+
+    fn error_to_rust_type(&self, error: &xcbdefs::ErrorRef) -> String {
+        let error = error.as_error_def();
+        let name = error.name();
+        let namespace = error.namespace();
+        let rust_name = format!("{}Error", to_rust_type_name(name));
+        self.type_name_to_rust_type(&rust_name, &namespace)
     }
 
     /// Returns the parameters needed by the `try_parse` function for `type_`.

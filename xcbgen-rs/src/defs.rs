@@ -338,6 +338,13 @@ impl ErrorDef {
         }
     }
 
+    pub fn namespace(&self) -> Rc<Namespace> {
+        match self {
+            Self::Full(error_full_def) => error_full_def.namespace.upgrade().unwrap(),
+            Self::Copy(error_copy_def) => error_copy_def.namespace.upgrade().unwrap(),
+        }
+    }
+
     pub fn get_original_full_def(&self) -> Rc<ErrorFullDef> {
         match self {
             Self::Full(error_full_def) => error_full_def.clone(),
@@ -590,6 +597,13 @@ impl ErrorRef {
                     }
                 }
             }
+        }
+    }
+
+    pub fn as_error_def(&self) -> ErrorDef {
+        match self {
+            Self::Full(error_full_def) => ErrorDef::Full(error_full_def.upgrade().unwrap()),
+            Self::Copy(error_copy_def) => ErrorDef::Copy(error_copy_def.upgrade().unwrap()),
         }
     }
 }
