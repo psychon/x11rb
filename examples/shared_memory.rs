@@ -164,15 +164,10 @@ fn main() {
                 return;
             }
 
-            if cfg!(feature = "allow-unsafe-code") {
-                println!("Trying to send an FD");
-                send_fd(&conn, screen_num, file).unwrap();
-                println!("Trying to receive an FD");
-                receive_fd(&conn, screen_num).unwrap();
-            } else {
-                eprintln!("Skipping FD passing since not supported RustConnection");
-                // FIXME
-            }
+            println!("Trying to send an FD");
+            send_fd(&conn, screen_num, file).unwrap();
+            println!("Trying to receive an FD");
+            receive_fd(&conn, screen_num).unwrap();
         }
     }
 }
