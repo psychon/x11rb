@@ -150,11 +150,13 @@ impl WriteFD for Stream {
             } else {
                 sendmsg(fd, &iov, &[], MsgFlags::empty(), None)
             };
-            match res {
-                Ok(n) => Ok(n),
-                // Nothing touched errno since sendmsg() failed
-                Err(_) => Err(std::io::Error::last_os_error()),
-            }
+            // Nothing touched errno since sendmsg() failed
+            let res = res.map_err(|_| std::io::Error::last_os_error())?;
+
+            // We successfully sent all FDs
+            fds.clear();
+
+            Ok(res)
         }
         #[cfg(not(unix))]
         {
