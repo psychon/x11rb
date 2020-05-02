@@ -99,13 +99,10 @@ pub struct RawFdContainer(RawFd);
 
 impl Drop for RawFdContainer {
     fn drop(&mut self) {
-        #[cfg(all(unix, feature = "allow-unsafe-code"))]
+        #[cfg(unix)]
         {
-            use libc::close;
-            let result = unsafe { close(self.0) };
-            if result != 0 {
-                panic!("Close failed in some RawFdContainer");
-            }
+            use nix::unistd::close;
+            close(self.0).expect("Close failed in some RawFdContainer");
         }
     }
 }
@@ -115,15 +112,10 @@ impl RawFdContainer {
     ///
     /// The `RawFdContainer` takes ownership of the `RawFd` and closes it on drop.
     ///
-    /// This function panics on non-unix systems and when the `allow-unsafe-code` feature is
-    /// disabled.
+    /// This function panics on non-unix systems.
     pub fn new(fd: RawFd) -> RawFdContainer {
         if cfg!(unix) {
-            if cfg!(feature = "allow-unsafe-code") {
-                RawFdContainer(fd)
-            } else {
-                unimplemented!("RawFdContainer requires the allow-unsafe-code feature");
-            }
+            RawFdContainer(fd)
         } else {
             unimplemented!("RawFdContainer is only implemented on Unix-like systems");
         }

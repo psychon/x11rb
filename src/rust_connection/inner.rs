@@ -2,8 +2,9 @@
 
 use std::collections::VecDeque;
 
-use super::RawEventAndSeqNumber;
-use crate::connection::{DiscardMode, RequestKind, SequenceNumber};
+use super::{BufWithFds, RawEventAndSeqNumber, ReplyFDKind};
+use crate::connection::{DiscardMode, SequenceNumber};
+use crate::utils::RawFdContainer;
 
 #[derive(Debug, Clone)]
 pub(crate) enum PollReply {
@@ -19,6 +20,7 @@ pub(crate) enum PollReply {
 struct SentRequest {
     seqno: SequenceNumber,
     discard_mode: Option<DiscardMode>,
+    has_fds: bool,
 }
 
 #[derive(Debug)]
@@ -36,7 +38,10 @@ pub(crate) struct ConnectionInner {
     // Events that were read, but not yet returned to the API user
     pending_events: VecDeque<(SequenceNumber, Vec<u8>)>,
     // Replies that were read, but not yet returned to the API user
-    pending_replies: VecDeque<(SequenceNumber, Vec<u8>)>,
+    pending_replies: VecDeque<(SequenceNumber, BufWithFds)>,
+
+    // FDs that were read, but not yet assigned to any reply
+    pending_fds: VecDeque<RawFdContainer>,
 }
 
 impl ConnectionInner {
@@ -52,6 +57,7 @@ impl ConnectionInner {
             sent_requests: VecDeque::new(),
             pending_events: VecDeque::new(),
             pending_replies: VecDeque::new(),
+            pending_fds: VecDeque::new(),
         }
     }
 
@@ -59,10 +65,15 @@ impl ConnectionInner {
     ///
     /// When this returns `None`, a sync with the server is necessary. Afterwards, the caller
     /// should try again.
-    pub(crate) fn send_request(&mut self, kind: RequestKind) -> Option<SequenceNumber> {
+    pub(crate) fn send_request(&mut self, kind: ReplyFDKind) -> Option<SequenceNumber> {
+        let has_response = match kind {
+            ReplyFDKind::NoReply => false,
+            ReplyFDKind::ReplyWithoutFDs => true,
+            ReplyFDKind::ReplyWithFDs => true,
+        };
         if self.next_reply_expected + SequenceNumber::from(u16::max_value())
             <= self.last_sequence_written
-            && kind != RequestKind::HasResponse
+            && !has_response
         {
             // The caller need to call send_sync(). Otherwise, we might not be able to reconstruct
             // full sequence numbers for received packets.
@@ -72,13 +83,14 @@ impl ConnectionInner {
         self.last_sequence_written += 1;
         let seqno = self.last_sequence_written;
 
-        if kind == RequestKind::HasResponse {
+        if has_response {
             self.next_reply_expected = self.last_sequence_written;
         }
 
         let sent_request = SentRequest {
             seqno,
             discard_mode: None,
+            has_fds: kind == ReplyFDKind::ReplyWithFDs,
         };
         self.sent_requests.push_back(sent_request);
 
@@ -101,9 +113,9 @@ impl ConnectionInner {
                         .is_some()
                     {
                         if let Some((_, packet)) = self.pending_replies.remove(index) {
-                            if packet[0] == 0 {
+                            if packet.0[0] == 0 {
                                 // This is an error
-                                self.pending_events.push_back((seqno, packet));
+                                self.pending_events.push_back((seqno, packet.0));
                             }
                         }
                     }
@@ -141,7 +153,9 @@ impl ConnectionInner {
     }
 
     /// An X11 packet was received from the connection and is now enqueued into our state.
-    pub(crate) fn enqueue_packet(&mut self, packet: Vec<u8>) {
+    pub(crate) fn enqueue_packet(&mut self, packet: Vec<u8>, fds: Vec<RawFdContainer>) {
+        self.pending_fds.extend(fds);
+
         let kind = packet[0];
 
         // extract_sequence_number() updates our state and is thus important to call even when we
@@ -168,18 +182,34 @@ impl ConnectionInner {
                     Some(DiscardMode::DiscardReply) => {
                         self.pending_events.push_back((seqno, packet))
                     }
-                    None => self.pending_replies.push_back((seqno, packet)),
+                    None => self
+                        .pending_replies
+                        .push_back((seqno, (packet, Vec::new()))),
                 }
             } else {
                 // Unexpected error, send to main loop
                 self.pending_events.push_back((seqno, packet));
             }
         } else if kind == 1 {
+            let fds = if request.filter(|r| r.has_fds).is_some() {
+                // This reply has FDs, the number of FDs is always in the second byte
+                let num_fds = usize::from(packet[1]);
+                if num_fds > self.pending_fds.len() {
+                    // FIXME Turn this into some kind of "permanent error state" (so that
+                    // everything fails with said error) instead of using a panic (this panic will
+                    // likely poison some Mutex and produce an error state that way).
+                    panic!("FIXME: The server sent us too few FDs. The connection is now unusable since we will never be sure again which FD belongs to which reply.");
+                }
+                self.pending_fds.drain(..num_fds).collect()
+            } else {
+                Vec::new()
+            };
+
             // It is a reply
             if request.filter(|r| r.discard_mode.is_some()).is_some() {
                 // This reply should be discarded
             } else {
-                self.pending_replies.push_back((seqno, packet));
+                self.pending_replies.push_back((seqno, (packet, fds)));
             }
         } else {
             // It is an event
@@ -191,7 +221,10 @@ impl ConnectionInner {
     ///
     /// This function is meant to be used for requests that have a reply. Such requests always
     /// cause a reply or an error to be sent.
-    pub(crate) fn poll_for_reply_or_error(&mut self, sequence: SequenceNumber) -> Option<Vec<u8>> {
+    pub(crate) fn poll_for_reply_or_error(
+        &mut self,
+        sequence: SequenceNumber,
+    ) -> Option<BufWithFds> {
         for (index, (seqno, _packet)) in self.pending_replies.iter().enumerate() {
             if *seqno == sequence {
                 return Some(self.pending_replies.remove(index).unwrap().1);
@@ -222,7 +255,7 @@ impl ConnectionInner {
     /// This function can be used for requests with and without a reply.
     pub(crate) fn poll_check_for_reply_or_error(&mut self, sequence: SequenceNumber) -> PollReply {
         if let Some(result) = self.poll_for_reply_or_error(sequence) {
-            return PollReply::Reply(result);
+            return PollReply::Reply(result.0);
         }
 
         if self.last_sequence_read > sequence {
@@ -240,11 +273,11 @@ impl ConnectionInner {
     /// latter call to `poll_for_event()` will return it.
     pub(crate) fn poll_for_reply(&mut self, sequence: SequenceNumber) -> PollReply {
         if let Some(reply) = self.poll_for_reply_or_error(sequence) {
-            if reply[0] == 0 {
-                self.pending_events.push_back((sequence, reply));
+            if reply.0[0] == 0 {
+                self.pending_events.push_back((sequence, reply.0));
                 PollReply::NoReply
             } else {
-                PollReply::Reply(reply)
+                PollReply::Reply(reply.0)
             }
         } else {
             PollReply::TryAgain
@@ -261,8 +294,7 @@ impl ConnectionInner {
 
 #[cfg(test)]
 mod test {
-    use super::ConnectionInner;
-    use crate::connection::RequestKind;
+    use super::{ConnectionInner, ReplyFDKind};
 
     #[test]
     fn insert_sync_no_reply() {
@@ -272,47 +304,47 @@ mod test {
         let mut connection = ConnectionInner::new();
 
         for num in 1..0x10000 {
-            let seqno = connection.send_request(RequestKind::IsVoid);
+            let seqno = connection.send_request(ReplyFDKind::NoReply);
             assert_eq!(Some(num), seqno);
         }
         // request 0x10000 should be a sync, hence the next one is 0x10001
-        let seqno = connection.send_request(RequestKind::IsVoid);
+        let seqno = connection.send_request(ReplyFDKind::NoReply);
         assert_eq!(None, seqno);
 
-        let seqno = connection.send_request(RequestKind::HasResponse);
+        let seqno = connection.send_request(ReplyFDKind::ReplyWithoutFDs);
         assert_eq!(Some(0x10000), seqno);
 
-        let seqno = connection.send_request(RequestKind::IsVoid);
+        let seqno = connection.send_request(ReplyFDKind::NoReply);
         assert_eq!(Some(0x10001), seqno);
     }
 
     #[test]
     fn insert_no_sync_with_reply() {
-        // Compared to the previous test, this uses RequestKind::HasResponse, so no sync needs to
+        // Compared to the previous test, this uses ReplyFDKind::ReplyWithoutFDs, so no sync needs to
         // be inserted.
 
         let mut connection = ConnectionInner::new();
 
         for num in 1..=0x10001 {
-            let seqno = connection.send_request(RequestKind::HasResponse);
+            let seqno = connection.send_request(ReplyFDKind::ReplyWithoutFDs);
             assert_eq!(Some(num), seqno);
         }
     }
 
     #[test]
     fn insert_no_sync_when_already_syncing() {
-        // This test sends enough RequestKind::IsVoid requests that a sync becomes necessary on
-        // the next request. Then it sends a RequestKind::HasResponse request so that no sync is
+        // This test sends enough ReplyFDKind::NoReply requests that a sync becomes necessary on
+        // the next request. Then it sends a ReplyFDKind::ReplyWithoutFDs request so that no sync is
         // necessary. This is a regression test: Once upon a time, an unnecessary sync was done.
 
         let mut connection = ConnectionInner::new();
 
         for num in 1..0x10000 {
-            let seqno = connection.send_request(RequestKind::IsVoid);
+            let seqno = connection.send_request(ReplyFDKind::NoReply);
             assert_eq!(Some(num), seqno);
         }
 
-        let seqno = connection.send_request(RequestKind::HasResponse);
+        let seqno = connection.send_request(ReplyFDKind::ReplyWithoutFDs);
         assert_eq!(Some(0x10000), seqno);
     }
 }

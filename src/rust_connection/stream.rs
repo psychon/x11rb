@@ -1,9 +1,13 @@
-use std::io::{IoSlice, IoSliceMut, Read, Result, Write};
+use std::io::{IoSlice, Result};
 use std::net::{Ipv4Addr, SocketAddr, TcpStream};
+#[cfg(unix)]
+use std::os::unix::io::{AsRawFd, RawFd};
 #[cfg(unix)]
 use std::os::unix::net::UnixStream;
 
+use super::fd_read_write::{ReadFD, WriteFD};
 use super::xauth::Family;
+use crate::utils::RawFdContainer;
 
 /// A wrapper around a `TcpStream` or `UnixStream`.
 #[derive(Debug)]
@@ -119,64 +123,124 @@ impl Stream {
             Stream::UnixStream(stream) => Ok(Stream::UnixStream(stream.try_clone()?)),
         }
     }
+
+    #[cfg(unix)]
+    fn as_raw_fd(&self) -> RawFd {
+        match self {
+            Stream::TcpStream(stream) => stream.as_raw_fd(),
+            Stream::UnixStream(stream) => stream.as_raw_fd(),
+        }
+    }
 }
 
-impl Read for Stream {
-    // Implementation basically copied from impl Read for TcpStream/UnixStream
+#[cfg(unix)]
+fn do_write(fd: RawFd, bufs: &[IoSlice<'_>], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
+    use nix::sys::{
+        socket::{sendmsg, ControlMessage, MsgFlags},
+        uio::IoVec,
+    };
 
-    fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
-        match self {
-            Stream::TcpStream(stream) => stream.read(buf),
-            #[cfg(unix)]
-            Stream::UnixStream(stream) => stream.read(buf),
-        }
-    }
+    let iov = bufs
+        .iter()
+        .map(|b| IoVec::from_slice(&**b))
+        .collect::<Vec<_>>();
+    let res = if !fds.is_empty() {
+        let fds = fds.iter().map(|fd| fd.as_raw_fd()).collect::<Vec<_>>();
+        let cmsgs = [ControlMessage::ScmRights(&fds[..])];
+        sendmsg(fd, &iov, &cmsgs, MsgFlags::empty(), None)
+    } else {
+        sendmsg(fd, &iov, &[], MsgFlags::empty(), None)
+    };
+    // Nothing touched errno since sendmsg() failed
+    let res = res.map_err(|_| std::io::Error::last_os_error())?;
 
-    fn read_vectored(&mut self, bufs: &mut [IoSliceMut<'_>]) -> Result<usize> {
-        match self {
-            Stream::TcpStream(stream) => stream.read_vectored(bufs),
-            #[cfg(unix)]
-            Stream::UnixStream(stream) => stream.read_vectored(bufs),
-        }
-    }
+    // We successfully sent all FDs
+    fds.clear();
 
-    /*
-     * Initializer is unstable: https://github.com/rust-lang/rust/issues/42788
-    #[inline]
-    unsafe fn initializer(&self) -> Initializer {
-        match self {
-            Stream::TcpStream(stream) => stream.initializer(),
-            #[cfg(unix)]
-            Stream::UnixStream(stream) => stream.initializer(),
-        }
-    }
-    */
+    Ok(res)
 }
 
-impl Write for Stream {
-    // Implementation basically copied from impl Write for TcpStream/UnixStream
-
-    fn write(&mut self, buf: &[u8]) -> Result<usize> {
-        match self {
-            Stream::TcpStream(stream) => stream.write(buf),
-            #[cfg(unix)]
-            Stream::UnixStream(stream) => stream.write(buf),
+impl WriteFD for Stream {
+    fn write(&mut self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
+        #[cfg(unix)]
+        {
+            do_write(self.as_raw_fd(), &[IoSlice::new(buf)], fds)
+        }
+        #[cfg(not(unix))]
+        {
+            use std::io::{Error, ErrorKind, Write};
+            if !fds.is_empty() {
+                return Err(Error::new(ErrorKind::Other, "FD passing is unsupported"));
+            }
+            match self {
+                Stream::TcpStream(stream) => stream.write(buf),
+            }
         }
     }
 
-    fn write_vectored(&mut self, bufs: &[IoSlice<'_>]) -> Result<usize> {
-        match self {
-            Stream::TcpStream(stream) => stream.write_vectored(bufs),
-            #[cfg(unix)]
-            Stream::UnixStream(stream) => stream.write_vectored(bufs),
+    fn write_vectored(
+        &mut self,
+        bufs: &[IoSlice<'_>],
+        fds: &mut Vec<RawFdContainer>,
+    ) -> Result<usize> {
+        #[cfg(unix)]
+        {
+            do_write(self.as_raw_fd(), bufs, fds)
+        }
+        #[cfg(not(unix))]
+        {
+            use std::io::{Error, ErrorKind, Write};
+            if !fds.is_empty() {
+                return Err(Error::new(ErrorKind::Other, "FD passing is unsupported"));
+            }
+            match self {
+                Stream::TcpStream(stream) => stream.write_vectored(bufs),
+            }
         }
     }
 
     fn flush(&mut self) -> Result<()> {
-        match self {
-            Stream::TcpStream(stream) => stream.flush(),
-            #[cfg(unix)]
-            Stream::UnixStream(stream) => stream.flush(),
+        // We do no buffering
+        Ok(())
+    }
+}
+
+impl ReadFD for Stream {
+    fn read(&mut self, buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> Result<usize> {
+        #[cfg(unix)]
+        {
+            use nix::sys::{
+                socket::{recvmsg, ControlMessageOwned, MsgFlags},
+                uio::IoVec,
+            };
+
+            // Chosen by checking what libxcb does
+            const MAX_FDS_RECEIVED: usize = 16;
+            let mut cmsg = nix::cmsg_space!([RawFd; MAX_FDS_RECEIVED]);
+            let iov = [IoVec::from_mut_slice(buf)];
+
+            let fd = self.as_raw_fd();
+            let msg = recvmsg(fd, &iov[..], Some(&mut cmsg), MsgFlags::empty());
+            // Nothing touched errno since recvmsg() failed
+            let msg = msg.map_err(|_| std::io::Error::last_os_error())?;
+
+            let fds_received = msg
+                .cmsgs()
+                .flat_map(|cmsg| match cmsg {
+                    ControlMessageOwned::ScmRights(r) => r,
+                    _ => Vec::new(),
+                })
+                .map(RawFdContainer::new);
+            fd_storage.extend(fds_received);
+
+            Ok(msg.bytes)
+        }
+        #[cfg(not(unix))]
+        {
+            use std::io::Read;
+            match self {
+                Stream::TcpStream(stream) => stream.read(buf),
+            }
         }
     }
 }

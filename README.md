@@ -34,8 +34,7 @@ of sending multiple requests and only afterwards wait for the replies.
 The following features are enabled by default:
 
 * `allow-unsafe-code`: Without this feature, `forbid(unsafe_code)` forbids all
-  unsafe code. With this feature, `XCBConnection` and FD passing become
-  available.
+  unsafe code. With this feature, `XCBConnection` becomes available.
 
 
 ## Current state

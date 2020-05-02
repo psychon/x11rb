@@ -1,7 +1,7 @@
 //! A pure-rust implementation of a connection to an X11 server.
 
 use std::convert::{TryFrom, TryInto};
-use std::io::{BufReader, BufWriter, IoSlice, Read, Write};
+use std::io::IoSlice;
 use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 
 use crate::connection::{
@@ -16,12 +16,14 @@ use crate::protocol::xproto::{Setup, SetupRequest, GET_INPUT_FOCUS_REQUEST};
 use crate::utils::RawFdContainer;
 use crate::x11_utils::{ExtensionInformation, Serialize};
 
+mod fd_read_write;
 mod id_allocator;
 mod inner;
 mod parse_display;
 mod stream;
 mod xauth;
 
+pub use fd_read_write::{BufReadFD, BufWriteFD, ReadFD, ReadFDWrapper, WriteFD, WriteFDWrapper};
 use inner::PollReply;
 
 type Buffer = <RustConnection as RequestConnection>::Buf;
@@ -40,10 +42,19 @@ enum MaxRequestBytes {
 
 type MutexGuardInner<'a> = MutexGuard<'a, inner::ConnectionInner>;
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub(crate) enum ReplyFDKind {
+    NoReply,
+    ReplyWithoutFDs,
+    ReplyWithFDs,
+}
+
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
-pub struct RustConnection<R: Read = BufReader<stream::Stream>, W: Write = BufWriter<stream::Stream>>
-{
+pub struct RustConnection<
+    R: ReadFD = BufReadFD<stream::Stream>,
+    W: WriteFD = BufWriteFD<stream::Stream>,
+> {
     inner: Mutex<inner::ConnectionInner>,
     read: Mutex<R>,
     write: Mutex<W>,
@@ -54,7 +65,7 @@ pub struct RustConnection<R: Read = BufReader<stream::Stream>, W: Write = BufWri
     maximum_request_bytes: Mutex<MaxRequestBytes>,
 }
 
-impl RustConnection<BufReader<stream::Stream>, BufWriter<stream::Stream>> {
+impl RustConnection<BufReadFD<stream::Stream>, BufWriteFD<stream::Stream>> {
     /// Establish a new connection.
     ///
     /// If no `dpy_name` is provided, the value from `$DISPLAY` is used.
@@ -75,8 +86,8 @@ impl RustConnection<BufReader<stream::Stream>, BufWriter<stream::Stream>> {
             .unwrap_or(None)
             .unwrap_or_else(|| (Vec::new(), Vec::new()));
 
-        let write = BufWriter::new(stream.try_clone()?);
-        let read = BufReader::new(stream);
+        let write = BufWriteFD::new(stream.try_clone()?);
+        let read = BufReadFD::new(stream);
         Ok((
             Self::connect_to_stream_with_auth_info(read, write, screen, auth_name, auth_data)?,
             screen,
@@ -84,7 +95,7 @@ impl RustConnection<BufReader<stream::Stream>, BufWriter<stream::Stream>> {
     }
 }
 
-impl<R: Read, W: Write> RustConnection<R, W> {
+impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
     /// Establish a new connection to the given streams.
     ///
     /// `read` is used for reading data from the X11 server and `write` is used for writing.
@@ -159,11 +170,8 @@ impl<R: Read, W: Write> RustConnection<R, W> {
         &self,
         bufs: &[IoSlice<'_>],
         fds: Vec<RawFdContainer>,
-        kind: RequestKind,
+        kind: ReplyFDKind,
     ) -> Result<SequenceNumber, ConnectionError> {
-        if !fds.is_empty() {
-            return Err(ConnectionError::FDPassingFailed);
-        }
         let mut storage = Default::default();
         let bufs = compute_length_field(self, bufs, &mut storage)?;
 
@@ -174,7 +182,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
                 Some(seqno) => {
                     // Now actually send the buffers
                     // FIXME: We must always be able to read when we write
-                    write_all_vectored(&mut *write, bufs)?;
+                    write_all_vectored(&mut *write, bufs, fds)?;
                     return Ok(seqno);
                 }
                 None => self.send_sync(&mut *inner, &mut *write)?,
@@ -201,10 +209,10 @@ impl<R: Read, W: Write> RustConnection<R, W> {
         ];
 
         let seqno = inner
-            .send_request(RequestKind::HasResponse)
+            .send_request(ReplyFDKind::ReplyWithoutFDs)
             .expect("Sending a HasResponse request should not be blocked by syncs");
         inner.discard_reply(seqno, DiscardMode::DiscardReplyAndError);
-        write_all_vectored(write, &[IoSlice::new(&request)])?;
+        write_all_vectored(write, &[IoSlice::new(&request)], Vec::new())?;
 
         Ok(())
     }
@@ -239,7 +247,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
                 drop(inner);
 
                 // 2.2. Block the thread until a packet is received.
-                let packet = read_packet(&mut *lock)?;
+                let (packet, fds) = read_packet(&mut *lock)?;
 
                 // 2.3. Relock `inner` to enqueue the packet.
                 inner = self.inner.lock().unwrap();
@@ -254,7 +262,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
                 drop(lock);
 
                 // 2.5. Actually enqueue the read packet.
-                inner.enqueue_packet(packet);
+                inner.enqueue_packet(packet, fds);
 
                 // 2.6. Notify threads that a packet has been enqueued,
                 // so other threads waiting on 1.1 can return.
@@ -277,7 +285,7 @@ impl<R: Read, W: Write> RustConnection<R, W> {
     }
 }
 
-impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
+impl<R: ReadFD, W: WriteFD> RequestConnection for RustConnection<R, W> {
     type Buf = Vec<u8>;
 
     fn send_request_with_reply<Reply>(
@@ -290,7 +298,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
     {
         Ok(Cookie::new(
             self,
-            self.send_request(bufs, fds, RequestKind::HasResponse)?,
+            self.send_request(bufs, fds, ReplyFDKind::ReplyWithoutFDs)?,
         ))
     }
 
@@ -302,8 +310,10 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
     where
         Reply: for<'a> TryFrom<(&'a [u8], Vec<RawFdContainer>), Error = ParseError>,
     {
-        let _ = (bufs, fds);
-        Err(ConnectionError::FDPassingFailed)
+        Ok(CookieWithFds::new(
+            self,
+            self.send_request(bufs, fds, ReplyFDKind::ReplyWithFDs)?,
+        ))
     }
 
     fn send_request_without_reply(
@@ -313,7 +323,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
     ) -> Result<VoidCookie<'_, Self>, ConnectionError> {
         Ok(VoidCookie::new(
             self,
-            self.send_request(bufs, fds, RequestKind::IsVoid)?,
+            self.send_request(bufs, fds, ReplyFDKind::NoReply)?,
         ))
     }
 
@@ -345,19 +355,9 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
         &self,
         sequence: SequenceNumber,
     ) -> Result<ReplyOrError<Vec<u8>>, ConnectionError> {
-        let mut write = self.write.lock().unwrap();
-        let mut inner = self.inner.lock().unwrap();
-        write.flush()?; // Ensure the request is sent
-        drop(write);
-        loop {
-            if let Some(reply) = inner.poll_for_reply_or_error(sequence) {
-                if reply[0] == 0 {
-                    return Ok(ReplyOrError::Error(reply));
-                } else {
-                    return Ok(ReplyOrError::Reply(reply));
-                }
-            }
-            inner = self.read_packet_and_enqueue(inner)?;
+        match self.wait_for_reply_with_fds_raw(sequence)? {
+            ReplyOrError::Reply((reply, _fds)) => Ok(ReplyOrError::Reply(reply)),
+            ReplyOrError::Error(e) => Ok(ReplyOrError::Error(e)),
         }
     }
 
@@ -400,12 +400,22 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
 
     fn wait_for_reply_with_fds_raw(
         &self,
-        _sequence: SequenceNumber,
+        sequence: SequenceNumber,
     ) -> Result<ReplyOrError<BufWithFds, Buffer>, ConnectionError> {
-        unreachable!(
-            "To wait for a reply containing FDs, a successful call to \
-        send_request_with_reply_with_fds() is necessary. However, this function never succeeds."
-        );
+        let mut write = self.write.lock().unwrap();
+        let mut inner = self.inner.lock().unwrap();
+        write.flush()?; // Ensure the request is sent
+        drop(write);
+        loop {
+            if let Some(reply) = inner.poll_for_reply_or_error(sequence) {
+                if reply.0[0] == 0 {
+                    return Ok(ReplyOrError::Error(reply.0));
+                } else {
+                    return Ok(ReplyOrError::Reply(reply));
+                }
+            }
+            inner = self.read_packet_and_enqueue(inner)?;
+        }
     }
 
     fn maximum_request_bytes(&self) -> usize {
@@ -459,7 +469,7 @@ impl<R: Read, W: Write> RequestConnection for RustConnection<R, W> {
     }
 }
 
-impl<R: Read, W: Write> Connection for RustConnection<R, W> {
+impl<R: ReadFD, W: WriteFD> Connection for RustConnection<R, W> {
     fn wait_for_raw_event_with_sequence(&self) -> Result<RawEventAndSeqNumber, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
         loop {
@@ -494,9 +504,10 @@ impl<R: Read, W: Write> Connection for RustConnection<R, W> {
 //
 // This function only supports errors, events, and replies. Namely, this cannot be used to receive
 // the initial setup reply from the X11 server.
-fn read_packet(read: &mut impl Read) -> Result<Vec<u8>, std::io::Error> {
+fn read_packet(read: &mut impl ReadFD) -> Result<(Vec<u8>, Vec<RawFdContainer>), std::io::Error> {
+    let mut fds = Vec::new();
     let mut buffer = vec![0; 32];
-    read.read_exact(&mut buffer)?;
+    read.read_exact(&mut buffer, &mut fds)?;
 
     use crate::protocol::xproto::GE_GENERIC_EVENT;
     const REPLY: u8 = 1;
@@ -511,9 +522,9 @@ fn read_packet(read: &mut impl Read) -> Result<Vec<u8>, std::io::Error> {
     // length of the vector.
     buffer.reserve_exact(extra_length);
     buffer.resize(32 + extra_length, 0);
-    read.read_exact(&mut buffer[32..])?;
+    read.read_exact(&mut buffer[32..], &mut fds)?;
 
-    Ok(buffer)
+    Ok((buffer, fds))
 }
 
 #[cfg(target_endian = "little")]
@@ -528,7 +539,7 @@ fn byte_order() -> u8 {
 
 /// Send a `SetupRequest` to the X11 server.
 fn write_setup(
-    write: &mut impl Write,
+    write: &mut impl WriteFD,
     auth_name: Vec<u8>,
     auth_data: Vec<u8>,
 ) -> Result<(), std::io::Error> {
@@ -539,7 +550,7 @@ fn write_setup(
         authorization_protocol_name: auth_name,
         authorization_protocol_data: auth_data,
     };
-    write.write_all(&request.serialize())?;
+    write.write_all(&request.serialize(), Vec::new())?;
     write.flush()?;
     Ok(())
 }
@@ -548,15 +559,23 @@ fn write_setup(
 ///
 /// If the server sends a `SetupFailed` or `SetupAuthenticate` packet, these will be returned
 /// as errors.
-fn read_setup(read: &mut impl Read) -> Result<Setup, ConnectError> {
+fn read_setup(read: &mut impl ReadFD) -> Result<Setup, ConnectError> {
+    let mut fds = Vec::new();
     let mut setup = vec![0; 8];
-    read.read_exact(&mut setup)?;
+    read.read_exact(&mut setup, &mut fds)?;
     let extra_length = usize::from(u16::from_ne_bytes([setup[6], setup[7]])) * 4;
     // Use `Vec::reserve_exact` because this will be the final
     // length of the vector.
     setup.reserve_exact(extra_length);
     setup.resize(8 + extra_length, 0);
-    read.read_exact(&mut setup[8..])?;
+    read.read_exact(&mut setup[8..], &mut fds)?;
+    if !fds.is_empty() {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "unexpectedly received FDs in connection setup",
+        )
+        .into());
+    }
     match setup[0] {
         // 0 is SetupFailed
         0 => Err(ConnectError::SetupFailed((&setup[..]).try_into()?)),
@@ -571,11 +590,15 @@ fn read_setup(read: &mut impl Read) -> Result<Setup, ConnectError> {
 
 /// Write a set of buffers on a Writer.
 ///
-/// This is basically `Write::write_all_vectored`, but on stable.
-fn write_all_vectored(write: &mut impl Write, bufs: &[IoSlice<'_>]) -> Result<(), std::io::Error> {
+/// This is basically `Write::write_all_vectored`, but on stable and for `WriteFD`.
+fn write_all_vectored(
+    write: &mut impl WriteFD,
+    bufs: &[IoSlice<'_>],
+    mut fds: Vec<RawFdContainer>,
+) -> Result<(), std::io::Error> {
     let mut bufs = bufs;
     while !bufs.is_empty() {
-        let mut count = write.write_vectored(bufs)?;
+        let mut count = write.write_vectored(bufs, &mut fds)?;
         if count == 0 {
             return Err(std::io::Error::new(
                 std::io::ErrorKind::WriteZero,
@@ -587,7 +610,8 @@ fn write_all_vectored(write: &mut impl Write, bufs: &[IoSlice<'_>]) -> Result<()
                 count -= bufs[0].len();
             } else {
                 let remaining = &bufs[0][count..];
-                write.write_all(remaining)?;
+                write.write_all(remaining, fds)?;
+                fds = Vec::new();
                 count = 0;
             }
             bufs = &bufs[1..];
@@ -598,33 +622,61 @@ fn write_all_vectored(write: &mut impl Write, bufs: &[IoSlice<'_>]) -> Result<()
             }
         }
     }
+    if !fds.is_empty() {
+        write.write_all(&[], fds)?;
+    }
     Ok(())
 }
 
 #[cfg(test)]
 mod test {
-    use std::io::IoSlice;
+    use std::io::{IoSlice, Read, Result, Write};
 
-    use super::{read_setup, write_all_vectored};
+    use super::{read_setup, write_all_vectored, ReadFD, WriteFD};
     use crate::errors::ConnectError;
     use crate::protocol::xproto::{ImageOrder, Setup, SetupAuthenticate, SetupFailed};
+    use crate::utils::RawFdContainer;
     use crate::x11_utils::Serialize;
+
+    struct WriteFDSlice<'a>(&'a mut [u8]);
+
+    impl WriteFD for WriteFDSlice<'_> {
+        fn write(&mut self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
+            assert!(fds.is_empty());
+            self.0.write(buf)
+        }
+
+        fn flush(&mut self) -> Result<()> {
+            Ok(())
+        }
+    }
+
+    struct ReadFDSlice<'a>(&'a [u8]);
+
+    impl ReadFD for ReadFDSlice<'_> {
+        fn read(&mut self, buf: &mut [u8], _fd_storage: &mut Vec<RawFdContainer>) -> Result<usize> {
+            self.0.read(buf)
+        }
+    }
 
     fn partial_write_test(request: &[u8], expected_err: &str) {
         let mut written = [0x21; 2];
         let mut output = &mut written[..];
         let request = [IoSlice::new(&request), IoSlice::new(&request)];
-        let error = write_all_vectored(&mut output, &request).unwrap_err();
+        let mut writer = WriteFDSlice(&mut output);
+        let error = write_all_vectored(&mut writer, &request, Vec::new()).unwrap_err();
         assert_eq!(expected_err, error.to_string());
     }
 
     #[test]
     fn partial_write_larger_slice() {
+        // This tries to write 4+4 bytes into a buffer of size 2
         partial_write_test(&[0; 4], "failed to write whole buffer");
     }
 
     #[test]
     fn partial_write_slice_border() {
+        // This tries to write 2+2 bytes into a buffer of size 2
         partial_write_test(&[0; 2], "failed to write anything");
     }
 
@@ -634,7 +686,8 @@ mod test {
         let mut output = &mut written[..];
         let (request1, request2) = ([0; 4], [0; 0]);
         let request = [IoSlice::new(&request1), IoSlice::new(&request2)];
-        write_all_vectored(&mut output, &request).unwrap();
+        let mut writer = WriteFDSlice(&mut output);
+        write_all_vectored(&mut writer, &request, Vec::new()).unwrap();
     }
 
     #[test]
@@ -662,7 +715,8 @@ mod test {
         setup.length = ((setup.serialize().len() - 8) / 4) as _;
         let setup_bytes = setup.serialize();
 
-        let read = read_setup(&mut &setup_bytes[..]);
+        let mut reader = ReadFDSlice(&setup_bytes[..]);
+        let read = read_setup(&mut reader);
         assert_eq!(setup, read.unwrap());
     }
 
@@ -678,7 +732,8 @@ mod test {
         setup.length = ((setup.serialize().len() - 8) / 4) as _;
         let setup_bytes = setup.serialize();
 
-        match read_setup(&mut &setup_bytes[..]) {
+        let mut reader = ReadFDSlice(&setup_bytes[..]);
+        match read_setup(&mut reader) {
             Err(ConnectError::SetupFailed(read)) => assert_eq!(setup, read),
             value => panic!("Unexpected value {:?}", value),
         }
@@ -692,7 +747,8 @@ mod test {
         };
         let setup_bytes = setup.serialize();
 
-        match read_setup(&mut &setup_bytes[..]) {
+        let mut reader = ReadFDSlice(&setup_bytes[..]);
+        match read_setup(&mut reader) {
             Err(ConnectError::SetupAuthenticate(read)) => assert_eq!(setup, read),
             value => panic!("Unexpected value {:?}", value),
         }
