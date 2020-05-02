@@ -20,8 +20,6 @@ use crate::connection::RequestConnection;
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError};
-#[allow(unused_imports)]
-use crate::x11_utils::GenericEvent;
 use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
@@ -81,16 +79,6 @@ impl TryFrom<&[u8]> for GenericError {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
-    }
-}
-impl<B: AsRef<[u8]>> From<crate::x11_utils::GenericError<B>> for GenericError {
-    fn from(value: crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
-impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for GenericError {
-    fn from(value: &crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
     }
 }
 impl From<&GenericError> for [u8; 32] {
@@ -173,16 +161,6 @@ impl TryFrom<&[u8]> for BadContextError {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<crate::x11_utils::GenericError<B>> for BadContextError {
-    fn from(value: crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
-impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadContextError {
-    fn from(value: &crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
 impl From<&BadContextError> for [u8; 32] {
     fn from(input: &BadContextError) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -261,16 +239,6 @@ impl TryFrom<&[u8]> for BadContextStateError {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
-    }
-}
-impl<B: AsRef<[u8]>> From<crate::x11_utils::GenericError<B>> for BadContextStateError {
-    fn from(value: crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
-impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadContextStateError {
-    fn from(value: &crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
     }
 }
 impl From<&BadContextStateError> for [u8; 32] {
@@ -353,16 +321,6 @@ impl TryFrom<&[u8]> for BadDrawableError {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<crate::x11_utils::GenericError<B>> for BadDrawableError {
-    fn from(value: crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
-impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadDrawableError {
-    fn from(value: &crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
 impl From<&BadDrawableError> for [u8; 32] {
     fn from(input: &BadDrawableError) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -441,16 +399,6 @@ impl TryFrom<&[u8]> for BadPixmapError {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
-    }
-}
-impl<B: AsRef<[u8]>> From<crate::x11_utils::GenericError<B>> for BadPixmapError {
-    fn from(value: crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
-impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadPixmapError {
-    fn from(value: &crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
     }
 }
 impl From<&BadPixmapError> for [u8; 32] {
@@ -533,16 +481,6 @@ impl TryFrom<&[u8]> for BadContextTagError {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<crate::x11_utils::GenericError<B>> for BadContextTagError {
-    fn from(value: crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
-impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadContextTagError {
-    fn from(value: &crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
 impl From<&BadContextTagError> for [u8; 32] {
     fn from(input: &BadContextTagError) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -621,16 +559,6 @@ impl TryFrom<&[u8]> for BadCurrentWindowError {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
-    }
-}
-impl<B: AsRef<[u8]>> From<crate::x11_utils::GenericError<B>> for BadCurrentWindowError {
-    fn from(value: crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
-impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadCurrentWindowError {
-    fn from(value: &crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
     }
 }
 impl From<&BadCurrentWindowError> for [u8; 32] {
@@ -713,16 +641,6 @@ impl TryFrom<&[u8]> for BadRenderRequestError {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<crate::x11_utils::GenericError<B>> for BadRenderRequestError {
-    fn from(value: crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
-impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadRenderRequestError {
-    fn from(value: &crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
 impl From<&BadRenderRequestError> for [u8; 32] {
     fn from(input: &BadRenderRequestError) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -801,16 +719,6 @@ impl TryFrom<&[u8]> for BadLargeRequestError {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
-    }
-}
-impl<B: AsRef<[u8]>> From<crate::x11_utils::GenericError<B>> for BadLargeRequestError {
-    fn from(value: crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
-impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadLargeRequestError {
-    fn from(value: &crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
     }
 }
 impl From<&BadLargeRequestError> for [u8; 32] {
@@ -893,16 +801,6 @@ impl TryFrom<&[u8]> for UnsupportedPrivateRequestError {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<crate::x11_utils::GenericError<B>> for UnsupportedPrivateRequestError {
-    fn from(value: crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
-impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for UnsupportedPrivateRequestError {
-    fn from(value: &crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
 impl From<&UnsupportedPrivateRequestError> for [u8; 32] {
     fn from(input: &UnsupportedPrivateRequestError) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -981,16 +879,6 @@ impl TryFrom<&[u8]> for BadFBConfigError {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
-    }
-}
-impl<B: AsRef<[u8]>> From<crate::x11_utils::GenericError<B>> for BadFBConfigError {
-    fn from(value: crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
-impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadFBConfigError {
-    fn from(value: &crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
     }
 }
 impl From<&BadFBConfigError> for [u8; 32] {
@@ -1073,16 +961,6 @@ impl TryFrom<&[u8]> for BadPbufferError {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<crate::x11_utils::GenericError<B>> for BadPbufferError {
-    fn from(value: crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
-impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadPbufferError {
-    fn from(value: &crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
 impl From<&BadPbufferError> for [u8; 32] {
     fn from(input: &BadPbufferError) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -1161,16 +1039,6 @@ impl TryFrom<&[u8]> for BadCurrentDrawableError {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
-    }
-}
-impl<B: AsRef<[u8]>> From<crate::x11_utils::GenericError<B>> for BadCurrentDrawableError {
-    fn from(value: crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
-impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadCurrentDrawableError {
-    fn from(value: &crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
     }
 }
 impl From<&BadCurrentDrawableError> for [u8; 32] {
@@ -1253,16 +1121,6 @@ impl TryFrom<&[u8]> for BadWindowError {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<crate::x11_utils::GenericError<B>> for BadWindowError {
-    fn from(value: crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
-impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for BadWindowError {
-    fn from(value: &crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
 impl From<&BadWindowError> for [u8; 32] {
     fn from(input: &BadWindowError) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -1341,16 +1199,6 @@ impl TryFrom<&[u8]> for GLXBadProfileARBError {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
-    }
-}
-impl<B: AsRef<[u8]>> From<crate::x11_utils::GenericError<B>> for GLXBadProfileARBError {
-    fn from(value: crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
-impl<B: AsRef<[u8]>> From<&crate::x11_utils::GenericError<B>> for GLXBadProfileARBError {
-    fn from(value: &crate::x11_utils::GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
     }
 }
 impl From<&GLXBadProfileARBError> for [u8; 32] {
@@ -1446,19 +1294,6 @@ impl TryFrom<&[u8]> for PbufferClobberEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for PbufferClobberEvent {
-    type Error = ParseError;
-
-    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
-impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for PbufferClobberEvent {
-    type Error = ParseError;
-    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
 impl From<&PbufferClobberEvent> for [u8; 32] {
     fn from(input: &PbufferClobberEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -1550,19 +1385,6 @@ impl TryFrom<&[u8]> for BufferSwapCompleteEvent {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
-    }
-}
-impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for BufferSwapCompleteEvent {
-    type Error = ParseError;
-
-    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
-impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for BufferSwapCompleteEvent {
-    type Error = ParseError;
-    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&BufferSwapCompleteEvent> for [u8; 32] {

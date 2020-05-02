@@ -20,10 +20,6 @@ use crate::connection::RequestConnection;
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError};
-#[allow(unused_imports)]
-use crate::x11_utils::GenericEvent;
-#[allow(unused_imports)]
-use crate::x11_utils::GenericError;
 
 /// The X11 name of the extension for QueryExtension
 pub const X11_EXTENSION_NAME: &str = "XC-MISC";

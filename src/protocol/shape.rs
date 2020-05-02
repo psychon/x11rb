@@ -20,10 +20,6 @@ use crate::connection::RequestConnection;
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError};
-#[allow(unused_imports)]
-use crate::x11_utils::GenericEvent;
-#[allow(unused_imports)]
-use crate::x11_utils::GenericError;
 use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
@@ -214,19 +210,6 @@ impl TryFrom<&[u8]> for NotifyEvent {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
-    }
-}
-impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for NotifyEvent {
-    type Error = ParseError;
-
-    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
-impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for NotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&NotifyEvent> for [u8; 32] {

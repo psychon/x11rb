@@ -20,8 +20,6 @@ use crate::connection::RequestConnection;
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError};
-#[allow(unused_imports)]
-use crate::x11_utils::GenericError;
 use super::randr;
 use super::sync;
 use super::xfixes;
@@ -854,19 +852,6 @@ impl TryFrom<&[u8]> for GenericEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> TryFrom<crate::x11_utils::GenericEvent<B>> for GenericEvent {
-    type Error = ParseError;
-
-    fn try_from(value: crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
-impl<B: AsRef<[u8]>> TryFrom<&crate::x11_utils::GenericEvent<B>> for GenericEvent {
-    type Error = ParseError;
-    fn try_from(value: &crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
 impl From<&GenericEvent> for [u8; 32] {
     fn from(input: &GenericEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -968,19 +953,6 @@ impl TryFrom<&[u8]> for ConfigureNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> TryFrom<crate::x11_utils::GenericEvent<B>> for ConfigureNotifyEvent {
-    type Error = ParseError;
-
-    fn try_from(value: crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
-impl<B: AsRef<[u8]>> TryFrom<&crate::x11_utils::GenericEvent<B>> for ConfigureNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
 
 /// Opcode for the CompleteNotify event
 pub const COMPLETE_NOTIFY_EVENT: u16 = 1;
@@ -1025,19 +997,6 @@ impl TryFrom<&[u8]> for CompleteNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> TryFrom<crate::x11_utils::GenericEvent<B>> for CompleteNotifyEvent {
-    type Error = ParseError;
-
-    fn try_from(value: crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
-impl<B: AsRef<[u8]>> TryFrom<&crate::x11_utils::GenericEvent<B>> for CompleteNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
 
 /// Opcode for the IdleNotify event
 pub const IDLE_NOTIFY_EVENT: u16 = 2;
@@ -1075,19 +1034,6 @@ impl TryFrom<&[u8]> for IdleNotifyEvent {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
-    }
-}
-impl<B: AsRef<[u8]>> TryFrom<crate::x11_utils::GenericEvent<B>> for IdleNotifyEvent {
-    type Error = ParseError;
-
-    fn try_from(value: crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
-impl<B: AsRef<[u8]>> TryFrom<&crate::x11_utils::GenericEvent<B>> for IdleNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
     }
 }
 
@@ -1165,19 +1111,6 @@ impl TryFrom<&[u8]> for RedirectNotifyEvent {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
-    }
-}
-impl<B: AsRef<[u8]>> TryFrom<crate::x11_utils::GenericEvent<B>> for RedirectNotifyEvent {
-    type Error = ParseError;
-
-    fn try_from(value: crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
-impl<B: AsRef<[u8]>> TryFrom<&crate::x11_utils::GenericEvent<B>> for RedirectNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &crate::x11_utils::GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
     }
 }
 

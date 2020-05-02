@@ -20,10 +20,6 @@ use crate::connection::RequestConnection;
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError};
-#[allow(unused_imports)]
-use crate::x11_utils::GenericEvent;
-#[allow(unused_imports)]
-use crate::x11_utils::GenericError;
 use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
@@ -1248,19 +1244,6 @@ impl TryFrom<&[u8]> for BufferSwapCompleteEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for BufferSwapCompleteEvent {
-    type Error = ParseError;
-
-    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
-impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for BufferSwapCompleteEvent {
-    type Error = ParseError;
-    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
 impl From<&BufferSwapCompleteEvent> for [u8; 32] {
     fn from(input: &BufferSwapCompleteEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -1336,19 +1319,6 @@ impl TryFrom<&[u8]> for InvalidateBuffersEvent {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
-    }
-}
-impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for InvalidateBuffersEvent {
-    type Error = ParseError;
-
-    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
-impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for InvalidateBuffersEvent {
-    type Error = ParseError;
-    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&InvalidateBuffersEvent> for [u8; 32] {

@@ -20,10 +20,6 @@ use crate::connection::RequestConnection;
 #[allow(unused_imports)]
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
 use crate::errors::{ConnectionError, ParseError};
-#[allow(unused_imports)]
-use crate::x11_utils::GenericEvent;
-#[allow(unused_imports)]
-use crate::x11_utils::GenericError;
 use super::xproto;
 
 /// The X11 name of the extension for QueryExtension
@@ -564,16 +560,6 @@ impl TryFrom<&[u8]> for CounterError {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> From<GenericError<B>> for CounterError {
-    fn from(value: GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
-impl<B: AsRef<[u8]>> From<&GenericError<B>> for CounterError {
-    fn from(value: &GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
 impl From<&CounterError> for [u8; 32] {
     fn from(input: &CounterError) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -652,16 +638,6 @@ impl TryFrom<&[u8]> for AlarmError {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
-    }
-}
-impl<B: AsRef<[u8]>> From<GenericError<B>> for AlarmError {
-    fn from(value: GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
-    }
-}
-impl<B: AsRef<[u8]>> From<&GenericError<B>> for AlarmError {
-    fn from(value: &GenericError<B>) -> Self {
-        Self::try_from(value.raw_bytes()).expect("Buffer should be large enough so that parsing cannot fail")
     }
 }
 impl From<&AlarmError> for [u8; 32] {
@@ -1709,19 +1685,6 @@ impl TryFrom<&[u8]> for CounterNotifyEvent {
         Ok(Self::try_parse(value)?.0)
     }
 }
-impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for CounterNotifyEvent {
-    type Error = ParseError;
-
-    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
-impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for CounterNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
 impl From<&CounterNotifyEvent> for [u8; 32] {
     fn from(input: &CounterNotifyEvent) -> Self {
         let response_type_bytes = input.response_type.serialize();
@@ -1808,19 +1771,6 @@ impl TryFrom<&[u8]> for AlarmNotifyEvent {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
-    }
-}
-impl<B: AsRef<[u8]>> TryFrom<GenericEvent<B>> for AlarmNotifyEvent {
-    type Error = ParseError;
-
-    fn try_from(value: GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
-    }
-}
-impl<B: AsRef<[u8]>> TryFrom<&GenericEvent<B>> for AlarmNotifyEvent {
-    type Error = ParseError;
-    fn try_from(value: &GenericEvent<B>) -> Result<Self, Self::Error> {
-        Self::try_from(value.raw_bytes())
     }
 }
 impl From<&AlarmNotifyEvent> for [u8; 32] {
