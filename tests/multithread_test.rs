@@ -57,7 +57,6 @@ fn multithread_test() {
 
 /// Implementations of `Read` and `Write` that do enough for the test to work.
 mod fake_stream {
-    use std::io::{IoSlice, Read, Write};
     use std::sync::mpsc::{channel, Receiver, Sender};
 
     use x11rb::connection::SequenceNumber;
@@ -65,7 +64,8 @@ mod fake_stream {
     use x11rb::protocol::xproto::{
         ImageOrder, Setup, CLIENT_MESSAGE_EVENT, GET_INPUT_FOCUS_REQUEST, SEND_EVENT_REQUEST,
     };
-    use x11rb::rust_connection::RustConnection;
+    use x11rb::rust_connection::{ReadFD, RustConnection, WriteFD};
+    use x11rb::utils::RawFdContainer;
 
     /// Create a new `RustConnection` connected to a fake stream
     pub(crate) fn connect() -> Result<RustConnection<FakeStreamRead, FakeStreamWrite>, ConnectError>
@@ -135,8 +135,8 @@ mod fake_stream {
         pending: Vec<u8>,
     }
 
-    impl Read for FakeStreamRead {
-        fn read(&mut self, buf: &mut [u8]) -> Result<usize, std::io::Error> {
+    impl ReadFD for FakeStreamRead {
+        fn read(&mut self, buf: &mut [u8], _fd_storage: &mut Vec<RawFdContainer>) -> Result<usize, std::io::Error> {
             if self.pending.is_empty() {
                 let packet = self.recv.recv().unwrap();
                 self.pending.extend(packet.to_raw());
@@ -156,8 +156,9 @@ mod fake_stream {
         skip: usize
     }
 
-    impl Write for FakeStreamWrite {
-        fn write(&mut self, buf: &[u8]) -> Result<usize, std::io::Error> {
+    impl WriteFD for FakeStreamWrite {
+        fn write(&mut self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize, std::io::Error> {
+            assert!(fds.is_empty());
             if self.skip > 0 {
                 assert_eq!(self.skip, buf.len());
                 self.skip = 0;
@@ -176,15 +177,6 @@ mod fake_stream {
             // Compute how much of the package was not yet received
             self.skip = usize::from(u16::from_ne_bytes([buf[2], buf[3]])) * 4 - buf.len();
             Ok(buf.len())
-        }
-
-        fn write_vectored(&mut self, bufs: &[IoSlice]) -> Result<usize, std::io::Error> {
-            let buf = bufs
-                .iter()
-                .flat_map(|b| b.iter())
-                .copied()
-                .collect::<Vec<_>>();
-            self.write(&buf)
         }
 
         fn flush(&mut self) -> Result<(), std::io::Error> {
