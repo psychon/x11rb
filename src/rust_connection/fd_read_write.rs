@@ -99,6 +99,74 @@ fn check_no_fds(fds: &[RawFdContainer]) -> Result<()> {
     }
 }
 
+/// A version of [`std::io::BufWriter`] that supports sending file descriptors.
+#[derive(Debug)]
+pub struct BufWriteFD<W: WriteFD + std::fmt::Debug> {
+    inner: W,
+    data_buf: Vec<u8>,
+    fd_buf: Vec<RawFdContainer>,
+}
+
+impl<W: WriteFD + std::fmt::Debug> BufWriteFD<W> {
+    /// Creates a new `BufWriteFD` with a default buffer capacity.
+    pub fn new(inner: W) -> Self {
+        // Chosen by checking what libxcb does
+        let default = 16384;
+        Self::with_capacity(default, inner)
+    }
+
+    /// Creates a new `BufWriteFD` with the specified buffer capacity.
+    pub fn with_capacity(capacity: usize, inner: W) -> Self {
+        Self {
+            inner,
+            data_buf: Vec::with_capacity(capacity),
+            fd_buf: Vec::new(),
+        }
+    }
+
+    fn flush_buffer(&mut self) -> Result<()> {
+        let mut written = 0;
+        let mut ret = Ok(());
+        while written < self.data_buf.len() || !self.fd_buf.is_empty() {
+            match self.inner.write(&self.data_buf[written..], &mut self.fd_buf) {
+                Ok(0) => {
+                    ret = Err(Error::new(ErrorKind::WriteZero, "failed to write the buffered data"));
+                    break;
+                }
+                Ok(n) => written += n,
+                Err(ref e) if e.kind() == ErrorKind::Interrupted => {}
+                Err(e) => {
+                    ret = Err(e);
+                    break;
+                }
+            }
+        }
+        if written > 0 {
+            let _ = self.data_buf.drain(..written);
+        }
+        ret
+    }
+}
+
+impl<W: WriteFD + std::fmt::Debug> WriteFD for BufWriteFD<W> {
+    fn write(&mut self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
+        self.fd_buf.extend(fds.drain(..));
+
+        if self.data_buf.len() + buf.len() > self.data_buf.capacity() {
+            self.flush_buffer()?;
+        }
+        if buf.len() >= self.data_buf.capacity() {
+            self.inner.write(buf, &mut self.fd_buf)
+        } else {
+            self.data_buf.write(buf)
+        }
+    }
+
+    fn flush(&mut self) -> Result<()> {
+        self.flush_buffer().and_then(|_| self.inner.flush())
+    }
+}
+
 /// A version of [`std::io::Read`] that also allows receiving file descriptors.
 pub trait ReadFD {
     /// Read some bytes and FDs from this reader, returning how many bytes were read.
