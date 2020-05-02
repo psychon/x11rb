@@ -39,7 +39,7 @@ pub(crate) struct ConnectionInner {
     // Events that were read, but not yet returned to the API user
     pending_events: VecDeque<(SequenceNumber, Vec<u8>)>,
     // Replies that were read, but not yet returned to the API user
-    pending_replies: VecDeque<(SequenceNumber, (Vec<u8>, Vec<RawFdContainer>))>,
+    pending_replies: VecDeque<(SequenceNumber, BufWithFds)>,
 
     // FDs that were read, but not yet assigned to any reply
     pending_fds: VecDeque<RawFdContainer>,
@@ -192,8 +192,7 @@ impl ConnectionInner {
                 self.pending_events.push_back((seqno, packet));
             }
         } else if kind == 1 {
-            let fds;
-            if request.filter(|r| r.has_fds).is_some() {
+            let fds = if request.filter(|r| r.has_fds).is_some() {
                 // This reply has FDs, the number of FDs is always in the second byte
                 let num_fds = usize::from(packet[1]);
                 if num_fds > self.pending_fds.len() {
@@ -202,10 +201,10 @@ impl ConnectionInner {
                     // likely poison some Mutex and produce an error state that way).
                     panic!("FIXME: The server sent us too few FDs. The connection is now unusable since we will never be sure again which FD belongs to which reply.");
                 }
-                fds = self.pending_fds.drain(..num_fds).collect();
+                self.pending_fds.drain(..num_fds).collect()
             } else {
-                fds = Vec::new();
-            }
+                Vec::new()
+            };
 
             // It is a reply
             if request.filter(|r| r.discard_mode.is_some()).is_some() {
