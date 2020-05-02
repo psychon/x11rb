@@ -130,7 +130,12 @@ impl<W: WriteFD + std::fmt::Debug> BufWriteFD<W> {
         while written < self.data_buf.len() || !self.fd_buf.is_empty() {
             match self.inner.write(&self.data_buf[written..], &mut self.fd_buf) {
                 Ok(0) => {
-                    ret = Err(Error::new(ErrorKind::WriteZero, "failed to write the buffered data"));
+                    if written == self.data_buf.len() {
+                        assert!(!self.fd_buf.is_empty());
+                        ret = Err(Error::new(ErrorKind::WriteZero, "failed to write the buffered FDs"));
+                    } else {
+                        ret = Err(Error::new(ErrorKind::WriteZero, "failed to write the buffered data"));
+                    }
                     break;
                 }
                 Ok(n) => written += n,
