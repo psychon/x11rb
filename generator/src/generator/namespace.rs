@@ -954,10 +954,15 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
     fn generate_event_copy_def(&self, event_copy_def: &xcbdefs::EventCopyDef, out: &mut Output) {
         let name = to_rust_type_name(&event_copy_def.name);
-        let number = event_copy_def.number;
-
         let event_full_def = event_copy_def.get_original_full_def();
-        self.emit_event(&name, number, &event_full_def, out);
+        self.emit_event_opcode(&name, event_copy_def.number, &event_full_def, out);
+        outln!(
+            out,
+            "pub type {}Event = {};",
+            name,
+            self.event_to_rust_type(event_copy_def.ref_.def.get().unwrap()),
+        );
+        outln!(out, "");
     }
 
     fn emit_event(
@@ -967,25 +972,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         event_full_def: &xcbdefs::EventFullDef,
         out: &mut Output,
     ) {
+        self.emit_event_opcode(name, number, &event_full_def, out);
+
         let full_name = format!("{}Event", name);
-
-        // The opcode specified for GeGeneric in xproto (35) is the value
-        // in the 8-bit response_type field
-        let opcode_type =
-            if event_full_def.xge && (self.ns.header != "xproto" || name != "GeGeneric") {
-                "u16"
-            } else {
-                "u8"
-            };
-
-        outln!(out, "/// Opcode for the {} event", name);
-        outln!(
-            out,
-            "pub const {}_EVENT: {} = {};",
-            super::camel_case_to_upper_snake(name),
-            opcode_type,
-            number,
-        );
 
         let fields = event_full_def.fields.borrow();
         let mut derives = Derives::all();
@@ -1013,6 +1002,32 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         outln!(out, "");
     }
 
+    fn emit_event_opcode(
+        &self,
+        name: &str,
+        number: u16,
+        event_full_def: &xcbdefs::EventFullDef,
+        out: &mut Output,
+    ) {
+        // The opcode specified for GeGeneric in xproto (35) is the value
+        // in the 8-bit response_type field
+        let opcode_type =
+            if event_full_def.xge && (self.ns.header != "xproto" || name != "GeGeneric") {
+                "u16"
+            } else {
+                "u8"
+            };
+
+        outln!(out, "/// Opcode for the {} event", name);
+        outln!(
+            out,
+            "pub const {}_EVENT: {} = {};",
+            super::camel_case_to_upper_snake(name),
+            opcode_type,
+            number,
+        );
+    }
+
     fn generate_error_full_def(&self, error_full_def: &xcbdefs::ErrorFullDef, out: &mut Output) {
         let name = to_rust_type_name(&error_full_def.name);
         self.emit_error(&name, error_full_def.number, error_full_def, out);
@@ -1020,10 +1035,14 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
     fn generate_error_copy_def(&self, error_copy_def: &xcbdefs::ErrorCopyDef, out: &mut Output) {
         let name = to_rust_type_name(&error_copy_def.name);
-        let number = error_copy_def.number;
-
-        let error_full_def = error_copy_def.get_original_full_def();
-        self.emit_error(&name, number, &error_full_def, out);
+        self.emit_error_opcode(&name, error_copy_def.number, out);
+        outln!(
+            out,
+            "pub type {}Error = {};",
+            name,
+            self.error_to_rust_type(error_copy_def.ref_.def.get().unwrap()),
+        );
+        outln!(out, "");
     }
 
     fn emit_error(
@@ -1033,19 +1052,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         error_full_def: &xcbdefs::ErrorFullDef,
         out: &mut Output,
     ) {
-        let full_name = format!("{}Error", name);
+        self.emit_error_opcode(name, number, out);
 
-        // The XML has a comment saying "fake number"
-        let emit_opcode = self.ns.header != "glx" || name != "Generic";
-        if emit_opcode {
-            outln!(out, "/// Opcode for the {} error", name);
-            outln!(
-                out,
-                "pub const {}_ERROR: u8 = {};",
-                super::camel_case_to_upper_snake(name),
-                number,
-            );
-        }
+        let full_name = format!("{}Error", name);
 
         let fields = error_full_def.fields.borrow();
         let mut derives = Derives::all();
@@ -1069,6 +1078,20 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         self.emit_event_or_error_serialize(&full_name, &*fields, &deducible_fields, out);
 
         outln!(out, "");
+    }
+
+    fn emit_error_opcode(&self, name: &str, number: i16, out: &mut Output) {
+        // The XML has a comment saying "fake number"
+        let emit_opcode = self.ns.header != "glx" || name != "Generic";
+        if emit_opcode {
+            outln!(out, "/// Opcode for the {} error", name);
+            outln!(
+                out,
+                "pub const {}_ERROR: u8 = {};",
+                super::camel_case_to_upper_snake(name),
+                number,
+            );
+        }
     }
 
     fn emit_event_or_error_serialize(
@@ -1341,11 +1364,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         out.indented(|out| {
             for allowed in event_struct_def.alloweds.iter() {
                 for event in allowed.resolved.borrow().iter() {
-                    let event = event.as_event_def();
-                    let event_name = event.name();
-                    let event_ns = event.namespace();
-                    let rust_event_name = format!("{}Event", to_rust_type_name(event_name));
-                    let rust_event_type = self.type_name_to_rust_type(&rust_event_name, &event_ns);
+                    let rust_event_name =
+                        format!("{}Event", to_rust_type_name(event.as_event_def().name()));
+                    let rust_event_type = self.event_to_rust_type(event);
                     outln!(
                         out,
                         "pub fn {}(&self) -> {} {{",
@@ -1396,13 +1417,18 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         });
         outln!(out, "}}");
 
+        let mut events_with_from = FxHashSet::default();
+
         for allowed in event_struct_def.alloweds.iter() {
             for event in allowed.resolved.borrow().iter() {
-                let event = event.as_event_def();
-                let event_name = event.name();
-                let event_ns = event.namespace();
-                let rust_event_name = format!("{}Event", to_rust_type_name(event_name));
-                let rust_event_type = self.type_name_to_rust_type(&rust_event_name, &event_ns);
+                let rust_original_event_type = self.event_def_to_rust_type(
+                    &xcbdefs::EventDef::Full(event.get_original_full_def()),
+                );
+                if !events_with_from.insert(rust_original_event_type) {
+                    // Avoid conflicting `From` implementations.
+                    continue;
+                }
+                let rust_event_type = self.event_to_rust_type(event);
                 outln!(out, "impl From<{}> for {} {{", rust_event_type, rust_name);
                 out.indented(|out| {
                     outln!(out, "fn from(value: {}) -> Self {{", rust_event_type);
@@ -1419,7 +1445,6 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 outln!(out, "}}");
             }
         }
-        // TODO: `From` impl for each event.
 
         outln!(out, "");
     }
@@ -4524,6 +4549,25 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             // Different namespace, requires specfying the module
             format!("{}::{}", ns.header, name)
         }
+    }
+
+    fn event_to_rust_type(&self, event: &xcbdefs::EventRef) -> String {
+        self.event_def_to_rust_type(&event.as_event_def())
+    }
+
+    fn event_def_to_rust_type(&self, event: &xcbdefs::EventDef) -> String {
+        let name = event.name();
+        let namespace = event.namespace();
+        let rust_name = format!("{}Event", to_rust_type_name(name));
+        self.type_name_to_rust_type(&rust_name, &namespace)
+    }
+
+    fn error_to_rust_type(&self, error: &xcbdefs::ErrorRef) -> String {
+        let error = error.as_error_def();
+        let name = error.name();
+        let namespace = error.namespace();
+        let rust_name = format!("{}Error", to_rust_type_name(name));
+        self.type_name_to_rust_type(&rust_name, &namespace)
     }
 
     /// Returns the parameters needed by the `try_parse` function for `type_`.
