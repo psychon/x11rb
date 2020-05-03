@@ -1229,12 +1229,9 @@ impl VariableSize {
                 let incr1 = 1u32 << min_base.trailing_zeros().min(31);
                 let incr2 = 1u32 << (max_base - min_base).trailing_zeros().min(31);
                 if incr1 > incr2 {
-                    // FIXME: How can `1u32 << (1u32 << [something])` not overflow? that requires
-                    // [something] to be at most 4.
-                    // A quick unreachable!() says that this is dead code
                     Self {
                         base: max_base - min_base,
-                        incr: 1u32 << incr1,
+                        incr: incr1,
                     }
                 } else {
                     Self {
