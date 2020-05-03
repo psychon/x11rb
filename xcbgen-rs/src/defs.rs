@@ -272,17 +272,7 @@ impl EventDef {
     pub fn get_original_full_def(&self) -> Rc<EventFullDef> {
         match self {
             Self::Full(event_full_def) => event_full_def.clone(),
-            Self::Copy(event_copy_def) => {
-                let mut event_copy_def = event_copy_def.clone();
-                loop {
-                    match event_copy_def.ref_.def.get().unwrap() {
-                        EventRef::Full(event_full_def) => return event_full_def.upgrade().unwrap(),
-                        EventRef::Copy(event_copy_ref) => {
-                            event_copy_def = event_copy_ref.upgrade().unwrap()
-                        }
-                    }
-                }
-            }
+            Self::Copy(event_copy_def) => event_copy_def.get_original_full_def(),
         }
     }
 
@@ -348,17 +338,7 @@ impl ErrorDef {
     pub fn get_original_full_def(&self) -> Rc<ErrorFullDef> {
         match self {
             Self::Full(error_full_def) => error_full_def.clone(),
-            Self::Copy(error_copy_def) => {
-                let mut error_copy_def = error_copy_def.clone();
-                loop {
-                    match error_copy_def.ref_.def.get().unwrap() {
-                        ErrorRef::Full(error_full_def) => return error_full_def.upgrade().unwrap(),
-                        ErrorRef::Copy(event_copy_ref) => {
-                            error_copy_def = event_copy_ref.upgrade().unwrap()
-                        }
-                    }
-                }
-            }
+            Self::Copy(error_copy_def) => error_copy_def.get_original_full_def(),
         }
     }
 }
