@@ -171,14 +171,15 @@ impl Namespace {
     /// Insert new request definitions into this namespace.
     ///
     /// Returns `false` if the name is already in use.
-    ///
-    // FIXME This function does not insert the definition into `src_order_defs`. FIXME
     #[must_use]
     pub fn insert_request_def(&self, name: String, request_def: Rc<RequestDef>) -> bool {
         match self.request_defs.borrow_mut().entry(name) {
             HashMapEntry::Occupied(_) => false,
             HashMapEntry::Vacant(entry) => {
-                entry.insert(request_def);
+                entry.insert(Rc::clone(&request_def));
+                self.src_order_defs
+                    .borrow_mut()
+                    .push(Def::Request(request_def));
                 true
             }
         }
@@ -187,14 +188,19 @@ impl Namespace {
     /// Insert a new event definition into this namespace.
     ///
     /// Returns `false` if the name is already in use.
-    ///
-    // FIXME This function does not insert the definition into `src_order_defs`. FIXME
     #[must_use]
     pub fn insert_event_def(&self, name: String, event_def: EventDef) -> bool {
         match self.event_defs.borrow_mut().entry(name) {
             HashMapEntry::Occupied(_) => false,
             HashMapEntry::Vacant(entry) => {
+                let clone = match event_def {
+                    EventDef::Full(ref def) => EventDef::Full(Rc::clone(def)),
+                    EventDef::Copy(ref def) => EventDef::Copy(Rc::clone(def)),
+                };
                 entry.insert(event_def);
+                self.src_order_defs
+                    .borrow_mut()
+                    .push(Def::Event(clone));
                 true
             }
         }
@@ -203,14 +209,19 @@ impl Namespace {
     /// Insert a new error definition into this namespace.
     ///
     /// Returns `false` if the name is already in use.
-    ///
-    // FIXME This function does not insert the definition into `src_order_defs`. FIXME
     #[must_use]
     pub fn insert_error_def(&self, name: String, error_def: ErrorDef) -> bool {
         match self.error_defs.borrow_mut().entry(name) {
             HashMapEntry::Occupied(_) => false,
             HashMapEntry::Vacant(entry) => {
+                let clone = match error_def {
+                    ErrorDef::Full(ref def) => ErrorDef::Full(Rc::clone(def)),
+                    ErrorDef::Copy(ref def) => ErrorDef::Copy(Rc::clone(def)),
+                };
                 entry.insert(error_def);
+                self.src_order_defs
+                    .borrow_mut()
+                    .push(Def::Error(clone));
                 true
             }
         }
@@ -219,14 +230,24 @@ impl Namespace {
     /// Insert a new type definition into this namespace.
     ///
     /// Returns `false` if the name is already in use.
-    ///
-    // FIXME This function does not insert the definition into `src_order_defs`. FIXME
     #[must_use]
     pub fn insert_type_def(&self, name: String, type_def: TypeDef) -> bool {
         match self.type_defs.borrow_mut().entry(name) {
             HashMapEntry::Occupied(_) => false,
             HashMapEntry::Vacant(entry) => {
+                let clone = match type_def {
+                    TypeDef::Struct(ref def) => TypeDef::Struct(Rc::clone(def)),
+                    TypeDef::Union(ref def) => TypeDef::Union(Rc::clone(def)),
+                    TypeDef::EventStruct(ref def) => TypeDef::EventStruct(Rc::clone(def)),
+                    TypeDef::Xid(ref def) => TypeDef::Xid(Rc::clone(def)),
+                    TypeDef::XidUnion(ref def) => TypeDef::XidUnion(Rc::clone(def)),
+                    TypeDef::Enum(ref def) => TypeDef::Enum(Rc::clone(def)),
+                    TypeDef::Alias(ref def) => TypeDef::Alias(Rc::clone(def)),
+                };
                 entry.insert(type_def);
+                self.src_order_defs
+                    .borrow_mut()
+                    .push(Def::Type(clone));
                 true
             }
         }

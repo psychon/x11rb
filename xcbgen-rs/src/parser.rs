@@ -182,12 +182,9 @@ impl Parser {
         if let Some(ref reply) = request.reply {
             reply.request.set(Rc::downgrade(&request)).unwrap();
         }
-        if !ns.insert_request_def(name.into(), request.clone()) {
+        if !ns.insert_request_def(name.into(), request) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Request(request));
             Ok(())
         }
     }
@@ -280,12 +277,9 @@ impl Parser {
             fields: RefCell::new(fields),
             doc,
         });
-        if !ns.insert_event_def(name.into(), defs::EventDef::Full(event_full.clone())) {
+        if !ns.insert_event_def(name.into(), defs::EventDef::Full(event_full)) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Event(defs::EventDef::Full(event_full)));
             Ok(())
         }
     }
@@ -307,12 +301,9 @@ impl Parser {
             number,
             ref_: defs::NamedEventRef::unresolved(ref_.into()),
         });
-        if !ns.insert_event_def(name.into(), defs::EventDef::Copy(event_copy.clone())) {
+        if !ns.insert_event_def(name.into(), defs::EventDef::Copy(event_copy)) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Event(defs::EventDef::Copy(event_copy)));
             Ok(())
         }
     }
@@ -354,12 +345,9 @@ impl Parser {
             required_start_align,
             fields: RefCell::new(fields),
         });
-        if !ns.insert_error_def(name.into(), defs::ErrorDef::Full(error_full.clone())) {
+        if !ns.insert_error_def(name.into(), defs::ErrorDef::Full(error_full)) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Error(defs::ErrorDef::Full(error_full)));
             Ok(())
         }
     }
@@ -381,12 +369,9 @@ impl Parser {
             number,
             ref_: defs::NamedErrorRef::unresolved(ref_.into()),
         });
-        if !ns.insert_error_def(name.into(), defs::ErrorDef::Copy(error_copy.clone())) {
+        if !ns.insert_error_def(name.into(), defs::ErrorDef::Copy(error_copy)) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Error(defs::ErrorDef::Copy(error_copy)));
             Ok(())
         }
     }
@@ -421,12 +406,9 @@ impl Parser {
             fields: RefCell::new(fields),
             external_params: RefCell::new(Vec::new()),
         });
-        if !ns.insert_type_def(name.into(), defs::TypeDef::Struct(struct_.clone())) {
+        if !ns.insert_type_def(name.into(), defs::TypeDef::Struct(struct_)) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Type(defs::TypeDef::Struct(struct_)));
             Ok(())
         }
     }
@@ -460,12 +442,9 @@ impl Parser {
             alignment: OnceCell::new(),
             fields,
         });
-        if !ns.insert_type_def(name.into(), defs::TypeDef::Union(union.clone())) {
+        if !ns.insert_type_def(name.into(), defs::TypeDef::Union(union)) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Type(defs::TypeDef::Union(union)));
             Ok(())
         }
     }
@@ -500,13 +479,10 @@ impl Parser {
         });
         if !ns.insert_type_def(
             name.into(),
-            defs::TypeDef::EventStruct(event_struct.clone()),
+            defs::TypeDef::EventStruct(event_struct),
         ) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Type(defs::TypeDef::EventStruct(event_struct)));
             Ok(())
         }
     }
@@ -544,12 +520,9 @@ impl Parser {
             namespace: Rc::downgrade(ns),
             name: name.into(),
         });
-        if !ns.insert_type_def(name.into(), defs::TypeDef::Xid(xid_type.clone())) {
+        if !ns.insert_type_def(name.into(), defs::TypeDef::Xid(xid_type)) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Type(defs::TypeDef::Xid(xid_type)));
             Ok(())
         }
     }
@@ -582,12 +555,9 @@ impl Parser {
             name: name.into(),
             types,
         });
-        if !ns.insert_type_def(name.into(), defs::TypeDef::XidUnion(xid_union.clone())) {
+        if !ns.insert_type_def(name.into(), defs::TypeDef::XidUnion(xid_union)) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Type(defs::TypeDef::XidUnion(xid_union)));
             Ok(())
         }
     }
@@ -626,12 +596,9 @@ impl Parser {
             items,
             doc,
         });
-        if !ns.insert_type_def(name.into(), defs::TypeDef::Enum(enum_.clone())) {
+        if !ns.insert_type_def(name.into(), defs::TypeDef::Enum(enum_)) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Type(defs::TypeDef::Enum(enum_)));
             Ok(())
         }
     }
@@ -695,12 +662,9 @@ impl Parser {
             old_name,
             new_name: new_name.into(),
         });
-        if !ns.insert_type_def(new_name.into(), defs::TypeDef::Alias(type_alias.clone())) {
+        if !ns.insert_type_def(new_name.into(), defs::TypeDef::Alias(type_alias)) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Type(defs::TypeDef::Alias(type_alias)));
             Ok(())
         }
     }
