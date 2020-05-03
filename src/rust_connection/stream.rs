@@ -238,6 +238,8 @@ impl ReadFD for Stream {
         #[cfg(not(unix))]
         {
             use std::io::Read;
+            // No FDs are read, so nothing needs to be done with fd_storage
+            let _ = fd_storage;
             match self {
                 Stream::TcpStream(stream) => stream.read(buf),
             }
