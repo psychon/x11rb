@@ -1015,24 +1015,43 @@ impl NamedTypeRef {
 /// An alignment specification.
 ///
 /// This structure represents a requirement that some byte position `pos` satisfies
-/// `(pos + offset) % align == 0`.
+/// `pos % align == offset`.
+///
+/// `align` must be a power of 2 and `offset` must be less than `align`.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Alignment {
-    pub align: u32,
-    pub offset: u32,
+    align: u32,
+    offset: u32,
 }
 
 impl Alignment {
+    /// Creates a new `Alignment` with `align` and `offset`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `align` is not a power of two or if `offset` is
+    /// equal or greater than `align`.
+    pub fn new(align: u32, offset: u32) -> Self {
+        assert!(align.is_power_of_two() && offset < align);
+        Self { align, offset }
+    }
+
+    /// Returns the value of `align`.
+    #[inline]
+    pub fn align(self) -> u32 {
+        self.align
+    }
+
+    /// Returns the value of `offset`.
+    #[inline]
+    pub fn offset(self) -> u32 {
+        self.offset
+    }
+
     /// Advance this alignment specification by some variably sized object.
     ///
     /// The resulting value describes the alignment at the end of the variably sized object if it
     /// is aligned by `self` at its beginning.
-    // FIXME: I am not sure this algorithm is correct (or that the alignment can even be specified
-    // in general). For example, imagine a list with elements of size 12 that is aligned at an 8
-    // byte boundary. The result of `Alignment { align: 8, offset: 0
-    // }.advance_variable_size(VariableSize { base: 0, incr: 12 })` has `.align == 8`, but only an
-    // alignment of 4 is actually guaranteed.
-    // I haven't thought about the `offset` calculation here.
     pub fn advance_variable_size(self, size: VariableSize) -> Self {
         let align = if size.incr == 0 {
             self.align
@@ -1061,9 +1080,7 @@ impl Alignment {
                 }
             }
             std::cmp::Ordering::Greater => {
-                // FIXME: Shouldn't this use % instead of %? (Not that it matters much in practice,
-                // since I think only alignments by powers of two appear in X11)
-                if (self.offset & other.align) != other.align {
+                if (self.offset % other.align) != other.align {
                     None
                 } else {
                     Some(self)
@@ -1097,10 +1114,10 @@ impl Alignment {
 
     /// Returns whether `self` meets the alignment requirements
     /// of `required`.
-    // FIXME: Does something that is aligned at a 5 byte boundary really meet a 4 byte alignment? I
-    // think `self.align >= required.align` really should be `self.align % required.align == 0`.
-    // Perhaps some unit tests for this?
     pub fn meets(self, required: Self) -> bool {
+        // `self.align >= required.align` is equivalent to
+        // `self.align % required.align == 0` because `align`
+        // is always a power of 2.
         self.align >= required.align && (self.offset % required.align) == required.offset
     }
 }
@@ -1112,14 +1129,35 @@ impl Alignment {
 /// non-negative value of `n`.
 ///
 /// `incr` must be zero or a power of 2
-// FIXME: Make the members non-pub and make the constructor enforce the power-of-2 requirement.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct VariableSize {
-    pub base: u32,
-    pub incr: u32,
+    base: u32,
+    incr: u32,
 }
 
 impl VariableSize {
+    /// Creates a new `VariableSize` with `base` and `incr`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `incr` neither zero nor a power of 2.
+    pub fn new(base: u32, incr: u32) -> Self {
+        assert!(incr == 0 || incr.is_power_of_two());
+        Self { base, incr }
+    }
+
+    /// Returns the value of `base`.
+    #[inline]
+    pub fn base(self) -> u32 {
+        self.base
+    }
+
+    /// Returns the value of `incr`.
+    #[inline]
+    pub fn incr(self) -> u32 {
+        self.incr
+    }
+
     /// Get the minimum of two values, but not zero (unless both are zero).
     fn incr_union(incr1: u32, incr2: u32) -> u32 {
         if incr1 == 0 {
@@ -1159,7 +1197,7 @@ impl VariableSize {
         }
     }
 
-    /// Returns an `AlignSize` that can represent all the sizes
+    /// Returns an `VariableSize` that can represent all the sizes
     /// represented by `self` and `other`.
     pub fn union(self, other: Self) -> Self {
         let incr_union = Self::incr_union(self.incr, other.incr);
@@ -1191,12 +1229,9 @@ impl VariableSize {
                 let incr1 = 1u32 << min_base.trailing_zeros().min(31);
                 let incr2 = 1u32 << (max_base - min_base).trailing_zeros().min(31);
                 if incr1 > incr2 {
-                    // FIXME: How can `1u32 << (1u32 << [something])` not overflow? that requires
-                    // [something] to be at most 4.
-                    // A quick unreachable!() says that this is dead code
                     Self {
                         base: max_base - min_base,
-                        incr: 1u32 << incr1,
+                        incr: incr1,
                     }
                 } else {
                     Self {
@@ -1214,17 +1249,17 @@ impl VariableSize {
 
     /// Describe the size of an arbitrary number of elements.
     pub fn zero_one_or_many(self) -> Self {
-        let base = Self::reduce_base(self.base, self.incr);
-        if base == 0 {
-            Self {
-                base: 0,
-                incr: self.incr,
-            }
+        // Self represents sizes `base + incr * n`, where `n >= 0`.
+        // The returned value must represent sizes `(base + incr * n) * m`
+        // (or a superset), where `m >= 0`.
+        if self.base == 0 && self.incr == 0 {
+            Self::zero()
         } else {
-            // FIXME: Why is it correct to just ignore `incr` in this case?
+            // `(base + incr * n) * m = base * m + incr * n * m = gcd(base, incr) * l`
             Self {
                 base: 0,
-                incr: 1u32 << base.trailing_zeros().min(31),
+                // `self.base | self.incr` won't be zero, so `trailing_zeros < 32`.
+                incr: 1u32 << (self.base | self.incr).trailing_zeros(),
             }
         }
     }

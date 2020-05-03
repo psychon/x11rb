@@ -33,11 +33,19 @@ pub enum ParseError {
     /// A `<pad>` must contain either a `bytes` or `align` attribute. This property was violated.
     InvalidPad,
 
+    /// A `<pad align= >` has an invalid value (i.e., `align` is not
+    /// a power of two).
+    InvalidPadAlign,
+
     /// A `<field>` contains an invalid set of properties.
     ///
     /// At most one of the attributes `enum`, `altenum`, `mask`, or `altmask` may be present.
     /// However, some field had more than this.
     InvalidFieldValueSet,
+
+    /// A `<required_start_align>` has an invalid value (i.e., `align` is not a power of two
+    /// or `offset` is equal or greater than `align`).
+    InvalidRequiredStartAlign,
 }
 
 /// A `Parser` that adds namespaces to a module.
@@ -679,12 +687,17 @@ impl Parser {
         match node.tag_name().name() {
             "pad" => {
                 let bytes = try_get_attr_parsed(node, "bytes")?;
-                let align = try_get_attr_parsed(node, "align")?;
+                let align = try_get_attr_parsed::<u16>(node, "align")?;
                 let serialize = try_get_attr_parsed(node, "serialize")?.unwrap_or(false);
 
                 let pad_kind = match (bytes, align) {
                     (Some(bytes), None) => defs::PadKind::Bytes(bytes),
-                    (None, Some(align)) => defs::PadKind::Align(align),
+                    (None, Some(align)) => {
+                        if !align.is_power_of_two() {
+                            return Err(ParseError::InvalidPadAlign);
+                        }
+                        defs::PadKind::Align(align)
+                    }
                     _ => return Err(ParseError::InvalidPad),
                 };
                 Ok(Some(defs::FieldDef::Pad(defs::PadField {
@@ -809,9 +822,13 @@ impl Parser {
     ) -> Result<defs::Alignment, ParseError> {
         assert!(node.is_element());
 
-        let align = get_attr_parsed(node, "align")?;
+        let align = get_attr_parsed::<u32>(node, "align")?;
         let offset = try_get_attr_parsed(node, "offset")?.unwrap_or(0);
-        Ok(defs::Alignment { align, offset })
+        if !align.is_power_of_two() || offset >= align {
+            Err(ParseError::InvalidRequiredStartAlign)
+        } else {
+            Ok(defs::Alignment::new(align, offset))
+        }
     }
 
     fn try_parse_switch_case(

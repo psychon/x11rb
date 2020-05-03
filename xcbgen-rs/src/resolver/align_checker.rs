@@ -25,18 +25,15 @@ fn check_alignment_in_request_def(request_def: &defs::RequestDef) -> Result<(), 
     let req_start_align = if let Some(required_start_align) = request_def.required_start_align {
         check_required_start_align(required_start_align)?;
         // there cannot be an offset here
-        if required_start_align.offset != 0 {
+        if required_start_align.offset() != 0 {
             return Err(ResolveError::InvalidRequiredStartAlign(
-                required_start_align.align,
-                required_start_align.offset,
+                required_start_align.align(),
+                required_start_align.offset(),
             ));
         }
         required_start_align
     } else {
-        defs::Alignment {
-            align: 4,
-            offset: 0,
-        }
+        defs::Alignment::new(4, 0)
     };
 
     let fields = request_def.fields.borrow();
@@ -61,18 +58,15 @@ fn check_alignment_in_reply_def(
     let req_start_align = if let Some(required_start_align) = reply_def.required_start_align {
         check_required_start_align(required_start_align)?;
         // there cannot be an offset here
-        if required_start_align.offset != 0 {
+        if required_start_align.offset() != 0 {
             return Err(ResolveError::InvalidRequiredStartAlign(
-                required_start_align.align,
-                required_start_align.offset,
+                required_start_align.align(),
+                required_start_align.offset(),
             ));
         }
         required_start_align
     } else {
-        defs::Alignment {
-            align: 4,
-            offset: 0,
-        }
+        defs::Alignment::new(4, 0)
     };
 
     let fields = reply_def.fields.borrow();
@@ -93,18 +87,15 @@ fn check_alignment_in_event_def(event_def: &defs::EventDef) -> Result<(), Resolv
                 if let Some(required_start_align) = event_full_def.required_start_align {
                     check_required_start_align(required_start_align)?;
                     // there cannot be an offset here
-                    if required_start_align.offset != 0 {
+                    if required_start_align.offset() != 0 {
                         return Err(ResolveError::InvalidRequiredStartAlign(
-                            required_start_align.align,
-                            required_start_align.offset,
+                            required_start_align.align(),
+                            required_start_align.offset(),
                         ));
                     }
                     required_start_align
                 } else {
-                    defs::Alignment {
-                        align: 4,
-                        offset: 0,
-                    }
+                    defs::Alignment::new(4, 0)
                 };
 
             let fields = event_full_def.fields.borrow();
@@ -128,18 +119,15 @@ fn check_alignment_in_error_def(error_def: &defs::ErrorDef) -> Result<(), Resolv
                 if let Some(required_start_align) = error_full_def.required_start_align {
                     check_required_start_align(required_start_align)?;
                     // there cannot be an offset here
-                    if required_start_align.offset != 0 {
+                    if required_start_align.offset() != 0 {
                         return Err(ResolveError::InvalidRequiredStartAlign(
-                            required_start_align.align,
-                            required_start_align.offset,
+                            required_start_align.align(),
+                            required_start_align.offset(),
                         ));
                     }
                     required_start_align
                 } else {
-                    defs::Alignment {
-                        align: 4,
-                        offset: 0,
-                    }
+                    defs::Alignment::new(4, 0)
                 };
 
             let fields = error_full_def.fields.borrow();
@@ -199,10 +187,7 @@ fn resolve_union_alignment(union_def: &defs::UnionDef) -> Result<(), ResolveErro
             .ok_or_else(|| ResolveError::UnaligneableUnion(union_def.name.clone()))?;
 
         // Unlike case switches, unions always have the size of its largest field.
-        union_align.body = defs::AlignBody::Size(defs::VariableSize {
-            base: union_def.size(),
-            incr: 0,
-        });
+        union_align.body = defs::AlignBody::Size(defs::VariableSize::new(union_def.size(), 0));
         assert_eq!(union_align.internal_align, 1);
 
         Ok(union_align)
@@ -264,7 +249,7 @@ fn find_struct_fields_alignment(
 ) -> Option<defs::ComplexAlignment> {
     for &align in [1, 2, 4, 8].iter() {
         for offset in 0..align {
-            let start_align = defs::Alignment { align, offset };
+            let start_align = defs::Alignment::new(align, offset);
             if let Some(alignment) = check_struct_fields_alignment(start_align, field_aligns) {
                 return Some(alignment);
             }
@@ -287,7 +272,7 @@ fn check_struct_fields_alignment(
         global_alignment = global_alignment.append(field_align)?;
     }
 
-    if start_align.align < global_alignment.internal_align {
+    if start_align.align() < global_alignment.internal_align {
         None
     } else {
         Some(global_alignment)
@@ -309,7 +294,7 @@ fn check_union_fields_alignment(
         global_alignment = global_alignment.union_append(field_align)?;
     }
 
-    if start_align.align < global_alignment.internal_align {
+    if start_align.align() < global_alignment.internal_align {
         None
     } else {
         Some(global_alignment)
@@ -321,7 +306,7 @@ fn find_union_fields_alignment(
 ) -> Option<defs::ComplexAlignment> {
     for &align in [1, 2, 4, 8].iter() {
         for offset in 0..align {
-            let start_align = defs::Alignment { align, offset };
+            let start_align = defs::Alignment::new(align, offset);
             if let Some(alignment) = check_union_fields_alignment(start_align, field_aligns) {
                 return Some(alignment);
             }
@@ -344,7 +329,7 @@ fn check_bitcases_alignment(
         global_alignment = global_alignment.bitcase_append(field_align)?;
     }
 
-    if start_align.align < global_alignment.internal_align {
+    if start_align.align() < global_alignment.internal_align {
         None
     } else {
         Some(global_alignment)
@@ -356,7 +341,7 @@ fn find_bitcases_alignment(
 ) -> Option<defs::ComplexAlignment> {
     for &align in [1, 2, 4, 8].iter() {
         for offset in 0..align {
-            let start_align = defs::Alignment { align, offset };
+            let start_align = defs::Alignment::new(align, offset);
             if let Some(alignment) = check_bitcases_alignment(start_align, case_aligns) {
                 return Some(alignment);
             }
@@ -372,14 +357,8 @@ fn resolve_field_alignment(field: &defs::FieldDef) -> Result<defs::ComplexAlignm
                 Ok(defs::ComplexAlignment::fixed_size(u32::from(bytes), 1))
             }
             defs::PadKind::Align(align) => Ok(defs::ComplexAlignment {
-                begin: defs::Alignment {
-                    align: 1,
-                    offset: 0,
-                },
-                body: defs::AlignBody::EndAlign(defs::Alignment {
-                    align: u32::from(align),
-                    offset: 0,
-                }),
+                begin: defs::Alignment::new(1, 0),
+                body: defs::AlignBody::EndAlign(defs::Alignment::new(u32::from(align), 0)),
                 internal_align: u32::from(align),
             }),
         },
@@ -460,12 +439,12 @@ fn get_type_alignment(type_: &defs::TypeRef) -> Result<defs::ComplexAlignment, R
 }
 
 fn check_required_start_align(required_start_align: defs::Alignment) -> Result<(), ResolveError> {
-    if !required_start_align.align.is_power_of_two()
-        || required_start_align.offset >= required_start_align.align
+    if !required_start_align.align().is_power_of_two()
+        || required_start_align.offset() >= required_start_align.align()
     {
         Err(ResolveError::InvalidRequiredStartAlign(
-            required_start_align.align,
-            required_start_align.offset,
+            required_start_align.align(),
+            required_start_align.offset(),
         ))
     } else {
         Ok(())
