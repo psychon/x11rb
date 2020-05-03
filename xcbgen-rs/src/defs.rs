@@ -198,9 +198,7 @@ impl Namespace {
                     EventDef::Copy(ref def) => EventDef::Copy(Rc::clone(def)),
                 };
                 entry.insert(event_def);
-                self.src_order_defs
-                    .borrow_mut()
-                    .push(Def::Event(clone));
+                self.src_order_defs.borrow_mut().push(Def::Event(clone));
                 true
             }
         }
@@ -219,9 +217,7 @@ impl Namespace {
                     ErrorDef::Copy(ref def) => ErrorDef::Copy(Rc::clone(def)),
                 };
                 entry.insert(error_def);
-                self.src_order_defs
-                    .borrow_mut()
-                    .push(Def::Error(clone));
+                self.src_order_defs.borrow_mut().push(Def::Error(clone));
                 true
             }
         }
@@ -245,9 +241,7 @@ impl Namespace {
                     TypeDef::Alias(ref def) => TypeDef::Alias(Rc::clone(def)),
                 };
                 entry.insert(type_def);
-                self.src_order_defs
-                    .borrow_mut()
-                    .push(Def::Type(clone));
+                self.src_order_defs.borrow_mut().push(Def::Type(clone));
                 true
             }
         }

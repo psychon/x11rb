@@ -477,10 +477,7 @@ impl Parser {
             name: name.into(),
             alloweds,
         });
-        if !ns.insert_type_def(
-            name.into(),
-            defs::TypeDef::EventStruct(event_struct),
-        ) {
+        if !ns.insert_type_def(name.into(), defs::TypeDef::EventStruct(event_struct)) {
             Err(ParseError::RepeatedTypeName)
         } else {
             Ok(())
