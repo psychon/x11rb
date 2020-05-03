@@ -1015,7 +1015,7 @@ impl NamedTypeRef {
 /// An alignment specification.
 ///
 /// This structure represents a requirement that some byte position `pos` satisfies
-/// `(pos + offset) % align == 0`.
+/// `pos % align == offset`.
 ///
 /// `align` must be a power of 2 and `offset` must be less than `align`.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
