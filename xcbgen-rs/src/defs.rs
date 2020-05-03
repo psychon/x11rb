@@ -1197,7 +1197,7 @@ impl VariableSize {
         }
     }
 
-    /// Returns an `AlignSize` that can represent all the sizes
+    /// Returns an `VariableSize` that can represent all the sizes
     /// represented by `self` and `other`.
     pub fn union(self, other: Self) -> Self {
         let incr_union = Self::incr_union(self.incr, other.incr);
