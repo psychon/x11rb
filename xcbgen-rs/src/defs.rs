@@ -1052,12 +1052,6 @@ impl Alignment {
     ///
     /// The resulting value describes the alignment at the end of the variably sized object if it
     /// is aligned by `self` at its beginning.
-    // FIXME: I am not sure this algorithm is correct (or that the alignment can even be specified
-    // in general). For example, imagine a list with elements of size 12 that is aligned at an 8
-    // byte boundary. The result of `Alignment { align: 8, offset: 0
-    // }.advance_variable_size(VariableSize { base: 0, incr: 12 })` has `.align == 8`, but only an
-    // alignment of 4 is actually guaranteed.
-    // I haven't thought about the `offset` calculation here.
     pub fn advance_variable_size(self, size: VariableSize) -> Self {
         let align = if size.incr == 0 {
             self.align
