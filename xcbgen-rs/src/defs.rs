@@ -1249,17 +1249,17 @@ impl VariableSize {
 
     /// Describe the size of an arbitrary number of elements.
     pub fn zero_one_or_many(self) -> Self {
-        let base = Self::reduce_base(self.base, self.incr);
-        if base == 0 {
-            Self {
-                base: 0,
-                incr: self.incr,
-            }
+        // Self represents sizes `base + incr * n`, where `n >= 0`.
+        // The returned value must represent sizes `(base + incr * n) * m`
+        // (or a superset), where `m >= 0`.
+        if self.base == 0 && self.incr == 0 {
+            Self::zero()
         } else {
-            // FIXME: Why is it correct to just ignore `incr` in this case?
+            // `(base + incr * n) * m = base * m + incr * n * m = gcd(base, incr) * l`
             Self {
                 base: 0,
-                incr: 1u32 << base.trailing_zeros().min(31),
+                // `self.base | self.incr` won't be zero, so `trailing_zeros < 32`.
+                incr: 1u32 << (self.base | self.incr).trailing_zeros(),
             }
         }
     }
