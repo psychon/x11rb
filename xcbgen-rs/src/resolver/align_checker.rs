@@ -1,5 +1,8 @@
 use crate::{defs, ResolveError};
 
+/// Check the alignment of the contents of a module.
+///
+/// Any errors found by this functions mean that the original XML is incorrect.
 pub(super) fn check(module: &defs::Module) -> Result<(), ResolveError> {
     for ns in module.namespaces.borrow().values() {
         for request_def in ns.request_defs.borrow().values() {

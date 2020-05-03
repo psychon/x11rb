@@ -4,6 +4,8 @@ use fxhash::FxHashSet;
 
 use crate::{defs, ResolveError};
 
+/// Check that there is no infinite struct nesting, i.e. no structs containing themselves (even
+/// indirectly).
 #[inline]
 pub(super) fn check(module: &defs::Module) -> Result<(), ResolveError> {
     NestingChecker::new().check_module(module)

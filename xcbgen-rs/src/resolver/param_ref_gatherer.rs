@@ -1,5 +1,6 @@
 use crate::{defs, ResolveError};
 
+/// Gather elements to param references in the module.
 pub(super) fn gather(module: &defs::Module) -> Result<(), ResolveError> {
     for ns in module.namespaces.borrow().values() {
         for type_def in ns.type_defs.borrow().values() {

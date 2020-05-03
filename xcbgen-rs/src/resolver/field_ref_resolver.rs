@@ -2,6 +2,7 @@ use std::cell::RefCell;
 
 use crate::{defs, ResolveError};
 
+/// Resolve references to other fields in the module.
 pub(super) fn resolve(module: &defs::Module) -> Result<(), ResolveError> {
     for ns in module.namespaces.borrow().values() {
         for request_def in ns.request_defs.borrow().values() {

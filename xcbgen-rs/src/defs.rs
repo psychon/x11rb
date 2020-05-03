@@ -1,3 +1,9 @@
+//! Definitions describing the structure of the XML protocol and its extension.
+//!
+//! This module contains the [`Module`] type. A [`Module`] contains some [`Namespace`]s, where each
+//! [`Namespace`] corresponds to one XML file from the xcb-proto project. Each XML file describes
+//! one X11 extension or the core protocol.
+
 use std::cell::RefCell;
 use std::collections::hash_map::Entry as HashMapEntry;
 use std::convert::TryFrom;
@@ -6,12 +12,15 @@ use std::rc::{Rc, Weak};
 use fxhash::FxHashMap;
 use once_cell::unsync::OnceCell;
 
+/// A `Module` contains a collection of namespaces.
 #[derive(Debug)]
 pub struct Module {
+    /// All namespaces in this module
     pub namespaces: RefCell<FxHashMap<String, Rc<Namespace>>>,
 }
 
 impl Module {
+    /// Create a new, empty module
     pub fn new() -> Rc<Self> {
         Rc::new(Module {
             namespaces: RefCell::new(FxHashMap::default()),
@@ -29,24 +38,12 @@ impl Module {
         }
     }
 
+    /// Find a namespace by `header` name.
     pub fn namespace(&self, header: &str) -> Option<Rc<Namespace>> {
         self.namespaces.borrow().get(header).cloned()
     }
 
-    pub fn sorted_namespaces(&self) -> Vec<Rc<Namespace>> {
-        let mut namespaces: Vec<_> = self.namespaces.borrow().values().cloned().collect();
-        namespaces.sort_by(|a, b| {
-            // Always put xproto at the beginning
-            match (a.header.as_str(), b.header.as_str()) {
-                ("xproto", "xproto") => std::cmp::Ordering::Equal,
-                ("xproto", _) => std::cmp::Ordering::Less,
-                (_, "xproto") => std::cmp::Ordering::Greater,
-                (_, _) => a.header.cmp(&b.header),
-            }
-        });
-        namespaces
-    }
-
+    /// Find a namespace by `extension-name`.
     pub fn get_namespace_by_ext_name(&self, name: &str) -> Option<Rc<Namespace>> {
         self.namespaces
             .borrow()
@@ -60,31 +57,90 @@ impl Module {
             })
             .cloned()
     }
+
+    /// Get a sorted list of all loaded namespaces.
+    ///
+    /// The namespaces are sorted by name with the exception of `xproto` being before everything
+    /// else.
+    pub fn sorted_namespaces(&self) -> Vec<Rc<Namespace>> {
+        let mut namespaces: Vec<_> = self.namespaces.borrow().values().cloned().collect();
+        namespaces.sort_by(|a, b| {
+            // Always put xproto at the beginning
+            match (a.header.as_str(), b.header.as_str()) {
+                ("xproto", "xproto") => std::cmp::Ordering::Equal,
+                ("xproto", _) => std::cmp::Ordering::Less,
+                (_, "xproto") => std::cmp::Ordering::Greater,
+                (_, _) => a.header.cmp(&b.header),
+            }
+        });
+        namespaces
+    }
 }
 
+/// Information about an X11 extension.
 #[derive(Clone, Debug)]
 pub struct ExtInfo {
+    /// The name of the extension as used in `QueryExtension`.
     pub xname: String,
+
+    /// The name of the extension as meant for humans.
     pub name: String,
+
+    /// A special property used by libxcb.
+    ///
+    /// See xcb-proto's `NEWS` file for more information.
     pub multiword: bool,
+
+    /// The major version number of the extension.
     pub major_version: u16,
+
+    /// The minor version number of the extension.
     pub minor_version: u16,
 }
 
+/// A namespace of X11 definitions.
+///
+/// Every XML file corresponds to one namespace.
 #[derive(Debug)]
 pub struct Namespace {
+    /// The module that owns this namespace.
     pub module: Weak<Module>,
+
+    /// The `header` name for this namespace.
+    ///
+    /// This is a good choice for naming files.
     pub header: String,
+
+    /// Information about the extension that is described.
+    ///
+    /// This should only be `None` for the core X11 protocol `xproto.
     pub ext_info: Option<ExtInfo>,
+
+    /// Other namespaces that are imported into this namespace.
     pub imports: RefCell<FxHashMap<String, Import>>,
+
+    /// The requests that are defined in this module.
     pub request_defs: RefCell<FxHashMap<String, Rc<RequestDef>>>,
+
+    /// The events that are defined in this module.
     pub event_defs: RefCell<FxHashMap<String, EventDef>>,
+
+    /// The errors that are defined in this module.
     pub error_defs: RefCell<FxHashMap<String, ErrorDef>>,
+
+    /// The types that are defined in this module.
     pub type_defs: RefCell<FxHashMap<String, TypeDef>>,
+
+    /// All definitions in this module in the order they appear in the XML description.
     pub src_order_defs: RefCell<Vec<Def>>,
 }
 
 impl Namespace {
+    /// Create a new namespace.
+    ///
+    /// This function creates a new namespace in the given `module`.
+    ///
+    /// The namespace is not added to the `module` yet. See [`Module::insert_namespace`] for that.
     pub fn new(module: &Rc<Module>, header: String, ext_info: Option<ExtInfo>) -> Rc<Self> {
         Rc::new(Self {
             module: Rc::downgrade(module),
@@ -99,6 +155,9 @@ impl Namespace {
         })
     }
 
+    /// Record a new import in this namespace.
+    ///
+    /// The import is not yet resolved, but only its existence recorded.
     pub fn add_import(&self, import_name: String) {
         self.imports.borrow_mut().insert(
             import_name.clone(),
@@ -109,54 +168,101 @@ impl Namespace {
         );
     }
 
+    /// Insert new request definitions into this namespace.
+    ///
     /// Returns `false` if the name is already in use.
+    #[must_use]
     pub fn insert_request_def(&self, name: String, request_def: Rc<RequestDef>) -> bool {
         match self.request_defs.borrow_mut().entry(name) {
             HashMapEntry::Occupied(_) => false,
             HashMapEntry::Vacant(entry) => {
-                entry.insert(request_def);
+                entry.insert(Rc::clone(&request_def));
+                self.src_order_defs
+                    .borrow_mut()
+                    .push(Def::Request(request_def));
                 true
             }
         }
     }
 
+    /// Insert a new event definition into this namespace.
+    ///
     /// Returns `false` if the name is already in use.
+    #[must_use]
     pub fn insert_event_def(&self, name: String, event_def: EventDef) -> bool {
         match self.event_defs.borrow_mut().entry(name) {
             HashMapEntry::Occupied(_) => false,
             HashMapEntry::Vacant(entry) => {
+                let clone = match event_def {
+                    EventDef::Full(ref def) => EventDef::Full(Rc::clone(def)),
+                    EventDef::Copy(ref def) => EventDef::Copy(Rc::clone(def)),
+                };
                 entry.insert(event_def);
+                self.src_order_defs.borrow_mut().push(Def::Event(clone));
                 true
             }
         }
     }
 
+    /// Insert a new error definition into this namespace.
+    ///
     /// Returns `false` if the name is already in use.
+    #[must_use]
     pub fn insert_error_def(&self, name: String, error_def: ErrorDef) -> bool {
         match self.error_defs.borrow_mut().entry(name) {
             HashMapEntry::Occupied(_) => false,
             HashMapEntry::Vacant(entry) => {
+                let clone = match error_def {
+                    ErrorDef::Full(ref def) => ErrorDef::Full(Rc::clone(def)),
+                    ErrorDef::Copy(ref def) => ErrorDef::Copy(Rc::clone(def)),
+                };
                 entry.insert(error_def);
+                self.src_order_defs.borrow_mut().push(Def::Error(clone));
                 true
             }
         }
     }
 
+    /// Insert a new type definition into this namespace.
+    ///
     /// Returns `false` if the name is already in use.
+    #[must_use]
     pub fn insert_type_def(&self, name: String, type_def: TypeDef) -> bool {
         match self.type_defs.borrow_mut().entry(name) {
             HashMapEntry::Occupied(_) => false,
             HashMapEntry::Vacant(entry) => {
+                let clone = match type_def {
+                    TypeDef::Struct(ref def) => TypeDef::Struct(Rc::clone(def)),
+                    TypeDef::Union(ref def) => TypeDef::Union(Rc::clone(def)),
+                    TypeDef::EventStruct(ref def) => TypeDef::EventStruct(Rc::clone(def)),
+                    TypeDef::Xid(ref def) => TypeDef::Xid(Rc::clone(def)),
+                    TypeDef::XidUnion(ref def) => TypeDef::XidUnion(Rc::clone(def)),
+                    TypeDef::Enum(ref def) => TypeDef::Enum(Rc::clone(def)),
+                    TypeDef::Alias(ref def) => TypeDef::Alias(Rc::clone(def)),
+                };
                 entry.insert(type_def);
+                self.src_order_defs.borrow_mut().push(Def::Type(clone));
                 true
             }
         }
     }
 
+    /// Get an imported namespace by name.
+    ///
+    /// This function returns `None` if the namespace is not found.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the namespace exists, but was not yet resolved.
     pub fn get_import(&self, name: &str) -> Option<Rc<Namespace>> {
         self.imports.borrow().get(name).map(|import| import.ns())
     }
 
+    /// Get an event reference by name.
+    ///
+    /// Only the current namespace is searched and not its imports.
+    ///
+    /// This function returns `None` if the event is not found.
     pub fn get_event(&self, name: &str) -> Option<EventRef> {
         self.event_defs
             .borrow()
@@ -167,6 +273,11 @@ impl Namespace {
             })
     }
 
+    /// Get an error reference by name.
+    ///
+    /// Only the current namespace is searched and not its imports.
+    ///
+    /// This function returns `None` if the event is not found.
     pub fn get_error(&self, name: &str) -> Option<ErrorRef> {
         self.error_defs
             .borrow()
@@ -177,6 +288,11 @@ impl Namespace {
             })
     }
 
+    /// Get a type reference by name.
+    ///
+    /// Only the current namespace is searched and not its imports.
+    ///
+    /// This function returns `None` if the event is not found.
     pub fn get_type(&self, name: &str) -> Option<TypeRef> {
         self.type_defs
             .borrow()
@@ -192,6 +308,7 @@ impl Namespace {
             })
     }
 
+    /// Get an event definition by event `number` and whether it is XGE.
     pub fn get_event_by_number(&self, number: u16, is_xge: bool) -> Option<EventDef> {
         self.event_defs
             .borrow()
@@ -208,53 +325,110 @@ impl Namespace {
     }
 }
 
+/// Representation of an `<import>`.
 #[derive(Debug)]
 pub struct Import {
+    /// The name that was `<import>`ed.
     pub name: String,
+
+    /// After resolving, this is a reference to the namespace that was imported.
     pub ns: OnceCell<Weak<Namespace>>,
 }
 
 impl Import {
+    /// Get the namespace that is imported.
+    ///
+    /// # Panics
+    ///
+    /// Panics if this import was not yet resolved or if the target namespace was already dropped.
     pub fn ns(&self) -> Rc<Namespace> {
         self.ns.get().unwrap().upgrade().unwrap()
     }
 }
 
+/// Any kind of definition in a namespace.
 #[derive(Debug)]
 pub enum Def {
+    /// A request definition.
     Request(Rc<RequestDef>),
+
+    /// An event definition.
     Event(EventDef),
+
+    /// An error definition.
     Error(ErrorDef),
+
+    /// A type definition.
     Type(TypeDef),
 }
 
+/// A `<request>` definition.
 #[derive(Debug)]
 pub struct RequestDef {
+    /// Reference to the namespace that this request is defined in.
     pub namespace: Weak<Namespace>,
+
+    /// The name of the request.
     pub name: String,
+
+    /// The opcode of the request.
     pub opcode: u8,
+
+    /// Whether adjacent requests of this kind can be combined.
+    ///
+    /// For example, xproto's `PolyRectangle` request contains a list of rectangles to draw. If two
+    /// such requests are sent one after the other with the same fields, their list of rectangles
+    /// can be combined into a single `PolyRectangle` request.
     pub combine_adjacent: bool,
+
+    /// The value of this request's `<required_start_align>` child, if any.
     pub required_start_align: Option<Alignment>,
+
+    /// The list of fields of this request.
+    ///
+    /// The fields appear in the order in which they are defined.
     pub fields: RefCell<Vec<FieldDef>>,
+
+    /// The definition of the reply to this request, if any.
     pub reply: Option<Rc<ReplyDef>>,
+
+    /// The documentation of this request.
     pub doc: Option<Doc>,
 }
 
+/// A `<reply>` definition.
 #[derive(Debug)]
 pub struct ReplyDef {
+    /// The request that causes this reply.
+    ///
+    /// This reference should always be set after parsing so that `.get()` should not return
+    /// `None`.
     pub request: OnceCell<Weak<RequestDef>>,
+
+    /// The value of this request's `<required_start_align>` child, if any.
     pub required_start_align: Option<Alignment>,
+
+    /// The list of fields of this reply.
+    ///
+    /// The fields appear in the order in which they are defined.
     pub fields: RefCell<Vec<FieldDef>>,
+
+    /// The documentation of this reply.
     pub doc: Option<Doc>,
 }
 
+/// An `<event>` or `<eventcopy>` definition.
 #[derive(Clone, Debug)]
 pub enum EventDef {
+    /// This is an `<event>`.
     Full(Rc<EventFullDef>),
+
+    /// This is an `<eventcopy>`.
     Copy(Rc<EventCopyDef>),
 }
 
 impl EventDef {
+    /// The value of the `name` attribute.
     pub fn name(&self) -> &str {
         match self {
             Self::Full(event_full_def) => &event_full_def.name,
@@ -262,6 +436,7 @@ impl EventDef {
         }
     }
 
+    /// The namespace that this event belongs to.
     pub fn namespace(&self) -> Rc<Namespace> {
         match self {
             Self::Full(event_full_def) => event_full_def.namespace.upgrade().unwrap(),
@@ -269,6 +444,14 @@ impl EventDef {
         }
     }
 
+    /// Get the full definition of this event.
+    ///
+    /// For an `<event>`, this simply returns the contained event. For an `<eventcopy>`, this
+    /// returns the definition of the original `<event>` that was copied.
+    ///
+    /// # Panics
+    ///
+    /// Panics if an `<eventcopy>` was not yet resolved.
     pub fn get_original_full_def(&self) -> Rc<EventFullDef> {
         match self {
             Self::Full(event_full_def) => event_full_def.clone(),
@@ -276,10 +459,14 @@ impl EventDef {
         }
     }
 
+    /// Is this event XGE?
     pub fn is_xge(&self) -> bool {
         self.get_original_full_def().xge
     }
 
+    /// Downgrade this definition to a weak reference.
+    ///
+    /// See [`Rc::downgrade`].
     pub fn as_event_ref(&self) -> EventRef {
         match self {
             Self::Full(event_full_def) => EventRef::Full(Rc::downgrade(event_full_def)),
@@ -288,39 +475,77 @@ impl EventDef {
     }
 }
 
+/// An `<event>` definition.
 #[derive(Debug)]
 pub struct EventFullDef {
+    /// The namespace that this event belongs to.
     pub namespace: Weak<Namespace>,
+
+    /// The `name` of the event.
     pub name: String,
+
+    /// The `number` of the event.
     pub number: u16,
+
+    /// The `no-sequence-number` attribute of the event.
+    ///
+    /// The only known event without a sequence number is xproto's `KeymapNotify`.
     pub no_sequence_number: bool,
+
+    /// The `xge` attribute of the `<event>`.
     pub xge: bool,
+
+    /// The value of this event's `<required_start_align>` child, if any.
     pub required_start_align: Option<Alignment>,
+
+    /// The list of fields of this event.
+    ///
+    /// The fields appear in the order in which they are defined.
     pub fields: RefCell<Vec<FieldDef>>,
+
+    /// The documentation of this event.
     pub doc: Option<Doc>,
 }
 
+/// An `<eventcopy>` definition.
 #[derive(Debug)]
 pub struct EventCopyDef {
+    /// The namespace that this event belongs to.
     pub namespace: Weak<Namespace>,
+
+    /// The `name` of the new event.
     pub name: String,
+
+    /// The `number` of the new event.
     pub number: u16,
+
+    /// A reference to the event that is copied.
     pub ref_: NamedEventRef,
 }
 
 impl EventCopyDef {
+    /// Get the event that was copied.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the reference was not resolved yet.
     pub fn get_original_full_def(&self) -> Rc<EventFullDef> {
         self.ref_.def.get().unwrap().get_original_full_def()
     }
 }
 
+/// An `<error>` or `<errorcopy>` definition.
 #[derive(Clone, Debug)]
 pub enum ErrorDef {
+    /// This is an `<error>`.
     Full(Rc<ErrorFullDef>),
+
+    /// This is an `<errorcopy>`.
     Copy(Rc<ErrorCopyDef>),
 }
 
 impl ErrorDef {
+    /// The value of the `name` attribute.
     pub fn name(&self) -> &str {
         match self {
             Self::Full(error_full_def) => &error_full_def.name,
@@ -328,6 +553,7 @@ impl ErrorDef {
         }
     }
 
+    /// The namespace that this error belongs to.
     pub fn namespace(&self) -> Rc<Namespace> {
         match self {
             Self::Full(error_full_def) => error_full_def.namespace.upgrade().unwrap(),
@@ -335,6 +561,14 @@ impl ErrorDef {
         }
     }
 
+    /// Get the full definition of this error.
+    ///
+    /// For an `<error>`, this simply returns the contained error. For an `<errorcopy>`, this
+    /// returns the definition of the original `<error>` that was copied.
+    ///
+    /// # Panics
+    ///
+    /// Panics if an `<errorcopy>` was not yet resolved.
     pub fn get_original_full_def(&self) -> Rc<ErrorFullDef> {
         match self {
             Self::Full(error_full_def) => error_full_def.clone(),
@@ -343,30 +577,60 @@ impl ErrorDef {
     }
 }
 
+/// An `<error>` definition.
 #[derive(Debug)]
 pub struct ErrorFullDef {
+    /// The namespace that this error belongs to.
     pub namespace: Weak<Namespace>,
+
+    /// The `name` of the error.
     pub name: String,
+
+    /// The `number` of the error.
     // Signed because there are some `-1` somewhere.
     pub number: i16,
+
+    /// The value of this error's `<required_start_align>` child, if any.
     pub required_start_align: Option<Alignment>,
+
+    /// The list of fields of this error.
+    ///
+    /// The fields appear in the order in which they are defined.
     pub fields: RefCell<Vec<FieldDef>>,
 }
 
+/// An `<errorcopy>` definition.
 #[derive(Debug)]
 pub struct ErrorCopyDef {
+    /// The namespace that this error belongs to.
     pub namespace: Weak<Namespace>,
+
+    /// The `name` of the new error.
     pub name: String,
+
+    /// The `number` of the new error.
     pub number: i16,
+
+    /// A reference to the error that is copied.
     pub ref_: NamedErrorRef,
 }
 
 impl ErrorCopyDef {
+    /// Get the error that was copied.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the reference was not resolved yet.
     pub fn get_original_full_def(&self) -> Rc<ErrorFullDef> {
         self.ref_.def.get().unwrap().get_original_full_def()
     }
 }
 
+/// An enumeration of the possible type definitions that a module can contain.
+///
+/// This enumeration represents any kind of child of the `<xcb>` tag with the exception of
+/// `<request>`, `<event>`, `<eventcopy>`, `<error>`, and `<errorcopy>` because these types have
+/// some special meaning in the protocol.
 #[derive(Debug)]
 pub enum TypeDef {
     Struct(Rc<StructDef>),
@@ -378,16 +642,35 @@ pub enum TypeDef {
     Alias(Rc<TypeAliasDef>),
 }
 
+/// A `<struct>` definition.
 #[derive(Debug)]
 pub struct StructDef {
+    /// The namespace that this struct belongs to.
     pub namespace: Weak<Namespace>,
+
+    /// The `name` of the struct.
     pub name: String,
+
+    /// Alignment information about this struct.
+    ///
+    /// This information is not available before the struct was resolved.
     pub alignment: OnceCell<ComplexAlignment>,
+
+    /// The list of fields of this struct.
+    ///
+    /// The fields appear in the order in which they are defined.
     pub fields: RefCell<Vec<FieldDef>>,
+
+    /// The list of `<paramref>`s that appear in descendants of this struct.
+    ///
+    /// This list is empty before the struct was resolved.
     pub external_params: RefCell<Vec<ExternalParam>>,
 }
 
 impl StructDef {
+    /// Get the size in bytes of this struct on the wire.
+    ///
+    /// This returns `None` if the struct does not have a fixed size.
     pub fn size(&self) -> Option<u32> {
         self.fields
             .borrow()
@@ -396,15 +679,30 @@ impl StructDef {
     }
 }
 
+/// A `<union>` definition.
 #[derive(Debug)]
 pub struct UnionDef {
+    /// The namespace that this union belongs to.
     pub namespace: Weak<Namespace>,
+
+    /// The `name` of the union.
     pub name: String,
+
+    /// Alignment information about this union.
+    ///
+    /// This information is not available before the union was resolved.
     pub alignment: OnceCell<ComplexAlignment>,
+
+    /// The list of fields of this union.
+    ///
+    /// The fields appear in the order in which they are defined.
     pub fields: Vec<FieldDef>,
 }
 
 impl UnionDef {
+    /// Get the size of the union.
+    ///
+    /// This function returns the size of the largest child of the union.
     pub fn size(&self) -> u32 {
         self.fields
             .iter()
@@ -414,63 +712,120 @@ impl UnionDef {
     }
 }
 
+/// A `<eventstruct>` definition.
 #[derive(Clone, Debug)]
 pub struct EventStructDef {
+    /// The namespace that this eventstruct belongs to.
     pub namespace: Weak<Namespace>,
+
+    /// The `name` of the eventstruct.
     pub name: String,
+
+    /// The list of `<allowed>` children.
     pub alloweds: Vec<EventStructAllowed>,
 }
 
+/// A `<allowed>` definition inside of an `<eventstruct>`.
 #[derive(Clone, Debug)]
 pub struct EventStructAllowed {
+    /// The extension that events come from.
     pub extension: String,
+
+    /// Whether XGEs are allowed.
     pub xge: bool,
+
+    /// The minimum opcode of the events.
     pub opcode_min: u16,
+
+    /// The maximum opcode of the events.
     pub opcode_max: u16,
+
+    /// The list of events that this `<allowed>` references.
+    ///
+    /// This member is set up during resolution
     pub resolved: RefCell<Vec<EventRef>>,
 }
 
+/// An `<xidtype>` definition.
 #[derive(Debug)]
 pub struct XidTypeDef {
+    /// The namespace that this XID type belongs to.
     pub namespace: Weak<Namespace>,
+
+    /// The name of the new XID type.
     pub name: String,
 }
 
+/// An `<xidunion>` definition.
 #[derive(Debug)]
 pub struct XidUnionDef {
+    /// The namespace that this XID union belongs to.
     pub namespace: Weak<Namespace>,
+
+    /// The name of the new XID type.
     pub name: String,
+
+    /// The list of types that are contained in the union.
     pub types: Vec<NamedTypeRef>,
 }
 
+/// An `<enum>` definition.
 #[derive(Debug)]
 pub struct EnumDef {
+    /// The namespace that this XID union belongs to.
     pub namespace: Weak<Namespace>,
+
+    /// The name of the new XID type.
     pub name: String,
+
+    /// The list of items in this enum.
     pub items: Vec<EnumItem>,
+
+    /// The documentation of this enum.
     pub doc: Option<Doc>,
 }
 
+/// An `<item>` inside of an `<enum>`.
 #[derive(Debug)]
 pub struct EnumItem {
+    /// The name of this item.
     pub name: String,
+
+    /// The value of this item.
     pub value: EnumValue,
 }
 
+/// The value of an enum item
 #[derive(Debug)]
 pub enum EnumValue {
+    /// A `<value>`.
     Value(u32),
+
+    /// A `<bit>`.
+    ///
+    /// A bit encodes a value of `1 << bit`.
     Bit(u8),
 }
 
+/// A `<typedef>` definition.
 #[derive(Debug)]
 pub struct TypeAliasDef {
+    /// The namespace that this typedef belongs to.
     pub namespace: Weak<Namespace>,
+
+    /// The name of the new type.
     pub new_name: String,
+
+    /// The name of the old type that is given a new name.
     pub old_name: NamedTypeRef,
 }
 
 impl TypeAliasDef {
+    /// Get the original type that is copied in this type def.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the type definition was not yet resolved.
     pub fn get_original_type(&self) -> TypeRef {
         let mut type_ref = self.old_name.def.get().unwrap().clone();
         loop {
@@ -484,19 +839,31 @@ impl TypeAliasDef {
     }
 }
 
+/// Information about a `<paramref>` that is contained in some expression.
 #[derive(Clone, Debug)]
 pub struct ExternalParam {
+    /// The name of the parameter that is referenced.
     pub name: String,
+
+    /// The type of the parameter that is referenced.
     pub type_: TypeRef,
 }
 
+/// A reference to an event by name.
 #[derive(Debug)]
 pub struct NamedEventRef {
+    /// The name of the event that is referenced.
     pub name: String,
+
+    /// The definition of the event that is referenced.
+    ///
+    /// This field is only set up during resolving.
+    // FIXME Can this be changed to a Weak<EventFullDef>?
     pub def: OnceCell<EventRef>,
 }
 
 impl NamedEventRef {
+    /// Create a new unresolved instance.
     pub fn unresolved(name: String) -> Self {
         Self {
             name,
@@ -505,13 +872,25 @@ impl NamedEventRef {
     }
 }
 
+/// A reference to an event.
 #[derive(Clone, Debug)]
 pub enum EventRef {
+    /// A reference to an `<event>`.
     Full(Weak<EventFullDef>),
+
+    /// A reference to an `<eventcopy>`.
     Copy(Weak<EventCopyDef>),
 }
 
 impl EventRef {
+    /// Get the full definition of this event.
+    ///
+    /// For an `<event>`, this simply returns the contained event. For an `<eventcopy>`, this
+    /// returns the definition of the original `<event>` that was copied.
+    ///
+    /// # Panics
+    ///
+    /// Panics if an `<eventcopy>` was not yet resolved.
     pub fn get_original_full_def(&self) -> Rc<EventFullDef> {
         match self {
             Self::Full(event_full_def) => event_full_def.upgrade().unwrap(),
@@ -529,10 +908,14 @@ impl EventRef {
         }
     }
 
+    /// Is this an XGE?
     pub fn is_xge(&self) -> bool {
         self.get_original_full_def().xge
     }
 
+    /// Upgrade this event reference to an event definition.
+    ///
+    /// See [`Weak::Upgrade`] for more about what this really does.
     pub fn as_event_def(&self) -> EventDef {
         match self {
             Self::Full(event_full_def) => EventDef::Full(event_full_def.upgrade().unwrap()),
@@ -541,13 +924,20 @@ impl EventRef {
     }
 }
 
+/// A reference to an error by name.
 #[derive(Debug)]
 pub struct NamedErrorRef {
+    /// The name of the error that is referenced.
     pub name: String,
+
+    /// The definition of the event that is referenced.
+    ///
+    /// This field is only set up during resolving.
     pub def: OnceCell<ErrorRef>,
 }
 
 impl NamedErrorRef {
+    /// Create a new unresolved instance.
     pub fn unresolved(name: String) -> Self {
         Self {
             name,
@@ -556,13 +946,25 @@ impl NamedErrorRef {
     }
 }
 
+/// A reference to an error.
 #[derive(Clone, Debug)]
 pub enum ErrorRef {
+    /// A reference to an `<error>`.
     Full(Weak<ErrorFullDef>),
+
+    /// A reference to an `<errorcopy>`.
     Copy(Weak<ErrorCopyDef>),
 }
 
 impl ErrorRef {
+    /// Get the full definition of this error.
+    ///
+    /// For an `<error>`, this simply returns the contained error. For an `<errorcopy>`, this
+    /// returns the definition of the original `<error>` that was copied.
+    ///
+    /// # Panics
+    ///
+    /// Panics if an `<errorcopy>` was not yet resolved.
     pub fn get_original_full_def(&self) -> Rc<ErrorFullDef> {
         match self {
             Self::Full(error_full_def) => error_full_def.upgrade().unwrap(),
@@ -588,13 +990,20 @@ impl ErrorRef {
     }
 }
 
+/// A reference to a type by name.
 #[derive(Debug)]
 pub struct NamedTypeRef {
+    /// The name of the type that is referenced
     pub name: String,
+
+    /// The definition of the type that is referenced.
+    ///
+    /// This field is only set up during resolving.
     pub def: OnceCell<TypeRef>,
 }
 
 impl NamedTypeRef {
+    /// Create a new unresolved instance.
     pub fn unresolved(name: String) -> Self {
         Self {
             name,
@@ -603,6 +1012,10 @@ impl NamedTypeRef {
     }
 }
 
+/// An alignment specification.
+///
+/// This structure represents a requirement that some byte position `pos` satisfies
+/// `(pos + offset) % align == 0`.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Alignment {
     pub align: u32,
@@ -610,6 +1023,16 @@ pub struct Alignment {
 }
 
 impl Alignment {
+    /// Advance this alignment specification by some variably sized object.
+    ///
+    /// The resulting value describes the alignment at the end of the variably sized object if it
+    /// is aligned by `self` at its beginning.
+    // FIXME: I am not sure this algorithm is correct (or that the alignment can even be specified
+    // in general). For example, imagine a list with elements of size 12 that is aligned at an 8
+    // byte boundary. The result of `Alignment { align: 8, offset: 0
+    // }.advance_variable_size(VariableSize { base: 0, incr: 12 })` has `.align == 8`, but only an
+    // alignment of 4 is actually guaranteed.
+    // I haven't thought about the `offset` calculation here.
     pub fn advance_variable_size(self, size: VariableSize) -> Self {
         let align = if size.incr == 0 {
             self.align
@@ -638,6 +1061,8 @@ impl Alignment {
                 }
             }
             std::cmp::Ordering::Greater => {
+                // FIXME: Shouldn't this use % instead of %? (Not that it matters much in practice,
+                // since I think only alignments by powers of two appear in X11)
                 if (self.offset & other.align) != other.align {
                     None
                 } else {
@@ -648,6 +1073,8 @@ impl Alignment {
     }
 
     /// Returns an alignment that is met by `self` and `other`.
+    // FIXME: `align = self.align.min(other.align)` strikes my as fishy. See my comment on
+    // advance_variable_size().
     pub fn intersection(self, other: Self) -> Self {
         let align = self.align.min(other.align);
         let offset1 = self.offset % align;
@@ -670,16 +1097,22 @@ impl Alignment {
 
     /// Returns whether `self` meets the alignment requirements
     /// of `required`.
+    // FIXME: Does something that is aligned at a 5 byte boundary really meet a 4 byte alignment? I
+    // think `self.align >= required.align` really should be `self.align % required.align == 0`.
+    // Perhaps some unit tests for this?
     pub fn meets(self, required: Self) -> bool {
         self.align >= required.align && (self.offset % required.align) == required.offset
     }
 }
 
-/// Represents the size of an object.
+/// Represents the size of an object that has a variable size.
 ///
-/// `size = base + incr * n`
+/// An object has a minimum size that is described by `base`. It can then have a variable number of
+/// increments of size `incr`. That is, the object can have a size of `base + incr * n` for some
+/// non-negative value of `n`.
 ///
 /// `incr` must be zero or a power of 2
+// FIXME: Make the members non-pub and make the constructor enforce the power-of-2 requirement.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct VariableSize {
     pub base: u32,
@@ -687,6 +1120,7 @@ pub struct VariableSize {
 }
 
 impl VariableSize {
+    /// Get the minimum of two values, but not zero (unless both are zero).
     fn incr_union(incr1: u32, incr2: u32) -> u32 {
         if incr1 == 0 {
             incr2
@@ -697,6 +1131,7 @@ impl VariableSize {
         }
     }
 
+    /// Reduce the base by the given increment.
     fn reduce_base(base: u32, incr: u32) -> u32 {
         if incr == 0 {
             base
@@ -705,11 +1140,17 @@ impl VariableSize {
         }
     }
 
+    /// Create an instance that describes a zero-sized type.
     #[inline]
     pub fn zero() -> Self {
         Self { base: 0, incr: 0 }
     }
 
+    /// Return a description of the size of things when `self` is appended to `other`.
+    // FIXME: This code makes no sense to me. When I have something of size `1+4*n` and something
+    // of size `2+8*m`, the result has sizes `3+4*n+8*m` and not `3+4*l`. There is a discrepancy
+    // between what the docs for `VariableSize` say what it represents and what this method is
+    // supposed to do.
     pub fn append(self, other: Self) -> Self {
         Self {
             // FIXME: check overflow
@@ -736,16 +1177,23 @@ impl VariableSize {
                     incr: incr_union,
                 }
             } else if base1 == 0 || base2 == 0 {
+                // FIXME: I am quite confused by this code. Some quick println!-debugging says that
+                // this is only called with self == Self::zero(). In this case it returns base:0,
+                // incr: other.base.
                 Self {
                     base: 0,
                     incr: 1u32 << (base1 | base2).trailing_zeros().min(31),
                 }
             } else {
+                // FIXME: I am quite confused by this code.
                 let min_base = base1.min(base2);
                 let max_base = base1.max(base2);
                 let incr1 = 1u32 << min_base.trailing_zeros().min(31);
                 let incr2 = 1u32 << (max_base - min_base).trailing_zeros().min(31);
                 if incr1 > incr2 {
+                    // FIXME: How can `1u32 << (1u32 << [something])` not overflow? that requires
+                    // [something] to be at most 4.
+                    // A quick unreachable!() says that this is dead code
                     Self {
                         base: max_base - min_base,
                         incr: 1u32 << incr1,
@@ -764,6 +1212,7 @@ impl VariableSize {
         }
     }
 
+    /// Describe the size of an arbitrary number of elements.
     pub fn zero_one_or_many(self) -> Self {
         let base = Self::reduce_base(self.base, self.incr);
         if base == 0 {
@@ -772,6 +1221,7 @@ impl VariableSize {
                 incr: self.incr,
             }
         } else {
+            // FIXME: Why is it correct to just ignore `incr` in this case?
             Self {
                 base: 0,
                 incr: 1u32 << base.trailing_zeros().min(31),
@@ -779,6 +1229,9 @@ impl VariableSize {
         }
     }
 
+    /// Describe the size of `n` elements of this type.
+    // FIXME: I am not quite sure what is going on here, but a quick println!()-debugging says this
+    // is only called with incr:0 and n > 0 and in that case it returns base:base*n and incr:0.
     pub fn repeat_n(self, n: u32) -> Self {
         if n == 0 {
             Self::zero()
@@ -807,6 +1260,7 @@ impl VariableSize {
     }
 }
 
+/// Some computed alignment information.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct ComplexAlignment {
     /// Alignment at the beginning of the structure.
@@ -815,6 +1269,7 @@ pub struct ComplexAlignment {
     pub body: AlignBody,
     /// Internal alignments made inside the object using
     /// align pads.
+    // FIXME: What does that mean?
     pub internal_align: u32,
 }
 
@@ -980,19 +1435,40 @@ impl ComplexAlignment {
     }
 }
 
+/// Some field of a complex type.
 #[derive(Debug)]
 pub enum FieldDef {
+    /// A `<pad>`.
     Pad(PadField),
+
+    /// A `<field>`.
     Normal(NormalField),
+
+    /// A `<list>` that is not a list of file descripts.
     List(ListField),
+
+    /// A `<switch>`.
     Switch(SwitchField),
+
+    /// A `<fd>`.
     Fd(FdField),
+
+    /// A `<list>` containing file descriptors.
     FdList(FdListField),
+
+    /// A `<exprfield>`.
     Expr(ExprField),
+
+    /// An invented length field for a list that has no length.
+    ///
+    /// Fields of this kind are synthesised while resolving.
     VirtualLen(VirtualLenField),
 }
 
 impl FieldDef {
+    /// Get the name of the field, if it has a name.
+    ///
+    /// This returns the `name` attribute of the original field. `<pad>`s do not have a name. For a
     pub fn name(&self) -> Option<&str> {
         match self {
             Self::Pad(_) => None,
@@ -1006,6 +1482,11 @@ impl FieldDef {
         }
     }
 
+    /// Get the type of the field.
+    ///
+    /// * For `<field>`s and `<exprfield>`s, this returns the type of the field.
+    /// * For `<list>`s, this returns the element type of the list.
+    /// * For virtual length fields, this returns the type of the length, which is a `CARD32`.
     pub fn value_type(&self) -> Option<&FieldValueType> {
         match self {
             Self::Pad(_) => None,
@@ -1167,6 +1648,7 @@ pub struct ExprField {
 #[derive(Debug)]
 pub struct VirtualLenField {
     pub name: String,
+    // FIXME: This is always BuiltInType::Card32, so this field can be removed
     pub type_: FieldValueType,
     pub list_name: String,
 }

@@ -1,3 +1,8 @@
+//! Parser for protocol XML descriptions.
+//!
+//! This module contains the [`Parser`] that allows parsing a [`roxmltree::Node`] into a
+//! [`defs::Module`].
+
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::str::FromStr;
@@ -6,27 +11,56 @@ use once_cell::unsync::OnceCell;
 
 use crate::defs;
 
+/// An error that occurred while parsing an error.
 #[derive(Debug)]
 pub enum ParseError {
+    /// The XML tree is in some way malformed.
+    ///
+    /// Possible errors include missing or duplicate tags, or tags that were not understood, among
+    /// others.
     InvalidXml,
+
+    /// The module already contains a namespace with this header name.
     RepeatedHeaderName,
-    RepeatedRequestName,
-    RepeatedEventName,
-    RepeatedErrorName,
+
+    /// Some type was specified multiple times.
+    ///
+    /// An example for this error is two requests with the same name.
     RepeatedTypeName,
+
+    /// A `<pad>` field is invalid.
+    ///
+    /// A `<pad>` must contain either a `bytes` or `align` attribute. This property was violated.
     InvalidPad,
+
+    /// A `<field>` contains an invalid set of properties.
+    ///
+    /// At most one of the attributes `enum`, `altenum`, `mask`, or `altmask` may be present.
+    /// However, some field had more than this.
     InvalidFieldValueSet,
 }
 
+/// A `Parser` that adds namespaces to a module.
+///
+/// One instance of this struct can be used to parse multiple namespaces, one after another.
 pub struct Parser {
     module: Rc<defs::Module>,
 }
 
 impl Parser {
+    /// Create a new parser that adds its information to the given module
     pub fn new(module: Rc<defs::Module>) -> Self {
         Self { module }
     }
 
+    /// Parse an XML tree.
+    ///
+    /// This function parses the XML tree that is described by the given `node`. This `node` must
+    /// describe a complete namespace, which means that it should correspond to the root tag of an
+    /// XML document.
+    ///
+    /// The resulting namespace is added to the module that this parser was constructed for. A
+    /// reference to the namespace is also returned.
     pub fn parse_namespace(
         &mut self,
         node: roxmltree::Node<'_, '_>,
@@ -148,12 +182,9 @@ impl Parser {
         if let Some(ref reply) = request.reply {
             reply.request.set(Rc::downgrade(&request)).unwrap();
         }
-        if !ns.insert_request_def(name.into(), request.clone()) {
+        if !ns.insert_request_def(name.into(), request) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Request(request));
             Ok(())
         }
     }
@@ -246,12 +277,9 @@ impl Parser {
             fields: RefCell::new(fields),
             doc,
         });
-        if !ns.insert_event_def(name.into(), defs::EventDef::Full(event_full.clone())) {
+        if !ns.insert_event_def(name.into(), defs::EventDef::Full(event_full)) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Event(defs::EventDef::Full(event_full)));
             Ok(())
         }
     }
@@ -273,12 +301,9 @@ impl Parser {
             number,
             ref_: defs::NamedEventRef::unresolved(ref_.into()),
         });
-        if !ns.insert_event_def(name.into(), defs::EventDef::Copy(event_copy.clone())) {
+        if !ns.insert_event_def(name.into(), defs::EventDef::Copy(event_copy)) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Event(defs::EventDef::Copy(event_copy)));
             Ok(())
         }
     }
@@ -320,12 +345,9 @@ impl Parser {
             required_start_align,
             fields: RefCell::new(fields),
         });
-        if !ns.insert_error_def(name.into(), defs::ErrorDef::Full(error_full.clone())) {
+        if !ns.insert_error_def(name.into(), defs::ErrorDef::Full(error_full)) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Error(defs::ErrorDef::Full(error_full)));
             Ok(())
         }
     }
@@ -347,12 +369,9 @@ impl Parser {
             number,
             ref_: defs::NamedErrorRef::unresolved(ref_.into()),
         });
-        if !ns.insert_error_def(name.into(), defs::ErrorDef::Copy(error_copy.clone())) {
+        if !ns.insert_error_def(name.into(), defs::ErrorDef::Copy(error_copy)) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Error(defs::ErrorDef::Copy(error_copy)));
             Ok(())
         }
     }
@@ -387,12 +406,9 @@ impl Parser {
             fields: RefCell::new(fields),
             external_params: RefCell::new(Vec::new()),
         });
-        if !ns.insert_type_def(name.into(), defs::TypeDef::Struct(struct_.clone())) {
+        if !ns.insert_type_def(name.into(), defs::TypeDef::Struct(struct_)) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Type(defs::TypeDef::Struct(struct_)));
             Ok(())
         }
     }
@@ -426,12 +442,9 @@ impl Parser {
             alignment: OnceCell::new(),
             fields,
         });
-        if !ns.insert_type_def(name.into(), defs::TypeDef::Union(union.clone())) {
+        if !ns.insert_type_def(name.into(), defs::TypeDef::Union(union)) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Type(defs::TypeDef::Union(union)));
             Ok(())
         }
     }
@@ -464,15 +477,9 @@ impl Parser {
             name: name.into(),
             alloweds,
         });
-        if !ns.insert_type_def(
-            name.into(),
-            defs::TypeDef::EventStruct(event_struct.clone()),
-        ) {
+        if !ns.insert_type_def(name.into(), defs::TypeDef::EventStruct(event_struct)) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Type(defs::TypeDef::EventStruct(event_struct)));
             Ok(())
         }
     }
@@ -510,12 +517,9 @@ impl Parser {
             namespace: Rc::downgrade(ns),
             name: name.into(),
         });
-        if !ns.insert_type_def(name.into(), defs::TypeDef::Xid(xid_type.clone())) {
+        if !ns.insert_type_def(name.into(), defs::TypeDef::Xid(xid_type)) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Type(defs::TypeDef::Xid(xid_type)));
             Ok(())
         }
     }
@@ -548,12 +552,9 @@ impl Parser {
             name: name.into(),
             types,
         });
-        if !ns.insert_type_def(name.into(), defs::TypeDef::XidUnion(xid_union.clone())) {
+        if !ns.insert_type_def(name.into(), defs::TypeDef::XidUnion(xid_union)) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Type(defs::TypeDef::XidUnion(xid_union)));
             Ok(())
         }
     }
@@ -592,12 +593,9 @@ impl Parser {
             items,
             doc,
         });
-        if !ns.insert_type_def(name.into(), defs::TypeDef::Enum(enum_.clone())) {
+        if !ns.insert_type_def(name.into(), defs::TypeDef::Enum(enum_)) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Type(defs::TypeDef::Enum(enum_)));
             Ok(())
         }
     }
@@ -661,12 +659,9 @@ impl Parser {
             old_name,
             new_name: new_name.into(),
         });
-        if !ns.insert_type_def(new_name.into(), defs::TypeDef::Alias(type_alias.clone())) {
+        if !ns.insert_type_def(new_name.into(), defs::TypeDef::Alias(type_alias)) {
             Err(ParseError::RepeatedTypeName)
         } else {
-            ns.src_order_defs
-                .borrow_mut()
-                .push(defs::Def::Type(defs::TypeDef::Alias(type_alias)));
             Ok(())
         }
     }
