@@ -1129,7 +1129,6 @@ impl Alignment {
 /// non-negative value of `n`.
 ///
 /// `incr` must be zero or a power of 2
-// FIXME: Make the members non-pub and make the constructor enforce the power-of-2 requirement.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct VariableSize {
     base: u32,
