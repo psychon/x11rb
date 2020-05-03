@@ -222,7 +222,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
         if switch_fields.len() == 1 {
             if let Some(aux_start_align) = switch_fields[0].required_start_align {
-                assert_eq!(aux_start_align.offset, 0);
+                assert_eq!(aux_start_align.offset(), 0);
             }
             self.generate_aux(
                 request_def,
@@ -1145,8 +1145,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     fn generate_struct_def(&self, struct_def: &xcbdefs::StructDef, out: &mut Output) {
         let struct_align = struct_def.alignment.get().unwrap();
         // serializing / parsing wouldn't work correctly otherwise
-        assert!(struct_align.internal_align <= struct_align.begin.align);
-        assert_eq!(struct_align.begin.offset % struct_align.internal_align, 0);
+        assert!(struct_align.internal_align <= struct_align.begin.align());
+        assert_eq!(struct_align.begin.offset() % struct_align.internal_align, 0);
 
         let rust_name = self.get_struct_rust_name(struct_def);
         let derives = self.get_derives_for_struct_def(struct_def);
@@ -2134,16 +2134,16 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     ) -> Vec<CaseInfo> {
         let switch_align = switch.alignment.get().unwrap();
         // serializing / parsing wouldn't work correctly otherwise
-        assert!(switch_align.internal_align <= switch_align.begin.align);
-        assert_eq!(switch_align.begin.offset % switch_align.internal_align, 0);
+        assert!(switch_align.internal_align <= switch_align.begin.align());
+        assert_eq!(switch_align.begin.offset() % switch_align.internal_align, 0);
 
         let mut case_infos = Vec::new();
 
         for (i, case) in switch.cases.iter().enumerate() {
             let case_align = case.alignment.get().unwrap();
             // serializing / parsing wouldn't work correctly otherwise
-            assert!(case_align.internal_align <= case_align.begin.align);
-            assert_eq!(case_align.begin.offset % case_align.internal_align, 0);
+            assert!(case_align.internal_align <= case_align.begin.align());
+            assert_eq!(case_align.begin.offset() % case_align.internal_align, 0);
 
             let case_deducible_fields = gather_deducible_fields(&*case.fields.borrow());
             let mut single_field_index =

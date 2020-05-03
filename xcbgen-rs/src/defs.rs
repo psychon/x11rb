@@ -1016,13 +1016,38 @@ impl NamedTypeRef {
 ///
 /// This structure represents a requirement that some byte position `pos` satisfies
 /// `(pos + offset) % align == 0`.
+///
+/// `align` must be a power of 2 and `offset` must be less than `align`.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct Alignment {
-    pub align: u32,
-    pub offset: u32,
+    align: u32,
+    offset: u32,
 }
 
 impl Alignment {
+    /// Creates a new `Alignment` with `align` and `offset`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `align` is not a power of two or if `offset` is
+    /// equal or greater than `align`.
+    pub fn new(align: u32, offset: u32) -> Self {
+        assert!(align.is_power_of_two() && offset < align);
+        Self { align, offset }
+    }
+
+    /// Returns the value of `align`.
+    #[inline]
+    pub fn align(self) -> u32 {
+        self.align
+    }
+
+    /// Returns the value of `offset`.
+    #[inline]
+    pub fn offset(self) -> u32 {
+        self.offset
+    }
+
     /// Advance this alignment specification by some variably sized object.
     ///
     /// The resulting value describes the alignment at the end of the variably sized object if it
@@ -1097,10 +1122,10 @@ impl Alignment {
 
     /// Returns whether `self` meets the alignment requirements
     /// of `required`.
-    // FIXME: Does something that is aligned at a 5 byte boundary really meet a 4 byte alignment? I
-    // think `self.align >= required.align` really should be `self.align % required.align == 0`.
-    // Perhaps some unit tests for this?
     pub fn meets(self, required: Self) -> bool {
+        // `self.align >= required.align` is equivalent to
+        // `self.align % required.align == 0` because `align`
+        // is always a power of 2.
         self.align >= required.align && (self.offset % required.align) == required.offset
     }
 }
@@ -1115,11 +1140,33 @@ impl Alignment {
 // FIXME: Make the members non-pub and make the constructor enforce the power-of-2 requirement.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub struct VariableSize {
-    pub base: u32,
-    pub incr: u32,
+    base: u32,
+    incr: u32,
 }
 
 impl VariableSize {
+    /// Creates a new `VariableSize` with `base` and `incr`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `incr` is not zero or a power of 2.
+    pub fn new(base: u32, incr: u32) -> Self {
+        assert!(incr == 0 || incr.is_power_of_two());
+        Self { base, incr }
+    }
+
+    /// Returns the value of `base`.
+    #[inline]
+    pub fn base(self) -> u32 {
+        self.base
+    }
+
+    /// Returns the value of `incr`.
+    #[inline]
+    pub fn incr(self) -> u32 {
+        self.incr
+    }
+
     /// Get the minimum of two values, but not zero (unless both are zero).
     fn incr_union(incr1: u32, incr2: u32) -> u32 {
         if incr1 == 0 {

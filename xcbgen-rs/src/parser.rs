@@ -811,7 +811,7 @@ impl Parser {
 
         let align = get_attr_parsed(node, "align")?;
         let offset = try_get_attr_parsed(node, "offset")?.unwrap_or(0);
-        Ok(defs::Alignment { align, offset })
+        Ok(defs::Alignment::new(align, offset))
     }
 
     fn try_parse_switch_case(
