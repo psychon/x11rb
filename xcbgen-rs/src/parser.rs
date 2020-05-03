@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
-use std::str::FromStr as _;
+use std::str::FromStr;
 
 use once_cell::unsync::OnceCell;
 
@@ -41,9 +41,9 @@ impl Parser {
             .attribute("extension-xname")
             .map::<Result<defs::ExtInfo, ParseError>, _>(|xname| {
                 let name = get_attr(node, "extension-name")?;
-                let multiword = try_get_attr_as_bool(node, "extension-multiword")?.unwrap_or(false);
-                let major_version = get_attr_as_u16(node, "major-version")?;
-                let minor_version = get_attr_as_u16(node, "minor-version")?;
+                let multiword = try_get_attr_parsed(node, "extension-multiword")?.unwrap_or(false);
+                let major_version = get_attr_parsed(node, "major-version")?;
+                let minor_version = get_attr_parsed(node, "minor-version")?;
                 Ok(defs::ExtInfo {
                     xname: xname.into(),
                     name: name.into(),
@@ -100,8 +100,8 @@ impl Parser {
         assert!(node.is_element());
 
         let name = get_attr(node, "name")?;
-        let opcode = get_attr_as_u8(node, "opcode")?;
-        let combine_adjacent = try_get_attr_as_bool(node, "combine-adjacent")?.unwrap_or(false);
+        let opcode = get_attr_parsed(node, "opcode")?;
+        let combine_adjacent = try_get_attr_parsed(node, "combine-adjacent")?.unwrap_or(false);
 
         let mut required_start_align = None;
         let mut fields = Vec::new();
@@ -206,9 +206,9 @@ impl Parser {
         assert!(node.is_element());
 
         let name = get_attr(node, "name")?;
-        let number = get_attr_as_u16(node, "number")?;
-        let no_sequence_number = try_get_attr_as_bool(node, "no-sequence-number")?.unwrap_or(false);
-        let xge = try_get_attr_as_bool(node, "xge")?.unwrap_or(false);
+        let number = get_attr_parsed(node, "number")?;
+        let no_sequence_number = try_get_attr_parsed(node, "no-sequence-number")?.unwrap_or(false);
+        let xge = try_get_attr_parsed(node, "xge")?.unwrap_or(false);
 
         let mut required_start_align = None;
         let mut fields = Vec::new();
@@ -264,7 +264,7 @@ impl Parser {
         assert!(node.is_element());
 
         let name = get_attr(node, "name")?;
-        let number = get_attr_as_u16(node, "number")?;
+        let number = get_attr_parsed(node, "number")?;
         let ref_ = get_attr(node, "ref")?;
 
         let event_copy = Rc::new(defs::EventCopyDef {
@@ -291,7 +291,7 @@ impl Parser {
         assert!(node.is_element());
 
         let name = get_attr(node, "name")?;
-        let number = get_attr_as_i16(node, "number")?;
+        let number = get_attr_parsed(node, "number")?;
 
         let mut required_start_align = None;
         let mut fields = Vec::new();
@@ -338,7 +338,7 @@ impl Parser {
         assert!(node.is_element());
 
         let name = get_attr(node, "name")?;
-        let number = get_attr_as_i16(node, "number")?;
+        let number = get_attr_parsed(node, "number")?;
         let ref_ = get_attr(node, "ref")?;
 
         let error_copy = Rc::new(defs::ErrorCopyDef {
@@ -484,9 +484,9 @@ impl Parser {
         assert!(node.is_element());
 
         let extension = get_attr(node, "extension")?;
-        let xge = get_attr_as_bool(node, "xge")?;
-        let opcode_min = get_attr_as_u16(node, "opcode-min")?;
-        let opcode_max = get_attr_as_u16(node, "opcode-max")?;
+        let xge = get_attr_parsed(node, "xge")?;
+        let opcode_min = get_attr_parsed(node, "opcode-min")?;
+        let opcode_max = get_attr_parsed(node, "opcode-max")?;
 
         Ok(defs::EventStructAllowed {
             extension: extension.into(),
@@ -621,13 +621,13 @@ impl Parser {
                 if value.is_some() {
                     return Err(ParseError::InvalidXml);
                 }
-                let v = get_text_as_u32(child_node)?;
+                let v = get_text_parsed(child_node)?;
                 value = Some(defs::EnumValue::Value(v));
             } else if child_node.has_tag_name("bit") {
                 if value.is_some() {
                     return Err(ParseError::InvalidXml);
                 }
-                let bit = get_text_as_u8(child_node)?;
+                let bit = get_text_parsed(child_node)?;
                 if bit >= 32 {
                     return Err(ParseError::InvalidXml);
                 }
@@ -683,9 +683,9 @@ impl Parser {
 
         match node.tag_name().name() {
             "pad" => {
-                let bytes = try_get_attr_as_u16(node, "bytes")?;
-                let align = try_get_attr_as_u16(node, "align")?;
-                let serialize = try_get_attr_as_bool(node, "serialize")?.unwrap_or(false);
+                let bytes = try_get_attr_parsed(node, "bytes")?;
+                let align = try_get_attr_parsed(node, "align")?;
+                let serialize = try_get_attr_parsed(node, "serialize")?.unwrap_or(false);
 
                 let pad_kind = match (bytes, align) {
                     (Some(bytes), None) => defs::PadKind::Bytes(bytes),
@@ -814,8 +814,8 @@ impl Parser {
     ) -> Result<defs::Alignment, ParseError> {
         assert!(node.is_element());
 
-        let align = get_attr_as_u32(node, "align")?;
-        let offset = try_get_attr_as_u32(node, "offset")?.unwrap_or(0);
+        let align = get_attr_parsed(node, "align")?;
+        let offset = try_get_attr_parsed(node, "offset")?.unwrap_or(0);
         Ok(defs::Alignment { align, offset })
     }
 
@@ -1009,11 +1009,11 @@ impl Parser {
             }
             "listelement-ref" => Ok(Some(defs::Expression::ListElementRef)),
             "value" => {
-                let value = get_text_as_u32(node)?;
+                let value = get_text_parsed(node)?;
                 Ok(Some(defs::Expression::Value(value)))
             }
             "bit" => {
-                let bit = get_text_as_u8(node)?;
+                let bit = get_text_parsed(node)?;
                 if bit >= 32 {
                     return Err(ParseError::InvalidXml);
                 }
@@ -1113,80 +1113,26 @@ impl Parser {
     }
 }
 
-fn parse_bool(value: &str) -> Option<bool> {
-    match value {
-        "false" => Some(false),
-        "true" => Some(true),
-        _ => None,
-    }
-}
-
 fn get_attr<'a>(node: roxmltree::Node<'a, '_>, name: &str) -> Result<&'a str, ParseError> {
-    node.attribute(name).ok_or_else(|| ParseError::InvalidXml)
+    node.attribute(name).ok_or(ParseError::InvalidXml)
 }
 
-fn get_attr_as_bool(node: roxmltree::Node<'_, '_>, name: &str) -> Result<bool, ParseError> {
-    parse_bool(get_attr(node, name)?).ok_or_else(|| ParseError::InvalidXml)
+fn get_attr_parsed<T: FromStr>(node: roxmltree::Node<'_, '_>, name: &str) -> Result<T, ParseError> {
+    try_get_attr_parsed(node, name)?.ok_or(ParseError::InvalidXml)
 }
 
-fn try_get_attr_as_bool(
+fn try_get_attr_parsed<T: FromStr>(
     node: roxmltree::Node<'_, '_>,
     name: &str,
-) -> Result<Option<bool>, ParseError> {
+) -> Result<Option<T>, ParseError> {
     node.attribute(name)
-        .map(|value| parse_bool(value).ok_or_else(|| ParseError::InvalidXml))
+        .map(FromStr::from_str)
         .transpose()
-}
-
-fn get_attr_as_u8(node: roxmltree::Node<'_, '_>, name: &str) -> Result<u8, ParseError> {
-    u8::from_str(get_attr(node, name)?).map_err(|_| ParseError::InvalidXml)
-}
-
-fn get_attr_as_i16(node: roxmltree::Node<'_, '_>, name: &str) -> Result<i16, ParseError> {
-    i16::from_str(get_attr(node, name)?).map_err(|_| ParseError::InvalidXml)
-}
-
-fn get_attr_as_u16(node: roxmltree::Node<'_, '_>, name: &str) -> Result<u16, ParseError> {
-    u16::from_str(get_attr(node, name)?).map_err(|_| ParseError::InvalidXml)
-}
-
-fn get_attr_as_u32(node: roxmltree::Node<'_, '_>, name: &str) -> Result<u32, ParseError> {
-    u32::from_str(get_attr(node, name)?).map_err(|_| ParseError::InvalidXml)
-}
-
-fn try_get_attr_as_u16(
-    node: roxmltree::Node<'_, '_>,
-    name: &str,
-) -> Result<Option<u16>, ParseError> {
-    node.attribute(name)
-        .map(|value| u16::from_str(value).map_err(|_| ParseError::InvalidXml))
-        .transpose()
-}
-
-fn try_get_attr_as_u32(
-    node: roxmltree::Node<'_, '_>,
-    name: &str,
-) -> Result<Option<u32>, ParseError> {
-    node.attribute(name)
-        .map(|value| u32::from_str(value).map_err(|_| ParseError::InvalidXml))
-        .transpose()
+        .map_err(|_| ParseError::InvalidXml)
 }
 
 fn get_text<'a>(node: roxmltree::Node<'a, '_>) -> Result<&'a str, ParseError> {
-    let mut text = None;
-    for child_node in node.children() {
-        if child_node.is_comment() {
-            continue;
-        }
-        if !child_node.is_text() {
-            return Err(ParseError::InvalidXml);
-        }
-        if text.is_some() {
-            return Err(ParseError::InvalidXml);
-        }
-        text = Some(child_node.text().unwrap());
-    }
-    text.ok_or_else(|| ParseError::InvalidXml)
+    try_get_text(node)?.ok_or(ParseError::InvalidXml)
 }
 
 fn try_get_text<'a>(node: roxmltree::Node<'a, '_>) -> Result<Option<&'a str>, ParseError> {
@@ -1206,10 +1152,6 @@ fn try_get_text<'a>(node: roxmltree::Node<'a, '_>) -> Result<Option<&'a str>, Pa
     Ok(text)
 }
 
-fn get_text_as_u8(node: roxmltree::Node<'_, '_>) -> Result<u8, ParseError> {
-    u8::from_str(get_text(node)?).map_err(|_| ParseError::InvalidXml)
-}
-
-fn get_text_as_u32(node: roxmltree::Node<'_, '_>) -> Result<u32, ParseError> {
-    u32::from_str(get_text(node)?).map_err(|_| ParseError::InvalidXml)
+fn get_text_parsed<T: FromStr>(node: roxmltree::Node<'_, '_>) -> Result<T, ParseError> {
+    FromStr::from_str(get_text(node)?).map_err(|_| ParseError::InvalidXml)
 }
