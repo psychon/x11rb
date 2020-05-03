@@ -1140,7 +1140,7 @@ impl VariableSize {
     ///
     /// # Panics
     ///
-    /// Panics if `incr` is not zero or a power of 2.
+    /// Panics if `incr` neither zero nor a power of 2.
     pub fn new(base: u32, incr: u32) -> Self {
         assert!(incr == 0 || incr.is_power_of_two());
         Self { base, incr }
