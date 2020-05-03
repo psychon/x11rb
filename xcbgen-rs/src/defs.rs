@@ -630,34 +630,6 @@ pub struct Alignment {
 }
 
 impl Alignment {
-    #[inline]
-    pub fn min() -> Self {
-        Self {
-            align: 1,
-            offset: 0,
-        }
-    }
-
-    #[inline]
-    pub fn max() -> Self {
-        Self {
-            align: Self::max_align(),
-            offset: 0,
-        }
-    }
-
-    #[inline]
-    pub const fn max_align() -> u32 {
-        1 << 31
-    }
-
-    pub fn advance_fixed_size(self, size: u32) -> Self {
-        Self {
-            align: self.align,
-            offset: self.offset.wrapping_add(size) % self.align,
-        }
-    }
-
     pub fn advance_variable_size(self, size: VariableSize) -> Self {
         let align = if size.incr == 0 {
             self.align
@@ -812,21 +784,6 @@ impl VariableSize {
         }
     }
 
-    pub fn zero_or_one(self) -> Self {
-        let base = Self::reduce_base(self.base, self.incr);
-        if base == 0 {
-            Self {
-                base: 0,
-                incr: self.incr,
-            }
-        } else {
-            Self {
-                base: 0,
-                incr: 1u32 << base.trailing_zeros().min(31),
-            }
-        }
-    }
-
     pub fn zero_one_or_many(self) -> Self {
         let base = Self::reduce_base(self.base, self.incr);
         if base == 0 {
@@ -909,21 +866,6 @@ impl ComplexAlignment {
         match self.body {
             AlignBody::Size(size) => self.begin.advance_variable_size(size),
             AlignBody::EndAlign(end_align) => end_align,
-        }
-    }
-
-    pub fn zero_or_one(self) -> Self {
-        match self.body {
-            AlignBody::Size(size) => Self {
-                begin: self.begin,
-                body: AlignBody::Size(size.zero_or_one()),
-                internal_align: self.internal_align,
-            },
-            AlignBody::EndAlign(end_align) => Self {
-                begin: self.begin,
-                body: AlignBody::EndAlign(self.begin.intersection(end_align)),
-                internal_align: self.internal_align,
-            },
         }
     }
 
@@ -1141,14 +1083,7 @@ pub struct ListField {
 
 impl ListField {
     pub fn has_fixed_length(&self) -> bool {
-        if let Some(ref length_expr) = self.length_expr {
-            match length_expr {
-                Expression::Value(_) | Expression::Bit(_) => true,
-                _ => false,
-            }
-        } else {
-            false
-        }
+        self.length().is_some()
     }
 
     pub fn length(&self) -> Option<u32> {
