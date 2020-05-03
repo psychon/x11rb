@@ -1080,9 +1080,7 @@ impl Alignment {
                 }
             }
             std::cmp::Ordering::Greater => {
-                // FIXME: Shouldn't this use % instead of %? (Not that it matters much in practice,
-                // since I think only alignments by powers of two appear in X11)
-                if (self.offset & other.align) != other.align {
+                if (self.offset % other.align) != other.align {
                     None
                 } else {
                     Some(self)
