@@ -633,12 +633,25 @@ impl ErrorCopyDef {
 /// some special meaning in the protocol.
 #[derive(Debug)]
 pub enum TypeDef {
+    /// A `<struct>` definition.
     Struct(Rc<StructDef>),
+
+    /// A `<union>` definition.
     Union(Rc<UnionDef>),
+
+    /// A `<eventstruct>` definition.
     EventStruct(Rc<EventStructDef>),
+
+    /// A `<xidtype>` definition.
     Xid(Rc<XidTypeDef>),
+
+    /// A `<xidunion>` definition.
     XidUnion(Rc<XidUnionDef>),
+
+    /// A `<enum>` definition.
     Enum(Rc<EnumDef>),
+
+    /// A `<typedef>` definition.
     Alias(Rc<TypeAliasDef>),
 }
 
@@ -981,6 +994,9 @@ impl ErrorRef {
         }
     }
 
+    /// Upgrade this error reference to an error definition.
+    ///
+    /// See [`Weak::Upgrade`] for more about what this really does.
     pub fn as_error_def(&self) -> ErrorDef {
         match self {
             Self::Full(error_full_def) => ErrorDef::Full(error_full_def.upgrade().unwrap()),
@@ -1305,30 +1321,35 @@ pub struct ComplexAlignment {
     pub internal_align: u32,
 }
 
+/// Alignment information after some structure.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum AlignBody {
+    /// Some `VariableSize` can describe the size of the body.
     Size(VariableSize),
+
+    /// Information about the alignment after the structure.
     EndAlign(Alignment),
 }
 
 impl ComplexAlignment {
+    /// Create alignment information for some structure with a fixed size `size` that needs to be
+    /// aligned to a multiple of `align`.
     #[inline]
     pub fn fixed_size(size: u32, align: u32) -> Self {
         Self {
             begin: Alignment { align, offset: 0 },
-            body: AlignBody::Size(VariableSize {
-                base: size,
-                incr: 0,
-            }),
+            body: AlignBody::Size(VariableSize::new(size, 0)),
             internal_align: 1,
         }
     }
 
+    /// Create alignment information for an empty structure.
     #[inline]
     pub fn zero_sized() -> Self {
         Self::fixed_size(0, 1)
     }
 
+    /// Get the alignment after the structure.
     pub fn end_align(self) -> Alignment {
         match self.body {
             AlignBody::Size(size) => self.begin.advance_variable_size(size),
@@ -1336,6 +1357,10 @@ impl ComplexAlignment {
         }
     }
 
+    /// Compute alignment information for an arbitrary repetition of the current description.
+    ///
+    /// This returns `None` if the alignment of this structure is violated, i.e. it cannot be
+    /// repeated.
     pub fn zero_one_or_many(self) -> Option<Self> {
         if !self.end_align().meets(self.begin) {
             None
@@ -1355,6 +1380,10 @@ impl ComplexAlignment {
         }
     }
 
+    /// Compute alignment information for `n` repetitions of this type.
+    ///
+    /// This returns `None` if the alignment of this structure is violated, i.e. it cannot be
+    /// repeated.
     pub fn repeat_n(self, n: u32) -> Option<Self> {
         if n == 0 {
             Some(Self {
@@ -1380,6 +1409,7 @@ impl ComplexAlignment {
         }
     }
 
+    /// Get a new alignment description for the combination of two types right after each other.
     pub fn append(self, next: Self) -> Option<Self> {
         if !self.end_align().meets(next.begin) {
             None
@@ -1401,6 +1431,8 @@ impl ComplexAlignment {
         }
     }
 
+    /// Compute a new alignment description for two types appearing in a union, i.e. both starting
+    /// at the same position.
     pub fn union_append(self, other: Self) -> Option<Self> {
         if !self.begin.meets(other.begin) {
             None
@@ -1433,6 +1465,9 @@ impl ComplexAlignment {
         }
     }
 
+    /// Compute alignment information of types that can appear optionally after each other.
+    ///
+    /// This computes the alignment for the concatenation of bitcases.
     pub fn bitcase_append(self, next: Self) -> Option<Self> {
         if !self.end_align().meets(next.begin) {
             None
