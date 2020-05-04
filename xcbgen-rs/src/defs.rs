@@ -858,7 +858,6 @@ pub struct NamedEventRef {
     /// The definition of the event that is referenced.
     ///
     /// This field is only set up during resolving.
-    // FIXME Can this be changed to a Weak<EventFullDef>?
     pub def: OnceCell<EventRef>,
 }
 
@@ -1090,8 +1089,6 @@ impl Alignment {
     }
 
     /// Returns an alignment that is met by `self` and `other`.
-    // FIXME: `align = self.align.min(other.align)` strikes my as fishy. See my comment on
-    // advance_variable_size().
     pub fn intersection(self, other: Self) -> Self {
         let align = self.align.min(other.align);
         let offset1 = self.offset % align;
@@ -1535,6 +1532,9 @@ impl FieldDef {
         }
     }
 
+    /// Get the size in bytes of this field on the wire.
+    ///
+    /// This returns `None` for fields that have a variable size
     pub fn size(&self) -> Option<u32> {
         match self {
             Self::Pad(pad_field) => match pad_field.kind {
@@ -1558,30 +1558,50 @@ impl FieldDef {
     }
 }
 
+/// A `<pad>` field.
 #[derive(Clone, Debug)]
 pub struct PadField {
+    /// The kind and size of padding
     pub kind: PadKind,
+
+    /// The value of the `serialize` attribute.
+    ///
+    /// If no attribute was present, the value is `false`.
     pub serialize: bool,
 }
 
+/// A `<field>` field.
 #[derive(Debug)]
 pub struct NormalField {
+    /// The name of the field.
     pub name: String,
+
+    /// The kind of values that the field can take.
     pub type_: FieldValueType,
 }
 
+/// A `<list>` field.
 #[derive(Debug)]
 pub struct ListField {
+    /// The name of the field.
     pub name: String,
+
+    /// The kind of values that the field can take.
     pub element_type: FieldValueType,
+
+    /// The expression describing the length of the list, if present.
     pub length_expr: Option<Expression>,
 }
 
 impl ListField {
+    /// Does the list have a fixed/constant length.
+    ///
+    /// This function is true if there is only one possible length for the list.
     pub fn has_fixed_length(&self) -> bool {
         self.length().is_some()
     }
 
+    /// Get the length of the list if it is statically known.
     pub fn length(&self) -> Option<u32> {
         if let Some(ref length_expr) = self.length_expr {
             match length_expr {
@@ -1595,18 +1615,43 @@ impl ListField {
     }
 }
 
+/// A `<switch>` field.
 #[derive(Debug)]
 pub struct SwitchField {
+    /// The name of the field.
     pub name: String,
+
+    /// The expression on which the `<switch>`... well, switches.
     pub expr: Expression,
+
+    /// The value of this switch's `<required_start_align>` child, if any.
     pub required_start_align: Option<Alignment>,
+
+    /// The computed alignment for this switch.
+    ///
+    /// This field is only set after resolving.
     pub alignment: OnceCell<ComplexAlignment>,
+
+    /// The kind of switch.
+    ///
+    /// All `cases` of this switch have to conform to this kind: Either they are all `<case>`s or
+    /// all `<bitcase>`s.
     pub kind: SwitchKind,
+
+    /// The `cases` that the switch can have.
     pub cases: Vec<SwitchCase>,
+
+    /// The list of `<paramref>`s that appear in descendants of this switch.
+    ///
+    /// This list is empty before the switch was resolved.
     pub external_params: RefCell<Vec<ExternalParam>>,
 }
 
 impl SwitchField {
+    /// Get the size in bytes of this switch on the wire.
+    ///
+    /// This returns `None` if the switch does not have a fixed size. Only switches of kind
+    /// `<bitcase>` can have a fixed size.
     pub fn size(&self) -> Option<u32> {
         if self.kind != SwitchKind::Case {
             return None;
@@ -1627,23 +1672,48 @@ impl SwitchField {
     }
 }
 
+/// The possible kinds that a `<switch>` can have.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum SwitchKind {
+    /// All children of the `<switch>` are `<bitcase>`s.
     BitCase,
+
+    /// All children of the `<switch>` are `<case>`s.
     Case,
 }
 
+/// A single `<case>` or `<bitcase>` of a switch.
 #[derive(Debug)]
 pub struct SwitchCase {
+    /// The value of the `name` attribute, if present.
     pub name: Option<String>,
+
+    /// All the expressions that this case contains.
     pub exprs: Vec<Expression>,
+
+    /// The value of the `<required_start_align>` child, if any.
     pub required_start_align: Option<Alignment>,
+
+    /// Alignment information about this case.
+    ///
+    /// This information is not available before the case was resolved.
     pub alignment: OnceCell<ComplexAlignment>,
+
+    /// The list of fields of this case.
+    ///
+    /// The fields appear in the order in which they are defined.
     pub fields: RefCell<Vec<FieldDef>>,
+
+    /// The list of `<paramref>`s that appear in descendants of this case.
+    ///
+    /// This list is empty before the case was resolved.
     pub external_params: RefCell<Vec<ExternalParam>>,
 }
 
 impl SwitchCase {
+    /// Get the size in bytes of this case on the wire.
+    ///
+    /// This returns `None` if this case does not have a constant size.
     fn size(&self) -> Option<u32> {
         self.fields
             .borrow()
@@ -1652,18 +1722,25 @@ impl SwitchCase {
     }
 }
 
+/// A `<fd>` field.
 #[derive(Debug)]
 pub struct FdField {
+    /// The value of the `name` attribute.
     pub name: String,
 }
 
+/// A `<list>` field with `type="fd"`.
 #[derive(Debug)]
 pub struct FdListField {
+    /// The value of the `name` attribute.
     pub name: String,
+
+    /// The length of the list
     pub length_expr: Expression,
 }
 
 impl FdListField {
+    /// Get the length of the list if it is statically known.
     pub fn length(&self) -> Option<u32> {
         match self.length_expr {
             Expression::Value(v) => Some(u32::try_from(v).unwrap()),
@@ -1673,61 +1750,139 @@ impl FdListField {
     }
 }
 
+/// A `<exprfield>` field.
 #[derive(Debug)]
 pub struct ExprField {
+    /// The value of the `name` attribute.
     pub name: String,
+
+    /// The type of the field.
     pub type_: FieldValueType,
+
+    /// The expression describing how the field is computed.
     pub expr: Expression,
 }
 
+/// An invented length field for a list that has no length.
+///
+/// There is currently exactly one `<exprfield>` tag in xcb-proto:
+/// ```text
+/// <request name="QueryTextExtents" opcode="48">
+///   <exprfield type="BOOL" name="odd_length">
+///     <op op="&amp;"><fieldref>string_len</fieldref><value>1</value></op>
+///   </exprfield>
+///   <field type="FONTABLE" name="font" />
+///   <list type="CHAR2B" name="string" />
+///   <reply>
+/// [...]
+/// ```
+/// The `<exprfield>` above refers to a field `string_len` that does not exist. This refers to the
+/// implicit length of the `string` list.
+///
+/// To make this work, a `VirtualLenField` is invented during resolving and inserted in the
+/// representation of the request above.
 #[derive(Debug)]
 pub struct VirtualLenField {
+    /// The name of the virtual length field.
     pub name: String,
+
+    /// The type of the field.
     // FIXME: This is always BuiltInType::Card32, so this field can be removed
     pub type_: FieldValueType,
+
+    /// The name of the referenced list.
     pub list_name: String,
 }
 
+/// The type of a field's value.
 #[derive(Debug)]
 pub struct FieldValueType {
+    /// The actual type of the field's value.
     pub type_: NamedTypeRef,
+
+    /// Constraints describing the possible values that the field can have.
+    ///
+    /// This represents the `enum`, `altenum`, `mask`, and `altmask` attributes of the XML.
     pub value_set: FieldValueSet,
 }
 
 impl FieldValueType {
+    /// Get the size in bytes of this field on the wire.
+    ///
+    /// This returns `None` if the struct does not have a fixed size.
+    ///
+    /// # Panics
+    ///
+    /// Panics if this value type was not yet resolved.
     pub fn size(&self) -> Option<u32> {
         self.type_.def.get().unwrap().size()
     }
 }
 
+/// A possible value set constraining a field's value.
 #[derive(Debug)]
 pub enum FieldValueSet {
+    /// The field can take any possible value of its type.
     None,
+
+    /// The field can only takes values from the referenced value.
     Enum(NamedTypeRef),
+
+    /// The field can take any possible value of its type, but values of the referenced enum have a
+    /// special meaning.
     AltEnum(NamedTypeRef),
+
+    /// The field is a bitmask of the values of the referenced enum.
     Mask(NamedTypeRef),
+
+    /// The field can take any possible value of its type, but the referenced enum gives special
+    /// meaning to some bits.
     AltMask(NamedTypeRef),
 }
 
+/// The kind of padding a `<pad>` can represent.
 #[derive(Clone, Debug)]
 pub enum PadKind {
+    /// A fixed size padding of the given size (`bytes` attribute).
     Bytes(u16),
+
+    /// An alignment padding aligning to the given alignment ( `align` attribute).
     Align(u16),
 }
 
+/// A reference to some type.
 #[derive(Clone, Debug)]
 pub enum TypeRef {
+    /// A built-in type is referenced.
     BuiltIn(BuiltInType),
+
+    /// A struct is referenced.
     Struct(Weak<StructDef>),
+
+    /// A union is referenced.
     Union(Weak<UnionDef>),
+
+    /// An event structure is referenced.
     EventStruct(Weak<EventStructDef>),
+
+    /// A X11 ID is referenced.
     Xid(Weak<XidTypeDef>),
+
+    /// A union of X11 IDs is referenced.
     XidUnion(Weak<XidUnionDef>),
+
+    /// An enumeration is referenced.
     Enum(Weak<EnumDef>),
+
+    /// A type alias is referenced.
     Alias(Weak<TypeAliasDef>),
 }
 
 impl TypeRef {
+    /// Check if two types are structurally identical.
+    ///
+    /// This does e.g. not resolve type aliases, but instead checks that both sides reference the
+    /// same type alias.
     pub fn same_as(&self, other: &Self) -> bool {
         match (self, other) {
             (Self::BuiltIn(builtin1), Self::BuiltIn(builtin2)) => builtin1 == builtin2,
@@ -1742,6 +1897,9 @@ impl TypeRef {
         }
     }
 
+    /// Get the size in bytes of this case on the wire.
+    ///
+    /// This returns `None` if the type does not have a constant size.
     pub fn size(&self) -> Option<u32> {
         match self {
             Self::BuiltIn(builtin_type) => Some(builtin_type.size()),
@@ -1777,6 +1935,9 @@ impl TypeRef {
         }
     }
 
+    /// Get the original type.
+    ///
+    /// This function resolves type aliases by calling [`TypeAliasDef::get_original_type`].
     pub fn get_original_type(&self) -> Self {
         match self {
             Self::Alias(type_alias_def) => {
@@ -1788,25 +1949,63 @@ impl TypeRef {
     }
 }
 
+/// A built-in type that is not explicitly defined.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum BuiltInType {
+    /// An unsigned integer with 8 bits.
     Card8,
+
+    /// An unsigned integer with 16 bits.
     Card16,
+
+    /// An unsigned integer with 32 bits.
     Card32,
+
+    /// An unsigned integer with 64 bits.
     Card64,
+
+    /// A signed integer with 8 bits.
     Int8,
+
+    /// A signed integer with 16 bits.
     Int16,
+
+    /// A signed integer with 32 bits.
     Int32,
+
+    /// A signed integer with 64 bits.
     Int64,
+
+    /// A single byte.
     Byte,
+
+    /// A boolean value
     Bool,
+
+    /// A single character.
+    ///
+    /// Characters are represented as bytes. It best not to think about non-ASCII characters.
     Char,
+
+    /// A single precision floating point value with 32 bits as defined by IEEE 754.
     Float,
+
+    /// A double precision floating point value with 64 bits as defined by IEEE 754.
     Double,
+
+    /// A value with an unspecified encoding.
+    ///
+    /// One example for this is the argument to xproto's `ChangeProperty` request. Depending on
+    /// other values in the request, the arguments have type `Card8`, `Card16`, or `Card32`.
+    ///
+    /// Values of this type can be treated as bytes. In particular, the size of a single value is
+    /// one and larger values (like in the `ChangeProperty` example above) are composed of multiple
+    /// instances of the `Void` type.
     Void,
 }
 
 impl BuiltInType {
+    /// Get the size in bytes of this type on the wire.
     pub fn size(self) -> u32 {
         match self {
             Self::Card8 => 1,
@@ -1827,111 +2026,223 @@ impl BuiltInType {
     }
 }
 
+/// An expression for computing some value.
+///
+/// This is a recursive type describing a tree of the expression.
 #[derive(Debug)]
 pub enum Expression {
+    /// An operation with two sub-expressions.
     BinaryOp(BinaryOpExpr),
+
+    /// An operation with one sub-expression.
     UnaryOp(UnaryOpExpr),
+
+    /// A reference to a field of the type in which this expression is evaluated.
     FieldRef(FieldRefExpr),
+
+    /// A reference to an outer parameter.
+    ///
+    /// Currently, there is only a single `<paramref>` in xcb-proto:
+    /// The reply to xinput's `GetDeviceMotionEvents` request has a `num_axes` field and an
+    /// `events` list. This list contains structures of type `DeviceTimeCoord`. This structure in
+    /// turn has a list. The length of this list is a `<paramref>` to `num_axes`.
+    ///
+    /// Thus, a `<paramref>` is a reference to a field that is not even present in the type where
+    /// the expression is originally, but in some context that is even farther away.
     ParamRef(ParamRefExpr),
+
+    /// A reference to a value of an enum.
     EnumRef(EnumRefExpr),
+
+    /// The value of this expression is the number of bits that are set in the value of the inner
+    /// expression.
     PopCount(Box<Expression>),
+
+    /// The value of this expression is the sum of some other expression evaluated for each element
+    /// of some list.
     SumOf(SumOfExpr),
+
+    /// A reference to the current list element inside of a `SumOf` expression.
     ListElementRef,
+
+    /// A constant and fixed value.
     Value(u32),
+
+    /// A constant and fixed value specified in the form `1 << bit`.
     Bit(u8),
 }
 
+/// An expression with two sub-expressions.
 #[derive(Debug)]
 pub struct BinaryOpExpr {
+    /// The operator that is applied to the two sub-expressions.
     pub operator: BinaryOperator,
+
+    /// The left hand side of the expression.
     pub lhs: Box<Expression>,
+
+    /// The right hand side of the expression.
     pub rhs: Box<Expression>,
 }
 
+/// The possible binary operators
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum BinaryOperator {
+    /// Addition
     Add,
+
+    /// Subtraction
     Sub,
+
+    /// Multiplication
     Mul,
+
+    /// (Integer) division
     Div,
+
+    /// Logical and
     And,
+
+    /// A logical left shift
     Shl,
 }
 
+/// An expression with one sub-expression
 #[derive(Debug)]
 pub struct UnaryOpExpr {
+    /// The operator that is applied to the sub-expression.
     pub operator: UnaryOperator,
+
+    /// The sub-expression.
     pub rhs: Box<Expression>,
 }
 
+/// The possible unary operators
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum UnaryOperator {
+    /// Bitwise negation
     Not,
 }
 
+/// An expression referencing a field from the surrounding context.
 #[derive(Debug)]
 pub struct FieldRefExpr {
+    /// The name of the field that is referenced.
     pub field_name: String,
+
+    /// After resolution, this contains information about the referenced field.
     pub resolved: OnceCell<ResolvedFieldRef>,
 }
 
+/// Information about a field reference.
 #[derive(Debug)]
 pub struct ResolvedFieldRef {
+    /// The kind of reference to another field.
     pub ref_kind: FieldRefKind,
+
+    /// The type of the referenced field.
     pub field_type: TypeRef,
 }
 
+/// Possible kinds of references to fields inside of an expression.
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum FieldRefKind {
+    /// The reference is to a field of the expression where the field is evaluated.
     LocalField,
+
+    /// The reference is to an external parameter from a surrounding context.
     ExtParam,
+
+    /// The reference is used inside of a [`SumOfExpr`].
     SumOfRef,
 }
 
+/// An expression referencing a parameter from a surrounding context.
 #[derive(Debug)]
 pub struct ParamRefExpr {
+    /// The name of the referenced field.
     pub field_name: String,
+
+    /// The type of the referenced field.
     pub type_: NamedTypeRef,
 }
 
+/// An expression referencing a value from an enumeration.
 #[derive(Debug)]
 pub struct EnumRefExpr {
+    /// The enum that is referenced.
     pub enum_: NamedTypeRef,
+
+    /// The name of the enum's variant that is used.
     pub variant: String,
 }
 
+/// An expression representing the sum over some referenced list.
 #[derive(Debug)]
 pub struct SumOfExpr {
+    /// The name of the list that is used.
     pub field_name: String,
+
+    /// After resolving, a reference to the list that is used.
     pub resolved_field: OnceCell<ResolvedFieldRef>,
+
+    /// The expression that is applied to each element of the list.
+    ///
+    /// If no expression is provided, the elements are summed as-is.
+    // FIXME: Can the Option be replaced with `Expression::ListElementRef`?
     pub operand: Option<Box<Expression>>,
 }
 
+/// Documentation of some type.
 #[derive(Clone, Debug)]
 pub struct Doc {
+    /// A brief, one-line description.
     pub brief: Option<String>,
+
+    /// A verbose description.
     pub description: Option<String>,
+
+    /// A usage example. This will most likely assume libxcb's C API.
     pub example: Option<String>,
+
+    /// Documentation of the individual fields.
     pub fields: Vec<FieldDoc>,
+
+    /// The possible X11 errors that can occur.
     pub errors: Vec<ErrorDoc>,
+
+    /// A reference to a related type.
     pub sees: Vec<SeeDoc>,
 }
 
+/// Documentation for a single type.
 #[derive(Clone, Debug)]
 pub struct FieldDoc {
+    /// The name of the field.
     pub name: String,
+
+    /// A description of this field.
     pub doc: Option<String>,
 }
 
+/// Documentation of a X11 error that can occur.
 #[derive(Clone, Debug)]
 pub struct ErrorDoc {
+    /// The name of the error.
     pub type_: String,
+
+    /// A description of when this error occurs.
     pub doc: Option<String>,
 }
 
+/// A reference to another type for further information.
 #[derive(Clone, Debug)]
 pub struct SeeDoc {
+    /// The kind of type that is referenced.
+    // TODO: Turn this into an enum?
     pub type_: String,
+
+    /// The name of the thing that is referenced, for example the name of a request.
     pub name: String,
 }
 
