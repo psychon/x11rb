@@ -50,8 +50,19 @@
 //!     let (conn, screen_num) = x11rb::connect(None).unwrap();
 //!     let screen = &conn.setup().roots[screen_num];
 //!     let win_id = conn.generate_id()?;
-//!     conn.create_window(COPY_DEPTH_FROM_PARENT, win_id, screen.root, 0, 0, 100, 100, 0, WindowClass::InputOutput,
-//!                        0, &CreateWindowAux::new().background_pixel(screen.white_pixel))?;
+//!     conn.create_window(
+//!         COPY_DEPTH_FROM_PARENT,
+//!         win_id,
+//!         screen.root,
+//!         0,
+//!         0,
+//!         100,
+//!         100,
+//!         0,
+//!         WindowClass::InputOutput,
+//!         0,
+//!         &CreateWindowAux::new().background_pixel(screen.white_pixel),
+//!     )?;
 //!     conn.map_window(win_id)?;
 //!     conn.flush();
 //!     loop {

@@ -69,8 +69,10 @@ where
 ///     // ASCII values are most common and for these from_utf8() should be fine.
 ///     let class = std::str::from_utf8(wm_class.class());
 ///     let instance = std::str::from_utf8(wm_class.instance());
-///     println!("For window {:x}, class is '{:?}' and instance is '{:?}'",
-///         window, class, instance);
+///     println!(
+///         "For window {:x}, class is '{:?}' and instance is '{:?}'",
+///         window, class, instance,
+///     );
 ///     Ok(true)
 /// }
 /// ```
