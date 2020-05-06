@@ -6,6 +6,7 @@
 
 #![deny(
     rust_2018_idioms,
+    missing_docs,
     trivial_casts,
     trivial_numeric_casts,
     unsafe_code,

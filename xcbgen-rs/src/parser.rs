@@ -1007,16 +1007,16 @@ impl Parser {
                 let ref_ = get_attr(node, "ref")?;
 
                 let operands = self.parse_expression_list(node)?;
-                if operands.len() > 1 {
-                    return Err(ParseError::InvalidXml);
-                }
-                let mut operand_iter = operands.into_iter();
-                let operand = operand_iter.next().map(Box::new);
+                let operand = match operands.len() {
+                    0 => defs::Expression::ListElementRef,
+                    1 => operands.into_iter().next().unwrap(),
+                    _ => return Err(ParseError::InvalidXml),
+                };
 
                 Ok(Some(defs::Expression::SumOf(defs::SumOfExpr {
                     field_name: ref_.into(),
                     resolved_field: OnceCell::new(),
-                    operand,
+                    operand: Box::new(operand),
                 })))
             }
             "listelement-ref" => Ok(Some(defs::Expression::ListElementRef)),
