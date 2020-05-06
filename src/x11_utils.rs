@@ -311,8 +311,7 @@ macro_rules! bitmask_binop {
 /// }
 ///
 /// #[allow(non_snake_case)]
-/// struct AtomCollectionCookie<'c, C: ConnectionExt>
-/// {
+/// struct AtomCollectionCookie<'c, C: ConnectionExt> {
 ///     _NET_WM_NAME: Cookie<'c, C, InternAtomReply>,
 ///     _NET_WM_ICON: Cookie<'c, C, InternAtomReply>,
 ///     ATOM_WITH_SPACES: Cookie<'c, C, InternAtomReply>,
@@ -320,8 +319,9 @@ macro_rules! bitmask_binop {
 /// }
 ///
 /// impl AtomCollection {
-///     pub fn new<C: ConnectionExt>(conn: &C) -> Result<AtomCollectionCookie<'_, C>, ConnectionError>
-///     {
+///     pub fn new<C: ConnectionExt>(
+///         conn: &C,
+///     ) -> Result<AtomCollectionCookie<'_, C>, ConnectionError> {
 ///         Ok(AtomCollectionCookie {
 ///             _NET_WM_NAME: conn.intern_atom(false, b"_NET_WM_NAME")?,
 ///             _NET_WM_ICON: conn.intern_atom(false, b"_NET_WM_ICON")?,
@@ -332,7 +332,8 @@ macro_rules! bitmask_binop {
 /// }
 ///
 /// impl<'c, C> AtomCollectionCookie<'c, C>
-/// where C: ConnectionExt
+/// where
+///     C: ConnectionExt,
 /// {
 ///     pub fn reply(self) -> Result<AtomCollection, ReplyError<C::Buf>> {
 ///         Ok(AtomCollection {
