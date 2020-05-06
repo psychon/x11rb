@@ -23,7 +23,7 @@ impl<C: Connection> Drop for FreePixmap<'_, C> {
 }
 
 /// Get the supported SHM version from the X11 server
-fn check_shm_version<C: Connection>(conn: &C) -> Result<Option<(u16, u16)>, ReplyError<C::Buf>> {
+fn check_shm_version<C: Connection>(conn: &C) -> Result<Option<(u16, u16)>, ReplyError> {
     if conn
         .extension_information(shm::X11_EXTENSION_NAME)?
         .is_none()
@@ -42,7 +42,7 @@ fn get_shared_memory_content_at_offset<C: Connection>(
     screen: &xproto::Screen,
     shmseg: shm::Seg,
     offset: u32,
-) -> Result<Vec<u8>, ReplyOrIdError<C::Buf>> {
+) -> Result<Vec<u8>, ReplyOrIdError> {
     let width = match screen.root_depth {
         24 => 1,
         16 => 2,
@@ -70,7 +70,7 @@ fn use_shared_mem<C: Connection>(
     conn: &C,
     screen_num: usize,
     shmseg: shm::Seg,
-) -> Result<(), ReplyOrIdError<C::Buf>> {
+) -> Result<(), ReplyOrIdError> {
     let screen = &conn.setup().roots[screen_num];
 
     let content = get_shared_memory_content_at_offset(conn, screen, shmseg, 0)?;
@@ -96,11 +96,7 @@ fn make_file() -> IOResult<File> {
     Ok(file)
 }
 
-fn send_fd<C: Connection>(
-    conn: &C,
-    screen_num: usize,
-    file: File,
-) -> Result<(), ReplyOrIdError<C::Buf>> {
+fn send_fd<C: Connection>(conn: &C, screen_num: usize, file: File) -> Result<(), ReplyOrIdError> {
     let shmseg = conn.generate_id()?;
     conn.shm_attach_fd(shmseg, file, false)?;
 
@@ -111,7 +107,7 @@ fn send_fd<C: Connection>(
     Ok(())
 }
 
-fn receive_fd<C: Connection>(conn: &C, screen_num: usize) -> Result<(), ReplyOrIdError<C::Buf>> {
+fn receive_fd<C: Connection>(conn: &C, screen_num: usize) -> Result<(), ReplyOrIdError> {
     let shmseg = conn.generate_id()?;
     let segment_size = TEMP_FILE_CONTENT.len() as _;
     let reply = conn

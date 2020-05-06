@@ -171,7 +171,7 @@ fn create_pixmap_wrapper<C: Connection>(
     depth: u8,
     drawable: Drawable,
     size: (u16, u16),
-) -> Result<FreePixmap<C>, ReplyOrIdError<C::Buf>> {
+) -> Result<FreePixmap<C>, ReplyOrIdError> {
     let pixmap = conn.generate_id()?;
     conn.create_pixmap(depth, pixmap, drawable, size.0, size.1)?;
     Ok(FreePixmap(conn, pixmap))
@@ -181,7 +181,7 @@ fn shape_window<C: Connection>(
     conn: &C,
     win_id: Window,
     window_size: (u16, u16),
-) -> Result<(), ReplyOrIdError<C::Buf>> {
+) -> Result<(), ReplyOrIdError> {
     // Create a pixmap for the shape
     let pixmap = create_pixmap_wrapper(conn, 1, win_id, window_size)?;
 
@@ -213,7 +213,7 @@ fn setup_window<C: Connection>(
     window_size: (u16, u16),
     wm_protocols: Atom,
     wm_delete_window: Atom,
-) -> Result<Window, ReplyOrIdError<C::Buf>> {
+) -> Result<Window, ReplyOrIdError> {
     let win_id = conn.generate_id()?;
     let win_aux = CreateWindowAux::new()
         .event_mask(EventMask::Exposure | EventMask::StructureNotify | EventMask::PointerMotion)
@@ -260,7 +260,7 @@ fn create_gc_with_foreground<C: Connection>(
     conn: &C,
     win_id: Window,
     foreground: u32,
-) -> Result<Gcontext, ReplyOrIdError<C::Buf>> {
+) -> Result<Gcontext, ReplyOrIdError> {
     let gc = conn.generate_id()?;
     let gc_aux = CreateGCAux::new()
         .graphics_exposures(0)

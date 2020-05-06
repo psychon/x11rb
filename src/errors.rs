@@ -166,16 +166,16 @@ impl From<std::io::Error> for ConnectionError {
 
 /// An error that occurred with some request.
 #[derive(Debug)]
-pub enum ReplyError<B: AsRef<[u8]> + std::fmt::Debug> {
+pub enum ReplyError {
     /// Some error occurred on the X11 connection.
     ConnectionError(ConnectionError),
     /// The X11 server sent an error in response to the request.
-    X11Error(Error<B>),
+    X11Error(Error),
 }
 
-impl<B: AsRef<[u8]> + std::fmt::Debug> std::error::Error for ReplyError<B> {}
+impl std::error::Error for ReplyError {}
 
-impl<B: AsRef<[u8]> + std::fmt::Debug> std::fmt::Display for ReplyError<B> {
+impl std::fmt::Display for ReplyError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ReplyError::ConnectionError(e) => write!(f, "{}", e),
@@ -184,42 +184,42 @@ impl<B: AsRef<[u8]> + std::fmt::Debug> std::fmt::Display for ReplyError<B> {
     }
 }
 
-impl<B: AsRef<[u8]> + std::fmt::Debug> From<ParseError> for ReplyError<B> {
+impl From<ParseError> for ReplyError {
     fn from(err: ParseError) -> Self {
         Self::from(ConnectionError::from(err))
     }
 }
 
-impl<B: AsRef<[u8]> + std::fmt::Debug> From<std::io::Error> for ReplyError<B> {
+impl From<std::io::Error> for ReplyError {
     fn from(err: std::io::Error) -> Self {
         ConnectionError::from(err).into()
     }
 }
 
-impl<B: AsRef<[u8]> + std::fmt::Debug> From<ConnectionError> for ReplyError<B> {
+impl From<ConnectionError> for ReplyError {
     fn from(err: ConnectionError) -> Self {
         Self::ConnectionError(err)
     }
 }
 
-impl<B: AsRef<[u8]> + std::fmt::Debug> From<Error<B>> for ReplyError<B> {
-    fn from(err: Error<B>) -> Self {
+impl From<Error> for ReplyError {
+    fn from(err: Error) -> Self {
         Self::X11Error(err)
     }
 }
 
 /// An error caused by some request or by the exhaustion of IDs.
 #[derive(Debug)]
-pub enum ReplyOrIdError<B: AsRef<[u8]> + std::fmt::Debug> {
+pub enum ReplyOrIdError {
     /// All available IDs have been exhausted.
     IdsExhausted,
     /// Some error occurred on the X11 connection.
     ConnectionError(ConnectionError),
     /// The X11 server sent an error in response to a XC-MISC request.
-    X11Error(Error<B>),
+    X11Error(Error),
 }
 
-impl<B: AsRef<[u8]> + std::fmt::Debug> std::fmt::Display for ReplyOrIdError<B> {
+impl std::fmt::Display for ReplyOrIdError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ReplyOrIdError::IdsExhausted => f.write_str("X11 IDs have been exhausted"),
@@ -229,28 +229,28 @@ impl<B: AsRef<[u8]> + std::fmt::Debug> std::fmt::Display for ReplyOrIdError<B> {
     }
 }
 
-impl<B: AsRef<[u8]> + std::fmt::Debug> std::error::Error for ReplyOrIdError<B> {}
+impl std::error::Error for ReplyOrIdError {}
 
-impl<B: AsRef<[u8]> + std::fmt::Debug> From<ParseError> for ReplyOrIdError<B> {
+impl From<ParseError> for ReplyOrIdError {
     fn from(err: ParseError) -> Self {
         ConnectionError::from(err).into()
     }
 }
 
-impl<B: AsRef<[u8]> + std::fmt::Debug> From<ConnectionError> for ReplyOrIdError<B> {
+impl From<ConnectionError> for ReplyOrIdError {
     fn from(err: ConnectionError) -> Self {
         ReplyOrIdError::ConnectionError(err)
     }
 }
 
-impl<B: AsRef<[u8]> + std::fmt::Debug> From<Error<B>> for ReplyOrIdError<B> {
-    fn from(err: Error<B>) -> Self {
+impl From<Error> for ReplyOrIdError {
+    fn from(err: Error) -> Self {
         ReplyOrIdError::X11Error(err)
     }
 }
 
-impl<B: AsRef<[u8]> + std::fmt::Debug> From<ReplyError<B>> for ReplyOrIdError<B> {
-    fn from(err: ReplyError<B>) -> Self {
+impl From<ReplyError> for ReplyOrIdError {
+    fn from(err: ReplyError) -> Self {
         match err {
             ReplyError::ConnectionError(err) => ReplyOrIdError::ConnectionError(err),
             ReplyError::X11Error(err) => ReplyOrIdError::X11Error(err),

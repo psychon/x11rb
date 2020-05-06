@@ -262,17 +262,11 @@ mod test {
             unimplemented!()
         }
 
-        fn parse_error<E>(&self, _error: E) -> Result<crate::protocol::Error<E>, ParseError>
-        where
-            E: std::fmt::Debug + AsRef<[u8]>,
-        {
+        fn parse_error(&self, _error: &[u8]) -> Result<crate::protocol::Error, ParseError> {
             unimplemented!()
         }
 
-        fn parse_event<E>(&self, _event: E) -> Result<crate::protocol::Event<E>, ParseError>
-        where
-            E: std::fmt::Debug + AsRef<[u8]>,
-        {
+        fn parse_event(&self, _event: &[u8]) -> Result<crate::protocol::Event, ParseError> {
             unimplemented!()
         }
     }

@@ -55,7 +55,7 @@ struct WMState<'a, C: Connection> {
 }
 
 impl<'a, C: Connection> WMState<'a, C> {
-    fn new(conn: &'a C, screen_num: usize) -> Result<WMState<'a, C>, ReplyOrIdError<C::Buf>> {
+    fn new(conn: &'a C, screen_num: usize) -> Result<WMState<'a, C>, ReplyOrIdError> {
         let screen = &conn.setup().roots[screen_num];
         let black_gc = conn.generate_id()?;
         let font = conn.generate_id()?;
@@ -84,7 +84,7 @@ impl<'a, C: Connection> WMState<'a, C> {
     }
 
     /// Scan for already existing windows and manage them
-    fn scan_windows(&mut self) -> Result<(), ReplyOrIdError<C::Buf>> {
+    fn scan_windows(&mut self) -> Result<(), ReplyOrIdError> {
         // Get the already existing top-level windows.
         let screen = &self.conn.setup().roots[self.screen_num];
         let tree_reply = self.conn.query_tree(screen.root)?.reply()?;
@@ -117,7 +117,7 @@ impl<'a, C: Connection> WMState<'a, C> {
         &mut self,
         win: Window,
         geom: &GetGeometryReply,
-    ) -> Result<(), ReplyOrIdError<C::Buf>> {
+    ) -> Result<(), ReplyOrIdError> {
         println!("Managing window {:?}", win);
         let screen = &self.conn.setup().roots[self.screen_num];
         assert!(self.find_window_by_id(win).is_none());
@@ -152,7 +152,7 @@ impl<'a, C: Connection> WMState<'a, C> {
     }
 
     /// Draw the titlebar of a window
-    fn redraw_titlebar(&self, state: &WindowState) -> Result<(), ReplyError<C::Buf>> {
+    fn redraw_titlebar(&self, state: &WindowState) -> Result<(), ReplyError> {
         let close_x = state.close_x_position();
         self.conn.poly_line(
             CoordMode::Origin,
@@ -198,7 +198,7 @@ impl<'a, C: Connection> WMState<'a, C> {
     }
 
     /// Do all pending work that was queued while handling some events
-    fn refresh(&mut self) -> Result<(), ReplyError<C::Buf>> {
+    fn refresh(&mut self) -> Result<(), ReplyError> {
         while let Some(&win) = self.pending_expose.iter().next() {
             self.pending_expose.remove(&win);
             if let Some(state) = self.find_window_by_id(win) {
@@ -226,7 +226,7 @@ impl<'a, C: Connection> WMState<'a, C> {
     }
 
     /// Handle the given event
-    fn handle_event(&mut self, event: Event<C::Buf>) -> Result<(), ReplyOrIdError<C::Buf>> {
+    fn handle_event(&mut self, event: Event) -> Result<(), ReplyOrIdError> {
         println!("Got event {:?}", event);
         match event {
             Event::UnmapNotify(event) => self.handle_unmap_notify(event)?,
@@ -240,7 +240,7 @@ impl<'a, C: Connection> WMState<'a, C> {
         Ok(())
     }
 
-    fn handle_unmap_notify(&mut self, event: UnmapNotifyEvent) -> Result<(), ReplyError<C::Buf>> {
+    fn handle_unmap_notify(&mut self, event: UnmapNotifyEvent) -> Result<(), ReplyError> {
         let conn = self.conn;
         self.windows.retain(|state| {
             if state.window != event.window {
@@ -252,10 +252,7 @@ impl<'a, C: Connection> WMState<'a, C> {
         Ok(())
     }
 
-    fn handle_configure_request(
-        &mut self,
-        event: ConfigureRequestEvent,
-    ) -> Result<(), ReplyError<C::Buf>> {
+    fn handle_configure_request(&mut self, event: ConfigureRequestEvent) -> Result<(), ReplyError> {
         if let Some(state) = self.find_window_by_id_mut(event.window) {
             let _ = state;
             unimplemented!();
@@ -278,19 +275,19 @@ impl<'a, C: Connection> WMState<'a, C> {
         Ok(())
     }
 
-    fn handle_map_request(&mut self, event: MapRequestEvent) -> Result<(), ReplyOrIdError<C::Buf>> {
+    fn handle_map_request(&mut self, event: MapRequestEvent) -> Result<(), ReplyOrIdError> {
         self.manage_window(
             event.window,
             &self.conn.get_geometry(event.window)?.reply()?,
         )
     }
 
-    fn handle_expose(&mut self, event: ExposeEvent) -> Result<(), ReplyError<C::Buf>> {
+    fn handle_expose(&mut self, event: ExposeEvent) -> Result<(), ReplyError> {
         self.pending_expose.insert(event.window);
         Ok(())
     }
 
-    fn handle_enter(&mut self, event: EnterNotifyEvent) -> Result<(), ReplyError<C::Buf>> {
+    fn handle_enter(&mut self, event: EnterNotifyEvent) -> Result<(), ReplyError> {
         let window = if let Some(state) = self.find_window_by_id(event.child) {
             state.window
         } else {
@@ -301,10 +298,7 @@ impl<'a, C: Connection> WMState<'a, C> {
         Ok(())
     }
 
-    fn handle_button_release(
-        &mut self,
-        event: ButtonReleaseEvent,
-    ) -> Result<(), ReplyError<C::Buf>> {
+    fn handle_button_release(&mut self, event: ButtonReleaseEvent) -> Result<(), ReplyError> {
         if let Some(state) = self.find_window_by_id(event.event) {
             let data = [self.wm_delete_window, 0, 0, 0, 0];
             let event = ClientMessageEvent {
@@ -322,7 +316,7 @@ impl<'a, C: Connection> WMState<'a, C> {
     }
 }
 
-fn become_wm<C: Connection>(conn: &C, screen: &Screen) -> Result<(), ReplyError<C::Buf>> {
+fn become_wm<C: Connection>(conn: &C, screen: &Screen) -> Result<(), ReplyError> {
     // Try to become the window manager. This causes an error if there is already another WM.
     let change = ChangeWindowAttributesAux::default().event_mask(
         EventMask::SubstructureRedirect | EventMask::SubstructureNotify | EventMask::EnterWindow,

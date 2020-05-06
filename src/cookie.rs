@@ -49,7 +49,7 @@ where
     }
 
     /// Check if the original request caused an X11 error.
-    pub fn check(self) -> Result<Option<Error<C::Buf>>, ConnectionError> {
+    pub fn check(self) -> Result<Option<Error>, ConnectionError> {
         let (connection, sequence) = self.consume();
         connection.check_for_error(sequence)
     }
@@ -163,7 +163,7 @@ where
     }
 
     /// Get the raw reply that the server sent.
-    pub fn raw_reply(self) -> Result<C::Buf, ReplyError<C::Buf>> {
+    pub fn raw_reply(self) -> Result<C::Buf, ReplyError> {
         let conn = self.raw_cookie.connection;
         Ok(conn.wait_for_reply_or_error(self.raw_cookie.into_sequence_number())?)
     }
@@ -175,7 +175,7 @@ where
     }
 
     /// Get the reply that the server sent.
-    pub fn reply(self) -> Result<R, ReplyError<C::Buf>> {
+    pub fn reply(self) -> Result<R, ReplyError> {
         Ok(self.raw_reply()?.as_ref().try_into()?)
     }
 
@@ -242,13 +242,13 @@ where
     }
 
     /// Get the raw reply that the server sent.
-    pub fn raw_reply(self) -> Result<BufWithFds<C::Buf>, ReplyError<C::Buf>> {
+    pub fn raw_reply(self) -> Result<BufWithFds<C::Buf>, ReplyError> {
         let conn = self.raw_cookie.connection;
         Ok(conn.wait_for_reply_with_fds(self.raw_cookie.into_sequence_number())?)
     }
 
     /// Get the reply that the server sent.
-    pub fn reply(self) -> Result<R, ReplyError<C::Buf>> {
+    pub fn reply(self) -> Result<R, ReplyError> {
         let (buffer, fds) = self.raw_reply()?;
         Ok(R::try_from((buffer.as_ref(), fds))?)
     }
@@ -281,7 +281,7 @@ impl<C> Iterator for ListFontsWithInfoCookie<'_, C>
 where
     C: RequestConnection + ?Sized,
 {
-    type Item = Result<ListFontsWithInfoReply, ReplyError<C::Buf>>;
+    type Item = Result<ListFontsWithInfoReply, ReplyError>;
 
     fn next(&mut self) -> Option<Self::Item> {
         let cookie = match self.0.take() {

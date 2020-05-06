@@ -1475,7 +1475,7 @@ fn gc_font_get<C: Connection>(
     screen: &Screen,
     window: Window,
     font_name: &str,
-) -> Result<Gcontext, ReplyOrIdError<C::Buf>> {
+) -> Result<Gcontext, ReplyOrIdError> {
     let font = conn.generate_id()?;
 
     conn.open_font(font, font_name.as_bytes())?;
@@ -1755,7 +1755,7 @@ fn example9() -> Result<(), Box<dyn Error>> {
 // be done like this:
 
 #[allow(unused)]
-fn example_move<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError<C::Buf>> {
+fn example_move<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError> {
     // Move the window to coordinates x = 10 and y = 20
     let values = ConfigureWindowAux::default().x(10).y(20);
     conn.configure_window(win, &values)?;
@@ -1773,7 +1773,7 @@ fn example_move<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError<C
 // following code:
 
 #[allow(unused)]
-fn example_resize<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError<C::Buf>> {
+fn example_resize<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError> {
     // Move the window to coordinates width = 10 and height = 20
     let values = ConfigureWindowAux::default().width(10).height(20);
     conn.configure_window(win, &values)?;
@@ -1784,7 +1784,7 @@ fn example_resize<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError
 // `xcb_configure_window_t`:
 
 #[allow(unused)]
-fn example_move_resize<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError<C::Buf>> {
+fn example_move_resize<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError> {
     // Move the window to coordinates x = 10 and y = 20
     // and resize the window to width = 200 and height = 300
     let values = ConfigureWindowAux::default()
@@ -1806,7 +1806,7 @@ fn example_move_resize<C: Connection>(conn: &C, win: Window) -> Result<(), Reply
 // manipulate our windows stack order:
 
 #[allow(unused)]
-fn example_stack_above<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError<C::Buf>> {
+fn example_stack_above<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError> {
     // Move the window on the top of the stack
     let values = ConfigureWindowAux::default().stack_mode(StackMode::Above);
     conn.configure_window(win, &values)?;
@@ -1814,7 +1814,7 @@ fn example_stack_above<C: Connection>(conn: &C, win: Window) -> Result<(), Reply
 }
 
 #[allow(unused)]
-fn example_stack_below<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError<C::Buf>> {
+fn example_stack_below<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError> {
     // Move the window to the bottom of the stack
     let values = ConfigureWindowAux::default().stack_mode(StackMode::Below);
     conn.configure_window(win, &values)?;
@@ -1848,7 +1848,7 @@ pub struct RenamedGetGeometryReply {
 // You use them as follows:
 
 #[allow(unused)]
-fn example_get_geometry<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError<C::Buf>> {
+fn example_get_geometry<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError> {
     let geom = conn.get_geometry(win)?.reply()?;
 
     // Do something with the fields of geom
@@ -1900,7 +1900,7 @@ fn example_get_geometry<C: Connection>(conn: &C, win: Window) -> Result<(), Repl
 // We use them as follows:
 
 #[allow(unused)]
-fn example_get_and_query<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError<C::Buf>> {
+fn example_get_and_query<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError> {
     let geom = conn.get_geometry(win)?;
     let tree = conn.query_tree(win)?;
     let geom = geom.reply()?;
@@ -1947,7 +1947,7 @@ fn example_get_and_query<C: Connection>(conn: &C, win: Window) -> Result<(), Rep
 // You use them as follows:
 
 #[allow(unused)]
-fn example_get_attributes<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError<C::Buf>> {
+fn example_get_attributes<C: Connection>(conn: &C, win: Window) -> Result<(), ReplyError> {
     let geom = conn.get_window_attributes(win)?.reply()?;
 
     // Do something with the fields of attr
@@ -2041,7 +2041,7 @@ fn example_create_colormap<C: Connection>(
     conn: &C,
     win: Window,
     screen: &Screen,
-) -> Result<(), ReplyOrIdError<C::Buf>> {
+) -> Result<(), ReplyOrIdError> {
     let cmap = conn.generate_id()?;
     conn.create_colormap(ColormapAlloc::None, cmap, win, screen.root_visual)?;
 
@@ -2083,7 +2083,7 @@ fn example_fill_colormap<C: Connection>(
     conn: &C,
     win: Window,
     screen: &Screen,
-) -> Result<(), ReplyOrIdError<C::Buf>> {
+) -> Result<(), ReplyOrIdError> {
     let cmap = conn.generate_id()?;
     conn.create_colormap(ColormapAlloc::None, cmap, win, screen.root_visual)?;
     let _rep = conn.alloc_color(cmap, 65535, 0, 0)?.reply()?;
@@ -2236,7 +2236,7 @@ fn example_create_glyph_cursor<C: Connection>(
     conn: &C,
     win: Window,
     screen: &Screen,
-) -> Result<(), ReplyOrIdError<C::Buf>> {
+) -> Result<(), ReplyOrIdError> {
     let font = conn.generate_id()?;
     conn.open_font(font, b"cursor")?;
 
@@ -2272,7 +2272,7 @@ fn example_change_window_cursor<C: Connection>(
     conn: &C,
     win: Window,
     cursor: Cursor,
-) -> Result<(), ReplyError<C::Buf>> {
+) -> Result<(), ReplyError> {
     let values = ChangeWindowAttributesAux::default().cursor(cursor);
     conn.change_window_attributes(win, &values)?;
 
@@ -2297,7 +2297,7 @@ fn button_draw<C: Connection>(
     x1: i16,
     y1: i16,
     label: &str,
-) -> Result<(), ReplyOrIdError<C::Buf>> {
+) -> Result<(), ReplyOrIdError> {
     let inset = 2;
     let gc = gc_font_get(conn, screen, window, "7x13")?;
     let width = 7 * label.len() + 2 * (inset + 1);
@@ -2334,7 +2334,7 @@ fn cursor_set<C: Connection>(
     screen: &Screen,
     window: Window,
     cursor_id: u16,
-) -> Result<(), ReplyOrIdError<C::Buf>> {
+) -> Result<(), ReplyOrIdError> {
     let font = conn.generate_id()?;
     conn.open_font(font, b"cursor")?;
 
@@ -2704,7 +2704,7 @@ fn example_get_visual2<C: Connection>(conn: &C, screen_num: usize) {
 fn example_create_default_gc<C: Connection>(
     conn: &C,
     screen_num: usize,
-) -> Result<Gcontext, ReplyOrIdError<C::Buf>> {
+) -> Result<Gcontext, ReplyOrIdError> {
     let screen = &conn.setup().roots[screen_num];
     let values = CreateGCAux::default()
         .foreground(screen.black_pixel)
