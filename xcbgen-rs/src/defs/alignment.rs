@@ -169,10 +169,11 @@ impl VariableSize {
     }
 
     /// Return a description of the size of things when `self` is appended to `other`.
-    // FIXME: This code makes no sense to me. When I have something of size `1+4*n` and something
-    // of size `2+8*m`, the result has sizes `3+4*n+8*m` and not `3+4*l`. There is a discrepancy
-    // between what the docs for `VariableSize` say what it represents and what this method is
-    // supposed to do.
+    ///
+    /// This function returns an over-approximation. This means that all sizes that can be created
+    /// by such a concatenation are described by the returned object. However, not all sizes that
+    /// are described by the returned object can necessarily be constructed by such a
+    /// concatenation.
     pub fn append(self, other: Self) -> Self {
         Self {
             // FIXME: check overflow
@@ -199,15 +200,10 @@ impl VariableSize {
                     incr: incr_union,
                 }
             } else if base1 == 0 || base2 == 0 {
-                // FIXME: I am quite confused by this code. Some quick println!-debugging says that
-                // this is only called with self == Self::zero(). In this case it returns base:0,
-                // incr: other.base.
-                Self {
-                    base: 0,
-                    incr: 1u32 << (base1 | base2).trailing_zeros().min(31),
-                }
+                // Compute base1.min(base2). This only works because both values are powers of two.
+                let incr = 1u32 << (base1 | base2).trailing_zeros().min(31);
+                Self { base: 0, incr }
             } else {
-                // FIXME: I am quite confused by this code.
                 let min_base = base1.min(base2);
                 let max_base = base1.max(base2);
                 let incr1 = 1u32 << min_base.trailing_zeros().min(31);
@@ -249,8 +245,6 @@ impl VariableSize {
     }
 
     /// Describe the size of `n` elements of this type.
-    // FIXME: I am not quite sure what is going on here, but a quick println!()-debugging says this
-    // is only called with incr:0 and n > 0 and in that case it returns base:base*n and incr:0.
     pub fn repeat_n(self, n: u32) -> Self {
         if n == 0 {
             Self::zero()
@@ -286,9 +280,11 @@ pub struct ComplexAlignment {
     pub begin: Alignment,
     /// Alignment at the end of the structure.
     pub body: AlignBody,
-    /// Internal alignments made inside the object using
-    /// align pads.
-    // FIXME: What does that mean?
+    /// The size of the largest alignment pad inside this object.
+    ///
+    /// At the time of writing, the code generator assumes that the start of an object is suitable
+    /// aligned for the largest internal alignment. This property needs to be checked and for that
+    /// this field exists.
     pub internal_align: u32,
 }
 
