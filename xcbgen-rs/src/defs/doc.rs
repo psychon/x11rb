@@ -20,7 +20,7 @@ pub struct Doc {
     pub sees: Vec<SeeDoc>,
 }
 
-/// Documentation for a single type.
+/// Documentation for a single field.
 #[derive(Clone, Debug)]
 pub struct FieldDoc {
     /// The name of the field.
