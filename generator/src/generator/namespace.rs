@@ -4100,29 +4100,16 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     xcbdefs::FieldRefKind::SumOfRef => unreachable!(),
                 };
                 if panic_on_overflow {
-                    if let xcbdefs::Expression::ListElementRef = &*sum_of_expr.operand {
-                        format!(
-                            "{}.iter().fold(0u32, |acc, &x| acc.checked_add(u32::from(x)).unwrap())",
-                            field_value,
-                        )
-                    } else {
-                        format!(
-                            "{}.iter().fold(0u32, |acc, x| acc.checked_add({}).unwrap())",
-                            field_value,
-                            self.expr_to_str_impl(
-                                &sum_of_expr.operand,
-                                wrap_field_ref,
-                                panic_on_overflow,
-                                true,
-                                true,
-                            ),
-                        )
-                    }
-                } else if let xcbdefs::Expression::ListElementRef = &*sum_of_expr.operand {
                     format!(
-                        "{}.iter().try_fold(0u32, |acc, &x| \
-                        acc.checked_add(u32::from(x)).ok_or(ParseError::ParseError))?",
+                        "{}.iter().fold(0u32, |acc, x| acc.checked_add({}).unwrap())",
                         field_value,
+                        self.expr_to_str_impl(
+                            &sum_of_expr.operand,
+                            wrap_field_ref,
+                            panic_on_overflow,
+                            true,
+                            true,
+                        ),
                     )
                 } else {
                     format!(

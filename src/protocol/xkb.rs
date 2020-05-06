@@ -8134,7 +8134,7 @@ impl GetNamesValueListBitcase8 {
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let (kt_level_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_levels_per_type.iter().try_fold(0u32, |acc, &x| acc.checked_add(u32::from(x)).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (kt_level_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_levels_per_type.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetNamesValueListBitcase8 { n_levels_per_type, kt_level_names };
         Ok((result, remaining))
     }
@@ -8345,7 +8345,7 @@ impl SetNamesAuxBitcase8 {
         assert_eq!(self.n_levels_per_type.len(), usize::try_from(n_types).unwrap(), "`n_levels_per_type` has an incorrect length");
         bytes.extend_from_slice(&self.n_levels_per_type);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
-        assert_eq!(self.kt_level_names.len(), usize::try_from(self.n_levels_per_type.iter().fold(0u32, |acc, &x| acc.checked_add(u32::from(x)).unwrap())).unwrap(), "`kt_level_names` has an incorrect length");
+        assert_eq!(self.kt_level_names.len(), usize::try_from(self.n_levels_per_type.iter().fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).unwrap())).unwrap(), "`kt_level_names` has an incorrect length");
         self.kt_level_names.serialize_into(bytes);
     }
 }
@@ -9100,7 +9100,7 @@ impl GetKbdByNameRepliesKeyNamesValueListBitcase8 {
         let offset = remaining.as_ptr() as usize - value.as_ptr() as usize;
         let misalignment = (4 - (offset % 4)) % 4;
         let remaining = remaining.get(misalignment..).ok_or(ParseError::ParseError)?;
-        let (kt_level_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_levels_per_type.iter().try_fold(0u32, |acc, &x| acc.checked_add(u32::from(x)).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
+        let (kt_level_names, remaining) = crate::x11_utils::parse_list::<xproto::Atom>(remaining, n_levels_per_type.iter().try_fold(0u32, |acc, x| acc.checked_add(u32::from(*x)).ok_or(ParseError::ParseError))?.try_into().or(Err(ParseError::ParseError))?)?;
         let result = GetKbdByNameRepliesKeyNamesValueListBitcase8 { n_levels_per_type, kt_level_names };
         Ok((result, remaining))
     }
