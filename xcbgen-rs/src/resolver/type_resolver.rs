@@ -316,9 +316,7 @@ impl<'a> TypeResolver<'a> {
                 Ok(())
             }
             defs::Expression::SumOf(sum_of_expr) => {
-                if let Some(ref operand) = sum_of_expr.operand {
-                    self.resolve_expr(operand, ns)?;
-                }
+                self.resolve_expr(&sum_of_expr.operand, ns)?;
                 Ok(())
             }
             defs::Expression::ListElementRef => Ok(()),

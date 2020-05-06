@@ -386,25 +386,23 @@ fn resolve_field_refs_in_expr(
             let resolved = scope.resolve_field_ref(&sum_of_expr.field_name)?;
             sum_of_expr.resolved_field.set(resolved).unwrap();
 
-            if let Some(ref operand_expr) = sum_of_expr.operand {
-                let resolved = sum_of_expr.resolved_field.get().unwrap();
-                match resolved.field_type {
-                    defs::TypeRef::Struct(ref struct_def) => {
-                        let struct_def = struct_def.upgrade().unwrap();
-                        let struct_fields = struct_def.fields.borrow();
-                        let sum_of_scope = FieldRefResolveScope::SumOf(SumOfFieldRefResolveScope {
-                            parent: scope.as_normal().unwrap(),
-                            struct_fields: &struct_fields,
-                        });
-                        resolve_field_refs_in_expr(operand_expr, &sum_of_scope)?;
-                    }
-                    _ => {
-                        let sum_of_scope = FieldRefResolveScope::SumOf(SumOfFieldRefResolveScope {
-                            parent: scope.as_normal().unwrap(),
-                            struct_fields: &[],
-                        });
-                        resolve_field_refs_in_expr(operand_expr, &sum_of_scope)?;
-                    }
+            let resolved = sum_of_expr.resolved_field.get().unwrap();
+            match resolved.field_type {
+                defs::TypeRef::Struct(ref struct_def) => {
+                    let struct_def = struct_def.upgrade().unwrap();
+                    let struct_fields = struct_def.fields.borrow();
+                    let sum_of_scope = FieldRefResolveScope::SumOf(SumOfFieldRefResolveScope {
+                        parent: scope.as_normal().unwrap(),
+                        struct_fields: &struct_fields,
+                    });
+                    resolve_field_refs_in_expr(&sum_of_expr.operand, &sum_of_scope)?;
+                }
+                _ => {
+                    let sum_of_scope = FieldRefResolveScope::SumOf(SumOfFieldRefResolveScope {
+                        parent: scope.as_normal().unwrap(),
+                        struct_fields: &[],
+                    });
+                    resolve_field_refs_in_expr(&sum_of_expr.operand, &sum_of_scope)?;
                 }
             }
             Ok(())

@@ -108,9 +108,7 @@ impl StructParamRefGatherer {
                 Ok(())
             }
             defs::Expression::SumOf(sum_of_expr) => {
-                if let Some(ref operand) = sum_of_expr.operand {
-                    self.gather_param_refs_in_expr(operand)?;
-                }
+                self.gather_param_refs_in_expr(&sum_of_expr.operand)?;
                 Ok(())
             }
             defs::Expression::ListElementRef => Ok(()),

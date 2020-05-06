@@ -165,6 +165,5 @@ pub struct SumOfExpr {
     /// The expression that is applied to each element of the list.
     ///
     /// If no expression is provided, the elements are summed as-is.
-    // FIXME: Can the Option be replaced with `Expression::ListElementRef`?
-    pub operand: Option<Box<Expression>>,
+    pub operand: Box<Expression>,
 }
