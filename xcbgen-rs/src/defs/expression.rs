@@ -1,6 +1,6 @@
 use once_cell::unsync::OnceCell;
 
-use super::{TypeRef, NamedTypeRef};
+use super::{NamedTypeRef, TypeRef};
 
 /// An expression for computing some value.
 ///
