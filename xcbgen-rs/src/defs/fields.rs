@@ -325,7 +325,6 @@ pub struct VirtualLenField {
     pub name: String,
 
     /// The type of the field.
-    // FIXME: This is always BuiltInType::Card32, so this field can be removed
     pub type_: FieldValueType,
 
     /// The name of the referenced list.
