@@ -21,6 +21,8 @@ you have modified the definitions or the generator itself.
 The code generator uses the X11 XML description from `xcb-proto`. A copy of
 xcb-proto that comes with the source code is used.
 
+The interaction with libxcb via `XCBConnection` requires at least libxcb 1.12.
+
 
 ## Does this support async/await
 

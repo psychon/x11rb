@@ -1,10 +1,113 @@
 # Version 0.5.0 (2020-XX-XX)
 
+New features:
+* The new `Connection::prefetch_maximum_request_bytes()` API allows avoiding a
+  round-trip when sending large requests.
+* Use enums to represent values in structs where it makes sense. Previously,
+  numeric types like `u8` were used.  This simplifies usage of much of the API.
+* `x11rb::extension_manager::ExtensionInformation` can now provide information
+  about all the extensions that are known to be present.
+* New enums `x11rb::protocol::Error` and `Event` allow representing any possible
+  error or event in a parsed form. This allows e.g. `match`ing on events for
+  event handling. Also, these enums implement `Debug` and thus allow printing
+  human-readable output on unexpected errors or events. This type also abstracts
+  some of the complications of parsing events away from the library user. The
+  `Connection` trait was extended to be able to parse events/errors into these
+  new types.
+* Some arguments to request functions became generic where it makes sense. For
+  example, `xproto::change_property` now accepts `Into<ATOM>` instead of just
+  `ATOM` as the name of the property to be changed. Thus, the predefined atoms
+  like `AtomEnum::WM_NAME` can be used directly without having to call `.into()`
+  yourself.
+* Type names now follow Rust convention. For example, `xproto::WINDOW` is now
+  called `xproto::Window`.
+* Added utilities for working `WM_CLASS`, `WM_SIZE_HINTS`, and `WM_SIZE`
+  properties.
+* Implement `Serialize` and `TryParse` for tuples.
+* Increased the bus factor of the project by about factor 2. Welcome @eduardosm!
+* Replace the Python code generator with a generator written in Rust.
+* Added an API for reading a cursor from the active cursor theme. The
+  `simple_window` example was extended to use the new API.
+* `RustConnection` now supports FD passing.
+
+Fixes:
+* A possible hang when a `QueryExtension` request failed was fixed.
+* Improve FFI definitions used by `XCBConnection`.
+* Fix some shadowing issues in the generated code. For example, GLX has its own
+  `Pixmap` type, but also wants to refer to xproto's `Pixmap` in some places.
+* Alignment pads were incorrectly ignored in `<switch>` cases with only one
+  visible field. This affected only the xinput and xkb extensions.
+* Properly reconstruct sequence numbers in `XCBConnection` after 2^32 requests.
+  The old code only ever provided 32 bits of the sequence number.
+* Fix compiler error on empty `atom_manager!` invocations.
+* Request serialisation panics if some overflow occurs instead of producing
+  incorrect data.
+
 Breaking changes:
 * The `vendor-xcb-proto` feature flag is no longer available. The included
   xcb-proto is now always used.
-* The generated code is accessed directly without going through the `generated`
-  module (e.g., `x11rb::generated::xproto` is now `x11rb::xproto`).
+* The `xproto` feature flag was removed. It did not do anything.
+* The module `x11rb::generated` was renamed to `x11rb::protocol`.
+* Better snake names are generated, e.g. `XIQueryVersion` becomes
+  `xi_query_version` instead of `xiquery_version`.
+* Opcodes for events using the generic event extension are now `u16`.
+* `x11rb::connection::Connection::compute_length_field()` was moved out of the
+  `Connection` trait and to `x11rb::connection::compute_length_field()`.
+* Use enums to represent values in structs where it makes sense.
+* Enums that collide with types now have the suffix `Enum` attached to their
+  name. For example, `xproto::Atom` is now called `xproto::AtomEnum`.
+* Return a simplified struct from `RequestConnection::extension_information`
+  instead of the full `QueryExtensionReply`.
+* Rename the `ExtensionInformation` struct to `ExtensionManager`.
+* `GenericEvent`, `GenericError`, and the related `Event` trait were removed.
+* Changes to `RequestConnection` and `Connection` that affect implementations of
+  these traits. For example, methods `parse_event` and `parse_error` were added.
+* The `Connection` trait now returns parsed event and errors of type
+  `x11rb::protocol::Event` and `Error`, respectively. The old API providing
+  bytes is retained with alternative names. For example, there is
+  `wait_for_event()` and `wait_for_raw_event()`.
+* Some functions in the `Connection` trait now return X11 errors in their `Ok`
+  variant via a new `ReplyOrError` enum. This should only affect implementations
+  of the `Connection` trait.
+* Added some wrapper structs in some parts of `xinput`. This is related to
+  `<switch>` handling.
+* Swap the order of elements in `EventAndSeqNumber`.
+* Remove some length fields from the public API that can be deduced from the
+  length of other values.
+* Some `Serialize` implementations were removed from types that depend on value
+  from the surrounding context.
+* `RustConnection` now supports FD passing. This removes the API for
+  constructing a `RustConnection` from a pair of `Read` and `Write`, but
+  alternatives for the new API exists.
+* `RawFdContainer` provides no methods when it is not available. This turns some
+  run-time errors into compile-time errors.
+
+Minor changes:
+* No code is generated anymore at build times. Instead, the generated code is
+  shipped with the crate.
+* The code generator sorts the list of XML files before generating output,
+  ensuring a stable output independent of file system order.
+* Some parsing code was simplified, saving 5903 (according to git's `--stat`
+  output).
+* The vendored copy of xcb-proto was updated.
+* Some fixes to the internal XCB FFI mock that is used for testing.
+* The code generator and `xcb-proto` are excluded from releases, shrinking the
+  size of the crate a bit.
+* `XCBConnection` now uses `xcb_poll_for_reply64()` instead of
+  `xcb_poll_for_reply()`. This means that libxcb 1.12 or newer is required.
+* The `simple_window` example sets more properties.
+* Some readability and general improvements to the generated code.
+* Implement conversion to `bool` for enums with just two values.
+* Added a special fast path for parsing lists of `u8`.
+* Some refactoring to the I/O in `RustConnection`.
+* Implement `From<ParseError>` for `ReplyOrIdError`.
+* Added an example showing how to use x11rb with cairo.
+* `RawFdContainer` no longer depends on the `allow-unsafe-code` feature.
+* `RawFdContainer` no longer panics when the `close` on drop fails.
+* New API `close()` and `try_clone()` is available on `RawFdContainer`.
+* Use type aliases for `<eventcopy>` and `<errorcopy>` definitions. This means
+  that the `Debug` implementation may now print the 'wrong' type name, but
+  shortens the generated code by more than 4000 lines.
 
 # Version 0.4.1 (2020-03-12)
 
