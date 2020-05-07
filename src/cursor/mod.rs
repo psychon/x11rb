@@ -46,7 +46,7 @@ pub struct Cookie<'a, C: Connection> {
 
 impl<C: Connection> Cookie<'_, C> {
     /// Get the handle from the replies from the X11 server
-    pub fn reply(self) -> Result<Handle, ReplyOrIdError<C::Buf>> {
+    pub fn reply(self) -> Result<Handle, ReplyOrIdError> {
         let resource_manager = self.resource_manager.reply()?;
         #[allow(unused_mut)]
         let mut render_version = (0, 0);
@@ -70,7 +70,7 @@ impl<C: Connection> Cookie<'_, C> {
     }
 
     /// Get the handle from the replies from the X11 server
-    pub fn reply_unchecked(self) -> Result<Option<Handle>, ReplyOrIdError<C::Buf>> {
+    pub fn reply_unchecked(self) -> Result<Option<Handle>, ReplyOrIdError> {
         let resource_manager = self.resource_manager.reply_unchecked()?;
         #[allow(unused_mut)]
         let mut render_version = (0, 0);
@@ -107,7 +107,7 @@ impl<C: Connection> Cookie<'_, C> {
         resource_manager: xproto::GetPropertyReply,
         render_version: (u32, u32),
         _picture_format: u32,
-    ) -> Result<Handle, ReplyOrIdError<C::Buf>> {
+    ) -> Result<Handle, ReplyOrIdError> {
         let render_support = if render_version.0 >= 1 || render_version.1 >= 8 {
             RenderSupport::AnimatedCursor
         } else if render_version.0 >= 1 || render_version.1 >= 5 {
@@ -194,11 +194,7 @@ impl Handle {
 
     /// Loads the specified cursor, either from the cursor theme or by falling back to the X11
     /// "cursor" font.
-    pub fn load_cursor<C>(
-        &self,
-        conn: &C,
-        name: &str,
-    ) -> Result<xproto::Cursor, ReplyOrIdError<C::Buf>>
+    pub fn load_cursor<C>(&self, conn: &C, name: &str) -> Result<xproto::Cursor, ReplyOrIdError>
     where
         C: Connection,
     {
@@ -223,7 +219,7 @@ fn create_core_cursor<C: Connection>(
     conn: &C,
     cursor_font: Font,
     cursor: u16,
-) -> Result<xproto::Cursor, ReplyOrIdError<C::Buf>> {
+) -> Result<xproto::Cursor, ReplyOrIdError> {
     let result = conn.generate_id()?;
     xproto::create_glyph_cursor(
         conn,
@@ -250,7 +246,7 @@ fn create_render_cursor<C: Connection>(
     handle: &Handle,
     image: &parse_cursor::Image,
     storage: &mut Option<(xproto::Pixmap, xproto::Gcontext, u16, u16)>,
-) -> Result<render::Animcursorelt, ReplyOrIdError<C::Buf>> {
+) -> Result<render::Animcursorelt, ReplyOrIdError> {
     let (cursor, picture) = (conn.generate_id()?, conn.generate_id()?);
 
     // Get a pixmap of the right size and a gc for it
@@ -307,7 +303,7 @@ fn load_cursor<C: Connection>(
     conn: &C,
     handle: &Handle,
     name: &str,
-) -> Result<xproto::Cursor, ReplyOrIdError<C::Buf>> {
+) -> Result<xproto::Cursor, ReplyOrIdError> {
     // Find the right cursor, load it directly if it is a core cursor
     let cursor_file = match open_cursor(&handle.theme, name) {
         None => return Ok(NONE),

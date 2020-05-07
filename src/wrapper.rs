@@ -135,7 +135,7 @@ pub trait ConnectionExt: XProtoConnectionExt {
     /// This function synchronises with the X11 server. This means that all requests that are still
     /// in the output buffer are sent to the server. Then, we wait until the X11 server processed
     /// all requests.
-    fn sync(&self) -> Result<(), ReplyError<Self::Buf>> {
+    fn sync(&self) -> Result<(), ReplyError> {
         // When a new request is generated, it is appended to the output buffer. Thus, this causes
         // all previous requests to be sent.
         // The X11 server is single-threaded and processes requests in-order. Thus, it will only

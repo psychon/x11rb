@@ -151,23 +151,17 @@ impl RequestConnection for FakeConnection {
         unimplemented!()
     }
 
-    fn parse_error<E>(&self, _error: E) -> Result<x11rb::protocol::Error<E>, ParseError>
-    where
-        E: std::fmt::Debug + AsRef<[u8]>,
-    {
+    fn parse_error(&self, _error: &[u8]) -> Result<x11rb::protocol::Error, ParseError> {
         unimplemented!()
     }
 
-    fn parse_event<E>(&self, _event: E) -> Result<x11rb::protocol::Event<E>, ParseError>
-    where
-        E: std::fmt::Debug + AsRef<[u8]>,
-    {
+    fn parse_event(&self, _event: &[u8]) -> Result<x11rb::protocol::Event, ParseError> {
         unimplemented!()
     }
 }
 
 #[test]
-fn test_poly_segment() -> Result<(), ReplyError<Vec<u8>>> {
+fn test_poly_segment() -> Result<(), ReplyError> {
     let conn = FakeConnection::default();
     let drawable = 42;
     let gc = 0x1337;

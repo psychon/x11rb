@@ -61,7 +61,7 @@ pub type SequenceNumber = u64;
 
 // Used to avoid too-complex types.
 pub type BufWithFds<B> = (B, Vec<RawFdContainer>);
-pub type EventAndSeqNumber<B> = (Event<B>, SequenceNumber);
+pub type EventAndSeqNumber = (Event, SequenceNumber);
 pub type RawEventAndSeqNumber<B> = (B, SequenceNumber);
 
 /// Either a raw reply or a raw error response to an X11 request.
@@ -205,13 +205,12 @@ pub trait RequestConnection {
     /// server answered the request with an error, that error is returned as an `Err`.
     ///
     /// Users of this library will most likely not want to use this function directly.
-    fn wait_for_reply_or_error(
-        &self,
-        sequence: SequenceNumber,
-    ) -> Result<Self::Buf, ReplyError<Self::Buf>> {
+    fn wait_for_reply_or_error(&self, sequence: SequenceNumber) -> Result<Self::Buf, ReplyError> {
         match self.wait_for_reply_or_raw_error(sequence)? {
             ReplyOrError::Reply(reply) => Ok(reply),
-            ReplyOrError::Error(error) => Err(ReplyError::X11Error(self.parse_error(error)?)),
+            ReplyOrError::Error(error) => {
+                Err(ReplyError::X11Error(self.parse_error(error.as_ref())?))
+            }
         }
     }
 
@@ -246,10 +245,12 @@ pub trait RequestConnection {
     fn wait_for_reply_with_fds(
         &self,
         sequence: SequenceNumber,
-    ) -> Result<BufWithFds<Self::Buf>, ReplyError<Self::Buf>> {
+    ) -> Result<BufWithFds<Self::Buf>, ReplyError> {
         match self.wait_for_reply_with_fds_raw(sequence)? {
             ReplyOrError::Reply(reply) => Ok(reply),
-            ReplyOrError::Error(error) => Err(ReplyError::X11Error(self.parse_error(error)?)),
+            ReplyOrError::Error(error) => {
+                Err(ReplyError::X11Error(self.parse_error(error.as_ref())?))
+            }
         }
     }
 
@@ -268,12 +269,9 @@ pub trait RequestConnection {
     /// The given sequence number identifies the request for which the check should be performed.
     ///
     /// Users of this library will most likely not want to use this function directly.
-    fn check_for_error(
-        &self,
-        sequence: SequenceNumber,
-    ) -> Result<Option<Error<Self::Buf>>, ConnectionError> {
+    fn check_for_error(&self, sequence: SequenceNumber) -> Result<Option<Error>, ConnectionError> {
         let res = self.check_for_raw_error(sequence)?;
-        let res = res.map(|e| self.parse_error(e)).transpose()?;
+        let res = res.map(|e| self.parse_error(e.as_ref())).transpose()?;
         Ok(res)
     }
 
@@ -318,20 +316,16 @@ pub trait RequestConnection {
     fn maximum_request_bytes(&self) -> usize;
 
     /// Parse a generic error.
-    fn parse_error<E>(&self, error: E) -> Result<Error<E>, ParseError>
-    where
-        E: std::fmt::Debug + AsRef<[u8]>;
+    fn parse_error(&self, error: &[u8]) -> Result<Error, ParseError>;
 
     /// Parse a generic event.
-    fn parse_event<E>(&self, event: E) -> Result<Event<E>, ParseError>
-    where
-        E: std::fmt::Debug + AsRef<[u8]>;
+    fn parse_event(&self, event: &[u8]) -> Result<Event, ParseError>;
 }
 
 /// A connection to an X11 server.
 pub trait Connection: RequestConnection {
     /// Wait for a new event from the X11 server.
-    fn wait_for_event(&self) -> Result<Event<Self::Buf>, ConnectionError> {
+    fn wait_for_event(&self) -> Result<Event, ConnectionError> {
         Ok(self.wait_for_event_with_sequence()?.0)
     }
 
@@ -341,11 +335,9 @@ pub trait Connection: RequestConnection {
     }
 
     /// Wait for a new event from the X11 server.
-    fn wait_for_event_with_sequence(
-        &self,
-    ) -> Result<EventAndSeqNumber<Self::Buf>, ConnectionError> {
+    fn wait_for_event_with_sequence(&self) -> Result<EventAndSeqNumber, ConnectionError> {
         let (event, seq) = self.wait_for_raw_event_with_sequence()?;
-        let event = self.parse_event(event)?;
+        let event = self.parse_event(event.as_ref())?;
         Ok((event, seq))
     }
 
@@ -355,7 +347,7 @@ pub trait Connection: RequestConnection {
     ) -> Result<RawEventAndSeqNumber<Self::Buf>, ConnectionError>;
 
     /// Poll for a new event from the X11 server.
-    fn poll_for_event(&self) -> Result<Option<Event<Self::Buf>>, ConnectionError> {
+    fn poll_for_event(&self) -> Result<Option<Event>, ConnectionError> {
         Ok(self.poll_for_event_with_sequence()?.map(|r| r.0))
     }
 
@@ -365,11 +357,9 @@ pub trait Connection: RequestConnection {
     }
 
     /// Poll for a new event from the X11 server.
-    fn poll_for_event_with_sequence(
-        &self,
-    ) -> Result<Option<EventAndSeqNumber<Self::Buf>>, ConnectionError> {
+    fn poll_for_event_with_sequence(&self) -> Result<Option<EventAndSeqNumber>, ConnectionError> {
         Ok(match self.poll_for_raw_event_with_sequence()? {
-            Some((event, seq)) => Some((self.parse_event(event)?, seq)),
+            Some((event, seq)) => Some((self.parse_event(event.as_ref())?, seq)),
             None => None,
         })
     }
@@ -398,7 +388,7 @@ pub trait Connection: RequestConnection {
     /// This method can, for example, be used for creating a new window. First, this method is
     /// called to generate an identifier. Next, `xproto::create_window` can be called to
     /// actually create the window.
-    fn generate_id(&self) -> Result<u32, ReplyOrIdError<Self::Buf>>;
+    fn generate_id(&self) -> Result<u32, ReplyOrIdError>;
 }
 
 /// Does a request have a response?
@@ -487,14 +477,10 @@ pub enum DiscardMode {
 ///     # fn prefetch_maximum_request_bytes(&self) {
 ///     #    unimplemented!()
 ///     # }
-///     # fn parse_error<E>(&self, _error: E) -> Result<x11rb::protocol::Error<E>, ParseError>
-///     # where E: std::fmt::Debug + AsRef<[u8]>,
-///     # {
+///     # fn parse_error(&self, _error: &[u8]) -> Result<x11rb::protocol::Error, ParseError> {
 ///     #     unimplemented!()
 ///     # }
-///     # fn parse_event<E>(&self, _event: E) -> Result<x11rb::protocol::Event<E>, ParseError>
-///     # where E: std::fmt::Debug + AsRef<[u8]>,
-///     # {
+///     # fn parse_event(&self, _event: &[u8]) -> Result<x11rb::protocol::Event, ParseError> {
 ///     #     unimplemented!()
 ///     # }
 ///

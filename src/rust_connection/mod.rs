@@ -9,7 +9,7 @@ use crate::connection::{
     SequenceNumber,
 };
 use crate::cookie::{Cookie, CookieWithFds, VoidCookie};
-pub use crate::errors::{ConnectError, ConnectionError, ParseError};
+pub use crate::errors::{ConnectError, ConnectionError, ParseError, ReplyError, ReplyOrIdError};
 use crate::extension_manager::ExtensionManager;
 use crate::protocol::bigreq::{ConnectionExt as _, EnableReply};
 use crate::protocol::xproto::{Setup, SetupRequest, GET_INPUT_FOCUS_REQUEST};
@@ -27,13 +27,8 @@ pub use fd_read_write::{BufReadFD, BufWriteFD, ReadFD, ReadFDWrapper, WriteFD, W
 use inner::PollReply;
 
 type Buffer = <RustConnection as RequestConnection>::Buf;
-pub type ReplyOrIdError = crate::errors::ReplyOrIdError<Buffer>;
-pub type ReplyError = crate::errors::ReplyError<Buffer>;
-pub type EventAndSeqNumber = crate::connection::EventAndSeqNumber<Buffer>;
 pub type RawEventAndSeqNumber = crate::connection::RawEventAndSeqNumber<Buffer>;
 pub type BufWithFds = crate::connection::BufWithFds<Buffer>;
-pub type Event = crate::protocol::Event<Buffer>;
-pub type Error = crate::protocol::Error<Buffer>;
 
 #[derive(Debug)]
 enum MaxRequestBytes {
@@ -454,18 +449,12 @@ impl<R: ReadFD, W: WriteFD> RequestConnection for RustConnection<R, W> {
         self.prefetch_maximum_request_bytes_impl(&mut max_bytes);
     }
 
-    fn parse_error<E>(&self, error: E) -> Result<crate::protocol::Error<E>, ParseError>
-    where
-        E: std::fmt::Debug + AsRef<[u8]>,
-    {
+    fn parse_error(&self, error: &[u8]) -> Result<crate::protocol::Error, ParseError> {
         let ext_mgr = self.extension_manager.lock().unwrap();
         crate::protocol::Error::parse(error, &*ext_mgr)
     }
 
-    fn parse_event<E>(&self, event: E) -> Result<crate::protocol::Event<E>, ParseError>
-    where
-        E: std::fmt::Debug + AsRef<[u8]>,
-    {
+    fn parse_event(&self, event: &[u8]) -> Result<crate::protocol::Event, ParseError> {
         let ext_mgr = self.extension_manager.lock().unwrap();
         crate::protocol::Event::parse(event, &*ext_mgr)
     }

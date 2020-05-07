@@ -34,7 +34,7 @@ where
     }
 
     /// Get the reply that the server sent.
-    pub fn reply(self) -> Result<WmClass, ReplyError<Conn::Buf>> {
+    pub fn reply(self) -> Result<WmClass, ReplyError> {
         Ok(WmClass::from_reply(self.0.reply()?)?)
     }
 
@@ -164,7 +164,7 @@ where
     }
 
     /// Get the reply that the server sent.
-    pub fn reply(self) -> Result<WmSizeHints, ReplyError<Conn::Buf>> {
+    pub fn reply(self) -> Result<WmSizeHints, ReplyError> {
         Ok(WmSizeHints::from_reply(self.0.reply()?)?)
     }
 
@@ -460,7 +460,7 @@ where
     }
 
     /// Get the reply that the server sent.
-    pub fn reply(self) -> Result<WmHints, ReplyError<Conn::Buf>> {
+    pub fn reply(self) -> Result<WmHints, ReplyError> {
         Ok(WmHints::from_reply(self.0.reply()?)?)
     }
 

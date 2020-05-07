@@ -66,8 +66,8 @@ pub mod xvmc;
 
 /// Enumeration of all possible X11 errors.
 #[derive(Debug, Clone)]
-pub enum Error<B: std::fmt::Debug + AsRef<[u8]>> {
-    Unknown(B),
+pub enum Error {
+    Unknown(Vec<u8>),
     Access(xproto::AccessError),
     Alloc(xproto::AllocError),
     Atom(xproto::AtomError),
@@ -181,34 +181,34 @@ pub enum Error<B: std::fmt::Debug + AsRef<[u8]>> {
     XvBadPort(xv::BadPortError),
 }
 
-impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
+impl Error {
     /// Parse a generic X11 error into a concrete error type.
     #[allow(clippy::cognitive_complexity)]
     pub fn parse(
-        error: B,
+        error: &[u8],
         ext_info_provider: &dyn ExtInfoProvider,
     ) -> Result<Self, ParseError> {
-        let error_code = error_code(error.as_ref())?;
+        let error_code = error_code(error)?;
 
         // Check if this is a core protocol error
         match error_code {
-            xproto::ACCESS_ERROR => return Ok(Self::Access(error.as_ref().try_into()?)),
-            xproto::ALLOC_ERROR => return Ok(Self::Alloc(error.as_ref().try_into()?)),
-            xproto::ATOM_ERROR => return Ok(Self::Atom(error.as_ref().try_into()?)),
-            xproto::COLORMAP_ERROR => return Ok(Self::Colormap(error.as_ref().try_into()?)),
-            xproto::CURSOR_ERROR => return Ok(Self::Cursor(error.as_ref().try_into()?)),
-            xproto::DRAWABLE_ERROR => return Ok(Self::Drawable(error.as_ref().try_into()?)),
-            xproto::FONT_ERROR => return Ok(Self::Font(error.as_ref().try_into()?)),
-            xproto::G_CONTEXT_ERROR => return Ok(Self::GContext(error.as_ref().try_into()?)),
-            xproto::ID_CHOICE_ERROR => return Ok(Self::IDChoice(error.as_ref().try_into()?)),
-            xproto::IMPLEMENTATION_ERROR => return Ok(Self::Implementation(error.as_ref().try_into()?)),
-            xproto::LENGTH_ERROR => return Ok(Self::Length(error.as_ref().try_into()?)),
-            xproto::MATCH_ERROR => return Ok(Self::Match(error.as_ref().try_into()?)),
-            xproto::NAME_ERROR => return Ok(Self::Name(error.as_ref().try_into()?)),
-            xproto::PIXMAP_ERROR => return Ok(Self::Pixmap(error.as_ref().try_into()?)),
-            xproto::REQUEST_ERROR => return Ok(Self::Request(error.as_ref().try_into()?)),
-            xproto::VALUE_ERROR => return Ok(Self::Value(error.as_ref().try_into()?)),
-            xproto::WINDOW_ERROR => return Ok(Self::Window(error.as_ref().try_into()?)),
+            xproto::ACCESS_ERROR => return Ok(Self::Access(error.try_into()?)),
+            xproto::ALLOC_ERROR => return Ok(Self::Alloc(error.try_into()?)),
+            xproto::ATOM_ERROR => return Ok(Self::Atom(error.try_into()?)),
+            xproto::COLORMAP_ERROR => return Ok(Self::Colormap(error.try_into()?)),
+            xproto::CURSOR_ERROR => return Ok(Self::Cursor(error.try_into()?)),
+            xproto::DRAWABLE_ERROR => return Ok(Self::Drawable(error.try_into()?)),
+            xproto::FONT_ERROR => return Ok(Self::Font(error.try_into()?)),
+            xproto::G_CONTEXT_ERROR => return Ok(Self::GContext(error.try_into()?)),
+            xproto::ID_CHOICE_ERROR => return Ok(Self::IDChoice(error.try_into()?)),
+            xproto::IMPLEMENTATION_ERROR => return Ok(Self::Implementation(error.try_into()?)),
+            xproto::LENGTH_ERROR => return Ok(Self::Length(error.try_into()?)),
+            xproto::MATCH_ERROR => return Ok(Self::Match(error.try_into()?)),
+            xproto::NAME_ERROR => return Ok(Self::Name(error.try_into()?)),
+            xproto::PIXMAP_ERROR => return Ok(Self::Pixmap(error.try_into()?)),
+            xproto::REQUEST_ERROR => return Ok(Self::Request(error.try_into()?)),
+            xproto::VALUE_ERROR => return Ok(Self::Value(error.try_into()?)),
+            xproto::WINDOW_ERROR => return Ok(Self::Window(error.try_into()?)),
             _ => {}
         }
 
@@ -218,136 +218,136 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
             #[cfg(feature = "damage")]
             Some((damage::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    damage::BAD_DAMAGE_ERROR => Ok(Self::DamageBadDamage(error.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(error)),
+                    damage::BAD_DAMAGE_ERROR => Ok(Self::DamageBadDamage(error.try_into()?)),
+                    _ => Ok(Self::Unknown(error.to_vec())),
                 }
             }
             #[cfg(feature = "glx")]
             Some((glx::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    glx::BAD_CONTEXT_ERROR => Ok(Self::GlxBadContext(error.as_ref().try_into()?)),
-                    glx::BAD_CONTEXT_STATE_ERROR => Ok(Self::GlxBadContextState(error.as_ref().try_into()?)),
-                    glx::BAD_CONTEXT_TAG_ERROR => Ok(Self::GlxBadContextTag(error.as_ref().try_into()?)),
-                    glx::BAD_CURRENT_DRAWABLE_ERROR => Ok(Self::GlxBadCurrentDrawable(error.as_ref().try_into()?)),
-                    glx::BAD_CURRENT_WINDOW_ERROR => Ok(Self::GlxBadCurrentWindow(error.as_ref().try_into()?)),
-                    glx::BAD_DRAWABLE_ERROR => Ok(Self::GlxBadDrawable(error.as_ref().try_into()?)),
-                    glx::BAD_FB_CONFIG_ERROR => Ok(Self::GlxBadFBConfig(error.as_ref().try_into()?)),
-                    glx::BAD_LARGE_REQUEST_ERROR => Ok(Self::GlxBadLargeRequest(error.as_ref().try_into()?)),
-                    glx::BAD_PBUFFER_ERROR => Ok(Self::GlxBadPbuffer(error.as_ref().try_into()?)),
-                    glx::BAD_PIXMAP_ERROR => Ok(Self::GlxBadPixmap(error.as_ref().try_into()?)),
-                    glx::BAD_RENDER_REQUEST_ERROR => Ok(Self::GlxBadRenderRequest(error.as_ref().try_into()?)),
-                    glx::BAD_WINDOW_ERROR => Ok(Self::GlxBadWindow(error.as_ref().try_into()?)),
-                    glx::GLX_BAD_PROFILE_ARB_ERROR => Ok(Self::GlxGLXBadProfileARB(error.as_ref().try_into()?)),
-                    glx::UNSUPPORTED_PRIVATE_REQUEST_ERROR => Ok(Self::GlxUnsupportedPrivateRequest(error.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(error)),
+                    glx::BAD_CONTEXT_ERROR => Ok(Self::GlxBadContext(error.try_into()?)),
+                    glx::BAD_CONTEXT_STATE_ERROR => Ok(Self::GlxBadContextState(error.try_into()?)),
+                    glx::BAD_CONTEXT_TAG_ERROR => Ok(Self::GlxBadContextTag(error.try_into()?)),
+                    glx::BAD_CURRENT_DRAWABLE_ERROR => Ok(Self::GlxBadCurrentDrawable(error.try_into()?)),
+                    glx::BAD_CURRENT_WINDOW_ERROR => Ok(Self::GlxBadCurrentWindow(error.try_into()?)),
+                    glx::BAD_DRAWABLE_ERROR => Ok(Self::GlxBadDrawable(error.try_into()?)),
+                    glx::BAD_FB_CONFIG_ERROR => Ok(Self::GlxBadFBConfig(error.try_into()?)),
+                    glx::BAD_LARGE_REQUEST_ERROR => Ok(Self::GlxBadLargeRequest(error.try_into()?)),
+                    glx::BAD_PBUFFER_ERROR => Ok(Self::GlxBadPbuffer(error.try_into()?)),
+                    glx::BAD_PIXMAP_ERROR => Ok(Self::GlxBadPixmap(error.try_into()?)),
+                    glx::BAD_RENDER_REQUEST_ERROR => Ok(Self::GlxBadRenderRequest(error.try_into()?)),
+                    glx::BAD_WINDOW_ERROR => Ok(Self::GlxBadWindow(error.try_into()?)),
+                    glx::GLX_BAD_PROFILE_ARB_ERROR => Ok(Self::GlxGLXBadProfileARB(error.try_into()?)),
+                    glx::UNSUPPORTED_PRIVATE_REQUEST_ERROR => Ok(Self::GlxUnsupportedPrivateRequest(error.try_into()?)),
+                    _ => Ok(Self::Unknown(error.to_vec())),
                 }
             }
             #[cfg(feature = "randr")]
             Some((randr::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    randr::BAD_CRTC_ERROR => Ok(Self::RandrBadCrtc(error.as_ref().try_into()?)),
-                    randr::BAD_MODE_ERROR => Ok(Self::RandrBadMode(error.as_ref().try_into()?)),
-                    randr::BAD_OUTPUT_ERROR => Ok(Self::RandrBadOutput(error.as_ref().try_into()?)),
-                    randr::BAD_PROVIDER_ERROR => Ok(Self::RandrBadProvider(error.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(error)),
+                    randr::BAD_CRTC_ERROR => Ok(Self::RandrBadCrtc(error.try_into()?)),
+                    randr::BAD_MODE_ERROR => Ok(Self::RandrBadMode(error.try_into()?)),
+                    randr::BAD_OUTPUT_ERROR => Ok(Self::RandrBadOutput(error.try_into()?)),
+                    randr::BAD_PROVIDER_ERROR => Ok(Self::RandrBadProvider(error.try_into()?)),
+                    _ => Ok(Self::Unknown(error.to_vec())),
                 }
             }
             #[cfg(feature = "record")]
             Some((record::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    record::BAD_CONTEXT_ERROR => Ok(Self::RecordBadContext(error.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(error)),
+                    record::BAD_CONTEXT_ERROR => Ok(Self::RecordBadContext(error.try_into()?)),
+                    _ => Ok(Self::Unknown(error.to_vec())),
                 }
             }
             #[cfg(feature = "render")]
             Some((render::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    render::GLYPH_ERROR => Ok(Self::RenderGlyph(error.as_ref().try_into()?)),
-                    render::GLYPH_SET_ERROR => Ok(Self::RenderGlyphSet(error.as_ref().try_into()?)),
-                    render::PICT_FORMAT_ERROR => Ok(Self::RenderPictFormat(error.as_ref().try_into()?)),
-                    render::PICT_OP_ERROR => Ok(Self::RenderPictOp(error.as_ref().try_into()?)),
-                    render::PICTURE_ERROR => Ok(Self::RenderPicture(error.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(error)),
+                    render::GLYPH_ERROR => Ok(Self::RenderGlyph(error.try_into()?)),
+                    render::GLYPH_SET_ERROR => Ok(Self::RenderGlyphSet(error.try_into()?)),
+                    render::PICT_FORMAT_ERROR => Ok(Self::RenderPictFormat(error.try_into()?)),
+                    render::PICT_OP_ERROR => Ok(Self::RenderPictOp(error.try_into()?)),
+                    render::PICTURE_ERROR => Ok(Self::RenderPicture(error.try_into()?)),
+                    _ => Ok(Self::Unknown(error.to_vec())),
                 }
             }
             #[cfg(feature = "shm")]
             Some((shm::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    shm::BAD_SEG_ERROR => Ok(Self::ShmBadSeg(error.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(error)),
+                    shm::BAD_SEG_ERROR => Ok(Self::ShmBadSeg(error.try_into()?)),
+                    _ => Ok(Self::Unknown(error.to_vec())),
                 }
             }
             #[cfg(feature = "sync")]
             Some((sync::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    sync::ALARM_ERROR => Ok(Self::SyncAlarm(error.as_ref().try_into()?)),
-                    sync::COUNTER_ERROR => Ok(Self::SyncCounter(error.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(error)),
+                    sync::ALARM_ERROR => Ok(Self::SyncAlarm(error.try_into()?)),
+                    sync::COUNTER_ERROR => Ok(Self::SyncCounter(error.try_into()?)),
+                    _ => Ok(Self::Unknown(error.to_vec())),
                 }
             }
             #[cfg(feature = "xf86vidmode")]
             Some((xf86vidmode::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    xf86vidmode::BAD_CLOCK_ERROR => Ok(Self::Xf86vidmodeBadClock(error.as_ref().try_into()?)),
-                    xf86vidmode::BAD_H_TIMINGS_ERROR => Ok(Self::Xf86vidmodeBadHTimings(error.as_ref().try_into()?)),
-                    xf86vidmode::BAD_V_TIMINGS_ERROR => Ok(Self::Xf86vidmodeBadVTimings(error.as_ref().try_into()?)),
-                    xf86vidmode::CLIENT_NOT_LOCAL_ERROR => Ok(Self::Xf86vidmodeClientNotLocal(error.as_ref().try_into()?)),
-                    xf86vidmode::EXTENSION_DISABLED_ERROR => Ok(Self::Xf86vidmodeExtensionDisabled(error.as_ref().try_into()?)),
-                    xf86vidmode::MODE_UNSUITABLE_ERROR => Ok(Self::Xf86vidmodeModeUnsuitable(error.as_ref().try_into()?)),
-                    xf86vidmode::ZOOM_LOCKED_ERROR => Ok(Self::Xf86vidmodeZoomLocked(error.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(error)),
+                    xf86vidmode::BAD_CLOCK_ERROR => Ok(Self::Xf86vidmodeBadClock(error.try_into()?)),
+                    xf86vidmode::BAD_H_TIMINGS_ERROR => Ok(Self::Xf86vidmodeBadHTimings(error.try_into()?)),
+                    xf86vidmode::BAD_V_TIMINGS_ERROR => Ok(Self::Xf86vidmodeBadVTimings(error.try_into()?)),
+                    xf86vidmode::CLIENT_NOT_LOCAL_ERROR => Ok(Self::Xf86vidmodeClientNotLocal(error.try_into()?)),
+                    xf86vidmode::EXTENSION_DISABLED_ERROR => Ok(Self::Xf86vidmodeExtensionDisabled(error.try_into()?)),
+                    xf86vidmode::MODE_UNSUITABLE_ERROR => Ok(Self::Xf86vidmodeModeUnsuitable(error.try_into()?)),
+                    xf86vidmode::ZOOM_LOCKED_ERROR => Ok(Self::Xf86vidmodeZoomLocked(error.try_into()?)),
+                    _ => Ok(Self::Unknown(error.to_vec())),
                 }
             }
             #[cfg(feature = "xfixes")]
             Some((xfixes::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    xfixes::BAD_REGION_ERROR => Ok(Self::XfixesBadRegion(error.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(error)),
+                    xfixes::BAD_REGION_ERROR => Ok(Self::XfixesBadRegion(error.try_into()?)),
+                    _ => Ok(Self::Unknown(error.to_vec())),
                 }
             }
             #[cfg(feature = "xinput")]
             Some((xinput::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    xinput::CLASS_ERROR => Ok(Self::XinputClass(error.as_ref().try_into()?)),
-                    xinput::DEVICE_ERROR => Ok(Self::XinputDevice(error.as_ref().try_into()?)),
-                    xinput::DEVICE_BUSY_ERROR => Ok(Self::XinputDeviceBusy(error.as_ref().try_into()?)),
-                    xinput::EVENT_ERROR => Ok(Self::XinputEvent(error.as_ref().try_into()?)),
-                    xinput::MODE_ERROR => Ok(Self::XinputMode(error.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(error)),
+                    xinput::CLASS_ERROR => Ok(Self::XinputClass(error.try_into()?)),
+                    xinput::DEVICE_ERROR => Ok(Self::XinputDevice(error.try_into()?)),
+                    xinput::DEVICE_BUSY_ERROR => Ok(Self::XinputDeviceBusy(error.try_into()?)),
+                    xinput::EVENT_ERROR => Ok(Self::XinputEvent(error.try_into()?)),
+                    xinput::MODE_ERROR => Ok(Self::XinputMode(error.try_into()?)),
+                    _ => Ok(Self::Unknown(error.to_vec())),
                 }
             }
             #[cfg(feature = "xkb")]
             Some((xkb::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    xkb::KEYBOARD_ERROR => Ok(Self::XkbKeyboard(error.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(error)),
+                    xkb::KEYBOARD_ERROR => Ok(Self::XkbKeyboard(error.try_into()?)),
+                    _ => Ok(Self::Unknown(error.to_vec())),
                 }
             }
             #[cfg(feature = "xprint")]
             Some((xprint::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    xprint::BAD_CONTEXT_ERROR => Ok(Self::XprintBadContext(error.as_ref().try_into()?)),
-                    xprint::BAD_SEQUENCE_ERROR => Ok(Self::XprintBadSequence(error.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(error)),
+                    xprint::BAD_CONTEXT_ERROR => Ok(Self::XprintBadContext(error.try_into()?)),
+                    xprint::BAD_SEQUENCE_ERROR => Ok(Self::XprintBadSequence(error.try_into()?)),
+                    _ => Ok(Self::Unknown(error.to_vec())),
                 }
             }
             #[cfg(feature = "xv")]
             Some((xv::X11_EXTENSION_NAME, ext_info)) => {
                 match error_code - ext_info.first_error {
-                    xv::BAD_CONTROL_ERROR => Ok(Self::XvBadControl(error.as_ref().try_into()?)),
-                    xv::BAD_ENCODING_ERROR => Ok(Self::XvBadEncoding(error.as_ref().try_into()?)),
-                    xv::BAD_PORT_ERROR => Ok(Self::XvBadPort(error.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(error)),
+                    xv::BAD_CONTROL_ERROR => Ok(Self::XvBadControl(error.try_into()?)),
+                    xv::BAD_ENCODING_ERROR => Ok(Self::XvBadEncoding(error.try_into()?)),
+                    xv::BAD_PORT_ERROR => Ok(Self::XvBadPort(error.try_into()?)),
+                    _ => Ok(Self::Unknown(error.to_vec())),
                 }
             }
-            _ => Ok(Self::Unknown(error)),
+            _ => Ok(Self::Unknown(error.to_vec())),
         }
     }
 
     /// Get the sequence number contained in this X11 error
     pub fn wire_sequence_number(&self) -> u16 {
         match self {
-            Error::Unknown(value) => sequence_number(value.as_ref()).unwrap(),
+            Error::Unknown(value) => sequence_number(value).unwrap(),
             Error::Access(value) => value.sequence,
             Error::Alloc(value) => value.sequence,
             Error::Atom(value) => value.sequence,
@@ -465,7 +465,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
     /// Get the error code of this X11 error
     pub fn error_code(&self) -> u8 {
         match self {
-            Error::Unknown(value) => error_code(value.as_ref()).unwrap(),
+            Error::Unknown(value) => error_code(value).unwrap(),
             Error::Access(value) => value.error_code,
             Error::Alloc(value) => value.error_code,
             Error::Atom(value) => value.error_code,
@@ -585,7 +585,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
     /// This is not `pub` because it should always be `0` for errors.
     fn raw_response_type(&self) -> u8 {
         match self {
-            Error::Unknown(value) => response_type(value.as_ref()).unwrap(),
+            Error::Unknown(value) => response_type(value).unwrap(),
             Error::Access(value) => value.response_type,
             Error::Alloc(value) => value.response_type,
             Error::Atom(value) => value.response_type,
@@ -703,9 +703,9 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Error<B> {
 
 /// Enumeration of all possible X11 events.
 #[derive(Debug, Clone)]
-pub enum Event<B: std::fmt::Debug + AsRef<[u8]>> {
-    Unknown(B),
-    Error(Error<B>),
+pub enum Event {
+    Unknown(Vec<u8>),
+    Error(Error),
     ButtonPress(xproto::ButtonPressEvent),
     ButtonRelease(xproto::ButtonReleaseEvent),
     CirculateNotify(xproto::CirculateNotifyEvent),
@@ -898,51 +898,51 @@ pub enum Event<B: std::fmt::Debug + AsRef<[u8]>> {
     XvVideoNotify(xv::VideoNotifyEvent),
 }
 
-impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
+impl Event {
     /// Parse a generic X11 event into a concrete event type.
     #[allow(clippy::cognitive_complexity)]
     pub fn parse(
-        event: B,
+        event: &[u8],
         ext_info_provider: &dyn ExtInfoProvider,
     ) -> Result<Self, ParseError> {
-        let event_code = response_type(event.as_ref())?;
+        let event_code = response_type(event)?;
 
         // Check if this is a core protocol event or error, or from the generic event extension
         match event_code {
             0 => return Ok(Self::Error(Error::parse(event, ext_info_provider)?)),
-            xproto::BUTTON_PRESS_EVENT => return Ok(Self::ButtonPress(event.as_ref().try_into()?)),
-            xproto::BUTTON_RELEASE_EVENT => return Ok(Self::ButtonRelease(event.as_ref().try_into()?)),
-            xproto::CIRCULATE_NOTIFY_EVENT => return Ok(Self::CirculateNotify(event.as_ref().try_into()?)),
-            xproto::CIRCULATE_REQUEST_EVENT => return Ok(Self::CirculateRequest(event.as_ref().try_into()?)),
-            xproto::CLIENT_MESSAGE_EVENT => return Ok(Self::ClientMessage(event.as_ref().try_into()?)),
-            xproto::COLORMAP_NOTIFY_EVENT => return Ok(Self::ColormapNotify(event.as_ref().try_into()?)),
-            xproto::CONFIGURE_NOTIFY_EVENT => return Ok(Self::ConfigureNotify(event.as_ref().try_into()?)),
-            xproto::CONFIGURE_REQUEST_EVENT => return Ok(Self::ConfigureRequest(event.as_ref().try_into()?)),
-            xproto::CREATE_NOTIFY_EVENT => return Ok(Self::CreateNotify(event.as_ref().try_into()?)),
-            xproto::DESTROY_NOTIFY_EVENT => return Ok(Self::DestroyNotify(event.as_ref().try_into()?)),
-            xproto::ENTER_NOTIFY_EVENT => return Ok(Self::EnterNotify(event.as_ref().try_into()?)),
-            xproto::EXPOSE_EVENT => return Ok(Self::Expose(event.as_ref().try_into()?)),
-            xproto::FOCUS_IN_EVENT => return Ok(Self::FocusIn(event.as_ref().try_into()?)),
-            xproto::FOCUS_OUT_EVENT => return Ok(Self::FocusOut(event.as_ref().try_into()?)),
-            xproto::GRAPHICS_EXPOSURE_EVENT => return Ok(Self::GraphicsExposure(event.as_ref().try_into()?)),
-            xproto::GRAVITY_NOTIFY_EVENT => return Ok(Self::GravityNotify(event.as_ref().try_into()?)),
-            xproto::KEY_PRESS_EVENT => return Ok(Self::KeyPress(event.as_ref().try_into()?)),
-            xproto::KEY_RELEASE_EVENT => return Ok(Self::KeyRelease(event.as_ref().try_into()?)),
-            xproto::KEYMAP_NOTIFY_EVENT => return Ok(Self::KeymapNotify(event.as_ref().try_into()?)),
-            xproto::LEAVE_NOTIFY_EVENT => return Ok(Self::LeaveNotify(event.as_ref().try_into()?)),
-            xproto::MAP_NOTIFY_EVENT => return Ok(Self::MapNotify(event.as_ref().try_into()?)),
-            xproto::MAP_REQUEST_EVENT => return Ok(Self::MapRequest(event.as_ref().try_into()?)),
-            xproto::MAPPING_NOTIFY_EVENT => return Ok(Self::MappingNotify(event.as_ref().try_into()?)),
-            xproto::MOTION_NOTIFY_EVENT => return Ok(Self::MotionNotify(event.as_ref().try_into()?)),
-            xproto::NO_EXPOSURE_EVENT => return Ok(Self::NoExposure(event.as_ref().try_into()?)),
-            xproto::PROPERTY_NOTIFY_EVENT => return Ok(Self::PropertyNotify(event.as_ref().try_into()?)),
-            xproto::REPARENT_NOTIFY_EVENT => return Ok(Self::ReparentNotify(event.as_ref().try_into()?)),
-            xproto::RESIZE_REQUEST_EVENT => return Ok(Self::ResizeRequest(event.as_ref().try_into()?)),
-            xproto::SELECTION_CLEAR_EVENT => return Ok(Self::SelectionClear(event.as_ref().try_into()?)),
-            xproto::SELECTION_NOTIFY_EVENT => return Ok(Self::SelectionNotify(event.as_ref().try_into()?)),
-            xproto::SELECTION_REQUEST_EVENT => return Ok(Self::SelectionRequest(event.as_ref().try_into()?)),
-            xproto::UNMAP_NOTIFY_EVENT => return Ok(Self::UnmapNotify(event.as_ref().try_into()?)),
-            xproto::VISIBILITY_NOTIFY_EVENT => return Ok(Self::VisibilityNotify(event.as_ref().try_into()?)),
+            xproto::BUTTON_PRESS_EVENT => return Ok(Self::ButtonPress(event.try_into()?)),
+            xproto::BUTTON_RELEASE_EVENT => return Ok(Self::ButtonRelease(event.try_into()?)),
+            xproto::CIRCULATE_NOTIFY_EVENT => return Ok(Self::CirculateNotify(event.try_into()?)),
+            xproto::CIRCULATE_REQUEST_EVENT => return Ok(Self::CirculateRequest(event.try_into()?)),
+            xproto::CLIENT_MESSAGE_EVENT => return Ok(Self::ClientMessage(event.try_into()?)),
+            xproto::COLORMAP_NOTIFY_EVENT => return Ok(Self::ColormapNotify(event.try_into()?)),
+            xproto::CONFIGURE_NOTIFY_EVENT => return Ok(Self::ConfigureNotify(event.try_into()?)),
+            xproto::CONFIGURE_REQUEST_EVENT => return Ok(Self::ConfigureRequest(event.try_into()?)),
+            xproto::CREATE_NOTIFY_EVENT => return Ok(Self::CreateNotify(event.try_into()?)),
+            xproto::DESTROY_NOTIFY_EVENT => return Ok(Self::DestroyNotify(event.try_into()?)),
+            xproto::ENTER_NOTIFY_EVENT => return Ok(Self::EnterNotify(event.try_into()?)),
+            xproto::EXPOSE_EVENT => return Ok(Self::Expose(event.try_into()?)),
+            xproto::FOCUS_IN_EVENT => return Ok(Self::FocusIn(event.try_into()?)),
+            xproto::FOCUS_OUT_EVENT => return Ok(Self::FocusOut(event.try_into()?)),
+            xproto::GRAPHICS_EXPOSURE_EVENT => return Ok(Self::GraphicsExposure(event.try_into()?)),
+            xproto::GRAVITY_NOTIFY_EVENT => return Ok(Self::GravityNotify(event.try_into()?)),
+            xproto::KEY_PRESS_EVENT => return Ok(Self::KeyPress(event.try_into()?)),
+            xproto::KEY_RELEASE_EVENT => return Ok(Self::KeyRelease(event.try_into()?)),
+            xproto::KEYMAP_NOTIFY_EVENT => return Ok(Self::KeymapNotify(event.try_into()?)),
+            xproto::LEAVE_NOTIFY_EVENT => return Ok(Self::LeaveNotify(event.try_into()?)),
+            xproto::MAP_NOTIFY_EVENT => return Ok(Self::MapNotify(event.try_into()?)),
+            xproto::MAP_REQUEST_EVENT => return Ok(Self::MapRequest(event.try_into()?)),
+            xproto::MAPPING_NOTIFY_EVENT => return Ok(Self::MappingNotify(event.try_into()?)),
+            xproto::MOTION_NOTIFY_EVENT => return Ok(Self::MotionNotify(event.try_into()?)),
+            xproto::NO_EXPOSURE_EVENT => return Ok(Self::NoExposure(event.try_into()?)),
+            xproto::PROPERTY_NOTIFY_EVENT => return Ok(Self::PropertyNotify(event.try_into()?)),
+            xproto::REPARENT_NOTIFY_EVENT => return Ok(Self::ReparentNotify(event.try_into()?)),
+            xproto::RESIZE_REQUEST_EVENT => return Ok(Self::ResizeRequest(event.try_into()?)),
+            xproto::SELECTION_CLEAR_EVENT => return Ok(Self::SelectionClear(event.try_into()?)),
+            xproto::SELECTION_NOTIFY_EVENT => return Ok(Self::SelectionNotify(event.try_into()?)),
+            xproto::SELECTION_REQUEST_EVENT => return Ok(Self::SelectionRequest(event.try_into()?)),
+            xproto::UNMAP_NOTIFY_EVENT => return Ok(Self::UnmapNotify(event.try_into()?)),
+            xproto::VISIBILITY_NOTIFY_EVENT => return Ok(Self::VisibilityNotify(event.try_into()?)),
             xproto::GE_GENERIC_EVENT => return Self::from_generic_event(event, ext_info_provider),
             _ => {}
         }
@@ -952,147 +952,147 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
             #[cfg(feature = "damage")]
             Some((damage::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    damage::NOTIFY_EVENT => Ok(Self::DamageNotify(event.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(event)),
+                    damage::NOTIFY_EVENT => Ok(Self::DamageNotify(event.try_into()?)),
+                    _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "dri2")]
             Some((dri2::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    dri2::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::Dri2BufferSwapComplete(event.as_ref().try_into()?)),
-                    dri2::INVALIDATE_BUFFERS_EVENT => Ok(Self::Dri2InvalidateBuffers(event.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(event)),
+                    dri2::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::Dri2BufferSwapComplete(event.try_into()?)),
+                    dri2::INVALIDATE_BUFFERS_EVENT => Ok(Self::Dri2InvalidateBuffers(event.try_into()?)),
+                    _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "glx")]
             Some((glx::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    glx::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::GlxBufferSwapComplete(event.as_ref().try_into()?)),
-                    glx::PBUFFER_CLOBBER_EVENT => Ok(Self::GlxPbufferClobber(event.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(event)),
+                    glx::BUFFER_SWAP_COMPLETE_EVENT => Ok(Self::GlxBufferSwapComplete(event.try_into()?)),
+                    glx::PBUFFER_CLOBBER_EVENT => Ok(Self::GlxPbufferClobber(event.try_into()?)),
+                    _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "present")]
             Some((present::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    present::GENERIC_EVENT => Ok(Self::PresentGeneric(event.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(event)),
+                    present::GENERIC_EVENT => Ok(Self::PresentGeneric(event.try_into()?)),
+                    _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "randr")]
             Some((randr::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    randr::NOTIFY_EVENT => Ok(Self::RandrNotify(event.as_ref().try_into()?)),
-                    randr::SCREEN_CHANGE_NOTIFY_EVENT => Ok(Self::RandrScreenChangeNotify(event.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(event)),
+                    randr::NOTIFY_EVENT => Ok(Self::RandrNotify(event.try_into()?)),
+                    randr::SCREEN_CHANGE_NOTIFY_EVENT => Ok(Self::RandrScreenChangeNotify(event.try_into()?)),
+                    _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "screensaver")]
             Some((screensaver::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    screensaver::NOTIFY_EVENT => Ok(Self::ScreensaverNotify(event.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(event)),
+                    screensaver::NOTIFY_EVENT => Ok(Self::ScreensaverNotify(event.try_into()?)),
+                    _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "shape")]
             Some((shape::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    shape::NOTIFY_EVENT => Ok(Self::ShapeNotify(event.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(event)),
+                    shape::NOTIFY_EVENT => Ok(Self::ShapeNotify(event.try_into()?)),
+                    _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "shm")]
             Some((shm::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    shm::COMPLETION_EVENT => Ok(Self::ShmCompletion(event.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(event)),
+                    shm::COMPLETION_EVENT => Ok(Self::ShmCompletion(event.try_into()?)),
+                    _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "sync")]
             Some((sync::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    sync::ALARM_NOTIFY_EVENT => Ok(Self::SyncAlarmNotify(event.as_ref().try_into()?)),
-                    sync::COUNTER_NOTIFY_EVENT => Ok(Self::SyncCounterNotify(event.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(event)),
+                    sync::ALARM_NOTIFY_EVENT => Ok(Self::SyncAlarmNotify(event.try_into()?)),
+                    sync::COUNTER_NOTIFY_EVENT => Ok(Self::SyncCounterNotify(event.try_into()?)),
+                    _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "xfixes")]
             Some((xfixes::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    xfixes::CURSOR_NOTIFY_EVENT => Ok(Self::XfixesCursorNotify(event.as_ref().try_into()?)),
-                    xfixes::SELECTION_NOTIFY_EVENT => Ok(Self::XfixesSelectionNotify(event.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(event)),
+                    xfixes::CURSOR_NOTIFY_EVENT => Ok(Self::XfixesCursorNotify(event.try_into()?)),
+                    xfixes::SELECTION_NOTIFY_EVENT => Ok(Self::XfixesSelectionNotify(event.try_into()?)),
+                    _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "xinput")]
             Some((xinput::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    xinput::CHANGE_DEVICE_NOTIFY_EVENT => Ok(Self::XinputChangeDeviceNotify(event.as_ref().try_into()?)),
-                    xinput::DEVICE_BUTTON_PRESS_EVENT => Ok(Self::XinputDeviceButtonPress(event.as_ref().try_into()?)),
-                    xinput::DEVICE_BUTTON_RELEASE_EVENT => Ok(Self::XinputDeviceButtonRelease(event.as_ref().try_into()?)),
-                    xinput::DEVICE_BUTTON_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceButtonStateNotify(event.as_ref().try_into()?)),
-                    xinput::DEVICE_FOCUS_IN_EVENT => Ok(Self::XinputDeviceFocusIn(event.as_ref().try_into()?)),
-                    xinput::DEVICE_FOCUS_OUT_EVENT => Ok(Self::XinputDeviceFocusOut(event.as_ref().try_into()?)),
-                    xinput::DEVICE_KEY_PRESS_EVENT => Ok(Self::XinputDeviceKeyPress(event.as_ref().try_into()?)),
-                    xinput::DEVICE_KEY_RELEASE_EVENT => Ok(Self::XinputDeviceKeyRelease(event.as_ref().try_into()?)),
-                    xinput::DEVICE_KEY_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceKeyStateNotify(event.as_ref().try_into()?)),
-                    xinput::DEVICE_MAPPING_NOTIFY_EVENT => Ok(Self::XinputDeviceMappingNotify(event.as_ref().try_into()?)),
-                    xinput::DEVICE_MOTION_NOTIFY_EVENT => Ok(Self::XinputDeviceMotionNotify(event.as_ref().try_into()?)),
-                    xinput::DEVICE_PRESENCE_NOTIFY_EVENT => Ok(Self::XinputDevicePresenceNotify(event.as_ref().try_into()?)),
-                    xinput::DEVICE_PROPERTY_NOTIFY_EVENT => Ok(Self::XinputDevicePropertyNotify(event.as_ref().try_into()?)),
-                    xinput::DEVICE_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceStateNotify(event.as_ref().try_into()?)),
-                    xinput::DEVICE_VALUATOR_EVENT => Ok(Self::XinputDeviceValuator(event.as_ref().try_into()?)),
-                    xinput::PROXIMITY_IN_EVENT => Ok(Self::XinputProximityIn(event.as_ref().try_into()?)),
-                    xinput::PROXIMITY_OUT_EVENT => Ok(Self::XinputProximityOut(event.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(event)),
+                    xinput::CHANGE_DEVICE_NOTIFY_EVENT => Ok(Self::XinputChangeDeviceNotify(event.try_into()?)),
+                    xinput::DEVICE_BUTTON_PRESS_EVENT => Ok(Self::XinputDeviceButtonPress(event.try_into()?)),
+                    xinput::DEVICE_BUTTON_RELEASE_EVENT => Ok(Self::XinputDeviceButtonRelease(event.try_into()?)),
+                    xinput::DEVICE_BUTTON_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceButtonStateNotify(event.try_into()?)),
+                    xinput::DEVICE_FOCUS_IN_EVENT => Ok(Self::XinputDeviceFocusIn(event.try_into()?)),
+                    xinput::DEVICE_FOCUS_OUT_EVENT => Ok(Self::XinputDeviceFocusOut(event.try_into()?)),
+                    xinput::DEVICE_KEY_PRESS_EVENT => Ok(Self::XinputDeviceKeyPress(event.try_into()?)),
+                    xinput::DEVICE_KEY_RELEASE_EVENT => Ok(Self::XinputDeviceKeyRelease(event.try_into()?)),
+                    xinput::DEVICE_KEY_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceKeyStateNotify(event.try_into()?)),
+                    xinput::DEVICE_MAPPING_NOTIFY_EVENT => Ok(Self::XinputDeviceMappingNotify(event.try_into()?)),
+                    xinput::DEVICE_MOTION_NOTIFY_EVENT => Ok(Self::XinputDeviceMotionNotify(event.try_into()?)),
+                    xinput::DEVICE_PRESENCE_NOTIFY_EVENT => Ok(Self::XinputDevicePresenceNotify(event.try_into()?)),
+                    xinput::DEVICE_PROPERTY_NOTIFY_EVENT => Ok(Self::XinputDevicePropertyNotify(event.try_into()?)),
+                    xinput::DEVICE_STATE_NOTIFY_EVENT => Ok(Self::XinputDeviceStateNotify(event.try_into()?)),
+                    xinput::DEVICE_VALUATOR_EVENT => Ok(Self::XinputDeviceValuator(event.try_into()?)),
+                    xinput::PROXIMITY_IN_EVENT => Ok(Self::XinputProximityIn(event.try_into()?)),
+                    xinput::PROXIMITY_OUT_EVENT => Ok(Self::XinputProximityOut(event.try_into()?)),
+                    _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "xkb")]
             Some((xkb::X11_EXTENSION_NAME, ext_info)) => {
                 if event_code != ext_info.first_event {
-                    return Ok(Self::Unknown(event));
+                    return Ok(Self::Unknown(event.to_vec()));
                 }
-                match *event.as_ref().get(1).ok_or(ParseError::ParseError)? {
-                    xkb::ACCESS_X_NOTIFY_EVENT => Ok(Self::XkbAccessXNotify(event.as_ref().try_into()?)),
-                    xkb::ACTION_MESSAGE_EVENT => Ok(Self::XkbActionMessage(event.as_ref().try_into()?)),
-                    xkb::BELL_NOTIFY_EVENT => Ok(Self::XkbBellNotify(event.as_ref().try_into()?)),
-                    xkb::COMPAT_MAP_NOTIFY_EVENT => Ok(Self::XkbCompatMapNotify(event.as_ref().try_into()?)),
-                    xkb::CONTROLS_NOTIFY_EVENT => Ok(Self::XkbControlsNotify(event.as_ref().try_into()?)),
-                    xkb::EXTENSION_DEVICE_NOTIFY_EVENT => Ok(Self::XkbExtensionDeviceNotify(event.as_ref().try_into()?)),
-                    xkb::INDICATOR_MAP_NOTIFY_EVENT => Ok(Self::XkbIndicatorMapNotify(event.as_ref().try_into()?)),
-                    xkb::INDICATOR_STATE_NOTIFY_EVENT => Ok(Self::XkbIndicatorStateNotify(event.as_ref().try_into()?)),
-                    xkb::MAP_NOTIFY_EVENT => Ok(Self::XkbMapNotify(event.as_ref().try_into()?)),
-                    xkb::NAMES_NOTIFY_EVENT => Ok(Self::XkbNamesNotify(event.as_ref().try_into()?)),
-                    xkb::NEW_KEYBOARD_NOTIFY_EVENT => Ok(Self::XkbNewKeyboardNotify(event.as_ref().try_into()?)),
-                    xkb::STATE_NOTIFY_EVENT => Ok(Self::XkbStateNotify(event.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(event)),
+                match *event.get(1).ok_or(ParseError::ParseError)? {
+                    xkb::ACCESS_X_NOTIFY_EVENT => Ok(Self::XkbAccessXNotify(event.try_into()?)),
+                    xkb::ACTION_MESSAGE_EVENT => Ok(Self::XkbActionMessage(event.try_into()?)),
+                    xkb::BELL_NOTIFY_EVENT => Ok(Self::XkbBellNotify(event.try_into()?)),
+                    xkb::COMPAT_MAP_NOTIFY_EVENT => Ok(Self::XkbCompatMapNotify(event.try_into()?)),
+                    xkb::CONTROLS_NOTIFY_EVENT => Ok(Self::XkbControlsNotify(event.try_into()?)),
+                    xkb::EXTENSION_DEVICE_NOTIFY_EVENT => Ok(Self::XkbExtensionDeviceNotify(event.try_into()?)),
+                    xkb::INDICATOR_MAP_NOTIFY_EVENT => Ok(Self::XkbIndicatorMapNotify(event.try_into()?)),
+                    xkb::INDICATOR_STATE_NOTIFY_EVENT => Ok(Self::XkbIndicatorStateNotify(event.try_into()?)),
+                    xkb::MAP_NOTIFY_EVENT => Ok(Self::XkbMapNotify(event.try_into()?)),
+                    xkb::NAMES_NOTIFY_EVENT => Ok(Self::XkbNamesNotify(event.try_into()?)),
+                    xkb::NEW_KEYBOARD_NOTIFY_EVENT => Ok(Self::XkbNewKeyboardNotify(event.try_into()?)),
+                    xkb::STATE_NOTIFY_EVENT => Ok(Self::XkbStateNotify(event.try_into()?)),
+                    _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "xprint")]
             Some((xprint::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    xprint::ATTRIBUT_NOTIFY_EVENT => Ok(Self::XprintAttributNotify(event.as_ref().try_into()?)),
-                    xprint::NOTIFY_EVENT => Ok(Self::XprintNotify(event.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(event)),
+                    xprint::ATTRIBUT_NOTIFY_EVENT => Ok(Self::XprintAttributNotify(event.try_into()?)),
+                    xprint::NOTIFY_EVENT => Ok(Self::XprintNotify(event.try_into()?)),
+                    _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "xv")]
             Some((xv::X11_EXTENSION_NAME, ext_info)) => {
                 match event_code - ext_info.first_event {
-                    xv::PORT_NOTIFY_EVENT => Ok(Self::XvPortNotify(event.as_ref().try_into()?)),
-                    xv::VIDEO_NOTIFY_EVENT => Ok(Self::XvVideoNotify(event.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(event)),
+                    xv::PORT_NOTIFY_EVENT => Ok(Self::XvPortNotify(event.try_into()?)),
+                    xv::VIDEO_NOTIFY_EVENT => Ok(Self::XvVideoNotify(event.try_into()?)),
+                    _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
-            _ => Ok(Self::Unknown(event)),
+            _ => Ok(Self::Unknown(event.to_vec())),
         }
     }
 
     fn from_generic_event(
-        event: B,
+        event: &[u8],
         ext_info_provider: &dyn ExtInfoProvider,
     ) -> Result<Self, ParseError> {
-        let ge_event = xproto::GeGenericEvent::try_from(event.as_ref())?;
+        let ge_event = xproto::GeGenericEvent::try_from(event)?;
         let ext_name = ext_info_provider
             .get_from_major_opcode(ge_event.extension)
             .map(|(name, _)| name);
@@ -1100,53 +1100,53 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
             #[cfg(feature = "present")]
             Some(present::X11_EXTENSION_NAME) => {
                 match ge_event.event_type {
-                    present::COMPLETE_NOTIFY_EVENT => Ok(Self::PresentCompleteNotify(event.as_ref().try_into()?)),
-                    present::CONFIGURE_NOTIFY_EVENT => Ok(Self::PresentConfigureNotify(event.as_ref().try_into()?)),
-                    present::IDLE_NOTIFY_EVENT => Ok(Self::PresentIdleNotify(event.as_ref().try_into()?)),
-                    present::REDIRECT_NOTIFY_EVENT => Ok(Self::PresentRedirectNotify(event.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(event)),
+                    present::COMPLETE_NOTIFY_EVENT => Ok(Self::PresentCompleteNotify(event.try_into()?)),
+                    present::CONFIGURE_NOTIFY_EVENT => Ok(Self::PresentConfigureNotify(event.try_into()?)),
+                    present::IDLE_NOTIFY_EVENT => Ok(Self::PresentIdleNotify(event.try_into()?)),
+                    present::REDIRECT_NOTIFY_EVENT => Ok(Self::PresentRedirectNotify(event.try_into()?)),
+                    _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
             #[cfg(feature = "xinput")]
             Some(xinput::X11_EXTENSION_NAME) => {
                 match ge_event.event_type {
-                    xinput::BARRIER_HIT_EVENT => Ok(Self::XinputBarrierHit(event.as_ref().try_into()?)),
-                    xinput::BARRIER_LEAVE_EVENT => Ok(Self::XinputBarrierLeave(event.as_ref().try_into()?)),
-                    xinput::BUTTON_PRESS_EVENT => Ok(Self::XinputButtonPress(event.as_ref().try_into()?)),
-                    xinput::BUTTON_RELEASE_EVENT => Ok(Self::XinputButtonRelease(event.as_ref().try_into()?)),
-                    xinput::DEVICE_CHANGED_EVENT => Ok(Self::XinputDeviceChanged(event.as_ref().try_into()?)),
-                    xinput::ENTER_EVENT => Ok(Self::XinputEnter(event.as_ref().try_into()?)),
-                    xinput::FOCUS_IN_EVENT => Ok(Self::XinputFocusIn(event.as_ref().try_into()?)),
-                    xinput::FOCUS_OUT_EVENT => Ok(Self::XinputFocusOut(event.as_ref().try_into()?)),
-                    xinput::HIERARCHY_EVENT => Ok(Self::XinputHierarchy(event.as_ref().try_into()?)),
-                    xinput::KEY_PRESS_EVENT => Ok(Self::XinputKeyPress(event.as_ref().try_into()?)),
-                    xinput::KEY_RELEASE_EVENT => Ok(Self::XinputKeyRelease(event.as_ref().try_into()?)),
-                    xinput::LEAVE_EVENT => Ok(Self::XinputLeave(event.as_ref().try_into()?)),
-                    xinput::MOTION_EVENT => Ok(Self::XinputMotion(event.as_ref().try_into()?)),
-                    xinput::PROPERTY_EVENT => Ok(Self::XinputProperty(event.as_ref().try_into()?)),
-                    xinput::RAW_BUTTON_PRESS_EVENT => Ok(Self::XinputRawButtonPress(event.as_ref().try_into()?)),
-                    xinput::RAW_BUTTON_RELEASE_EVENT => Ok(Self::XinputRawButtonRelease(event.as_ref().try_into()?)),
-                    xinput::RAW_KEY_PRESS_EVENT => Ok(Self::XinputRawKeyPress(event.as_ref().try_into()?)),
-                    xinput::RAW_KEY_RELEASE_EVENT => Ok(Self::XinputRawKeyRelease(event.as_ref().try_into()?)),
-                    xinput::RAW_MOTION_EVENT => Ok(Self::XinputRawMotion(event.as_ref().try_into()?)),
-                    xinput::RAW_TOUCH_BEGIN_EVENT => Ok(Self::XinputRawTouchBegin(event.as_ref().try_into()?)),
-                    xinput::RAW_TOUCH_END_EVENT => Ok(Self::XinputRawTouchEnd(event.as_ref().try_into()?)),
-                    xinput::RAW_TOUCH_UPDATE_EVENT => Ok(Self::XinputRawTouchUpdate(event.as_ref().try_into()?)),
-                    xinput::TOUCH_BEGIN_EVENT => Ok(Self::XinputTouchBegin(event.as_ref().try_into()?)),
-                    xinput::TOUCH_END_EVENT => Ok(Self::XinputTouchEnd(event.as_ref().try_into()?)),
-                    xinput::TOUCH_OWNERSHIP_EVENT => Ok(Self::XinputTouchOwnership(event.as_ref().try_into()?)),
-                    xinput::TOUCH_UPDATE_EVENT => Ok(Self::XinputTouchUpdate(event.as_ref().try_into()?)),
-                    _ => Ok(Self::Unknown(event)),
+                    xinput::BARRIER_HIT_EVENT => Ok(Self::XinputBarrierHit(event.try_into()?)),
+                    xinput::BARRIER_LEAVE_EVENT => Ok(Self::XinputBarrierLeave(event.try_into()?)),
+                    xinput::BUTTON_PRESS_EVENT => Ok(Self::XinputButtonPress(event.try_into()?)),
+                    xinput::BUTTON_RELEASE_EVENT => Ok(Self::XinputButtonRelease(event.try_into()?)),
+                    xinput::DEVICE_CHANGED_EVENT => Ok(Self::XinputDeviceChanged(event.try_into()?)),
+                    xinput::ENTER_EVENT => Ok(Self::XinputEnter(event.try_into()?)),
+                    xinput::FOCUS_IN_EVENT => Ok(Self::XinputFocusIn(event.try_into()?)),
+                    xinput::FOCUS_OUT_EVENT => Ok(Self::XinputFocusOut(event.try_into()?)),
+                    xinput::HIERARCHY_EVENT => Ok(Self::XinputHierarchy(event.try_into()?)),
+                    xinput::KEY_PRESS_EVENT => Ok(Self::XinputKeyPress(event.try_into()?)),
+                    xinput::KEY_RELEASE_EVENT => Ok(Self::XinputKeyRelease(event.try_into()?)),
+                    xinput::LEAVE_EVENT => Ok(Self::XinputLeave(event.try_into()?)),
+                    xinput::MOTION_EVENT => Ok(Self::XinputMotion(event.try_into()?)),
+                    xinput::PROPERTY_EVENT => Ok(Self::XinputProperty(event.try_into()?)),
+                    xinput::RAW_BUTTON_PRESS_EVENT => Ok(Self::XinputRawButtonPress(event.try_into()?)),
+                    xinput::RAW_BUTTON_RELEASE_EVENT => Ok(Self::XinputRawButtonRelease(event.try_into()?)),
+                    xinput::RAW_KEY_PRESS_EVENT => Ok(Self::XinputRawKeyPress(event.try_into()?)),
+                    xinput::RAW_KEY_RELEASE_EVENT => Ok(Self::XinputRawKeyRelease(event.try_into()?)),
+                    xinput::RAW_MOTION_EVENT => Ok(Self::XinputRawMotion(event.try_into()?)),
+                    xinput::RAW_TOUCH_BEGIN_EVENT => Ok(Self::XinputRawTouchBegin(event.try_into()?)),
+                    xinput::RAW_TOUCH_END_EVENT => Ok(Self::XinputRawTouchEnd(event.try_into()?)),
+                    xinput::RAW_TOUCH_UPDATE_EVENT => Ok(Self::XinputRawTouchUpdate(event.try_into()?)),
+                    xinput::TOUCH_BEGIN_EVENT => Ok(Self::XinputTouchBegin(event.try_into()?)),
+                    xinput::TOUCH_END_EVENT => Ok(Self::XinputTouchEnd(event.try_into()?)),
+                    xinput::TOUCH_OWNERSHIP_EVENT => Ok(Self::XinputTouchOwnership(event.try_into()?)),
+                    xinput::TOUCH_UPDATE_EVENT => Ok(Self::XinputTouchUpdate(event.try_into()?)),
+                    _ => Ok(Self::Unknown(event.to_vec())),
                 }
             }
-            _ => Ok(Self::Unknown(event)),
+            _ => Ok(Self::Unknown(event.to_vec())),
         }
     }
 
     /// Get the sequence number contained in this X11 event
     pub fn wire_sequence_number(&self) -> Option<u16> {
         match self {
-            Event::Unknown(value) => sequence_number(value.as_ref()).ok(),
+            Event::Unknown(value) => sequence_number(value).ok(),
             Event::Error(value) => Some(value.wire_sequence_number()),
             Event::ButtonPress(value) => Some(value.sequence),
             Event::ButtonRelease(value) => Some(value.sequence),
@@ -1350,7 +1350,7 @@ impl<B: std::fmt::Debug + AsRef<[u8]>> Event<B> {
     /// See also the `response_type()`, `server_generated()` and `sent_event()` methods.
     pub fn raw_response_type(&self) -> u8 {
         match self {
-            Event::Unknown(value) => response_type(value.as_ref()).unwrap(),
+            Event::Unknown(value) => response_type(value).unwrap(),
             Event::Error(value) => value.raw_response_type(),
             Event::ButtonPress(value) => value.response_type,
             Event::ButtonRelease(value) => value.response_type,

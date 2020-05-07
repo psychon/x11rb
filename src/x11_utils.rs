@@ -335,7 +335,7 @@ macro_rules! bitmask_binop {
 /// where
 ///     C: ConnectionExt,
 /// {
-///     pub fn reply(self) -> Result<AtomCollection, ReplyError<C::Buf>> {
+///     pub fn reply(self) -> Result<AtomCollection, ReplyError> {
 ///         Ok(AtomCollection {
 ///             _NET_WM_NAME: self._NET_WM_NAME.reply()?.atom,
 ///             _NET_WM_ICON: self._NET_WM_ICON.reply()?.atom,
@@ -400,7 +400,7 @@ macro_rules! atom_manager {
         }
 
         impl<'a, C: $crate::protocol::xproto::ConnectionExt> $cookie_name<'a, C> {
-            $vis fn reply(self) -> ::std::result::Result<$struct_name, $crate::errors::ReplyError<C::Buf>> {
+            $vis fn reply(self) -> ::std::result::Result<$struct_name, $crate::errors::ReplyError> {
                 Ok($struct_name {
                     $(
                         $field_name: self.$field_name.reply()?.atom,

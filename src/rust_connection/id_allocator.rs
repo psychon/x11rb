@@ -42,7 +42,7 @@ impl IDAllocator {
     pub(crate) fn generate_id<C: RequestConnection>(
         &mut self,
         conn: &C,
-    ) -> Result<u32, ReplyOrIdError<C::Buf>> {
+    ) -> Result<u32, ReplyOrIdError> {
         self.generate_id_impl(|| {
             if conn
                 .extension_information(xc_misc::X11_EXTENSION_NAME)?
@@ -59,10 +59,9 @@ impl IDAllocator {
     /// Generate the next ID.
     ///
     /// The `get_xid_range` callback is used to request more IDs from the X11 server if necessary.
-    fn generate_id_impl<B, F>(&mut self, get_xid_range: F) -> Result<u32, ReplyOrIdError<B>>
+    fn generate_id_impl<F>(&mut self, get_xid_range: F) -> Result<u32, ReplyOrIdError>
     where
-        B: std::fmt::Debug + AsRef<[u8]>,
-        F: FnOnce() -> Result<GetXIDRangeReply, ReplyOrIdError<B>>,
+        F: FnOnce() -> Result<GetXIDRangeReply, ReplyOrIdError>,
     {
         if self.next_id > self.max_id {
             // Send an XC-MISC GetXIDRange request.
@@ -90,7 +89,7 @@ mod test {
 
     use super::IDAllocator;
 
-    fn unreachable_cb() -> Result<GetXIDRangeReply, ReplyOrIdError<[u8; 0]>> {
+    fn unreachable_cb() -> Result<GetXIDRangeReply, ReplyOrIdError> {
         unreachable!()
     }
 
@@ -103,7 +102,7 @@ mod test {
                 allocator.generate_id_impl(unreachable_cb).unwrap()
             );
         }
-        let cb = || -> Result<_, ReplyOrIdError<[u8; 0]>> { Err(ReplyOrIdError::IdsExhausted) };
+        let cb = || -> Result<_, ReplyOrIdError> { Err(ReplyOrIdError::IdsExhausted) };
         assert!(allocator.generate_id_impl(cb).is_err());
     }
 
@@ -114,7 +113,7 @@ mod test {
         assert_eq!(0b0100, allocator.generate_id_impl(unreachable_cb).unwrap());
         assert_eq!(0b1000, allocator.generate_id_impl(unreachable_cb).unwrap());
         assert_eq!(0b1100, allocator.generate_id_impl(unreachable_cb).unwrap());
-        let cb = || -> Result<_, ReplyOrIdError<[u8; 0]>> { Err(ReplyOrIdError::IdsExhausted) };
+        let cb = || -> Result<_, ReplyOrIdError> { Err(ReplyOrIdError::IdsExhausted) };
         assert!(allocator.generate_id_impl(cb).is_err());
     }
 
@@ -125,12 +124,12 @@ mod test {
         assert_eq!(0x420, allocator.generate_id_impl(unreachable_cb).unwrap());
         assert_eq!(0x422, allocator.generate_id_impl(unreachable_cb).unwrap());
         // At this point the range is exhausted and a GetXIDRange request is sent
-        let cb = || -> Result<_, ReplyOrIdError<[u8; 0]>> { Ok(reply) };
+        let cb = || -> Result<_, ReplyOrIdError> { Ok(reply) };
         assert_eq!(0x13370, allocator.generate_id_impl(cb).unwrap());
         assert_eq!(0x13372, allocator.generate_id_impl(unreachable_cb).unwrap());
         assert_eq!(0x13374, allocator.generate_id_impl(unreachable_cb).unwrap());
         // At this point the range is exhausted and a GetXIDRange request is sent
-        let cb = || -> Result<_, ReplyOrIdError<[u8; 0]>> { Ok(reply) };
+        let cb = || -> Result<_, ReplyOrIdError> { Ok(reply) };
         assert_eq!(0x13370, allocator.generate_id_impl(cb).unwrap());
     }
 

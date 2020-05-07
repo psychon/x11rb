@@ -74,7 +74,7 @@ fn create_window<C>(
     screen: &x11rb::protocol::xproto::Screen,
     atoms: &AtomCollection,
     (width, height): (u16, u16),
-) -> Result<Window, ReplyOrIdError<C::Buf>>
+) -> Result<Window, ReplyOrIdError>
 where
     C: Connection,
 {
