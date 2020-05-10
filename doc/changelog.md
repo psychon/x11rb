@@ -1,4 +1,4 @@
-# Version 0.5.0 (2020-XX-XX)
+# Version 0.5.0 (2020-05-10)
 
 New features:
 * The new `Connection::prefetch_maximum_request_bytes()` API allows avoiding a
