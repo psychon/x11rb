@@ -109,4 +109,4 @@ name = "xeyes"
 required-features = ["shape"]
 
 [workspace]
-members = ["generator", "xcbgen-rs", "cairo-example"]
+members = ["generator", "xcbgen-rs", "cairo-example", "xclock-example"]
