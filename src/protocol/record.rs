@@ -402,6 +402,21 @@ impl Serialize for ClientInfo {
         self.ranges.serialize_into(bytes);
     }
 }
+impl ClientInfo {
+    /// Get the value of the `num_ranges` field.
+    ///
+    /// The `num_ranges` field is used as the length field of the `ranges` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_ranges(&self) -> u32 {
+        self.ranges.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the BadContext error
 pub const BAD_CONTEXT_ERROR: u8 = 0;
@@ -726,6 +741,21 @@ impl TryFrom<&[u8]> for GetContextReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetContextReply {
+    /// Get the value of the `num_intercepted_clients` field.
+    ///
+    /// The `num_intercepted_clients` field is used as the length field of the `intercepted_clients` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_intercepted_clients(&self) -> u32 {
+        self.intercepted_clients.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the EnableContext request
 pub const ENABLE_CONTEXT_REQUEST: u8 = 5;
@@ -789,6 +819,22 @@ impl TryFrom<&[u8]> for EnableContextReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl EnableContextReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.data.len()
+            .checked_div(4).unwrap()
+            .try_into().unwrap()
     }
 }
 

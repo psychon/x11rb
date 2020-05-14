@@ -1334,6 +1334,21 @@ impl Serialize for Pictdepth {
         self.visuals.serialize_into(bytes);
     }
 }
+impl Pictdepth {
+    /// Get the value of the `num_visuals` field.
+    ///
+    /// The `num_visuals` field is used as the length field of the `visuals` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_visuals(&self) -> u16 {
+        self.visuals.len()
+            .try_into().unwrap()
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Pictscreen {
@@ -1368,6 +1383,21 @@ impl Serialize for Pictscreen {
         num_depths.serialize_into(bytes);
         self.fallback.serialize_into(bytes);
         self.depths.serialize_into(bytes);
+    }
+}
+impl Pictscreen {
+    /// Get the value of the `num_depths` field.
+    ///
+    /// The `num_depths` field is used as the length field of the `depths` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_depths(&self) -> u32 {
+        self.depths.len()
+            .try_into().unwrap()
     }
 }
 
@@ -1903,6 +1933,47 @@ impl TryFrom<&[u8]> for QueryPictFormatsReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl QueryPictFormatsReply {
+    /// Get the value of the `num_formats` field.
+    ///
+    /// The `num_formats` field is used as the length field of the `formats` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_formats(&self) -> u32 {
+        self.formats.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `num_screens` field.
+    ///
+    /// The `num_screens` field is used as the length field of the `screens` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_screens(&self) -> u32 {
+        self.screens.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `num_subpixel` field.
+    ///
+    /// The `num_subpixel` field is used as the length field of the `subpixels` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_subpixel(&self) -> u32 {
+        self.subpixels.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the QueryPictIndexValues request
 pub const QUERY_PICT_INDEX_VALUES_REQUEST: u8 = 2;
@@ -1955,6 +2026,21 @@ impl TryFrom<&[u8]> for QueryPictIndexValuesReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl QueryPictIndexValuesReply {
+    /// Get the value of the `num_values` field.
+    ///
+    /// The `num_values` field is used as the length field of the `values` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_values(&self) -> u32 {
+        self.values.len()
+            .try_into().unwrap()
     }
 }
 
@@ -3378,6 +3464,34 @@ impl TryFrom<&[u8]> for QueryFiltersReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl QueryFiltersReply {
+    /// Get the value of the `num_aliases` field.
+    ///
+    /// The `num_aliases` field is used as the length field of the `aliases` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_aliases(&self) -> u32 {
+        self.aliases.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `num_filters` field.
+    ///
+    /// The `num_filters` field is used as the length field of the `filters` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_filters(&self) -> u32 {
+        self.filters.len()
+            .try_into().unwrap()
     }
 }
 

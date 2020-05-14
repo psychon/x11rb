@@ -1549,6 +1549,22 @@ impl TryFrom<&[u8]> for FetchRegionReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl FetchRegionReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `rectangles` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.rectangles.len()
+            .checked_mul(2).unwrap()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the SetGCClipRegion request
 pub const SET_GC_CLIP_REGION_REQUEST: u8 = 20;
@@ -1767,6 +1783,21 @@ impl TryFrom<&[u8]> for GetCursorNameReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetCursorNameReply {
+    /// Get the value of the `nbytes` field.
+    ///
+    /// The `nbytes` field is used as the length field of the `name` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn nbytes(&self) -> u16 {
+        self.name.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetCursorImageAndName request
 pub const GET_CURSOR_IMAGE_AND_NAME_REQUEST: u8 = 25;
@@ -1833,6 +1864,21 @@ impl TryFrom<&[u8]> for GetCursorImageAndNameReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetCursorImageAndNameReply {
+    /// Get the value of the `nbytes` field.
+    ///
+    /// The `nbytes` field is used as the length field of the `name` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn nbytes(&self) -> u16 {
+        self.name.len()
+            .try_into().unwrap()
     }
 }
 

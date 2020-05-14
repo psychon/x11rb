@@ -489,6 +489,21 @@ impl TryFrom<&[u8]> for GetModeLineReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetModeLineReply {
+    /// Get the value of the `privsize` field.
+    ///
+    /// The `privsize` field is used as the length field of the `private` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn privsize(&self) -> u32 {
+        self.private.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the ModModeLine request
 pub const MOD_MODE_LINE_REQUEST: u8 = 2;
@@ -669,6 +684,60 @@ impl TryFrom<&[u8]> for GetMonitorReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetMonitorReply {
+    /// Get the value of the `vendor_length` field.
+    ///
+    /// The `vendor_length` field is used as the length field of the `vendor` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn vendor_length(&self) -> u8 {
+        self.vendor.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `model_length` field.
+    ///
+    /// The `model_length` field is used as the length field of the `model` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn model_length(&self) -> u8 {
+        self.model.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `num_hsync` field.
+    ///
+    /// The `num_hsync` field is used as the length field of the `hsync` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_hsync(&self) -> u8 {
+        self.hsync.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `num_vsync` field.
+    ///
+    /// The `num_vsync` field is used as the length field of the `vsync` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_vsync(&self) -> u8 {
+        self.vsync.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the LockModeSwitch request
 pub const LOCK_MODE_SWITCH_REQUEST: u8 = 5;
@@ -749,6 +818,21 @@ impl TryFrom<&[u8]> for GetAllModeLinesReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetAllModeLinesReply {
+    /// Get the value of the `modecount` field.
+    ///
+    /// The `modecount` field is used as the length field of the `modeinfo` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn modecount(&self) -> u32 {
+        self.modeinfo.len()
+            .try_into().unwrap()
     }
 }
 

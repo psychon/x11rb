@@ -1976,6 +1976,58 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 );
             }
         }
+
+        // Generate accessors for length fields that are not part of the struct.
+        // First, collect all relevant fields.
+        let deducible = fields
+            .iter()
+            .filter_map(|field| match field {
+                xcbdefs::FieldDef::Normal(normal_field) => deducible_fields
+                    .get(&normal_field.name)
+                    .and_then(|d| match d {
+                        DeducibleField::LengthOf(list_name, op) => Some((list_name, op)),
+                        // switches are not yet supported
+                        _ => None,
+                    })
+                    .map(|d| (field, d)),
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+        if !deducible.is_empty() {
+            outln!(out, "impl {} {{", name);
+            for (field, (list_name, op)) in deducible {
+                let field_type = self.field_to_rust_type(field, switch_prefix);
+                let name = field.name().unwrap();
+                let name = if name == "type" {
+                    format!("r#{}", name)
+                } else {
+                    name.to_string()
+                };
+                out.indented(|out| {
+                    outln!(out, "/// Get the value of the `{}` field.", &name);
+                    outln!(out, "///");
+                    outln!(out, "/// The `{}` field is used as the length field of the `{}` field.", &name, &list_name);
+                    outln!(out, "/// This function computes the field's value again based on the length of the list.");
+                    outln!(out, "///");
+                    outln!(out, "/// # Panics");
+                    outln!(out, "///");
+                    outln!(out, "/// Panics if the value cannot be represented in the target type. This can");
+                    outln!(out, "/// not happen with values of the struct received from the X11 server.");
+                    outln!(out, "pub fn {}(&self) -> {} {{", to_rust_variable_name(&name), field_type);
+                    out.indented(|out| {
+                        outln!(out, "self.{}.len()", to_rust_variable_name(&list_name));
+                        match op {
+                            DeducibleLengthFieldOp::None => {},
+                            DeducibleLengthFieldOp::Mul(n) => outln!(out.indent(), ".checked_mul({}).unwrap()", n),
+                            DeducibleLengthFieldOp::Div(n) => outln!(out.indent(), ".checked_div({}).unwrap()", n),
+                        }
+                        outln!(out.indent(), ".try_into().unwrap()");
+                    });
+                    outln!(out, "}}");
+                });
+            }
+            outln!(out, "}}");
+        }
     }
 
     fn emit_fixed_size_struct_serialize(

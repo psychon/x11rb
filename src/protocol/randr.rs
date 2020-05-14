@@ -482,6 +482,21 @@ impl Serialize for RefreshRates {
         self.rates.serialize_into(bytes);
     }
 }
+impl RefreshRates {
+    /// Get the value of the `nRates` field.
+    ///
+    /// The `nRates` field is used as the length field of the `rates` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn n_rates(&self) -> u16 {
+        self.rates.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
@@ -881,6 +896,21 @@ impl TryFrom<&[u8]> for GetScreenInfoReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetScreenInfoReply {
+    /// Get the value of the `nSizes` field.
+    ///
+    /// The `nSizes` field is used as the length field of the `sizes` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn n_sizes(&self) -> u16 {
+        self.sizes.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetScreenSizeRange request
 pub const GET_SCREEN_SIZE_RANGE_REQUEST: u8 = 6;
@@ -1244,6 +1274,60 @@ impl TryFrom<&[u8]> for GetScreenResourcesReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetScreenResourcesReply {
+    /// Get the value of the `num_crtcs` field.
+    ///
+    /// The `num_crtcs` field is used as the length field of the `crtcs` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_crtcs(&self) -> u16 {
+        self.crtcs.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `num_outputs` field.
+    ///
+    /// The `num_outputs` field is used as the length field of the `outputs` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_outputs(&self) -> u16 {
+        self.outputs.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `num_modes` field.
+    ///
+    /// The `num_modes` field is used as the length field of the `modes` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_modes(&self) -> u16 {
+        self.modes.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `names_len` field.
+    ///
+    /// The `names_len` field is used as the length field of the `names` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn names_len(&self) -> u16 {
+        self.names.len()
+            .try_into().unwrap()
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -1395,6 +1479,60 @@ impl TryFrom<&[u8]> for GetOutputInfoReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetOutputInfoReply {
+    /// Get the value of the `num_crtcs` field.
+    ///
+    /// The `num_crtcs` field is used as the length field of the `crtcs` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_crtcs(&self) -> u16 {
+        self.crtcs.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `num_modes` field.
+    ///
+    /// The `num_modes` field is used as the length field of the `modes` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_modes(&self) -> u16 {
+        self.modes.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `num_clones` field.
+    ///
+    /// The `num_clones` field is used as the length field of the `clones` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_clones(&self) -> u16 {
+        self.clones.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `name_len` field.
+    ///
+    /// The `name_len` field is used as the length field of the `name` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn name_len(&self) -> u16 {
+        self.name.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the ListOutputProperties request
 pub const LIST_OUTPUT_PROPERTIES_REQUEST: u8 = 10;
@@ -1447,6 +1585,21 @@ impl TryFrom<&[u8]> for ListOutputPropertiesReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl ListOutputPropertiesReply {
+    /// Get the value of the `num_atoms` field.
+    ///
+    /// The `num_atoms` field is used as the length field of the `atoms` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_atoms(&self) -> u16 {
+        self.atoms.len()
+            .try_into().unwrap()
     }
 }
 
@@ -1510,6 +1663,21 @@ impl TryFrom<&[u8]> for QueryOutputPropertyReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl QueryOutputPropertyReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `validValues` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.valid_values.len()
+            .try_into().unwrap()
     }
 }
 
@@ -1986,6 +2154,34 @@ impl TryFrom<&[u8]> for GetCrtcInfoReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetCrtcInfoReply {
+    /// Get the value of the `num_outputs` field.
+    ///
+    /// The `num_outputs` field is used as the length field of the `outputs` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_outputs(&self) -> u16 {
+        self.outputs.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `num_possible_outputs` field.
+    ///
+    /// The `num_possible_outputs` field is used as the length field of the `possible` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_possible_outputs(&self) -> u16 {
+        self.possible.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the SetCrtcConfig request
 pub const SET_CRTC_CONFIG_REQUEST: u8 = 21;
@@ -2184,6 +2380,21 @@ impl TryFrom<&[u8]> for GetCrtcGammaReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetCrtcGammaReply {
+    /// Get the value of the `size` field.
+    ///
+    /// The `size` field is used as the length field of the `red` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn size(&self) -> u16 {
+        self.red.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the SetCrtcGamma request
 pub const SET_CRTC_GAMMA_REQUEST: u8 = 24;
@@ -2293,6 +2504,60 @@ impl TryFrom<&[u8]> for GetScreenResourcesCurrentReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetScreenResourcesCurrentReply {
+    /// Get the value of the `num_crtcs` field.
+    ///
+    /// The `num_crtcs` field is used as the length field of the `crtcs` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_crtcs(&self) -> u16 {
+        self.crtcs.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `num_outputs` field.
+    ///
+    /// The `num_outputs` field is used as the length field of the `outputs` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_outputs(&self) -> u16 {
+        self.outputs.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `num_modes` field.
+    ///
+    /// The `num_modes` field is used as the length field of the `modes` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_modes(&self) -> u16 {
+        self.modes.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `names_len` field.
+    ///
+    /// The `names_len` field is used as the length field of the `names` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn names_len(&self) -> u16 {
+        self.names.len()
+            .try_into().unwrap()
     }
 }
 
@@ -2520,6 +2785,60 @@ impl TryFrom<&[u8]> for GetCrtcTransformReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetCrtcTransformReply {
+    /// Get the value of the `pending_len` field.
+    ///
+    /// The `pending_len` field is used as the length field of the `pending_filter_name` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn pending_len(&self) -> u16 {
+        self.pending_filter_name.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `pending_nparams` field.
+    ///
+    /// The `pending_nparams` field is used as the length field of the `pending_params` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn pending_nparams(&self) -> u16 {
+        self.pending_params.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `current_len` field.
+    ///
+    /// The `current_len` field is used as the length field of the `current_filter_name` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn current_len(&self) -> u16 {
+        self.current_filter_name.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `current_nparams` field.
+    ///
+    /// The `current_nparams` field is used as the length field of the `current_params` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn current_nparams(&self) -> u16 {
+        self.current_params.len()
+            .try_into().unwrap()
     }
 }
 
@@ -2835,6 +3154,21 @@ impl TryFrom<&[u8]> for GetProvidersReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetProvidersReply {
+    /// Get the value of the `num_providers` field.
+    ///
+    /// The `num_providers` field is used as the length field of the `providers` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_providers(&self) -> u16 {
+        self.providers.len()
+            .try_into().unwrap()
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -2980,6 +3314,60 @@ impl TryFrom<&[u8]> for GetProviderInfoReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetProviderInfoReply {
+    /// Get the value of the `num_crtcs` field.
+    ///
+    /// The `num_crtcs` field is used as the length field of the `crtcs` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_crtcs(&self) -> u16 {
+        self.crtcs.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `num_outputs` field.
+    ///
+    /// The `num_outputs` field is used as the length field of the `outputs` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_outputs(&self) -> u16 {
+        self.outputs.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `num_associated_providers` field.
+    ///
+    /// The `num_associated_providers` field is used as the length field of the `associated_providers` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_associated_providers(&self) -> u16 {
+        self.associated_providers.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `name_len` field.
+    ///
+    /// The `name_len` field is used as the length field of the `name` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn name_len(&self) -> u16 {
+        self.name.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the SetProviderOffloadSink request
 pub const SET_PROVIDER_OFFLOAD_SINK_REQUEST: u8 = 34;
@@ -3108,6 +3496,21 @@ impl TryFrom<&[u8]> for ListProviderPropertiesReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl ListProviderPropertiesReply {
+    /// Get the value of the `num_atoms` field.
+    ///
+    /// The `num_atoms` field is used as the length field of the `atoms` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_atoms(&self) -> u16 {
+        self.atoms.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the QueryProviderProperty request
 pub const QUERY_PROVIDER_PROPERTY_REQUEST: u8 = 37;
@@ -3169,6 +3572,21 @@ impl TryFrom<&[u8]> for QueryProviderPropertyReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl QueryProviderPropertyReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `valid_values` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.valid_values.len()
+            .try_into().unwrap()
     }
 }
 
@@ -4091,6 +4509,21 @@ impl Serialize for MonitorInfo {
         self.outputs.serialize_into(bytes);
     }
 }
+impl MonitorInfo {
+    /// Get the value of the `nOutput` field.
+    ///
+    /// The `nOutput` field is used as the length field of the `outputs` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn n_output(&self) -> u16 {
+        self.outputs.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetMonitors request
 pub const GET_MONITORS_REQUEST: u8 = 42;
@@ -4152,6 +4585,21 @@ impl TryFrom<&[u8]> for GetMonitorsReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetMonitorsReply {
+    /// Get the value of the `nMonitors` field.
+    ///
+    /// The `nMonitors` field is used as the length field of the `monitors` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn n_monitors(&self) -> u32 {
+        self.monitors.len()
+            .try_into().unwrap()
     }
 }
 

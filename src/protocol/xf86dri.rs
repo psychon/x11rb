@@ -241,6 +241,21 @@ impl TryFrom<&[u8]> for OpenConnectionReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl OpenConnectionReply {
+    /// Get the value of the `bus_id_len` field.
+    ///
+    /// The `bus_id_len` field is used as the length field of the `bus_id` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn bus_id_len(&self) -> u32 {
+        self.bus_id.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the CloseConnection request
 pub const CLOSE_CONNECTION_REQUEST: u8 = 3;
@@ -327,6 +342,21 @@ impl TryFrom<&[u8]> for GetClientDriverNameReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetClientDriverNameReply {
+    /// Get the value of the `client_driver_name_len` field.
+    ///
+    /// The `client_driver_name_len` field is used as the length field of the `client_driver_name` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn client_driver_name_len(&self) -> u32 {
+        self.client_driver_name.len()
+            .try_into().unwrap()
     }
 }
 
@@ -589,6 +619,34 @@ impl TryFrom<&[u8]> for GetDrawableInfoReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetDrawableInfoReply {
+    /// Get the value of the `num_clip_rects` field.
+    ///
+    /// The `num_clip_rects` field is used as the length field of the `clip_rects` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_clip_rects(&self) -> u32 {
+        self.clip_rects.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `num_back_clip_rects` field.
+    ///
+    /// The `num_back_clip_rects` field is used as the length field of the `back_clip_rects` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn num_back_clip_rects(&self) -> u32 {
+        self.back_clip_rects.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetDeviceInfo request
 pub const GET_DEVICE_INFO_REQUEST: u8 = 10;
@@ -650,6 +708,21 @@ impl TryFrom<&[u8]> for GetDeviceInfoReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetDeviceInfoReply {
+    /// Get the value of the `device_private_size` field.
+    ///
+    /// The `device_private_size` field is used as the length field of the `device_private` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn device_private_size(&self) -> u32 {
+        self.device_private.len()
+            .try_into().unwrap()
     }
 }
 

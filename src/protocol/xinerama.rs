@@ -400,6 +400,21 @@ impl TryFrom<&[u8]> for QueryScreensReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl QueryScreensReply {
+    /// Get the value of the `number` field.
+    ///
+    /// The `number` field is used as the length field of the `screen_info` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This can
+    /// not happen with values of the struct received from the X11 server.
+    pub fn number(&self) -> u32 {
+        self.screen_info.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Extension trait defining the requests of this extension.
 pub trait ConnectionExt: RequestConnection {
