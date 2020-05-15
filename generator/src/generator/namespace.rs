@@ -1994,6 +1994,13 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
             })
             .collect::<Vec<_>>();
         if !deducible.is_empty() {
+            if deducible
+                .iter()
+                .any(|(field, _)| field.name() == Some("len"))
+            {
+                let comment = "This is not a container and is_empty() makes no sense";
+                outln!(out, "#[allow(clippy::len_without_is_empty)] // {}", comment);
+            }
             outln!(out, "impl {} {{", name);
             for (field, (list_name, op)) in deducible {
                 let field_type = self.field_to_rust_type(field, switch_prefix);

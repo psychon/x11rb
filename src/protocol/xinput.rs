@@ -905,6 +905,7 @@ impl Serialize for DeviceName {
         bytes.extend_from_slice(&self.string);
     }
 }
+#[allow(clippy::len_without_is_empty)] // This is not a container and is_empty() makes no sense
 impl DeviceName {
     /// Get the value of the `len` field.
     ///
