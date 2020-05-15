@@ -246,3 +246,13 @@ impl ReadFD for Stream {
         }
     }
 }
+
+#[cfg(unix)]
+impl AsRawFd for Stream {
+    fn as_raw_fd(&self) -> RawFd {
+        match self {
+            Stream::TcpStream(stream) => stream.as_raw_fd(),
+            Stream::UnixStream(stream) => stream.as_raw_fd(),
+        }
+    }
+}
