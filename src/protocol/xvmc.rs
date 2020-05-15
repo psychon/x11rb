@@ -233,8 +233,8 @@ impl ListSurfaceTypesReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn num(&self) -> u32 {
         self.surfaces.len()
             .try_into().unwrap()
@@ -327,8 +327,8 @@ impl CreateContextReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn length(&self) -> u32 {
         self.priv_data.len()
             .try_into().unwrap()
@@ -426,8 +426,8 @@ impl CreateSurfaceReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn length(&self) -> u32 {
         self.priv_data.len()
             .try_into().unwrap()
@@ -547,8 +547,8 @@ impl CreateSubpictureReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn length(&self) -> u32 {
         self.priv_data.len()
             .try_into().unwrap()
@@ -648,8 +648,8 @@ impl ListSubpictureTypesReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn num(&self) -> u32 {
         self.types.len()
             .try_into().unwrap()

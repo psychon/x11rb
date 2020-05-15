@@ -410,8 +410,8 @@ impl ClientInfo {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn num_ranges(&self) -> u32 {
         self.ranges.len()
             .try_into().unwrap()
@@ -749,8 +749,8 @@ impl GetContextReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn num_intercepted_clients(&self) -> u32 {
         self.intercepted_clients.len()
             .try_into().unwrap()
@@ -829,8 +829,8 @@ impl EnableContextReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn length(&self) -> u32 {
         self.data.len()
             .checked_div(4).unwrap()

@@ -410,8 +410,8 @@ impl Systemcounter {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn name_len(&self) -> u16 {
         self.name.len()
             .try_into().unwrap()
@@ -816,8 +816,8 @@ impl ListSystemCountersReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn counters_len(&self) -> u32 {
         self.counters.len()
             .try_into().unwrap()

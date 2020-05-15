@@ -249,8 +249,8 @@ impl OpenConnectionReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn bus_id_len(&self) -> u32 {
         self.bus_id.len()
             .try_into().unwrap()
@@ -352,8 +352,8 @@ impl GetClientDriverNameReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn client_driver_name_len(&self) -> u32 {
         self.client_driver_name.len()
             .try_into().unwrap()
@@ -627,8 +627,8 @@ impl GetDrawableInfoReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn num_clip_rects(&self) -> u32 {
         self.clip_rects.len()
             .try_into().unwrap()
@@ -640,8 +640,8 @@ impl GetDrawableInfoReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn num_back_clip_rects(&self) -> u32 {
         self.back_clip_rects.len()
             .try_into().unwrap()
@@ -718,8 +718,8 @@ impl GetDeviceInfoReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn device_private_size(&self) -> u32 {
         self.device_private.len()
             .try_into().unwrap()

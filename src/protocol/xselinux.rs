@@ -174,8 +174,8 @@ impl GetDeviceCreateContextReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn context_len(&self) -> u32 {
         self.context.len()
             .try_into().unwrap()
@@ -280,8 +280,8 @@ impl GetDeviceContextReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn context_len(&self) -> u32 {
         self.context.len()
             .try_into().unwrap()
@@ -376,8 +376,8 @@ impl GetWindowCreateContextReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn context_len(&self) -> u32 {
         self.context.len()
             .try_into().unwrap()
@@ -446,8 +446,8 @@ impl GetWindowContextReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn context_len(&self) -> u32 {
         self.context.len()
             .try_into().unwrap()
@@ -516,8 +516,8 @@ impl ListItem {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn object_context_len(&self) -> u32 {
         self.object_context.len()
             .try_into().unwrap()
@@ -529,8 +529,8 @@ impl ListItem {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn data_context_len(&self) -> u32 {
         self.data_context.len()
             .try_into().unwrap()
@@ -625,8 +625,8 @@ impl GetPropertyCreateContextReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn context_len(&self) -> u32 {
         self.context.len()
             .try_into().unwrap()
@@ -721,8 +721,8 @@ impl GetPropertyUseContextReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn context_len(&self) -> u32 {
         self.context.len()
             .try_into().unwrap()
@@ -796,8 +796,8 @@ impl GetPropertyContextReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn context_len(&self) -> u32 {
         self.context.len()
             .try_into().unwrap()
@@ -871,8 +871,8 @@ impl GetPropertyDataContextReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn context_len(&self) -> u32 {
         self.context.len()
             .try_into().unwrap()
@@ -940,8 +940,8 @@ impl ListPropertiesReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn properties_len(&self) -> u32 {
         self.properties.len()
             .try_into().unwrap()
@@ -1036,8 +1036,8 @@ impl GetSelectionCreateContextReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn context_len(&self) -> u32 {
         self.context.len()
             .try_into().unwrap()
@@ -1132,8 +1132,8 @@ impl GetSelectionUseContextReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn context_len(&self) -> u32 {
         self.context.len()
             .try_into().unwrap()
@@ -1202,8 +1202,8 @@ impl GetSelectionContextReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn context_len(&self) -> u32 {
         self.context.len()
             .try_into().unwrap()
@@ -1272,8 +1272,8 @@ impl GetSelectionDataContextReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn context_len(&self) -> u32 {
         self.context.len()
             .try_into().unwrap()
@@ -1336,8 +1336,8 @@ impl ListSelectionsReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn selections_len(&self) -> u32 {
         self.selections.len()
             .try_into().unwrap()
@@ -1406,8 +1406,8 @@ impl GetClientContextReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn context_len(&self) -> u32 {
         self.context.len()
             .try_into().unwrap()

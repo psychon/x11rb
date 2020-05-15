@@ -497,8 +497,8 @@ impl GetModeLineReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn privsize(&self) -> u32 {
         self.private.len()
             .try_into().unwrap()
@@ -692,8 +692,8 @@ impl GetMonitorReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn vendor_length(&self) -> u8 {
         self.vendor.len()
             .try_into().unwrap()
@@ -705,8 +705,8 @@ impl GetMonitorReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn model_length(&self) -> u8 {
         self.model.len()
             .try_into().unwrap()
@@ -718,8 +718,8 @@ impl GetMonitorReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn num_hsync(&self) -> u8 {
         self.hsync.len()
             .try_into().unwrap()
@@ -731,8 +731,8 @@ impl GetMonitorReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn num_vsync(&self) -> u8 {
         self.vsync.len()
             .try_into().unwrap()
@@ -828,8 +828,8 @@ impl GetAllModeLinesReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn modecount(&self) -> u32 {
         self.modeinfo.len()
             .try_into().unwrap()

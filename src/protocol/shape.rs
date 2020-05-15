@@ -708,8 +708,8 @@ impl GetRectanglesReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn rectangles_len(&self) -> u32 {
         self.rectangles.len()
             .try_into().unwrap()

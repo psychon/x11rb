@@ -91,8 +91,8 @@ impl Printer {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn name_len(&self) -> u32 {
         self.name.len()
             .try_into().unwrap()
@@ -104,8 +104,8 @@ impl Printer {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn desc_len(&self) -> u32 {
         self.description.len()
             .try_into().unwrap()
@@ -522,8 +522,8 @@ impl PrintGetPrinterListReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn list_count(&self) -> u32 {
         self.printers.len()
             .try_into().unwrap()
@@ -968,8 +968,8 @@ impl PrintGetDocumentDataReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn data_len(&self) -> u32 {
         self.data.len()
             .try_into().unwrap()
@@ -1183,8 +1183,8 @@ impl PrintGetAttributesReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn string_len(&self) -> u32 {
         self.attributes.len()
             .try_into().unwrap()
@@ -1267,8 +1267,8 @@ impl PrintGetOneAttributesReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn value_len(&self) -> u32 {
         self.value.len()
             .try_into().unwrap()
@@ -1434,8 +1434,8 @@ impl PrintQueryScreensReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn list_count(&self) -> u32 {
         self.roots.len()
             .try_into().unwrap()

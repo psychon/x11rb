@@ -2643,8 +2643,8 @@ impl CountedString16 {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn length(&self) -> u16 {
         self.string.len()
             .try_into().unwrap()
@@ -2768,8 +2768,8 @@ impl KeyType {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn n_map_entries(&self) -> u8 {
         self.map.len()
             .try_into().unwrap()
@@ -2826,8 +2826,8 @@ impl KeySymMap {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn n_syms(&self) -> u16 {
         self.syms.len()
             .try_into().unwrap()
@@ -3468,8 +3468,8 @@ impl SetKeyType {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn n_map_entries(&self) -> u8 {
         self.entries.len()
             .try_into().unwrap()
@@ -3523,8 +3523,8 @@ impl Outline {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn n_points(&self) -> u8 {
         self.points.len()
             .try_into().unwrap()
@@ -3582,8 +3582,8 @@ impl Shape {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn n_outlines(&self) -> u8 {
         self.outlines.len()
             .try_into().unwrap()
@@ -3727,8 +3727,8 @@ impl OverlayRow {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn n_keys(&self) -> u8 {
         self.keys.len()
             .try_into().unwrap()
@@ -3780,8 +3780,8 @@ impl Overlay {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn n_rows(&self) -> u8 {
         self.rows.len()
             .try_into().unwrap()
@@ -3839,8 +3839,8 @@ impl Row {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn n_keys(&self) -> u8 {
         self.keys.len()
             .try_into().unwrap()
@@ -3968,8 +3968,8 @@ impl Listing {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn length(&self) -> u16 {
         self.string.len()
             .try_into().unwrap()
@@ -7863,8 +7863,8 @@ impl GetCompatMapReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn n_si_rtrn(&self) -> u16 {
         self.si_rtrn.len()
             .try_into().unwrap()
@@ -8958,8 +8958,8 @@ impl ListComponentsReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn n_keymaps(&self) -> u16 {
         self.keymaps.len()
             .try_into().unwrap()
@@ -8971,8 +8971,8 @@ impl ListComponentsReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn n_keycodes(&self) -> u16 {
         self.keycodes.len()
             .try_into().unwrap()
@@ -8984,8 +8984,8 @@ impl ListComponentsReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn n_types(&self) -> u16 {
         self.types.len()
             .try_into().unwrap()
@@ -8997,8 +8997,8 @@ impl ListComponentsReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn n_compat_maps(&self) -> u16 {
         self.compat_maps.len()
             .try_into().unwrap()
@@ -9010,8 +9010,8 @@ impl ListComponentsReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn n_symbols(&self) -> u16 {
         self.symbols.len()
             .try_into().unwrap()
@@ -9023,8 +9023,8 @@ impl ListComponentsReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn n_geometries(&self) -> u16 {
         self.geometries.len()
             .try_into().unwrap()
@@ -9308,8 +9308,8 @@ impl GetKbdByNameRepliesCompatMap {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn n_si_rtrn(&self) -> u16 {
         self.si_rtrn.len()
             .try_into().unwrap()
@@ -9354,8 +9354,8 @@ impl GetKbdByNameRepliesIndicatorMaps {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn n_indicators(&self) -> u8 {
         self.maps.len()
             .try_into().unwrap()
@@ -9822,8 +9822,8 @@ impl GetDeviceInfoReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn n_device_led_f_bs(&self) -> u16 {
         self.leds.len()
             .try_into().unwrap()
@@ -9835,8 +9835,8 @@ impl GetDeviceInfoReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn n_btns_rtrn(&self) -> u8 {
         self.btn_actions.len()
             .try_into().unwrap()
@@ -9848,8 +9848,8 @@ impl GetDeviceInfoReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn name_len(&self) -> u16 {
         self.name.len()
             .try_into().unwrap()

@@ -263,8 +263,8 @@ impl ClientIdValue {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn length(&self) -> u32 {
         self.value.len()
             .checked_mul(4).unwrap()
@@ -419,8 +419,8 @@ impl ResourceSizeValue {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn num_cross_references(&self) -> u32 {
         self.cross_references.len()
             .try_into().unwrap()
@@ -538,8 +538,8 @@ impl QueryClientsReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn num_clients(&self) -> u32 {
         self.clients.len()
             .try_into().unwrap()
@@ -607,8 +607,8 @@ impl QueryClientResourcesReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn num_types(&self) -> u32 {
         self.types.len()
             .try_into().unwrap()
@@ -735,8 +735,8 @@ impl QueryClientIdsReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn num_ids(&self) -> u32 {
         self.ids.len()
             .try_into().unwrap()
@@ -814,8 +814,8 @@ impl QueryResourceBytesReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn num_sizes(&self) -> u32 {
         self.sizes.len()
             .try_into().unwrap()

@@ -499,8 +499,8 @@ impl ConnectReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn driver_name_length(&self) -> u32 {
         self.driver_name.len()
             .try_into().unwrap()
@@ -512,8 +512,8 @@ impl ConnectReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn device_name_length(&self) -> u32 {
         self.device_name.len()
             .try_into().unwrap()
@@ -705,8 +705,8 @@ impl GetBuffersReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn count(&self) -> u32 {
         self.buffers.len()
             .try_into().unwrap()
@@ -852,8 +852,8 @@ impl GetBuffersWithFormatReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn count(&self) -> u32 {
         self.buffers.len()
             .try_into().unwrap()

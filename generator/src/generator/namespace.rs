@@ -2011,8 +2011,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     outln!(out, "///");
                     outln!(out, "/// # Panics");
                     outln!(out, "///");
-                    outln!(out, "/// Panics if the value cannot be represented in the target type. This can");
-                    outln!(out, "/// not happen with values of the struct received from the X11 server.");
+                    outln!(out, "/// Panics if the value cannot be represented in the target type. This");
+                    outln!(out, "/// cannot happen with values of the struct received from the X11 server.");
                     outln!(out, "pub fn {}(&self) -> {} {{", to_rust_variable_name(&name), field_type);
                     out.indented(|out| {
                         outln!(out, "self.{}.len()", to_rust_variable_name(&list_name));

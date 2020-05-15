@@ -1557,8 +1557,8 @@ impl FetchRegionReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn length(&self) -> u32 {
         self.rectangles.len()
             .checked_mul(2).unwrap()
@@ -1791,8 +1791,8 @@ impl GetCursorNameReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn nbytes(&self) -> u16 {
         self.name.len()
             .try_into().unwrap()
@@ -1874,8 +1874,8 @@ impl GetCursorImageAndNameReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn nbytes(&self) -> u16 {
         self.name.len()
             .try_into().unwrap()

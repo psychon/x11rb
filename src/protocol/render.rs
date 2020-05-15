@@ -1342,8 +1342,8 @@ impl Pictdepth {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn num_visuals(&self) -> u16 {
         self.visuals.len()
             .try_into().unwrap()
@@ -1393,8 +1393,8 @@ impl Pictscreen {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn num_depths(&self) -> u32 {
         self.depths.len()
             .try_into().unwrap()
@@ -1941,8 +1941,8 @@ impl QueryPictFormatsReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn num_formats(&self) -> u32 {
         self.formats.len()
             .try_into().unwrap()
@@ -1954,8 +1954,8 @@ impl QueryPictFormatsReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn num_screens(&self) -> u32 {
         self.screens.len()
             .try_into().unwrap()
@@ -1967,8 +1967,8 @@ impl QueryPictFormatsReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn num_subpixel(&self) -> u32 {
         self.subpixels.len()
             .try_into().unwrap()
@@ -2036,8 +2036,8 @@ impl QueryPictIndexValuesReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn num_values(&self) -> u32 {
         self.values.len()
             .try_into().unwrap()
@@ -3474,8 +3474,8 @@ impl QueryFiltersReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn num_aliases(&self) -> u32 {
         self.aliases.len()
             .try_into().unwrap()
@@ -3487,8 +3487,8 @@ impl QueryFiltersReply {
     ///
     /// # Panics
     ///
-    /// Panics if the value cannot be represented in the target type. This can
-    /// not happen with values of the struct received from the X11 server.
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
     pub fn num_filters(&self) -> u32 {
         self.filters.len()
             .try_into().unwrap()
