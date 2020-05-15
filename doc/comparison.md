@@ -87,5 +87,5 @@ its users to blindly trust length fields that come from the X11 server.
 The downside of this is possibly slower code. However, if your bottleneck is in
 talking to the X11 server, you are seriously doing something wrong.
 
-Examples of the generated code [can be found here](doc/generated_code.md). Feel
+Examples of the generated code [can be found here](generated_code.md). Feel
 free to suggest improvements to it.
