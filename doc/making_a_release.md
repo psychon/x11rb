@@ -1,4 +1,5 @@
 ```
+vim doc/generated_code.md  # Update the generated code
 vim doc/changelog.md  # Update the changelog
 vim Cargo.toml  # Update version number
 # Now get these changes merged
