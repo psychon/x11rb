@@ -19,12 +19,14 @@ use crate::x11_utils::{ExtensionInformation, Serialize};
 mod fd_read_write;
 mod id_allocator;
 mod inner;
+mod packet_reader;
 mod parse_display;
 mod stream;
 mod xauth;
 
 pub use fd_read_write::{BufReadFD, BufWriteFD, ReadFD, ReadFDWrapper, WriteFD, WriteFDWrapper};
 use inner::PollReply;
+use packet_reader::PacketReader;
 
 type Buffer = <RustConnection as RequestConnection>::Buf;
 pub type RawEventAndSeqNumber = crate::connection::RawEventAndSeqNumber<Buffer>;
@@ -50,7 +52,7 @@ pub(crate) enum ReplyFDKind {
 #[derive(Debug)]
 pub struct RustConnection {
     inner: Mutex<inner::ConnectionInner>,
-    read: Mutex<BufReadFD<stream::Stream>>,
+    read: Mutex<PacketReader<stream::Stream>>,
     write: Mutex<BufWriteFD<stream::Stream>>,
     reader_condition: Condvar,
     id_allocator: Mutex<id_allocator::IDAllocator>,
@@ -152,7 +154,7 @@ impl RustConnection {
             id_allocator::IDAllocator::new(setup.resource_id_base, setup.resource_id_mask)?;
         Ok(RustConnection {
             inner: Mutex::new(inner),
-            read: Mutex::new(read),
+            read: Mutex::new(PacketReader::new(read)),
             write: Mutex::new(write),
             reader_condition: Condvar::new(),
             id_allocator: Mutex::new(allocator),
@@ -247,7 +249,8 @@ impl RustConnection {
                 drop(inner);
 
                 // 2.2. Block the thread until a packet is received.
-                let (packet, fds) = read_packet(&mut *lock)?;
+                let mut fds = Vec::new();
+                let packet = lock.read_packet(&mut fds)?;
 
                 // 2.3. Relock `inner` to enqueue the packet.
                 inner = self.inner.lock().unwrap();
@@ -493,33 +496,6 @@ impl Connection for RustConnection {
     fn generate_id(&self) -> Result<u32, ReplyOrIdError> {
         self.id_allocator.lock().unwrap().generate_id(self)
     }
-}
-
-// Read a single X11 packet from the connection.
-//
-// This function only supports errors, events, and replies. Namely, this cannot be used to receive
-// the initial setup reply from the X11 server.
-fn read_packet(read: &mut impl ReadFD) -> Result<(Vec<u8>, Vec<RawFdContainer>), std::io::Error> {
-    let mut fds = Vec::new();
-    let mut buffer = vec![0; 32];
-    read.read_exact(&mut buffer, &mut fds)?;
-
-    use crate::protocol::xproto::GE_GENERIC_EVENT;
-    const REPLY: u8 = 1;
-    const SENT_GE_GENERIC_EVENT: u8 = GE_GENERIC_EVENT | 0x80;
-    let extra_length = match buffer[0] {
-        REPLY | GE_GENERIC_EVENT | SENT_GE_GENERIC_EVENT => {
-            4 * u32::from_ne_bytes([buffer[4], buffer[5], buffer[6], buffer[7]])
-        }
-        _ => 0,
-    } as usize;
-    // Use `Vec::reserve_exact` because this will be the final
-    // length of the vector.
-    buffer.reserve_exact(extra_length);
-    buffer.resize(32 + extra_length, 0);
-    read.read_exact(&mut buffer[32..], &mut fds)?;
-
-    Ok((buffer, fds))
 }
 
 #[cfg(target_endian = "little")]
