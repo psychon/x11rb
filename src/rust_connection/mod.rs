@@ -653,7 +653,8 @@ fn write_all_vectored(
         }
     }
     if !fds.is_empty() {
-        write.write_all(&[], fds)?;
+        let count = write_polling_repeat(write_fd, || write.write(&[], &mut fds))?;
+        assert_eq!(count, 0);
     }
     Ok(())
 }
