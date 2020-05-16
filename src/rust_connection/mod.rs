@@ -6,6 +6,8 @@ use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, RawFd};
 
+use nix::poll::{PollFd, PollFlags, poll};
+
 use crate::connection::{
     compute_length_field, Connection, DiscardMode, ReplyOrError, RequestConnection, RequestKind,
     SequenceNumber,
@@ -121,7 +123,9 @@ impl RustConnection {
         auth_name: Vec<u8>,
         auth_data: Vec<u8>,
     ) -> Result<Self, ConnectError> {
-        write_setup(&mut write, auth_name, auth_data)?;
+        let raw_write = write.get_ref().as_raw_fd();
+        write_setup(raw_write, &mut write, auth_name, auth_data)?;
+
         let raw_read = read.get_ref().as_raw_fd();
         let mut read = PacketReader::new(read);
         let setup = read_setup(raw_read, &mut read)?;
@@ -256,7 +260,7 @@ impl RustConnection {
                 // 2.2. Block the thread until a packet is received.
                 let mut fds = Vec::new();
                 let raw_fd = lock.get_ref().get_ref().as_raw_fd();
-                let packet = polling_repeat(raw_fd, || lock.read_x11_packet(&mut fds))?;
+                let packet = read_polling_repeat(raw_fd, || lock.read_x11_packet(&mut fds))?;
 
                 // 2.3. Relock `inner` to enqueue the packet.
                 inner = self.inner.lock().unwrap();
@@ -516,6 +520,7 @@ fn byte_order() -> u8 {
 
 /// Send a `SetupRequest` to the X11 server.
 fn write_setup(
+    fd: RawFd,
     write: &mut impl WriteFD,
     auth_name: Vec<u8>,
     auth_data: Vec<u8>,
@@ -527,8 +532,13 @@ fn write_setup(
         authorization_protocol_name: auth_name,
         authorization_protocol_data: auth_data,
     };
-    write.write_all(&request.serialize(), Vec::new())?;
-    write.flush()?;
+    let request = request.serialize();
+    let mut to_write = &request[..];
+    while !to_write.is_empty() {
+        let written = write_polling_repeat(fd, || write.write(to_write, &mut Vec::new()))?;
+        to_write = &to_write[written..];
+    }
+    write_polling_repeat(fd, || write.flush())?;
     Ok(())
 }
 
@@ -538,7 +548,7 @@ fn write_setup(
 /// as errors.
 fn read_setup(fd: RawFd, read: &mut PacketReader<impl ReadFD + std::fmt::Debug>) -> Result<Setup, ConnectError> {
     let mut fds = Vec::new();
-    let setup = polling_repeat(fd, || read.read_setup_packet(&mut fds))?;
+    let setup = read_polling_repeat(fd, || read.read_setup_packet(&mut fds))?;
     if !fds.is_empty() {
         return Err(IOError::new(
             std::io::ErrorKind::Other,
@@ -598,11 +608,9 @@ fn write_all_vectored(
     Ok(())
 }
 
-/// Wait for some FD to become readable.
-fn poll_readable(fd: RawFd) -> std::io::Result<()> {
-    use nix::poll::{PollFd, PollFlags, poll};
-
-    let mut fds = [PollFd::new(fd, PollFlags::POLLIN)];
+/// Wait for some FD to satisfy the given poll flags
+fn do_poll(fd: RawFd, flags: PollFlags) -> std::io::Result<()> {
+    let mut fds = [PollFd::new(fd, flags)];
     let res = poll(&mut fds, -1)
         // errno still contains the error code
         .map_err(|_| IOError::last_os_error())?;
@@ -610,7 +618,7 @@ fn poll_readable(fd: RawFd) -> std::io::Result<()> {
     // The timeout could not have expired and there was no error, so our one FD must be readable.
     assert_eq!(res, 1);
     assert!(
-        fds[0].revents().map(|e| e.contains(PollFlags::POLLIN)).unwrap_or(false),
+        fds[0].revents().map(|e| e.contains(flags)).unwrap_or(false),
         "{:?}", fds[0].revents(),
     );
 
@@ -619,7 +627,21 @@ fn poll_readable(fd: RawFd) -> std::io::Result<()> {
 
 /// Call some function, handling `ErrorKind::WouldBlock` by waiting for the given `fd` to become
 /// readable.
-fn polling_repeat<T>(fd: RawFd, mut callback: impl FnMut() -> Result<T, IOError>) -> Result<T, IOError> {
+fn read_polling_repeat<T>(fd: RawFd, callback: impl FnMut() -> Result<T, IOError>) -> Result<T, IOError> {
+    polling_repeat(fd, callback, PollFlags::POLLIN)
+}
+
+/// Call some function, handling `ErrorKind::WouldBlock` by waiting for the given `fd` to become
+/// writable.
+fn write_polling_repeat<T>(fd: RawFd, callback: impl FnMut() -> Result<T, IOError>) -> Result<T, IOError> {
+    polling_repeat(fd, callback, PollFlags::POLLOUT)
+}
+
+fn polling_repeat<T>(
+    fd: RawFd,
+    mut callback: impl FnMut() -> Result<T, IOError>,
+    flags: PollFlags,
+) -> Result<T, IOError> {
     use std::io::ErrorKind;
     loop {
         match callback() {
@@ -627,7 +649,7 @@ fn polling_repeat<T>(fd: RawFd, mut callback: impl FnMut() -> Result<T, IOError>
             Err(e) => return Err(e),
             Ok(r) => return Ok(r),
         }
-        poll_readable(fd)?;
+        do_poll(fd, flags)?;
     }
 }
 
