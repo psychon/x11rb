@@ -187,16 +187,22 @@ impl RustConnection {
         let bufs = compute_length_field(self, bufs, &mut storage)?;
 
         let mut write = self.write.lock().unwrap();
+        let write_fd = write.get_ref().as_raw_fd();
         let mut inner = self.inner.lock().unwrap();
         loop {
             match inner.send_request(kind) {
                 Some(seqno) => {
                     // Now actually send the buffers
                     // FIXME: We must always be able to read when we write
-                    write_all_vectored(&mut *write, bufs, fds)?;
+                    write_all_vectored(
+                        write_fd,
+                        &mut *write,
+                        bufs,
+                        fds,
+                    )?;
                     return Ok(seqno);
                 }
-                None => self.send_sync(&mut *inner, &mut *write)?,
+                None => self.send_sync(&mut *inner, write_fd, &mut *write)?,
             }
         }
     }
@@ -209,6 +215,7 @@ impl RustConnection {
     fn send_sync(
         &self,
         inner: &mut inner::ConnectionInner,
+        write_fd: RawFd,
         write: &mut impl WriteFD,
     ) -> Result<(), IOError> {
         let length = 1u16.to_ne_bytes();
@@ -223,7 +230,12 @@ impl RustConnection {
             .send_request(ReplyFDKind::ReplyWithoutFDs)
             .expect("Sending a HasResponse request should not be blocked by syncs");
         inner.discard_reply(seqno, DiscardMode::DiscardReplyAndError);
-        write_all_vectored(write, &[IoSlice::new(&request)], Vec::new())?;
+        write_all_vectored(
+            write_fd,
+            &mut *write,
+            &[IoSlice::new(&request)],
+            Vec::new(),
+        )?;
 
         Ok(())
     }
@@ -397,7 +409,8 @@ impl RequestConnection for RustConnection {
         let mut write = self.write.lock().unwrap();
         let mut inner = self.inner.lock().unwrap();
         if inner.prepare_check_for_reply_or_error(sequence) {
-            self.send_sync(&mut *inner, &mut *write)?;
+            let write_fd = write.get_ref().as_raw_fd();
+            self.send_sync(&mut *inner, write_fd, &mut *write)?;
             assert!(!inner.prepare_check_for_reply_or_error(sequence));
         }
         flush(write.get_ref().as_raw_fd(), &mut *write)?; // Ensure the request is sent
@@ -573,13 +586,14 @@ fn read_setup(fd: RawFd, read: &mut PacketReader<impl ReadFD + std::fmt::Debug>)
 ///
 /// This is basically `Write::write_all_vectored`, but on stable and for `WriteFD`.
 fn write_all_vectored(
+    write_fd: RawFd,
     write: &mut impl WriteFD,
     bufs: &[IoSlice<'_>],
     mut fds: Vec<RawFdContainer>,
 ) -> Result<(), IOError> {
     let mut bufs = bufs;
     while !bufs.is_empty() {
-        let mut count = write.write_vectored(bufs, &mut fds)?;
+        let mut count = write_polling_repeat(write_fd, || write.write_vectored(bufs, &mut fds))?;
         if count == 0 {
             return Err(IOError::new(
                 std::io::ErrorKind::WriteZero,
@@ -590,8 +604,11 @@ fn write_all_vectored(
             if count >= bufs[0].len() {
                 count -= bufs[0].len();
             } else {
-                let remaining = &bufs[0][count..];
-                write.write_all(remaining, fds)?;
+                let mut remaining = &bufs[0][count..];
+                while !remaining.is_empty() {
+                    let written = write_polling_repeat(write_fd, || write.write(remaining, &mut fds))?;
+                    remaining = &remaining[written..];
+                }
                 fds = Vec::new();
                 count = 0;
             }
