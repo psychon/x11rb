@@ -433,6 +433,34 @@ impl TryFrom<&[u8]> for GetSupportedModifiersReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetSupportedModifiersReply {
+    /// Get the value of the `num_window_modifiers` field.
+    ///
+    /// The `num_window_modifiers` field is used as the length field of the `window_modifiers` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn num_window_modifiers(&self) -> u32 {
+        self.window_modifiers.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `num_screen_modifiers` field.
+    ///
+    /// The `num_screen_modifiers` field is used as the length field of the `screen_modifiers` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn num_screen_modifiers(&self) -> u32 {
+        self.screen_modifiers.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the PixmapFromBuffers request
 pub const PIXMAP_FROM_BUFFERS_REQUEST: u8 = 7;
@@ -602,6 +630,21 @@ impl TryFrom<(&[u8], Vec<RawFdContainer>)> for BuffersFromPixmapReply {
     fn try_from(value: (&[u8], Vec<RawFdContainer>)) -> Result<Self, Self::Error> {
         let (value, mut fds) = value;
         Ok(Self::try_parse_fd(value, &mut fds)?.0)
+    }
+}
+impl BuffersFromPixmapReply {
+    /// Get the value of the `nfd` field.
+    ///
+    /// The `nfd` field is used as the length field of the `strides` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn nfd(&self) -> u8 {
+        self.strides.len()
+            .try_into().unwrap()
     }
 }
 

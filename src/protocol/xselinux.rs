@@ -166,6 +166,21 @@ impl TryFrom<&[u8]> for GetDeviceCreateContextReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetDeviceCreateContextReply {
+    /// Get the value of the `context_len` field.
+    ///
+    /// The `context_len` field is used as the length field of the `context` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn context_len(&self) -> u32 {
+        self.context.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the SetDeviceContext request
 pub const SET_DEVICE_CONTEXT_REQUEST: u8 = 3;
@@ -257,6 +272,21 @@ impl TryFrom<&[u8]> for GetDeviceContextReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetDeviceContextReply {
+    /// Get the value of the `context_len` field.
+    ///
+    /// The `context_len` field is used as the length field of the `context` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn context_len(&self) -> u32 {
+        self.context.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the SetWindowCreateContext request
 pub const SET_WINDOW_CREATE_CONTEXT_REQUEST: u8 = 5;
@@ -338,6 +368,21 @@ impl TryFrom<&[u8]> for GetWindowCreateContextReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetWindowCreateContextReply {
+    /// Get the value of the `context_len` field.
+    ///
+    /// The `context_len` field is used as the length field of the `context` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn context_len(&self) -> u32 {
+        self.context.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetWindowContext request
 pub const GET_WINDOW_CONTEXT_REQUEST: u8 = 7;
@@ -393,6 +438,21 @@ impl TryFrom<&[u8]> for GetWindowContextReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetWindowContextReply {
+    /// Get the value of the `context_len` field.
+    ///
+    /// The `context_len` field is used as the length field of the `context` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn context_len(&self) -> u32 {
+        self.context.len()
+            .try_into().unwrap()
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ListItem {
@@ -446,6 +506,34 @@ impl Serialize for ListItem {
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         bytes.extend_from_slice(&self.data_context);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
+    }
+}
+impl ListItem {
+    /// Get the value of the `object_context_len` field.
+    ///
+    /// The `object_context_len` field is used as the length field of the `object_context` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn object_context_len(&self) -> u32 {
+        self.object_context.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `data_context_len` field.
+    ///
+    /// The `data_context_len` field is used as the length field of the `data_context` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn data_context_len(&self) -> u32 {
+        self.data_context.len()
+            .try_into().unwrap()
     }
 }
 
@@ -529,6 +617,21 @@ impl TryFrom<&[u8]> for GetPropertyCreateContextReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetPropertyCreateContextReply {
+    /// Get the value of the `context_len` field.
+    ///
+    /// The `context_len` field is used as the length field of the `context` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn context_len(&self) -> u32 {
+        self.context.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the SetPropertyUseContext request
 pub const SET_PROPERTY_USE_CONTEXT_REQUEST: u8 = 10;
@@ -610,6 +713,21 @@ impl TryFrom<&[u8]> for GetPropertyUseContextReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetPropertyUseContextReply {
+    /// Get the value of the `context_len` field.
+    ///
+    /// The `context_len` field is used as the length field of the `context` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn context_len(&self) -> u32 {
+        self.context.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetPropertyContext request
 pub const GET_PROPERTY_CONTEXT_REQUEST: u8 = 12;
@@ -668,6 +786,21 @@ impl TryFrom<&[u8]> for GetPropertyContextReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetPropertyContextReply {
+    /// Get the value of the `context_len` field.
+    ///
+    /// The `context_len` field is used as the length field of the `context` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn context_len(&self) -> u32 {
+        self.context.len()
+            .try_into().unwrap()
     }
 }
 
@@ -730,6 +863,21 @@ impl TryFrom<&[u8]> for GetPropertyDataContextReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetPropertyDataContextReply {
+    /// Get the value of the `context_len` field.
+    ///
+    /// The `context_len` field is used as the length field of the `context` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn context_len(&self) -> u32 {
+        self.context.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the ListProperties request
 pub const LIST_PROPERTIES_REQUEST: u8 = 14;
@@ -782,6 +930,21 @@ impl TryFrom<&[u8]> for ListPropertiesReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl ListPropertiesReply {
+    /// Get the value of the `properties_len` field.
+    ///
+    /// The `properties_len` field is used as the length field of the `properties` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn properties_len(&self) -> u32 {
+        self.properties.len()
+            .try_into().unwrap()
     }
 }
 
@@ -865,6 +1028,21 @@ impl TryFrom<&[u8]> for GetSelectionCreateContextReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetSelectionCreateContextReply {
+    /// Get the value of the `context_len` field.
+    ///
+    /// The `context_len` field is used as the length field of the `context` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn context_len(&self) -> u32 {
+        self.context.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the SetSelectionUseContext request
 pub const SET_SELECTION_USE_CONTEXT_REQUEST: u8 = 17;
@@ -946,6 +1124,21 @@ impl TryFrom<&[u8]> for GetSelectionUseContextReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetSelectionUseContextReply {
+    /// Get the value of the `context_len` field.
+    ///
+    /// The `context_len` field is used as the length field of the `context` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn context_len(&self) -> u32 {
+        self.context.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetSelectionContext request
 pub const GET_SELECTION_CONTEXT_REQUEST: u8 = 19;
@@ -999,6 +1192,21 @@ impl TryFrom<&[u8]> for GetSelectionContextReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetSelectionContextReply {
+    /// Get the value of the `context_len` field.
+    ///
+    /// The `context_len` field is used as the length field of the `context` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn context_len(&self) -> u32 {
+        self.context.len()
+            .try_into().unwrap()
     }
 }
 
@@ -1056,6 +1264,21 @@ impl TryFrom<&[u8]> for GetSelectionDataContextReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetSelectionDataContextReply {
+    /// Get the value of the `context_len` field.
+    ///
+    /// The `context_len` field is used as the length field of the `context` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn context_len(&self) -> u32 {
+        self.context.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the ListSelections request
 pub const LIST_SELECTIONS_REQUEST: u8 = 21;
@@ -1103,6 +1326,21 @@ impl TryFrom<&[u8]> for ListSelectionsReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl ListSelectionsReply {
+    /// Get the value of the `selections_len` field.
+    ///
+    /// The `selections_len` field is used as the length field of the `selections` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn selections_len(&self) -> u32 {
+        self.selections.len()
+            .try_into().unwrap()
     }
 }
 
@@ -1158,6 +1396,21 @@ impl TryFrom<&[u8]> for GetClientContextReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetClientContextReply {
+    /// Get the value of the `context_len` field.
+    ///
+    /// The `context_len` field is used as the length field of the `context` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn context_len(&self) -> u32 {
+        self.context.len()
+            .try_into().unwrap()
     }
 }
 

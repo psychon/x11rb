@@ -669,6 +669,34 @@ impl Serialize for AdaptorInfo {
         self.formats.serialize_into(bytes);
     }
 }
+impl AdaptorInfo {
+    /// Get the value of the `name_size` field.
+    ///
+    /// The `name_size` field is used as the length field of the `name` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn name_size(&self) -> u16 {
+        self.name.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `num_formats` field.
+    ///
+    /// The `num_formats` field is used as the length field of the `formats` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn num_formats(&self) -> u16 {
+        self.formats.len()
+            .try_into().unwrap()
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct EncodingInfo {
@@ -721,6 +749,21 @@ impl Serialize for EncodingInfo {
         self.rate.serialize_into(bytes);
         bytes.extend_from_slice(&self.name);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
+    }
+}
+impl EncodingInfo {
+    /// Get the value of the `name_size` field.
+    ///
+    /// The `name_size` field is used as the length field of the `name` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn name_size(&self) -> u16 {
+        self.name.len()
+            .try_into().unwrap()
     }
 }
 
@@ -776,6 +819,34 @@ impl Serialize for Image {
         bytes.extend_from_slice(&self.data);
     }
 }
+impl Image {
+    /// Get the value of the `data_size` field.
+    ///
+    /// The `data_size` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn data_size(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `num_planes` field.
+    ///
+    /// The `num_planes` field is used as the length field of the `pitches` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn num_planes(&self) -> u32 {
+        self.pitches.len()
+            .try_into().unwrap()
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AttributeInfo {
@@ -823,6 +894,21 @@ impl Serialize for AttributeInfo {
         size.serialize_into(bytes);
         bytes.extend_from_slice(&self.name);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
+    }
+}
+impl AttributeInfo {
+    /// Get the value of the `size` field.
+    ///
+    /// The `size` field is used as the length field of the `name` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn size(&self) -> u32 {
+        self.name.len()
+            .try_into().unwrap()
     }
 }
 
@@ -1559,6 +1645,21 @@ impl TryFrom<&[u8]> for QueryAdaptorsReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl QueryAdaptorsReply {
+    /// Get the value of the `num_adaptors` field.
+    ///
+    /// The `num_adaptors` field is used as the length field of the `info` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn num_adaptors(&self) -> u16 {
+        self.info.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the QueryEncodings request
 pub const QUERY_ENCODINGS_REQUEST: u8 = 2;
@@ -1611,6 +1712,21 @@ impl TryFrom<&[u8]> for QueryEncodingsReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl QueryEncodingsReply {
+    /// Get the value of the `num_encodings` field.
+    ///
+    /// The `num_encodings` field is used as the length field of the `info` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn num_encodings(&self) -> u16 {
+        self.info.len()
+            .try_into().unwrap()
     }
 }
 
@@ -2267,6 +2383,21 @@ impl TryFrom<&[u8]> for QueryPortAttributesReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl QueryPortAttributesReply {
+    /// Get the value of the `num_attributes` field.
+    ///
+    /// The `num_attributes` field is used as the length field of the `attributes` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn num_attributes(&self) -> u32 {
+        self.attributes.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the ListImageFormats request
 pub const LIST_IMAGE_FORMATS_REQUEST: u8 = 16;
@@ -2319,6 +2450,21 @@ impl TryFrom<&[u8]> for ListImageFormatsReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl ListImageFormatsReply {
+    /// Get the value of the `num_formats` field.
+    ///
+    /// The `num_formats` field is used as the length field of the `format` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn num_formats(&self) -> u32 {
+        self.format.len()
+            .try_into().unwrap()
     }
 }
 
@@ -2392,6 +2538,21 @@ impl TryFrom<&[u8]> for QueryImageAttributesReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl QueryImageAttributesReply {
+    /// Get the value of the `num_planes` field.
+    ///
+    /// The `num_planes` field is used as the length field of the `pitches` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn num_planes(&self) -> u32 {
+        self.pitches.len()
+            .try_into().unwrap()
     }
 }
 

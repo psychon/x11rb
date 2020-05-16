@@ -187,6 +187,21 @@ impl TryFrom<&[u8]> for GetXIDListReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetXIDListReply {
+    /// Get the value of the `ids_len` field.
+    ///
+    /// The `ids_len` field is used as the length field of the `ids` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn ids_len(&self) -> u32 {
+        self.ids.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Extension trait defining the requests of this extension.
 pub trait ConnectionExt: RequestConnection {

@@ -491,6 +491,34 @@ impl TryFrom<&[u8]> for ConnectReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl ConnectReply {
+    /// Get the value of the `driver_name_length` field.
+    ///
+    /// The `driver_name_length` field is used as the length field of the `driver_name` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn driver_name_length(&self) -> u32 {
+        self.driver_name.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `device_name_length` field.
+    ///
+    /// The `device_name_length` field is used as the length field of the `device_name` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn device_name_length(&self) -> u32 {
+        self.device_name.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the Authenticate request
 pub const AUTHENTICATE_REQUEST: u8 = 2;
@@ -669,6 +697,21 @@ impl TryFrom<&[u8]> for GetBuffersReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetBuffersReply {
+    /// Get the value of the `count` field.
+    ///
+    /// The `count` field is used as the length field of the `buffers` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn count(&self) -> u32 {
+        self.buffers.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the CopyRegion request
 pub const COPY_REGION_REQUEST: u8 = 6;
@@ -799,6 +842,21 @@ impl TryFrom<&[u8]> for GetBuffersWithFormatReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetBuffersWithFormatReply {
+    /// Get the value of the `count` field.
+    ///
+    /// The `count` field is used as the length field of the `buffers` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn count(&self) -> u32 {
+        self.buffers.len()
+            .try_into().unwrap()
     }
 }
 
