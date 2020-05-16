@@ -635,12 +635,13 @@ fn polling_repeat<T>(fd: RawFd, mut callback: impl FnMut() -> Result<T, IOError>
 mod test {
     use std::io::{IoSlice, Read, Result, Write};
 
-    use super::{read_setup, write_all_vectored, ReadFD, WriteFD};
+    use super::{read_setup, write_all_vectored, BufReadFD, PacketReader, ReadFD, WriteFD};
     use crate::errors::ConnectError;
     use crate::protocol::xproto::{ImageOrder, Setup, SetupAuthenticate, SetupFailed};
     use crate::utils::RawFdContainer;
     use crate::x11_utils::Serialize;
 
+    #[derive(Debug)]
     struct WriteFDSlice<'a>(&'a mut [u8]);
 
     impl WriteFD for WriteFDSlice<'_> {
@@ -654,6 +655,7 @@ mod test {
         }
     }
 
+    #[derive(Debug)]
     struct ReadFDSlice<'a>(&'a [u8]);
 
     impl ReadFD for ReadFDSlice<'_> {
@@ -718,8 +720,9 @@ mod test {
         setup.length = ((setup.serialize().len() - 8) / 4) as _;
         let setup_bytes = setup.serialize();
 
-        let mut reader = ReadFDSlice(&setup_bytes[..]);
-        let read = read_setup(&mut reader);
+        let reader = ReadFDSlice(&setup_bytes[..]);
+        let mut reader = PacketReader::new(BufReadFD::new(reader));
+        let read = read_setup(-1, &mut reader);
         assert_eq!(setup, read.unwrap());
     }
 
@@ -735,8 +738,9 @@ mod test {
         setup.length = ((setup.serialize().len() - 8) / 4) as _;
         let setup_bytes = setup.serialize();
 
-        let mut reader = ReadFDSlice(&setup_bytes[..]);
-        match read_setup(&mut reader) {
+        let reader = ReadFDSlice(&setup_bytes[..]);
+        let mut reader = PacketReader::new(BufReadFD::new(reader));
+        match read_setup(-1, &mut reader) {
             Err(ConnectError::SetupFailed(read)) => assert_eq!(setup, read),
             value => panic!("Unexpected value {:?}", value),
         }
@@ -750,8 +754,9 @@ mod test {
         };
         let setup_bytes = setup.serialize();
 
-        let mut reader = ReadFDSlice(&setup_bytes[..]);
-        match read_setup(&mut reader) {
+        let reader = ReadFDSlice(&setup_bytes[..]);
+        let mut reader = PacketReader::new(BufReadFD::new(reader));
+        match read_setup(-1, &mut reader) {
             Err(ConnectError::SetupAuthenticate(read)) => assert_eq!(setup, read),
             value => panic!("Unexpected value {:?}", value),
         }
