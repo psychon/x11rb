@@ -38,6 +38,21 @@ impl<R: ReadFD + Debug> PacketReader<R> {
         }
     }
 
+    /// Gets a mutable reference to the underlying FD reader.
+    ///
+    /// It is inadvisable to directly read from the underlying reader.
+    #[allow(dead_code)] // This function exists for completeness with `get_ref`.
+    pub(crate) fn get_mut(&mut self) -> &mut BufReadFD<R> {
+        &mut self.inner
+    }
+
+    /// Gets a reference to the underlying FD reader.
+    ///
+    /// It is inadvisable to directly read from the underlying reader.
+    pub(crate) fn get_ref(&self) -> &BufReadFD<R> {
+        &self.inner
+    }
+
     /// Try to read an X11 packet from the inner reader.
     pub(crate) fn read_x11_packet(
         &mut self,

@@ -255,7 +255,8 @@ impl RustConnection {
 
                 // 2.2. Block the thread until a packet is received.
                 let mut fds = Vec::new();
-                let packet = lock.read_x11_packet(&mut fds)?;
+                let raw_fd = lock.get_ref().get_ref().as_raw_fd();
+                let packet = polling_repeat(raw_fd, || lock.read_x11_packet(&mut fds))?;
 
                 // 2.3. Relock `inner` to enqueue the packet.
                 inner = self.inner.lock().unwrap();
