@@ -214,36 +214,6 @@ pub trait ReadFD {
     /// data that was sent at the same time. Instead, file descriptors may only be received
     /// earlier.
     fn read(&mut self, buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> Result<usize>;
-
-    /// Read the exact number of bytes required to fill `buf` and also some amount of FDs.
-    ///
-    /// This function works like [`std::io::Read::read`], but also supports the reception of file
-    /// descriptors. Any received file descriptors are appended to the given `fd_storage`.
-    ///
-    /// This function does not guarantee that all file descriptors were sent together with the data
-    /// with which they are received. However, file descriptors may not be received later than the
-    /// data that was sent at the same time. Instead, file descriptors may only be received
-    /// earlier.
-    fn read_exact(
-        &mut self,
-        mut buf: &mut [u8],
-        fd_storage: &mut Vec<RawFdContainer>,
-    ) -> Result<()> {
-        while !buf.is_empty() {
-            match self.read(buf, fd_storage) {
-                Ok(0) => {
-                    return Err(Error::new(
-                        ErrorKind::UnexpectedEof,
-                        "failed to fill the whole buffer",
-                    ))
-                }
-                Ok(n) => buf = &mut buf[n..],
-                Err(ref e) if e.kind() == ErrorKind::Interrupted => {}
-                Err(e) => return Err(e),
-            }
-        }
-        Ok(())
-    }
 }
 
 /// Wraps a [`std::io::Read`] to implement the [`ReadFD`] trait.
@@ -263,10 +233,6 @@ impl<R: Read + std::fmt::Debug> ReadFDWrapper<R> {
 impl<R: Read + std::fmt::Debug> ReadFD for ReadFDWrapper<R> {
     fn read(&mut self, buf: &mut [u8], _fd_storage: &mut Vec<RawFdContainer>) -> Result<usize> {
         self.0.read(buf)
-    }
-
-    fn read_exact(&mut self, buf: &mut [u8], _fd_storage: &mut Vec<RawFdContainer>) -> Result<()> {
-        self.0.read_exact(buf)
     }
 }
 
