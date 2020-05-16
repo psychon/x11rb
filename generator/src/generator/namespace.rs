@@ -53,10 +53,19 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         } else {
             outln!(out, "//! Bindings to the core X11 protocol.");
             outln!(out, "//!");
-            outln!(out, "//! For more documentation on the X11 protocol, see the [protocol");
-            outln!(out, "//! reference manual](https://www.x.org/releases/X11R7.6/doc/xproto/x11protocol.html).");
-            outln!(out, "//! This is especially recommended for looking up the exact semantics of specific");
-            outln!(out, "//! errors, events, or requests.");
+            outln!(
+                out,
+                "//! For more documentation on the X11 protocol, see the"
+            );
+            outln!(
+                out,
+                "//! [protocol reference manual](https://www.x.org/releases/X11R7.6/doc/xproto/x11protocol.html).",
+            );
+            outln!(
+                out,
+                "//! This is especially recommended for looking up the exact semantics of"
+            );
+            outln!(out, "//! specific errors, events, or requests.");
         }
         outln!(out, "");
         outln!(out, "#![allow(clippy::too_many_arguments)]");

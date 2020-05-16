@@ -3,10 +3,10 @@
 
 //! Bindings to the core X11 protocol.
 //!
-//! For more documentation on the X11 protocol, see the [protocol
-//! reference manual](https://www.x.org/releases/X11R7.6/doc/xproto/x11protocol.html).
-//! This is especially recommended for looking up the exact semantics of specific
-//! errors, events, or requests.
+//! For more documentation on the X11 protocol, see the
+//! [protocol reference manual](https://www.x.org/releases/X11R7.6/doc/xproto/x11protocol.html).
+//! This is especially recommended for looking up the exact semantics of
+//! specific errors, events, or requests.
 
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::identity_op)]

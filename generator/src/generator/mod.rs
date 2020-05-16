@@ -18,7 +18,10 @@ pub(crate) fn generate(module: &xcbgen::defs::Module) -> FxHashMap<PathBuf, Stri
     write_code_header(&mut main_out);
     outln!(main_out, "//! Bindings to the X11 protocol.");
     outln!(main_out, "//!");
-    outln!(main_out, "//! Each sub-module of this module corresponds to one X11 extension. It contains all the");
+    outln!(
+        main_out,
+        "//! Each sub-module of this module corresponds to one X11 extension. It contains all the"
+    );
     outln!(main_out, "//! definitions from that extension. The core X11 protocol is in [`xproto`](xproto/index.html).");
     outln!(main_out, "");
     outln!(main_out, "use std::convert::{{TryFrom, TryInto}};");
