@@ -504,7 +504,39 @@ impl Connection for RustConnection {
     fn poll_for_raw_event_with_sequence(
         &self,
     ) -> Result<Option<RawEventAndSeqNumber>, ConnectionError> {
-        Ok(self.inner.lock().unwrap().poll_for_event_with_sequence())
+        use std::io::ErrorKind;
+
+        let mut inner = self.inner.lock().unwrap();
+        loop {
+            // Do we have a pending event?
+            if let Some(event) = inner.poll_for_event_with_sequence() {
+                return Ok(Some(event))
+            } else {
+                // Try reading something new from the connection
+                let mut fds = Vec::new();
+                match self.read.try_lock() {
+                    // Some other thread is already reading
+                    Err(TryLockError::WouldBlock) => return Ok(None),
+                    Err(TryLockError::Poisoned(e)) => panic!("{}", e),
+
+                    // No one is reading yet, so we can try to read
+                    Ok(mut lock) => match lock.read_x11_packet(&mut fds) {
+                        // There is nothing new to read
+                        Err(e) if e.kind() == ErrorKind::WouldBlock => return Ok(None),
+
+                        // Some error occurred
+                        Err(e) => return Err(e.into()),
+
+                        // We managed to read something new
+                        Ok(packet) => {
+                            inner.enqueue_fds(fds);
+                            inner.enqueue_packet(packet);
+                            // Now repeat the outer loop
+                        }
+                    }
+                }
+            }
+        }
     }
 
     fn flush(&self) -> Result<(), ConnectionError> {
