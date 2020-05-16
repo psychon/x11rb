@@ -378,7 +378,7 @@ impl RequestConnection for RustConnection {
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Vec<u8>>, ConnectionError> {
         let mut write = self.write.lock().unwrap();
         let mut inner = self.inner.lock().unwrap();
-        write.flush()?; // Ensure the request is sent
+        flush(write.get_ref().as_raw_fd(), &mut *write)?; // Ensure the request is sent
         drop(write);
         loop {
             match inner.poll_for_reply(sequence) {
@@ -400,7 +400,7 @@ impl RequestConnection for RustConnection {
             self.send_sync(&mut *inner, &mut *write)?;
             assert!(!inner.prepare_check_for_reply_or_error(sequence));
         }
-        write.flush()?; // Ensure the request is sent
+        flush(write.get_ref().as_raw_fd(), &mut *write)?; // Ensure the request is sent
         drop(write);
         loop {
             match inner.poll_check_for_reply_or_error(sequence) {
@@ -418,7 +418,7 @@ impl RequestConnection for RustConnection {
     ) -> Result<ReplyOrError<BufWithFds, Buffer>, ConnectionError> {
         let mut write = self.write.lock().unwrap();
         let mut inner = self.inner.lock().unwrap();
-        write.flush()?; // Ensure the request is sent
+        flush(write.get_ref().as_raw_fd(), &mut *write)?; // Ensure the request is sent
         drop(write);
         loop {
             if let Some(reply) = inner.poll_for_reply_or_error(sequence) {
@@ -495,7 +495,8 @@ impl Connection for RustConnection {
     }
 
     fn flush(&self) -> Result<(), ConnectionError> {
-        self.write.lock().unwrap().flush()?;
+        let mut write = self.write.lock().unwrap();
+        flush(write.get_ref().as_raw_fd(), &mut *write)?;
         Ok(())
     }
 
@@ -623,6 +624,12 @@ fn do_poll(fd: RawFd, flags: PollFlags) -> std::io::Result<()> {
     );
 
     Ok(())
+}
+
+/// Flush some output, handling `ErrorKind::WouldBlock` by waiting for the given `fd` to become
+/// writable.
+fn flush(fd: RawFd, write: &mut impl WriteFD) -> std::io::Result<()> {
+    write_polling_repeat(fd, || write.flush())
 }
 
 /// Call some function, handling `ErrorKind::WouldBlock` by waiting for the given `fd` to become
