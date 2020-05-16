@@ -1,8 +1,10 @@
 //! A pure-rust implementation of a connection to an X11 server.
 
 use std::convert::{TryFrom, TryInto};
-use std::io::IoSlice;
+use std::io::{Error as IOError, IoSlice};
 use std::sync::{Condvar, Mutex, MutexGuard, TryLockError};
+#[cfg(unix)]
+use std::os::unix::io::{AsRawFd, RawFd};
 
 use crate::connection::{
     compute_length_field, Connection, DiscardMode, ReplyOrError, RequestConnection, RequestKind,
@@ -120,8 +122,9 @@ impl RustConnection {
         auth_data: Vec<u8>,
     ) -> Result<Self, ConnectError> {
         write_setup(&mut write, auth_name, auth_data)?;
+        let raw_read = read.get_ref().as_raw_fd();
         let mut read = PacketReader::new(read);
-        let setup = read_setup(&mut read)?;
+        let setup = read_setup(raw_read, &mut read)?;
         let read = read.into_inner().expect("There should be no partial packet now");
 
         // Check that we got a valid screen number
@@ -203,7 +206,7 @@ impl RustConnection {
         &self,
         inner: &mut inner::ConnectionInner,
         write: &mut impl WriteFD,
-    ) -> Result<(), std::io::Error> {
+    ) -> Result<(), IOError> {
         let length = 1u16.to_ne_bytes();
         let request = [
             GET_INPUT_FOCUS_REQUEST,
@@ -230,7 +233,7 @@ impl RustConnection {
     fn read_packet_and_enqueue<'a>(
         &'a self,
         mut inner: MutexGuardInner<'a>,
-    ) -> Result<MutexGuardInner<'a>, std::io::Error> {
+    ) -> Result<MutexGuardInner<'a>, IOError> {
         // 0.1. Try to lock the `read` mutex.
         match self.read.try_lock() {
             Err(TryLockError::WouldBlock) => {
@@ -515,7 +518,7 @@ fn write_setup(
     write: &mut impl WriteFD,
     auth_name: Vec<u8>,
     auth_data: Vec<u8>,
-) -> Result<(), std::io::Error> {
+) -> Result<(), IOError> {
     let request = SetupRequest {
         byte_order: byte_order(),
         protocol_major_version: 11,
@@ -532,11 +535,11 @@ fn write_setup(
 ///
 /// If the server sends a `SetupFailed` or `SetupAuthenticate` packet, these will be returned
 /// as errors.
-fn read_setup(read: &mut PacketReader<impl ReadFD + std::fmt::Debug>) -> Result<Setup, ConnectError> {
+fn read_setup(fd: RawFd, read: &mut PacketReader<impl ReadFD + std::fmt::Debug>) -> Result<Setup, ConnectError> {
     let mut fds = Vec::new();
-    let setup = read.read_setup_packet(&mut fds)?;
+    let setup = polling_repeat(fd, || read.read_setup_packet(&mut fds))?;
     if !fds.is_empty() {
-        return Err(std::io::Error::new(
+        return Err(IOError::new(
             std::io::ErrorKind::Other,
             "unexpectedly received FDs in connection setup",
         )
@@ -561,12 +564,12 @@ fn write_all_vectored(
     write: &mut impl WriteFD,
     bufs: &[IoSlice<'_>],
     mut fds: Vec<RawFdContainer>,
-) -> Result<(), std::io::Error> {
+) -> Result<(), IOError> {
     let mut bufs = bufs;
     while !bufs.is_empty() {
         let mut count = write.write_vectored(bufs, &mut fds)?;
         if count == 0 {
-            return Err(std::io::Error::new(
+            return Err(IOError::new(
                 std::io::ErrorKind::WriteZero,
                 "failed to write anything",
             ));
@@ -592,6 +595,39 @@ fn write_all_vectored(
         write.write_all(&[], fds)?;
     }
     Ok(())
+}
+
+/// Wait for some FD to become readable.
+fn poll_readable(fd: RawFd) -> std::io::Result<()> {
+    use nix::poll::{PollFd, PollFlags, poll};
+
+    let mut fds = [PollFd::new(fd, PollFlags::POLLIN)];
+    let res = poll(&mut fds, -1)
+        // errno still contains the error code
+        .map_err(|_| IOError::last_os_error())?;
+
+    // The timeout could not have expired and there was no error, so our one FD must be readable.
+    assert_eq!(res, 1);
+    assert!(
+        fds[0].revents().map(|e| e.contains(PollFlags::POLLIN)).unwrap_or(false),
+        "{:?}", fds[0].revents(),
+    );
+
+    Ok(())
+}
+
+/// Call some function, handling `ErrorKind::WouldBlock` by waiting for the given `fd` to become
+/// readable.
+fn polling_repeat<T>(fd: RawFd, mut callback: impl FnMut() -> Result<T, IOError>) -> Result<T, IOError> {
+    use std::io::ErrorKind;
+    loop {
+        match callback() {
+            Err(e) if e.kind() == ErrorKind::WouldBlock => {},
+            Err(e) => return Err(e),
+            Ok(r) => return Ok(r),
+        }
+        poll_readable(fd)?;
+    }
 }
 
 #[cfg(test)]
