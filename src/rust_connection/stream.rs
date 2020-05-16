@@ -20,6 +20,16 @@ pub enum Stream {
 impl Stream {
     /// Try to connect to the X11 server described by the given arguments.
     pub fn connect(host: &str, protocol: Option<&str>, display: u16) -> Result<Self> {
+        let stream = Self::connect_impl(host, protocol, display)?;
+        match &stream {
+            Stream::TcpStream(stream) => stream.set_nonblocking(true)?,
+            #[cfg(unix)]
+            Stream::UnixStream(stream) => stream.set_nonblocking(true)?,
+        }
+        Ok(stream)
+    }
+
+    fn connect_impl(host: &str, protocol: Option<&str>, display: u16) -> Result<Self> {
         const TCP_PORT_BASE: u16 = 6000;
 
         if (protocol.is_none() || protocol != Some("unix")) && !host.is_empty() && host != "unix" {
