@@ -7,9 +7,6 @@ use std::io::Result;
 use super::fd_read_write::{BufReadFD, ReadFD};
 use crate::utils::RawFdContainer;
 
-/// Minimal length of an X11 packet
-const MINIMAL_PACKET_LENGTH: usize = 32;
-
 /// A wrapper around a reader that reads X11 packet.
 #[derive(Debug)]
 pub(crate) struct PacketReader<R: ReadFD + Debug> {
@@ -29,13 +26,43 @@ impl<R: ReadFD + Debug> PacketReader<R> {
         }
     }
 
-    /// Try to read a packet from the inner reader.
-    pub(crate) fn read_packet(
+    /// Deconstruct this `PacketReader`, returning the inner reader.
+    ///
+    /// This fails if there is currently a pending packet. In this case, `self` is returned as an
+    /// error.
+    pub(crate) fn into_inner(self) -> std::result::Result<BufReadFD<R>, Self> {
+        if self.pending_packet.is_none() {
+            Ok(self.inner)
+        } else {
+            Err(self)
+        }
+    }
+
+    /// Try to read an X11 packet from the inner reader.
+    pub(crate) fn read_x11_packet(
         &mut self,
         fd_storage: &mut Vec<RawFdContainer>,
     ) -> Result<Vec<u8>> {
+        self.read_packet(fd_storage, 32, compute_extra_length)
+    }
+
+    /// Try to read an X11 Setup packet from the inner reader.
+    pub(crate) fn read_setup_packet(
+        &mut self,
+        fd_storage: &mut Vec<RawFdContainer>,
+    ) -> Result<Vec<u8>> {
+        self.read_packet(fd_storage, 8, compute_setup_length)
+    }
+
+    /// Try to read a packet from the inner reader.
+    fn read_packet(
+        &mut self,
+        fd_storage: &mut Vec<RawFdContainer>,
+        minimal_length: usize,
+        extra_length: impl Fn(&[u8]) -> usize,
+    ) -> Result<Vec<u8>> {
         if self.pending_packet.is_none() {
-            self.pending_packet = Some((vec![0; MINIMAL_PACKET_LENGTH], 0));
+            self.pending_packet = Some((vec![0; minimal_length], 0));
         }
 
         // Get mutable reference to the pending packet
@@ -47,28 +74,28 @@ impl<R: ReadFD + Debug> PacketReader<R> {
             let nread = self.inner.read(&mut packet[*already_read..], fd_storage)?;
             *already_read += nread;
 
-             // Do we still need to compute the length field? (length == MINIMAL_PACKET_LENGTH)
-             if let Ok(array) = packet[..].try_into() {
+            // Do we still need to compute the length field? (length == minimal_length)
+            if packet.len() == minimal_length {
                  // Yes, then compute the packet length and resize the `Vec` to its final size.
-                 let extra = extra_length(array);
+                 let extra = extra_length(&packet[..]);
                  packet.reserve_exact(extra);
-                 packet.resize(MINIMAL_PACKET_LENGTH + extra, 0);
+                 packet.resize(minimal_length + extra, 0);
              }
         }
 
         // Check that we really read the whole packet
-        let initial_packet = &packet[0..MINIMAL_PACKET_LENGTH].try_into().unwrap();
-        let extra = extra_length(&initial_packet);
-        assert_eq!(packet.len(), MINIMAL_PACKET_LENGTH + extra);
+        let extra = extra_length(&packet[0..minimal_length]);
+        assert_eq!(packet.len(), minimal_length + extra);
 
         // Packet successfully read
         Ok(self.pending_packet.take().unwrap().0)
     }
 }
 
-// Compute the length beyond `MINIMAL_PACKET_LENGTH` of an X11 packet.
-fn extra_length(buffer: &[u8; MINIMAL_PACKET_LENGTH]) -> usize {
+// Compute the length beyond the fixed 32 bytes of an X11 packet.
+fn compute_extra_length(buffer: &[u8]) -> usize {
     use crate::protocol::xproto::GE_GENERIC_EVENT;
+    assert_eq!(buffer.len(), 32);
 
     let response_type = buffer[0];
 
@@ -81,4 +108,10 @@ fn extra_length(buffer: &[u8; MINIMAL_PACKET_LENGTH]) -> usize {
         // Fixed size packet: error or event that is not GE_GENERIC_EVENT
         0
     }
+}
+
+// Compute the length beyond the fixed 8 bytes of an X11 connection setup packet.
+fn compute_setup_length(buffer: &[u8]) -> usize {
+    assert_eq!(buffer.len(), 8);
+    4 * usize::from(u16::from_ne_bytes([buffer[6], buffer[7]]))
 }

@@ -113,14 +113,16 @@ impl RustConnection {
     /// `authorization_protocol_name` and `authorization_protocol_data` of the `SetupRequest` that
     /// is sent to the X11 server.
     pub fn connect_to_stream_with_auth_info(
-        mut read: BufReadFD<stream::Stream>,
+        read: BufReadFD<stream::Stream>,
         mut write: BufWriteFD<stream::Stream>,
         screen: usize,
         auth_name: Vec<u8>,
         auth_data: Vec<u8>,
     ) -> Result<Self, ConnectError> {
         write_setup(&mut write, auth_name, auth_data)?;
+        let mut read = PacketReader::new(read);
         let setup = read_setup(&mut read)?;
+        let read = read.into_inner().expect("There should be no partial packet now");
 
         // Check that we got a valid screen number
         if screen >= setup.roots.len() {
@@ -250,7 +252,7 @@ impl RustConnection {
 
                 // 2.2. Block the thread until a packet is received.
                 let mut fds = Vec::new();
-                let packet = lock.read_packet(&mut fds)?;
+                let packet = lock.read_x11_packet(&mut fds)?;
 
                 // 2.3. Relock `inner` to enqueue the packet.
                 inner = self.inner.lock().unwrap();
@@ -530,16 +532,9 @@ fn write_setup(
 ///
 /// If the server sends a `SetupFailed` or `SetupAuthenticate` packet, these will be returned
 /// as errors.
-fn read_setup(read: &mut impl ReadFD) -> Result<Setup, ConnectError> {
+fn read_setup(read: &mut PacketReader<impl ReadFD + std::fmt::Debug>) -> Result<Setup, ConnectError> {
     let mut fds = Vec::new();
-    let mut setup = vec![0; 8];
-    read.read_exact(&mut setup, &mut fds)?;
-    let extra_length = usize::from(u16::from_ne_bytes([setup[6], setup[7]])) * 4;
-    // Use `Vec::reserve_exact` because this will be the final
-    // length of the vector.
-    setup.reserve_exact(extra_length);
-    setup.resize(8 + extra_length, 0);
-    read.read_exact(&mut setup[8..], &mut fds)?;
+    let setup = read.read_setup_packet(&mut fds)?;
     if !fds.is_empty() {
         return Err(std::io::Error::new(
             std::io::ErrorKind::Other,
