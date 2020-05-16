@@ -48,6 +48,17 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
     fn generate(&self, out: &mut Output) {
         super::write_code_header(out);
+        if let Some(info) = &self.ns.ext_info {
+            outln!(out, "//! Bindings to the `{}` X11 extension.", info.name);
+        } else {
+            outln!(out, "//! Bindings to the core X11 protocol.");
+            outln!(out, "//!");
+            outln!(out, "//! For more documentation on the X11 protocol, see the [protocol");
+            outln!(out, "//! reference manual](https://www.x.org/releases/X11R7.6/doc/xproto/x11protocol.html).");
+            outln!(out, "//! This is especially recommended for looking up the exact semantics of specific");
+            outln!(out, "//! errors, events, or requests.");
+        }
+        outln!(out, "");
         outln!(out, "#![allow(clippy::too_many_arguments)]");
         outln!(out, "#![allow(clippy::identity_op)]");
         outln!(out, "#![allow(clippy::trivially_copy_pass_by_ref)]");
