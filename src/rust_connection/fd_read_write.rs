@@ -24,39 +24,6 @@ pub trait WriteFD {
     /// time.
     fn write(&mut self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize>;
 
-    /// Write an entire buffer of data and file descriptors into this writer.
-    ///
-    /// This function works like [`std::io::Write::write_all`], but also supports sending file
-    /// descriptors. The `fds` argument contains the file descriptors to send. The order of file
-    /// descriptors is maintained.
-    ///
-    /// When this function returns, all file descriptors were written.
-    ///
-    /// This function does not guarantee that all file descriptors are sent together with the data.
-    /// Any file descriptors that were sent are removed from the beginning of the given `Vec`.
-    ///
-    /// There is no guarantee that the given file descriptors are received together with the given
-    /// data. File descriptors might be received earlier than their corresponding data. It is not
-    /// allowed for file descriptors to be received later than the bytes that were sent at the same
-    /// time.
-    fn write_all(&mut self, mut buf: &[u8], mut fds: Vec<RawFdContainer>) -> Result<()> {
-        while !buf.is_empty() || !fds.is_empty() {
-            let old_fds_len = fds.len();
-            match self.write(buf, &mut fds) {
-                Ok(0) if fds.len() == old_fds_len => {
-                    return Err(Error::new(
-                        ErrorKind::WriteZero,
-                        "failed to write whole buffer",
-                    ));
-                }
-                Ok(n) => buf = &buf[n..],
-                Err(ref e) if e.kind() == ErrorKind::Interrupted => {}
-                Err(e) => return Err(e),
-            }
-        }
-        Ok(())
-    }
-
     /// Like `write`, except that it writes from a slice of buffers.
     ///
     /// This method must behave as a call to `write` with the buffers concatenated would.
@@ -96,11 +63,6 @@ impl<W: Write + std::fmt::Debug> WriteFD for WriteFDWrapper<W> {
     fn write(&mut self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
         check_no_fds(fds)?;
         self.0.write(buf)
-    }
-
-    fn write_all(&mut self, bufs: &[u8], fds: Vec<RawFdContainer>) -> Result<()> {
-        check_no_fds(&fds)?;
-        self.0.write_all(bufs)
     }
 
     fn write_vectored(
