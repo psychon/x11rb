@@ -262,7 +262,8 @@ impl RustConnection {
                 drop(lock);
 
                 // 2.5. Actually enqueue the read packet.
-                inner.enqueue_packet(packet, fds);
+                inner.enqueue_fds(fds);
+                inner.enqueue_packet(packet);
 
                 // 2.6. Notify threads that a packet has been enqueued,
                 // so other threads waiting on 1.1 can return.
