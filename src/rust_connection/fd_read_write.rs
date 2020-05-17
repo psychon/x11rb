@@ -83,16 +83,16 @@ pub trait WriteFD {
 ///
 /// Any attempts to write file descriptors will fail. Bytes are forwarded to the underlying writer.
 #[derive(Debug)]
-pub struct WriteFDWrapper<W: Write + std::fmt::Debug>(W);
+pub struct WriteFDWrapper<W: Write>(W);
 
-impl<W: Write + std::fmt::Debug> WriteFDWrapper<W> {
+impl<W: Write> WriteFDWrapper<W> {
     /// Create a new `WriteFDWrapper` for the given writer.
     pub fn new(write: W) -> Self {
         Self(write)
     }
 }
 
-impl<W: Write + std::fmt::Debug> WriteFD for WriteFDWrapper<W> {
+impl<W: Write> WriteFD for WriteFDWrapper<W> {
     fn write(&mut self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
         check_no_fds(fds)?;
         self.0.write(buf)
@@ -128,13 +128,13 @@ fn check_no_fds(fds: &[RawFdContainer]) -> Result<()> {
 
 /// A version of [`std::io::BufWriter`] that supports sending file descriptors.
 #[derive(Debug)]
-pub struct BufWriteFD<W: WriteFD + std::fmt::Debug> {
+pub struct BufWriteFD<W: WriteFD> {
     inner: W,
     data_buf: Vec<u8>,
     fd_buf: Vec<RawFdContainer>,
 }
 
-impl<W: WriteFD + std::fmt::Debug> BufWriteFD<W> {
+impl<W: WriteFD> BufWriteFD<W> {
     /// Creates a new `BufWriteFD` with a default buffer capacity.
     pub fn new(inner: W) -> Self {
         // Chosen by checking what libxcb does
@@ -189,7 +189,7 @@ impl<W: WriteFD + std::fmt::Debug> BufWriteFD<W> {
     }
 }
 
-impl<W: WriteFD + std::fmt::Debug> WriteFD for BufWriteFD<W> {
+impl<W: WriteFD> WriteFD for BufWriteFD<W> {
     fn write(&mut self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
         self.fd_buf.extend(fds.drain(..));
 
@@ -268,6 +268,13 @@ pub trait ReadFD {
         }
         Ok(())
     }
+
+    /// Moves this reader into or out of nonblocking mode.
+    ///
+    /// In nonblocking mode, reading becomes nonblocking. This means that such calls immediately
+    /// return. If an immediate result is not possible, an error with kind
+    /// [`std::io::ErrorKind::WouldBlock`] is returned.
+    fn set_nonblocking(&mut self, nonblocking: bool) -> Result<()>;
 }
 
 /// Wraps a [`std::io::Read`] to implement the [`ReadFD`] trait.
@@ -275,16 +282,16 @@ pub trait ReadFD {
 /// No file descriptors will be received. Attempts to read bytes are forwarded to the underlying
 /// reader.
 #[derive(Debug)]
-pub struct ReadFDWrapper<R: Read + std::fmt::Debug>(R);
+pub struct ReadFDWrapper<R: Read>(R);
 
-impl<R: Read + std::fmt::Debug> ReadFDWrapper<R> {
+impl<R: Read> ReadFDWrapper<R> {
     /// Create a new `ReadFDWrapper` for the given reader.
     pub fn new(read: R) -> Self {
         Self(read)
     }
 }
 
-impl<R: Read + std::fmt::Debug> ReadFD for ReadFDWrapper<R> {
+impl<R: Read> ReadFD for ReadFDWrapper<R> {
     fn read(&mut self, buf: &mut [u8], _fd_storage: &mut Vec<RawFdContainer>) -> Result<usize> {
         self.0.read(buf)
     }
@@ -292,11 +299,15 @@ impl<R: Read + std::fmt::Debug> ReadFD for ReadFDWrapper<R> {
     fn read_exact(&mut self, buf: &mut [u8], _fd_storage: &mut Vec<RawFdContainer>) -> Result<()> {
         self.0.read_exact(buf)
     }
+
+    fn set_nonblocking(&mut self, _nonblocking: bool) -> Result<()> {
+        unimplemented!()
+    }
 }
 
 /// A version of [`std::io::BufReader`] that supports receiving file descriptors.
 #[derive(Debug)]
-pub struct BufReadFD<R: ReadFD + std::fmt::Debug> {
+pub struct BufReadFD<R: ReadFD> {
     inner: R,
     buf: Box<[u8]>,
     // The following two variables describe the range of available data in `buf`
@@ -304,7 +315,7 @@ pub struct BufReadFD<R: ReadFD + std::fmt::Debug> {
     end: usize,
 }
 
-impl<R: ReadFD + std::fmt::Debug> BufReadFD<R> {
+impl<R: ReadFD> BufReadFD<R> {
     /// Creates a new `BufReadFD` with a default buffer capacity.
     pub fn new(inner: R) -> Self {
         // Chosen by checking what libxcb does
@@ -323,7 +334,7 @@ impl<R: ReadFD + std::fmt::Debug> BufReadFD<R> {
     }
 }
 
-impl<R: ReadFD + std::fmt::Debug> ReadFD for BufReadFD<R> {
+impl<R: ReadFD> ReadFD for BufReadFD<R> {
     fn read(&mut self, buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> Result<usize> {
         if self.start >= self.end {
             // We have no data buffered
@@ -339,5 +350,9 @@ impl<R: ReadFD + std::fmt::Debug> ReadFD for BufReadFD<R> {
         let nread = (&self.buf[self.start..self.end]).read(buf)?;
         self.start += nread;
         Ok(nread)
+    }
+
+    fn set_nonblocking(&mut self, nonblocking: bool) -> Result<()> {
+        self.inner.set_nonblocking(nonblocking)
     }
 }
