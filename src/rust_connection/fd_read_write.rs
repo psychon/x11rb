@@ -301,7 +301,7 @@ impl<R: Read> ReadFD for ReadFDWrapper<R> {
     }
 
     fn set_nonblocking(&mut self, _nonblocking: bool) -> Result<()> {
-        todo!()
+        unimplemented!()
     }
 }
 
