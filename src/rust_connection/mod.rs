@@ -48,10 +48,13 @@ pub(crate) enum ReplyFDKind {
 
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
-pub struct RustConnection {
+pub struct RustConnection<
+    R: ReadFD = BufReadFD<stream::Stream>,
+    W: WriteFD = BufWriteFD<stream::Stream>,
+> {
     inner: Mutex<inner::ConnectionInner>,
-    read: Mutex<BufReadFD<stream::Stream>>,
-    write: Mutex<BufWriteFD<stream::Stream>>,
+    read: Mutex<R>,
+    write: Mutex<W>,
     reader_condition: Condvar,
     id_allocator: Mutex<id_allocator::IDAllocator>,
     setup: Setup,
@@ -59,7 +62,7 @@ pub struct RustConnection {
     maximum_request_bytes: Mutex<MaxRequestBytes>,
 }
 
-impl RustConnection {
+impl RustConnection<BufReadFD<stream::Stream>, BufWriteFD<stream::Stream>> {
     /// Establish a new connection.
     ///
     /// If no `dpy_name` is provided, the value from `$DISPLAY` is used.
@@ -87,17 +90,15 @@ impl RustConnection {
             screen,
         ))
     }
+}
 
+impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
     /// Establish a new connection to the given streams.
     ///
     /// `read` is used for reading data from the X11 server and `write` is used for writing.
     /// `screen` is the number of the screen that should be used. This function checks that a
     /// screen with that number exists.
-    pub fn connect_to_stream(
-        read: BufReadFD<stream::Stream>,
-        write: BufWriteFD<stream::Stream>,
-        screen: usize,
-    ) -> Result<Self, ConnectError> {
+    pub fn connect_to_stream(read: R, write: W, screen: usize) -> Result<Self, ConnectError> {
         Self::connect_to_stream_with_auth_info(read, write, screen, Vec::new(), Vec::new())
     }
 
@@ -111,8 +112,8 @@ impl RustConnection {
     /// `authorization_protocol_name` and `authorization_protocol_data` of the `SetupRequest` that
     /// is sent to the X11 server.
     pub fn connect_to_stream_with_auth_info(
-        mut read: BufReadFD<stream::Stream>,
-        mut write: BufWriteFD<stream::Stream>,
+        mut read: R,
+        mut write: W,
         screen: usize,
         auth_name: Vec<u8>,
         auth_data: Vec<u8>,
@@ -134,17 +135,13 @@ impl RustConnection {
     /// `read` is used for reading data from the X11 server and `write` is used for writing.
     /// It is assumed that `setup` was just received from the server. Thus, the first reply to a
     /// request that is sent will have sequence number one.
-    pub fn for_connected_stream(
-        read: BufReadFD<stream::Stream>,
-        write: BufWriteFD<stream::Stream>,
-        setup: Setup,
-    ) -> Result<Self, ConnectError> {
+    pub fn for_connected_stream(read: R, write: W, setup: Setup) -> Result<Self, ConnectError> {
         Self::for_inner(read, write, inner::ConnectionInner::new(), setup)
     }
 
     fn for_inner(
-        read: BufReadFD<stream::Stream>,
-        write: BufWriteFD<stream::Stream>,
+        read: R,
+        write: W,
         inner: inner::ConnectionInner,
         setup: Setup,
     ) -> Result<Self, ConnectError> {
@@ -198,7 +195,7 @@ impl RustConnection {
     fn send_sync(
         &self,
         inner: &mut inner::ConnectionInner,
-        write: &mut impl WriteFD,
+        write: &mut W,
     ) -> Result<(), std::io::Error> {
         let length = 1u16.to_ne_bytes();
         let request = [
@@ -285,7 +282,7 @@ impl RustConnection {
     }
 }
 
-impl RequestConnection for RustConnection {
+impl<R: ReadFD, W: WriteFD> RequestConnection for RustConnection<R, W> {
     type Buf = Vec<u8>;
 
     fn send_request_with_reply<Reply>(
@@ -463,7 +460,7 @@ impl RequestConnection for RustConnection {
     }
 }
 
-impl Connection for RustConnection {
+impl<R: ReadFD, W: WriteFD> Connection for RustConnection<R, W> {
     fn wait_for_raw_event_with_sequence(&self) -> Result<RawEventAndSeqNumber, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
         loop {
