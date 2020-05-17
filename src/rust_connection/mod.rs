@@ -48,6 +48,21 @@ pub(crate) enum ReplyFDKind {
     ReplyWithFDs,
 }
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub(crate) enum BlockingMode {
+    Blocking,
+    NonBlocking,
+}
+
+impl BlockingMode {
+    fn set_on_reader(self, read: &mut impl ReadFD) -> std::io::Result<()> {
+        match self {
+            BlockingMode::Blocking => read.set_nonblocking(false),
+            BlockingMode::NonBlocking => read.set_nonblocking(true),
+        }
+    }
+}
+
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
 pub struct RustConnection<
@@ -225,10 +240,17 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
     fn read_packet_and_enqueue<'a>(
         &'a self,
         mut inner: MutexGuardInner<'a>,
+        mode: BlockingMode,
     ) -> Result<MutexGuardInner<'a>, std::io::Error> {
         // 0.1. Try to lock the `read` mutex.
         match self.read.try_lock() {
             Err(TryLockError::WouldBlock) => {
+                // In non-blocking mode, we just return immediately
+                match mode {
+                    BlockingMode::NonBlocking => return Ok(inner),
+                    BlockingMode::Blocking => {},
+                }
+
                 // 1.1. Someone else is reading (other thread is at 2.2);
                 // wait for it. `Condvar::wait` will unlock `inner`, so
                 // the other thread can relock `inner` at 2.3 (and to allow
@@ -246,11 +268,19 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
                 drop(inner);
 
                 // 2.2. Block the thread until a packet is received.
+                mode.set_on_reader(lock.get_mut())?;
                 let mut fds = Vec::new();
-                let packet = lock.read_packet(&mut fds)?;
+                use std::io::ErrorKind::WouldBlock;
+                let packet = lock.read_packet(&mut fds);
 
                 // 2.3. Relock `inner` to enqueue the packet.
                 inner = self.inner.lock().unwrap();
+
+                let packet = match packet {
+                    Err(e) if e.kind() == WouldBlock => return Ok(inner),
+                    Err(e) => return Err(e.into()),
+                    Ok(packet) => packet,
+                };
 
                 // 2.4. Once `inner` has been relocked, drop the
                 // lock on `read`. While inner is locked, other
@@ -373,7 +403,7 @@ impl<R: ReadFD, W: WriteFD> RequestConnection for RustConnection<R, W> {
                 PollReply::NoReply => return Ok(None),
                 PollReply::Reply(buffer) => return Ok(Some(buffer)),
             }
-            inner = self.read_packet_and_enqueue(inner)?;
+            inner = self.read_packet_and_enqueue(inner, BlockingMode::Blocking)?;
         }
     }
 
@@ -395,7 +425,7 @@ impl<R: ReadFD, W: WriteFD> RequestConnection for RustConnection<R, W> {
                 PollReply::NoReply => return Ok(None),
                 PollReply::Reply(buffer) => return Ok(Some(buffer)),
             }
-            inner = self.read_packet_and_enqueue(inner)?;
+            inner = self.read_packet_and_enqueue(inner, BlockingMode::Blocking)?;
         }
     }
 
@@ -415,7 +445,7 @@ impl<R: ReadFD, W: WriteFD> RequestConnection for RustConnection<R, W> {
                     return Ok(ReplyOrError::Reply(reply));
                 }
             }
-            inner = self.read_packet_and_enqueue(inner)?;
+            inner = self.read_packet_and_enqueue(inner, BlockingMode::Blocking)?;
         }
     }
 
@@ -471,14 +501,20 @@ impl<R: ReadFD, W: WriteFD> Connection for RustConnection<R, W> {
             if let Some(event) = inner.poll_for_event_with_sequence() {
                 return Ok(event);
             }
-            inner = self.read_packet_and_enqueue(inner)?;
+            inner = self.read_packet_and_enqueue(inner, BlockingMode::Blocking)?;
         }
     }
 
     fn poll_for_raw_event_with_sequence(
         &self,
     ) -> Result<Option<RawEventAndSeqNumber>, ConnectionError> {
-        Ok(self.inner.lock().unwrap().poll_for_event_with_sequence())
+        let mut inner = self.inner.lock().unwrap();
+        if let Some(event) = inner.poll_for_event_with_sequence() {
+            Ok(Some(event))
+        } else {
+            inner = self.read_packet_and_enqueue(inner, BlockingMode::NonBlocking)?;
+            Ok(inner.poll_for_event_with_sequence())
+        }
     }
 
     fn flush(&self) -> Result<(), ConnectionError> {

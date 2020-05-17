@@ -28,6 +28,11 @@ impl<R: ReadFD> PacketReader<R> {
         }
     }
 
+    /// Get a mutable reference to the inner reader
+    pub(crate) fn get_mut(&mut self) -> &mut R {
+        &mut self.inner
+    }
+
     /// Try to read a packet from the inner reader.
     pub(crate) fn read_packet(&mut self, fd_storage: &mut Vec<RawFdContainer>) -> Result<Vec<u8>> {
         if self.pending_packet.is_none() {
