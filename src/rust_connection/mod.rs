@@ -55,7 +55,7 @@ pub(crate) enum BlockingMode {
 }
 
 impl BlockingMode {
-    fn set_on_reader(self, read: &mut impl ReadFD) -> std::io::Result<()> {
+    fn set_on_reader(self, read: &mut PacketReader<impl ReadFD>) -> std::io::Result<()> {
         match self {
             BlockingMode::Blocking => read.set_nonblocking(false),
             BlockingMode::NonBlocking => read.set_nonblocking(true),
@@ -272,7 +272,7 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
                 let _notify = NotifyOnDrop(&self.reader_condition);
 
                 // 2.2. Block the thread until a packet is received.
-                mode.set_on_reader(lock.get_mut())?;
+                mode.set_on_reader(&mut lock)?;
                 let mut fds = Vec::new();
                 use std::io::ErrorKind::WouldBlock;
                 let packet = lock.read_packet(&mut fds);

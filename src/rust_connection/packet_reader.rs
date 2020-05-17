@@ -14,6 +14,9 @@ const MINIMAL_PACKET_LENGTH: usize = 32;
 pub(crate) struct PacketReader<R: ReadFD> {
     inner: R,
 
+    // The nonblocking state of `inner`
+    nonblocking: Option<bool>,
+
     // A packet that was partially read. The `Vec` is the partial packet and the `usize` describes
     // up to where the packet was already read.
     pending_packet: Option<(Vec<u8>, usize)>,
@@ -24,13 +27,18 @@ impl<R: ReadFD> PacketReader<R> {
     pub(crate) fn new(inner: R) -> Self {
         Self {
             inner,
+            nonblocking: None,
             pending_packet: None,
         }
     }
 
-    /// Get a mutable reference to the inner reader
-    pub(crate) fn get_mut(&mut self) -> &mut R {
-        &mut self.inner
+    /// Set the nonblocking status of the inner reader
+    pub(crate) fn set_nonblocking(&mut self, nonblocking: bool) -> Result<()> {
+        if self.nonblocking != Some(nonblocking) {
+            self.inner.set_nonblocking(nonblocking)?;
+            self.nonblocking = Some(nonblocking);
+        }
+        Ok(())
     }
 
     /// Try to read a packet from the inner reader.
