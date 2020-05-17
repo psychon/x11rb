@@ -154,6 +154,10 @@ mod fake_stream {
             self.pending.drain(..len);
             Ok(len)
         }
+
+        fn set_nonblocking(&mut self, nonblocking: bool) -> std::io::Result<()> {
+            todo!()
+        }
     }
 
     #[derive(Debug)]

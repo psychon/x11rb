@@ -625,6 +625,10 @@ mod test {
         fn read(&mut self, buf: &mut [u8], _fd_storage: &mut Vec<RawFdContainer>) -> Result<usize> {
             self.0.read(buf)
         }
+
+        fn set_nonblocking(&mut self, _nonblocking: bool) -> Result<()> {
+            todo!()
+        }
     }
 
     fn partial_write_test(request: &[u8], expected_err: &str) {

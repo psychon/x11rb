@@ -268,6 +268,13 @@ pub trait ReadFD {
         }
         Ok(())
     }
+
+    /// Moves this reader into or out of nonblocking mode.
+    ///
+    /// In nonblocking mode, reading becomes nonblocking. This means that such calls immediately
+    /// return. If an immediate result is not possible, an error with kind
+    /// [`std::io::ErrorKind::WouldBlock`] is returned.
+    fn set_nonblocking(&mut self, nonblocking: bool) -> Result<()>;
 }
 
 /// Wraps a [`std::io::Read`] to implement the [`ReadFD`] trait.
@@ -291,6 +298,10 @@ impl<R: Read> ReadFD for ReadFDWrapper<R> {
 
     fn read_exact(&mut self, buf: &mut [u8], _fd_storage: &mut Vec<RawFdContainer>) -> Result<()> {
         self.0.read_exact(buf)
+    }
+
+    fn set_nonblocking(&mut self, _nonblocking: bool) -> Result<()> {
+        todo!()
     }
 }
 
@@ -339,5 +350,9 @@ impl<R: ReadFD> ReadFD for BufReadFD<R> {
         let nread = (&self.buf[self.start..self.end]).read(buf)?;
         self.start += nread;
         Ok(nread)
+    }
+
+    fn set_nonblocking(&mut self, nonblocking: bool) -> Result<()> {
+        self.inner.set_nonblocking(nonblocking)
     }
 }
