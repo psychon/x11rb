@@ -248,7 +248,7 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
                 // In non-blocking mode, we just return immediately
                 match mode {
                     BlockingMode::NonBlocking => return Ok(inner),
-                    BlockingMode::Blocking => {},
+                    BlockingMode::Blocking => {}
                 }
 
                 // 1.1. Someone else is reading (other thread is at 2.2);
