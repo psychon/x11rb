@@ -156,7 +156,8 @@ mod fake_stream {
         }
 
         fn set_nonblocking(&mut self, nonblocking: bool) -> std::io::Result<()> {
-            todo!()
+            assert!(nonblocking == false);
+            Ok(())
         }
     }
 
