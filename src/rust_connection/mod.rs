@@ -281,7 +281,7 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
                 inner = self.inner.lock().unwrap();
 
                 let packet = match packet {
-                    Err(e) if e.kind() == WouldBlock => return Ok(inner),
+                    Err(ref e) if e.kind() == WouldBlock => return Ok(inner),
                     Err(e) => return Err(e),
                     Ok(packet) => packet,
                 };
