@@ -267,6 +267,10 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
                 // `read_packet` is blocking.
                 drop(inner);
 
+                // Make sure sleeping readers are woken up when we return
+                // (Even in case of errors)
+                let _notify = NotifyOnDrop(&self.reader_condition);
+
                 // 2.2. Block the thread until a packet is received.
                 mode.set_on_reader(lock.get_mut())?;
                 let mut fds = Vec::new();
@@ -295,11 +299,7 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
                 inner.enqueue_fds(fds);
                 inner.enqueue_packet(packet);
 
-                // 2.6. Notify threads that a packet has been enqueued,
-                // so other threads waiting on 1.1 can return.
-                self.reader_condition.notify_all();
-
-                // 2.7. Return the locked `inner` to the caller.
+                // 2.6. Return the locked `inner` to the caller.
                 Ok(inner)
             }
         }
@@ -630,6 +630,16 @@ fn write_all_vectored(
         write.write_all(&[], fds)?;
     }
     Ok(())
+}
+
+/// Call `notify_all` on a condition variable when dropped.
+#[derive(Debug)]
+struct NotifyOnDrop<'a>(&'a Condvar);
+
+impl Drop for NotifyOnDrop<'_> {
+    fn drop(&mut self) {
+        self.0.notify_all();
+    }
 }
 
 #[cfg(test)]
