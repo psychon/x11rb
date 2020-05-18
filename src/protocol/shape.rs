@@ -1,6 +1,8 @@
 // This file contains generated code. Do not edit directly.
 // To regenerate this, run 'make'.
 
+//! Bindings to the `Shape` X11 extension.
+
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::identity_op)]
 #![allow(clippy::trivially_copy_pass_by_ref)]
@@ -698,6 +700,21 @@ impl TryFrom<&[u8]> for GetRectanglesReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetRectanglesReply {
+    /// Get the value of the `rectangles_len` field.
+    ///
+    /// The `rectangles_len` field is used as the length field of the `rectangles` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn rectangles_len(&self) -> u32 {
+        self.rectangles.len()
+            .try_into().unwrap()
     }
 }
 

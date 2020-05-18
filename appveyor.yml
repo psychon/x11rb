@@ -18,7 +18,7 @@ test_script:
   - cargo check --verbose --all-targets --features all-extensions
 
   # Also build once without any feature
-  - cargo build --verbose --all-targets --no-default-features
+  - cargo check --verbose --all-targets --no-default-features
 
   # We do not have libxcb and thus cannot build XCBConnection
   - cargo build --verbose --all-targets --no-default-features --features all-extensions

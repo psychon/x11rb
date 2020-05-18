@@ -255,4 +255,12 @@ impl ReadFD for Stream {
             }
         }
     }
+
+    fn set_nonblocking(&mut self, nonblocking: bool) -> Result<()> {
+        match self {
+            Stream::TcpStream(stream) => stream.set_nonblocking(nonblocking),
+            #[cfg(unix)]
+            Stream::UnixStream(stream) => stream.set_nonblocking(nonblocking),
+        }
+    }
 }

@@ -1,6 +1,8 @@
 // This file contains generated code. Do not edit directly.
 // To regenerate this, run 'make'.
 
+//! Bindings to the `Res` X11 extension.
+
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::identity_op)]
 #![allow(clippy::trivially_copy_pass_by_ref)]
@@ -255,6 +257,22 @@ impl Serialize for ClientIdValue {
         self.value.serialize_into(bytes);
     }
 }
+impl ClientIdValue {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `value` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.value.len()
+            .checked_mul(4).unwrap()
+            .try_into().unwrap()
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ResourceIdSpec {
@@ -395,6 +413,21 @@ impl Serialize for ResourceSizeValue {
         self.cross_references.serialize_into(bytes);
     }
 }
+impl ResourceSizeValue {
+    /// Get the value of the `num_cross_references` field.
+    ///
+    /// The `num_cross_references` field is used as the length field of the `cross_references` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn num_cross_references(&self) -> u32 {
+        self.cross_references.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the QueryVersion request
 pub const QUERY_VERSION_REQUEST: u8 = 0;
@@ -499,6 +532,21 @@ impl TryFrom<&[u8]> for QueryClientsReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl QueryClientsReply {
+    /// Get the value of the `num_clients` field.
+    ///
+    /// The `num_clients` field is used as the length field of the `clients` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn num_clients(&self) -> u32 {
+        self.clients.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the QueryClientResources request
 pub const QUERY_CLIENT_RESOURCES_REQUEST: u8 = 2;
@@ -551,6 +599,21 @@ impl TryFrom<&[u8]> for QueryClientResourcesReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl QueryClientResourcesReply {
+    /// Get the value of the `num_types` field.
+    ///
+    /// The `num_types` field is used as the length field of the `types` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn num_types(&self) -> u32 {
+        self.types.len()
+            .try_into().unwrap()
     }
 }
 
@@ -666,6 +729,21 @@ impl TryFrom<&[u8]> for QueryClientIdsReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl QueryClientIdsReply {
+    /// Get the value of the `num_ids` field.
+    ///
+    /// The `num_ids` field is used as the length field of the `ids` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn num_ids(&self) -> u32 {
+        self.ids.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the QueryResourceBytes request
 pub const QUERY_RESOURCE_BYTES_REQUEST: u8 = 5;
@@ -728,6 +806,21 @@ impl TryFrom<&[u8]> for QueryResourceBytesReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl QueryResourceBytesReply {
+    /// Get the value of the `num_sizes` field.
+    ///
+    /// The `num_sizes` field is used as the length field of the `sizes` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn num_sizes(&self) -> u32 {
+        self.sizes.len()
+            .try_into().unwrap()
     }
 }
 

@@ -1,6 +1,8 @@
 // This file contains generated code. Do not edit directly.
 // To regenerate this, run 'make'.
 
+//! Bindings to the `Sync` X11 extension.
+
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::identity_op)]
 #![allow(clippy::trivially_copy_pass_by_ref)]
@@ -402,6 +404,21 @@ impl Serialize for Systemcounter {
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }
+impl Systemcounter {
+    /// Get the value of the `name_len` field.
+    ///
+    /// The `name_len` field is used as the length field of the `name` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn name_len(&self) -> u16 {
+        self.name.len()
+            .try_into().unwrap()
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Trigger {
@@ -791,6 +808,21 @@ impl TryFrom<&[u8]> for ListSystemCountersReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl ListSystemCountersReply {
+    /// Get the value of the `counters_len` field.
+    ///
+    /// The `counters_len` field is used as the length field of the `counters` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn counters_len(&self) -> u32 {
+        self.counters.len()
+            .try_into().unwrap()
     }
 }
 

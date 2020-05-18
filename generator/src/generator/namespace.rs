@@ -48,6 +48,26 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
 
     fn generate(&self, out: &mut Output) {
         super::write_code_header(out);
+        if let Some(info) = &self.ns.ext_info {
+            outln!(out, "//! Bindings to the `{}` X11 extension.", info.name);
+        } else {
+            outln!(out, "//! Bindings to the core X11 protocol.");
+            outln!(out, "//!");
+            outln!(
+                out,
+                "//! For more documentation on the X11 protocol, see the"
+            );
+            outln!(
+                out,
+                "//! [protocol reference manual](https://www.x.org/releases/X11R7.6/doc/xproto/x11protocol.html).",
+            );
+            outln!(
+                out,
+                "//! This is especially recommended for looking up the exact semantics of"
+            );
+            outln!(out, "//! specific errors, events, or requests.");
+        }
+        outln!(out, "");
         outln!(out, "#![allow(clippy::too_many_arguments)]");
         outln!(out, "#![allow(clippy::identity_op)]");
         outln!(out, "#![allow(clippy::trivially_copy_pass_by_ref)]");
@@ -1975,6 +1995,65 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                     out,
                 );
             }
+        }
+
+        // Generate accessors for length fields that are not part of the struct.
+        // First, collect all relevant fields.
+        let deducible = fields
+            .iter()
+            .filter_map(|field| match field {
+                xcbdefs::FieldDef::Normal(normal_field) => deducible_fields
+                    .get(&normal_field.name)
+                    .and_then(|d| match d {
+                        DeducibleField::LengthOf(list_name, op) => Some((list_name, op)),
+                        // switches are not yet supported
+                        _ => None,
+                    })
+                    .map(|d| (field, d)),
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+        if !deducible.is_empty() {
+            if deducible
+                .iter()
+                .any(|(field, _)| field.name() == Some("len"))
+            {
+                let comment = "This is not a container and is_empty() makes no sense";
+                outln!(out, "#[allow(clippy::len_without_is_empty)] // {}", comment);
+            }
+            outln!(out, "impl {} {{", name);
+            for (field, (list_name, op)) in deducible {
+                let field_type = self.field_to_rust_type(field, switch_prefix);
+                let name = field.name().unwrap();
+                let name = if name == "type" {
+                    format!("r#{}", name)
+                } else {
+                    name.to_string()
+                };
+                out.indented(|out| {
+                    outln!(out, "/// Get the value of the `{}` field.", &name);
+                    outln!(out, "///");
+                    outln!(out, "/// The `{}` field is used as the length field of the `{}` field.", &name, &list_name);
+                    outln!(out, "/// This function computes the field's value again based on the length of the list.");
+                    outln!(out, "///");
+                    outln!(out, "/// # Panics");
+                    outln!(out, "///");
+                    outln!(out, "/// Panics if the value cannot be represented in the target type. This");
+                    outln!(out, "/// cannot happen with values of the struct received from the X11 server.");
+                    outln!(out, "pub fn {}(&self) -> {} {{", to_rust_variable_name(&name), field_type);
+                    out.indented(|out| {
+                        outln!(out, "self.{}.len()", to_rust_variable_name(&list_name));
+                        match op {
+                            DeducibleLengthFieldOp::None => {},
+                            DeducibleLengthFieldOp::Mul(n) => outln!(out.indent(), ".checked_mul({}).unwrap()", n),
+                            DeducibleLengthFieldOp::Div(n) => outln!(out.indent(), ".checked_div({}).unwrap()", n),
+                        }
+                        outln!(out.indent(), ".try_into().unwrap()");
+                    });
+                    outln!(out, "}}");
+                });
+            }
+            outln!(out, "}}");
         }
     }
 

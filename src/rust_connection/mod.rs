@@ -19,12 +19,14 @@ use crate::x11_utils::{ExtensionInformation, Serialize};
 mod fd_read_write;
 mod id_allocator;
 mod inner;
+mod packet_reader;
 mod parse_display;
 mod stream;
 mod xauth;
 
 pub use fd_read_write::{BufReadFD, BufWriteFD, ReadFD, ReadFDWrapper, WriteFD, WriteFDWrapper};
 use inner::PollReply;
+use packet_reader::PacketReader;
 
 type Buffer = <RustConnection as RequestConnection>::Buf;
 pub type RawEventAndSeqNumber = crate::connection::RawEventAndSeqNumber<Buffer>;
@@ -46,6 +48,21 @@ pub(crate) enum ReplyFDKind {
     ReplyWithFDs,
 }
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub(crate) enum BlockingMode {
+    Blocking,
+    NonBlocking,
+}
+
+impl BlockingMode {
+    fn set_on_reader(self, read: &mut PacketReader<impl ReadFD>) -> std::io::Result<()> {
+        match self {
+            BlockingMode::Blocking => read.set_nonblocking(false),
+            BlockingMode::NonBlocking => read.set_nonblocking(true),
+        }
+    }
+}
+
 /// A connection to an X11 server implemented in pure rust
 #[derive(Debug)]
 pub struct RustConnection<
@@ -53,7 +70,7 @@ pub struct RustConnection<
     W: WriteFD = BufWriteFD<stream::Stream>,
 > {
     inner: Mutex<inner::ConnectionInner>,
-    read: Mutex<R>,
+    read: Mutex<PacketReader<R>>,
     write: Mutex<W>,
     reader_condition: Condvar,
     id_allocator: Mutex<id_allocator::IDAllocator>,
@@ -149,7 +166,7 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
             id_allocator::IDAllocator::new(setup.resource_id_base, setup.resource_id_mask)?;
         Ok(RustConnection {
             inner: Mutex::new(inner),
-            read: Mutex::new(read),
+            read: Mutex::new(PacketReader::new(read)),
             write: Mutex::new(write),
             reader_condition: Condvar::new(),
             id_allocator: Mutex::new(allocator),
@@ -223,10 +240,17 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
     fn read_packet_and_enqueue<'a>(
         &'a self,
         mut inner: MutexGuardInner<'a>,
+        mode: BlockingMode,
     ) -> Result<MutexGuardInner<'a>, std::io::Error> {
         // 0.1. Try to lock the `read` mutex.
         match self.read.try_lock() {
             Err(TryLockError::WouldBlock) => {
+                // In non-blocking mode, we just return immediately
+                match mode {
+                    BlockingMode::NonBlocking => return Ok(inner),
+                    BlockingMode::Blocking => {}
+                }
+
                 // 1.1. Someone else is reading (other thread is at 2.2);
                 // wait for it. `Condvar::wait` will unlock `inner`, so
                 // the other thread can relock `inner` at 2.3 (and to allow
@@ -243,11 +267,24 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
                 // `read_packet` is blocking.
                 drop(inner);
 
+                // Make sure sleeping readers are woken up when we return
+                // (Even in case of errors)
+                let _notify = NotifyOnDrop(&self.reader_condition);
+
                 // 2.2. Block the thread until a packet is received.
-                let (packet, fds) = read_packet(&mut *lock)?;
+                mode.set_on_reader(&mut lock)?;
+                let mut fds = Vec::new();
+                use std::io::ErrorKind::WouldBlock;
+                let packet = lock.read_packet(&mut fds);
 
                 // 2.3. Relock `inner` to enqueue the packet.
                 inner = self.inner.lock().unwrap();
+
+                let packet = match packet {
+                    Err(ref e) if e.kind() == WouldBlock => return Ok(inner),
+                    Err(e) => return Err(e),
+                    Ok(packet) => packet,
+                };
 
                 // 2.4. Once `inner` has been relocked, drop the
                 // lock on `read`. While inner is locked, other
@@ -259,13 +296,10 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
                 drop(lock);
 
                 // 2.5. Actually enqueue the read packet.
-                inner.enqueue_packet(packet, fds);
+                inner.enqueue_fds(fds);
+                inner.enqueue_packet(packet);
 
-                // 2.6. Notify threads that a packet has been enqueued,
-                // so other threads waiting on 1.1 can return.
-                self.reader_condition.notify_all();
-
-                // 2.7. Return the locked `inner` to the caller.
+                // 2.6. Return the locked `inner` to the caller.
                 Ok(inner)
             }
         }
@@ -393,7 +427,7 @@ impl<R: ReadFD, W: WriteFD> RequestConnection for RustConnection<R, W> {
                 PollReply::NoReply => return Ok(None),
                 PollReply::Reply(buffer) => return Ok(Some(buffer)),
             }
-            inner = self.read_packet_and_enqueue(inner)?;
+            inner = self.read_packet_and_enqueue(inner, BlockingMode::Blocking)?;
         }
     }
 
@@ -415,7 +449,7 @@ impl<R: ReadFD, W: WriteFD> RequestConnection for RustConnection<R, W> {
                 PollReply::NoReply => return Ok(None),
                 PollReply::Reply(buffer) => return Ok(Some(buffer)),
             }
-            inner = self.read_packet_and_enqueue(inner)?;
+            inner = self.read_packet_and_enqueue(inner, BlockingMode::Blocking)?;
         }
     }
 
@@ -435,7 +469,7 @@ impl<R: ReadFD, W: WriteFD> RequestConnection for RustConnection<R, W> {
                     return Ok(ReplyOrError::Reply(reply));
                 }
             }
-            inner = self.read_packet_and_enqueue(inner)?;
+            inner = self.read_packet_and_enqueue(inner, BlockingMode::Blocking)?;
         }
     }
 
@@ -491,14 +525,20 @@ impl<R: ReadFD, W: WriteFD> Connection for RustConnection<R, W> {
             if let Some(event) = inner.poll_for_event_with_sequence() {
                 return Ok(event);
             }
-            inner = self.read_packet_and_enqueue(inner)?;
+            inner = self.read_packet_and_enqueue(inner, BlockingMode::Blocking)?;
         }
     }
 
     fn poll_for_raw_event_with_sequence(
         &self,
     ) -> Result<Option<RawEventAndSeqNumber>, ConnectionError> {
-        Ok(self.inner.lock().unwrap().poll_for_event_with_sequence())
+        let mut inner = self.inner.lock().unwrap();
+        if let Some(event) = inner.poll_for_event_with_sequence() {
+            Ok(Some(event))
+        } else {
+            inner = self.read_packet_and_enqueue(inner, BlockingMode::NonBlocking)?;
+            Ok(inner.poll_for_event_with_sequence())
+        }
     }
 
     fn flush(&self) -> Result<(), ConnectionError> {
@@ -513,33 +553,6 @@ impl<R: ReadFD, W: WriteFD> Connection for RustConnection<R, W> {
     fn generate_id(&self) -> Result<u32, ReplyOrIdError> {
         self.id_allocator.lock().unwrap().generate_id(self)
     }
-}
-
-// Read a single X11 packet from the connection.
-//
-// This function only supports errors, events, and replies. Namely, this cannot be used to receive
-// the initial setup reply from the X11 server.
-fn read_packet(read: &mut impl ReadFD) -> Result<(Vec<u8>, Vec<RawFdContainer>), std::io::Error> {
-    let mut fds = Vec::new();
-    let mut buffer = vec![0; 32];
-    read.read_exact(&mut buffer, &mut fds)?;
-
-    use crate::protocol::xproto::GE_GENERIC_EVENT;
-    const REPLY: u8 = 1;
-    const SENT_GE_GENERIC_EVENT: u8 = GE_GENERIC_EVENT | 0x80;
-    let extra_length = match buffer[0] {
-        REPLY | GE_GENERIC_EVENT | SENT_GE_GENERIC_EVENT => {
-            4 * u32::from_ne_bytes([buffer[4], buffer[5], buffer[6], buffer[7]])
-        }
-        _ => 0,
-    } as usize;
-    // Use `Vec::reserve_exact` because this will be the final
-    // length of the vector.
-    buffer.reserve_exact(extra_length);
-    buffer.resize(32 + extra_length, 0);
-    read.read_exact(&mut buffer[32..], &mut fds)?;
-
-    Ok((buffer, fds))
 }
 
 #[cfg(target_endian = "little")]
@@ -643,6 +656,16 @@ fn write_all_vectored(
     Ok(())
 }
 
+/// Call `notify_all` on a condition variable when dropped.
+#[derive(Debug)]
+struct NotifyOnDrop<'a>(&'a Condvar);
+
+impl Drop for NotifyOnDrop<'_> {
+    fn drop(&mut self) {
+        self.0.notify_all();
+    }
+}
+
 #[cfg(test)]
 mod test {
     use std::io::{IoSlice, Read, Result, Write};
@@ -671,6 +694,10 @@ mod test {
     impl ReadFD for ReadFDSlice<'_> {
         fn read(&mut self, buf: &mut [u8], _fd_storage: &mut Vec<RawFdContainer>) -> Result<usize> {
             self.0.read(buf)
+        }
+
+        fn set_nonblocking(&mut self, _nonblocking: bool) -> Result<()> {
+            unimplemented!()
         }
     }
 

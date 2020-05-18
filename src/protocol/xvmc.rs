@@ -1,6 +1,8 @@
 // This file contains generated code. Do not edit directly.
 // To regenerate this, run 'make'.
 
+//! Bindings to the `XvMC` X11 extension.
+
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::identity_op)]
 #![allow(clippy::trivially_copy_pass_by_ref)]
@@ -225,6 +227,21 @@ impl TryFrom<&[u8]> for ListSurfaceTypesReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl ListSurfaceTypesReply {
+    /// Get the value of the `num` field.
+    ///
+    /// The `num` field is used as the length field of the `surfaces` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn num(&self) -> u32 {
+        self.surfaces.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 2;
@@ -302,6 +319,21 @@ impl TryFrom<&[u8]> for CreateContextReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl CreateContextReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `priv_data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.priv_data.len()
+            .try_into().unwrap()
     }
 }
 
@@ -386,6 +418,21 @@ impl TryFrom<&[u8]> for CreateSurfaceReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl CreateSurfaceReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `priv_data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.priv_data.len()
+            .try_into().unwrap()
     }
 }
 
@@ -494,6 +541,21 @@ impl TryFrom<&[u8]> for CreateSubpictureReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl CreateSubpictureReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `priv_data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.priv_data.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the DestroySubpicture request
 pub const DESTROY_SUBPICTURE_REQUEST: u8 = 7;
@@ -578,6 +640,21 @@ impl TryFrom<&[u8]> for ListSubpictureTypesReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl ListSubpictureTypesReply {
+    /// Get the value of the `num` field.
+    ///
+    /// The `num` field is used as the length field of the `types` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn num(&self) -> u32 {
+        self.types.len()
+            .try_into().unwrap()
     }
 }
 

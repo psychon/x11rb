@@ -1,6 +1,13 @@
 // This file contains generated code. Do not edit directly.
 // To regenerate this, run 'make'.
 
+//! Bindings to the core X11 protocol.
+//!
+//! For more documentation on the X11 protocol, see the
+//! [protocol reference manual](https://www.x.org/releases/X11R7.6/doc/xproto/x11protocol.html).
+//! This is especially recommended for looking up the exact semantics of
+//! specific errors, events, or requests.
+
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::identity_op)]
 #![allow(clippy::trivially_copy_pass_by_ref)]
@@ -480,6 +487,21 @@ impl Serialize for Depth {
         self.visuals.serialize_into(bytes);
     }
 }
+impl Depth {
+    /// Get the value of the `visuals_len` field.
+    ///
+    /// The `visuals_len` field is used as the length field of the `visuals` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn visuals_len(&self) -> u16 {
+        self.visuals.len()
+            .try_into().unwrap()
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
@@ -727,6 +749,21 @@ impl Serialize for Screen {
         self.allowed_depths.serialize_into(bytes);
     }
 }
+impl Screen {
+    /// Get the value of the `allowed_depths_len` field.
+    ///
+    /// The `allowed_depths_len` field is used as the length field of the `allowed_depths` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn allowed_depths_len(&self) -> u8 {
+        self.allowed_depths.len()
+            .try_into().unwrap()
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetupRequest {
@@ -792,6 +829,34 @@ impl Serialize for SetupRequest {
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }
+impl SetupRequest {
+    /// Get the value of the `authorization_protocol_name_len` field.
+    ///
+    /// The `authorization_protocol_name_len` field is used as the length field of the `authorization_protocol_name` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn authorization_protocol_name_len(&self) -> u16 {
+        self.authorization_protocol_name.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `authorization_protocol_data_len` field.
+    ///
+    /// The `authorization_protocol_data_len` field is used as the length field of the `authorization_protocol_data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn authorization_protocol_data_len(&self) -> u16 {
+        self.authorization_protocol_data.len()
+            .try_into().unwrap()
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetupFailed {
@@ -838,6 +903,21 @@ impl Serialize for SetupFailed {
         bytes.extend_from_slice(&self.reason);
     }
 }
+impl SetupFailed {
+    /// Get the value of the `reason_len` field.
+    ///
+    /// The `reason_len` field is used as the length field of the `reason` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn reason_len(&self) -> u8 {
+        self.reason.len()
+            .try_into().unwrap()
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetupAuthenticate {
@@ -876,6 +956,22 @@ impl Serialize for SetupAuthenticate {
         let length = u16::try_from(self.reason.len() / 4).expect("`reason` has too many elements");
         length.serialize_into(bytes);
         bytes.extend_from_slice(&self.reason);
+    }
+}
+impl SetupAuthenticate {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `reason` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u16 {
+        self.reason.len()
+            .checked_div(4).unwrap()
+            .try_into().unwrap()
     }
 }
 
@@ -1049,6 +1145,47 @@ impl Serialize for Setup {
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
         self.pixmap_formats.serialize_into(bytes);
         self.roots.serialize_into(bytes);
+    }
+}
+impl Setup {
+    /// Get the value of the `vendor_len` field.
+    ///
+    /// The `vendor_len` field is used as the length field of the `vendor` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn vendor_len(&self) -> u16 {
+        self.vendor.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `roots_len` field.
+    ///
+    /// The `roots_len` field is used as the length field of the `roots` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn roots_len(&self) -> u8 {
+        self.roots.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `pixmap_formats_len` field.
+    ///
+    /// The `pixmap_formats_len` field is used as the length field of the `pixmap_formats` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn pixmap_formats_len(&self) -> u8 {
+        self.pixmap_formats.len()
+            .try_into().unwrap()
     }
 }
 
@@ -7458,6 +7595,21 @@ impl TryFrom<&[u8]> for QueryTreeReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl QueryTreeReply {
+    /// Get the value of the `children_len` field.
+    ///
+    /// The `children_len` field is used as the length field of the `children` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn children_len(&self) -> u16 {
+        self.children.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the InternAtom request
 pub const INTERN_ATOM_REQUEST: u8 = 16;
@@ -7609,6 +7761,21 @@ impl TryFrom<&[u8]> for GetAtomNameReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetAtomNameReply {
+    /// Get the value of the `name_len` field.
+    ///
+    /// The `name_len` field is used as the length field of the `name` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn name_len(&self) -> u16 {
+        self.name.len()
+            .try_into().unwrap()
     }
 }
 
@@ -8254,6 +8421,21 @@ impl TryFrom<&[u8]> for ListPropertiesReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl ListPropertiesReply {
+    /// Get the value of the `atoms_len` field.
+    ///
+    /// The `atoms_len` field is used as the length field of the `atoms` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn atoms_len(&self) -> u16 {
+        self.atoms.len()
+            .try_into().unwrap()
     }
 }
 
@@ -10119,6 +10301,21 @@ impl TryFrom<&[u8]> for GetMotionEventsReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetMotionEventsReply {
+    /// Get the value of the `events_len` field.
+    ///
+    /// The `events_len` field is used as the length field of the `events` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn events_len(&self) -> u32 {
+        self.events.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the TranslateCoordinates request
 pub const TRANSLATE_COORDINATES_REQUEST: u8 = 40;
@@ -10860,6 +11057,34 @@ impl TryFrom<&[u8]> for QueryFontReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl QueryFontReply {
+    /// Get the value of the `properties_len` field.
+    ///
+    /// The `properties_len` field is used as the length field of the `properties` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn properties_len(&self) -> u16 {
+        self.properties.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `char_infos_len` field.
+    ///
+    /// The `char_infos_len` field is used as the length field of the `char_infos` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn char_infos_len(&self) -> u32 {
+        self.char_infos.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the QueryTextExtents request
 pub const QUERY_TEXT_EXTENTS_REQUEST: u8 = 48;
@@ -10998,6 +11223,21 @@ impl Serialize for Str {
         bytes.extend_from_slice(&self.name);
     }
 }
+impl Str {
+    /// Get the value of the `name_len` field.
+    ///
+    /// The `name_len` field is used as the length field of the `name` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn name_len(&self) -> u8 {
+        self.name.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the ListFonts request
 pub const LIST_FONTS_REQUEST: u8 = 49;
@@ -11069,6 +11309,21 @@ impl TryFrom<&[u8]> for ListFontsReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl ListFontsReply {
+    /// Get the value of the `names_len` field.
+    ///
+    /// The `names_len` field is used as the length field of the `names` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn names_len(&self) -> u16 {
+        self.names.len()
+            .try_into().unwrap()
     }
 }
 
@@ -11186,6 +11441,34 @@ impl TryFrom<&[u8]> for ListFontsWithInfoReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl ListFontsWithInfoReply {
+    /// Get the value of the `name_len` field.
+    ///
+    /// The `name_len` field is used as the length field of the `name` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn name_len(&self) -> u8 {
+        self.name.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `properties_len` field.
+    ///
+    /// The `properties_len` field is used as the length field of the `properties` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn properties_len(&self) -> u16 {
+        self.properties.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the SetFontPath request
 pub const SET_FONT_PATH_REQUEST: u8 = 51;
@@ -11261,6 +11544,21 @@ impl TryFrom<&[u8]> for GetFontPathReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetFontPathReply {
+    /// Get the value of the `path_len` field.
+    ///
+    /// The `path_len` field is used as the length field of the `path` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn path_len(&self) -> u16 {
+        self.path.len()
+            .try_into().unwrap()
     }
 }
 
@@ -14015,6 +14313,22 @@ impl TryFrom<&[u8]> for GetImageReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetImageReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.data.len()
+            .checked_div(4).unwrap()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the PolyText8 request
 pub const POLY_TEXT8_REQUEST: u8 = 74;
@@ -14508,6 +14822,21 @@ impl TryFrom<&[u8]> for ListInstalledColormapsReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl ListInstalledColormapsReply {
+    /// Get the value of the `cmaps_len` field.
+    ///
+    /// The `cmaps_len` field is used as the length field of the `cmaps` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn cmaps_len(&self) -> u16 {
+        self.cmaps.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the AllocColor request
 pub const ALLOC_COLOR_REQUEST: u8 = 84;
@@ -14727,6 +15056,34 @@ impl TryFrom<&[u8]> for AllocColorCellsReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl AllocColorCellsReply {
+    /// Get the value of the `pixels_len` field.
+    ///
+    /// The `pixels_len` field is used as the length field of the `pixels` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn pixels_len(&self) -> u16 {
+        self.pixels.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `masks_len` field.
+    ///
+    /// The `masks_len` field is used as the length field of the `masks` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn masks_len(&self) -> u16 {
+        self.masks.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the AllocColorPlanes request
 pub const ALLOC_COLOR_PLANES_REQUEST: u8 = 87;
@@ -14797,6 +15154,21 @@ impl TryFrom<&[u8]> for AllocColorPlanesReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl AllocColorPlanesReply {
+    /// Get the value of the `pixels_len` field.
+    ///
+    /// The `pixels_len` field is used as the length field of the `pixels` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn pixels_len(&self) -> u16 {
+        self.pixels.len()
+            .try_into().unwrap()
     }
 }
 
@@ -15132,6 +15504,21 @@ impl TryFrom<&[u8]> for QueryColorsReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl QueryColorsReply {
+    /// Get the value of the `colors_len` field.
+    ///
+    /// The `colors_len` field is used as the length field of the `colors` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn colors_len(&self) -> u16 {
+        self.colors.len()
+            .try_into().unwrap()
     }
 }
 
@@ -15814,6 +16201,21 @@ impl TryFrom<&[u8]> for ListExtensionsReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl ListExtensionsReply {
+    /// Get the value of the `names_len` field.
+    ///
+    /// The `names_len` field is used as the length field of the `names` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn names_len(&self) -> u8 {
+        self.names.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the ChangeKeyboardMapping request
 pub const CHANGE_KEYBOARD_MAPPING_REQUEST: u8 = 100;
@@ -15896,6 +16298,21 @@ impl TryFrom<&[u8]> for GetKeyboardMappingReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetKeyboardMappingReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `keysyms` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.keysyms.len()
+            .try_into().unwrap()
     }
 }
 
@@ -16864,6 +17281,21 @@ impl Serialize for Host {
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
     }
 }
+impl Host {
+    /// Get the value of the `address_len` field.
+    ///
+    /// The `address_len` field is used as the length field of the `address` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn address_len(&self) -> u16 {
+        self.address.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the ListHosts request
 pub const LIST_HOSTS_REQUEST: u8 = 110;
@@ -16911,6 +17343,21 @@ impl TryFrom<&[u8]> for ListHostsReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl ListHostsReply {
+    /// Get the value of the `hosts_len` field.
+    ///
+    /// The `hosts_len` field is used as the length field of the `hosts` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn hosts_len(&self) -> u16 {
+        self.hosts.len()
+            .try_into().unwrap()
     }
 }
 
@@ -17484,6 +17931,21 @@ impl TryFrom<&[u8]> for GetPointerMappingReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetPointerMappingReply {
+    /// Get the value of the `map_len` field.
+    ///
+    /// The `map_len` field is used as the length field of the `map` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn map_len(&self) -> u8 {
+        self.map.len()
+            .try_into().unwrap()
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -17660,6 +18122,22 @@ impl TryFrom<&[u8]> for GetModifierMappingReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetModifierMappingReply {
+    /// Get the value of the `keycodes_per_modifier` field.
+    ///
+    /// The `keycodes_per_modifier` field is used as the length field of the `keycodes` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn keycodes_per_modifier(&self) -> u8 {
+        self.keycodes.len()
+            .checked_div(8).unwrap()
+            .try_into().unwrap()
     }
 }
 

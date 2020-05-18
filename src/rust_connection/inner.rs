@@ -152,10 +152,17 @@ impl ConnectionInner {
         Some(full_number)
     }
 
-    /// An X11 packet was received from the connection and is now enqueued into our state.
-    pub(crate) fn enqueue_packet(&mut self, packet: Vec<u8>, fds: Vec<RawFdContainer>) {
+    /// Add FDs that were received to the internal state.
+    ///
+    /// This must be called before the corresponding packets are enqueued.
+    pub(crate) fn enqueue_fds(&mut self, fds: Vec<RawFdContainer>) {
         self.pending_fds.extend(fds);
+    }
 
+    /// An X11 packet was received from the connection and is now enqueued into our state.
+    ///
+    /// Any FDs that were received must already be enqueued before this can be called.
+    pub(crate) fn enqueue_packet(&mut self, packet: Vec<u8>) {
         let kind = packet[0];
 
         // extract_sequence_number() updates our state and is thus important to call even when we

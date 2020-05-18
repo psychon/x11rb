@@ -1,6 +1,8 @@
 // This file contains generated code. Do not edit directly.
 // To regenerate this, run 'make'.
 
+//! Bindings to the `XPrint` X11 extension.
+
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::identity_op)]
 #![allow(clippy::trivially_copy_pass_by_ref)]
@@ -81,6 +83,34 @@ impl Serialize for Printer {
         desc_len.serialize_into(bytes);
         bytes.extend_from_slice(&self.description);
         bytes.extend_from_slice(&[0; 3][..(4 - (bytes.len() % 4)) % 4]);
+    }
+}
+impl Printer {
+    /// Get the value of the `nameLen` field.
+    ///
+    /// The `nameLen` field is used as the length field of the `name` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn name_len(&self) -> u32 {
+        self.name.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `descLen` field.
+    ///
+    /// The `descLen` field is used as the length field of the `description` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn desc_len(&self) -> u32 {
+        self.description.len()
+            .try_into().unwrap()
     }
 }
 
@@ -484,6 +514,21 @@ impl TryFrom<&[u8]> for PrintGetPrinterListReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl PrintGetPrinterListReply {
+    /// Get the value of the `listCount` field.
+    ///
+    /// The `listCount` field is used as the length field of the `printers` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn list_count(&self) -> u32 {
+        self.printers.len()
+            .try_into().unwrap()
     }
 }
 
@@ -917,6 +962,21 @@ impl TryFrom<&[u8]> for PrintGetDocumentDataReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl PrintGetDocumentDataReply {
+    /// Get the value of the `dataLen` field.
+    ///
+    /// The `dataLen` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn data_len(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the PrintStartPage request
 pub const PRINT_START_PAGE_REQUEST: u8 = 13;
@@ -1117,6 +1177,21 @@ impl TryFrom<&[u8]> for PrintGetAttributesReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl PrintGetAttributesReply {
+    /// Get the value of the `stringLen` field.
+    ///
+    /// The `stringLen` field is used as the length field of the `attributes` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn string_len(&self) -> u32 {
+        self.attributes.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the PrintGetOneAttributes request
 pub const PRINT_GET_ONE_ATTRIBUTES_REQUEST: u8 = 19;
@@ -1184,6 +1259,21 @@ impl TryFrom<&[u8]> for PrintGetOneAttributesReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl PrintGetOneAttributesReply {
+    /// Get the value of the `valueLen` field.
+    ///
+    /// The `valueLen` field is used as the length field of the `value` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn value_len(&self) -> u32 {
+        self.value.len()
+            .try_into().unwrap()
     }
 }
 
@@ -1336,6 +1426,21 @@ impl TryFrom<&[u8]> for PrintQueryScreensReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl PrintQueryScreensReply {
+    /// Get the value of the `listCount` field.
+    ///
+    /// The `listCount` field is used as the length field of the `roots` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn list_count(&self) -> u32 {
+        self.roots.len()
+            .try_into().unwrap()
     }
 }
 

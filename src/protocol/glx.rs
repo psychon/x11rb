@@ -1,6 +1,8 @@
 // This file contains generated code. Do not edit directly.
 // To regenerate this, run 'make'.
 
+//! Bindings to the `Glx` X11 extension.
+
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::identity_op)]
 #![allow(clippy::trivially_copy_pass_by_ref)]
@@ -1148,6 +1150,21 @@ impl TryFrom<&[u8]> for GetVisualConfigsReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetVisualConfigsReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `property_list` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.property_list.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the DestroyGLXPixmap request
 pub const DESTROY_GLX_PIXMAP_REQUEST: u8 = 15;
@@ -1275,6 +1292,22 @@ impl TryFrom<&[u8]> for VendorPrivateWithReplyReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl VendorPrivateWithReplyReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `data2` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.data2.len()
+            .checked_div(4).unwrap()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the QueryExtensionsString request
 pub const QUERY_EXTENSIONS_STRING_REQUEST: u8 = 18;
@@ -1390,6 +1423,21 @@ impl TryFrom<&[u8]> for QueryServerStringReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl QueryServerStringReply {
+    /// Get the value of the `str_len` field.
+    ///
+    /// The `str_len` field is used as the length field of the `string` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn str_len(&self) -> u32 {
+        self.string.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the ClientInfo request
 pub const CLIENT_INFO_REQUEST: u8 = 20;
@@ -1485,6 +1533,21 @@ impl TryFrom<&[u8]> for GetFBConfigsReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetFBConfigsReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `property_list` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.property_list.len()
+            .try_into().unwrap()
     }
 }
 
@@ -1671,6 +1734,22 @@ impl TryFrom<&[u8]> for QueryContextReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl QueryContextReply {
+    /// Get the value of the `num_attribs` field.
+    ///
+    /// The `num_attribs` field is used as the length field of the `attribs` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn num_attribs(&self) -> u32 {
+        self.attribs.len()
+            .checked_div(2).unwrap()
+            .try_into().unwrap()
     }
 }
 
@@ -1868,6 +1947,22 @@ impl TryFrom<&[u8]> for GetDrawableAttributesReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetDrawableAttributesReply {
+    /// Get the value of the `num_attribs` field.
+    ///
+    /// The `num_attribs` field is used as the length field of the `attribs` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn num_attribs(&self) -> u32 {
+        self.attribs.len()
+            .checked_div(2).unwrap()
+            .try_into().unwrap()
     }
 }
 
@@ -2450,6 +2545,21 @@ impl TryFrom<&[u8]> for RenderModeReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl RenderModeReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[allow(non_camel_case_types)]
@@ -2713,6 +2823,22 @@ impl TryFrom<&[u8]> for ReadPixelsReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl ReadPixelsReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.data.len()
+            .checked_div(4).unwrap()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetBooleanv request
 pub const GET_BOOLEANV_REQUEST: u8 = 112;
@@ -2775,6 +2901,21 @@ impl TryFrom<&[u8]> for GetBooleanvReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetBooleanvReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetClipPlane request
 pub const GET_CLIP_PLANE_REQUEST: u8 = 113;
@@ -2830,6 +2971,22 @@ impl TryFrom<&[u8]> for GetClipPlaneReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetClipPlaneReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.data.len()
+            .checked_mul(2).unwrap()
+            .try_into().unwrap()
     }
 }
 
@@ -2892,6 +3049,21 @@ impl TryFrom<&[u8]> for GetDoublevReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetDoublevReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
     }
 }
 
@@ -3008,6 +3180,21 @@ impl TryFrom<&[u8]> for GetFloatvReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetFloatvReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetIntegerv request
 pub const GET_INTEGERV_REQUEST: u8 = 117;
@@ -3068,6 +3255,21 @@ impl TryFrom<&[u8]> for GetIntegervReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetIntegervReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
     }
 }
 
@@ -3137,6 +3339,21 @@ impl TryFrom<&[u8]> for GetLightfvReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetLightfvReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetLightiv request
 pub const GET_LIGHTIV_REQUEST: u8 = 119;
@@ -3202,6 +3419,21 @@ impl TryFrom<&[u8]> for GetLightivReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetLightivReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
     }
 }
 
@@ -3271,6 +3503,21 @@ impl TryFrom<&[u8]> for GetMapdvReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetMapdvReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetMapfv request
 pub const GET_MAPFV_REQUEST: u8 = 121;
@@ -3336,6 +3583,21 @@ impl TryFrom<&[u8]> for GetMapfvReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetMapfvReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
     }
 }
 
@@ -3405,6 +3667,21 @@ impl TryFrom<&[u8]> for GetMapivReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetMapivReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetMaterialfv request
 pub const GET_MATERIALFV_REQUEST: u8 = 123;
@@ -3470,6 +3747,21 @@ impl TryFrom<&[u8]> for GetMaterialfvReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetMaterialfvReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
     }
 }
 
@@ -3539,6 +3831,21 @@ impl TryFrom<&[u8]> for GetMaterialivReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetMaterialivReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetPixelMapfv request
 pub const GET_PIXEL_MAPFV_REQUEST: u8 = 125;
@@ -3599,6 +3906,21 @@ impl TryFrom<&[u8]> for GetPixelMapfvReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetPixelMapfvReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
     }
 }
 
@@ -3663,6 +3985,21 @@ impl TryFrom<&[u8]> for GetPixelMapuivReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetPixelMapuivReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetPixelMapusv request
 pub const GET_PIXEL_MAPUSV_REQUEST: u8 = 127;
@@ -3725,6 +4062,21 @@ impl TryFrom<&[u8]> for GetPixelMapusvReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetPixelMapusvReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetPolygonStipple request
 pub const GET_POLYGON_STIPPLE_REQUEST: u8 = 128;
@@ -3781,6 +4133,22 @@ impl TryFrom<&[u8]> for GetPolygonStippleReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetPolygonStippleReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.data.len()
+            .checked_div(4).unwrap()
+            .try_into().unwrap()
     }
 }
 
@@ -3842,6 +4210,21 @@ impl TryFrom<&[u8]> for GetStringReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetStringReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `string` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.string.len()
+            .try_into().unwrap()
     }
 }
 
@@ -3911,6 +4294,21 @@ impl TryFrom<&[u8]> for GetTexEnvfvReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetTexEnvfvReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetTexEnviv request
 pub const GET_TEX_ENVIV_REQUEST: u8 = 131;
@@ -3976,6 +4374,21 @@ impl TryFrom<&[u8]> for GetTexEnvivReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetTexEnvivReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
     }
 }
 
@@ -4045,6 +4458,21 @@ impl TryFrom<&[u8]> for GetTexGendvReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetTexGendvReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetTexGenfv request
 pub const GET_TEX_GENFV_REQUEST: u8 = 133;
@@ -4112,6 +4540,21 @@ impl TryFrom<&[u8]> for GetTexGenfvReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetTexGenfvReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetTexGeniv request
 pub const GET_TEX_GENIV_REQUEST: u8 = 134;
@@ -4177,6 +4620,21 @@ impl TryFrom<&[u8]> for GetTexGenivReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetTexGenivReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
     }
 }
 
@@ -4264,6 +4722,22 @@ impl TryFrom<&[u8]> for GetTexImageReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetTexImageReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.data.len()
+            .checked_div(4).unwrap()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetTexParameterfv request
 pub const GET_TEX_PARAMETERFV_REQUEST: u8 = 136;
@@ -4331,6 +4805,21 @@ impl TryFrom<&[u8]> for GetTexParameterfvReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetTexParameterfvReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetTexParameteriv request
 pub const GET_TEX_PARAMETERIV_REQUEST: u8 = 137;
@@ -4396,6 +4885,21 @@ impl TryFrom<&[u8]> for GetTexParameterivReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetTexParameterivReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
     }
 }
 
@@ -4470,6 +4974,21 @@ impl TryFrom<&[u8]> for GetTexLevelParameterfvReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetTexLevelParameterfvReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetTexLevelParameteriv request
 pub const GET_TEX_LEVEL_PARAMETERIV_REQUEST: u8 = 139;
@@ -4540,6 +5059,21 @@ impl TryFrom<&[u8]> for GetTexLevelParameterivReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetTexLevelParameterivReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
     }
 }
 
@@ -4747,6 +5281,22 @@ impl TryFrom<&[u8]> for AreTexturesResidentReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl AreTexturesResidentReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.data.len()
+            .checked_div(4).unwrap()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the DeleteTextures request
 pub const DELETE_TEXTURES_REQUEST: u8 = 144;
@@ -4839,6 +5389,21 @@ impl TryFrom<&[u8]> for GenTexturesReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GenTexturesReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
     }
 }
 
@@ -4974,6 +5539,22 @@ impl TryFrom<&[u8]> for GetColorTableReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetColorTableReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.data.len()
+            .checked_div(4).unwrap()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetColorTableParameterfv request
 pub const GET_COLOR_TABLE_PARAMETERFV_REQUEST: u8 = 148;
@@ -5041,6 +5622,21 @@ impl TryFrom<&[u8]> for GetColorTableParameterfvReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetColorTableParameterfvReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetColorTableParameteriv request
 pub const GET_COLOR_TABLE_PARAMETERIV_REQUEST: u8 = 149;
@@ -5106,6 +5702,21 @@ impl TryFrom<&[u8]> for GetColorTableParameterivReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetColorTableParameterivReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
     }
 }
 
@@ -5186,6 +5797,22 @@ impl TryFrom<&[u8]> for GetConvolutionFilterReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetConvolutionFilterReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.data.len()
+            .checked_div(4).unwrap()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetConvolutionParameterfv request
 pub const GET_CONVOLUTION_PARAMETERFV_REQUEST: u8 = 151;
@@ -5253,6 +5880,21 @@ impl TryFrom<&[u8]> for GetConvolutionParameterfvReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetConvolutionParameterfvReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetConvolutionParameteriv request
 pub const GET_CONVOLUTION_PARAMETERIV_REQUEST: u8 = 152;
@@ -5318,6 +5960,21 @@ impl TryFrom<&[u8]> for GetConvolutionParameterivReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetConvolutionParameterivReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
     }
 }
 
@@ -5398,6 +6055,22 @@ impl TryFrom<&[u8]> for GetSeparableFilterReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetSeparableFilterReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `rows_and_cols` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.rows_and_cols.len()
+            .checked_div(4).unwrap()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetHistogram request
 pub const GET_HISTOGRAM_REQUEST: u8 = 154;
@@ -5475,6 +6148,22 @@ impl TryFrom<&[u8]> for GetHistogramReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetHistogramReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.data.len()
+            .checked_div(4).unwrap()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetHistogramParameterfv request
 pub const GET_HISTOGRAM_PARAMETERFV_REQUEST: u8 = 155;
@@ -5542,6 +6231,21 @@ impl TryFrom<&[u8]> for GetHistogramParameterfvReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetHistogramParameterfvReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetHistogramParameteriv request
 pub const GET_HISTOGRAM_PARAMETERIV_REQUEST: u8 = 156;
@@ -5607,6 +6311,21 @@ impl TryFrom<&[u8]> for GetHistogramParameterivReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetHistogramParameterivReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
     }
 }
 
@@ -5683,6 +6402,22 @@ impl TryFrom<&[u8]> for GetMinmaxReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetMinmaxReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.data.len()
+            .checked_div(4).unwrap()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetMinmaxParameterfv request
 pub const GET_MINMAX_PARAMETERFV_REQUEST: u8 = 158;
@@ -5748,6 +6483,21 @@ impl TryFrom<&[u8]> for GetMinmaxParameterfvReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetMinmaxParameterfvReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
     }
 }
 
@@ -5817,6 +6567,21 @@ impl TryFrom<&[u8]> for GetMinmaxParameterivReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetMinmaxParameterivReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetCompressedTexImageARB request
 pub const GET_COMPRESSED_TEX_IMAGE_ARB_REQUEST: u8 = 160;
@@ -5881,6 +6646,22 @@ impl TryFrom<&[u8]> for GetCompressedTexImageARBReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetCompressedTexImageARBReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.data.len()
+            .checked_div(4).unwrap()
+            .try_into().unwrap()
     }
 }
 
@@ -5975,6 +6756,21 @@ impl TryFrom<&[u8]> for GenQueriesARBReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GenQueriesARBReply {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
     }
 }
 
@@ -6101,6 +6897,21 @@ impl TryFrom<&[u8]> for GetQueryivARBReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetQueryivARBReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetQueryObjectivARB request
 pub const GET_QUERY_OBJECTIV_ARB_REQUEST: u8 = 165;
@@ -6168,6 +6979,21 @@ impl TryFrom<&[u8]> for GetQueryObjectivARBReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetQueryObjectivARBReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetQueryObjectuivARB request
 pub const GET_QUERY_OBJECTUIV_ARB_REQUEST: u8 = 166;
@@ -6233,6 +7059,21 @@ impl TryFrom<&[u8]> for GetQueryObjectuivARBReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetQueryObjectuivARBReply {
+    /// Get the value of the `n` field.
+    ///
+    /// The `n` field is used as the length field of the `data` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n(&self) -> u32 {
+        self.data.len()
+            .try_into().unwrap()
     }
 }
 

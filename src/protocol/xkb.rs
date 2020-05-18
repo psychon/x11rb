@@ -1,6 +1,8 @@
 // This file contains generated code. Do not edit directly.
 // To regenerate this, run 'make'.
 
+//! Bindings to the `xkb` X11 extension.
+
 #![allow(clippy::too_many_arguments)]
 #![allow(clippy::identity_op)]
 #![allow(clippy::trivially_copy_pass_by_ref)]
@@ -2635,6 +2637,21 @@ impl Serialize for CountedString16 {
         bytes.extend_from_slice(&self.alignment_pad);
     }
 }
+impl CountedString16 {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `string` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u16 {
+        self.string.len()
+            .try_into().unwrap()
+    }
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct KTMapEntry {
@@ -2745,6 +2762,21 @@ impl Serialize for KeyType {
         self.preserve.serialize_into(bytes);
     }
 }
+impl KeyType {
+    /// Get the value of the `nMapEntries` field.
+    ///
+    /// The `nMapEntries` field is used as the length field of the `map` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n_map_entries(&self) -> u8 {
+        self.map.len()
+            .try_into().unwrap()
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct KeySymMap {
@@ -2786,6 +2818,21 @@ impl Serialize for KeySymMap {
         let n_syms = u16::try_from(self.syms.len()).expect("`syms` has too many elements");
         n_syms.serialize_into(bytes);
         self.syms.serialize_into(bytes);
+    }
+}
+impl KeySymMap {
+    /// Get the value of the `nSyms` field.
+    ///
+    /// The `nSyms` field is used as the length field of the `syms` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n_syms(&self) -> u16 {
+        self.syms.len()
+            .try_into().unwrap()
     }
 }
 
@@ -3415,6 +3462,21 @@ impl Serialize for SetKeyType {
         self.preserve_entries.serialize_into(bytes);
     }
 }
+impl SetKeyType {
+    /// Get the value of the `nMapEntries` field.
+    ///
+    /// The `nMapEntries` field is used as the length field of the `entries` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n_map_entries(&self) -> u8 {
+        self.entries.len()
+            .try_into().unwrap()
+    }
+}
 
 pub type String8 = u8;
 
@@ -3453,6 +3515,21 @@ impl Serialize for Outline {
         self.corner_radius.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.points.serialize_into(bytes);
+    }
+}
+impl Outline {
+    /// Get the value of the `nPoints` field.
+    ///
+    /// The `nPoints` field is used as the length field of the `points` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n_points(&self) -> u8 {
+        self.points.len()
+            .try_into().unwrap()
     }
 }
 
@@ -3497,6 +3574,21 @@ impl Serialize for Shape {
         self.approx_ndx.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 1]);
         self.outlines.serialize_into(bytes);
+    }
+}
+impl Shape {
+    /// Get the value of the `nOutlines` field.
+    ///
+    /// The `nOutlines` field is used as the length field of the `outlines` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n_outlines(&self) -> u8 {
+        self.outlines.len()
+            .try_into().unwrap()
     }
 }
 
@@ -3629,6 +3721,21 @@ impl Serialize for OverlayRow {
         self.keys.serialize_into(bytes);
     }
 }
+impl OverlayRow {
+    /// Get the value of the `nKeys` field.
+    ///
+    /// The `nKeys` field is used as the length field of the `keys` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n_keys(&self) -> u8 {
+        self.keys.len()
+            .try_into().unwrap()
+    }
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Overlay {
@@ -3665,6 +3772,21 @@ impl Serialize for Overlay {
         n_rows.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 3]);
         self.rows.serialize_into(bytes);
+    }
+}
+impl Overlay {
+    /// Get the value of the `nRows` field.
+    ///
+    /// The `nRows` field is used as the length field of the `rows` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n_rows(&self) -> u8 {
+        self.rows.len()
+            .try_into().unwrap()
     }
 }
 
@@ -3709,6 +3831,21 @@ impl Serialize for Row {
         self.vertical.serialize_into(bytes);
         bytes.extend_from_slice(&[0; 2]);
         self.keys.serialize_into(bytes);
+    }
+}
+impl Row {
+    /// Get the value of the `nKeys` field.
+    ///
+    /// The `nKeys` field is used as the length field of the `keys` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n_keys(&self) -> u8 {
+        self.keys.len()
+            .try_into().unwrap()
     }
 }
 
@@ -3823,6 +3960,21 @@ impl Serialize for Listing {
         length.serialize_into(bytes);
         bytes.extend_from_slice(&self.string);
         bytes.extend_from_slice(&[0; 1][..(2 - (bytes.len() % 2)) % 2]);
+    }
+}
+impl Listing {
+    /// Get the value of the `length` field.
+    ///
+    /// The `length` field is used as the length field of the `string` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn length(&self) -> u16 {
+        self.string.len()
+            .try_into().unwrap()
     }
 }
 
@@ -7705,6 +7857,21 @@ impl TryFrom<&[u8]> for GetCompatMapReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetCompatMapReply {
+    /// Get the value of the `nSIRtrn` field.
+    ///
+    /// The `nSIRtrn` field is used as the length field of the `si_rtrn` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n_si_rtrn(&self) -> u16 {
+        self.si_rtrn.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the SetCompatMap request
 pub const SET_COMPAT_MAP_REQUEST: u8 = 11;
@@ -8785,6 +8952,86 @@ impl TryFrom<&[u8]> for ListComponentsReply {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl ListComponentsReply {
+    /// Get the value of the `nKeymaps` field.
+    ///
+    /// The `nKeymaps` field is used as the length field of the `keymaps` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n_keymaps(&self) -> u16 {
+        self.keymaps.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `nKeycodes` field.
+    ///
+    /// The `nKeycodes` field is used as the length field of the `keycodes` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n_keycodes(&self) -> u16 {
+        self.keycodes.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `nTypes` field.
+    ///
+    /// The `nTypes` field is used as the length field of the `types` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n_types(&self) -> u16 {
+        self.types.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `nCompatMaps` field.
+    ///
+    /// The `nCompatMaps` field is used as the length field of the `compatMaps` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n_compat_maps(&self) -> u16 {
+        self.compat_maps.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `nSymbols` field.
+    ///
+    /// The `nSymbols` field is used as the length field of the `symbols` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n_symbols(&self) -> u16 {
+        self.symbols.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `nGeometries` field.
+    ///
+    /// The `nGeometries` field is used as the length field of the `geometries` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n_geometries(&self) -> u16 {
+        self.geometries.len()
+            .try_into().unwrap()
+    }
+}
 
 /// Opcode for the GetKbdByName request
 pub const GET_KBD_BY_NAME_REQUEST: u8 = 23;
@@ -9055,6 +9302,21 @@ impl TryFrom<&[u8]> for GetKbdByNameRepliesCompatMap {
         Ok(Self::try_parse(value)?.0)
     }
 }
+impl GetKbdByNameRepliesCompatMap {
+    /// Get the value of the `nSIRtrn` field.
+    ///
+    /// The `nSIRtrn` field is used as the length field of the `si_rtrn` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n_si_rtrn(&self) -> u16 {
+        self.si_rtrn.len()
+            .try_into().unwrap()
+    }
+}
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetKbdByNameRepliesIndicatorMaps {
     pub indicatormap_type: u8,
@@ -9084,6 +9346,21 @@ impl TryFrom<&[u8]> for GetKbdByNameRepliesIndicatorMaps {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetKbdByNameRepliesIndicatorMaps {
+    /// Get the value of the `nIndicators` field.
+    ///
+    /// The `nIndicators` field is used as the length field of the `maps` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n_indicators(&self) -> u8 {
+        self.maps.len()
+            .try_into().unwrap()
     }
 }
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -9537,6 +9814,47 @@ impl TryFrom<&[u8]> for GetDeviceInfoReply {
     type Error = ParseError;
     fn try_from(value: &[u8]) -> Result<Self, Self::Error> {
         Ok(Self::try_parse(value)?.0)
+    }
+}
+impl GetDeviceInfoReply {
+    /// Get the value of the `nDeviceLedFBs` field.
+    ///
+    /// The `nDeviceLedFBs` field is used as the length field of the `leds` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n_device_led_f_bs(&self) -> u16 {
+        self.leds.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `nBtnsRtrn` field.
+    ///
+    /// The `nBtnsRtrn` field is used as the length field of the `btnActions` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn n_btns_rtrn(&self) -> u8 {
+        self.btn_actions.len()
+            .try_into().unwrap()
+    }
+    /// Get the value of the `nameLen` field.
+    ///
+    /// The `nameLen` field is used as the length field of the `name` field.
+    /// This function computes the field's value again based on the length of the list.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the value cannot be represented in the target type. This
+    /// cannot happen with values of the struct received from the X11 server.
+    pub fn name_len(&self) -> u16 {
+        self.name.len()
+            .try_into().unwrap()
     }
 }
 
