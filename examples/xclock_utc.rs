@@ -1,4 +1,4 @@
-use chrono::prelude::*;
+use std::time::{SystemTime, UNIX_EPOCH};
 use nix::poll::{poll, PollFd, PollFlags};
 use x11rb::atom_manager;
 use x11rb::connection::Connection;
@@ -76,8 +76,7 @@ fn redraw(
     gc_id: Gcontext,
     (width, height): (u16, u16),
 ) -> Result<(), ConnectionError> {
-    let time = Local::now();
-    let (hour, minute, second) = (time.hour(), time.minute(), time.second());
+    let (hour, minute, second) = get_time();
 
     let center = ((width as f32) / 2.0, (height as f32) / 2.0);
     let size = (width.min(height) as f32) / 2.0;
@@ -220,4 +219,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         redraw(&conn, &screen, win_id, gc_id, (width, height))?;
         conn.flush()?;
     }
+}
+
+/// Get the current time as (hour, minute, second)
+fn get_time() -> (u8, u8, u8) {
+    let total_secs = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
+    let (second, total_minutes) = (total_secs % 60, total_secs / 60);
+    let (minute, total_hours) = (total_minutes % 60, total_minutes / 60);
+    let hour = total_hours % 24;
+
+    // This is in UTC. Getting local time is complicated and not important for us.
+    (hour as _, minute as _, second as _)
 }
