@@ -325,7 +325,7 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
     where
         F: FnOnce(&R) -> O,
     {
-        func(&*self.read.lock().unwrap())
+        func(&*self.read.lock().unwrap().get_mut())
     }
 
     /// Do something with the contained `write` and return the result.
