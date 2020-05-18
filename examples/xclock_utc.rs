@@ -1,6 +1,6 @@
-use std::time::{SystemTime, UNIX_EPOCH};
 #[cfg(unix)]
 use nix::poll::{poll, PollFd, PollFlags};
+use std::time::{SystemTime, UNIX_EPOCH};
 use x11rb::atom_manager;
 use x11rb::connection::Connection;
 use x11rb::errors::{ConnectionError, ReplyOrIdError};
