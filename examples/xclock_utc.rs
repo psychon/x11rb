@@ -1,4 +1,5 @@
 use std::time::{SystemTime, UNIX_EPOCH};
+#[cfg(unix)]
 use nix::poll::{poll, PollFd, PollFlags};
 use x11rb::atom_manager;
 use x11rb::connection::Connection;
@@ -165,6 +166,7 @@ fn redraw(
     Ok(())
 }
 
+#[cfg(unix)]
 fn do_poll(conn: &RustConnection) -> nix::Result<()> {
     use std::os::unix::io::AsRawFd;
 
@@ -176,6 +178,11 @@ fn do_poll(conn: &RustConnection) -> nix::Result<()> {
     poll(&mut [PollFd::new(fd, PollFlags::POLLIN)], 1_000)?;
 
     Ok(())
+}
+
+#[cfg(not(unix))]
+fn do_poll(conn: &RustConnection) -> Result<(), Box<dyn std::error::Error>> {
+    panic!("This function is only implemented on unix")
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
