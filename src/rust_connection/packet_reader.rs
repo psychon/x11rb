@@ -32,6 +32,11 @@ impl<R: ReadFD> PacketReader<R> {
         }
     }
 
+    /// Get access to the inner reader
+    pub(crate) fn get_mut(&mut self) -> &mut R {
+        &mut self.inner
+    }
+
     /// Set the nonblocking status of the inner reader
     pub(crate) fn set_nonblocking(&mut self, nonblocking: bool) -> Result<()> {
         if self.nonblocking != Some(nonblocking) {

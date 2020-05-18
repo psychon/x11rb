@@ -314,6 +314,30 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
             **max_bytes = MaxRequestBytes::Requested(request);
         }
     }
+
+    /// Do something with the contained `read` and return the result.
+    ///
+    /// You should be very careful with this function in a multi-thread context. This function
+    /// locks a mutex. This will wait for any other thread to finishing reading. For example, if
+    /// some other thread is currently block in `wait_for_event()`, then this will block until
+    /// after the next event was received.
+    pub fn with_read<F, O>(&self, func: F) -> O
+    where
+        F: FnOnce(&R) -> O,
+    {
+        func(&*self.read.lock().unwrap().get_mut())
+    }
+
+    /// Do something with the contained `write` and return the result.
+    ///
+    /// You should be very careful with this function in a multi-thread context. This function
+    /// locks a mutex. This will wait for any other thread to finishing writing.
+    pub fn with_write<F, O>(&self, func: F) -> O
+    where
+        F: FnOnce(&W) -> O,
+    {
+        func(&*self.write.lock().unwrap())
+    }
 }
 
 impl<R: ReadFD, W: WriteFD> RequestConnection for RustConnection<R, W> {

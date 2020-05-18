@@ -134,6 +134,16 @@ impl Stream {
 }
 
 #[cfg(unix)]
+impl AsRawFd for Stream {
+    fn as_raw_fd(&self) -> RawFd {
+        match self {
+            Stream::TcpStream(stream) => stream.as_raw_fd(),
+            Stream::UnixStream(stream) => stream.as_raw_fd(),
+        }
+    }
+}
+
+#[cfg(unix)]
 fn do_write(fd: RawFd, bufs: &[IoSlice<'_>], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
     use nix::sys::{
         socket::{sendmsg, ControlMessage, MsgFlags},

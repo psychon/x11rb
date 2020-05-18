@@ -151,6 +151,20 @@ impl<W: WriteFD> BufWriteFD<W> {
         }
     }
 
+    /// Gets a mutable reference to the underlying FD writer.
+    ///
+    /// It is inadvisable to directly write to the underlying writer.
+    pub fn get_mut(&mut self) -> &mut W {
+        &mut self.inner
+    }
+
+    /// Gets a reference to the underlying FD writer.
+    ///
+    /// It is inadvisable to directly write to the underlying writer.
+    pub fn get_ref(&self) -> &W {
+        &self.inner
+    }
+
     fn flush_buffer(&mut self) -> Result<()> {
         let mut written = 0;
         let mut ret = Ok(());
@@ -331,6 +345,20 @@ impl<R: ReadFD> BufReadFD<R> {
             start: 0,
             end: 0,
         }
+    }
+
+    /// Gets a mutable reference to the underlying FD reader.
+    ///
+    /// It is inadvisable to directly read from the underlying reader.
+    pub fn get_mut(&mut self) -> &mut R {
+        &mut self.inner
+    }
+
+    /// Gets a reference to the underlying FD reader.
+    ///
+    /// It is inadvisable to directly read from the underlying reader.
+    pub fn get_ref(&self) -> &R {
+        &self.inner
     }
 }
 
