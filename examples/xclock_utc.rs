@@ -187,20 +187,26 @@ fn do_poll(conn: &RustConnection) -> Result<(), Box<dyn std::error::Error>> {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let (conn, screen_num) = RustConnection::connect(None)?;
-    let screen = &conn.setup().roots[screen_num];
 
-    let atoms = Atoms::new(&conn)?.reply()?;
+    // The following is only needed for start_timeout_thread(), which is used for 'tests'
+    let conn1 = std::sync::Arc::new(conn);
+    let conn = &*conn1;
+
+    let screen = &conn.setup().roots[screen_num];
+    let atoms = Atoms::new(conn)?.reply()?;
 
     let (mut width, mut height) = (100, 100);
-    let win_id = create_window(&conn, &screen, &atoms, (width, height))?;
+    let win_id = create_window(conn, &screen, &atoms, (width, height))?;
 
     let gc_id = conn.generate_id().unwrap();
     conn.create_gc(gc_id, win_id, &CreateGCAux::default())?;
 
+    util::start_timeout_thread(conn1.clone(), win_id);
+
     conn.flush()?;
 
     loop {
-        do_poll(&conn)?;
+        do_poll(conn)?;
         while let Some(event) = conn.poll_for_event()? {
             println!("{:?})", event);
             match event {
@@ -223,7 +229,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         }
 
-        redraw(&conn, &screen, win_id, gc_id, (width, height))?;
+        redraw(conn, &screen, win_id, gc_id, (width, height))?;
         conn.flush()?;
     }
 }
@@ -241,3 +247,5 @@ fn get_time() -> (u8, u8, u8) {
     // This is in UTC. Getting local time is complicated and not important for us.
     (hour as _, minute as _, second as _)
 }
+
+include!("integration_test_util/util.rs");
