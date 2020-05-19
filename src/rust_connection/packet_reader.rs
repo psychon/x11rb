@@ -1,7 +1,7 @@
 //! Read X11 packets from a reader
 
 use std::convert::TryInto;
-use std::io::Result;
+use std::io::{Error, ErrorKind, Result};
 
 use super::fd_read_write::ReadFD;
 use crate::utils::RawFdContainer;
@@ -60,6 +60,13 @@ impl<R: ReadFD> PacketReader<R> {
             // ...continue reading the packet
             let nread = self.inner.read(&mut packet[*already_read..], fd_storage)?;
             *already_read += nread;
+
+            if nread == 0 {
+                return Err(Error::new(
+                    ErrorKind::UnexpectedEof,
+                    "The X11 server closed the connection",
+                ));
+            }
 
             // Do we still need to compute the length field? (length == MINIMAL_PACKET_LENGTH)
             if let Ok(array) = packet[..].try_into() {
