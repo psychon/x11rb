@@ -79,6 +79,35 @@ pub struct RustConnection<
     maximum_request_bytes: Mutex<MaxRequestBytes>,
 }
 
+// Locking rules
+// =============
+//
+// To avoid deadlocks, it is important to have a defined ordering about mutexes:
+//
+// Mutexes that may be locked when no other mutex is held:
+// - maximum_request_bytes
+// - extension_manager
+// - id_allocator
+//
+// Next level is 'write'. Anything wanting to write something to the X11 server has to lock this
+// mutex. The mutex has to be locked until writing the request if finished. This is necessary to
+// ensure correct sync insertion without threads interfering with each other. At the same time,
+// threads not wanting to write anything should not be blocked.
+//
+// Then comes `inner`. This mutex protects the information about in-flight requests and packets
+// that were already read from the connection but not given out to callers. This mutex should only
+// be locked for short time.
+//
+// The inner level is `read`. This mutex is only locked when `inner` is already held and only with
+// `try_lock()`. This ensures that there is only one reader. While actually reading, the lock on
+// `inner` is released so that other threads can make progress. If more threads want to read while
+// `read` is already locked, they sleep on `reader_condition`. The actual reader will then notify
+// this condition variable once it is done reading.
+//
+// The condition variable is necessary since one thread may read packets that another thread waits
+// for. Thus, after reading something from the connection, all threads that wait for something have
+// to check if they are the intended recipient.
+
 impl RustConnection<BufReadFD<stream::Stream>, BufWriteFD<stream::Stream>> {
     /// Establish a new connection.
     ///
