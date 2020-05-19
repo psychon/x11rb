@@ -178,11 +178,7 @@ mod fake_stream {
     }
 
     impl WriteFD for FakeStreamWrite {
-        fn write(
-            &mut self,
-            buf: &[u8],
-            fds: &mut Vec<RawFdContainer>,
-        ) -> Result<usize, Error> {
+        fn write(&mut self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize, Error> {
             assert!(fds.is_empty());
             if self.skip > 0 {
                 assert_eq!(self.skip, buf.len());

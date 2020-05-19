@@ -308,7 +308,9 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
 
                 // 2.5. Actually enqueue the read packets.
                 inner.enqueue_fds(fds);
-                packets.into_iter().for_each(|packet| inner.enqueue_packet(packet));
+                packets
+                    .into_iter()
+                    .for_each(|packet| inner.enqueue_packet(packet));
 
                 // 2.6. Return the locked `inner` to the caller.
                 // If an error occurred while reading packets, the error is returned instead.
