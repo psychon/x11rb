@@ -18,12 +18,12 @@ test_script:
   - cargo check --verbose --all-targets --features all-extensions
 
   # Also build once without any feature
-  - cargo check --verbose --all-targets --no-default-features
+  - cargo check --verbose --all-targets
 
   # We do not have libxcb and thus cannot build XCBConnection
-  - cargo build --verbose --all-targets --no-default-features --features all-extensions
-  - cargo test --verbose --no-default-features --features all-extensions
-  - cargo doc --verbose --no-default-features --features all-extensions
+  - cargo build --verbose --all-targets --features all-extensions
+  - cargo test --verbose --features all-extensions
+  - cargo doc --verbose --features all-extensions
 
   # Start an X11 server in the background
   - ps: $Server = Start-Process -PassThru -FilePath C:\cygwin\bin\Xvfb.exe -ArgumentList "-listen tcp :0"
@@ -31,14 +31,14 @@ test_script:
   - set "X11RB_EXAMPLE_TIMEOUT=1"
 
   # FIXME: Can this list be automated? somehow?
-  - cargo run --verbose --no-default-features --features all-extensions --example check_unchecked_requests
-  - cargo run --verbose --no-default-features --features all-extensions --example generic_events
-  - cargo run --verbose --no-default-features --features all-extensions --example hypnomoire
-  - cargo run --verbose --no-default-features --features all-extensions --example list_fonts
-  - cargo run --verbose --no-default-features --features all-extensions --example simple_window
-  - cargo run --verbose --no-default-features --features all-extensions --example simple_window_manager
-  #- cargo run --verbose --no-default-features --features all-extensions --example tutorial
-  - cargo run --verbose --no-default-features --features all-extensions --example xeyes
+  - cargo run --verbose --features all-extensions --example check_unchecked_requests
+  - cargo run --verbose --features all-extensions --example generic_events
+  - cargo run --verbose --features all-extensions --example hypnomoire
+  - cargo run --verbose --features all-extensions --example list_fonts
+  - cargo run --verbose --features all-extensions --example simple_window
+  - cargo run --verbose --features all-extensions --example simple_window_manager
+  #- cargo run --verbose --features all-extensions --example tutorial
+  - cargo run --verbose --features all-extensions --example xeyes
 
 on_finish:
   - ps: Stop-Process -Id $Server.Id

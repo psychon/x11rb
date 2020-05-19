@@ -216,13 +216,13 @@ where
             Event::ButtonRelease(event) => {
                 if let Some(state) = find_window_by_id(&windows, event.event) {
                     let mut state = state.lock().unwrap();
-                    // FIXME: Make this matching somehow nicer
-                    if event.detail == ButtonIndex::M1.into() {
-                        state.angle_velocity *= -1.0;
-                    } else if event.detail == ButtonIndex::M4.into() {
-                        state.angle_velocity += 0.001;
-                    } else if event.detail == ButtonIndex::M5.into() {
-                        state.angle_velocity -= 0.001;
+                    match event.detail {
+                        // Button 1 is left mouse button
+                        1 => state.angle_velocity *= -1.0,
+                        // Buttons 4 and 5 are mouse wheel
+                        4 => state.angle_velocity += 0.001,
+                        5 => state.angle_velocity -= 0.001,
+                        _ => {}
                     }
                 } else {
                     eprintln!("ButtonRelease on unknown window!");

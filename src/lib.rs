@@ -88,7 +88,7 @@
 //! If you want to take the "I do not want to think about this"-approach, you can enable the
 //! `all-extensions` feature to just enable, well, all extensions.
 //!
-//! Additionally, the following flags are enabled by default:
+//! Additionally, the following flags exist:
 //! * `allow-unsafe-code`: Enable features that require `unsafe`. Without this flag,
 //!   `x11rb::xcb_ffi::XCBConnection` and some support code for it are unavailable.
 
