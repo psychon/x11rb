@@ -33,10 +33,14 @@ of sending multiple requests and only afterwards wait for the replies.
 
 ## Crate features
 
-The following features are enabled by default:
+Most X11 extensions are feature-gated. For example, to use the shared memory
+extansion, the `shm` feature has to be enabled.
 
-* `allow-unsafe-code`: Without this feature, `forbid(unsafe_code)` forbids all
-  unsafe code. With this feature, `XCBConnection` becomes available.
+The `all-extensions` feature just enables all X11 extensions.
+
+Additionally, the `allow-unsafe-code` feature enables `XCBConnection`. This uses
+`libxcb` internally and allows sharing the underlying `xcb_connection_t` pointer
+with other code.
 
 
 ## Current state

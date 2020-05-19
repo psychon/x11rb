@@ -25,10 +25,6 @@ gethostname = "0.2.1"
 nix = "0.17"
 
 [features]
-default = [
-    "allow-unsafe-code",
-]
-
 # Without this feature, all uses of `unsafe` in the crate are forbidden via
 # #![deny(unsafe_code)]. This has the effect of disabling the XCB FFI bindings.
 allow-unsafe-code = ["libc"]
