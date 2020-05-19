@@ -84,10 +84,11 @@ script:
   - cargo doc --verbose --all-features
 
   # Run the examples as 'integration tests'.
-  # Enable the 'all-extensions' feature or Cargo will complain
-  - run_examples --features all-extensions
+  # Enable the 'all-extensions' feature or Cargo will complain.
+  # Enable the 'allow-unsafe-code' feature so XCBConnection is used.
+  - run_examples --all-features
 
-  - cargo build --verbose --all-targets --no-default-features --features all-extensions
+  - cargo build --verbose --all-targets --features all-extensions
 
   # Run the examples as 'integration tests'. This time using RustConnection.
-  - run_examples --no-default-features --features "all-extensions libc"
+  - run_examples --features "all-extensions libc"
