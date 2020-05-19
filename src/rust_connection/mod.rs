@@ -191,6 +191,13 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
 
         let mut write = self.write.lock().unwrap();
         let mut inner = self.inner.lock().unwrap();
+
+        // We must always be able to read when we write. Otherwise, there might be a deadlock where
+        // the server stops reading from us when its output buffer fills up.
+        // As an approximation, we instead read as much as possible from the connection before
+        // blocking in the write.
+        inner = self.read_packet_and_enqueue(inner, BlockingMode::NonBlocking)?;
+
         loop {
             match inner.send_request(kind) {
                 Some(seqno) => {
