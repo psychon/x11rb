@@ -220,6 +220,13 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
 
         let mut write = self.write.lock().unwrap();
         let mut inner = self.inner.lock().unwrap();
+
+        // We must always be able to read when we write. Otherwise, there might be a deadlock where
+        // the server stops reading from us when its output buffer fills up.
+        // As an approximation, we instead read as much as possible from the connection before
+        // blocking in the write.
+        inner = self.read_packet_and_enqueue(inner, BlockingMode::NonBlocking)?;
+
         loop {
             match inner.send_request(kind) {
                 Some(seqno) => {
@@ -300,36 +307,48 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
                 // (Even in case of errors)
                 let _notify = NotifyOnDrop(&self.reader_condition);
 
-                // 2.2. Block the thread until a packet is received.
-                mode.set_on_reader(&mut lock)?;
+                // 2.2. Block the thread until at least one packet is received.
                 let mut fds = Vec::new();
-                use std::io::ErrorKind::WouldBlock;
-                let packet = lock.read_packet(&mut fds);
+                let mut packets = Vec::new();
+
+                let err = || -> std::io::Result<()> {
+                    // Read one packet
+                    mode.set_on_reader(&mut lock)?;
+                    packets.push(lock.read_packet(&mut fds)?);
+
+                    // And then read as many packages as possible
+                    BlockingMode::NonBlocking.set_on_reader(&mut lock)?;
+                    loop {
+                        packets.push(lock.read_packet(&mut fds)?);
+                    }
+                }();
 
                 // 2.3. Relock `inner` to enqueue the packet.
                 inner = self.inner.lock().unwrap();
 
-                let packet = match packet {
-                    Err(ref e) if e.kind() == WouldBlock => return Ok(inner),
-                    Err(e) => return Err(e),
-                    Ok(packet) => packet,
-                };
-
                 // 2.4. Once `inner` has been relocked, drop the
                 // lock on `read`. While inner is locked, other
-                // threads cannot arrive 0.1 anyways.
+                // threads cannot arrive at 0.1 anyways.
                 //
                 // `read` cannot unlocked before `inner` is relocked
                 // because it could let another thread wait on 2.2
                 // for a reply that has been read but not enqueued yet.
                 drop(lock);
 
-                // 2.5. Actually enqueue the read packet.
+                // 2.5. Actually enqueue the read packets.
                 inner.enqueue_fds(fds);
-                inner.enqueue_packet(packet);
+                packets
+                    .into_iter()
+                    .for_each(|packet| inner.enqueue_packet(packet));
 
                 // 2.6. Return the locked `inner` to the caller.
-                Ok(inner)
+                // If an error occurred while reading packets, the error is returned instead.
+                use std::io::ErrorKind::WouldBlock;
+                match err {
+                    Ok(()) => Ok(inner),
+                    Err(ref e) if e.kind() == WouldBlock => Ok(inner),
+                    Err(e) => Err(e),
+                }
             }
         }
     }
