@@ -56,6 +56,7 @@ fn multithread_test() {
 
 /// Implementations of `Read` and `Write` that do enough for the test to work.
 mod fake_stream {
+    use std::io::{Error, ErrorKind};
     use std::sync::mpsc::{channel, Receiver, Sender};
 
     use x11rb::connection::SequenceNumber;
@@ -97,7 +98,11 @@ mod fake_stream {
     fn fake_stream() -> (FakeStreamRead, FakeStreamWrite) {
         let (send, recv) = channel();
         let pending = Vec::new();
-        let read = FakeStreamRead { recv, pending };
+        let read = FakeStreamRead {
+            recv,
+            pending,
+            nonblocking: false,
+        };
         let write = FakeStreamWrite {
             send,
             seqno: 0,
@@ -136,6 +141,7 @@ mod fake_stream {
     pub(crate) struct FakeStreamRead {
         recv: Receiver<Packet>,
         pending: Vec<u8>,
+        nonblocking: bool,
     }
 
     impl ReadFD for FakeStreamRead {
@@ -143,8 +149,11 @@ mod fake_stream {
             &mut self,
             buf: &mut [u8],
             _fd_storage: &mut Vec<RawFdContainer>,
-        ) -> Result<usize, std::io::Error> {
+        ) -> Result<usize, Error> {
             if self.pending.is_empty() {
+                if self.nonblocking {
+                    return Err(Error::new(ErrorKind::WouldBlock, "Would block"));
+                }
                 let packet = self.recv.recv().unwrap();
                 self.pending.extend(packet.to_raw());
             }
@@ -155,8 +164,8 @@ mod fake_stream {
             Ok(len)
         }
 
-        fn set_nonblocking(&mut self, nonblocking: bool) -> std::io::Result<()> {
-            assert!(!nonblocking);
+        fn set_nonblocking(&mut self, nonblocking: bool) -> Result<(), Error> {
+            self.nonblocking = nonblocking;
             Ok(())
         }
     }
@@ -173,7 +182,7 @@ mod fake_stream {
             &mut self,
             buf: &[u8],
             fds: &mut Vec<RawFdContainer>,
-        ) -> Result<usize, std::io::Error> {
+        ) -> Result<usize, Error> {
             assert!(fds.is_empty());
             if self.skip > 0 {
                 assert_eq!(self.skip, buf.len());
@@ -195,7 +204,7 @@ mod fake_stream {
             Ok(buf.len())
         }
 
-        fn flush(&mut self) -> Result<(), std::io::Error> {
+        fn flush(&mut self) -> Result<(), Error> {
             Ok(())
         }
     }
