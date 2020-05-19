@@ -19,7 +19,7 @@ pub(crate) struct PacketReader<R: ReadFD> {
 
     // A packet that was partially read. The `Vec` is the partial packet and the `usize` describes
     // up to where the packet was already read.
-    pending_packet: Option<(Vec<u8>, usize)>,
+    pending_packet: (Vec<u8>, usize),
 }
 
 impl<R: ReadFD> PacketReader<R> {
@@ -28,7 +28,7 @@ impl<R: ReadFD> PacketReader<R> {
         Self {
             inner,
             nonblocking: None,
-            pending_packet: None,
+            pending_packet: (vec![0; 32], 0),
         }
     }
 
@@ -47,33 +47,37 @@ impl<R: ReadFD> PacketReader<R> {
     }
 
     /// Try to read a packet from the inner reader.
-    pub(crate) fn read_packet(&mut self, fd_storage: &mut Vec<RawFdContainer>) -> Result<Vec<u8>> {
-        if self.pending_packet.is_none() {
-            self.pending_packet = Some((vec![0; MINIMAL_PACKET_LENGTH], 0));
-        }
-
+    pub(crate) fn try_read_packet(
+        &mut self,
+        fd_storage: &mut Vec<RawFdContainer>,
+    ) -> Result<Option<Vec<u8>>> {
         // Get mutable reference to the pending packet
-        let (packet, already_read) = self.pending_packet.as_mut().unwrap();
+        let (packet, already_read) = &mut self.pending_packet;
 
         // Until the packet was fully read...
         while packet.len() != *already_read {
             // ...continue reading the packet
-            let nread = self.inner.read(&mut packet[*already_read..], fd_storage)?;
-            *already_read += nread;
-
-            if nread == 0 {
-                return Err(Error::new(
-                    ErrorKind::UnexpectedEof,
-                    "The X11 server closed the connection",
-                ));
-            }
-
-            // Do we still need to compute the length field? (length == MINIMAL_PACKET_LENGTH)
-            if let Ok(array) = packet[..].try_into() {
-                // Yes, then compute the packet length and resize the `Vec` to its final size.
-                let extra = extra_length(array);
-                packet.reserve_exact(extra);
-                packet.resize(MINIMAL_PACKET_LENGTH + extra, 0);
+            match self.inner.read(&mut packet[*already_read..], fd_storage) {
+                Ok(0) => {
+                    return Err(Error::new(
+                        ErrorKind::UnexpectedEof,
+                        "The X11 server closed the connection",
+                    ));
+                }
+                Ok(nread) => {
+                    *already_read += nread;
+                    // Do we still need to compute the length field? (length == MINIMAL_PACKET_LENGTH)
+                    if let Ok(array) = packet[..].try_into() {
+                        // Yes, then compute the packet length and resize the `Vec` to its final size.
+                        let extra = extra_length(array);
+                        packet.reserve_exact(extra);
+                        packet.resize(MINIMAL_PACKET_LENGTH + extra, 0);
+                    }
+                }
+                Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                    return Ok(None);
+                }
+                Err(e) => return Err(e),
             }
         }
 
@@ -82,8 +86,11 @@ impl<R: ReadFD> PacketReader<R> {
         let extra = extra_length(&initial_packet);
         assert_eq!(packet.len(), MINIMAL_PACKET_LENGTH + extra);
 
+        let packet = std::mem::replace(packet, vec![0; 32]);
+        *already_read = 0;
+
         // Packet successfully read
-        Ok(self.pending_packet.take().unwrap().0)
+        Ok(Some(packet))
     }
 }
 
