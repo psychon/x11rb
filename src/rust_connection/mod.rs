@@ -311,19 +311,19 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
                 let mut fds = Vec::new();
                 let mut packets = Vec::new();
 
-                let err = || -> std::io::Result<()> {
-                    // Read one packet
-                    mode.set_on_reader(&mut lock)?;
-                    packets.push(lock.read_packet(&mut fds)?);
+                // Read one packet
+                mode.set_on_reader(&mut lock)?;
+                if let Some(packet) = lock.try_read_packet(&mut fds)? {
+                    packets.push(packet);
 
                     // And then read as many packages as possible
                     BlockingMode::NonBlocking.set_on_reader(&mut lock)?;
-                    loop {
-                        packets.push(lock.read_packet(&mut fds)?);
+                    while let Some(packet) = lock.try_read_packet(&mut fds)? {
+                        packets.push(packet);
                     }
-                }();
+                }
 
-                // 2.3. Relock `inner` to enqueue the packet.
+                // 2.3. Relock `inner` to enqueue the packets.
                 inner = self.inner.lock().unwrap();
 
                 // 2.4. Once `inner` has been relocked, drop the
@@ -341,14 +341,8 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
                     .into_iter()
                     .for_each(|packet| inner.enqueue_packet(packet));
 
-                // 2.6. Return the locked `inner` to the caller.
-                // If an error occurred while reading packets, the error is returned instead.
-                use std::io::ErrorKind::WouldBlock;
-                match err {
-                    Ok(()) => Ok(inner),
-                    Err(ref e) if e.kind() == WouldBlock => Ok(inner),
-                    Err(e) => Err(e),
-                }
+                // 2.6. Return the locked `inner` back to the caller.
+                Ok(inner)
             }
         }
     }
