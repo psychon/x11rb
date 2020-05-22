@@ -64,7 +64,7 @@ mod fake_stream {
     use x11rb::protocol::xproto::{
         ImageOrder, Setup, CLIENT_MESSAGE_EVENT, GET_INPUT_FOCUS_REQUEST, SEND_EVENT_REQUEST,
     };
-    use x11rb::rust_connection::{ReadFD, RustConnection, WriteFD};
+    use x11rb::rust_connection::{Poll, ReadFD, RustConnection, WriteFD};
     use x11rb::utils::RawFdContainer;
 
     /// Create a new `RustConnection` connected to a fake stream
@@ -98,11 +98,7 @@ mod fake_stream {
     fn fake_stream() -> (FakeStreamRead, FakeStreamWrite) {
         let (send, recv) = channel();
         let pending = Vec::new();
-        let read = FakeStreamRead {
-            recv,
-            pending,
-            nonblocking: false,
-        };
+        let read = FakeStreamRead { recv, pending };
         let write = FakeStreamWrite {
             send,
             seqno: 0,
@@ -141,7 +137,6 @@ mod fake_stream {
     pub(crate) struct FakeStreamRead {
         recv: Receiver<Packet>,
         pending: Vec<u8>,
-        nonblocking: bool,
     }
 
     impl ReadFD for FakeStreamRead {
@@ -151,22 +146,34 @@ mod fake_stream {
             _fd_storage: &mut Vec<RawFdContainer>,
         ) -> Result<usize, Error> {
             if self.pending.is_empty() {
-                if self.nonblocking {
-                    return Err(Error::new(ErrorKind::WouldBlock, "Would block"));
-                }
-                let packet = self.recv.recv().unwrap();
-                self.pending.extend(packet.to_raw());
+                // The actual read from `recv` is done in `poll`
+                Err(Error::new(ErrorKind::WouldBlock, "Would block"))
+            } else {
+                let len = self.pending.len().min(buf.len());
+                buf[..len].copy_from_slice(&self.pending[..len]);
+                self.pending.drain(..len);
+                Ok(len)
             }
-
-            let len = self.pending.len().min(buf.len());
-            buf[..len].copy_from_slice(&self.pending[..len]);
-            self.pending.drain(..len);
-            Ok(len)
         }
+    }
 
-        fn set_nonblocking(&mut self, nonblocking: bool) -> Result<(), Error> {
-            self.nonblocking = nonblocking;
-            Ok(())
+    impl Poll for FakeStreamRead {
+        fn poll(&mut self, read: bool, write: bool) -> std::io::Result<(bool, bool)> {
+            assert!(
+                read || write,
+                "at least one of `read` and `write` must be true",
+            );
+            if read {
+                if self.pending.is_empty() {
+                    let packet = self.recv.recv().unwrap();
+                    self.pending.extend(packet.to_raw());
+                    Ok((!self.pending.is_empty(), false))
+                } else {
+                    Ok((true, false))
+                }
+            } else {
+                Ok((false, false))
+            }
         }
     }
 
@@ -202,6 +209,16 @@ mod fake_stream {
 
         fn flush(&mut self) -> Result<(), Error> {
             Ok(())
+        }
+    }
+
+    impl Poll for FakeStreamWrite {
+        fn poll(&mut self, read: bool, write: bool) -> std::io::Result<(bool, bool)> {
+            assert!(
+                read || write,
+                "at least one of `read` and `write` must be true",
+            );
+            Ok((false, write))
         }
     }
 }

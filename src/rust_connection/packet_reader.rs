@@ -4,6 +4,7 @@ use std::convert::TryInto;
 use std::io::{Error, ErrorKind, Result};
 
 use super::fd_read_write::ReadFD;
+use super::Poll;
 use crate::utils::RawFdContainer;
 
 /// Minimal length of an X11 packet
@@ -11,23 +12,19 @@ const MINIMAL_PACKET_LENGTH: usize = 32;
 
 /// A wrapper around a reader that reads X11 packet.
 #[derive(Debug)]
-pub(crate) struct PacketReader<R: ReadFD> {
+pub(crate) struct PacketReader<R: ReadFD + Poll> {
     inner: R,
-
-    // The nonblocking state of `inner`
-    nonblocking: Option<bool>,
 
     // A packet that was partially read. The `Vec` is the partial packet and the `usize` describes
     // up to where the packet was already read.
     pending_packet: (Vec<u8>, usize),
 }
 
-impl<R: ReadFD> PacketReader<R> {
+impl<R: ReadFD + Poll> PacketReader<R> {
     /// Create a new `PacketReader` that reads from the given stream.
     pub(crate) fn new(inner: R) -> Self {
         Self {
             inner,
-            nonblocking: None,
             pending_packet: (vec![0; 32], 0),
         }
     }
@@ -37,16 +34,18 @@ impl<R: ReadFD> PacketReader<R> {
         &mut self.inner
     }
 
-    /// Set the nonblocking status of the inner reader
-    pub(crate) fn set_nonblocking(&mut self, nonblocking: bool) -> Result<()> {
-        if self.nonblocking != Some(nonblocking) {
-            self.inner.set_nonblocking(nonblocking)?;
-            self.nonblocking = Some(nonblocking);
+    /// Read a packet from the inner reader (blocking).
+    pub(crate) fn read_packet(&mut self, fd_storage: &mut Vec<RawFdContainer>) -> Result<Vec<u8>> {
+        loop {
+            let _ = self.inner.poll(true, false)?;
+            // poll returned successfully, so the stream is readable.
+            if let Some(packet) = self.try_read_packet(fd_storage)? {
+                return Ok(packet);
+            }
         }
-        Ok(())
     }
 
-    /// Try to read a packet from the inner reader.
+    /// Try to read a packet from the inner reader (non-blocking).
     pub(crate) fn try_read_packet(
         &mut self,
         fd_storage: &mut Vec<RawFdContainer>,

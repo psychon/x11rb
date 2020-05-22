@@ -24,7 +24,7 @@ mod parse_display;
 mod stream;
 mod xauth;
 
-pub use fd_read_write::{BufReadFD, BufWriteFD, ReadFD, ReadFDWrapper, WriteFD, WriteFDWrapper};
+pub use fd_read_write::{BufReadFD, BufWriteFD, Poll, ReadFD, WriteFD};
 use inner::PollReply;
 use packet_reader::PacketReader;
 
@@ -54,20 +54,18 @@ pub(crate) enum BlockingMode {
     NonBlocking,
 }
 
-impl BlockingMode {
-    fn set_on_reader(self, read: &mut PacketReader<impl ReadFD>) -> std::io::Result<()> {
-        match self {
-            BlockingMode::Blocking => read.set_nonblocking(false),
-            BlockingMode::NonBlocking => read.set_nonblocking(true),
-        }
-    }
-}
-
 /// A connection to an X11 server implemented in pure rust
+///
+/// This type is generic over `R` and `W`, which allows to use a generic stream to
+/// comunicate to the server. This stream is splitted into a reader (`R`) and writer (`W`).
+/// Note that both the reader and the writer must be able to poll for both reading and
+/// writing. If the stream is buffered, polling is allowed to be incosistent across the
+/// reader and the writer: polling from the reader can ignore the writer buffer and polling
+/// from the writer is allowed to ignore the reader buffer.
 #[derive(Debug)]
 pub struct RustConnection<
-    R: ReadFD = BufReadFD<stream::Stream>,
-    W: WriteFD = BufWriteFD<stream::Stream>,
+    R: ReadFD + Poll = BufReadFD<stream::Stream>,
+    W: WriteFD + Poll = BufWriteFD<stream::Stream>,
 > {
     inner: Mutex<inner::ConnectionInner>,
     read: Mutex<PacketReader<R>>,
@@ -138,7 +136,7 @@ impl RustConnection<BufReadFD<stream::Stream>, BufWriteFD<stream::Stream>> {
     }
 }
 
-impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
+impl<R: ReadFD + Poll, W: WriteFD + Poll> RustConnection<R, W> {
     /// Establish a new connection to the given streams.
     ///
     /// `read` is used for reading data from the X11 server and `write` is used for writing.
@@ -221,21 +219,16 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
         let mut write = self.write.lock().unwrap();
         let mut inner = self.inner.lock().unwrap();
 
-        // We must always be able to read when we write. Otherwise, there might be a deadlock where
-        // the server stops reading from us when its output buffer fills up.
-        // As an approximation, we instead read as much as possible from the connection before
-        // blocking in the write.
-        inner = self.read_packet_and_enqueue(inner, BlockingMode::NonBlocking)?;
-
         loop {
             match inner.send_request(kind) {
                 Some(seqno) => {
                     // Now actually send the buffers
-                    // FIXME: We must always be able to read when we write
-                    write_all_vectored(&mut *write, bufs, fds)?;
+                    let _inner = self.write_all_vectored(inner, &mut write, bufs, fds)?;
                     return Ok(seqno);
                 }
-                None => self.send_sync(&mut *inner, &mut *write)?,
+                None => {
+                    inner = self.send_sync(inner, &mut *write)?;
+                }
             }
         }
     }
@@ -245,11 +238,11 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
     /// This function sends a `GetInputFocus` request to the X11 server and arranges for its reply
     /// to be ignored. This ensures that a reply is expected (`ConnectionInner.next_reply_expected`
     /// increases).
-    fn send_sync(
-        &self,
-        inner: &mut inner::ConnectionInner,
+    fn send_sync<'a>(
+        &'a self,
+        mut inner: MutexGuardInner<'a>,
         write: &mut W,
-    ) -> Result<(), std::io::Error> {
+    ) -> Result<MutexGuardInner<'a>, std::io::Error> {
         let length = 1u16.to_ne_bytes();
         let request = [
             GET_INPUT_FOCUS_REQUEST,
@@ -262,9 +255,86 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
             .send_request(ReplyFDKind::ReplyWithoutFDs)
             .expect("Sending a HasResponse request should not be blocked by syncs");
         inner.discard_reply(seqno, DiscardMode::DiscardReplyAndError);
-        write_all_vectored(write, &[IoSlice::new(&request)], Vec::new())?;
+        let inner = self.write_all_vectored(inner, write, &[IoSlice::new(&request)], Vec::new())?;
 
-        Ok(())
+        Ok(inner)
+    }
+
+    /// Write a set of buffers on a `writer`. May also read packets
+    /// from the server.
+    fn write_all_vectored<'a>(
+        &'a self,
+        mut inner: MutexGuardInner<'a>,
+        write: &mut W,
+        mut bufs: &[IoSlice<'_>],
+        mut fds: Vec<RawFdContainer>,
+    ) -> std::io::Result<MutexGuardInner<'a>> {
+        let mut partial_buf: &[u8] = &[];
+        while !partial_buf.is_empty() || !bufs.is_empty() || !fds.is_empty() {
+            let (can_read, can_write) = write.poll(true, true)?;
+            if can_write {
+                let mut count = if !partial_buf.is_empty() {
+                    write.write(partial_buf, &mut fds)?
+                } else {
+                    write.write_vectored(bufs, &mut fds)?
+                };
+                if count == 0 {
+                    return Err(std::io::Error::new(
+                        std::io::ErrorKind::WriteZero,
+                        "failed to write anything",
+                    ));
+                }
+                if count >= partial_buf.len() {
+                    count -= partial_buf.len();
+                    partial_buf = &[];
+                } else {
+                    partial_buf = &partial_buf[count..];
+                    count = 0;
+                }
+                while count > 0 {
+                    if count >= bufs[0].len() {
+                        count -= bufs[0].len();
+                    } else {
+                        partial_buf = &bufs[0][count..];
+                        count = 0;
+                    }
+                    bufs = &bufs[1..];
+                    // Skip empty slices
+                    while bufs.first().map(|s| s.len()) == Some(0) {
+                        bufs = &bufs[1..];
+                    }
+                }
+            } else if can_read {
+                // Cannot write, but can read, so read because the
+                // server might not accept new requests after its
+                // buffered replies have been read.
+                inner = self.read_packet_and_enqueue(inner, BlockingMode::NonBlocking)?;
+            }
+        }
+        Ok(inner)
+    }
+
+    fn flush_impl<'a>(
+        &'a self,
+        mut inner: MutexGuardInner<'a>,
+        write: &mut W,
+    ) -> std::io::Result<MutexGuardInner<'a>> {
+        loop {
+            let (can_read, can_write) = write.poll(true, true)?;
+            if can_write {
+                match write.flush() {
+                    Ok(_) => break,
+                    Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => continue,
+                    Err(e) => return Err(e),
+                }
+            } else if can_read {
+                // Cannot write, but can read, so read because the
+                // server might not accept new requests after its
+                // buffered replies have been read.
+                inner = self.read_packet_and_enqueue(inner, BlockingMode::NonBlocking)?;
+            }
+        }
+        Ok(inner)
     }
 
     /// Read a packet from the connection.
@@ -307,20 +377,19 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
                 // (Even in case of errors)
                 let _notify = NotifyOnDrop(&self.reader_condition);
 
-                // 2.2. Block the thread until at least one packet is received.
+                // 2.2. Read packets, possibly blocking on the first one.
                 let mut fds = Vec::new();
                 let mut packets = Vec::new();
 
-                // Read one packet
-                mode.set_on_reader(&mut lock)?;
-                if let Some(packet) = lock.try_read_packet(&mut fds)? {
-                    packets.push(packet);
+                if mode == BlockingMode::Blocking {
+                    // Read one packet blocking
+                    packets.push(lock.read_packet(&mut fds)?);
+                }
 
-                    // And then read as many packages as possible
-                    BlockingMode::NonBlocking.set_on_reader(&mut lock)?;
-                    while let Some(packet) = lock.try_read_packet(&mut fds)? {
-                        packets.push(packet);
-                    }
+                // And then read as many packages as possible
+                // without blocking.
+                while let Some(packet) = lock.try_read_packet(&mut fds)? {
+                    packets.push(packet);
                 }
 
                 // 2.3. Relock `inner` to enqueue the packets.
@@ -382,7 +451,7 @@ impl<R: ReadFD, W: WriteFD> RustConnection<R, W> {
     }
 }
 
-impl<R: ReadFD, W: WriteFD> RequestConnection for RustConnection<R, W> {
+impl<R: ReadFD + Poll, W: WriteFD + Poll> RequestConnection for RustConnection<R, W> {
     type Buf = Vec<u8>;
 
     fn send_request_with_reply<Reply>(
@@ -461,7 +530,7 @@ impl<R: ReadFD, W: WriteFD> RequestConnection for RustConnection<R, W> {
     fn wait_for_reply(&self, sequence: SequenceNumber) -> Result<Option<Vec<u8>>, ConnectionError> {
         let mut write = self.write.lock().unwrap();
         let mut inner = self.inner.lock().unwrap();
-        write.flush()?; // Ensure the request is sent
+        inner = self.flush_impl(inner, &mut write)?;
         drop(write);
         loop {
             match inner.poll_for_reply(sequence) {
@@ -480,10 +549,11 @@ impl<R: ReadFD, W: WriteFD> RequestConnection for RustConnection<R, W> {
         let mut write = self.write.lock().unwrap();
         let mut inner = self.inner.lock().unwrap();
         if inner.prepare_check_for_reply_or_error(sequence) {
-            self.send_sync(&mut *inner, &mut *write)?;
+            inner = self.send_sync(inner, &mut write)?;
             assert!(!inner.prepare_check_for_reply_or_error(sequence));
         }
-        write.flush()?; // Ensure the request is sent
+        // Ensure the request is sent
+        inner = self.flush_impl(inner, &mut write)?;
         drop(write);
         loop {
             match inner.poll_check_for_reply_or_error(sequence) {
@@ -501,7 +571,8 @@ impl<R: ReadFD, W: WriteFD> RequestConnection for RustConnection<R, W> {
     ) -> Result<ReplyOrError<BufWithFds, Buffer>, ConnectionError> {
         let mut write = self.write.lock().unwrap();
         let mut inner = self.inner.lock().unwrap();
-        write.flush()?; // Ensure the request is sent
+        // Ensure the request is sent
+        inner = self.flush_impl(inner, &mut write)?;
         drop(write);
         loop {
             if let Some(reply) = inner.poll_for_reply_or_error(sequence) {
@@ -560,7 +631,7 @@ impl<R: ReadFD, W: WriteFD> RequestConnection for RustConnection<R, W> {
     }
 }
 
-impl<R: ReadFD, W: WriteFD> Connection for RustConnection<R, W> {
+impl<R: ReadFD + Poll, W: WriteFD + Poll> Connection for RustConnection<R, W> {
     fn wait_for_raw_event_with_sequence(&self) -> Result<RawEventAndSeqNumber, ConnectionError> {
         let mut inner = self.inner.lock().unwrap();
         loop {
@@ -584,7 +655,9 @@ impl<R: ReadFD, W: WriteFD> Connection for RustConnection<R, W> {
     }
 
     fn flush(&self) -> Result<(), ConnectionError> {
-        self.write.lock().unwrap().flush()?;
+        let mut write = self.write.lock().unwrap();
+        let inner = self.inner.lock().unwrap();
+        let _inner = self.flush_impl(inner, &mut write)?;
         Ok(())
     }
 
@@ -609,7 +682,7 @@ fn byte_order() -> u8 {
 
 /// Send a `SetupRequest` to the X11 server.
 fn write_setup(
-    write: &mut impl WriteFD,
+    write: &mut (impl WriteFD + Poll),
     auth_name: Vec<u8>,
     auth_data: Vec<u8>,
 ) -> Result<(), std::io::Error> {
@@ -620,8 +693,36 @@ fn write_setup(
         authorization_protocol_name: auth_name,
         authorization_protocol_data: auth_data,
     };
-    write.write_all(&request.serialize(), Vec::new())?;
-    write.flush()?;
+    // Write the data
+    let data = request.serialize();
+    let mut nwritten = 0;
+    while nwritten != data.len() {
+        let _ = write.poll(false, true)?;
+        // poll returned successfully, so the stream is writable.
+        match write.write(&data[nwritten..], &mut Vec::new())? {
+            0 => {
+                return Err(std::io::Error::new(
+                    std::io::ErrorKind::WriteZero,
+                    "failed to write whole buffer",
+                ))
+            }
+            n => nwritten += n,
+        }
+    }
+    // Flush the buffer (note that `flush` is non-blocking
+    // and can return `WouldBlock` even after polling).
+    loop {
+        // Try the first time without poll because `flush` shall
+        // return immediately if the buffer is empty.
+        match write.flush() {
+            Ok(()) => break,
+            Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                // poll before trying again
+                let _ = write.poll(false, true)?;
+            }
+            Err(e) => return Err(e),
+        }
+    }
     Ok(())
 }
 
@@ -658,46 +759,6 @@ fn read_setup(read: &mut impl ReadFD) -> Result<Setup, ConnectError> {
     }
 }
 
-/// Write a set of buffers on a Writer.
-///
-/// This is basically `Write::write_all_vectored`, but on stable and for `WriteFD`.
-fn write_all_vectored(
-    write: &mut impl WriteFD,
-    bufs: &[IoSlice<'_>],
-    mut fds: Vec<RawFdContainer>,
-) -> Result<(), std::io::Error> {
-    let mut bufs = bufs;
-    while !bufs.is_empty() {
-        let mut count = write.write_vectored(bufs, &mut fds)?;
-        if count == 0 {
-            return Err(std::io::Error::new(
-                std::io::ErrorKind::WriteZero,
-                "failed to write anything",
-            ));
-        }
-        while count > 0 {
-            if count >= bufs[0].len() {
-                count -= bufs[0].len();
-            } else {
-                let remaining = &bufs[0][count..];
-                write.write_all(remaining, fds)?;
-                fds = Vec::new();
-                count = 0;
-            }
-            bufs = &bufs[1..];
-
-            // Skip empty slices
-            while bufs.first().map(|s| s.len()) == Some(0) {
-                bufs = &bufs[1..];
-            }
-        }
-    }
-    if !fds.is_empty() {
-        write.write_all(&[], fds)?;
-    }
-    Ok(())
-}
-
 /// Call `notify_all` on a condition variable when dropped.
 #[derive(Debug)]
 struct NotifyOnDrop<'a>(&'a Condvar);
@@ -710,9 +771,9 @@ impl Drop for NotifyOnDrop<'_> {
 
 #[cfg(test)]
 mod test {
-    use std::io::{IoSlice, Read, Result, Write};
+    use std::io::{Read, Result, Write};
 
-    use super::{read_setup, write_all_vectored, ReadFD, WriteFD};
+    use super::{read_setup, Poll, ReadFD, WriteFD};
     use crate::errors::ConnectError;
     use crate::protocol::xproto::{ImageOrder, Setup, SetupAuthenticate, SetupFailed};
     use crate::utils::RawFdContainer;
@@ -731,47 +792,32 @@ mod test {
         }
     }
 
+    impl Poll for WriteFDSlice<'_> {
+        fn poll(&mut self, read: bool, write: bool) -> Result<(bool, bool)> {
+            assert!(
+                read || write,
+                "at least one of `read` and `write` must be true",
+            );
+            Ok((read, write))
+        }
+    }
+
     struct ReadFDSlice<'a>(&'a [u8]);
 
     impl ReadFD for ReadFDSlice<'_> {
         fn read(&mut self, buf: &mut [u8], _fd_storage: &mut Vec<RawFdContainer>) -> Result<usize> {
             self.0.read(buf)
         }
+    }
 
-        fn set_nonblocking(&mut self, _nonblocking: bool) -> Result<()> {
-            unimplemented!()
+    impl Poll for ReadFDSlice<'_> {
+        fn poll(&mut self, read: bool, write: bool) -> Result<(bool, bool)> {
+            assert!(
+                read || write,
+                "at least one of `read` and `write` must be true",
+            );
+            Ok((read, write))
         }
-    }
-
-    fn partial_write_test(request: &[u8], expected_err: &str) {
-        let mut written = [0x21; 2];
-        let mut output = &mut written[..];
-        let request = [IoSlice::new(&request), IoSlice::new(&request)];
-        let mut writer = WriteFDSlice(&mut output);
-        let error = write_all_vectored(&mut writer, &request, Vec::new()).unwrap_err();
-        assert_eq!(expected_err, error.to_string());
-    }
-
-    #[test]
-    fn partial_write_larger_slice() {
-        // This tries to write 4+4 bytes into a buffer of size 2
-        partial_write_test(&[0; 4], "failed to write whole buffer");
-    }
-
-    #[test]
-    fn partial_write_slice_border() {
-        // This tries to write 2+2 bytes into a buffer of size 2
-        partial_write_test(&[0; 2], "failed to write anything");
-    }
-
-    #[test]
-    fn full_write_trailing_empty() {
-        let mut written = [0; 4];
-        let mut output = &mut written[..];
-        let (request1, request2) = ([0; 4], [0; 0]);
-        let request = [IoSlice::new(&request1), IoSlice::new(&request2)];
-        let mut writer = WriteFDSlice(&mut output);
-        write_all_vectored(&mut writer, &request, Vec::new()).unwrap();
     }
 
     #[test]

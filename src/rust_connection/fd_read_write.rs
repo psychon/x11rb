@@ -7,13 +7,32 @@ use std::io::{Error, ErrorKind, IoSlice, Read, Result, Write};
 
 use crate::utils::RawFdContainer;
 
-/// A version of [`std::io::Write`] that also allows sending file descriptors.
-pub trait WriteFD {
-    /// Write a buffer and some FDs into this writer, returning how many bytes were written.
+pub trait Poll {
+    /// Waits or checks for level-triggered read and/or write events
+    /// on the stream.
+    ///
+    /// The first returned boolean specifies whether the stream can
+    /// be read from and the second boolean specifies whether the
+    /// stream can be written into. If this function returns successfully,
+    /// at least one of the booleans must be `true`.
+    ///
+    /// # Panics
+    ///
+    /// This function shall panic if `read` and `write` are both false.
+    fn poll(&mut self, read: bool, write: bool) -> Result<(bool, bool)>;
+}
+
+/// A version of [`std::io::Write`] that also allows sending file descriptors and that
+/// imposes some requirements regarding blocking behavior.
+pub trait WriteFD: Poll {
+    /// Write a buffer and some FDs into this writer without blocking, returning how many
+    /// bytes were written.
     ///
     /// This function works like [`std::io::Write::write`], but also supports sending file
     /// descriptors. The `fds` argument contains the file descriptors to send. The order of file
-    /// descriptors is maintained.
+    /// descriptors is maintained. Whereas implementation of [`std::io::Write::write`] are
+    /// allowed to block or not to block, this function must never block and return
+    /// `ErrorKind::WouldBlock` if needed.
     ///
     /// This function does not guarantee that all file descriptors are sent together with the data.
     /// Any file descriptors that were sent are removed from the beginning of the given `Vec`.
@@ -24,40 +43,8 @@ pub trait WriteFD {
     /// time.
     fn write(&mut self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize>;
 
-    /// Write an entire buffer of data and file descriptors into this writer.
-    ///
-    /// This function works like [`std::io::Write::write_all`], but also supports sending file
-    /// descriptors. The `fds` argument contains the file descriptors to send. The order of file
-    /// descriptors is maintained.
-    ///
-    /// When this function returns, all file descriptors were written.
-    ///
-    /// This function does not guarantee that all file descriptors are sent together with the data.
-    /// Any file descriptors that were sent are removed from the beginning of the given `Vec`.
-    ///
-    /// There is no guarantee that the given file descriptors are received together with the given
-    /// data. File descriptors might be received earlier than their corresponding data. It is not
-    /// allowed for file descriptors to be received later than the bytes that were sent at the same
-    /// time.
-    fn write_all(&mut self, mut buf: &[u8], mut fds: Vec<RawFdContainer>) -> Result<()> {
-        while !buf.is_empty() || !fds.is_empty() {
-            let old_fds_len = fds.len();
-            match self.write(buf, &mut fds) {
-                Ok(0) if fds.len() == old_fds_len => {
-                    return Err(Error::new(
-                        ErrorKind::WriteZero,
-                        "failed to write whole buffer",
-                    ));
-                }
-                Ok(n) => buf = &buf[n..],
-                Err(ref e) if e.kind() == ErrorKind::Interrupted => {}
-                Err(e) => return Err(e),
-            }
-        }
-        Ok(())
-    }
-
-    /// Like `write`, except that it writes from a slice of buffers.
+    /// Like `write`, except that it writes from a slice of buffers. Like `write`, this
+    /// method must never block.
     ///
     /// This method must behave as a call to `write` with the buffers concatenated would.
     ///
@@ -76,54 +63,10 @@ pub trait WriteFD {
     }
 
     /// Flush this output stream, ensuring that all buffered contents are written out.
+    ///
+    /// This operation is also non-blocking. `ErrorKind::WouldBlock` shall be returned
+    /// if the buffer cannot be completely flushed.
     fn flush(&mut self) -> Result<()>;
-}
-
-/// Wraps a [`std::io::Write`] to implement the [`WriteFD`] trait.
-///
-/// Any attempts to write file descriptors will fail. Bytes are forwarded to the underlying writer.
-#[derive(Debug)]
-pub struct WriteFDWrapper<W: Write>(W);
-
-impl<W: Write> WriteFDWrapper<W> {
-    /// Create a new `WriteFDWrapper` for the given writer.
-    pub fn new(write: W) -> Self {
-        Self(write)
-    }
-}
-
-impl<W: Write> WriteFD for WriteFDWrapper<W> {
-    fn write(&mut self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
-        check_no_fds(fds)?;
-        self.0.write(buf)
-    }
-
-    fn write_all(&mut self, bufs: &[u8], fds: Vec<RawFdContainer>) -> Result<()> {
-        check_no_fds(&fds)?;
-        self.0.write_all(bufs)
-    }
-
-    fn write_vectored(
-        &mut self,
-        bufs: &[IoSlice<'_>],
-        fds: &mut Vec<RawFdContainer>,
-    ) -> Result<usize> {
-        check_no_fds(&fds)?;
-        self.0.write_vectored(bufs)
-    }
-
-    fn flush(&mut self) -> Result<()> {
-        self.0.flush()
-    }
-}
-
-// Check that the given argument is an empty slice
-fn check_no_fds(fds: &[RawFdContainer]) -> Result<()> {
-    if !fds.is_empty() {
-        Err(Error::new(ErrorKind::Other, "FD passing is unsupported"))
-    } else {
-        Ok(())
-    }
 }
 
 /// A version of [`std::io::BufWriter`] that supports sending file descriptors.
@@ -205,15 +148,52 @@ impl<W: WriteFD> BufWriteFD<W> {
 
 impl<W: WriteFD> WriteFD for BufWriteFD<W> {
     fn write(&mut self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
-        self.fd_buf.extend(fds.drain(..));
+        self.fd_buf.append(fds);
 
-        if self.data_buf.len() + buf.len() > self.data_buf.capacity() {
-            self.flush_buffer()?;
+        if (self.data_buf.capacity() - self.data_buf.len()) < buf.len() {
+            // Not enough space, try to flush
+            match self.flush_buffer() {
+                Ok(_) => {}
+                Err(e) => {
+                    if e.kind() == std::io::ErrorKind::WouldBlock {
+                        let available_buf = self.data_buf.capacity() - self.data_buf.len();
+                        if available_buf == 0 {
+                            // Buffer filled and cannot flush anything without
+                            // blocking, so return `WouldBlock`.
+                            return Err(e);
+                        } else {
+                            let n_to_write = buf.len().min(available_buf);
+                            let _ = self.data_buf.write(&buf[..n_to_write]).unwrap();
+                            // Return `Ok` because some or all data has been buffered,
+                            // so from the outside it is seen as a successful write.
+                            return Ok(n_to_write);
+                        }
+                    } else {
+                        return Err(e);
+                    }
+                }
+            }
         }
+
         if buf.len() >= self.data_buf.capacity() {
-            self.inner.write(buf, &mut self.fd_buf)
+            // At this point the buffer is empty
+            match self.inner.write(buf, &mut self.fd_buf) {
+                Ok(n) => Ok(n),
+                Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                    let n_to_write = buf
+                        .len()
+                        .min(self.data_buf.capacity() - self.data_buf.len());
+                    let _ = self.data_buf.write(&buf[..n_to_write]).unwrap();
+                    // Return `Ok` because some data has been buffered,
+                    // so from the outside it is seen as a successful write.
+                    Ok(n_to_write)
+                }
+                Err(e) => Err(e),
+            }
         } else {
-            self.data_buf.write(buf)
+            // At this point there is enough space available in the buffer.
+            let _ = self.data_buf.write(buf).unwrap();
+            Ok(buf.len())
         }
     }
 
@@ -222,16 +202,54 @@ impl<W: WriteFD> WriteFD for BufWriteFD<W> {
         bufs: &[IoSlice<'_>],
         fds: &mut Vec<RawFdContainer>,
     ) -> Result<usize> {
-        self.fd_buf.extend(fds.drain(..));
+        self.fd_buf.append(fds);
 
-        let total_len: usize = bufs.iter().map(|b| b.len()).sum();
-        if self.data_buf.len() + total_len > self.data_buf.capacity() {
-            self.flush_buffer()?;
+        let total_len = bufs.iter().map(|b| b.len()).sum();
+
+        if (self.data_buf.capacity() - self.data_buf.len()) < total_len {
+            // Not enough space, try to flush
+            match self.flush_buffer() {
+                Ok(_) => {}
+                Err(e) => {
+                    if e.kind() == std::io::ErrorKind::WouldBlock {
+                        let available_buf = self.data_buf.capacity() - self.data_buf.len();
+                        if available_buf == 0 {
+                            // Buffer filled and cannot flush anything without
+                            // blocking, so return `WouldBlock`.
+                            return Err(e);
+                        } else {
+                            let n_to_write = bufs[0].len().min(available_buf);
+                            let _ = self.data_buf.write(&bufs[0][..n_to_write]).unwrap();
+                            // Return `Ok` because some or all data has been buffered,
+                            // so from the outside it is seen as a successful write.
+                            return Ok(n_to_write);
+                        }
+                    } else {
+                        return Err(e);
+                    }
+                }
+            }
         }
+
         if total_len >= self.data_buf.capacity() {
-            self.inner.write_vectored(bufs, &mut self.fd_buf)
+            // At this point the buffer is empty
+            match self.inner.write_vectored(bufs, &mut self.fd_buf) {
+                Ok(n) => Ok(n),
+                Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                    let n_to_write = bufs[0]
+                        .len()
+                        .min(self.data_buf.capacity() - self.data_buf.len());
+                    let _ = self.data_buf.write(&bufs[0][..n_to_write]).unwrap();
+                    // Return `Ok` because some data has been buffered,
+                    // so from the outside it is seen as a successful write.
+                    Ok(n_to_write)
+                }
+                Err(e) => Err(e),
+            }
         } else {
-            self.data_buf.write_vectored(bufs)
+            // At this point there is enough space available in the buffer.
+            let _ = self.data_buf.write_vectored(bufs).unwrap();
+            Ok(total_len)
         }
     }
 
@@ -240,12 +258,27 @@ impl<W: WriteFD> WriteFD for BufWriteFD<W> {
     }
 }
 
-/// A version of [`std::io::Read`] that also allows receiving file descriptors.
-pub trait ReadFD {
-    /// Read some bytes and FDs from this reader, returning how many bytes were read.
+impl<T: WriteFD> Poll for BufWriteFD<T> {
+    fn poll(&mut self, read: bool, write: bool) -> Result<(bool, bool)> {
+        if write && self.data_buf.len() != self.data_buf.capacity() {
+            // Avoid blocking poll if write buffer is not full.
+            Ok((false, true))
+        } else {
+            self.inner.poll(read, write)
+        }
+    }
+}
+
+/// A version of [`std::io::Read`] that also allows receiving file descriptors and that
+/// imposes some requirements regarding blocking behavior.
+pub trait ReadFD: Poll {
+    /// Read some bytes and FDs from this reader without blocking, returning how many bytes
+    /// were read.
     ///
     /// This function works like [`std::io::Read::read`], but also supports the reception of file
     /// descriptors. Any received file descriptors are appended to the given `fd_storage`.
+    /// Whereas implementation of [`std::io::Read::read`] are allowed to block or not to block,
+    /// this method shall never block and return `ErrorKind::WouldBlock` if needed.
     ///
     /// This function does not guarantee that all file descriptors were sent together with the data
     /// with which they are received. However, file descriptors may not be received later than the
@@ -254,6 +287,8 @@ pub trait ReadFD {
     fn read(&mut self, buf: &mut [u8], fd_storage: &mut Vec<RawFdContainer>) -> Result<usize>;
 
     /// Read the exact number of bytes required to fill `buf` and also some amount of FDs.
+    ///
+    /// Unlike `read`, this method always blocks.
     ///
     /// This function works like [`std::io::Read::read`], but also supports the reception of file
     /// descriptors. Any received file descriptors are appended to the given `fd_storage`.
@@ -268,6 +303,8 @@ pub trait ReadFD {
         fd_storage: &mut Vec<RawFdContainer>,
     ) -> Result<()> {
         while !buf.is_empty() {
+            let _ = self.poll(true, false)?;
+            // poll returned successfully, so the stream is readable.
             match self.read(buf, fd_storage) {
                 Ok(0) => {
                     return Err(Error::new(
@@ -281,41 +318,6 @@ pub trait ReadFD {
             }
         }
         Ok(())
-    }
-
-    /// Moves this reader into or out of nonblocking mode.
-    ///
-    /// In nonblocking mode, reading becomes nonblocking. This means that such calls immediately
-    /// return. If an immediate result is not possible, an error with kind
-    /// [`std::io::ErrorKind::WouldBlock`] is returned.
-    fn set_nonblocking(&mut self, nonblocking: bool) -> Result<()>;
-}
-
-/// Wraps a [`std::io::Read`] to implement the [`ReadFD`] trait.
-///
-/// No file descriptors will be received. Attempts to read bytes are forwarded to the underlying
-/// reader.
-#[derive(Debug)]
-pub struct ReadFDWrapper<R: Read>(R);
-
-impl<R: Read> ReadFDWrapper<R> {
-    /// Create a new `ReadFDWrapper` for the given reader.
-    pub fn new(read: R) -> Self {
-        Self(read)
-    }
-}
-
-impl<R: Read> ReadFD for ReadFDWrapper<R> {
-    fn read(&mut self, buf: &mut [u8], _fd_storage: &mut Vec<RawFdContainer>) -> Result<usize> {
-        self.0.read(buf)
-    }
-
-    fn read_exact(&mut self, buf: &mut [u8], _fd_storage: &mut Vec<RawFdContainer>) -> Result<()> {
-        self.0.read_exact(buf)
-    }
-
-    fn set_nonblocking(&mut self, _nonblocking: bool) -> Result<()> {
-        unimplemented!()
     }
 }
 
@@ -379,8 +381,15 @@ impl<R: ReadFD> ReadFD for BufReadFD<R> {
         self.start += nread;
         Ok(nread)
     }
+}
 
-    fn set_nonblocking(&mut self, nonblocking: bool) -> Result<()> {
-        self.inner.set_nonblocking(nonblocking)
+impl<T: ReadFD> Poll for BufReadFD<T> {
+    fn poll(&mut self, read: bool, write: bool) -> Result<(bool, bool)> {
+        if read && self.start < self.end {
+            // Avoid blocking poll if read buffer is not empty.
+            Ok((true, false))
+        } else {
+            self.inner.poll(read, write)
+        }
     }
 }
