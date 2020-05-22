@@ -13,6 +13,7 @@ use x11rb::connection::Connection;
 use x11rb::errors::{ReplyError, ReplyOrIdError};
 use x11rb::protocol::xproto::*;
 use x11rb::protocol::Event;
+use x11rb::wrapper::ConnectionExt as _;
 use x11rb::COPY_DEPTH_FROM_PARENT;
 
 /// Lag angle for the follow line
@@ -76,6 +77,11 @@ fn run<C: Connection>(
     white: Gcontext,
     black: Gcontext,
 ) -> Result<(), ReplyOrIdError> {
+    let wm_protocols = conn.intern_atom(false, b"WM_PROTOCOLS")?;
+    let wm_delete_window = conn.intern_atom(false, b"WM_DELETE_WINDOW")?;
+    let wm_protocols = wm_protocols.reply().unwrap().atom;
+    let wm_delete_window = wm_delete_window.reply().unwrap().atom;
+
     let screen = &conn.setup().roots[screen_num];
     let default_size = 300;
     let pixmap = conn.generate_id()?;
@@ -103,6 +109,13 @@ fn run<C: Connection>(
             .background_pixel(screen.white_pixel)
             .event_mask(EventMask::ButtonRelease | EventMask::Exposure | EventMask::StructureNotify)
             .do_not_propogate_mask(EventMask::ButtonPress),
+    )?;
+    conn.change_property32(
+        PropMode::Replace,
+        window,
+        wm_protocols,
+        AtomEnum::ATOM,
+        &[wm_delete_window],
     )?;
     conn.map_window(window)?;
 
