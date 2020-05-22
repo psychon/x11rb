@@ -23,10 +23,9 @@ impl Stream {
         const TCP_PORT_BASE: u16 = 6000;
 
         if (protocol.is_none() || protocol != Some("unix")) && !host.is_empty() && host != "unix" {
-            Ok(Stream::TcpStream(TcpStream::connect((
-                host,
-                TCP_PORT_BASE + display,
-            ))?))
+            let stream = TcpStream::connect((host, TCP_PORT_BASE + display))?;
+            stream.set_nonblocking(true)?;
+            Ok(Stream::TcpStream(stream))
         } else {
             // On non-unix, this variable is not mutated.
             #[allow(unused_mut)]
@@ -41,17 +40,19 @@ impl Stream {
                     // Not supported on Rust right now: https://github.com/rust-lang/rust/issues/42048
 
                     match UnixStream::connect(file_name) {
-                        Ok(stream) => return Ok(Stream::UnixStream(stream)),
+                        Ok(stream) => {
+                            stream.set_nonblocking(true)?;
+                            return Ok(Stream::UnixStream(stream));
+                        }
                         Err(err) => error = Some(err),
                     }
                 }
             }
 
             if protocol.is_none() && host.is_empty() {
-                Ok(Stream::TcpStream(TcpStream::connect((
-                    "localhost",
-                    TCP_PORT_BASE + display,
-                ))?))
+                let stream = TcpStream::connect(("localhost", TCP_PORT_BASE + display))?;
+                stream.set_nonblocking(true)?;
+                Ok(Stream::TcpStream(stream))
             } else {
                 use crate::errors::ConnectError;
                 use std::io::{Error, ErrorKind};
@@ -255,12 +256,91 @@ impl ReadFD for Stream {
             }
         }
     }
+}
 
-    fn set_nonblocking(&mut self, nonblocking: bool) -> Result<()> {
-        match self {
-            Stream::TcpStream(stream) => stream.set_nonblocking(nonblocking),
-            #[cfg(unix)]
-            Stream::UnixStream(stream) => stream.set_nonblocking(nonblocking),
+impl super::Poll for Stream {
+    fn poll(&mut self, read: bool, write: bool) -> Result<(bool, bool)> {
+        assert!(
+            read || write,
+            "at least one of `read` and `write` must be true",
+        );
+
+        #[cfg(unix)]
+        {
+            use nix::errno::Errno;
+            use nix::poll::{poll, PollFd, PollFlags};
+            use nix::sys::socket::{getsockopt, sockopt::SocketError};
+
+            let mut poll_flags = PollFlags::empty();
+            if read {
+                poll_flags |= PollFlags::POLLIN;
+            }
+            if write {
+                poll_flags |= PollFlags::POLLOUT;
+            }
+            let fd = self.as_raw_fd();
+            let mut poll_fds = [PollFd::new(fd, poll_flags)];
+            loop {
+                match poll(&mut poll_fds, -1) {
+                    Ok(_) => {}
+                    Err(nix::Error::Sys(Errno::EINTR)) => {}
+                    Err(_) => return Err(std::io::Error::last_os_error()),
+                }
+                let revents = poll_fds[0].revents().unwrap_or_else(PollFlags::empty);
+                if revents.contains(PollFlags::POLLERR) {
+                    let socket_err =
+                        getsockopt(fd, SocketError).map_err(|_| std::io::Error::last_os_error())?;
+                    return Err(std::io::Error::from_raw_os_error(socket_err));
+                } else {
+                    let can_read = revents.contains(PollFlags::POLLIN);
+                    let can_write = revents.contains(PollFlags::POLLOUT);
+                    // Can a infinite timeout poll ever return without setting
+                    // any flag? Just in case, check and try again if needed...
+                    if (read && can_read) || (write && can_write) {
+                        return Ok((can_read, can_write));
+                    }
+                }
+            }
+        }
+        #[cfg(windows)]
+        {
+            use std::os::windows::io::AsRawSocket as _;
+
+            use winapi::um::winsock2::{
+                POLLERR, POLLHUP, POLLNVAL, POLLRDNORM, POLLWRNORM, SOCKET, WSAPOLLFD,
+            };
+            use winapi_wsapoll::wsa_poll;
+
+            let raw_socket = match self {
+                Stream::TcpStream(stream) => stream.as_raw_socket(),
+            };
+            let mut events = 0;
+            if read {
+                events |= POLLRDNORM;
+            }
+            if write {
+                events |= POLLWRNORM;
+            }
+            let mut poll_fds = [WSAPOLLFD {
+                fd: raw_socket as SOCKET,
+                events,
+                revents: 0,
+            }];
+            loop {
+                let _ = wsa_poll(&mut poll_fds, -1)?;
+                if (poll_fds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) != 0 {
+                    // Let the error be handled when trying to read or write.
+                    return Ok((read, write));
+                } else {
+                    let can_read = (poll_fds[0].revents & POLLRDNORM) != 0;
+                    let can_write = (poll_fds[0].revents & POLLWRNORM) != 0;
+                    // Can a infinite timeout poll ever return without setting
+                    // any flag? Just in case, check and try again if needed...
+                    if (read && can_read) || (write && can_write) {
+                        return Ok((can_read, can_write));
+                    }
+                }
+            }
         }
     }
 }

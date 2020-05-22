@@ -24,6 +24,13 @@ gethostname = "0.2.1"
 [target.'cfg(unix)'.dependencies]
 nix = "0.17"
 
+[target.'cfg(windows)'.dependencies]
+winapi-wsapoll = "0.1.0"
+
+[target.'cfg(windows)'.dependencies.winapi]
+version = "0.3"
+features = ["winsock2"]
+
 [features]
 # Without this feature, all uses of `unsafe` in the crate are forbidden via
 # #![deny(unsafe_code)]. This has the effect of disabling the XCB FFI bindings.
