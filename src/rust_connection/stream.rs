@@ -20,11 +20,20 @@ pub enum Stream {
 impl Stream {
     /// Try to connect to the X11 server described by the given arguments.
     pub fn connect(host: &str, protocol: Option<&str>, display: u16) -> Result<Self> {
+        let stream = Self::connect_impl(host, protocol, display)?;
+        match &stream {
+            Stream::TcpStream(ref stream) => stream.set_nonblocking(true)?,
+            #[cfg(unix)]
+            Stream::UnixStream(ref stream) => stream.set_nonblocking(true)?,
+        }
+        Ok(stream)
+    }
+
+    fn connect_impl(host: &str, protocol: Option<&str>, display: u16) -> Result<Self> {
         const TCP_PORT_BASE: u16 = 6000;
 
         if (protocol.is_none() || protocol != Some("unix")) && !host.is_empty() && host != "unix" {
             let stream = TcpStream::connect((host, TCP_PORT_BASE + display))?;
-            stream.set_nonblocking(true)?;
             Ok(Stream::TcpStream(stream))
         } else {
             // On non-unix, this variable is not mutated.
@@ -40,10 +49,7 @@ impl Stream {
                     // Not supported on Rust right now: https://github.com/rust-lang/rust/issues/42048
 
                     match UnixStream::connect(file_name) {
-                        Ok(stream) => {
-                            stream.set_nonblocking(true)?;
-                            return Ok(Stream::UnixStream(stream));
-                        }
+                        Ok(stream) => return Ok(Stream::UnixStream(stream)),
                         Err(err) => error = Some(err),
                     }
                 }
@@ -51,7 +57,6 @@ impl Stream {
 
             if protocol.is_none() && host.is_empty() {
                 let stream = TcpStream::connect(("localhost", TCP_PORT_BASE + display))?;
-                stream.set_nonblocking(true)?;
                 Ok(Stream::TcpStream(stream))
             } else {
                 use crate::errors::ConnectError;
