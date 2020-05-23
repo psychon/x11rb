@@ -144,13 +144,22 @@ impl<W: WriteFD> BufWriteFD<W> {
         }
         ret
     }
-}
 
-impl<W: WriteFD> WriteFD for BufWriteFD<W> {
-    fn write(&mut self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
+    fn write_helper<F, G>(
+        &mut self,
+        fds: &mut Vec<RawFdContainer>,
+        write_buffer: F,
+        write_inner: G,
+        first_buffer: &[u8],
+        to_write_length: usize,
+    ) -> Result<usize>
+    where
+        F: FnOnce(&mut Vec<u8>) -> Result<usize>,
+        G: FnOnce(&mut W, &mut Vec<RawFdContainer>) -> Result<usize>,
+    {
         self.fd_buf.append(fds);
 
-        if (self.data_buf.capacity() - self.data_buf.len()) < buf.len() {
+        if (self.data_buf.capacity() - self.data_buf.len()) < to_write_length {
             // Not enough space, try to flush
             match self.flush_buffer() {
                 Ok(_) => {}
@@ -162,8 +171,8 @@ impl<W: WriteFD> WriteFD for BufWriteFD<W> {
                             // blocking, so return `WouldBlock`.
                             return Err(e);
                         } else {
-                            let n_to_write = buf.len().min(available_buf);
-                            let _ = self.data_buf.write(&buf[..n_to_write]).unwrap();
+                            let n_to_write = first_buffer.len().min(available_buf);
+                            let _ = self.data_buf.write(&first_buffer[..n_to_write]).unwrap();
                             // Return `Ok` because some or all data has been buffered,
                             // so from the outside it is seen as a successful write.
                             return Ok(n_to_write);
@@ -175,15 +184,15 @@ impl<W: WriteFD> WriteFD for BufWriteFD<W> {
             }
         }
 
-        if buf.len() >= self.data_buf.capacity() {
+        if to_write_length >= self.data_buf.capacity() {
             // At this point the buffer is empty
-            match self.inner.write(buf, &mut self.fd_buf) {
+            match write_inner(&mut self.inner, &mut self.fd_buf) {
                 Ok(n) => Ok(n),
                 Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-                    let n_to_write = buf
+                    let n_to_write = first_buffer
                         .len()
                         .min(self.data_buf.capacity() - self.data_buf.len());
-                    let _ = self.data_buf.write(&buf[..n_to_write]).unwrap();
+                    let _ = self.data_buf.write(&first_buffer[..n_to_write]).unwrap();
                     // Return `Ok` because some data has been buffered,
                     // so from the outside it is seen as a successful write.
                     Ok(n_to_write)
@@ -192,9 +201,21 @@ impl<W: WriteFD> WriteFD for BufWriteFD<W> {
             }
         } else {
             // At this point there is enough space available in the buffer.
-            let _ = self.data_buf.write(buf).unwrap();
-            Ok(buf.len())
+            let _ = write_buffer(&mut self.data_buf).unwrap();
+            Ok(to_write_length)
         }
+    }
+}
+
+impl<W: WriteFD> WriteFD for BufWriteFD<W> {
+    fn write(&mut self, buf: &[u8], fds: &mut Vec<RawFdContainer>) -> Result<usize> {
+        self.write_helper(
+            fds,
+            |w| w.write(buf),
+            |w, fd| w.write(buf, fd),
+            buf,
+            buf.len(),
+        )
     }
 
     fn write_vectored(
@@ -202,55 +223,14 @@ impl<W: WriteFD> WriteFD for BufWriteFD<W> {
         bufs: &[IoSlice<'_>],
         fds: &mut Vec<RawFdContainer>,
     ) -> Result<usize> {
-        self.fd_buf.append(fds);
-
         let total_len = bufs.iter().map(|b| b.len()).sum();
-
-        if (self.data_buf.capacity() - self.data_buf.len()) < total_len {
-            // Not enough space, try to flush
-            match self.flush_buffer() {
-                Ok(_) => {}
-                Err(e) => {
-                    if e.kind() == std::io::ErrorKind::WouldBlock {
-                        let available_buf = self.data_buf.capacity() - self.data_buf.len();
-                        if available_buf == 0 {
-                            // Buffer filled and cannot flush anything without
-                            // blocking, so return `WouldBlock`.
-                            return Err(e);
-                        } else {
-                            let n_to_write = bufs[0].len().min(available_buf);
-                            let _ = self.data_buf.write(&bufs[0][..n_to_write]).unwrap();
-                            // Return `Ok` because some or all data has been buffered,
-                            // so from the outside it is seen as a successful write.
-                            return Ok(n_to_write);
-                        }
-                    } else {
-                        return Err(e);
-                    }
-                }
-            }
-        }
-
-        if total_len >= self.data_buf.capacity() {
-            // At this point the buffer is empty
-            match self.inner.write_vectored(bufs, &mut self.fd_buf) {
-                Ok(n) => Ok(n),
-                Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-                    let n_to_write = bufs[0]
-                        .len()
-                        .min(self.data_buf.capacity() - self.data_buf.len());
-                    let _ = self.data_buf.write(&bufs[0][..n_to_write]).unwrap();
-                    // Return `Ok` because some data has been buffered,
-                    // so from the outside it is seen as a successful write.
-                    Ok(n_to_write)
-                }
-                Err(e) => Err(e),
-            }
-        } else {
-            // At this point there is enough space available in the buffer.
-            let _ = self.data_buf.write_vectored(bufs).unwrap();
-            Ok(total_len)
-        }
+        self.write_helper(
+            fds,
+            |w| w.write_vectored(bufs),
+            |w, fd| w.write_vectored(bufs, fd),
+            &bufs[0],
+            total_len,
+        )
     }
 
     fn flush(&mut self) -> Result<()> {
