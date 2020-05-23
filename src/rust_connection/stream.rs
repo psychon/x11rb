@@ -13,7 +13,12 @@ use crate::utils::RawFdContainer;
 
 /// A wrapper around a `TcpStream` or `UnixStream`.
 #[derive(Debug)]
-pub enum Stream {
+pub struct Stream {
+    inner: StreamInner,
+}
+
+#[derive(Debug)]
+enum StreamInner {
     TcpStream(TcpStream),
     #[cfg(unix)]
     UnixStream(UnixStream),
@@ -26,8 +31,7 @@ impl Stream {
 
         if (protocol.is_none() || protocol != Some("unix")) && !host.is_empty() && host != "unix" {
             let stream = TcpStream::connect((host, TCP_PORT_BASE + display))?;
-            stream.set_nonblocking(true)?;
-            Ok(Stream::TcpStream(stream))
+            Self::from_tcp_stream(stream)
         } else {
             // On non-unix, this variable is not mutated.
             #[allow(unused_mut)]
@@ -43,8 +47,7 @@ impl Stream {
 
                     match UnixStream::connect(file_name) {
                         Ok(stream) => {
-                            stream.set_nonblocking(true)?;
-                            return Ok(Stream::UnixStream(stream));
+                            return Self::from_unix_stream(stream);
                         }
                         Err(err) => error = Some(err),
                     }
@@ -53,8 +56,7 @@ impl Stream {
 
             if protocol.is_none() && host.is_empty() {
                 let stream = TcpStream::connect(("localhost", TCP_PORT_BASE + display))?;
-                stream.set_nonblocking(true)?;
-                Ok(Stream::TcpStream(stream))
+                Self::from_tcp_stream(stream)
             } else {
                 use crate::errors::ConnectError;
                 use std::io::{Error, ErrorKind};
@@ -64,16 +66,35 @@ impl Stream {
             }
         }
     }
-}
 
-impl Stream {
+    /// Creates a new `Stream` from an already connected `TcpStream`.
+    ///
+    /// The stream will be set in non-blocking mode.
+    pub fn from_tcp_stream(stream: TcpStream) -> Result<Self> {
+        stream.set_nonblocking(true)?;
+        Ok(Self {
+            inner: StreamInner::TcpStream(stream),
+        })
+    }
+
+    /// Creates a new `Stream` from an already connected `UnixStream`.
+    ///
+    /// The stream will be set in non-blocking mode.
+    #[cfg(unix)]
+    pub fn from_unix_stream(stream: UnixStream) -> Result<Self> {
+        stream.set_nonblocking(true)?;
+        Ok(Self {
+            inner: StreamInner::UnixStream(stream),
+        })
+    }
+
     /// Get the peer's address in a format suitable for xauth.
     ///
     /// The returned values can be directly given to `super::xauth::get_auth` as `family` and
     /// `address`.
     pub(crate) fn peer_addr(&self) -> Result<(Family, Vec<u8>)> {
-        match self {
-            Stream::TcpStream(stream) => {
+        match self.inner {
+            StreamInner::TcpStream(ref stream) => {
                 // Get the v4 address of the other end (if there is one)
                 let ip = match stream.peer_addr()? {
                     SocketAddr::V4(addr) => *addr.ip(),
@@ -101,7 +122,7 @@ impl Stream {
                 }
             }
             #[cfg(unix)]
-            Stream::UnixStream(_) => {
+            StreamInner::UnixStream(_) => {
                 // Fall through to the code below.
             }
         };
@@ -120,18 +141,14 @@ impl Stream {
     /// handles will read and write the same stream of data, and options set on one stream will be
     /// propagated to the other stream.
     pub fn try_clone(&self) -> Result<Stream> {
-        match self {
-            Stream::TcpStream(stream) => Ok(Stream::TcpStream(stream.try_clone()?)),
+        match self.inner {
+            StreamInner::TcpStream(ref stream) => Ok(Self {
+                inner: StreamInner::TcpStream(stream.try_clone()?),
+            }),
             #[cfg(unix)]
-            Stream::UnixStream(stream) => Ok(Stream::UnixStream(stream.try_clone()?)),
-        }
-    }
-
-    #[cfg(unix)]
-    fn as_raw_fd(&self) -> RawFd {
-        match self {
-            Stream::TcpStream(stream) => stream.as_raw_fd(),
-            Stream::UnixStream(stream) => stream.as_raw_fd(),
+            StreamInner::UnixStream(ref stream) => Ok(Self {
+                inner: StreamInner::UnixStream(stream.try_clone()?),
+            }),
         }
     }
 }
@@ -139,9 +156,9 @@ impl Stream {
 #[cfg(unix)]
 impl AsRawFd for Stream {
     fn as_raw_fd(&self) -> RawFd {
-        match self {
-            Stream::TcpStream(stream) => stream.as_raw_fd(),
-            Stream::UnixStream(stream) => stream.as_raw_fd(),
+        match self.inner {
+            StreamInner::TcpStream(ref stream) => stream.as_raw_fd(),
+            StreamInner::UnixStream(ref stream) => stream.as_raw_fd(),
         }
     }
 }
@@ -149,9 +166,9 @@ impl AsRawFd for Stream {
 #[cfg(unix)]
 impl IntoRawFd for Stream {
     fn into_raw_fd(self) -> RawFd {
-        match self {
-            Stream::TcpStream(stream) => stream.into_raw_fd(),
-            Stream::UnixStream(stream) => stream.into_raw_fd(),
+        match self.inner {
+            StreamInner::TcpStream(stream) => stream.into_raw_fd(),
+            StreamInner::UnixStream(stream) => stream.into_raw_fd(),
         }
     }
 }
@@ -159,8 +176,8 @@ impl IntoRawFd for Stream {
 #[cfg(windows)]
 impl AsRawSocket for Stream {
     fn as_raw_socket(&self) -> RawSocket {
-        match self {
-            Stream::TcpStream(stream) => stream.as_raw_socket(),
+        match self.inner {
+            StreamInner::TcpStream(ref stream) => stream.as_raw_socket(),
         }
     }
 }
@@ -168,8 +185,8 @@ impl AsRawSocket for Stream {
 #[cfg(windows)]
 impl IntoRawSocket for Stream {
     fn into_raw_socket(self) -> RawSocket {
-        match self {
-            Stream::TcpStream(stream) => stream.into_raw_socket(),
+        match self.inner {
+            StreamInner::TcpStream(stream) => stream.into_raw_socket(),
         }
     }
 }
@@ -213,8 +230,8 @@ impl WriteFD for Stream {
             if !fds.is_empty() {
                 return Err(Error::new(ErrorKind::Other, "FD passing is unsupported"));
             }
-            match self {
-                Stream::TcpStream(stream) => stream.write(buf),
+            match self.inner {
+                StreamInner::TcpStream(ref mut stream) => stream.write(buf),
             }
         }
     }
@@ -234,8 +251,8 @@ impl WriteFD for Stream {
             if !fds.is_empty() {
                 return Err(Error::new(ErrorKind::Other, "FD passing is unsupported"));
             }
-            match self {
-                Stream::TcpStream(stream) => stream.write_vectored(bufs),
+            match self.inner {
+                StreamInner::TcpStream(ref mut stream) => stream.write_vectored(bufs),
             }
         }
     }
@@ -281,8 +298,8 @@ impl ReadFD for Stream {
             use std::io::Read;
             // No FDs are read, so nothing needs to be done with fd_storage
             let _ = fd_storage;
-            match self {
-                Stream::TcpStream(stream) => stream.read(buf),
+            match self.inner {
+                StreamInner::TcpStream(ref mut stream) => stream.read(buf),
             }
         }
     }
