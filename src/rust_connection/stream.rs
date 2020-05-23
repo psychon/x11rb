@@ -9,6 +9,8 @@ use std::os::windows::io::{AsRawSocket, IntoRawSocket, RawSocket};
 
 use super::fd_read_write::{ReadFD, WriteFD};
 use super::xauth::Family;
+#[cfg(unix)]
+use crate::utils::nix_error_to_io;
 use crate::utils::RawFdContainer;
 
 /// A wrapper around a `TcpStream` or `UnixStream`.
@@ -210,7 +212,7 @@ fn do_write(fd: RawFd, bufs: &[IoSlice<'_>], fds: &mut Vec<RawFdContainer>) -> R
         sendmsg(fd, &iov, &[], MsgFlags::empty(), None)
     };
     // Nothing touched errno since sendmsg() failed
-    let res = res.map_err(|_| std::io::Error::last_os_error())?;
+    let res = res.map_err(nix_error_to_io)?;
 
     // We successfully sent all FDs
     fds.clear();
@@ -280,7 +282,7 @@ impl ReadFD for Stream {
             let fd = self.as_raw_fd();
             let msg = recvmsg(fd, &iov[..], Some(&mut cmsg), MsgFlags::empty());
             // Nothing touched errno since recvmsg() failed
-            let msg = msg.map_err(|_| std::io::Error::last_os_error())?;
+            let msg = msg.map_err(nix_error_to_io)?;
 
             let fds_received = msg
                 .cmsgs()
@@ -331,13 +333,12 @@ impl super::Poll for Stream {
                 match poll(&mut poll_fds, -1) {
                     Ok(_) => break,
                     Err(nix::Error::Sys(Errno::EINTR)) => {}
-                    Err(_) => return Err(std::io::Error::last_os_error()),
+                    Err(e) => return Err(nix_error_to_io(e)),
                 }
             }
             let revents = poll_fds[0].revents().unwrap_or_else(PollFlags::empty);
             if revents.contains(PollFlags::POLLERR) {
-                let socket_err =
-                    getsockopt(fd, SocketError).map_err(|_| std::io::Error::last_os_error())?;
+                let socket_err = getsockopt(fd, SocketError).map_err(nix_error_to_io)?;
                 Err(std::io::Error::from_raw_os_error(socket_err))
             } else {
                 let can_read = revents.contains(PollFlags::POLLIN);
