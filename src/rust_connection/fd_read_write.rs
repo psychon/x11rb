@@ -223,12 +223,16 @@ impl<W: WriteFD> WriteFD for BufWriteFD<W> {
         bufs: &[IoSlice<'_>],
         fds: &mut Vec<RawFdContainer>,
     ) -> Result<usize> {
+        let first_nonempty = bufs
+            .iter()
+            .find(|b| !b.is_empty())
+            .map_or(&[][..], |b| &**b);
         let total_len = bufs.iter().map(|b| b.len()).sum();
         self.write_helper(
             fds,
             |w| w.write_vectored(bufs),
             |w, fd| w.write_vectored(bufs, fd),
-            &bufs[0],
+            first_nonempty,
             total_len,
         )
     }
@@ -371,5 +375,50 @@ impl<T: ReadFD> Poll for BufReadFD<T> {
         } else {
             self.inner.poll(read, write)
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use std::io::{IoSlice, Result};
+
+    use super::{BufWriteFD, Poll, WriteFD};
+    use crate::utils::RawFdContainer;
+
+    struct WouldBlockWriter();
+
+    impl WriteFD for WouldBlockWriter {
+        fn write(&mut self, _buf: &[u8], _fds: &mut Vec<RawFdContainer>) -> Result<usize> {
+            use std::io::{Error, ErrorKind};
+            Err(Error::new(ErrorKind::WouldBlock, "would block"))
+        }
+
+        fn flush(&mut self) -> Result<()> {
+            Ok(())
+        }
+    }
+
+    impl Poll for WouldBlockWriter {
+        fn poll(&mut self, _read: bool, _write: bool) -> Result<(bool, bool)> {
+            unimplemented!()
+        }
+    }
+
+    // Once upon a time, this paniced because it did bufs[0]
+    #[test]
+    fn empty_write() {
+        let mut write = BufWriteFD::new(WouldBlockWriter());
+        let bufs = &[];
+        let _ = write.write_vectored(bufs, &mut Vec::new()).unwrap();
+    }
+
+    // Once upon a time, BufWriteFD fell back to only writing the first buffer. This could be
+    // mistaken as EOF.
+    #[test]
+    fn incorrect_eof() {
+        let mut write = BufWriteFD::with_capacity(1, WouldBlockWriter());
+        let bufs = &[IoSlice::new(&[]), IoSlice::new(b"fooo")];
+        let written = write.write_vectored(bufs, &mut Vec::new()).unwrap();
+        assert!(written != 0);
     }
 }
