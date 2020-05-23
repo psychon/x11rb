@@ -329,24 +329,20 @@ impl super::Poll for Stream {
             let mut poll_fds = [PollFd::new(fd, poll_flags)];
             loop {
                 match poll(&mut poll_fds, -1) {
-                    Ok(_) => {}
+                    Ok(_) => break,
                     Err(nix::Error::Sys(Errno::EINTR)) => {}
                     Err(_) => return Err(std::io::Error::last_os_error()),
                 }
-                let revents = poll_fds[0].revents().unwrap_or_else(PollFlags::empty);
-                if revents.contains(PollFlags::POLLERR) {
-                    let socket_err =
-                        getsockopt(fd, SocketError).map_err(|_| std::io::Error::last_os_error())?;
-                    return Err(std::io::Error::from_raw_os_error(socket_err));
-                } else {
-                    let can_read = revents.contains(PollFlags::POLLIN);
-                    let can_write = revents.contains(PollFlags::POLLOUT);
-                    // Can a infinite timeout poll ever return without setting
-                    // any flag? Just in case, check and try again if needed...
-                    if (read && can_read) || (write && can_write) {
-                        return Ok((can_read, can_write));
-                    }
-                }
+            }
+            let revents = poll_fds[0].revents().unwrap_or_else(PollFlags::empty);
+            if revents.contains(PollFlags::POLLERR) {
+                let socket_err =
+                    getsockopt(fd, SocketError).map_err(|_| std::io::Error::last_os_error())?;
+                Err(std::io::Error::from_raw_os_error(socket_err))
+            } else {
+                let can_read = revents.contains(PollFlags::POLLIN);
+                let can_write = revents.contains(PollFlags::POLLOUT);
+                Ok((can_read, can_write))
             }
         }
         #[cfg(windows)]
@@ -369,20 +365,14 @@ impl super::Poll for Stream {
                 events,
                 revents: 0,
             }];
-            loop {
-                let _ = wsa_poll(&mut poll_fds, -1)?;
-                if (poll_fds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) != 0 {
-                    // Let the error be handled when trying to read or write.
-                    return Ok((read, write));
-                } else {
-                    let can_read = (poll_fds[0].revents & POLLRDNORM) != 0;
-                    let can_write = (poll_fds[0].revents & POLLWRNORM) != 0;
-                    // Can a infinite timeout poll ever return without setting
-                    // any flag? Just in case, check and try again if needed...
-                    if (read && can_read) || (write && can_write) {
-                        return Ok((can_read, can_write));
-                    }
-                }
+            let _ = wsa_poll(&mut poll_fds, -1)?;
+            if (poll_fds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) != 0 {
+                // Let the error be handled when trying to read or write.
+                Ok((read, write))
+            } else {
+                let can_read = (poll_fds[0].revents & POLLRDNORM) != 0;
+                let can_write = (poll_fds[0].revents & POLLWRNORM) != 0;
+                Ok((can_read, can_write))
             }
         }
     }
