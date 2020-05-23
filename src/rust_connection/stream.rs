@@ -151,14 +151,6 @@ impl Stream {
             }),
         }
     }
-
-    #[cfg(unix)]
-    fn as_raw_fd(&self) -> RawFd {
-        match self.inner {
-            StreamInner::TcpStream(ref stream) => stream.as_raw_fd(),
-            StreamInner::UnixStream(ref stream) => stream.as_raw_fd(),
-        }
-    }
 }
 
 #[cfg(unix)]
