@@ -13,8 +13,11 @@ pub trait Poll {
     ///
     /// The first returned boolean specifies whether the stream can
     /// be read from and the second boolean specifies whether the
-    /// stream can be written into. If this function returns successfully,
-    /// at least one of the booleans must be `true`.
+    /// stream can be written into.
+    ///
+    /// This function is allowed to return `(false, false)`. Additionally,
+    /// a read or write might return `WouldBlock` even after this function
+    /// reported that the stream is readable or writable.
     ///
     /// # Panics
     ///
@@ -66,6 +69,10 @@ pub trait WriteFD: Poll {
     ///
     /// This operation is also non-blocking. `ErrorKind::WouldBlock` shall be returned
     /// if the buffer cannot be completely flushed.
+    ///
+    /// Note that if the writer is actually buffered, `poll` shall not consider the write
+    /// buffer, it should only check the inner stream. This allows to use `poll` to check
+    /// whether `flush` can be called.
     fn flush(&mut self) -> Result<()>;
 }
 
@@ -236,12 +243,10 @@ impl<W: WriteFD> WriteFD for BufWriteFD<W> {
 
 impl<T: WriteFD> Poll for BufWriteFD<T> {
     fn poll(&mut self, read: bool, write: bool) -> Result<(bool, bool)> {
-        if write && self.data_buf.len() != self.data_buf.capacity() {
-            // Avoid blocking poll if write buffer is not full.
-            Ok((false, true))
-        } else {
-            self.inner.poll(read, write)
-        }
+        // Ignore buffer. Even if there is space available in the buffer, poll will block
+        // until the stream is actually writable. This simplifies the implementation of
+        // `write` and `write_vectored` and allows to use `poll` + `flush`.
+        self.inner.poll(read, write)
     }
 }
 
@@ -280,7 +285,6 @@ pub trait ReadFD: Poll {
     ) -> Result<()> {
         while !buf.is_empty() {
             let _ = self.poll(true, false)?;
-            // poll returned successfully, so the stream is readable.
             match self.read(buf, fd_storage) {
                 Ok(0) => {
                     return Err(Error::new(
@@ -289,6 +293,8 @@ pub trait ReadFD: Poll {
                     ))
                 }
                 Ok(n) => buf = &mut buf[n..],
+                // Spurious wakeup from poll
+                Err(ref e) if e.kind() == ErrorKind::WouldBlock => {}
                 Err(ref e) if e.kind() == ErrorKind::Interrupted => {}
                 Err(e) => return Err(e),
             }

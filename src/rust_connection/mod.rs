@@ -271,44 +271,49 @@ impl<R: ReadFD + Poll, W: WriteFD + Poll> RustConnection<R, W> {
     ) -> std::io::Result<MutexGuardInner<'a>> {
         let mut partial_buf: &[u8] = &[];
         while !partial_buf.is_empty() || !bufs.is_empty() || !fds.is_empty() {
-            let (can_read, can_write) = write.poll(true, true)?;
-            if can_write {
-                let mut count = if !partial_buf.is_empty() {
-                    write.write(partial_buf, &mut fds)?
-                } else {
-                    write.write_vectored(bufs, &mut fds)?
-                };
-                if count == 0 {
+            let _ = write.poll(true, true)?;
+            let write_result = if !partial_buf.is_empty() {
+                write.write(partial_buf, &mut fds)
+            } else {
+                write.write_vectored(bufs, &mut fds)
+            };
+            match write_result {
+                Ok(0) => {
                     return Err(std::io::Error::new(
                         std::io::ErrorKind::WriteZero,
                         "failed to write anything",
                     ));
                 }
-                if count >= partial_buf.len() {
-                    count -= partial_buf.len();
-                    partial_buf = &[];
-                } else {
-                    partial_buf = &partial_buf[count..];
-                    count = 0;
-                }
-                while count > 0 {
-                    if count >= bufs[0].len() {
-                        count -= bufs[0].len();
+                Ok(mut count) => {
+                    // Successful write
+                    if count >= partial_buf.len() {
+                        count -= partial_buf.len();
+                        partial_buf = &[];
                     } else {
-                        partial_buf = &bufs[0][count..];
+                        partial_buf = &partial_buf[count..];
                         count = 0;
                     }
-                    bufs = &bufs[1..];
-                    // Skip empty slices
-                    while bufs.first().map(|s| s.len()) == Some(0) {
+                    while count > 0 {
+                        if count >= bufs[0].len() {
+                            count -= bufs[0].len();
+                        } else {
+                            partial_buf = &bufs[0][count..];
+                            count = 0;
+                        }
                         bufs = &bufs[1..];
+                        // Skip empty slices
+                        while bufs.first().map(|s| s.len()) == Some(0) {
+                            bufs = &bufs[1..];
+                        }
                     }
                 }
-            } else if can_read {
-                // Cannot write, but can read, so read because the
-                // server might not accept new requests after its
-                // buffered replies have been read.
-                inner = self.read_packet_and_enqueue(inner, BlockingMode::NonBlocking)?;
+                Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                    // Writing would block, try to read instead because the
+                    // server might not accept new requests after its
+                    // buffered replies have been read.
+                    inner = self.read_packet_and_enqueue(inner, BlockingMode::NonBlocking)?;
+                }
+                Err(e) => return Err(e),
             }
         }
         Ok(inner)
@@ -320,18 +325,19 @@ impl<R: ReadFD + Poll, W: WriteFD + Poll> RustConnection<R, W> {
         write: &mut W,
     ) -> std::io::Result<MutexGuardInner<'a>> {
         loop {
-            let (can_read, can_write) = write.poll(true, true)?;
-            if can_write {
-                match write.flush() {
-                    Ok(_) => break,
-                    Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => continue,
-                    Err(e) => return Err(e),
+            // Try the first time without poll because `flush` shall
+            // return immediately if the buffer is empty.
+            match write.flush() {
+                Ok(()) => break,
+                Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
+                    // Writing would block, try to read instead because the
+                    // server might not accept new requests after its
+                    // buffered replies have been read.
+                    inner = self.read_packet_and_enqueue(inner, BlockingMode::NonBlocking)?;
+                    // Poll before trying again
+                    let _ = write.poll(true, true)?;
                 }
-            } else if can_read {
-                // Cannot write, but can read, so read because the
-                // server might not accept new requests after its
-                // buffered replies have been read.
-                inner = self.read_packet_and_enqueue(inner, BlockingMode::NonBlocking)?;
+                Err(e) => return Err(e),
             }
         }
         Ok(inner)
@@ -699,14 +705,17 @@ fn write_setup(
     while nwritten != data.len() {
         let _ = write.poll(false, true)?;
         // poll returned successfully, so the stream is writable.
-        match write.write(&data[nwritten..], &mut Vec::new())? {
-            0 => {
+        match write.write(&data[nwritten..], &mut Vec::new()) {
+            Ok(0) => {
                 return Err(std::io::Error::new(
                     std::io::ErrorKind::WriteZero,
                     "failed to write whole buffer",
                 ))
             }
-            n => nwritten += n,
+            Ok(n) => nwritten += n,
+            // Spurious wakeup from poll, try again
+            Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {}
+            Err(e) => return Err(e),
         }
     }
     // Flush the buffer (note that `flush` is non-blocking
