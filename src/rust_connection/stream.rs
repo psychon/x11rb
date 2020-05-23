@@ -1,9 +1,11 @@
 use std::io::{IoSlice, Result};
 use std::net::{Ipv4Addr, SocketAddr, TcpStream};
 #[cfg(unix)]
-use std::os::unix::io::{AsRawFd, RawFd};
+use std::os::unix::io::{AsRawFd, IntoRawFd, RawFd};
 #[cfg(unix)]
 use std::os::unix::net::UnixStream;
+#[cfg(windows)]
+use std::os::windows::io::{AsRawSocket, IntoRawSocket, RawSocket};
 
 use super::fd_read_write::{ReadFD, WriteFD};
 use super::xauth::Family;
@@ -140,6 +142,34 @@ impl AsRawFd for Stream {
         match self {
             Stream::TcpStream(stream) => stream.as_raw_fd(),
             Stream::UnixStream(stream) => stream.as_raw_fd(),
+        }
+    }
+}
+
+#[cfg(unix)]
+impl IntoRawFd for Stream {
+    fn into_raw_fd(self) -> RawFd {
+        match self {
+            Stream::TcpStream(stream) => stream.into_raw_fd(),
+            Stream::UnixStream(stream) => stream.into_raw_fd(),
+        }
+    }
+}
+
+#[cfg(windows)]
+impl AsRawSocket for Stream {
+    fn as_raw_socket(&self) -> RawSocket {
+        match self {
+            Stream::TcpStream(stream) => stream.as_raw_socket(),
+        }
+    }
+}
+
+#[cfg(windows)]
+impl IntoRawSocket for Stream {
+    fn into_raw_socket(self) -> RawSocket {
+        match self {
+            Stream::TcpStream(stream) => stream.into_raw_socket(),
         }
     }
 }
@@ -304,16 +334,12 @@ impl super::Poll for Stream {
         }
         #[cfg(windows)]
         {
-            use std::os::windows::io::AsRawSocket as _;
-
             use winapi::um::winsock2::{
                 POLLERR, POLLHUP, POLLNVAL, POLLRDNORM, POLLWRNORM, SOCKET, WSAPOLLFD,
             };
             use winapi_wsapoll::wsa_poll;
 
-            let raw_socket = match self {
-                Stream::TcpStream(stream) => stream.as_raw_socket(),
-            };
+            let raw_socket = self.as_raw_socket();
             let mut events = 0;
             if read {
                 events |= POLLRDNORM;
