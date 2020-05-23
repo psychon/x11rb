@@ -90,7 +90,7 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 /// Opcode for the SetDeviceCreateContext request
 pub const SET_DEVICE_CREATE_CONTEXT_REQUEST: u8 = 1;
-pub fn set_device_create_context<'c, Conn>(conn: &'c Conn, context: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_device_create_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -186,7 +186,7 @@ impl GetDeviceCreateContextReply {
 
 /// Opcode for the SetDeviceContext request
 pub const SET_DEVICE_CONTEXT_REQUEST: u8 = 3;
-pub fn set_device_context<'c, Conn>(conn: &'c Conn, device: u32, context: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_device_context<'c, 'input, Conn>(conn: &'c Conn, device: u32, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -292,7 +292,7 @@ impl GetDeviceContextReply {
 
 /// Opcode for the SetWindowCreateContext request
 pub const SET_WINDOW_CREATE_CONTEXT_REQUEST: u8 = 5;
-pub fn set_window_create_context<'c, Conn>(conn: &'c Conn, context: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_window_create_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -541,7 +541,7 @@ impl ListItem {
 
 /// Opcode for the SetPropertyCreateContext request
 pub const SET_PROPERTY_CREATE_CONTEXT_REQUEST: u8 = 8;
-pub fn set_property_create_context<'c, Conn>(conn: &'c Conn, context: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_property_create_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -637,7 +637,7 @@ impl GetPropertyCreateContextReply {
 
 /// Opcode for the SetPropertyUseContext request
 pub const SET_PROPERTY_USE_CONTEXT_REQUEST: u8 = 10;
-pub fn set_property_use_context<'c, Conn>(conn: &'c Conn, context: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_property_use_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -952,7 +952,7 @@ impl ListPropertiesReply {
 
 /// Opcode for the SetSelectionCreateContext request
 pub const SET_SELECTION_CREATE_CONTEXT_REQUEST: u8 = 15;
-pub fn set_selection_create_context<'c, Conn>(conn: &'c Conn, context: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_selection_create_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1048,7 +1048,7 @@ impl GetSelectionCreateContextReply {
 
 /// Opcode for the SetSelectionUseContext request
 pub const SET_SELECTION_USE_CONTEXT_REQUEST: u8 = 17;
-pub fn set_selection_use_context<'c, Conn>(conn: &'c Conn, context: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_selection_use_context<'c, 'input, Conn>(conn: &'c Conn, context: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1422,7 +1422,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, client_major, client_minor)
     }
-    fn xselinux_set_device_create_context<'c>(&'c self, context: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xselinux_set_device_create_context<'c, 'input>(&'c self, context: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_device_create_context(self, context)
     }
@@ -1430,7 +1430,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_device_create_context(self)
     }
-    fn xselinux_set_device_context<'c>(&'c self, device: u32, context: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xselinux_set_device_context<'c, 'input>(&'c self, device: u32, context: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_device_context(self, device, context)
     }
@@ -1438,7 +1438,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_device_context(self, device)
     }
-    fn xselinux_set_window_create_context<'c>(&'c self, context: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xselinux_set_window_create_context<'c, 'input>(&'c self, context: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_window_create_context(self, context)
     }
@@ -1450,7 +1450,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_window_context(self, window)
     }
-    fn xselinux_set_property_create_context<'c>(&'c self, context: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xselinux_set_property_create_context<'c, 'input>(&'c self, context: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_property_create_context(self, context)
     }
@@ -1458,7 +1458,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_property_create_context(self)
     }
-    fn xselinux_set_property_use_context<'c>(&'c self, context: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xselinux_set_property_use_context<'c, 'input>(&'c self, context: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_property_use_context(self, context)
     }
@@ -1478,7 +1478,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         list_properties(self, window)
     }
-    fn xselinux_set_selection_create_context<'c>(&'c self, context: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xselinux_set_selection_create_context<'c, 'input>(&'c self, context: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_selection_create_context(self, context)
     }
@@ -1486,7 +1486,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_selection_create_context(self)
     }
-    fn xselinux_set_selection_use_context<'c>(&'c self, context: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xselinux_set_selection_use_context<'c, 'input>(&'c self, context: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_selection_use_context(self, context)
     }

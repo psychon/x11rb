@@ -454,7 +454,7 @@ impl TryFrom<&[u8]> for PrintQueryVersionReply {
 
 /// Opcode for the PrintGetPrinterList request
 pub const PRINT_GET_PRINTER_LIST_REQUEST: u8 = 1;
-pub fn print_get_printer_list<'c, Conn>(conn: &'c Conn, printer_name: &[String8], locale: &[String8]) -> Result<Cookie<'c, Conn, PrintGetPrinterListReply>, ConnectionError>
+pub fn print_get_printer_list<'c, 'input, Conn>(conn: &'c Conn, printer_name: &'input [String8], locale: &'input [String8]) -> Result<Cookie<'c, Conn, PrintGetPrinterListReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -556,7 +556,7 @@ where
 
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 2;
-pub fn create_context<'c, Conn>(conn: &'c Conn, context_id: u32, printer_name: &[String8], locale: &[String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_context<'c, 'input, Conn>(conn: &'c Conn, context_id: u32, printer_name: &'input [String8], locale: &'input [String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -855,7 +855,7 @@ where
 
 /// Opcode for the PrintPutDocumentData request
 pub const PRINT_PUT_DOCUMENT_DATA_REQUEST: u8 = 11;
-pub fn print_put_document_data<'c, Conn>(conn: &'c Conn, drawable: xproto::Drawable, data: &[u8], doc_format: &[String8], options: &[String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn print_put_document_data<'c, 'input, Conn>(conn: &'c Conn, drawable: xproto::Drawable, data: &'input [u8], doc_format: &'input [String8], options: &'input [String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1195,7 +1195,7 @@ impl PrintGetAttributesReply {
 
 /// Opcode for the PrintGetOneAttributes request
 pub const PRINT_GET_ONE_ATTRIBUTES_REQUEST: u8 = 19;
-pub fn print_get_one_attributes<'c, Conn>(conn: &'c Conn, context: Pcontext, pool: u8, name: &[String8]) -> Result<Cookie<'c, Conn, PrintGetOneAttributesReply>, ConnectionError>
+pub fn print_get_one_attributes<'c, 'input, Conn>(conn: &'c Conn, context: Pcontext, pool: u8, name: &'input [String8]) -> Result<Cookie<'c, Conn, PrintGetOneAttributesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1279,7 +1279,7 @@ impl PrintGetOneAttributesReply {
 
 /// Opcode for the PrintSetAttributes request
 pub const PRINT_SET_ATTRIBUTES_REQUEST: u8 = 18;
-pub fn print_set_attributes<'c, Conn>(conn: &'c Conn, context: Pcontext, string_len: u32, pool: u8, rule: u8, attributes: &[String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn print_set_attributes<'c, 'input, Conn>(conn: &'c Conn, context: Pcontext, string_len: u32, pool: u8, rule: u8, attributes: &'input [String8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1853,7 +1853,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         print_query_version(self)
     }
-    fn xprint_print_get_printer_list<'c>(&'c self, printer_name: &[String8], locale: &[String8]) -> Result<Cookie<'c, Self, PrintGetPrinterListReply>, ConnectionError>
+    fn xprint_print_get_printer_list<'c, 'input>(&'c self, printer_name: &'input [String8], locale: &'input [String8]) -> Result<Cookie<'c, Self, PrintGetPrinterListReply>, ConnectionError>
     {
         print_get_printer_list(self, printer_name, locale)
     }
@@ -1861,7 +1861,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         print_rehash_printer_list(self)
     }
-    fn xprint_create_context<'c>(&'c self, context_id: u32, printer_name: &[String8], locale: &[String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xprint_create_context<'c, 'input>(&'c self, context_id: u32, printer_name: &'input [String8], locale: &'input [String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_context(self, context_id, printer_name, locale)
     }
@@ -1897,7 +1897,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         print_end_doc(self, cancel)
     }
-    fn xprint_print_put_document_data<'c>(&'c self, drawable: xproto::Drawable, data: &[u8], doc_format: &[String8], options: &[String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xprint_print_put_document_data<'c, 'input>(&'c self, drawable: xproto::Drawable, data: &'input [u8], doc_format: &'input [String8], options: &'input [String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         print_put_document_data(self, drawable, data, doc_format, options)
     }
@@ -1925,11 +1925,11 @@ pub trait ConnectionExt: RequestConnection {
     {
         print_get_attributes(self, context, pool)
     }
-    fn xprint_print_get_one_attributes<'c>(&'c self, context: Pcontext, pool: u8, name: &[String8]) -> Result<Cookie<'c, Self, PrintGetOneAttributesReply>, ConnectionError>
+    fn xprint_print_get_one_attributes<'c, 'input>(&'c self, context: Pcontext, pool: u8, name: &'input [String8]) -> Result<Cookie<'c, Self, PrintGetOneAttributesReply>, ConnectionError>
     {
         print_get_one_attributes(self, context, pool, name)
     }
-    fn xprint_print_set_attributes<'c>(&'c self, context: Pcontext, string_len: u32, pool: u8, rule: u8, attributes: &[String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xprint_print_set_attributes<'c, 'input>(&'c self, context: Pcontext, string_len: u32, pool: u8, rule: u8, attributes: &'input [String8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         print_set_attributes(self, context, string_len, pool, rule, attributes)
     }

@@ -385,7 +385,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
     ) {
         let mut generic_params = String::new();
         if gathered.needs_lifetime {
-            generic_params.push_str("'c, Conn");
+            generic_params.push_str("'c, 'input, Conn");
         } else {
             generic_params.push_str("Conn");
         }
@@ -879,7 +879,7 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
         if gathered.needs_lifetime || !gathered.generics.is_empty() {
             generic_params.push('<');
             if gathered.needs_lifetime {
-                generic_params.push_str("'c");
+                generic_params.push_str("'c, 'input");
             }
             for (i, (param_name, _)) in gathered.generics.iter().enumerate() {
                 if i != 0 || gathered.needs_lifetime {
@@ -4414,9 +4414,9 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                             self.field_value_type_to_rust_type(&list_field.element_type);
                         let rust_field_name = to_rust_variable_name(&list_field.name);
                         let rust_field_type = if let Some(list_len) = list_field.length() {
-                            format!("&[{}; {}]", element_type, list_len)
+                            format!("&'input [{}; {}]", element_type, list_len)
                         } else {
-                            format!("&[{}]", element_type)
+                            format!("&'input [{}]", element_type)
                         };
                         args.push((rust_field_name, rust_field_type));
                         needs_lifetime = true;
@@ -4424,7 +4424,8 @@ impl<'ns, 'c> NamespaceGenerator<'ns, 'c> {
                 }
                 xcbdefs::FieldDef::Switch(switch_field) => {
                     let rust_field_name = to_rust_variable_name(&switch_field.name);
-                    let rust_field_type = format!("&{}Aux", to_rust_type_name(&request_def.name));
+                    let rust_field_type =
+                        format!("&'input {}Aux", to_rust_type_name(&request_def.name));
                     args.push((rust_field_name, rust_field_type));
                     needs_lifetime = true;
                 }
@@ -4999,8 +5000,10 @@ fn gather_deducible_fields(fields: &[xcbdefs::FieldDef]) -> FxHashMap<String, De
 /// Some information about the fields of a request.
 struct GatheredRequestFields {
     reply_has_fds: bool,
-    /// Whether the request function needs a lifetime parameter
-    /// for the connection object.
+    /// Whether lifetimes in the request need to be explicitly
+    /// specified. If a request function takes any other
+    /// references other than the connection object, we'll need
+    /// to disambiguate the lifetimes for rustc.
     needs_lifetime: bool,
     /// Function arguments
     /// `(name, type)`

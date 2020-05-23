@@ -317,7 +317,7 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 /// Opcode for the Rectangles request
 pub const RECTANGLES_REQUEST: u8 = 1;
-pub fn rectangles<'c, Conn>(conn: &'c Conn, operation: SO, destination_kind: SK, ordering: xproto::ClipOrdering, destination_window: xproto::Window, x_offset: i16, y_offset: i16, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn rectangles<'c, 'input, Conn>(conn: &'c Conn, operation: SO, destination_kind: SK, ordering: xproto::ClipOrdering, destination_window: xproto::Window, x_offset: i16, y_offset: i16, rectangles: &'input [xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -724,7 +724,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self)
     }
-    fn shape_rectangles<'c>(&'c self, operation: SO, destination_kind: SK, ordering: xproto::ClipOrdering, destination_window: xproto::Window, x_offset: i16, y_offset: i16, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn shape_rectangles<'c, 'input>(&'c self, operation: SO, destination_kind: SK, ordering: xproto::ClipOrdering, destination_window: xproto::Window, x_offset: i16, y_offset: i16, rectangles: &'input [xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         self::rectangles(self, operation, destination_kind, ordering, destination_window, x_offset, y_offset, rectangles)
     }

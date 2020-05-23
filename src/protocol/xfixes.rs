@@ -1029,7 +1029,7 @@ impl TryFrom<u32> for RegionEnum {
 
 /// Opcode for the CreateRegion request
 pub const CREATE_REGION_REQUEST: u8 = 5;
-pub fn create_region<'c, Conn>(conn: &'c Conn, region: Region, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_region<'c, 'input, Conn>(conn: &'c Conn, region: Region, rectangles: &'input [xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1220,7 +1220,7 @@ where
 
 /// Opcode for the SetRegion request
 pub const SET_REGION_REQUEST: u8 = 11;
-pub fn set_region<'c, Conn>(conn: &'c Conn, region: Region, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_region<'c, 'input, Conn>(conn: &'c Conn, region: Region, rectangles: &'input [xproto::Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1695,7 +1695,7 @@ where
 
 /// Opcode for the SetCursorName request
 pub const SET_CURSOR_NAME_REQUEST: u8 = 23;
-pub fn set_cursor_name<'c, Conn>(conn: &'c Conn, cursor: xproto::Cursor, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_cursor_name<'c, 'input, Conn>(conn: &'c Conn, cursor: xproto::Cursor, name: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1918,7 +1918,7 @@ where
 
 /// Opcode for the ChangeCursorByName request
 pub const CHANGE_CURSOR_BY_NAME_REQUEST: u8 = 27;
-pub fn change_cursor_by_name<'c, Conn>(conn: &'c Conn, src: xproto::Cursor, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_cursor_by_name<'c, 'input, Conn>(conn: &'c Conn, src: xproto::Cursor, name: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -2123,7 +2123,7 @@ bitmask_binop!(BarrierDirections, u8);
 
 /// Opcode for the CreatePointerBarrier request
 pub const CREATE_POINTER_BARRIER_REQUEST: u8 = 31;
-pub fn create_pointer_barrier<'c, Conn, A>(conn: &'c Conn, barrier: Barrier, window: xproto::Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: A, devices: &[u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_pointer_barrier<'c, 'input, Conn, A>(conn: &'c Conn, barrier: Barrier, window: xproto::Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: A, devices: &'input [u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u32>,
@@ -2235,7 +2235,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_cursor_image(self)
     }
-    fn xfixes_create_region<'c>(&'c self, region: Region, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xfixes_create_region<'c, 'input>(&'c self, region: Region, rectangles: &'input [xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_region(self, region, rectangles)
     }
@@ -2259,7 +2259,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         destroy_region(self, region)
     }
-    fn xfixes_set_region<'c>(&'c self, region: Region, rectangles: &[xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xfixes_set_region<'c, 'input>(&'c self, region: Region, rectangles: &'input [xproto::Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_region(self, region, rectangles)
     }
@@ -2313,7 +2313,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         set_picture_clip_region(self, picture, region, x_origin, y_origin)
     }
-    fn xfixes_set_cursor_name<'c>(&'c self, cursor: xproto::Cursor, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xfixes_set_cursor_name<'c, 'input>(&'c self, cursor: xproto::Cursor, name: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_cursor_name(self, cursor, name)
     }
@@ -2329,7 +2329,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         change_cursor(self, source, destination)
     }
-    fn xfixes_change_cursor_by_name<'c>(&'c self, src: xproto::Cursor, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xfixes_change_cursor_by_name<'c, 'input>(&'c self, src: xproto::Cursor, name: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_cursor_by_name(self, src, name)
     }
@@ -2345,7 +2345,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         show_cursor(self, window)
     }
-    fn xfixes_create_pointer_barrier<'c, A>(&'c self, barrier: Barrier, window: xproto::Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: A, devices: &[u16]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xfixes_create_pointer_barrier<'c, 'input, A>(&'c self, barrier: Barrier, window: xproto::Window, x1: u16, y1: u16, x2: u16, y2: u16, directions: A, devices: &'input [u16]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u32>,
     {

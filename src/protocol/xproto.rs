@@ -6013,7 +6013,7 @@ impl CreateWindowAux {
 /// * `xcb_generate_id`: function
 /// * `MapWindow`: request
 /// * `CreateNotify`: event
-pub fn create_window<'c, Conn>(conn: &'c Conn, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_window<'c, 'input, Conn>(conn: &'c Conn, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &'input CreateWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -6305,7 +6305,7 @@ impl ChangeWindowAttributesAux {
 /// * `Pixmap` - TODO: reasons?
 /// * `Value` - TODO: reasons?
 /// * `Window` - The specified `window` does not exist.
-pub fn change_window_attributes<'c, Conn>(conn: &'c Conn, window: Window, value_list: &ChangeWindowAttributesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_window_attributes<'c, 'input, Conn>(conn: &'c Conn, window: Window, value_list: &'input ChangeWindowAttributesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -7241,7 +7241,7 @@ impl ConfigureWindowAux {
 ///     xcb_flush(c);
 /// }
 /// ```
-pub fn configure_window<'c, Conn>(conn: &'c Conn, window: Window, value_list: &ConfigureWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn configure_window<'c, 'input, Conn>(conn: &'c Conn, window: Window, value_list: &'input ConfigureWindowAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -7658,7 +7658,7 @@ pub const INTERN_ATOM_REQUEST: u8 = 16;
 ///     }
 /// }
 /// ```
-pub fn intern_atom<'c, Conn>(conn: &'c Conn, only_if_exists: bool, name: &[u8]) -> Result<Cookie<'c, Conn, InternAtomReply>, ConnectionError>
+pub fn intern_atom<'c, 'input, Conn>(conn: &'c Conn, only_if_exists: bool, name: &'input [u8]) -> Result<Cookie<'c, Conn, InternAtomReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -7906,7 +7906,7 @@ pub const CHANGE_PROPERTY_REQUEST: u8 = 18;
 ///     xcb_flush(conn);
 /// }
 /// ```
-pub fn change_property<'c, Conn, A, B>(conn: &'c Conn, mode: PropMode, window: Window, property: A, type_: B, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_property<'c, 'input, Conn, A, B>(conn: &'c Conn, mode: PropMode, window: Window, property: A, type_: B, format: u8, data_len: u32, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<Atom>,
@@ -10729,7 +10729,7 @@ pub const OPEN_FONT_REQUEST: u8 = 45;
 /// # See
 ///
 /// * `xcb_generate_id`: function
-pub fn open_font<'c, Conn>(conn: &'c Conn, fid: Font, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn open_font<'c, 'input, Conn>(conn: &'c Conn, fid: Font, name: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -11122,7 +11122,7 @@ pub const QUERY_TEXT_EXTENTS_REQUEST: u8 = 48;
 ///
 /// * `GContext` - The specified graphics context does not exist.
 /// * `Font` - The specified `font` does not exist.
-pub fn query_text_extents<'c, Conn>(conn: &'c Conn, font: Fontable, string: &[Char2b]) -> Result<Cookie<'c, Conn, QueryTextExtentsReply>, ConnectionError>
+pub fn query_text_extents<'c, 'input, Conn>(conn: &'c Conn, font: Fontable, string: &'input [Char2b]) -> Result<Cookie<'c, Conn, QueryTextExtentsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -11254,7 +11254,7 @@ pub const LIST_FONTS_REQUEST: u8 = 49;
 /// (?) is a wildcard for a single character. Use of uppercase or lowercase does
 /// not matter.
 /// * `max_names` - The maximum number of fonts to be returned.
-pub fn list_fonts<'c, Conn>(conn: &'c Conn, max_names: u16, pattern: &[u8]) -> Result<Cookie<'c, Conn, ListFontsReply>, ConnectionError>
+pub fn list_fonts<'c, 'input, Conn>(conn: &'c Conn, max_names: u16, pattern: &'input [u8]) -> Result<Cookie<'c, Conn, ListFontsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -11342,7 +11342,7 @@ pub const LIST_FONTS_WITH_INFO_REQUEST: u8 = 50;
 /// (?) is a wildcard for a single character. Use of uppercase or lowercase does
 /// not matter.
 /// * `max_names` - The maximum number of fonts to be returned.
-pub fn list_fonts_with_info<'c, Conn>(conn: &'c Conn, max_names: u16, pattern: &[u8]) -> Result<ListFontsWithInfoCookie<'c, Conn>, ConnectionError>
+pub fn list_fonts_with_info<'c, 'input, Conn>(conn: &'c Conn, max_names: u16, pattern: &'input [u8]) -> Result<ListFontsWithInfoCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -11472,7 +11472,7 @@ impl ListFontsWithInfoReply {
 
 /// Opcode for the SetFontPath request
 pub const SET_FONT_PATH_REQUEST: u8 = 51;
-pub fn set_font_path<'c, Conn>(conn: &'c Conn, font: &[Str]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_font_path<'c, 'input, Conn>(conn: &'c Conn, font: &'input [Str]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -12763,7 +12763,7 @@ impl CreateGCAux {
 /// # See
 ///
 /// * `xcb_generate_id`: function
-pub fn create_gc<'c, Conn>(conn: &'c Conn, cid: Gcontext, drawable: Drawable, value_list: &CreateGCAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_gc<'c, 'input, Conn>(conn: &'c Conn, cid: Gcontext, drawable: Drawable, value_list: &'input CreateGCAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -13151,7 +13151,7 @@ impl ChangeGCAux {
 ///     xcb_flush(conn);
 /// }
 /// ```
-pub fn change_gc<'c, Conn>(conn: &'c Conn, gc: Gcontext, value_list: &ChangeGCAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_gc<'c, 'input, Conn>(conn: &'c Conn, gc: Gcontext, value_list: &'input ChangeGCAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -13223,7 +13223,7 @@ where
 
 /// Opcode for the SetDashes request
 pub const SET_DASHES_REQUEST: u8 = 58;
-pub fn set_dashes<'c, Conn>(conn: &'c Conn, gc: Gcontext, dash_offset: u16, dashes: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_dashes<'c, 'input, Conn>(conn: &'c Conn, gc: Gcontext, dash_offset: u16, dashes: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -13326,7 +13326,7 @@ impl TryFrom<u32> for ClipOrdering {
 
 /// Opcode for the SetClipRectangles request
 pub const SET_CLIP_RECTANGLES_REQUEST: u8 = 59;
-pub fn set_clip_rectangles<'c, Conn>(conn: &'c Conn, ordering: ClipOrdering, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_clip_rectangles<'c, 'input, Conn>(conn: &'c Conn, ordering: ClipOrdering, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &'input [Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -13642,7 +13642,7 @@ impl TryFrom<u32> for CoordMode {
 
 /// Opcode for the PolyPoint request
 pub const POLY_POINT_REQUEST: u8 = 64;
-pub fn poly_point<'c, Conn>(conn: &'c Conn, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_point<'c, 'input, Conn>(conn: &'c Conn, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &'input [Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -13716,7 +13716,7 @@ pub const POLY_LINE_REQUEST: u8 = 65;
 ///     xcb_flush(conn);
 /// }
 /// ```
-pub fn poly_line<'c, Conn>(conn: &'c Conn, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_line<'c, 'input, Conn>(conn: &'c Conn, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &'input [Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -13827,7 +13827,7 @@ pub const POLY_SEGMENT_REQUEST: u8 = 66;
 /// * `Drawable` - The specified `drawable` does not exist.
 /// * `GContext` - The specified `gc` does not exist.
 /// * `Match` - TODO: reasons?
-pub fn poly_segment<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, segments: &[Segment]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_segment<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, segments: &'input [Segment]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -13861,7 +13861,7 @@ where
 
 /// Opcode for the PolyRectangle request
 pub const POLY_RECTANGLE_REQUEST: u8 = 67;
-pub fn poly_rectangle<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_rectangle<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, rectangles: &'input [Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -13895,7 +13895,7 @@ where
 
 /// Opcode for the PolyArc request
 pub const POLY_ARC_REQUEST: u8 = 68;
-pub fn poly_arc<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs: &[Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_arc<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs: &'input [Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -13994,7 +13994,7 @@ impl TryFrom<u32> for PolyShape {
 
 /// Opcode for the FillPoly request
 pub const FILL_POLY_REQUEST: u8 = 69;
-pub fn fill_poly<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, shape: PolyShape, coordinate_mode: CoordMode, points: &[Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn fill_poly<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, shape: PolyShape, coordinate_mode: CoordMode, points: &'input [Point]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -14059,7 +14059,7 @@ pub const POLY_FILL_RECTANGLE_REQUEST: u8 = 70;
 /// * `Drawable` - The specified `drawable` (Window or Pixmap) does not exist.
 /// * `GContext` - The specified graphics context does not exist.
 /// * `Match` - TODO: reasons?
-pub fn poly_fill_rectangle<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_fill_rectangle<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, rectangles: &'input [Rectangle]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -14093,7 +14093,7 @@ where
 
 /// Opcode for the PolyFillArc request
 pub const POLY_FILL_ARC_REQUEST: u8 = 71;
-pub fn poly_fill_arc<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs: &[Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_fill_arc<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, arcs: &'input [Arc]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -14192,7 +14192,7 @@ impl TryFrom<u32> for ImageFormat {
 
 /// Opcode for the PutImage request
 pub const PUT_IMAGE_REQUEST: u8 = 72;
-pub fn put_image<'c, Conn>(conn: &'c Conn, format: ImageFormat, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn put_image<'c, 'input, Conn>(conn: &'c Conn, format: ImageFormat, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -14332,7 +14332,7 @@ impl GetImageReply {
 
 /// Opcode for the PolyText8 request
 pub const POLY_TEXT8_REQUEST: u8 = 74;
-pub fn poly_text8<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_text8<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -14371,7 +14371,7 @@ where
 
 /// Opcode for the PolyText16 request
 pub const POLY_TEXT16_REQUEST: u8 = 75;
-pub fn poly_text16<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn poly_text16<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -14444,7 +14444,7 @@ pub const IMAGE_TEXT8_REQUEST: u8 = 76;
 /// # See
 ///
 /// * `ImageText16`: request
-pub fn image_text8<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn image_text8<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -14520,7 +14520,7 @@ pub const IMAGE_TEXT16_REQUEST: u8 = 77;
 /// # See
 ///
 /// * `ImageText8`: request
-pub fn image_text16<'c, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[Char2b]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn image_text16<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &'input [Char2b]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -14926,7 +14926,7 @@ impl TryFrom<&[u8]> for AllocColorReply {
 
 /// Opcode for the AllocNamedColor request
 pub const ALLOC_NAMED_COLOR_REQUEST: u8 = 85;
-pub fn alloc_named_color<'c, Conn>(conn: &'c Conn, cmap: Colormap, name: &[u8]) -> Result<Cookie<'c, Conn, AllocNamedColorReply>, ConnectionError>
+pub fn alloc_named_color<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, name: &'input [u8]) -> Result<Cookie<'c, Conn, AllocNamedColorReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -15174,7 +15174,7 @@ impl AllocColorPlanesReply {
 
 /// Opcode for the FreeColors request
 pub const FREE_COLORS_REQUEST: u8 = 88;
-pub fn free_colors<'c, Conn>(conn: &'c Conn, cmap: Colormap, plane_mask: u32, pixels: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn free_colors<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, plane_mask: u32, pixels: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -15334,7 +15334,7 @@ impl Serialize for Coloritem {
 
 /// Opcode for the StoreColors request
 pub const STORE_COLORS_REQUEST: u8 = 89;
-pub fn store_colors<'c, Conn>(conn: &'c Conn, cmap: Colormap, items: &[Coloritem]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn store_colors<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, items: &'input [Coloritem]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -15363,7 +15363,7 @@ where
 
 /// Opcode for the StoreNamedColor request
 pub const STORE_NAMED_COLOR_REQUEST: u8 = 90;
-pub fn store_named_color<'c, Conn, A>(conn: &'c Conn, flags: A, cmap: Colormap, pixel: u32, name: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn store_named_color<'c, 'input, Conn, A>(conn: &'c Conn, flags: A, cmap: Colormap, pixel: u32, name: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
@@ -15453,7 +15453,7 @@ impl Serialize for Rgb {
 
 /// Opcode for the QueryColors request
 pub const QUERY_COLORS_REQUEST: u8 = 91;
-pub fn query_colors<'c, Conn>(conn: &'c Conn, cmap: Colormap, pixels: &[u32]) -> Result<Cookie<'c, Conn, QueryColorsReply>, ConnectionError>
+pub fn query_colors<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, pixels: &'input [u32]) -> Result<Cookie<'c, Conn, QueryColorsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -15524,7 +15524,7 @@ impl QueryColorsReply {
 
 /// Opcode for the LookupColor request
 pub const LOOKUP_COLOR_REQUEST: u8 = 92;
-pub fn lookup_color<'c, Conn>(conn: &'c Conn, cmap: Colormap, name: &[u8]) -> Result<Cookie<'c, Conn, LookupColorReply>, ConnectionError>
+pub fn lookup_color<'c, 'input, Conn>(conn: &'c Conn, cmap: Colormap, name: &'input [u8]) -> Result<Cookie<'c, Conn, LookupColorReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -16092,7 +16092,7 @@ pub const QUERY_EXTENSION_REQUEST: u8 = 98;
 ///
 /// * `xdpyinfo`: program
 /// * `xcb_get_extension_data`: function
-pub fn query_extension<'c, Conn>(conn: &'c Conn, name: &[u8]) -> Result<Cookie<'c, Conn, QueryExtensionReply>, ConnectionError>
+pub fn query_extension<'c, 'input, Conn>(conn: &'c Conn, name: &'input [u8]) -> Result<Cookie<'c, Conn, QueryExtensionReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -16219,7 +16219,7 @@ impl ListExtensionsReply {
 
 /// Opcode for the ChangeKeyboardMapping request
 pub const CHANGE_KEYBOARD_MAPPING_REQUEST: u8 = 100;
-pub fn change_keyboard_mapping<'c, Conn>(conn: &'c Conn, keycode_count: u8, first_keycode: Keycode, keysyms_per_keycode: u8, keysyms: &[Keysym]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_keyboard_mapping<'c, 'input, Conn>(conn: &'c Conn, keycode_count: u8, first_keycode: Keycode, keysyms_per_keycode: u8, keysyms: &'input [Keysym]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -16657,7 +16657,7 @@ impl ChangeKeyboardControlAux {
     }
 }
 
-pub fn change_keyboard_control<'c, Conn>(conn: &'c Conn, value_list: &ChangeKeyboardControlAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_keyboard_control<'c, 'input, Conn>(conn: &'c Conn, value_list: &'input ChangeKeyboardControlAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -17207,7 +17207,7 @@ impl TryFrom<u32> for Family {
 
 /// Opcode for the ChangeHosts request
 pub const CHANGE_HOSTS_REQUEST: u8 = 109;
-pub fn change_hosts<'c, Conn>(conn: &'c Conn, mode: HostMode, family: Family, address: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_hosts<'c, 'input, Conn>(conn: &'c Conn, mode: HostMode, family: Family, address: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -17645,7 +17645,7 @@ where
 
 /// Opcode for the RotateProperties request
 pub const ROTATE_PROPERTIES_REQUEST: u8 = 114;
-pub fn rotate_properties<'c, Conn>(conn: &'c Conn, window: Window, delta: i16, atoms: &[Atom]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn rotate_properties<'c, 'input, Conn>(conn: &'c Conn, window: Window, delta: i16, atoms: &'input [Atom]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -17837,7 +17837,7 @@ impl TryFrom<u32> for MappingStatus {
 
 /// Opcode for the SetPointerMapping request
 pub const SET_POINTER_MAPPING_REQUEST: u8 = 116;
-pub fn set_pointer_mapping<'c, Conn>(conn: &'c Conn, map: &[u8]) -> Result<Cookie<'c, Conn, SetPointerMappingReply>, ConnectionError>
+pub fn set_pointer_mapping<'c, 'input, Conn>(conn: &'c Conn, map: &'input [u8]) -> Result<Cookie<'c, Conn, SetPointerMappingReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -18029,7 +18029,7 @@ impl TryFrom<u32> for MapIndex {
 
 /// Opcode for the SetModifierMapping request
 pub const SET_MODIFIER_MAPPING_REQUEST: u8 = 118;
-pub fn set_modifier_mapping<'c, Conn>(conn: &'c Conn, keycodes: &[Keycode]) -> Result<Cookie<'c, Conn, SetModifierMappingReply>, ConnectionError>
+pub fn set_modifier_mapping<'c, 'input, Conn>(conn: &'c Conn, keycodes: &'input [Keycode]) -> Result<Cookie<'c, Conn, SetModifierMappingReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -18217,7 +18217,7 @@ pub trait ConnectionExt: RequestConnection {
     /// * `xcb_generate_id`: function
     /// * `MapWindow`: request
     /// * `CreateNotify`: event
-    fn create_window<'c>(&'c self, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &CreateWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn create_window<'c, 'input>(&'c self, depth: u8, wid: Window, parent: Window, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: WindowClass, visual: Visualid, value_list: &'input CreateWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_window(self, depth, wid, parent, x, y, width, height, border_width, class, visual, value_list)
     }
@@ -18242,7 +18242,7 @@ pub trait ConnectionExt: RequestConnection {
     /// * `Pixmap` - TODO: reasons?
     /// * `Value` - TODO: reasons?
     /// * `Window` - The specified `window` does not exist.
-    fn change_window_attributes<'c>(&'c self, window: Window, value_list: &ChangeWindowAttributesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn change_window_attributes<'c, 'input>(&'c self, window: Window, value_list: &'input ChangeWindowAttributesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_window_attributes(self, window, value_list)
     }
@@ -18476,7 +18476,7 @@ pub trait ConnectionExt: RequestConnection {
     ///     xcb_flush(c);
     /// }
     /// ```
-    fn configure_window<'c>(&'c self, window: Window, value_list: &ConfigureWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn configure_window<'c, 'input>(&'c self, window: Window, value_list: &'input ConfigureWindowAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         configure_window(self, window, value_list)
     }
@@ -18627,7 +18627,7 @@ pub trait ConnectionExt: RequestConnection {
     ///     }
     /// }
     /// ```
-    fn intern_atom<'c>(&'c self, only_if_exists: bool, name: &[u8]) -> Result<Cookie<'c, Self, InternAtomReply>, ConnectionError>
+    fn intern_atom<'c, 'input>(&'c self, only_if_exists: bool, name: &'input [u8]) -> Result<Cookie<'c, Self, InternAtomReply>, ConnectionError>
     {
         intern_atom(self, only_if_exists, name)
     }
@@ -18686,7 +18686,7 @@ pub trait ConnectionExt: RequestConnection {
     ///     xcb_flush(conn);
     /// }
     /// ```
-    fn change_property<'c, A, B>(&'c self, mode: PropMode, window: Window, property: A, type_: B, format: u8, data_len: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn change_property<'c, 'input, A, B>(&'c self, mode: PropMode, window: Window, property: A, type_: B, format: u8, data_len: u32, data: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<Atom>,
         B: Into<Atom>,
@@ -19462,7 +19462,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * `xcb_generate_id`: function
-    fn open_font<'c>(&'c self, fid: Font, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn open_font<'c, 'input>(&'c self, fid: Font, name: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         open_font(self, fid, name)
     }
@@ -19515,7 +19515,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `GContext` - The specified graphics context does not exist.
     /// * `Font` - The specified `font` does not exist.
-    fn query_text_extents<'c>(&'c self, font: Fontable, string: &[Char2b]) -> Result<Cookie<'c, Self, QueryTextExtentsReply>, ConnectionError>
+    fn query_text_extents<'c, 'input>(&'c self, font: Fontable, string: &'input [Char2b]) -> Result<Cookie<'c, Self, QueryTextExtentsReply>, ConnectionError>
     {
         query_text_extents(self, font, string)
     }
@@ -19532,7 +19532,7 @@ pub trait ConnectionExt: RequestConnection {
     /// (?) is a wildcard for a single character. Use of uppercase or lowercase does
     /// not matter.
     /// * `max_names` - The maximum number of fonts to be returned.
-    fn list_fonts<'c>(&'c self, max_names: u16, pattern: &[u8]) -> Result<Cookie<'c, Self, ListFontsReply>, ConnectionError>
+    fn list_fonts<'c, 'input>(&'c self, max_names: u16, pattern: &'input [u8]) -> Result<Cookie<'c, Self, ListFontsReply>, ConnectionError>
     {
         list_fonts(self, max_names, pattern)
     }
@@ -19549,11 +19549,11 @@ pub trait ConnectionExt: RequestConnection {
     /// (?) is a wildcard for a single character. Use of uppercase or lowercase does
     /// not matter.
     /// * `max_names` - The maximum number of fonts to be returned.
-    fn list_fonts_with_info<'c>(&'c self, max_names: u16, pattern: &[u8]) -> Result<ListFontsWithInfoCookie<'c, Self>, ConnectionError>
+    fn list_fonts_with_info<'c, 'input>(&'c self, max_names: u16, pattern: &'input [u8]) -> Result<ListFontsWithInfoCookie<'c, Self>, ConnectionError>
     {
         list_fonts_with_info(self, max_names, pattern)
     }
-    fn set_font_path<'c>(&'c self, font: &[Str]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn set_font_path<'c, 'input>(&'c self, font: &'input [Str]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_font_path(self, font)
     }
@@ -19627,7 +19627,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * `xcb_generate_id`: function
-    fn create_gc<'c>(&'c self, cid: Gcontext, drawable: Drawable, value_list: &CreateGCAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn create_gc<'c, 'input>(&'c self, cid: Gcontext, drawable: Drawable, value_list: &'input CreateGCAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_gc(self, cid, drawable, value_list)
     }
@@ -19676,7 +19676,7 @@ pub trait ConnectionExt: RequestConnection {
     ///     xcb_flush(conn);
     /// }
     /// ```
-    fn change_gc<'c>(&'c self, gc: Gcontext, value_list: &ChangeGCAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn change_gc<'c, 'input>(&'c self, gc: Gcontext, value_list: &'input ChangeGCAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_gc(self, gc, value_list)
     }
@@ -19686,11 +19686,11 @@ pub trait ConnectionExt: RequestConnection {
     {
         copy_gc(self, src_gc, dst_gc, value_mask)
     }
-    fn set_dashes<'c>(&'c self, gc: Gcontext, dash_offset: u16, dashes: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn set_dashes<'c, 'input>(&'c self, gc: Gcontext, dash_offset: u16, dashes: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_dashes(self, gc, dash_offset, dashes)
     }
-    fn set_clip_rectangles<'c>(&'c self, ordering: ClipOrdering, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn set_clip_rectangles<'c, 'input>(&'c self, ordering: ClipOrdering, gc: Gcontext, clip_x_origin: i16, clip_y_origin: i16, rectangles: &'input [Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_clip_rectangles(self, ordering, gc, clip_x_origin, clip_y_origin, rectangles)
     }
@@ -19742,7 +19742,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         copy_plane(self, src_drawable, dst_drawable, gc, src_x, src_y, dst_x, dst_y, width, height, bit_plane)
     }
-    fn poly_point<'c>(&'c self, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_point<'c, 'input>(&'c self, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &'input [Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_point(self, coordinate_mode, drawable, gc, points)
     }
@@ -19785,7 +19785,7 @@ pub trait ConnectionExt: RequestConnection {
     ///     xcb_flush(conn);
     /// }
     /// ```
-    fn poly_line<'c>(&'c self, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_line<'c, 'input>(&'c self, coordinate_mode: CoordMode, drawable: Drawable, gc: Gcontext, points: &'input [Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_line(self, coordinate_mode, drawable, gc, points)
     }
@@ -19815,19 +19815,19 @@ pub trait ConnectionExt: RequestConnection {
     /// * `Drawable` - The specified `drawable` does not exist.
     /// * `GContext` - The specified `gc` does not exist.
     /// * `Match` - TODO: reasons?
-    fn poly_segment<'c>(&'c self, drawable: Drawable, gc: Gcontext, segments: &[Segment]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_segment<'c, 'input>(&'c self, drawable: Drawable, gc: Gcontext, segments: &'input [Segment]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_segment(self, drawable, gc, segments)
     }
-    fn poly_rectangle<'c>(&'c self, drawable: Drawable, gc: Gcontext, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_rectangle<'c, 'input>(&'c self, drawable: Drawable, gc: Gcontext, rectangles: &'input [Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_rectangle(self, drawable, gc, rectangles)
     }
-    fn poly_arc<'c>(&'c self, drawable: Drawable, gc: Gcontext, arcs: &[Arc]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_arc<'c, 'input>(&'c self, drawable: Drawable, gc: Gcontext, arcs: &'input [Arc]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_arc(self, drawable, gc, arcs)
     }
-    fn fill_poly<'c>(&'c self, drawable: Drawable, gc: Gcontext, shape: PolyShape, coordinate_mode: CoordMode, points: &[Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn fill_poly<'c, 'input>(&'c self, drawable: Drawable, gc: Gcontext, shape: PolyShape, coordinate_mode: CoordMode, points: &'input [Point]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         fill_poly(self, drawable, gc, shape, coordinate_mode, points)
     }
@@ -19856,15 +19856,15 @@ pub trait ConnectionExt: RequestConnection {
     /// * `Drawable` - The specified `drawable` (Window or Pixmap) does not exist.
     /// * `GContext` - The specified graphics context does not exist.
     /// * `Match` - TODO: reasons?
-    fn poly_fill_rectangle<'c>(&'c self, drawable: Drawable, gc: Gcontext, rectangles: &[Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_fill_rectangle<'c, 'input>(&'c self, drawable: Drawable, gc: Gcontext, rectangles: &'input [Rectangle]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_fill_rectangle(self, drawable, gc, rectangles)
     }
-    fn poly_fill_arc<'c>(&'c self, drawable: Drawable, gc: Gcontext, arcs: &[Arc]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_fill_arc<'c, 'input>(&'c self, drawable: Drawable, gc: Gcontext, arcs: &'input [Arc]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_fill_arc(self, drawable, gc, arcs)
     }
-    fn put_image<'c>(&'c self, format: ImageFormat, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn put_image<'c, 'input>(&'c self, format: ImageFormat, drawable: Drawable, gc: Gcontext, width: u16, height: u16, dst_x: i16, dst_y: i16, left_pad: u8, depth: u8, data: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         put_image(self, format, drawable, gc, width, height, dst_x, dst_y, left_pad, depth, data)
     }
@@ -19872,11 +19872,11 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_image(self, format, drawable, x, y, width, height, plane_mask)
     }
-    fn poly_text8<'c>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_text8<'c, 'input>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_text8(self, drawable, gc, x, y, items)
     }
-    fn poly_text16<'c>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn poly_text16<'c, 'input>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, items: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         poly_text16(self, drawable, gc, x, y, items)
     }
@@ -19914,7 +19914,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * `ImageText16`: request
-    fn image_text8<'c>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn image_text8<'c, 'input>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         image_text8(self, drawable, gc, x, y, string)
     }
@@ -19953,7 +19953,7 @@ pub trait ConnectionExt: RequestConnection {
     /// # See
     ///
     /// * `ImageText8`: request
-    fn image_text16<'c>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &[Char2b]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn image_text16<'c, 'input>(&'c self, drawable: Drawable, gc: Gcontext, x: i16, y: i16, string: &'input [Char2b]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         image_text16(self, drawable, gc, x, y, string)
     }
@@ -20003,7 +20003,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         alloc_color(self, cmap, red, green, blue)
     }
-    fn alloc_named_color<'c>(&'c self, cmap: Colormap, name: &[u8]) -> Result<Cookie<'c, Self, AllocNamedColorReply>, ConnectionError>
+    fn alloc_named_color<'c, 'input>(&'c self, cmap: Colormap, name: &'input [u8]) -> Result<Cookie<'c, Self, AllocNamedColorReply>, ConnectionError>
     {
         alloc_named_color(self, cmap, name)
     }
@@ -20015,25 +20015,25 @@ pub trait ConnectionExt: RequestConnection {
     {
         alloc_color_planes(self, contiguous, cmap, colors, reds, greens, blues)
     }
-    fn free_colors<'c>(&'c self, cmap: Colormap, plane_mask: u32, pixels: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn free_colors<'c, 'input>(&'c self, cmap: Colormap, plane_mask: u32, pixels: &'input [u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         free_colors(self, cmap, plane_mask, pixels)
     }
-    fn store_colors<'c>(&'c self, cmap: Colormap, items: &[Coloritem]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn store_colors<'c, 'input>(&'c self, cmap: Colormap, items: &'input [Coloritem]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         store_colors(self, cmap, items)
     }
-    fn store_named_color<'c, A>(&'c self, flags: A, cmap: Colormap, pixel: u32, name: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn store_named_color<'c, 'input, A>(&'c self, flags: A, cmap: Colormap, pixel: u32, name: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u8>,
     {
         store_named_color(self, flags, cmap, pixel, name)
     }
-    fn query_colors<'c>(&'c self, cmap: Colormap, pixels: &[u32]) -> Result<Cookie<'c, Self, QueryColorsReply>, ConnectionError>
+    fn query_colors<'c, 'input>(&'c self, cmap: Colormap, pixels: &'input [u32]) -> Result<Cookie<'c, Self, QueryColorsReply>, ConnectionError>
     {
         query_colors(self, cmap, pixels)
     }
-    fn lookup_color<'c>(&'c self, cmap: Colormap, name: &[u8]) -> Result<Cookie<'c, Self, LookupColorReply>, ConnectionError>
+    fn lookup_color<'c, 'input>(&'c self, cmap: Colormap, name: &'input [u8]) -> Result<Cookie<'c, Self, LookupColorReply>, ConnectionError>
     {
         lookup_color(self, cmap, name)
     }
@@ -20128,7 +20128,7 @@ pub trait ConnectionExt: RequestConnection {
     ///
     /// * `xdpyinfo`: program
     /// * `xcb_get_extension_data`: function
-    fn query_extension<'c>(&'c self, name: &[u8]) -> Result<Cookie<'c, Self, QueryExtensionReply>, ConnectionError>
+    fn query_extension<'c, 'input>(&'c self, name: &'input [u8]) -> Result<Cookie<'c, Self, QueryExtensionReply>, ConnectionError>
     {
         query_extension(self, name)
     }
@@ -20136,7 +20136,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         list_extensions(self)
     }
-    fn change_keyboard_mapping<'c>(&'c self, keycode_count: u8, first_keycode: Keycode, keysyms_per_keycode: u8, keysyms: &[Keysym]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn change_keyboard_mapping<'c, 'input>(&'c self, keycode_count: u8, first_keycode: Keycode, keysyms_per_keycode: u8, keysyms: &'input [Keysym]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_keyboard_mapping(self, keycode_count, first_keycode, keysyms_per_keycode, keysyms)
     }
@@ -20144,7 +20144,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_keyboard_mapping(self, first_keycode, count)
     }
-    fn change_keyboard_control<'c>(&'c self, value_list: &ChangeKeyboardControlAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn change_keyboard_control<'c, 'input>(&'c self, value_list: &'input ChangeKeyboardControlAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_keyboard_control(self, value_list)
     }
@@ -20172,7 +20172,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_screen_saver(self)
     }
-    fn change_hosts<'c>(&'c self, mode: HostMode, family: Family, address: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn change_hosts<'c, 'input>(&'c self, mode: HostMode, family: Family, address: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_hosts(self, mode, family, address)
     }
@@ -20213,7 +20213,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         kill_client(self, resource)
     }
-    fn rotate_properties<'c>(&'c self, window: Window, delta: i16, atoms: &[Atom]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn rotate_properties<'c, 'input>(&'c self, window: Window, delta: i16, atoms: &'input [Atom]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         rotate_properties(self, window, delta, atoms)
     }
@@ -20221,7 +20221,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         force_screen_saver(self, mode)
     }
-    fn set_pointer_mapping<'c>(&'c self, map: &[u8]) -> Result<Cookie<'c, Self, SetPointerMappingReply>, ConnectionError>
+    fn set_pointer_mapping<'c, 'input>(&'c self, map: &'input [u8]) -> Result<Cookie<'c, Self, SetPointerMappingReply>, ConnectionError>
     {
         set_pointer_mapping(self, map)
     }
@@ -20229,7 +20229,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_pointer_mapping(self)
     }
-    fn set_modifier_mapping<'c>(&'c self, keycodes: &[Keycode]) -> Result<Cookie<'c, Self, SetModifierMappingReply>, ConnectionError>
+    fn set_modifier_mapping<'c, 'input>(&'c self, keycodes: &'input [Keycode]) -> Result<Cookie<'c, Self, SetModifierMappingReply>, ConnectionError>
     {
         set_modifier_mapping(self, keycodes)
     }

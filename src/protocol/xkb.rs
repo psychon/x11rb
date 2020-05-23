@@ -6785,7 +6785,7 @@ impl SelectEventsAux {
     }
 }
 
-pub fn select_events<'c, Conn, A, B, C, D, E>(conn: &'c Conn, device_spec: DeviceSpec, affect_which: A, clear: B, select_all: C, affect_map: D, map: E, details: &SelectEventsAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn select_events<'c, 'input, Conn, A, B, C, D, E>(conn: &'c Conn, device_spec: DeviceSpec, affect_which: A, clear: B, select_all: C, affect_map: D, map: E, details: &'input SelectEventsAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u16>,
@@ -7132,7 +7132,7 @@ impl TryFrom<&[u8]> for GetControlsReply {
 
 /// Opcode for the SetControls request
 pub const SET_CONTROLS_REQUEST: u8 = 7;
-pub fn set_controls<'c, Conn, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P>(conn: &'c Conn, device_spec: DeviceSpec, affect_internal_real_mods: A, internal_real_mods: B, affect_ignore_lock_real_mods: C, ignore_lock_real_mods: D, affect_internal_virtual_mods: E, internal_virtual_mods: F, affect_ignore_lock_virtual_mods: G, ignore_lock_virtual_mods: H, mouse_keys_dflt_btn: u8, groups_wrap: u8, access_x_options: I, affect_enabled_controls: J, enabled_controls: K, change_controls: L, repeat_delay: u16, repeat_interval: u16, slow_keys_delay: u16, debounce_delay: u16, mouse_keys_delay: u16, mouse_keys_interval: u16, mouse_keys_time_to_max: u16, mouse_keys_max_speed: u16, mouse_keys_curve: i16, access_x_timeout: u16, access_x_timeout_mask: M, access_x_timeout_values: N, access_x_timeout_options_mask: O, access_x_timeout_options_values: P, per_key_repeat: &[u8; 32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_controls<'c, 'input, Conn, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P>(conn: &'c Conn, device_spec: DeviceSpec, affect_internal_real_mods: A, internal_real_mods: B, affect_ignore_lock_real_mods: C, ignore_lock_real_mods: D, affect_internal_virtual_mods: E, internal_virtual_mods: F, affect_ignore_lock_virtual_mods: G, ignore_lock_virtual_mods: H, mouse_keys_dflt_btn: u8, groups_wrap: u8, access_x_options: I, affect_enabled_controls: J, enabled_controls: K, change_controls: L, repeat_delay: u16, repeat_interval: u16, slow_keys_delay: u16, debounce_delay: u16, mouse_keys_delay: u16, mouse_keys_interval: u16, mouse_keys_time_to_max: u16, mouse_keys_max_speed: u16, mouse_keys_curve: i16, access_x_timeout: u16, access_x_timeout_mask: M, access_x_timeout_values: N, access_x_timeout_options_mask: O, access_x_timeout_options_values: P, per_key_repeat: &'input [u8; 32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
@@ -7697,7 +7697,7 @@ impl SetMapAux {
     }
 }
 
-pub fn set_map<'c, Conn, A, B>(conn: &'c Conn, device_spec: DeviceSpec, flags: A, min_key_code: xproto::Keycode, max_key_code: xproto::Keycode, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, total_syms: u16, first_key_action: xproto::Keycode, n_key_actions: u8, total_actions: u16, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, total_key_behaviors: u8, first_key_explicit: xproto::Keycode, n_key_explicit: u8, total_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, total_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8, total_v_mod_map_keys: u8, virtual_mods: B, values: &SetMapAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_map<'c, 'input, Conn, A, B>(conn: &'c Conn, device_spec: DeviceSpec, flags: A, min_key_code: xproto::Keycode, max_key_code: xproto::Keycode, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, total_syms: u16, first_key_action: xproto::Keycode, n_key_actions: u8, total_actions: u16, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, total_key_behaviors: u8, first_key_explicit: xproto::Keycode, n_key_explicit: u8, total_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, total_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8, total_v_mod_map_keys: u8, virtual_mods: B, values: &'input SetMapAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u16>,
@@ -7875,7 +7875,7 @@ impl GetCompatMapReply {
 
 /// Opcode for the SetCompatMap request
 pub const SET_COMPAT_MAP_REQUEST: u8 = 11;
-pub fn set_compat_map<'c, Conn, A>(conn: &'c Conn, device_spec: DeviceSpec, recompute_actions: bool, truncate_si: bool, groups: A, first_si: u16, si: &[SymInterpret], group_maps: &[ModDef]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_compat_map<'c, 'input, Conn, A>(conn: &'c Conn, device_spec: DeviceSpec, recompute_actions: bool, truncate_si: bool, groups: A, first_si: u16, si: &'input [SymInterpret], group_maps: &'input [ModDef]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u8>,
@@ -8044,7 +8044,7 @@ impl TryFrom<&[u8]> for GetIndicatorMapReply {
 
 /// Opcode for the SetIndicatorMap request
 pub const SET_INDICATOR_MAP_REQUEST: u8 = 14;
-pub fn set_indicator_map<'c, Conn>(conn: &'c Conn, device_spec: DeviceSpec, which: u32, maps: &[IndicatorMap]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_indicator_map<'c, 'input, Conn>(conn: &'c Conn, device_spec: DeviceSpec, which: u32, maps: &'input [IndicatorMap]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -8718,7 +8718,7 @@ impl SetNamesAux {
     }
 }
 
-pub fn set_names<'c, Conn, A, B>(conn: &'c Conn, device_spec: DeviceSpec, virtual_mods: A, first_type: u8, n_types: u8, first_kt_levelt: u8, n_kt_levels: u8, indicators: u32, group_names: B, n_radio_groups: u8, first_key: xproto::Keycode, n_keys: u8, n_key_aliases: u8, total_kt_level_names: u16, values: &SetNamesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_names<'c, 'input, Conn, A, B>(conn: &'c Conn, device_spec: DeviceSpec, virtual_mods: A, first_type: u8, n_types: u8, first_kt_levelt: u8, n_kt_levels: u8, indicators: u32, group_names: B, n_radio_groups: u8, first_key: xproto::Keycode, n_keys: u8, n_key_aliases: u8, total_kt_level_names: u16, values: &'input SetNamesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u16>,
@@ -9860,7 +9860,7 @@ impl GetDeviceInfoReply {
 
 /// Opcode for the SetDeviceInfo request
 pub const SET_DEVICE_INFO_REQUEST: u8 = 25;
-pub fn set_device_info<'c, Conn, A>(conn: &'c Conn, device_spec: DeviceSpec, first_btn: u8, change: A, btn_actions: &[Action], leds: &[DeviceLedInfo]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_device_info<'c, 'input, Conn, A>(conn: &'c Conn, device_spec: DeviceSpec, first_btn: u8, change: A, btn_actions: &'input [Action], leds: &'input [DeviceLedInfo]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u16>,
@@ -9905,7 +9905,7 @@ where
 
 /// Opcode for the SetDebuggingFlags request
 pub const SET_DEBUGGING_FLAGS_REQUEST: u8 = 101;
-pub fn set_debugging_flags<'c, Conn>(conn: &'c Conn, affect_flags: u32, flags: u32, affect_ctrls: u32, ctrls: u32, message: &[String8]) -> Result<Cookie<'c, Conn, SetDebuggingFlagsReply>, ConnectionError>
+pub fn set_debugging_flags<'c, 'input, Conn>(conn: &'c Conn, affect_flags: u32, flags: u32, affect_ctrls: u32, ctrls: u32, message: &'input [String8]) -> Result<Cookie<'c, Conn, SetDebuggingFlagsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -11229,7 +11229,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         use_extension(self, wanted_major, wanted_minor)
     }
-    fn xkb_select_events<'c, A, B, C, D, E>(&'c self, device_spec: DeviceSpec, affect_which: A, clear: B, select_all: C, affect_map: D, map: E, details: &SelectEventsAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xkb_select_events<'c, 'input, A, B, C, D, E>(&'c self, device_spec: DeviceSpec, affect_which: A, clear: B, select_all: C, affect_map: D, map: E, details: &'input SelectEventsAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u16>,
         B: Into<u16>,
@@ -11259,7 +11259,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_controls(self, device_spec)
     }
-    fn xkb_set_controls<'c, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P>(&'c self, device_spec: DeviceSpec, affect_internal_real_mods: A, internal_real_mods: B, affect_ignore_lock_real_mods: C, ignore_lock_real_mods: D, affect_internal_virtual_mods: E, internal_virtual_mods: F, affect_ignore_lock_virtual_mods: G, ignore_lock_virtual_mods: H, mouse_keys_dflt_btn: u8, groups_wrap: u8, access_x_options: I, affect_enabled_controls: J, enabled_controls: K, change_controls: L, repeat_delay: u16, repeat_interval: u16, slow_keys_delay: u16, debounce_delay: u16, mouse_keys_delay: u16, mouse_keys_interval: u16, mouse_keys_time_to_max: u16, mouse_keys_max_speed: u16, mouse_keys_curve: i16, access_x_timeout: u16, access_x_timeout_mask: M, access_x_timeout_values: N, access_x_timeout_options_mask: O, access_x_timeout_options_values: P, per_key_repeat: &[u8; 32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xkb_set_controls<'c, 'input, A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P>(&'c self, device_spec: DeviceSpec, affect_internal_real_mods: A, internal_real_mods: B, affect_ignore_lock_real_mods: C, ignore_lock_real_mods: D, affect_internal_virtual_mods: E, internal_virtual_mods: F, affect_ignore_lock_virtual_mods: G, ignore_lock_virtual_mods: H, mouse_keys_dflt_btn: u8, groups_wrap: u8, access_x_options: I, affect_enabled_controls: J, enabled_controls: K, change_controls: L, repeat_delay: u16, repeat_interval: u16, slow_keys_delay: u16, debounce_delay: u16, mouse_keys_delay: u16, mouse_keys_interval: u16, mouse_keys_time_to_max: u16, mouse_keys_max_speed: u16, mouse_keys_curve: i16, access_x_timeout: u16, access_x_timeout_mask: M, access_x_timeout_values: N, access_x_timeout_options_mask: O, access_x_timeout_options_values: P, per_key_repeat: &'input [u8; 32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u8>,
         B: Into<u8>,
@@ -11288,7 +11288,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_map(self, device_spec, full, partial, first_type, n_types, first_key_sym, n_key_syms, first_key_action, n_key_actions, first_key_behavior, n_key_behaviors, virtual_mods, first_key_explicit, n_key_explicit, first_mod_map_key, n_mod_map_keys, first_v_mod_map_key, n_v_mod_map_keys)
     }
-    fn xkb_set_map<'c, A, B>(&'c self, device_spec: DeviceSpec, flags: A, min_key_code: xproto::Keycode, max_key_code: xproto::Keycode, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, total_syms: u16, first_key_action: xproto::Keycode, n_key_actions: u8, total_actions: u16, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, total_key_behaviors: u8, first_key_explicit: xproto::Keycode, n_key_explicit: u8, total_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, total_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8, total_v_mod_map_keys: u8, virtual_mods: B, values: &SetMapAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xkb_set_map<'c, 'input, A, B>(&'c self, device_spec: DeviceSpec, flags: A, min_key_code: xproto::Keycode, max_key_code: xproto::Keycode, first_type: u8, n_types: u8, first_key_sym: xproto::Keycode, n_key_syms: u8, total_syms: u16, first_key_action: xproto::Keycode, n_key_actions: u8, total_actions: u16, first_key_behavior: xproto::Keycode, n_key_behaviors: u8, total_key_behaviors: u8, first_key_explicit: xproto::Keycode, n_key_explicit: u8, total_key_explicit: u8, first_mod_map_key: xproto::Keycode, n_mod_map_keys: u8, total_mod_map_keys: u8, first_v_mod_map_key: xproto::Keycode, n_v_mod_map_keys: u8, total_v_mod_map_keys: u8, virtual_mods: B, values: &'input SetMapAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u16>,
         B: Into<u16>,
@@ -11301,7 +11301,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_compat_map(self, device_spec, groups, get_all_si, first_si, n_si)
     }
-    fn xkb_set_compat_map<'c, A>(&'c self, device_spec: DeviceSpec, recompute_actions: bool, truncate_si: bool, groups: A, first_si: u16, si: &[SymInterpret], group_maps: &[ModDef]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xkb_set_compat_map<'c, 'input, A>(&'c self, device_spec: DeviceSpec, recompute_actions: bool, truncate_si: bool, groups: A, first_si: u16, si: &'input [SymInterpret], group_maps: &'input [ModDef]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u8>,
     {
@@ -11315,7 +11315,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_indicator_map(self, device_spec, which)
     }
-    fn xkb_set_indicator_map<'c>(&'c self, device_spec: DeviceSpec, which: u32, maps: &[IndicatorMap]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xkb_set_indicator_map<'c, 'input>(&'c self, device_spec: DeviceSpec, which: u32, maps: &'input [IndicatorMap]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_indicator_map(self, device_spec, which, maps)
     }
@@ -11344,7 +11344,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_names(self, device_spec, which)
     }
-    fn xkb_set_names<'c, A, B>(&'c self, device_spec: DeviceSpec, virtual_mods: A, first_type: u8, n_types: u8, first_kt_levelt: u8, n_kt_levels: u8, indicators: u32, group_names: B, n_radio_groups: u8, first_key: xproto::Keycode, n_keys: u8, n_key_aliases: u8, total_kt_level_names: u16, values: &SetNamesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xkb_set_names<'c, 'input, A, B>(&'c self, device_spec: DeviceSpec, virtual_mods: A, first_type: u8, n_types: u8, first_kt_levelt: u8, n_kt_levels: u8, indicators: u32, group_names: B, n_radio_groups: u8, first_key: xproto::Keycode, n_keys: u8, n_key_aliases: u8, total_kt_level_names: u16, values: &'input SetNamesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u16>,
         B: Into<u8>,
@@ -11379,13 +11379,13 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_device_info(self, device_spec, wanted, all_buttons, first_button, n_buttons, led_class, led_id)
     }
-    fn xkb_set_device_info<'c, A>(&'c self, device_spec: DeviceSpec, first_btn: u8, change: A, btn_actions: &[Action], leds: &[DeviceLedInfo]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xkb_set_device_info<'c, 'input, A>(&'c self, device_spec: DeviceSpec, first_btn: u8, change: A, btn_actions: &'input [Action], leds: &'input [DeviceLedInfo]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     where
         A: Into<u16>,
     {
         set_device_info(self, device_spec, first_btn, change, btn_actions, leds)
     }
-    fn xkb_set_debugging_flags<'c>(&'c self, affect_flags: u32, flags: u32, affect_ctrls: u32, ctrls: u32, message: &[String8]) -> Result<Cookie<'c, Self, SetDebuggingFlagsReply>, ConnectionError>
+    fn xkb_set_debugging_flags<'c, 'input>(&'c self, affect_flags: u32, flags: u32, affect_ctrls: u32, ctrls: u32, message: &'input [String8]) -> Result<Cookie<'c, Self, SetDebuggingFlagsReply>, ConnectionError>
     {
         set_debugging_flags(self, affect_flags, flags, affect_ctrls, ctrls, message)
     }

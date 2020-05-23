@@ -551,7 +551,7 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 /// Opcode for the CreateContext request
 pub const CREATE_CONTEXT_REQUEST: u8 = 1;
-pub fn create_context<'c, Conn>(conn: &'c Conn, context: Context, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_context<'c, 'input, Conn>(conn: &'c Conn, context: Context, element_header: ElementHeader, client_specs: &'input [ClientSpec], ranges: &'input [Range]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -601,7 +601,7 @@ where
 
 /// Opcode for the RegisterClients request
 pub const REGISTER_CLIENTS_REQUEST: u8 = 2;
-pub fn register_clients<'c, Conn>(conn: &'c Conn, context: Context, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn register_clients<'c, 'input, Conn>(conn: &'c Conn, context: Context, element_header: ElementHeader, client_specs: &'input [ClientSpec], ranges: &'input [Range]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -651,7 +651,7 @@ where
 
 /// Opcode for the UnregisterClients request
 pub const UNREGISTER_CLIENTS_REQUEST: u8 = 3;
-pub fn unregister_clients<'c, Conn>(conn: &'c Conn, context: Context, client_specs: &[ClientSpec]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn unregister_clients<'c, 'input, Conn>(conn: &'c Conn, context: Context, client_specs: &'input [ClientSpec]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -900,15 +900,15 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, major_version, minor_version)
     }
-    fn record_create_context<'c>(&'c self, context: Context, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn record_create_context<'c, 'input>(&'c self, context: Context, element_header: ElementHeader, client_specs: &'input [ClientSpec], ranges: &'input [Range]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_context(self, context, element_header, client_specs, ranges)
     }
-    fn record_register_clients<'c>(&'c self, context: Context, element_header: ElementHeader, client_specs: &[ClientSpec], ranges: &[Range]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn record_register_clients<'c, 'input>(&'c self, context: Context, element_header: ElementHeader, client_specs: &'input [ClientSpec], ranges: &'input [Range]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         register_clients(self, context, element_header, client_specs, ranges)
     }
-    fn record_unregister_clients<'c>(&'c self, context: Context, client_specs: &[ClientSpec]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn record_unregister_clients<'c, 'input>(&'c self, context: Context, client_specs: &'input [ClientSpec]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         unregister_clients(self, context, client_specs)
     }

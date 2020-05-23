@@ -673,7 +673,7 @@ impl TryFrom<&[u8]> for QueryClientPixmapBytesReply {
 
 /// Opcode for the QueryClientIds request
 pub const QUERY_CLIENT_IDS_REQUEST: u8 = 4;
-pub fn query_client_ids<'c, Conn>(conn: &'c Conn, specs: &[ClientIdSpec]) -> Result<Cookie<'c, Conn, QueryClientIdsReply>, ConnectionError>
+pub fn query_client_ids<'c, 'input, Conn>(conn: &'c Conn, specs: &'input [ClientIdSpec]) -> Result<Cookie<'c, Conn, QueryClientIdsReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -747,7 +747,7 @@ impl QueryClientIdsReply {
 
 /// Opcode for the QueryResourceBytes request
 pub const QUERY_RESOURCE_BYTES_REQUEST: u8 = 5;
-pub fn query_resource_bytes<'c, Conn>(conn: &'c Conn, client: u32, specs: &[ResourceIdSpec]) -> Result<Cookie<'c, Conn, QueryResourceBytesReply>, ConnectionError>
+pub fn query_resource_bytes<'c, 'input, Conn>(conn: &'c Conn, client: u32, specs: &'input [ResourceIdSpec]) -> Result<Cookie<'c, Conn, QueryResourceBytesReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -842,11 +842,11 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_client_pixmap_bytes(self, xid)
     }
-    fn res_query_client_ids<'c>(&'c self, specs: &[ClientIdSpec]) -> Result<Cookie<'c, Self, QueryClientIdsReply>, ConnectionError>
+    fn res_query_client_ids<'c, 'input>(&'c self, specs: &'input [ClientIdSpec]) -> Result<Cookie<'c, Self, QueryClientIdsReply>, ConnectionError>
     {
         query_client_ids(self, specs)
     }
-    fn res_query_resource_bytes<'c>(&'c self, client: u32, specs: &[ResourceIdSpec]) -> Result<Cookie<'c, Self, QueryResourceBytesReply>, ConnectionError>
+    fn res_query_resource_bytes<'c, 'input>(&'c self, client: u32, specs: &'input [ResourceIdSpec]) -> Result<Cookie<'c, Self, QueryResourceBytesReply>, ConnectionError>
     {
         query_resource_bytes(self, client, specs)
     }

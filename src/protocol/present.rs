@@ -560,7 +560,7 @@ impl TryFrom<&[u8]> for QueryVersionReply {
 
 /// Opcode for the Pixmap request
 pub const PIXMAP_REQUEST: u8 = 1;
-pub fn pixmap<'c, Conn>(conn: &'c Conn, window: xproto::Window, pixmap: xproto::Pixmap, serial: u32, valid: xfixes::Region, update: xfixes::Region, x_off: i16, y_off: i16, target_crtc: randr::Crtc, wait_fence: sync::Fence, idle_fence: sync::Fence, options: u32, target_msc: u64, divisor: u64, remainder: u64, notifies: &[Notify]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn pixmap<'c, 'input, Conn>(conn: &'c Conn, window: xproto::Window, pixmap: xproto::Pixmap, serial: u32, valid: xfixes::Region, update: xfixes::Region, x_off: i16, y_off: i16, target_crtc: randr::Crtc, wait_fence: sync::Fence, idle_fence: sync::Fence, options: u32, target_msc: u64, divisor: u64, remainder: u64, notifies: &'input [Notify]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1120,7 +1120,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_version(self, major_version, minor_version)
     }
-    fn present_pixmap<'c>(&'c self, window: xproto::Window, pixmap: xproto::Pixmap, serial: u32, valid: xfixes::Region, update: xfixes::Region, x_off: i16, y_off: i16, target_crtc: randr::Crtc, wait_fence: sync::Fence, idle_fence: sync::Fence, options: u32, target_msc: u64, divisor: u64, remainder: u64, notifies: &[Notify]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn present_pixmap<'c, 'input>(&'c self, window: xproto::Window, pixmap: xproto::Pixmap, serial: u32, valid: xfixes::Region, update: xfixes::Region, x_off: i16, y_off: i16, target_crtc: randr::Crtc, wait_fence: sync::Fence, idle_fence: sync::Fence, options: u32, target_msc: u64, divisor: u64, remainder: u64, notifies: &'input [Notify]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         self::pixmap(self, window, pixmap, serial, valid, update, x_off, y_off, target_crtc, wait_fence, idle_fence, options, target_msc, divisor, remainder, notifies)
     }

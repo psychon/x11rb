@@ -1685,7 +1685,7 @@ impl QueryOutputPropertyReply {
 
 /// Opcode for the ConfigureOutputProperty request
 pub const CONFIGURE_OUTPUT_PROPERTY_REQUEST: u8 = 12;
-pub fn configure_output_property<'c, Conn>(conn: &'c Conn, output: Output, property: xproto::Atom, pending: bool, range: bool, values: &[i32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn configure_output_property<'c, 'input, Conn>(conn: &'c Conn, output: Output, property: xproto::Atom, pending: bool, range: bool, values: &'input [i32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1727,7 +1727,7 @@ where
 
 /// Opcode for the ChangeOutputProperty request
 pub const CHANGE_OUTPUT_PROPERTY_REQUEST: u8 = 13;
-pub fn change_output_property<'c, Conn>(conn: &'c Conn, output: Output, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: xproto::PropMode, num_units: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_output_property<'c, 'input, Conn>(conn: &'c Conn, output: Output, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: xproto::PropMode, num_units: u32, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1900,7 +1900,7 @@ impl TryFrom<&[u8]> for GetOutputPropertyReply {
 
 /// Opcode for the CreateMode request
 pub const CREATE_MODE_REQUEST: u8 = 16;
-pub fn create_mode<'c, Conn>(conn: &'c Conn, window: xproto::Window, mode_info: ModeInfo, name: &[u8]) -> Result<Cookie<'c, Conn, CreateModeReply>, ConnectionError>
+pub fn create_mode<'c, 'input, Conn>(conn: &'c Conn, window: xproto::Window, mode_info: ModeInfo, name: &'input [u8]) -> Result<Cookie<'c, Conn, CreateModeReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -2187,7 +2187,7 @@ impl GetCrtcInfoReply {
 
 /// Opcode for the SetCrtcConfig request
 pub const SET_CRTC_CONFIG_REQUEST: u8 = 21;
-pub fn set_crtc_config<'c, Conn, A>(conn: &'c Conn, crtc: Crtc, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, x: i16, y: i16, mode: Mode, rotation: A, outputs: &[Output]) -> Result<Cookie<'c, Conn, SetCrtcConfigReply>, ConnectionError>
+pub fn set_crtc_config<'c, 'input, Conn, A>(conn: &'c Conn, crtc: Crtc, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, x: i16, y: i16, mode: Mode, rotation: A, outputs: &'input [Output]) -> Result<Cookie<'c, Conn, SetCrtcConfigReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
     A: Into<u16>,
@@ -2400,7 +2400,7 @@ impl GetCrtcGammaReply {
 
 /// Opcode for the SetCrtcGamma request
 pub const SET_CRTC_GAMMA_REQUEST: u8 = 24;
-pub fn set_crtc_gamma<'c, Conn>(conn: &'c Conn, crtc: Crtc, red: &[u16], green: &[u16], blue: &[u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_crtc_gamma<'c, 'input, Conn>(conn: &'c Conn, crtc: Crtc, red: &'input [u16], green: &'input [u16], blue: &'input [u16]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -2634,7 +2634,7 @@ bitmask_binop!(Transform, u8);
 
 /// Opcode for the SetCrtcTransform request
 pub const SET_CRTC_TRANSFORM_REQUEST: u8 = 26;
-pub fn set_crtc_transform<'c, Conn>(conn: &'c Conn, crtc: Crtc, transform: render::Transform, filter_name: &[u8], filter_params: &[render::Fixed]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_crtc_transform<'c, 'input, Conn>(conn: &'c Conn, crtc: Crtc, transform: render::Transform, filter_name: &'input [u8], filter_params: &'input [render::Fixed]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -3594,7 +3594,7 @@ impl QueryProviderPropertyReply {
 
 /// Opcode for the ConfigureProviderProperty request
 pub const CONFIGURE_PROVIDER_PROPERTY_REQUEST: u8 = 38;
-pub fn configure_provider_property<'c, Conn>(conn: &'c Conn, provider: Provider, property: xproto::Atom, pending: bool, range: bool, values: &[i32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn configure_provider_property<'c, 'input, Conn>(conn: &'c Conn, provider: Provider, property: xproto::Atom, pending: bool, range: bool, values: &'input [i32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -3636,7 +3636,7 @@ where
 
 /// Opcode for the ChangeProviderProperty request
 pub const CHANGE_PROVIDER_PROPERTY_REQUEST: u8 = 39;
-pub fn change_provider_property<'c, Conn>(conn: &'c Conn, provider: Provider, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: u8, num_items: u32, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_provider_property<'c, 'input, Conn>(conn: &'c Conn, provider: Provider, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: u8, num_items: u32, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -4670,7 +4670,7 @@ where
 
 /// Opcode for the CreateLease request
 pub const CREATE_LEASE_REQUEST: u8 = 45;
-pub fn create_lease<'c, Conn>(conn: &'c Conn, window: xproto::Window, lid: Lease, crtcs: &[Crtc], outputs: &[Output]) -> Result<CookieWithFds<'c, Conn, CreateLeaseReply>, ConnectionError>
+pub fn create_lease<'c, 'input, Conn>(conn: &'c Conn, window: xproto::Window, lid: Lease, crtcs: &'input [Crtc], outputs: &'input [Output]) -> Result<CookieWithFds<'c, Conn, CreateLeaseReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -5089,11 +5089,11 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_output_property(self, output, property)
     }
-    fn randr_configure_output_property<'c>(&'c self, output: Output, property: xproto::Atom, pending: bool, range: bool, values: &[i32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn randr_configure_output_property<'c, 'input>(&'c self, output: Output, property: xproto::Atom, pending: bool, range: bool, values: &'input [i32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         configure_output_property(self, output, property, pending, range, values)
     }
-    fn randr_change_output_property<'c>(&'c self, output: Output, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: xproto::PropMode, num_units: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn randr_change_output_property<'c, 'input>(&'c self, output: Output, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: xproto::PropMode, num_units: u32, data: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_output_property(self, output, property, type_, format, mode, num_units, data)
     }
@@ -5107,7 +5107,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_output_property(self, output, property, type_, long_offset, long_length, delete, pending)
     }
-    fn randr_create_mode<'c>(&'c self, window: xproto::Window, mode_info: ModeInfo, name: &[u8]) -> Result<Cookie<'c, Self, CreateModeReply>, ConnectionError>
+    fn randr_create_mode<'c, 'input>(&'c self, window: xproto::Window, mode_info: ModeInfo, name: &'input [u8]) -> Result<Cookie<'c, Self, CreateModeReply>, ConnectionError>
     {
         create_mode(self, window, mode_info, name)
     }
@@ -5127,7 +5127,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_crtc_info(self, crtc, config_timestamp)
     }
-    fn randr_set_crtc_config<'c, A>(&'c self, crtc: Crtc, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, x: i16, y: i16, mode: Mode, rotation: A, outputs: &[Output]) -> Result<Cookie<'c, Self, SetCrtcConfigReply>, ConnectionError>
+    fn randr_set_crtc_config<'c, 'input, A>(&'c self, crtc: Crtc, timestamp: xproto::Timestamp, config_timestamp: xproto::Timestamp, x: i16, y: i16, mode: Mode, rotation: A, outputs: &'input [Output]) -> Result<Cookie<'c, Self, SetCrtcConfigReply>, ConnectionError>
     where
         A: Into<u16>,
     {
@@ -5141,7 +5141,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_crtc_gamma(self, crtc)
     }
-    fn randr_set_crtc_gamma<'c>(&'c self, crtc: Crtc, red: &[u16], green: &[u16], blue: &[u16]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn randr_set_crtc_gamma<'c, 'input>(&'c self, crtc: Crtc, red: &'input [u16], green: &'input [u16], blue: &'input [u16]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_crtc_gamma(self, crtc, red, green, blue)
     }
@@ -5149,7 +5149,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_screen_resources_current(self, window)
     }
-    fn randr_set_crtc_transform<'c>(&'c self, crtc: Crtc, transform: render::Transform, filter_name: &[u8], filter_params: &[render::Fixed]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn randr_set_crtc_transform<'c, 'input>(&'c self, crtc: Crtc, transform: render::Transform, filter_name: &'input [u8], filter_params: &'input [render::Fixed]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_crtc_transform(self, crtc, transform, filter_name, filter_params)
     }
@@ -5197,11 +5197,11 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_provider_property(self, provider, property)
     }
-    fn randr_configure_provider_property<'c>(&'c self, provider: Provider, property: xproto::Atom, pending: bool, range: bool, values: &[i32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn randr_configure_provider_property<'c, 'input>(&'c self, provider: Provider, property: xproto::Atom, pending: bool, range: bool, values: &'input [i32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         configure_provider_property(self, provider, property, pending, range, values)
     }
-    fn randr_change_provider_property<'c>(&'c self, provider: Provider, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: u8, num_items: u32, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn randr_change_provider_property<'c, 'input>(&'c self, provider: Provider, property: xproto::Atom, type_: xproto::Atom, format: u8, mode: u8, num_items: u32, data: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_provider_property(self, provider, property, type_, format, mode, num_items, data)
     }
@@ -5225,7 +5225,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         delete_monitor(self, window, name)
     }
-    fn randr_create_lease<'c>(&'c self, window: xproto::Window, lid: Lease, crtcs: &[Crtc], outputs: &[Output]) -> Result<CookieWithFds<'c, Self, CreateLeaseReply>, ConnectionError>
+    fn randr_create_lease<'c, 'input>(&'c self, window: xproto::Window, lid: Lease, crtcs: &'input [Crtc], outputs: &'input [Output]) -> Result<CookieWithFds<'c, Self, CreateLeaseReply>, ConnectionError>
     {
         create_lease(self, window, lid, crtcs, outputs)
     }

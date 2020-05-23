@@ -635,7 +635,7 @@ where
 
 /// Opcode for the GetBuffers request
 pub const GET_BUFFERS_REQUEST: u8 = 5;
-pub fn get_buffers<'c, Conn>(conn: &'c Conn, drawable: xproto::Drawable, count: u32, attachments: &[u32]) -> Result<Cookie<'c, Conn, GetBuffersReply>, ConnectionError>
+pub fn get_buffers<'c, 'input, Conn>(conn: &'c Conn, drawable: xproto::Drawable, count: u32, attachments: &'input [u32]) -> Result<Cookie<'c, Conn, GetBuffersReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -782,7 +782,7 @@ impl TryFrom<&[u8]> for CopyRegionReply {
 
 /// Opcode for the GetBuffersWithFormat request
 pub const GET_BUFFERS_WITH_FORMAT_REQUEST: u8 = 7;
-pub fn get_buffers_with_format<'c, Conn>(conn: &'c Conn, drawable: xproto::Drawable, count: u32, attachments: &[AttachFormat]) -> Result<Cookie<'c, Conn, GetBuffersWithFormatReply>, ConnectionError>
+pub fn get_buffers_with_format<'c, 'input, Conn>(conn: &'c Conn, drawable: xproto::Drawable, count: u32, attachments: &'input [AttachFormat]) -> Result<Cookie<'c, Conn, GetBuffersWithFormatReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1449,7 +1449,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         destroy_drawable(self, drawable)
     }
-    fn dri2_get_buffers<'c>(&'c self, drawable: xproto::Drawable, count: u32, attachments: &[u32]) -> Result<Cookie<'c, Self, GetBuffersReply>, ConnectionError>
+    fn dri2_get_buffers<'c, 'input>(&'c self, drawable: xproto::Drawable, count: u32, attachments: &'input [u32]) -> Result<Cookie<'c, Self, GetBuffersReply>, ConnectionError>
     {
         get_buffers(self, drawable, count, attachments)
     }
@@ -1457,7 +1457,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         copy_region(self, drawable, region, dest, src)
     }
-    fn dri2_get_buffers_with_format<'c>(&'c self, drawable: xproto::Drawable, count: u32, attachments: &[AttachFormat]) -> Result<Cookie<'c, Self, GetBuffersWithFormatReply>, ConnectionError>
+    fn dri2_get_buffers_with_format<'c, 'input>(&'c self, drawable: xproto::Drawable, count: u32, attachments: &'input [AttachFormat]) -> Result<Cookie<'c, Self, GetBuffersWithFormatReply>, ConnectionError>
     {
         get_buffers_with_format(self, drawable, count, attachments)
     }

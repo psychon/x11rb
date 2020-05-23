@@ -591,7 +591,7 @@ impl SetAttributesAux {
     }
 }
 
-pub fn set_attributes<'c, Conn>(conn: &'c Conn, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: xproto::WindowClass, depth: u8, visual: xproto::Visualid, value_list: &SetAttributesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_attributes<'c, 'input, Conn>(conn: &'c Conn, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: xproto::WindowClass, depth: u8, visual: xproto::Visualid, value_list: &'input SetAttributesAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -808,7 +808,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         select_input(self, drawable, event_mask)
     }
-    fn screensaver_set_attributes<'c>(&'c self, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: xproto::WindowClass, depth: u8, visual: xproto::Visualid, value_list: &SetAttributesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn screensaver_set_attributes<'c, 'input>(&'c self, drawable: xproto::Drawable, x: i16, y: i16, width: u16, height: u16, border_width: u16, class: xproto::WindowClass, depth: u8, visual: xproto::Visualid, value_list: &'input SetAttributesAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_attributes(self, drawable, x, y, width, height, border_width, class, depth, visual, value_list)
     }

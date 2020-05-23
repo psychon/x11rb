@@ -2560,7 +2560,7 @@ impl QueryImageAttributesReply {
 
 /// Opcode for the PutImage request
 pub const PUT_IMAGE_REQUEST: u8 = 18;
-pub fn put_image<'c, Conn>(conn: &'c Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, id: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn put_image<'c, 'input, Conn>(conn: &'c Conn, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, id: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -2798,7 +2798,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_image_attributes(self, port, id, width, height)
     }
-    fn xv_put_image<'c>(&'c self, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, id: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn xv_put_image<'c, 'input>(&'c self, port: Port, drawable: xproto::Drawable, gc: xproto::Gcontext, id: u32, src_x: i16, src_y: i16, src_w: u16, src_h: u16, drw_x: i16, drw_y: i16, drw_w: u16, drw_h: u16, width: u16, height: u16, data: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         put_image(self, port, drawable, gc, id, src_x, src_y, src_w, src_h, drw_x, drw_y, drw_w, drw_h, width, height, data)
     }

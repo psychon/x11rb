@@ -943,7 +943,7 @@ impl TryFrom<&[u8]> for QueryCounterReply {
 
 /// Opcode for the Await request
 pub const AWAIT_REQUEST: u8 = 7;
-pub fn await_<'c, Conn>(conn: &'c Conn, wait_list: &[Waitcondition]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn await_<'c, 'input, Conn>(conn: &'c Conn, wait_list: &'input [Waitcondition]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1140,7 +1140,7 @@ impl CreateAlarmAux {
     }
 }
 
-pub fn create_alarm<'c, Conn>(conn: &'c Conn, id: Alarm, value_list: &CreateAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_alarm<'c, 'input, Conn>(conn: &'c Conn, id: Alarm, value_list: &'input CreateAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1276,7 +1276,7 @@ impl ChangeAlarmAux {
     }
 }
 
-pub fn change_alarm<'c, Conn>(conn: &'c Conn, id: Alarm, value_list: &ChangeAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_alarm<'c, 'input, Conn>(conn: &'c Conn, id: Alarm, value_list: &'input ChangeAlarmAux) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1655,7 +1655,7 @@ impl TryFrom<&[u8]> for QueryFenceReply {
 
 /// Opcode for the AwaitFence request
 pub const AWAIT_FENCE_REQUEST: u8 = 19;
-pub fn await_fence<'c, Conn>(conn: &'c Conn, fence_list: &[Fence]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn await_fence<'c, 'input, Conn>(conn: &'c Conn, fence_list: &'input [Fence]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1877,7 +1877,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_counter(self, counter)
     }
-    fn sync_await_<'c>(&'c self, wait_list: &[Waitcondition]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn sync_await_<'c, 'input>(&'c self, wait_list: &'input [Waitcondition]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         await_(self, wait_list)
     }
@@ -1889,11 +1889,11 @@ pub trait ConnectionExt: RequestConnection {
     {
         set_counter(self, counter, value)
     }
-    fn sync_create_alarm<'c>(&'c self, id: Alarm, value_list: &CreateAlarmAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn sync_create_alarm<'c, 'input>(&'c self, id: Alarm, value_list: &'input CreateAlarmAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_alarm(self, id, value_list)
     }
-    fn sync_change_alarm<'c>(&'c self, id: Alarm, value_list: &ChangeAlarmAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn sync_change_alarm<'c, 'input>(&'c self, id: Alarm, value_list: &'input ChangeAlarmAux) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_alarm(self, id, value_list)
     }
@@ -1933,7 +1933,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_fence(self, fence)
     }
-    fn sync_await_fence<'c>(&'c self, fence_list: &[Fence]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn sync_await_fence<'c, 'input>(&'c self, fence_list: &'input [Fence]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         await_fence(self, fence_list)
     }

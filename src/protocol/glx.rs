@@ -470,7 +470,7 @@ impl TryFrom<u32> for PBCDT {
 
 /// Opcode for the Render request
 pub const RENDER_REQUEST: u8 = 1;
-pub fn render<'c, Conn>(conn: &'c Conn, context_tag: ContextTag, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn render<'c, 'input, Conn>(conn: &'c Conn, context_tag: ContextTag, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -500,7 +500,7 @@ where
 
 /// Opcode for the RenderLarge request
 pub const RENDER_LARGE_REQUEST: u8 = 2;
-pub fn render_large<'c, Conn>(conn: &'c Conn, context_tag: ContextTag, request_num: u16, request_total: u16, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn render_large<'c, 'input, Conn>(conn: &'c Conn, context_tag: ContextTag, request_num: u16, request_total: u16, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1195,7 +1195,7 @@ where
 
 /// Opcode for the VendorPrivate request
 pub const VENDOR_PRIVATE_REQUEST: u8 = 16;
-pub fn vendor_private<'c, Conn>(conn: &'c Conn, vendor_code: u32, context_tag: ContextTag, data: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn vendor_private<'c, 'input, Conn>(conn: &'c Conn, vendor_code: u32, context_tag: ContextTag, data: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1230,7 +1230,7 @@ where
 
 /// Opcode for the VendorPrivateWithReply request
 pub const VENDOR_PRIVATE_WITH_REPLY_REQUEST: u8 = 17;
-pub fn vendor_private_with_reply<'c, Conn>(conn: &'c Conn, vendor_code: u32, context_tag: ContextTag, data: &[u8]) -> Result<Cookie<'c, Conn, VendorPrivateWithReplyReply>, ConnectionError>
+pub fn vendor_private_with_reply<'c, 'input, Conn>(conn: &'c Conn, vendor_code: u32, context_tag: ContextTag, data: &'input [u8]) -> Result<Cookie<'c, Conn, VendorPrivateWithReplyReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1441,7 +1441,7 @@ impl QueryServerStringReply {
 
 /// Opcode for the ClientInfo request
 pub const CLIENT_INFO_REQUEST: u8 = 20;
-pub fn client_info<'c, Conn>(conn: &'c Conn, major_version: u32, minor_version: u32, string: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn client_info<'c, 'input, Conn>(conn: &'c Conn, major_version: u32, minor_version: u32, string: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1553,7 +1553,7 @@ impl GetFBConfigsReply {
 
 /// Opcode for the CreatePixmap request
 pub const CREATE_PIXMAP_REQUEST: u8 = 22;
-pub fn create_pixmap<'c, Conn>(conn: &'c Conn, screen: u32, fbconfig: Fbconfig, pixmap: xproto::Pixmap, glx_pixmap: Pixmap, attribs: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_pixmap<'c, 'input, Conn>(conn: &'c Conn, screen: u32, fbconfig: Fbconfig, pixmap: xproto::Pixmap, glx_pixmap: Pixmap, attribs: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1823,7 +1823,7 @@ impl TryFrom<&[u8]> for MakeContextCurrentReply {
 
 /// Opcode for the CreatePbuffer request
 pub const CREATE_PBUFFER_REQUEST: u8 = 27;
-pub fn create_pbuffer<'c, Conn>(conn: &'c Conn, screen: u32, fbconfig: Fbconfig, pbuffer: Pbuffer, attribs: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_pbuffer<'c, 'input, Conn>(conn: &'c Conn, screen: u32, fbconfig: Fbconfig, pbuffer: Pbuffer, attribs: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -1968,7 +1968,7 @@ impl GetDrawableAttributesReply {
 
 /// Opcode for the ChangeDrawableAttributes request
 pub const CHANGE_DRAWABLE_ATTRIBUTES_REQUEST: u8 = 30;
-pub fn change_drawable_attributes<'c, Conn>(conn: &'c Conn, drawable: Drawable, attribs: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn change_drawable_attributes<'c, 'input, Conn>(conn: &'c Conn, drawable: Drawable, attribs: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -2006,7 +2006,7 @@ where
 
 /// Opcode for the CreateWindow request
 pub const CREATE_WINDOW_REQUEST: u8 = 31;
-pub fn create_window<'c, Conn>(conn: &'c Conn, screen: u32, fbconfig: Fbconfig, window: xproto::Window, glx_window: Window, attribs: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_window<'c, 'input, Conn>(conn: &'c Conn, screen: u32, fbconfig: Fbconfig, window: xproto::Window, glx_window: Window, attribs: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -2086,7 +2086,7 @@ where
 
 /// Opcode for the SetClientInfoARB request
 pub const SET_CLIENT_INFO_ARB_REQUEST: u8 = 33;
-pub fn set_client_info_arb<'c, Conn>(conn: &'c Conn, major_version: u32, minor_version: u32, gl_versions: &[u32], gl_extension_string: &[u8], glx_extension_string: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_client_info_arb<'c, 'input, Conn>(conn: &'c Conn, major_version: u32, minor_version: u32, gl_versions: &'input [u32], gl_extension_string: &'input [u8], glx_extension_string: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -2143,7 +2143,7 @@ where
 
 /// Opcode for the CreateContextAttribsARB request
 pub const CREATE_CONTEXT_ATTRIBS_ARB_REQUEST: u8 = 34;
-pub fn create_context_attribs_arb<'c, Conn>(conn: &'c Conn, context: Context, fbconfig: Fbconfig, screen: u32, share_list: Context, is_direct: bool, attribs: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn create_context_attribs_arb<'c, 'input, Conn>(conn: &'c Conn, context: Context, fbconfig: Fbconfig, screen: u32, share_list: Context, is_direct: bool, attribs: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -2201,7 +2201,7 @@ where
 
 /// Opcode for the SetClientInfo2ARB request
 pub const SET_CLIENT_INFO2_ARB_REQUEST: u8 = 35;
-pub fn set_client_info2_arb<'c, Conn>(conn: &'c Conn, major_version: u32, minor_version: u32, gl_versions: &[u32], gl_extension_string: &[u8], glx_extension_string: &[u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn set_client_info2_arb<'c, 'input, Conn>(conn: &'c Conn, major_version: u32, minor_version: u32, gl_versions: &'input [u32], gl_extension_string: &'input [u8], glx_extension_string: &'input [u8]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -5220,7 +5220,7 @@ where
 
 /// Opcode for the AreTexturesResident request
 pub const ARE_TEXTURES_RESIDENT_REQUEST: u8 = 143;
-pub fn are_textures_resident<'c, Conn>(conn: &'c Conn, context_tag: ContextTag, textures: &[u32]) -> Result<Cookie<'c, Conn, AreTexturesResidentReply>, ConnectionError>
+pub fn are_textures_resident<'c, 'input, Conn>(conn: &'c Conn, context_tag: ContextTag, textures: &'input [u32]) -> Result<Cookie<'c, Conn, AreTexturesResidentReply>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -5300,7 +5300,7 @@ impl AreTexturesResidentReply {
 
 /// Opcode for the DeleteTextures request
 pub const DELETE_TEXTURES_REQUEST: u8 = 144;
-pub fn delete_textures<'c, Conn>(conn: &'c Conn, context_tag: ContextTag, textures: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn delete_textures<'c, 'input, Conn>(conn: &'c Conn, context_tag: ContextTag, textures: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -6667,7 +6667,7 @@ impl GetCompressedTexImageARBReply {
 
 /// Opcode for the DeleteQueriesARB request
 pub const DELETE_QUERIES_ARB_REQUEST: u8 = 161;
-pub fn delete_queries_arb<'c, Conn>(conn: &'c Conn, context_tag: ContextTag, ids: &[u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
+pub fn delete_queries_arb<'c, 'input, Conn>(conn: &'c Conn, context_tag: ContextTag, ids: &'input [u32]) -> Result<VoidCookie<'c, Conn>, ConnectionError>
 where
     Conn: RequestConnection + ?Sized,
 {
@@ -7079,11 +7079,11 @@ impl GetQueryObjectuivARBReply {
 
 /// Extension trait defining the requests of this extension.
 pub trait ConnectionExt: RequestConnection {
-    fn glx_render<'c>(&'c self, context_tag: ContextTag, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn glx_render<'c, 'input>(&'c self, context_tag: ContextTag, data: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         render(self, context_tag, data)
     }
-    fn glx_render_large<'c>(&'c self, context_tag: ContextTag, request_num: u16, request_total: u16, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn glx_render_large<'c, 'input>(&'c self, context_tag: ContextTag, request_num: u16, request_total: u16, data: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         render_large(self, context_tag, request_num, request_total, data)
     }
@@ -7139,11 +7139,11 @@ pub trait ConnectionExt: RequestConnection {
     {
         destroy_glx_pixmap(self, glx_pixmap)
     }
-    fn glx_vendor_private<'c>(&'c self, vendor_code: u32, context_tag: ContextTag, data: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn glx_vendor_private<'c, 'input>(&'c self, vendor_code: u32, context_tag: ContextTag, data: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         vendor_private(self, vendor_code, context_tag, data)
     }
-    fn glx_vendor_private_with_reply<'c>(&'c self, vendor_code: u32, context_tag: ContextTag, data: &[u8]) -> Result<Cookie<'c, Self, VendorPrivateWithReplyReply>, ConnectionError>
+    fn glx_vendor_private_with_reply<'c, 'input>(&'c self, vendor_code: u32, context_tag: ContextTag, data: &'input [u8]) -> Result<Cookie<'c, Self, VendorPrivateWithReplyReply>, ConnectionError>
     {
         vendor_private_with_reply(self, vendor_code, context_tag, data)
     }
@@ -7155,7 +7155,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         query_server_string(self, screen, name)
     }
-    fn glx_client_info<'c>(&'c self, major_version: u32, minor_version: u32, string: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn glx_client_info<'c, 'input>(&'c self, major_version: u32, minor_version: u32, string: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         client_info(self, major_version, minor_version, string)
     }
@@ -7163,7 +7163,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_fb_configs(self, screen)
     }
-    fn glx_create_pixmap<'c>(&'c self, screen: u32, fbconfig: Fbconfig, pixmap: xproto::Pixmap, glx_pixmap: Pixmap, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn glx_create_pixmap<'c, 'input>(&'c self, screen: u32, fbconfig: Fbconfig, pixmap: xproto::Pixmap, glx_pixmap: Pixmap, attribs: &'input [u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_pixmap(self, screen, fbconfig, pixmap, glx_pixmap, attribs)
     }
@@ -7183,7 +7183,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         make_context_current(self, old_context_tag, drawable, read_drawable, context)
     }
-    fn glx_create_pbuffer<'c>(&'c self, screen: u32, fbconfig: Fbconfig, pbuffer: Pbuffer, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn glx_create_pbuffer<'c, 'input>(&'c self, screen: u32, fbconfig: Fbconfig, pbuffer: Pbuffer, attribs: &'input [u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_pbuffer(self, screen, fbconfig, pbuffer, attribs)
     }
@@ -7195,11 +7195,11 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_drawable_attributes(self, drawable)
     }
-    fn glx_change_drawable_attributes<'c>(&'c self, drawable: Drawable, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn glx_change_drawable_attributes<'c, 'input>(&'c self, drawable: Drawable, attribs: &'input [u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         change_drawable_attributes(self, drawable, attribs)
     }
-    fn glx_create_window<'c>(&'c self, screen: u32, fbconfig: Fbconfig, window: xproto::Window, glx_window: Window, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn glx_create_window<'c, 'input>(&'c self, screen: u32, fbconfig: Fbconfig, window: xproto::Window, glx_window: Window, attribs: &'input [u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_window(self, screen, fbconfig, window, glx_window, attribs)
     }
@@ -7207,15 +7207,15 @@ pub trait ConnectionExt: RequestConnection {
     {
         delete_window(self, glxwindow)
     }
-    fn glx_set_client_info_arb<'c>(&'c self, major_version: u32, minor_version: u32, gl_versions: &[u32], gl_extension_string: &[u8], glx_extension_string: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn glx_set_client_info_arb<'c, 'input>(&'c self, major_version: u32, minor_version: u32, gl_versions: &'input [u32], gl_extension_string: &'input [u8], glx_extension_string: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_client_info_arb(self, major_version, minor_version, gl_versions, gl_extension_string, glx_extension_string)
     }
-    fn glx_create_context_attribs_arb<'c>(&'c self, context: Context, fbconfig: Fbconfig, screen: u32, share_list: Context, is_direct: bool, attribs: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn glx_create_context_attribs_arb<'c, 'input>(&'c self, context: Context, fbconfig: Fbconfig, screen: u32, share_list: Context, is_direct: bool, attribs: &'input [u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         create_context_attribs_arb(self, context, fbconfig, screen, share_list, is_direct, attribs)
     }
-    fn glx_set_client_info2_arb<'c>(&'c self, major_version: u32, minor_version: u32, gl_versions: &[u32], gl_extension_string: &[u8], glx_extension_string: &[u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn glx_set_client_info2_arb<'c, 'input>(&'c self, major_version: u32, minor_version: u32, gl_versions: &'input [u32], gl_extension_string: &'input [u8], glx_extension_string: &'input [u8]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         set_client_info2_arb(self, major_version, minor_version, gl_versions, gl_extension_string, glx_extension_string)
     }
@@ -7387,11 +7387,11 @@ pub trait ConnectionExt: RequestConnection {
     {
         flush(self, context_tag)
     }
-    fn glx_are_textures_resident<'c>(&'c self, context_tag: ContextTag, textures: &[u32]) -> Result<Cookie<'c, Self, AreTexturesResidentReply>, ConnectionError>
+    fn glx_are_textures_resident<'c, 'input>(&'c self, context_tag: ContextTag, textures: &'input [u32]) -> Result<Cookie<'c, Self, AreTexturesResidentReply>, ConnectionError>
     {
         are_textures_resident(self, context_tag, textures)
     }
-    fn glx_delete_textures<'c>(&'c self, context_tag: ContextTag, textures: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn glx_delete_textures<'c, 'input>(&'c self, context_tag: ContextTag, textures: &'input [u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         delete_textures(self, context_tag, textures)
     }
@@ -7459,7 +7459,7 @@ pub trait ConnectionExt: RequestConnection {
     {
         get_compressed_tex_image_arb(self, context_tag, target, level)
     }
-    fn glx_delete_queries_arb<'c>(&'c self, context_tag: ContextTag, ids: &[u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
+    fn glx_delete_queries_arb<'c, 'input>(&'c self, context_tag: ContextTag, ids: &'input [u32]) -> Result<VoidCookie<'c, Self>, ConnectionError>
     {
         delete_queries_arb(self, context_tag, ids)
     }
