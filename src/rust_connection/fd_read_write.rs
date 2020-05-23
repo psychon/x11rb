@@ -159,6 +159,7 @@ impl<W: WriteFD> BufWriteFD<W> {
     {
         self.fd_buf.append(fds);
 
+        // Is there enough buffer space left for this write?
         if (self.data_buf.capacity() - self.data_buf.len()) < to_write_length {
             // Not enough space, try to flush
             match self.flush_buffer() {
@@ -185,24 +186,15 @@ impl<W: WriteFD> BufWriteFD<W> {
         }
 
         if to_write_length >= self.data_buf.capacity() {
-            // At this point the buffer is empty
-            match write_inner(&mut self.inner, &mut self.fd_buf) {
-                Ok(n) => Ok(n),
-                Err(ref e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-                    let n_to_write = first_buffer
-                        .len()
-                        .min(self.data_buf.capacity() - self.data_buf.len());
-                    let _ = self.data_buf.write(&first_buffer[..n_to_write]).unwrap();
-                    // Return `Ok` because some data has been buffered,
-                    // so from the outside it is seen as a successful write.
-                    Ok(n_to_write)
-                }
-                Err(e) => Err(e),
-            }
+            // Write is larger than the buffer capacity, thus we just flushed the buffer. This
+            // means that at this point the buffer is empty. Write directly to self.inner. No data
+            // is copied into the buffer, since that would just mean that the large write gets
+            // split into multiple smaller ones.
+            assert!(self.data_buf.is_empty());
+            write_inner(&mut self.inner, &mut self.fd_buf)
         } else {
             // At this point there is enough space available in the buffer.
-            let _ = write_buffer(&mut self.data_buf).unwrap();
-            Ok(to_write_length)
+            write_buffer(&mut self.data_buf)
         }
     }
 }
@@ -380,7 +372,7 @@ impl<T: ReadFD> Poll for BufReadFD<T> {
 
 #[cfg(test)]
 mod test {
-    use std::io::{IoSlice, Result};
+    use std::io::{Error, ErrorKind, IoSlice, Result};
 
     use super::{BufWriteFD, Poll, WriteFD};
     use crate::utils::RawFdContainer;
@@ -389,7 +381,6 @@ mod test {
 
     impl WriteFD for WouldBlockWriter {
         fn write(&mut self, _buf: &[u8], _fds: &mut Vec<RawFdContainer>) -> Result<usize> {
-            use std::io::{Error, ErrorKind};
             Err(Error::new(ErrorKind::WouldBlock, "would block"))
         }
 
@@ -418,7 +409,11 @@ mod test {
     fn incorrect_eof() {
         let mut write = BufWriteFD::with_capacity(1, WouldBlockWriter());
         let bufs = &[IoSlice::new(&[]), IoSlice::new(b"fooo")];
-        let written = write.write_vectored(bufs, &mut Vec::new()).unwrap();
-        assert!(written != 0);
+        match write.write_vectored(bufs, &mut Vec::new()) {
+            Ok(0) => panic!("This looks like EOF!?"),
+            Ok(_) => {}
+            Err(ref e) if e.kind() == ErrorKind::WouldBlock => {}
+            Err(e) => panic!("Unexpected error: {:?}", e),
+        }
     }
 }
